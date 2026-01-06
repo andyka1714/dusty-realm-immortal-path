@@ -11,9 +11,11 @@ export const REALM_NAMES: Record<MajorRealm, string> = {
   [MajorRealm.GoldenCore]: '金丹',
   [MajorRealm.NascentSoul]: '元嬰',
   [MajorRealm.SpiritSevering]: '化神',
+  [MajorRealm.VoidRefining]: '煉虛',
   [MajorRealm.Fusion]: '合體',
   [MajorRealm.Mahayana]: '大乘',
-  [MajorRealm.GoldenImmortal]: '金仙',
+  [MajorRealm.Tribulation]: '渡劫',
+  [MajorRealm.Immortal]: '仙人',
   [MajorRealm.ImmortalEmperor]: '仙帝',
 };
 
@@ -26,11 +28,12 @@ export const MOVEMENT_SPEEDS: Record<MajorRealm, number> = {
   [MajorRealm.GoldenCore]: 300,
   [MajorRealm.NascentSoul]: 300,
   [MajorRealm.SpiritSevering]: 300,
-  
+  [MajorRealm.VoidRefining]: 250,
+
   [MajorRealm.Fusion]: 200,
   [MajorRealm.Mahayana]: 200,
-  [MajorRealm.GoldenImmortal]: 150,
-  
+  [MajorRealm.Tribulation]: 200,
+  [MajorRealm.Immortal]: 150,
   [MajorRealm.ImmortalEmperor]: 100,
 };
 
@@ -331,10 +334,12 @@ export const REALM_MODIFIERS: Record<MajorRealm, number> = {
   [MajorRealm.GoldenCore]: 25,   
   [MajorRealm.NascentSoul]: 100, 
   [MajorRealm.SpiritSevering]: 500,
-  [MajorRealm.Fusion]: 2000,      // Re-balanced for 2.0
-  [MajorRealm.Mahayana]: 10000,   // Re-balanced
-  [MajorRealm.GoldenImmortal]: 50000,
-  [MajorRealm.ImmortalEmperor]: 200000,
+  [MajorRealm.VoidRefining]: 1500,
+  [MajorRealm.Fusion]: 5000,
+  [MajorRealm.Mahayana]: 20000,
+  [MajorRealm.Tribulation]: 50000,
+  [MajorRealm.Immortal]: 500000,
+  [MajorRealm.ImmortalEmperor]: 5000000,
 };
 
 export const LIFESPAN_BONUS: Record<MajorRealm, number> = {
@@ -344,10 +349,12 @@ export const LIFESPAN_BONUS: Record<MajorRealm, number> = {
   [MajorRealm.GoldenCore]: 300,
   [MajorRealm.NascentSoul]: 600,
   [MajorRealm.SpiritSevering]: 1200,
-  [MajorRealm.Fusion]: 2500,
-  [MajorRealm.Mahayana]: 5000,
-  [MajorRealm.GoldenImmortal]: 10000,
-  [MajorRealm.ImmortalEmperor]: 99999,
+  [MajorRealm.VoidRefining]: 2500,
+  [MajorRealm.Fusion]: 5000,
+  [MajorRealm.Mahayana]: 10000, // Approaching immortal
+  [MajorRealm.Tribulation]: 200000,  // Survival phase
+  [MajorRealm.Immortal]: 500000, // Massive boost once Immortal
+  [MajorRealm.ImmortalEmperor]: 999999,
 };
 
 export const REALM_BASE_STATS: Record<MajorRealm, { hp: number; mp: number }> = {
@@ -357,10 +364,12 @@ export const REALM_BASE_STATS: Record<MajorRealm, { hp: number; mp: number }> = 
   [MajorRealm.GoldenCore]: { hp: 10000, mp: 5000 },
   [MajorRealm.NascentSoul]: { hp: 50000, mp: 25000 },
   [MajorRealm.SpiritSevering]: { hp: 200000, mp: 100000 },
+  [MajorRealm.VoidRefining]: { hp: 500000, mp: 250000 },
   [MajorRealm.Fusion]: { hp: 1000000, mp: 500000 },
   [MajorRealm.Mahayana]: { hp: 5000000, mp: 2500000 },
-  [MajorRealm.GoldenImmortal]: { hp: 20000000, mp: 10000000 },
-  [MajorRealm.ImmortalEmperor]: { hp: 100000000, mp: 50000000 },
+  [MajorRealm.Tribulation]: { hp: 10000000, mp: 5000000 },
+  [MajorRealm.Immortal]: { hp: 100000000, mp: 50000000 },
+  [MajorRealm.ImmortalEmperor]: { hp: 1000000000, mp: 500000000 },
 };
 
 export const REALM_EXP_CONFIG: Record<MajorRealm, { base: number; growth: number; isLinear?: boolean }> = {
@@ -370,10 +379,12 @@ export const REALM_EXP_CONFIG: Record<MajorRealm, { base: number; growth: number
     [MajorRealm.GoldenCore]: { base: 100000, growth: 1.14 },
     [MajorRealm.NascentSoul]: { base: 1000000, growth: 1.13 },
     [MajorRealm.SpiritSevering]: { base: 10000000, growth: 1.12 },
-    [MajorRealm.Fusion]: { base: 80000000, growth: 1.11 },
-    [MajorRealm.Mahayana]: { base: 500000000, growth: 1.10 },
-    [MajorRealm.GoldenImmortal]: { base: 5000000000, growth: 1.09 },
-    [MajorRealm.ImmortalEmperor]: { base: 100000000000, growth: 1.05 },
+    [MajorRealm.VoidRefining]: { base: 50000000, growth: 1.11 },
+    [MajorRealm.Fusion]: { base: 200000000, growth: 1.10 },
+    [MajorRealm.Mahayana]: { base: 1000000000, growth: 1.09 },
+    [MajorRealm.Tribulation]: { base: 5000000000, growth: 1.08 },
+  [MajorRealm.Immortal]: { base: 100000000000, growth: 1.06 },
+  [MajorRealm.ImmortalEmperor]: { base: 0, growth: 0 }, // No Exp
 };
 
 export const calculateMaxExp = (major: number, minor: number): number => {
@@ -425,7 +436,7 @@ export const BREAKTHROUGH_CONFIG: Record<MajorRealm, BreakthroughRequirement> = 
     baseRate: 0.8, 
     requiredItemId: 'bt_foundation_gold', 
     tribulationName: '三九小雷劫',
-    penaltyType: 'major_unsafe', // Foundation -> Golden Core is the first unsafe one
+    penaltyType: 'major_unsafe', 
     bossHint: '烈焰妖王 (極熱深淵)'
   },
   [MajorRealm.GoldenCore]: { 
@@ -444,34 +455,48 @@ export const BREAKTHROUGH_CONFIG: Record<MajorRealm, BreakthroughRequirement> = 
   },
   [MajorRealm.SpiritSevering]: { 
     baseRate: 0.5, 
-    requiredItemId: 'bt_spirit_fusion', // Item ID needs update in items.ts
-    tribulationName: '紫霄神雷劫',
+    requiredItemId: 'bt_spirit_void', 
+    tribulationName: '天人五衰劫', // Placeholder name
     penaltyType: 'major_unsafe',
-    bossHint: '雷霆巨獸 (雷鳴廢墟)'
+    bossHint: '虛空守衛 (破碎虛空)'
+  },
+  [MajorRealm.VoidRefining]: { // NEW
+    baseRate: 0.45, 
+    requiredItemId: 'bt_void_fusion', 
+    tribulationName: '虛空混沌劫',
+    penaltyType: 'major_unsafe',
+    bossHint: '混沌古獸 (混沌邊緣)'
   },
   [MajorRealm.Fusion]: { 
     baseRate: 0.4, 
     requiredItemId: 'bt_fusion_maha', 
     tribulationName: '五行混元劫',
     penaltyType: 'major_unsafe',
-    bossHint: '虛空守衛 (虛空核心)'
+    bossHint: '五行尊者 (五行神殿)'
   },
   [MajorRealm.Mahayana]: { 
-    baseRate: 0.3, 
-    requiredItemId: 'bt_maha_golden', 
-    tribulationName: '飛升成仙劫',
+    baseRate: 0.35, 
+    requiredItemId: 'bt_maha_trib', 
+    tribulationName: '真仙降世劫',
     penaltyType: 'major_unsafe',
-    bossHint: '星辰古神 (星辰盡頭)'
+    bossHint: '接引使者 (飛升台)'
   },
-  [MajorRealm.GoldenImmortal]: { 
-    baseRate: 0.2, 
-    requiredItemId: 'bt_golden_emperor', 
+  [MajorRealm.Tribulation]: { // NEW
+    baseRate: 0.3, 
+    requiredItemId: 'bt_trib_immortal', 
+    tribulationName: '九天玄雷劫', // The "Final" tribulation
+    penaltyType: 'major_unsafe',
+    bossHint: '天道意志 (天門)'
+  },
+  [MajorRealm.Immortal]: { 
+    baseRate: 0.1, 
+    requiredItemId: 'bt_immortal_emperor', 
     tribulationName: '滅世虛無劫',
     penaltyType: 'major_unsafe',
     bossHint: '鴻蒙之影 (混沌源頭)'
   },
   [MajorRealm.ImmortalEmperor]: { 
-    baseRate: 0.1, 
+    baseRate: 0.0, 
     tribulationName: '終極因果劫',
     penaltyType: 'major_unsafe',
     bossHint: '天道化身 (彼岸終點)'

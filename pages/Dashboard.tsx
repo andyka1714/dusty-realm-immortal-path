@@ -1,5 +1,6 @@
 
 import React, { useCallback, useState, useEffect, useRef } from 'react';
+import { getRealmLabel } from '../utils/realm';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/store';
 import { manualCultivate, attemptBreakthrough, toggleSeclusion, reincarnate } from '../store/slices/characterSlice';
@@ -13,7 +14,7 @@ import { StatsPanel } from '../components/StatsPanel';
 import { Modal } from '../components/Modal';
 import { IntroSequence } from '../components/IntroSequence';
 import { Play, ChevronsUp, Moon, Info, Skull, AlertTriangle, Zap, Lock } from 'lucide-react';
-import { SpiritRootType } from '../types';
+import { MajorRealm, SpiritRootType } from '../types';
 
 export const Dashboard: React.FC = () => {
   const dispatch = useDispatch();
@@ -208,11 +209,13 @@ export const Dashboard: React.FC = () => {
 
               <div className="text-right">
                  <div className="text-2xl text-amber-500 tracking-widest font-serif font-bold">
-                    {REALM_NAMES[majorRealm]} 
+                    {getRealmLabel(majorRealm, minorRealm)}
                  </div>
-                 <div className="text-stone-500 text-sm">
-                    第 {minorRealm} 層
-                 </div>
+                 {majorRealm !== MajorRealm.Immortal && majorRealm !== MajorRealm.ImmortalEmperor && (
+                     <div className="text-stone-500 text-sm">
+                        第 {minorRealm + 1} 層
+                     </div>
+                 )}
               </div>
             </div>
 

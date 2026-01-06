@@ -6,10 +6,12 @@ export enum MajorRealm {
   GoldenCore = 3,     // 金丹
   NascentSoul = 4,    // 元嬰
   SpiritSevering = 5, // 化神
-  Fusion = 6,         // 合體 (Shifted up)
-  Mahayana = 7,       // 大乘 (Shifted up)
-  GoldenImmortal = 8, // 金仙 (New)
-  ImmortalEmperor = 9 // 仙帝 (New)
+  VoidRefining = 6,   // 煉虛
+  Fusion = 7,         // 合體
+  Mahayana = 8,       // 大乘
+  Tribulation = 9,    // 渡劫
+  Immortal = 10,      // 仙人 (Includes Human, Earth, Heaven, Golden)
+  ImmortalEmperor = 11// 仙帝 (Max)
 }
 
 export enum ElementType {

@@ -68,7 +68,7 @@ const BESTIARY: Record<string, Enemy> = {
     'thunder_beast': createEnemy('thunder_beast', '霆祖', MajorRealm.SpiritSevering, EnemyRank.Boss, 600000, 10000, 5000, ElementType.Metal, ['bt_spirit_fusion'], 100000),
     'void_guard': createEnemy('void_guard', '虛空守衛', MajorRealm.Fusion, EnemyRank.Boss, 3000000, 30000, 15000, ElementType.None, ['bt_fusion_maha'], 500000),
     'star_god': createEnemy('star_god', '古神 · 星緯', MajorRealm.Mahayana, EnemyRank.Boss, 15000000, 80000, 40000, ElementType.Earth, ['bt_maha_golden'], 2000000),
-    'chaos_shadow': createEnemy('chaos_shadow', '鴻蒙之影', MajorRealm.GoldenImmortal, EnemyRank.Boss, 100000000, 200000, 100000, ElementType.Metal, ['bt_golden_emperor'], 10000000),
+    'chaos_shadow': createEnemy('chaos_shadow', '鴻蒙之影', MajorRealm.Immortal, EnemyRank.Boss, 100000000, 200000, 100000, ElementType.Metal, ['bt_golden_emperor'], 10000000),
     'boss_final': createEnemy('boss_final', '天道意志 · 因果法身', MajorRealm.ImmortalEmperor, EnemyRank.Boss, 999999999, 500000, 500000, ElementType.None, [], 0),
     
     // Fillers for generic maps
@@ -330,7 +330,7 @@ const getRealmEnum = (str: string): MajorRealm => {
         case '化神': return MajorRealm.SpiritSevering;
         case '合體': return MajorRealm.Fusion;
         case '大乘': return MajorRealm.Mahayana;
-        case '金仙': return MajorRealm.GoldenImmortal;
+        case '金仙': return MajorRealm.Immortal;
         case '仙帝': return MajorRealm.ImmortalEmperor;
         default: return MajorRealm.Mortal;
     }

@@ -30,7 +30,17 @@ ExpPerTick = RootBone * RealmMod * SpiritMod * GatheringMod * ModeMultiplier
 > 根骨 10、練氣期 (3x)、天靈根 (2.5x)、無聚靈陣 (1x)、自動模式 (1x)
 > `Exp = 10 * 3 * 2.5 * 1 * 1 = 75 / sec`
 
-### 1.2 境界成長 (Realm Cap)
+### 1.2 境界劃分 (Realm Stages)
+
+| **大階層** | **小境界 (等級 1-10)** | **稱號劃分** |
+| --- | --- | --- |
+| **凡人 ~ 渡劫** | 10 層 (0-9) | **初期** (1-3)、**中期** (4-6)、**後期** (7-9)、**圓滿** (10) |
+| **仙人 (Immortal)** | 10 層 (0-9) | **人仙** (1-3)、**地仙** (4-6)、**天仙** (7-9)、**金仙** (10) |
+| **仙帝 (Emperor)** | 1 層 (Max) | 頂峰存在，執掌天道 (不積累修為)。 |
+
+> **備註**: 標準境界每層 (初期/中期...) 實際上對應內部多個小等級。仙人境界則直接以等級區分位格。
+
+### 1.3 境界經驗需求 (Realm Exp Req)
 升級至下一層小境界所需的經驗值：
 
 ```javascript
@@ -38,6 +48,7 @@ MaxExp = Base * (Growth ^ MinorRealm)
 ```
 - **練氣期**: Base=1000, Growth=1.25
 - **築基期**: Base=15000, Growth=1.15
+- (高境界數值詳見 `constants.ts`)
 
 ### 1.3 突破成功率 (Breakthrough Rate)
 嘗試突破境界時的成功率計算：
@@ -93,10 +104,12 @@ Damage = (Attacker.Atk * Random(0.9, 1.1)) - (Defender.Def * 0.5)
 - **金丹 (Golden Core)**: +300 歲
 - **元嬰 (Nascent Soul)**: +600 歲
 - **化神 (Spirit Severing)**: +1,200 歲
-- **合體 (Fusion)**: +2,500 歲
-- **大乘 (Mahayana)**: +5,000 歲
-- **金仙 (Golden Immortal)**: +10,000 歲
-- **仙帝 (Immortal Emperor)**: +100,000 歲 (長生久視)
+- **煉虛 (Void Refining)**: +2,500 歲
+- **合體 (Fusion)**: +5,000 歲
+- **大乘 (Mahayana)**: +10,000 歲
+- **渡劫 (Tribulation)**: +0 歲 (生死劫難)
+- **仙人 (Immortal)**: +500,000 歲 (晉升人仙時獲得)
+- **仙帝 (Immortal Emperor)**: +1,000,000 歲 (長生久視)
 
 #### B. 增壽丹藥 (Longevity Pills)
 - **來源**: 煉丹或 Boss 掉落。
