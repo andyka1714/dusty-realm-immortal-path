@@ -53,18 +53,20 @@ SuccessRate = (BaseRate * Decay) + (Comprehension * 0.002) + (Fortune * 0.001) +
 
 ## 2. 戰鬥系統 (Combat)
 
-### 2.1 衍生屬性公式
-- **HP (氣血)**: `RealmBaseHP + (Physique * 10)`
-- **MP (靈力)**: `RealmBaseMP + (Insight * 10)`
-- **Attack (攻擊)**: `RealmBaseAtk + (RootBone * 2) + WeaponAtk`
-- **Defense (防禦)**: `RealmBaseDef + (Physique * 1) + ArmorDef`
+### 2.1 戰鬥轉化公式 (Derived Stats)
+- **生命值 (HP)**: `RealmBaseHP + (Physique * 15)`
+- **靈力值 (MP)**: `RealmBaseMP + (Insight * 10)`
+- **物理攻擊 (ATK)**: `RealmBaseAtk + (RootBone * 2) + WeaponAtk`
+- **靈力攻擊 (MAG)**: `RealmBaseMgk + (Insight * 2) + WeaponMag`
+- **物理防禦 (DEF)**: `RealmBaseDef + (Physique * 1.5) + ArmorDef`
+- **靈力防禦 (RES)**: `RealmBaseRes + (Insight * 1.5) + ArmorRes`
 
 ### 2.2 傷害計算公式
 ```javascript
 Damage = (Attacker.Atk * Random(0.9, 1.1)) - (Defender.Def * 0.5)
 ```
 - **最小傷害**: 1 點。
-- **暴擊 (Crit)**: 機率 `Insight * 0.1%`，造成 1.5x 傷害。
+- **暴擊 (Crit)**: 機率 `Comprehension * 0.1%`，造成 1.5x 傷害。
 - **閃避 (Dodge)**: 機率 `Fortune * 0.1%`，完全免疫該次傷害。
 
 ## 3. 壽元與時間系統 (Time & Lifespan)
