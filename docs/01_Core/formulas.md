@@ -66,3 +66,29 @@ Damage = (Attacker.Atk * Random(0.9, 1.1)) - (Defender.Def * 0.5)
 - **最小傷害**: 1 點。
 - **暴擊 (Crit)**: 機率 `Insight * 0.1%`，造成 1.5x 傷害。
 - **閃避 (Dodge)**: 機率 `Fortune * 0.1%`，完全免疫該次傷害。
+
+## 3. 壽元與時間系統 (Time & Lifespan)
+
+### 3.1 時間流逝 (Global Ticker)
+- **比例**: 現實 1 秒 = 遊戲 1 天 (約 6分鐘 = 1年)。
+- **機制**: 無論玩家處於何種狀態 (Move, Combat, Idle)，時間皆恆定流逝。
+
+### 3.2 壽元獲取 (Longevity)
+角色初始壽命為 `100 ± 5` 歲。延長壽命的途徑如下：
+
+#### A. 境界突破 (Breakthrough Bonus)
+突破大境界時獲得 **永久壽命上限** 加成：
+- **練氣 (Qi Refining)**: +50 歲
+- **築基 (Foundation)**: +150 歲
+- **金丹 (Golden Core)**: +300 歲
+- **元嬰 (Nascent Soul)**: +600 歲
+- **化神 (Spirit Severing)**: +1,200 歲
+- **合體 (Fusion)**: +2,500 歲
+- **大乘 (Mahayana)**: +5,000 歲
+- **金仙 (Golden Immortal)**: +10,000 歲
+- **仙帝 (Immortal Emperor)**: +100,000 歲 (長生久視)
+
+#### B. 增壽丹藥 (Longevity Pills)
+- **來源**: 煉丹或 Boss 掉落。
+- **限制**: 角色一生僅限服用 **10 顆**。
+- **機制**: 使用後直接增加當前壽元上限。
