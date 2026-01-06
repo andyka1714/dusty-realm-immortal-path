@@ -6,21 +6,29 @@
 角色每秒 (Tick) 獲得的修為值計算如下：
 
 ```javascript
-ExpPerTick = BaseRate * RealmMult * SpiritRootMult * (1 + AttributeBonus)
+ExpPerTick = RootBone * RealmMod * SpiritMod * GatheringMod * ModeMultiplier
 ```
 
-- **BaseRate (基礎速率)**: 預設為 `1.0` (可受聚靈陣等級加成)。
-- **RealmMult (境界倍率)**: 隨大境界提升。
+- **RootBone (根骨)**: 角色基礎屬性，直接作為基礎速率 (例如根骨 10 點即為基礎 10/sec)。
+- **RealmMod (境界倍率)**: 
   - 凡人: 1x
   - 練氣: 3x
   - 築基: 8x
-  - 金丹: 25x (詳見 `constants.ts` 完整列表)
-- **SpiritRootMult (靈根倍率)**:
+  - 金丹: 25x
+  - (詳見 `constants.ts` `REALM_MODIFIERS`)
+- **SpiritMod (靈根倍率)**:
   - 天靈根: 2.5x
   - 變異靈根: 2.0x
   - 真靈根: 1.5x
   - 雜靈根: 1.0x
-- **AttributeBonus (屬性加成)**: `根骨 (RootBone) * 0.01` (即每點根骨 +1%)。
+- **GatheringMod (聚靈陣加成)**: `1 + (聚靈陣等級 * 0.05)`。
+- **ModeMultiplier (模式倍率)**:
+  - 自動 (Passive): 1.0x
+  - 閉關 (Secluded): 5.0x
+
+> **試算範例**: 
+> 根骨 10、練氣期 (3x)、天靈根 (2.5x)、無聚靈陣 (1x)、自動模式 (1x)
+> `Exp = 10 * 3 * 2.5 * 1 * 1 = 75 / sec`
 
 ### 1.2 境界成長 (Realm Cap)
 升級至下一層小境界所需的經驗值：
