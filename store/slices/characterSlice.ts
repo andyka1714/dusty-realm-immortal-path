@@ -35,14 +35,53 @@ export const generateSpiritRoot = (): SpiritRootId => {
   }
 };
 
-export const generateInitialStats = () => {
-  const stats = { ...INITIAL_BASE_STATS };
-  const points = 20 + Math.floor(Math.random() * 11);
-  for (let i = 0; i < points; i++) {
-    const keys = Object.keys(stats) as Array<keyof typeof stats>;
-    const randomKey = keys[Math.floor(Math.random() * keys.length)];
-    stats[randomKey]++;
+export const generateInitialStats = (spiritRootId?: SpiritRootId) => {
+  // Base: 10 per stat (Total 60)
+  const stats: BaseAttributes = {
+    physique: 10,
+    rootBone: 10,
+    insight: 10,
+    comprehension: 10,
+    fortune: 10,
+    charm: 10,
+  };
+
+  // Determine Target Total based on Spirit Root Tier
+  let targetTotal = 70; // Default Mixed
+  if (spiritRootId) {
+      const tier = SPIRIT_ROOT_DETAILS[spiritRootId]?.type;
+      // Map type to target total
+      // Heavenly/Variant -> 90
+      // True -> 80
+      // Mixed -> 70
+      if (tier === SpiritRootType.Heavenly || tier === SpiritRootType.Variant) {
+          targetTotal = 90;
+      } else if (tier === SpiritRootType.True) {
+          targetTotal = 80;
+      }
   }
+
+  let pointsToDistribute = targetTotal - 60; // e.g. 10, 20, or 30
+  const keys = Object.keys(stats) as Array<keyof typeof stats>;
+
+  // Distribute points randomly
+  // Constraint: Single attribute max is 20? User said "Generation range 10~20". 
+  // So we must ensure no stat exceeds 20.
+  // With base 10, max add is 10 per stat.
+  
+  while (pointsToDistribute > 0) {
+      const randomKey = keys[Math.floor(Math.random() * keys.length)];
+      if (stats[randomKey] < 20) {
+          stats[randomKey]++;
+          pointsToDistribute--;
+      } else {
+          // If all are capped (shouldn't happen with max total 90 and 6*20=120), continue search
+          // But to avoid infinite loop if logic changes:
+          const uncapped = keys.filter(k => stats[k] < 20);
+          if (uncapped.length === 0) break; 
+      }
+  }
+  
   return stats;
 };
 
@@ -105,12 +144,15 @@ const characterSlice = createSlice({
       state.lastSaveTime = Date.now();
       state.lastBreakthroughResult = undefined;
 
-      state.attributes = action.payload.attributes || generateInitialStats();
+      // Generate Spirit Root First to determine potential
       const generatedRootId = action.payload.spiritRootId || generateSpiritRoot();
       state.spiritRootId = generatedRootId;
       
       const rootDetails = SPIRIT_ROOT_DETAILS[generatedRootId];
       state.spiritRoot = rootDetails.type;
+
+      // Generate Attributes based on Spirit Root
+      state.attributes = action.payload.attributes || generateInitialStats(generatedRootId);
 
       if (rootDetails.bonuses.initialStats) {
          const bonusStats = rootDetails.bonuses.initialStats;
