@@ -1,0 +1,12 @@
+# Antigravity Compatibility Mode
+
+This project uses the definition in `.agent/rules.md` as the source of truth for Agent behavior.
+
+@import ".agent/rules.md"
+
+## Quick Context
+- **Project**: Dusty Realm Immortal Path
+- **Stack**: React 19, TypeScript, Redux Toolkit, Tailwind CSS
+- **Lang**: English (Code) / Traditional Chinese (Content)
+
+Please refer to `.agent/rules.md` for detailed coding standards.

@@ -1,4 +1,4 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import characterReducer from './slices/characterSlice';
 import logReducer from './slices/logSlice';
 import adventureReducer from './slices/adventureSlice';
@@ -6,16 +6,18 @@ import inventoryReducer from './slices/inventorySlice';
 import workshopReducer from './slices/workshopSlice';
 import { loadState, saveState } from './localStorage';
 
+const rootReducer = combineReducers({
+  character: characterReducer,
+  logs: logReducer,
+  adventure: adventureReducer,
+  inventory: inventoryReducer,
+  workshop: workshopReducer,
+});
+
 const preloadedState = loadState();
 
 export const store = configureStore({
-  reducer: {
-    character: characterReducer,
-    logs: logReducer,
-    adventure: adventureReducer,
-    inventory: inventoryReducer,
-    workshop: workshopReducer,
-  },
+  reducer: rootReducer,
   preloadedState: preloadedState as any,
 });
 
