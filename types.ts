@@ -117,6 +117,8 @@ export interface CharacterState {
   lastSaveTime: number; 
   
   lastBreakthroughResult?: BreakthroughResult;
+  
+  itemConsumption: Record<string, number>; // Track how many times an item was consumed
 }
 
 export interface LogEntry {
@@ -210,6 +212,7 @@ export interface Item {
     lifespan?: number;
   };
   rarity: number; // 1-5
+  maxConsumption?: number; // Max times this item can be consumed
 }
 
 export interface InventoryItem {

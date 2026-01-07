@@ -116,7 +116,9 @@ const initialState: CharacterState = {
   isInSeclusion: false,
   gatheringLevel: 1, 
   lastSaveTime: Date.now(),
+  // Last Line of initialState
   lastBreakthroughResult: undefined,
+  itemConsumption: {},
 };
 
 const characterSlice = createSlice({
@@ -143,6 +145,7 @@ const characterSlice = createSlice({
       state.isInSeclusion = false;
       state.lastSaveTime = Date.now();
       state.lastBreakthroughResult = undefined;
+      state.itemConsumption = {};
 
       // Generate Spirit Root First to determine potential
       const generatedRootId = action.payload.spiritRootId || generateSpiritRoot();
@@ -177,6 +180,50 @@ const characterSlice = createSlice({
     reincarnate: (state) => {
        state.isInitialized = false;
        state.isDead = false;
+       state.itemConsumption = {};
+    },
+
+    // ... (Keep processOfflineGains, tickCultivation, toggleSeclusion, manualCultivate, gainAttribute, attemptBreakthrough) ...
+
+    consumeItem: (state, action: PayloadAction<{ itemId: string, effects: any, maxConsumption?: number }>) => {
+        const { itemId, effects, maxConsumption } = action.payload;
+        
+        // Check Limit
+        const currentUses = state.itemConsumption[itemId] || 0;
+        if (maxConsumption && currentUses >= maxConsumption) {
+             return; // Silent fail or handled by UI check
+        }
+        
+        // Apply Effects
+        if (effects) {
+            if (effects.lifespan) {
+                state.lifespan += effects.lifespan;
+            }
+            if (effects.cultivationSpeed) {
+                // Assuming it adds instant Exp for now, as speed is calculated per tick based on stats
+                state.currentExp += effects.cultivationSpeed; 
+                // Or if it's meant to be permanent speed buff, we need a new state field.
+                // Given standard pills, usually it's Exp.
+                if (state.currentExp >= state.maxExp && !state.isBreakthroughAvailable) {
+                    state.currentExp = state.maxExp;
+                    state.isBreakthroughAvailable = true;
+                }
+            }
+            if (effects.healHp) {
+                // HP concept doesn't exist yet in char state (only stats). 
+                // Maybe useful for "Injuries" later.
+            }
+            if (effects.stat && effects.value) {
+                // Permanent Stat Boost
+                const statKey = effects.stat as keyof BaseAttributes;
+                if (state.attributes[statKey] !== undefined) {
+                    state.attributes[statKey] += effects.value;
+                }
+            }
+        }
+        
+        // Increment Counter
+        state.itemConsumption[itemId] = currentUses + 1;
     },
 
     processOfflineGains: (state) => {
@@ -286,11 +333,15 @@ const characterSlice = createSlice({
       const isMajorBreakthrough = state.minorRealm >= MINOR_REALM_CAP;
       const config = BREAKTHROUGH_CONFIG[state.majorRealm];
 
+      if (state.majorRealm >= MajorRealm.ImmortalEmperor && state.minorRealm >= MINOR_REALM_CAP) {
+          // Max Level Reached
+          return;
+      }
+
       // 1. Check Requirement (Double check logic for safety)
       if (isMajorBreakthrough && config.requiredItemId && !action.payload.consumedItem) {
           // Should have been handled by UI dispatching removeItem, but if logic fails here, we abort or fail
-          // For now, we assume the Thunk/UI successfully removed the item and passed the flag
-          // If strict, we would return here.
+          return;
       }
 
       // 2. Calculate Success Rate
@@ -400,5 +451,5 @@ const characterSlice = createSlice({
   },
 });
 
-export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, toggleSeclusion, processOfflineGains, reincarnate, gainAttribute } = characterSlice.actions;
+export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, toggleSeclusion, processOfflineGains, reincarnate, gainAttribute, consumeItem } = characterSlice.actions;
 export default characterSlice.reducer;

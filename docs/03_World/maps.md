@@ -1,39 +1,43 @@
 # 世界觀與地圖設計 (World Design)
 
-## 1. 地圖架構 (Map Structure)
-世界採用區塊化設計 (Block-based)，每個區塊包含若干個相連的地圖節點。
+塵寰仙途 (Dusty Realm Immortal Path) 的世界極為遼闊，分為多個修煉境界區域。為了方便管理，地圖詳細資料已拆分為以下文檔：
 
-### Block 1: 新手村 (凡人 - 練氣初期)
-以「青雲仙宗」為中心，向四方輻射。
+## 地圖詳細資料 (Detailed Map Data)
 
-- **0. 青雲仙宗 (Center)**: 安全區，連接四方。
-- **1. 宗門後山 (North)**: 採藥地，連接「北郊碎石坡」。
-- **2. 仙緣鎮 (South)**: 市集，連接「南郊蘆葦蕩」。
-- **3. 靈湖草甸 (East)**: 水系怪物，連接「東郊荒塚」。
-- **4. 外門試煉場 (West)**: 土系怪物，連接「萬獸林」。
+請點擊下方鏈接查看各境界的地圖詳情、連接關係與 Boss 資訊：
 
-**主要威脅**: 
-- 守塚老屍 (東郊荒塚 Boss)
-- 裂風狼王 (萬獸林入口 Boss)
-- 寒霜白猿 (北天門關 Boss)
+- **01. [凡人與練氣期 (Mortal & Qi Refining)](./maps/01_mortal_qi.md)**
+  - Maps 0-19: 青雲仙宗、仙緣鎮、萬獸林、北天門關等。
 
-### Block 2: 築基試煉 (築基期)
-分為四個極端環境，對應四種屬性試煉。
+- **02. [築基期 (Foundation Establishment)](./maps/02_foundation.md)**
+  - Maps 20-34: 雪線古道、熔岩流道、沉沒石塔、狂獸巢穴等。
 
-- **北方 (冰)**: 雪線古道 -> 冰封峽谷 -> 落雷懸崖 (Boss: 極地劍靈)。
-- **南方 (火)**: 烈焰荒原 -> 熔岩流道 -> 赤紅裂谷 (Boss: 烈焰妖王)。
-- **東方 (雷/魂)**: 古戰場遺跡 -> 沉沒石塔 -> 陰風窟 (Boss: 雷澤領主)。
-- **西方 (獸)**: 幽暗密林 -> 盤龍岩窟 -> 狂獸巢穴 (Boss: 萬獸獸王)。
+- **03. [金丹期 (Golden Core)](./maps/03_golden_core.md)**
+  - Maps 35-42: 迷霧幻海、腐蝕灘塗、古禁制廢墟、萬妖石窟等。
 
-### Block 3: 金丹秘境 (金丹期)
-探索更深層的屬性領域。
-- **迷霧幻海 / 幻夢神海**: 水/幻系，Boss 蜃樓主。
-- **萬妖石窟**: 毒/暗系，Boss 百眼蛛母。
+- **04. [元嬰期 (Nascent Soul)](./maps/04_nascent_soul.md)**
+  - Maps 43-48: 荒古遺地、萬法枯竭荒漠、不朽帝尊陵等。
 
-### Block 4-5: 高階領域 (元嬰 - 仙帝)
-從「荒古遺地」到「彼岸終點」，涉及空間法則與古神挑戰。
+- **05. [化神期 (Spirit Severing)](./maps/05_spirit_severing.md)**
+  - Maps 49-51: 碎星浮空島、乾坤倒置界、九天劫海。
 
-## 2. 怪物分佈邏輯 (Enemy Distribution)
+- **06. [煉虛期 (Void Refining)](./maps/06_void_refining.md)**
+  - Maps 52-54: 虛無裂隙、元神試煉場、太虛幻境。
+
+- **07. [合體期 (Fusion)](./maps/07_fusion.md)**
+  - Maps 55-57: 空間崩壞裂縫、天罰之巔、虛空樞紐。
+
+- **08. [大乘期 (Mahayana)](./maps/08_mahayana.md)**
+  - Maps 58-59: 墜星之地、星辰盡頭。
+
+- **09. [渡劫期 (Tribulation)](./maps/09_tribulation.md)**
+  - Maps 60-61: 劫雲深處、天道祭壇。
+
+- **10. [仙界 (Immortal & Beyond)](./maps/10_immortal.md)**
+  - Maps 62-67: 飛昇台、長生仙域、九重天闕、混沌源頭、彼岸終點。
+
+## 怪物分佈邏輯 (Enemy Distribution)
+
 怪物根據地圖名稱自動生成 (Auto-populate) 以保持多樣性與合理性：
 
 - **林/木**: 對應 `wind_wolf` (疾風野狼), `flower_spirit` (採花小妖)。
@@ -42,7 +46,3 @@
 - **火/熔**: 對應 `fire_ant` (火蟻), `fire_charm` (火魅)。
 - **塚/屍**: 對應 `corpse` (腐屍), `ghost` (冤魂)。
 - **星/空**: 對應 `void_ripper` (撕裂者), `star_fragment` (碎星靈)。
-
-## 3. Boss 機制
-每個區域設有固定位置的 Boss (如 `x:20, y:50`)。
-Boss 擁有獨特的掉落物 (如 `wolf_fang`, `bt_mortal_qi` 突破道具)，是境界突破的關鍵。
