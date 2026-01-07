@@ -123,6 +123,7 @@ export interface CharacterState {
   
   lastProcessedYear: number;
   lastWarningAge?: number; // For yearly events
+  lastManualCultivateTime?: number;
 }
 
 export interface LogEntry {

@@ -139,7 +139,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     statsDescription: "攻擊力 +15% / 修煉效率 2.5x",
     tags: ["戰力無雙", "修煉極快", "劍修奇才"],
     weights: { cultivation: 100, battle: 100, utility: 40 },
-    bonuses: { cultivationMult: 2.5, battle: { atkPercent: 15 } }
+    bonuses: { cultivationMult: 2.0, battle: { atkPercent: 15 } }
   },
   [SpiritRootId.HEAVENLY_WOOD]: {
     name: '木系天靈根',
@@ -152,7 +152,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     statsDescription: "初始壽元 +5歲 / 修煉效率 2.5x",
     tags: ["壽元綿長", "修煉極快", "恢復力強"],
     weights: { cultivation: 100, battle: 60, utility: 90 },
-    bonuses: { cultivationMult: 2.5, initialLifespan: 5 }
+    bonuses: { cultivationMult: 2.0, initialLifespan: 5 }
   },
   [SpiritRootId.HEAVENLY_WATER]: {
     name: '水系天靈根',
@@ -165,7 +165,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     statsDescription: "靈力上限 +20% / 修煉效率 2.5x",
     tags: ["靈力浩瀚", "修煉極快", "法術連發"],
     weights: { cultivation: 100, battle: 80, utility: 70 },
-    bonuses: { cultivationMult: 2.5, battle: { mpPercent: 20 } }
+    bonuses: { cultivationMult: 2.0, battle: { mpPercent: 20 } }
   },
   [SpiritRootId.HEAVENLY_FIRE]: {
     name: '火系天靈根',
@@ -178,7 +178,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     statsDescription: "煉丹成功率 +20% / 修煉效率 2.5x",
     tags: ["煉丹宗師", "修煉極快", "爆發傷害"],
     weights: { cultivation: 100, battle: 90, utility: 80 },
-    bonuses: { cultivationMult: 2.5 } // Battle crit dmg not implemented yet
+    bonuses: { cultivationMult: 2.0 } // Battle crit dmg not implemented yet
   },
   [SpiritRootId.HEAVENLY_EARTH]: {
     name: '土系天靈根',
@@ -191,7 +191,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     statsDescription: "體魄上限 +20% / 修煉效率 2.5x",
     tags: ["肉身成聖", "修煉極快", "防禦無敵"],
     weights: { cultivation: 100, battle: 70, utility: 60 },
-    bonuses: { cultivationMult: 2.5, battle: { hpPercent: 20, damageReduction: 5 } }
+    bonuses: { cultivationMult: 2.0, battle: { hpPercent: 20, damageReduction: 5 } }
   },
 
   // --- Variant (2.0x) ---
@@ -206,7 +206,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     statsDescription: "閃避率 +10% / 修煉效率 2.0x",
     tags: ["身法超絕", "修煉甚快", "地圖神行"],
     weights: { cultivation: 80, battle: 90, utility: 70 },
-    bonuses: { cultivationMult: 2.0, battle: { dodgeRate: 10 } }
+    bonuses: { cultivationMult: 1.7, battle: { dodgeRate: 10 } }
   },
   [SpiritRootId.VARIANT_THUNDER]: {
     name: '雷系異靈根',
@@ -219,7 +219,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     statsDescription: "突破損失減半 / 修煉效率 2.0x",
     tags: ["渡劫保送", "修煉甚快", "戰鬥麻痺"],
     weights: { cultivation: 85, battle: 95, utility: 50 },
-    bonuses: { cultivationMult: 2.0 } // Breakthrough bonus logic in slice
+    bonuses: { cultivationMult: 1.7 } // Breakthrough bonus logic in slice
   },
   [SpiritRootId.VARIANT_ICE]: {
     name: '冰系異靈根',
@@ -232,7 +232,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     statsDescription: "暴擊率 +10% / 修煉效率 2.0x",
     tags: ["神識強大", "修煉甚快", "致命一擊"],
     weights: { cultivation: 80, battle: 90, utility: 60 },
-    bonuses: { cultivationMult: 2.0, battle: { critRate: 10 } }
+    bonuses: { cultivationMult: 1.7, battle: { critRate: 10 } }
   },
 
   // --- True (1.5x) ---
@@ -247,7 +247,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     statsDescription: "煉丹產量提升 / 修煉效率 1.5x",
     tags: ["煉丹輔助", "修煉尚可", "生財有道"],
     weights: { cultivation: 60, battle: 50, utility: 90 },
-    bonuses: { cultivationMult: 1.5 }
+    bonuses: { cultivationMult: 1.3 }
   },
   [SpiritRootId.TRUE_METAL_EARTH]: { // Gold-Earth
     name: '金土真靈根',
@@ -260,7 +260,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     statsDescription: "雙防 +10% / 修煉效率 1.5x",
     tags: ["防禦加成", "修煉尚可", "生存力強"],
     weights: { cultivation: 60, battle: 70, utility: 50 },
-    bonuses: { cultivationMult: 1.5, battle: { defPercent: 10 } } // Applied to magic res too in logic
+    bonuses: { cultivationMult: 1.3, battle: { defPercent: 10 } } // Applied to magic res too in logic
   },
   [SpiritRootId.TRUE_WATER_WOOD]: {
     name: '水木真靈根',
@@ -273,7 +273,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     statsDescription: "抗性 +15% / 修煉效率 1.5x",
     tags: ["百毒不侵", "修煉尚可", "回復力UP"],
     weights: { cultivation: 60, battle: 50, utility: 80 },
-    bonuses: { cultivationMult: 1.5 }
+    bonuses: { cultivationMult: 1.3 }
   },
   [SpiritRootId.TRUE_TRI]: {
     name: '隨機三靈根',
@@ -286,7 +286,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     statsDescription: "突破成功率 +5% / 修煉效率 1.5x",
     tags: ["突破加成", "修煉尚可", "均衡發展"],
     weights: { cultivation: 65, battle: 55, utility: 55 },
-    bonuses: { cultivationMult: 1.5 }
+    bonuses: { cultivationMult: 1.3 }
   },
 
   // --- Mixed (1.0x) ---
@@ -295,7 +295,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     type: SpiritRootType.Heterogenous,
     colorClass: 'text-stone-500',
     glowClass: 'shadow-stone-500/50 bg-stone-500',
-    comment: "四色雜亂...哎，靈氣入體如亂麻纏繞。林凡，你的求道之路將會極度艱難。",
+    comment: "四色雜亂...哎，靈氣入體如亂麻纏繞。你的求道之路將會極度艱難。",
     destiny: "求道艱辛",
     description: "駁雜不純，意志磨礪。",
     statsDescription: "傷害抗性 +8% / 修煉效率 1.0x",
@@ -320,26 +320,29 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
 
 export const SPIRIT_ROOT_MULTIPLIERS: Record<SpiritRootType, number> = {
   [SpiritRootType.Heterogenous]: 1.0,
-  [SpiritRootType.True]: 1.5,
-  [SpiritRootType.Heavenly]: 2.5,
-  [SpiritRootType.Variant]: 2.0, 
+  [SpiritRootType.True]: 1.3,
+  [SpiritRootType.Heavenly]: 2.0,
+  [SpiritRootType.Variant]: 1.7, 
 };
+
+export const MANUAL_CULTIVATE_COOLDOWN = 3000; // 3 seconds
+export const PASSIVE_CULTIVATION_PENALTY = 0.3; // 30% Efficiency for passive
 
 // ... (Keep Realm Modifiers and Base Stats) ...
 
 export const REALM_MODIFIERS: Record<MajorRealm, number> = {
   [MajorRealm.Mortal]: 1,
-  [MajorRealm.QiRefining]: 3,    
-  [MajorRealm.Foundation]: 8,    
-  [MajorRealm.GoldenCore]: 25,   
-  [MajorRealm.NascentSoul]: 100, 
-  [MajorRealm.SpiritSevering]: 500,
-  [MajorRealm.VoidRefining]: 1500,
-  [MajorRealm.Fusion]: 5000,
-  [MajorRealm.Mahayana]: 20000,
-  [MajorRealm.Tribulation]: 50000,
-  [MajorRealm.Immortal]: 500000,
-  [MajorRealm.ImmortalEmperor]: 5000000,
+  [MajorRealm.QiRefining]: 2,    
+  [MajorRealm.Foundation]: 4,    
+  [MajorRealm.GoldenCore]: 8,   
+  [MajorRealm.NascentSoul]: 16, 
+  [MajorRealm.SpiritSevering]: 32,
+  [MajorRealm.VoidRefining]: 64,
+  [MajorRealm.Fusion]: 128,
+  [MajorRealm.Mahayana]: 256,
+  [MajorRealm.Tribulation]: 512,
+  [MajorRealm.Immortal]: 1024,
+  [MajorRealm.ImmortalEmperor]: 2048,
 };
 
 export const LIFESPAN_BONUS: Record<MajorRealm, number> = {

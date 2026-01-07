@@ -1,7 +1,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CharacterState, MajorRealm, SpiritRootType, SpiritRootId, ProfessionType, Gender, BaseAttributes } from '../../types';
-import { calculateMaxExp, INITIAL_BASE_STATS, MINOR_REALM_CAP, REALM_MODIFIERS, SPIRIT_ROOT_DETAILS, LIFESPAN_BONUS, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG } from '../../constants';
+import { calculateMaxExp, INITIAL_BASE_STATS, MINOR_REALM_CAP, REALM_MODIFIERS, SPIRIT_ROOT_DETAILS, LIFESPAN_BONUS, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN, PASSIVE_CULTIVATION_PENALTY } from '../../constants';
 import { addLog } from './logSlice';
 
 // ... (Keep helpers generateSpiritRoot, generateInitialStats, calculateInitialLifespan) ...
@@ -148,6 +148,7 @@ const characterSlice = createSlice({
       state.lastBreakthroughResult = undefined;
       state.itemConsumption = {};
       state.lastProcessedYear = 10;
+      state.lastManualCultivateTime = 0;
 
       // Generate Spirit Root First to determine potential
       const generatedRootId = action.payload.spiritRootId || generateSpiritRoot();
@@ -256,7 +257,7 @@ const characterSlice = createSlice({
         let rate = rootBone * realmMod * spiritMod * gatheringMod;
         
         if (state.isInSeclusion) {
-            rate *= 5.0;
+            rate *= 2.0;
         }
 
         const gain = rate * validSeconds;
@@ -300,8 +301,11 @@ const characterSlice = createSlice({
       let rate = rootBone * realmMod * spiritMod * gatheringMod;
       
       if (state.isInSeclusion) {
-        rate *= 5.0; 
+        rate *= 2.0; 
       }
+
+      // Apply Passive Penalty
+      rate *= PASSIVE_CULTIVATION_PENALTY;
 
       state.cultivationRate = parseFloat(rate.toFixed(1));
 
@@ -322,7 +326,29 @@ const characterSlice = createSlice({
 
     manualCultivate: (state) => {
       if (state.isBreakthroughAvailable || state.isDead) return;
-      state.currentExp += state.cultivationRate;
+      
+      const now = Date.now();
+      const lastTime = state.lastManualCultivateTime || 0;
+
+      if (now - lastTime < MANUAL_CULTIVATE_COOLDOWN) {
+          return;
+      }
+
+      // Manual Click gets 1x Rate (no 0.3 penalty)
+      // Recalculate Base Rate 
+      // (Ideally we should cache 'raw rate' separate from 'passive rate' in state, but recalculating is cheap here)
+      const rootBone = state.attributes.rootBone;
+      const realmMod = REALM_MODIFIERS[state.majorRealm];
+      const rootDetails = SPIRIT_ROOT_DETAILS[state.spiritRootId];
+      const spiritMod = rootDetails.bonuses.cultivationMult;
+      const gatheringMod = 1 + (state.gatheringLevel * 0.05);
+
+      let rate = rootBone * realmMod * spiritMod * gatheringMod;
+      if (state.isInSeclusion) rate *= 2.0;
+
+      state.currentExp += rate;
+      state.lastManualCultivateTime = now;
+
       if (state.currentExp >= state.maxExp) {
         state.currentExp = state.maxExp;
         state.isBreakthroughAvailable = true;

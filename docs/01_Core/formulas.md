@@ -11,20 +11,28 @@ ExpPerTick = RootBone * RealmMod * SpiritMod * GatheringMod * ModeMultiplier
 
 - **RootBone (根骨)**: 角色基礎屬性，直接作為基礎速率 (例如根骨 10 點即為基礎 10/sec)。
 - **RealmMod (境界倍率)**: 
-  - 凡人: 1x
-  - 練氣: 3x
-  - 築基: 8x
-  - 金丹: 25x
-  - (詳見 `constants.ts` `REALM_MODIFIERS`)
+  - 凡人 (Mortal): 1x
+  - 練氣 (Qi Refining): 2x
+  - 築基 (Foundation): 4x
+  - 金丹 (Golden Core): 8x
+  - 元嬰 (Nascent Soul): 16x
+  - 化神 (Spirit Severing): 32x
+  - 煉虛 (Void Refining): 64x
+  - 合體 (Fusion): 128x
+  - 大乘 (Mahayana): 256x
+  - 渡劫 (Tribulation): 512x
+  - 仙人 (Immortal): 1024x
+  - 仙帝 (Emperor): 2048x
 - **SpiritMod (靈根倍率)**:
-  - 天靈根: 2.5x
-  - 變異靈根: 2.0x
-  - 真靈根: 1.5x
-  - 雜靈根: 1.0x
+  - 天靈根: 2.0x (原 2.5x)
+  - 變異靈根: 1.7x (原 2.0x)
+  - 真靈根: 1.3x (原 1.5x)
+  - 雜靈根: 1.0x (原 1.0x)
 - **GatheringMod (聚靈陣加成)**: `1 + (聚靈陣等級 * 0.05)`。
 - **ModeMultiplier (模式倍率)**:
-  - 自動 (Passive): 1.0x
-  - 閉關 (Secluded): 5.0x
+  - 自動 (Passive): 0.3x (大幅下修，鼓勵手動)
+  - 手動 (Manual): 1.0x (每 3秒 可點擊運功一次)
+  - 閉關 (Seculded): 2.0x (原 5.0x)
 
 > **試算範例**: 
 > 根骨 10、練氣期 (3x)、天靈根 (2.5x)、無聚靈陣 (1x)、自動模式 (1x)

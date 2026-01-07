@@ -7,7 +7,7 @@ import { manualCultivate, attemptBreakthrough, toggleSeclusion, reincarnate } fr
 import { checkTimeEvents } from '../store/actions/timeActions';
 import { removeItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
-import { REALM_NAMES, SPIRIT_ROOT_MULTIPLIERS, REALM_MODIFIERS, MINOR_REALM_CAP, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG } from '../constants';
+import { REALM_NAMES, SPIRIT_ROOT_MULTIPLIERS, REALM_MODIFIERS, MINOR_REALM_CAP, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN } from '../constants';
 import { ITEMS } from '../data/items';
 import { ProgressBar } from '../components/ProgressBar';
 import { LogPanel } from '../components/LogPanel';
@@ -24,7 +24,7 @@ export const Dashboard: React.FC = () => {
   const { 
     isInitialized, isDead, name, gender, majorRealm, minorRealm, currentExp, maxExp, 
     cultivationRate, isBreakthroughAvailable, isInSeclusion, attributes, spiritRoot,
-    lastBreakthroughResult, age, lifespan, gatheringLevel
+    lastBreakthroughResult, age, lifespan, gatheringLevel, lastManualCultivateTime
   } = character;
 
   const [isBreakthroughModalOpen, setIsBreakthroughModalOpen] = useState(false);
@@ -60,6 +60,22 @@ export const Dashboard: React.FC = () => {
         }
     }
   }, [lastBreakthroughResult, dispatch]);
+
+  const [manualCooldown, setManualCooldown] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+        const now = Date.now();
+        const lastTime = lastManualCultivateTime || 0;
+        const diff = now - lastTime;
+        if (diff < MANUAL_CULTIVATE_COOLDOWN) {
+            setManualCooldown(MANUAL_CULTIVATE_COOLDOWN - diff);
+        } else {
+            setManualCooldown(0);
+        }
+    }, 100);
+    return () => clearInterval(interval);
+  }, [lastManualCultivateTime]);
 
   const handleReincarnate = () => {
       dispatch(reincarnate());
@@ -268,26 +284,35 @@ export const Dashboard: React.FC = () => {
               <div className="flex gap-2">
                  <button
                    onClick={handleManualCultivate}
-                   disabled={isBreakthroughAvailable || isInSeclusion}
-                   className="flex-1 bg-stone-800 hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed text-stone-200 py-4 rounded-lg border border-stone-700 transition-all flex flex-col items-center justify-center gap-2 group relative"
+                   disabled={isBreakthroughAvailable || isInSeclusion || manualCooldown > 0}
+                   className="flex-1 bg-stone-800 hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed text-stone-200 py-4 rounded-lg border border-stone-700 transition-all flex flex-col items-center justify-center gap-2 group relative overflow-hidden"
                  >
-                   <Play size={20} className={isInSeclusion ? "text-stone-600" : "text-emerald-500"} />
-                   <span className="font-bold tracking-widest">運功</span>
-                   <span className="text-[10px] text-stone-500 font-normal">日常修煉 (1.0x)</span>
+                   {manualCooldown > 0 && (
+                       <div 
+                         className="absolute bottom-0 left-0 h-1 bg-emerald-500 transition-all duration-100 ease-linear"
+                         style={{ width: `${(1 - manualCooldown / MANUAL_CULTIVATE_COOLDOWN) * 100}%` }}
+                       ></div>
+                   )}
+                   <Play size={20} className={`${isInSeclusion ? "text-stone-600" : "text-emerald-500"} ${manualCooldown > 0 ? "opacity-50" : ""}`} />
+                   <span className="font-bold tracking-widest">{manualCooldown > 0 ? "回氣中..." : "運功"}</span>
+                   <span className="text-[10px] text-stone-500 font-normal">
+                       {manualCooldown > 0 ? `${(manualCooldown/1000).toFixed(1)}s` : "日常修煉 (1.0x)"}
+                   </span>
                  </button>
 
                  <button
                    onClick={handleSeclusion}
-                   className={`flex-1 py-4 rounded-lg border transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden group
+                   disabled={isBreakthroughAvailable}
+                   className={`flex-1 py-4 rounded-lg border transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed
                      ${isInSeclusion 
-                       ? "bg-amber-900/30 border-amber-500/50 text-amber-200 shadow-[inset_0_0_20px_rgba(245,158,11,0.2)]" 
-                       : "bg-stone-800 hover:bg-stone-700 border-stone-700 text-stone-300"
+                            ? "bg-amber-900/30 border-amber-500/50 text-amber-200 shadow-[inset_0_0_20px_rgba(245,158,11,0.2)]" 
+                            : "bg-stone-800 hover:bg-stone-700 border-stone-700 text-stone-200"
                      }`}
                  >
                    <Moon size={20} className={isInSeclusion ? "text-amber-400 animate-pulse" : "text-indigo-400"} />
                    <span className="font-bold tracking-widest">{isInSeclusion ? "出關" : "閉關"}</span>
-                   <span className="text-[10px] text-stone-500 font-normal">心無旁騖 (5.0x)</span>
-                   {isInSeclusion && <div className="absolute bottom-0 left-0 w-full h-1 bg-amber-500 animate-pulse"></div>}
+                   <span className="text-[10px] text-stone-500 font-normal">心無旁騖 (2.0x)</span>
+                   {isInSeclusion && !isBreakthroughAvailable && <div className="absolute bottom-0 left-0 w-full h-1 bg-amber-500 animate-pulse"></div>}
                  </button>
               </div>
 
