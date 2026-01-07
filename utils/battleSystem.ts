@@ -1,6 +1,8 @@
 
 import { BaseAttributes, Enemy, CombatLog, MajorRealm, SpiritRootId, ElementType, EnemyRank } from '../types';
 import { REALM_BASE_STATS, SPIRIT_ROOT_DETAILS, SPIRIT_ROOT_TO_ELEMENT, ELEMENT_NAMES } from '../constants';
+import { getItem } from '../data/items';
+import { getDropRewards } from '../data/drop_tables';
 
 interface PlayerCombatStats {
   hp: number;
@@ -13,9 +15,19 @@ interface PlayerCombatStats {
   res: number;     // Magic Def
   speed: number;
   crit: number; // %
+  critDamage: number; // % (Base 150%)
   dodge: number; // %
-  name: string;
+  blockRate: number; // %
   damageReduction: number; // %
+  
+  // Utility Stats
+  alchemyBonus: number; // %
+  craftingBonus: number; // %
+  breakthroughBonus: number; // %
+  dropRateBonus: number; // %
+  cultivationSpeedBonus: number; // %
+  
+  name: string;
   element: ElementType;
   regenHp: number; // % MaxHP per turn
 }
@@ -43,7 +55,8 @@ const getRestriction = (attacker: ElementType, defender: ElementType): { isEffec
 
 export const calculatePlayerStats = (attributes: BaseAttributes, majorRealm: MajorRealm, spiritRootId: SpiritRootId): PlayerCombatStats => {
   const base = REALM_BASE_STATS[majorRealm];
-  const rootBonuses = SPIRIT_ROOT_DETAILS[spiritRootId].bonuses.battle || {};
+  const rootDetails = SPIRIT_ROOT_DETAILS[spiritRootId];
+  const rootBonuses = rootDetails.bonuses.battle || {};
 
   let maxHp = attributes.physique * 15 + base.hp;
   let maxMp = attributes.insight * 10 + base.mp;
@@ -78,16 +91,33 @@ export const calculatePlayerStats = (attributes: BaseAttributes, majorRealm: Maj
   let dodge = attributes.fortune * 0.1;
   if (rootBonuses.dodgeRate) dodge += rootBonuses.dodgeRate;
 
+  // New Derived Stats
+  const critDamage = 150 + (attributes.insight * 0.2); // Base 150%, +0.2% per Insight
+  const blockRate = attributes.physique * 0.1; // 0.1% per Physique
+  
+  // Alchemy & Crafting (Defined in Spirit Root Bonuses)
+  const alchemyBonus = rootDetails.bonuses.alchemyBonus || 0;
+  const craftingBonus = rootDetails.bonuses.craftingBonus || 0;
+  
+  const breakthroughBonus = 0; // Removed Attribute dependency
+  const dropRateBonus = attributes.fortune * 0.1; // Keep Fortune dependency
+  
+  // Cultivation Speed: Base 0 (User requested 0 base, purely equipment/method based)
+  const cultivationSpeedBonus = 0;
+
   const damageReduction = rootBonuses.damageReduction || 0;
   const regenHp = rootBonuses.hpRegen || 0;
   const element = SPIRIT_ROOT_TO_ELEMENT[spiritRootId] || ElementType.None;
 
   return {
-    hp: maxHp, maxHp, mp: maxMp, maxMp, attack, magic, defense, res, speed, crit, dodge, damageReduction, name: '道友', element, regenHp
+    hp: maxHp, maxHp, mp: maxMp, maxMp, attack, magic, defense, res, speed, 
+    crit, critDamage, dodge, blockRate, damageReduction, 
+    alchemyBonus, craftingBonus, breakthroughBonus, dropRateBonus, cultivationSpeedBonus,
+    name: '道友', element, regenHp
   };
 };
 
-export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: boolean; logs: CombatLog[] } => {
+export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: boolean; logs: CombatLog[], rewards?: { spiritStones: number, items: string[] } } => {
   let playerHp = player.hp;
   let enemyHp = enemy.hp;
   const logs: CombatLog[] = [];
@@ -126,7 +156,7 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
       return null;
   };
 
-  while (playerHp > 0 && enemyHp > 0 && turn <= 30) {
+  while (playerHp > 0 && enemyHp > 0 && turn <= 100) {
     
     // --- Special: Break Check (Player hits Boss) ---
     // If player counters boss, small chance to "Break"
@@ -228,8 +258,31 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
       logs.push({ turn, isPlayer: true, message: "戰鬥陷入僵局，你決定暫時撤退。", damage: 0 });
       return { won: false, logs };
   }
-  if (won) logs.push({ turn, isPlayer: true, message: `你擊敗了 [${enemy.name}]！`, damage: 0 });
-  else logs.push({ turn, isPlayer: false, message: `你不敵 [${enemy.name}]，身受重傷...`, damage: 0 });
+  if (won) {
+    logs.push({ turn, isPlayer: true, message: `你擊敗了 [${enemy.name}]！`, damage: 0 });
+    
+    // Drop Logic (Deterministic for Log & State)
+    const { spiritStones } = getDropRewards(enemy);
+    
+    // Item Drops (50% chance per item - moved from Adventure.tsx)
+    const droppedItemIds = enemy.drops.filter(() => Math.random() < 0.5);
+    
+    const droppedItemNames = droppedItemIds.map(id => {
+        const item = getItem(id);
+        return item ? item.name : id;
+    });
+
+    let dropMsg = `獲得戰利品：靈石 x${spiritStones}`;
+    if (droppedItemNames.length > 0) {
+        dropMsg += `，${droppedItemNames.join('，')}`;
+    }
+    logs.push({ turn, isPlayer: true, message: dropMsg, damage: 0 });
+
+    return { won, logs, rewards: { spiritStones, items: droppedItemIds } };
+
+  } else {
+    logs.push({ turn, isPlayer: false, message: `你不敵 [${enemy.name}]，身受重傷...`, damage: 0 });
+  }
 
   return { won, logs };
 };

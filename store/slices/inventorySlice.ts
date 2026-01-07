@@ -1,19 +1,22 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { InventoryItem, Equipment, ItemType, BaseAttributes } from '../../types';
+import { InventoryItem, EquipmentState, EquipmentSlot, BaseAttributes, ItemCategory, EquipmentItem } from '../../types';
 import { ITEMS } from '../../data/items';
 
 interface InventoryState {
   items: InventoryItem[];
-  equipment: Equipment;
+  equipment: EquipmentState;
   equipmentStats: Partial<BaseAttributes>;
 }
 
 const initialState: InventoryState = {
   items: [],
   equipment: {
-    weapon: null,
-    armor: null,
-    accessory: null,
+    [EquipmentSlot.Weapon]: null,
+    [EquipmentSlot.Head]: null,
+    [EquipmentSlot.Body]: null,
+    [EquipmentSlot.Legs]: null,
+    [EquipmentSlot.Accessory]: null,
+    offhand: null,
   },
   equipmentStats: {
     physique: 0,
@@ -21,16 +24,27 @@ const initialState: InventoryState = {
     insight: 0,
     comprehension: 0,
     fortune: 0,
+    charm: 0,
   }
 };
 
-const calculateStats = (equipment: Equipment) => {
-  const stats = { physique: 0, rootBone: 0, insight: 0, comprehension: 0, fortune: 0 };
+const calculateStats = (equipment: EquipmentState) => {
+  const stats: Partial<BaseAttributes & { attack: number, defense: number, speed: number }> = { 
+    physique: 0, rootBone: 0, insight: 0, comprehension: 0, fortune: 0, charm: 0,
+    attack: 0, defense: 0, speed: 0
+  };
+  
   Object.values(equipment).forEach(itemId => {
-    if (itemId && ITEMS[itemId] && ITEMS[itemId].effects?.stat) {
-      const statName = ITEMS[itemId].effects!.stat!;
-      const value = ITEMS[itemId].effects!.value || 0;
-      stats[statName] += value;
+    if (itemId && ITEMS[itemId] && ITEMS[itemId].category === ItemCategory.Equipment) {
+      const item = ITEMS[itemId] as EquipmentItem;
+      if (item.stats) {
+        Object.entries(item.stats).forEach(([key, val]) => {
+          // @ts-ignore
+          if (stats[key] !== undefined) stats[key] += val;
+          // @ts-ignore
+          else stats[key] = val; // Initialize if not present (e.g. attack)
+        });
+      }
     }
   });
   return stats;
@@ -62,12 +76,10 @@ const inventorySlice = createSlice({
     equipItem: (state, action: PayloadAction<string>) => {
       const itemId = action.payload;
       const itemDef = ITEMS[itemId];
-      if (!itemDef) return;
+      if (!itemDef || itemDef.category !== ItemCategory.Equipment) return;
 
-      let slot: keyof Equipment | null = null;
-      if (itemDef.type === 'weapon') slot = 'weapon';
-      if (itemDef.type === 'armor') slot = 'armor';
-      // if (itemDef.type === 'accessory') slot = 'accessory';
+      const equipItem = itemDef as EquipmentItem;
+      const slot = equipItem.slot; 
 
       if (slot) {
         // Unequip current if exists
@@ -90,7 +102,7 @@ const inventorySlice = createSlice({
         }
       }
     },
-    unequipItem: (state, action: PayloadAction<keyof Equipment>) => {
+    unequipItem: (state, action: PayloadAction<EquipmentSlot>) => {
       const slot = action.payload;
       const itemId = state.equipment[slot];
       if (itemId) {

@@ -4,7 +4,7 @@ import { createEnemy } from './utils';
 
 export const BOSS_ENEMIES: Record<string, Enemy> = {
     // mortal
-    'm7_boss': createEnemy('m7_boss', '守塚老屍', MajorRealm.Mortal, EnemyRank.Boss, 2000, 85, 45, ElementType.Earth, ['spirit_stone', 'bt_mortal_qi'], 400),
+    'm7_boss': createEnemy('m7_boss', '守塚老屍', MajorRealm.Mortal, EnemyRank.Boss, 2000, 80, 42, ElementType.Earth, ['spirit_stone', 'bt_mortal_qi'], 400),
     // qi
     'm8_boss': createEnemy('m8_boss', '裂風狼王', MajorRealm.QiRefining, EnemyRank.Boss, 25000, 550, 200, ElementType.Wood, ['bt_qi_foundation'], 2000),
     'm11_boss': createEnemy('m11_boss', '寒霜白猿', MajorRealm.QiRefining, EnemyRank.Boss, 30000, 600, 350, ElementType.Water, [], 3000),

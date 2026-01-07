@@ -449,32 +449,39 @@ export const Adventure: React.FC = () => {
     }
   }, [playerPosition, mapData, isBattling]);
 
-  // Battle Logic
+  // Battle Logic Effect
+  const battleProcessedRef = useRef(false);
+
   useEffect(() => {
-      if (isBattling && currentEnemy && !lastBattleResult) {
+      // Reset ref when battle ends
+      if (!isBattling) {
+          battleProcessedRef.current = false;
+          return;
+      }
+
+      if (isBattling && currentEnemy && !lastBattleResult && !battleProcessedRef.current) {
+          battleProcessedRef.current = true;
           const playerStats = calculatePlayerStats(character.attributes, character.majorRealm, character.spiritRootId);
-          const { won, logs } = runAutoBattle(playerStats, currentEnemy);
+          const { won, logs, rewards } = runAutoBattle(playerStats, currentEnemy);
+          
           setTimeout(() => {
               dispatch(resolveBattle({ won, logs }));
-              if (won) {
+              if (won && rewards) {
                   // XP Logic
                   dispatch(addLog({ message: `擊敗 ${currentEnemy.name}，獲得經驗 ${currentEnemy.exp}`, type: 'gain' }));
                   
-                  // Spirit Stones Drop
-                  const { spiritStones } = getDropRewards(currentEnemy);
-                  if (spiritStones > 0) {
-                      dispatch(addSpiritStones({ amount: spiritStones, source: 'battle' }));
-                      dispatch(addLog({ message: `獲得靈石 ${formatSpiritStone(spiritStones)}`, type: 'gain' }));
+                  // Spirit Stones Drop (From Battle Calculation)
+                  if (rewards.spiritStones > 0) {
+                      dispatch(addSpiritStones({ amount: rewards.spiritStones, source: 'battle' }));
+                      dispatch(addLog({ message: `獲得靈石 ${formatSpiritStone(rewards.spiritStones)}`, type: 'gain' }));
                   }
 
-                  // Item Drops (Legacy - kept for compatibility)
-                  currentEnemy.drops.forEach(dropId => {
-                      if (Math.random() < 0.5) { // 50% for now
-                          dispatch(addItem({ itemId: dropId, count: 1 }));
-                          dispatch(addLog({ message: `獲得戰利品: ${ITEMS[dropId]?.name}`, type: 'gold' }));
-                      }
+                  // Item Drops (From Battle Calculation)
+                  rewards.items.forEach(dropId => {
+                      dispatch(addItem({ itemId: dropId, count: 1 }));
+                      dispatch(addLog({ message: `獲得戰利品: ${ITEMS[dropId]?.name}`, type: 'gold' }));
                   });
-              } else {
+              } else if (!won) {
                   dispatch(addLog({ message: `不敵 ${currentEnemy.name}，狼狽逃回。`, type: 'danger' }));
               }
           }, 500);

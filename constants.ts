@@ -76,6 +76,7 @@ export const SPIRIT_ROOT_TO_ELEMENT: Record<SpiritRootId, ElementType> = {
 
     // True (Dual/Tri) -> Dominant Element (Arbitrary but consistent choice based on "Outcome")
     [SpiritRootId.TRUE_WOOD_FIRE]: ElementType.Fire, // Wood feeds Fire
+    [SpiritRootId.TRUE_FIRE_METAL]: ElementType.Fire, // Fire melts Metal
     [SpiritRootId.TRUE_METAL_EARTH]: ElementType.Metal, // Earth births Metal
     [SpiritRootId.TRUE_WATER_WOOD]: ElementType.Wood, // Water feeds Wood
     [SpiritRootId.TRUE_TRI]: ElementType.None, // Too balanced
@@ -115,6 +116,8 @@ interface SpiritRootDef {
     initialLifespan?: number; // Years
     initialStats?: Partial<BaseAttributes>;
     spiritStoneGainPercent?: number; // %
+    alchemyBonus?: number; // %
+    craftingBonus?: number; // %
     battle?: {
       atkPercent?: number;
       hpPercent?: number;
@@ -250,7 +253,20 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     statsDescription: "氣血+5% 暴擊+3% / 戰鬥靈石+10% / 修煉效率 1.3x",
     tags: ["煉丹輔助", "修煉尚可", "生財有道"],
     weights: { cultivation: 60, battle: 50, utility: 90 },
-    bonuses: { cultivationMult: 1.3, spiritStoneGainPercent: 10, battle: { hpPercent: 5, critRate: 3 } }
+    bonuses: { cultivationMult: 1.3, spiritStoneGainPercent: 10, alchemyBonus: 10, battle: { hpPercent: 5, critRate: 3 } }
+  },
+  [SpiritRootId.TRUE_FIRE_METAL]: {
+    name: '火金真靈根',
+    type: SpiritRootType.True,
+    colorClass: 'text-rose-500',
+    glowClass: 'shadow-rose-500/50 bg-gradient-to-r from-red-600 to-yellow-400',
+    comment: "烈火煉真金，百煉成器。真靈根！你天生具備極佳的煉器天賦。",
+    destiny: "爐火純青",
+    description: "火旺金鍛，器宇不凡。",
+    statsDescription: "攻擊+5% 煉器+10% / 修煉效率 1.3x",
+    tags: ["煉器專精", "修煉尚可", "器道天才"],
+    weights: { cultivation: 60, battle: 60, utility: 80 },
+    bonuses: { cultivationMult: 1.3, craftingBonus: 10, battle: { atkPercent: 5 } }
   },
   [SpiritRootId.TRUE_METAL_EARTH]: { // Gold-Earth
     name: '金土真靈根',

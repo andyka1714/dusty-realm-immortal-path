@@ -46,6 +46,7 @@ export enum SpiritRootId {
 
   // True (1.5x)
   TRUE_WOOD_FIRE = 'true_wood_fire',
+  TRUE_FIRE_METAL = 'true_fire_metal',
   TRUE_METAL_EARTH = 'true_metal_earth',
   TRUE_WATER_WOOD = 'true_water_wood',
   TRUE_TRI = 'true_tri',
@@ -200,35 +201,121 @@ export interface CombatLog {
 
 // --- Item & Inventory ---
 
-export type ItemType = 'weapon' | 'armor' | 'pill' | 'material' | 'manual' | 'breakthrough';
+// --- Item & Inventory System ---
 
-export interface Item {
+export enum ItemCategory {
+  Equipment = 'Equipment',
+  Consumable = 'Consumable',
+  Material = 'Material',
+  SkillBook = 'SkillBook',
+  Breakthrough = 'Breakthrough'
+}
+
+export enum ItemQuality {
+  Low = 0,      // 下品 (Grey)
+  Medium = 1,   // 中品 (Green)
+  High = 2,     // 上品 (Blue)
+  Immortal = 3  // 仙品 (Gold)
+}
+
+export interface BaseItem {
   id: string;
   name: string;
-  type: ItemType;
   description: string;
-  price: number; 
-  effects?: {
-    stat?: keyof BaseAttributes;
-    value?: number;
-    healHp?: number;
-    healMp?: number;
-    cultivationSpeed?: number;
-    lifespan?: number;
-  };
-  rarity: number; // 1-5
-  maxConsumption?: number; // Max times this item can be consumed
+  category: ItemCategory;
+  quality: ItemQuality;
+  price: number;
+  maxStack: number;
 }
+
+// -- Consumables --
+export enum ConsumableType {
+  Pill = 'Pill',             // 丹藥
+  Fateful = 'Fateful',       // 機緣物品
+  Other = 'Other'
+}
+
+export interface ConsumableEffect {
+  type: 'full_restore' | 'heal_hp' | 'heal_mp' | 'gain_exp' | 'buff_stat' | 'lifespan' | 'breakthrough_chance';
+  value: number;
+  duration?: number; // seconds, 0 for instant
+  stat?: keyof BaseAttributes;
+}
+
+export interface ConsumableItem extends BaseItem {
+  category: ItemCategory.Consumable | ItemCategory.Breakthrough;
+  subType: ConsumableType;
+  effects: ConsumableEffect[];
+  cooldown?: number;
+  maxUsage?: number;
+}
+
+// -- Materials --
+export enum MaterialType {
+  Herb = 'Herb',         // 藥草
+  MonsterPart = 'MonsterPart', // 妖獸素材
+  Ore = 'Ore',           // 礦石
+  Other = 'Other'
+}
+
+export interface MaterialItem extends BaseItem {
+  category: ItemCategory.Material;
+  subType: MaterialType;
+  element?: ElementType;
+}
+
+// -- Equipment --
+export enum EquipmentSlot {
+  Weapon = 'Weapon',
+  Head = 'Head',
+  Body = 'Body',
+  Legs = 'Legs',
+  Accessory = 'Accessory',
+  Offhand = 'Offhand'
+}
+
+export enum EquipmentType {
+  // Weapon
+  Sword = 'Sword',     // 劍修
+  Gauntlet = 'Gauntlet', // 體修
+  Staff = 'Staff',     // 法修
+  
+  // Defense
+  Helmet = 'Helmet',
+  Armor = 'Armor', 
+  Boots = 'Boots',
+  Ring = 'Ring',         // 戒指 (Accessory)
+  SimpleRobe = 'SimpleRobe', // Novice
+  Shield = 'Shield'
+}
+
+export interface EquipmentItem extends BaseItem {
+  category: ItemCategory.Equipment;
+  slot: EquipmentSlot;
+  subType: EquipmentType;
+  
+  // Stats
+  stats: Partial<Record<keyof BaseAttributes | 'attack' | 'defense' | 'speed' | 'hp' | 'maxHp' | 'mp' | 'maxMp', number>>;
+  
+  // Requirements
+  reqRealm?: MajorRealm;
+}
+
+export type Item = ConsumableItem | MaterialItem | EquipmentItem;
 
 export interface InventoryItem {
   itemId: string;
   count: number;
 }
 
-export interface Equipment {
-  weapon: string | null; 
-  armor: string | null;  
-  accessory: string | null; 
+export interface EquipmentState {
+  [EquipmentSlot.Weapon]: string | null; // itemId
+  [EquipmentSlot.Head]: string | null;
+  [EquipmentSlot.Body]: string | null;
+  [EquipmentSlot.Legs]: string | null;
+  [EquipmentSlot.Accessory]: string | null;
+  // Legacy support or extra slots can be added here
+  offhand?: string | null;
 }
 
 // --- Workshop ---
