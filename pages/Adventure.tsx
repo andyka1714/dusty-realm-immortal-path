@@ -258,6 +258,7 @@ export const Adventure: React.FC = () => {
   const [gridMetrics, setGridMetrics] = useState({
       cols: 15,
       rows: 15,
+      cellSize: 40,
       pixelWidth: 600,
       pixelHeight: 600
   });
@@ -299,7 +300,7 @@ export const Adventure: React.FC = () => {
         const pixelWidth = finalCellSize * cols;
         const pixelHeight = finalCellSize * rows;
 
-        setGridMetrics({ cols, rows, pixelWidth, pixelHeight });
+        setGridMetrics({ cols, rows, cellSize: finalCellSize, pixelWidth, pixelHeight });
     });
     
     if (containerRef.current) {
@@ -434,7 +435,7 @@ export const Adventure: React.FC = () => {
   };
 
   // --- Viewport & Smooth Scrolling Logic ---
-  const { cols, rows, pixelWidth, pixelHeight } = gridMetrics;
+  const { cols, rows, pixelWidth, pixelHeight, cellSize } = gridMetrics;
   let startX = 0;
   let startY = 0;
   let drawW = 0;
@@ -446,6 +447,10 @@ export const Adventure: React.FC = () => {
       drawW = Math.min(cols, mapData.width);
       drawH = Math.min(rows, mapData.height);
   }
+
+  // Ensure strict squareness by rendering exactly what we draw
+  const finalPixelWidth = cellSize * drawW;
+  const finalPixelHeight = cellSize * drawH;
 
   // Counter-Act Animation for Smooth Scroll
   useLayoutEffect(() => {
@@ -584,7 +589,7 @@ export const Adventure: React.FC = () => {
   }
 
   return (
-    <div className="h-full flex flex-col relative overflow-hidden bg-black">
+    <div className="fixed inset-0 flex flex-col bg-black overflow-hidden select-none">
         
         {/* Top Right Mini-Map */}
         <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-2">
@@ -630,8 +635,8 @@ export const Adventure: React.FC = () => {
             <div 
               className="relative shadow-2xl bg-black transition-none ease-out overflow-hidden" 
               style={{ 
-                 width: pixelWidth, 
-                 height: pixelHeight,
+                 width: finalPixelWidth, 
+                 height: finalPixelHeight,
                  margin: '0 auto',
                  border: '1px solid #44403c',
                  lineHeight: 0, 
