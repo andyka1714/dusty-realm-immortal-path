@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
 import { Heart, Brain, Zap, Shield, Sparkles, User, Dna, Activity, Gem } from 'lucide-react';
 import { SPIRIT_ROOT_DETAILS, REALM_BASE_STATS } from '../constants';
+import { formatSpiritStone } from '../utils/currency';
 import clsx from 'clsx';
 
 export const StatsPanel: React.FC = () => {
@@ -41,7 +42,7 @@ export const StatsPanel: React.FC = () => {
       <h3 className="text-stone-300 font-bold mb-4 border-b border-stone-800 pb-2 tracking-widest flex justify-between">
         <span>人物屬性</span>
         <span className="text-amber-500 text-sm font-normal flex items-center gap-1">
-          <span className="text-xs">靈石</span> {spiritStones}
+          <span className="text-xs">靈石</span> {formatSpiritStone(spiritStones)}
         </span>
       </h3>
       

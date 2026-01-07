@@ -1,115 +1,6 @@
-
 import { MapData, MajorRealm, ElementType, Enemy, EnemyRank } from '../types';
-
-// Helper to generate enemies
-const createEnemy = (
-    id: string, name: string, realm: MajorRealm, rank: EnemyRank, 
-    hp: number, atk: number, def: number, ele: ElementType, 
-    drops: string[], exp: number
-): Enemy => ({
-    id, name, realm, rank, hp, maxHp: hp, attack: atk, defense: def, element: ele, drops, exp
-});
-
-// --- BESTIARY DEFINITION ---
-const BESTIARY: Record<string, Enemy> = {
-    // --- Mortal & Qi ---
-    'flower_spirit': createEnemy('flower_spirit', '採花小妖', MajorRealm.Mortal, EnemyRank.Common, 40, 8, 1, ElementType.Wood, ['spirit_herb'], 5),
-    'grey_fox': createEnemy('grey_fox', '山野灰狐', MajorRealm.Mortal, EnemyRank.Common, 45, 10, 2, ElementType.Earth, [], 6),
-    'stone_spirit': createEnemy('stone_spirit', '巡山石精', MajorRealm.Mortal, EnemyRank.Elite, 200, 20, 10, ElementType.Earth, ['iron_ore'], 30),
-    'wind_wolf': createEnemy('wind_wolf', '疾風野狼', MajorRealm.Mortal, EnemyRank.Common, 60, 15, 3, ElementType.Wood, ['wolf_fang'], 8),
-    'poison_bee': createEnemy('poison_bee', '吸血毒蜂', MajorRealm.Mortal, EnemyRank.Common, 30, 20, 0, ElementType.Wood, [], 8),
-    'wolf_king': createEnemy('wolf_king', '嘯月狼將', MajorRealm.Mortal, EnemyRank.Elite, 300, 30, 15, ElementType.Metal, ['wolf_fang'], 40),
-    'corpse': createEnemy('corpse', '掘地腐屍', MajorRealm.Mortal, EnemyRank.Common, 80, 12, 5, ElementType.Earth, [], 10),
-    'ghost': createEnemy('ghost', '荒塚冤魂', MajorRealm.Mortal, EnemyRank.Common, 50, 18, 2, ElementType.Water, [], 10),
-    'zombie_guard': createEnemy('zombie_guard', '守墓殭屍', MajorRealm.Mortal, EnemyRank.Elite, 400, 35, 20, ElementType.Earth, [], 50),
-    
-    // Bosses
-    'boss_old_corpse': createEnemy('boss_old_corpse', '守塚老屍', MajorRealm.Mortal, EnemyRank.Boss, 800, 45, 25, ElementType.Earth, ['spirit_stone'], 100),
-    'boss_wolf_king_real': createEnemy('boss_wolf_king_real', '裂風狼王', MajorRealm.QiRefining, EnemyRank.Boss, 1800, 80, 30, ElementType.Wood, ['wolf_fang', 'bt_mortal_qi'], 200),
-    'boss_frost_ape': createEnemy('boss_frost_ape', '寒霜白猿', MajorRealm.QiRefining, EnemyRank.Boss, 2500, 100, 60, ElementType.Water, [], 300),
-    'boss_ink_monster': createEnemy('boss_ink_monster', '墨色水怪', MajorRealm.QiRefining, EnemyRank.Boss, 3000, 90, 50, ElementType.Water, ['bt_qi_foundation'], 400),
-    'boss_thunder_falcon': createEnemy('boss_thunder_falcon', '雷翼大隼', MajorRealm.QiRefining, EnemyRank.Boss, 2200, 130, 40, ElementType.Metal, [], 350),
-    'boss_tiger_king': createEnemy('boss_tiger_king', '金睛虎王', MajorRealm.QiRefining, EnemyRank.Boss, 3200, 120, 70, ElementType.Wood, ['wolf_fang'], 450),
-
-    // --- Foundation & Golden Core ---
-    'fire_ant': createEnemy('fire_ant', '地火工蟻', MajorRealm.Foundation, EnemyRank.Common, 600, 100, 50, ElementType.Fire, [], 100),
-    'scorpion': createEnemy('scorpion', '赤岩毒蝎', MajorRealm.Foundation, EnemyRank.Common, 700, 120, 60, ElementType.Earth, [], 110),
-    'lava_demon': createEnemy('lava_demon', '熔岩火魃', MajorRealm.Foundation, EnemyRank.Elite, 3000, 250, 150, ElementType.Fire, ['iron_ore'], 500),
-    'sand_snake': createEnemy('sand_snake', '負沙毒蛇', MajorRealm.Foundation, EnemyRank.Common, 650, 130, 40, ElementType.Earth, [], 120),
-    'dry_corpse': createEnemy('dry_corpse', '風乾行屍', MajorRealm.Foundation, EnemyRank.Common, 800, 110, 70, ElementType.Earth, [], 120),
-    'fire_charm': createEnemy('fire_charm', '煉獄火魅', MajorRealm.Foundation, EnemyRank.Common, 700, 150, 30, ElementType.Fire, [], 140),
-    'spider_queen': createEnemy('spider_queen', '人面魔蛛', MajorRealm.Foundation, EnemyRank.Elite, 4500, 320, 220, ElementType.Wood, [], 650),
-    
-    'boss_polar_sword': createEnemy('boss_polar_sword', '極地劍靈', MajorRealm.Foundation, EnemyRank.Boss, 8000, 350, 150, ElementType.Water, [], 1500),
-    'boss_demon': createEnemy('boss_demon', '烈焰妖王', MajorRealm.Foundation, EnemyRank.Boss, 10000, 450, 300, ElementType.Fire, ['bt_foundation_gold'], 2000),
-    'boss_thunder_lord': createEnemy('boss_thunder_lord', '雷澤領主', MajorRealm.Foundation, EnemyRank.Boss, 9000, 500, 200, ElementType.Metal, [], 1800),
-    'boss_beast_king': createEnemy('boss_beast_king', '萬獸獸王', MajorRealm.Foundation, EnemyRank.Boss, 12000, 400, 250, ElementType.Wood, [], 2200),
-
-    'mist_butterfly': createEnemy('mist_butterfly', '迷霧蝶妖', MajorRealm.GoldenCore, EnemyRank.Common, 2500, 350, 100, ElementType.Wood, [], 500),
-    'swamp_vine': createEnemy('swamp_vine', '腐水蔓藤', MajorRealm.GoldenCore, EnemyRank.Common, 3000, 300, 150, ElementType.Wood, [], 500),
-    'stone_guardian': createEnemy('stone_guardian', '破障石像生', MajorRealm.GoldenCore, EnemyRank.Elite, 15000, 750, 500, ElementType.Earth, [], 2200),
-    'mermaid': createEnemy('mermaid', '深海鮫人', MajorRealm.GoldenCore, EnemyRank.Common, 4000, 330, 160, ElementType.Water, [], 600),
-    
-    'boss_illusion': createEnemy('boss_illusion', '蜃樓主', MajorRealm.GoldenCore, EnemyRank.Boss, 40000, 1200, 800, ElementType.Water, ['bt_gold_nascent'], 8000),
-    'boss_spider_mother': createEnemy('boss_spider_mother', '百眼蛛母', MajorRealm.GoldenCore, EnemyRank.Boss, 45000, 1100, 900, ElementType.Wood, [], 8500),
-
-    // --- Nascent Soul & Above ---
-    'ruin_armor': createEnemy('ruin_armor', '殘破甲冑', MajorRealm.NascentSoul, EnemyRank.Common, 10000, 1000, 800, ElementType.Metal, [], 2000),
-    'blood_sword': createEnemy('blood_sword', '嗜血殘劍', MajorRealm.NascentSoul, EnemyRank.Common, 9500, 1300, 500, ElementType.Metal, [], 2200),
-    'sword_slave': createEnemy('sword_slave', '守劍劍奴', MajorRealm.NascentSoul, EnemyRank.Elite, 45000, 2500, 1500, ElementType.Metal, [], 9000),
-    
-    'boss_nameless_sword': createEnemy('boss_nameless_sword', '無名劍修', MajorRealm.NascentSoul, EnemyRank.Boss, 120000, 3500, 1500, ElementType.Metal, [], 25000),
-    'boss_stardust_giant': createEnemy('boss_stardust_giant', '星塵巨人', MajorRealm.NascentSoul, EnemyRank.Boss, 180000, 3000, 3000, ElementType.Earth, [], 28000),
-    'boss_corpse': createEnemy('boss_corpse', '屍皇', MajorRealm.NascentSoul, EnemyRank.Boss, 150000, 4000, 2500, ElementType.Earth, ['bt_nascent_spirit'], 30000),
-
-    'star_fragment': createEnemy('star_fragment', '碎星靈', MajorRealm.SpiritSevering, EnemyRank.Common, 40000, 3000, 1500, ElementType.Metal, [], 8000),
-    'tower_guard': createEnemy('tower_guard', '塔靈守衛', MajorRealm.SpiritSevering, EnemyRank.Elite, 850000, 22000, 11000, ElementType.Metal, [], 130000),
-    
-    'thunder_beast': createEnemy('thunder_beast', '霆祖', MajorRealm.SpiritSevering, EnemyRank.Boss, 600000, 10000, 5000, ElementType.Metal, ['bt_spirit_void'], 100000),
-    
-    'boss_void_nightmare': createEnemy('boss_void_nightmare', '太虛夢魘', MajorRealm.VoidRefining, EnemyRank.Boss, 1500000, 18000, 9000, ElementType.None, ['bt_void_fusion'], 300000),
-    'void_guard': createEnemy('void_guard', '虛空守衛', MajorRealm.Fusion, EnemyRank.Boss, 3000000, 30000, 15000, ElementType.None, ['bt_fusion_maha'], 500000),
-    
-    'star_god': createEnemy('star_god', '古神 · 星緯', MajorRealm.Mahayana, EnemyRank.Boss, 15000000, 80000, 40000, ElementType.Earth, ['bt_maha_trib'], 2000000),
-    
-    'boss_tribulation_guard': createEnemy('boss_tribulation_guard', '劫灰守衛', MajorRealm.Tribulation, EnemyRank.Boss, 40000000, 120000, 60000, ElementType.Fire, ['bt_trib_immortal'], 5000000),
-    
-    'boss_heaven_general': createEnemy('boss_heaven_general', '巡天神將', MajorRealm.Immortal, EnemyRank.Boss, 80000000, 160000, 80000, ElementType.Metal, [], 8000000),
-    'chaos_shadow': createEnemy('chaos_shadow', '鴻蒙之影', MajorRealm.Immortal, EnemyRank.Boss, 100000000, 200000, 100000, ElementType.Metal, ['bt_immortal_emperor'], 10000000), // Golden Immortal Top Boss
-    'boss_final': createEnemy('boss_final', '天道意志 · 因果法身', MajorRealm.ImmortalEmperor, EnemyRank.Boss, 999999999, 500000, 500000, ElementType.None, [], 0),
-    
-    // Fillers for generic maps
-    'water_ghost': createEnemy('water_ghost', '湖底水鬼', MajorRealm.QiRefining, EnemyRank.Common, 150, 30, 10, ElementType.Water, [], 20),
-    'void_ripper': createEnemy('void_ripper', '撕裂者', MajorRealm.Fusion, EnemyRank.Common, 900000, 24000, 12000, ElementType.None, [], 140000),
-    'koi': createEnemy('koi', '點靈錦鯉', MajorRealm.QiRefining, EnemyRank.Common, 120, 25, 15, ElementType.Water, ['spirit_stone'], 25),
-};
-
-const BOSS_MAPPING: Record<string, string> = {
-    "守塚老屍": 'boss_old_corpse',
-    "裂風狼王": 'boss_wolf_king_real',
-    "寒霜白猿": 'boss_frost_ape',
-    "墨色水怪": 'boss_ink_monster',
-    "雷翼大隼": 'boss_thunder_falcon',
-    "金睛虎王": 'boss_tiger_king',
-    "極地劍靈": 'boss_polar_sword',
-    "烈焰妖王": 'boss_demon',
-    "雷澤領主": 'boss_thunder_lord',
-    "萬獸獸王": 'boss_beast_king',
-    "蜃樓主": 'boss_illusion',
-    "百眼蛛母": 'boss_spider_mother',
-    "無名劍修": 'boss_nameless_sword',
-    "星塵巨人": 'boss_stardust_giant',
-    "屍皇": 'boss_corpse',
-    "霆祖": 'thunder_beast',
-    "太虛夢魘": 'boss_void_nightmare',
-    "虛空守衛": 'void_guard',
-    "古神 · 星緯": 'star_god',
-    "劫灰守衛": 'boss_tribulation_guard',
-    "巡天神將": 'boss_heaven_general',
-    "鴻蒙之影": 'chaos_shadow',
-    "天道意志": 'boss_final',
-    "天道意志 · 因果法身": 'boss_final',
-};
+import { BESTIARY, BOSS_MAPPING } from './enemies';
+import { REALM_NAMES } from '../constants';
 
 // Merged Data from V60 Specification
 const RAW_MAPS_V60 = [
@@ -794,45 +685,102 @@ export const MAPS: MapData[] = RAW_MAPS_V60.map((raw, index) => {
     // Generate Enemies List for the Map
     const enemies: Enemy[] = [];
     
-    // Auto-populate fodder based on name (Keep existing logic)
-    if (raw.name.includes('林') || raw.name.includes('木')) {
-        if(BESTIARY['wind_wolf']) enemies.push(BESTIARY['wind_wolf']);
-        if(BESTIARY['flower_spirit']) enemies.push(BESTIARY['flower_spirit']);
-    } else if (raw.name.includes('谷') || raw.name.includes('坡') || raw.name.includes('穴') || raw.name.includes('崖')) {
-        if(BESTIARY['poison_bee']) enemies.push(BESTIARY['poison_bee']);
-        if(BESTIARY['stone_spirit']) enemies.push(BESTIARY['stone_spirit']);
-    } else if (raw.name.includes('湖') || raw.name.includes('海') || raw.name.includes('潭') || raw.name.includes('澤') || raw.name.includes('蕩')) {
-        if(BESTIARY['water_ghost']) enemies.push(BESTIARY['water_ghost']);
-        if(BESTIARY['koi']) enemies.push(BESTIARY['koi']);
-    } else if (raw.name.includes('火') || raw.name.includes('焰') || raw.name.includes('熔') || raw.name.includes('熱') || raw.name.includes('焦')) {
-        if(BESTIARY['fire_ant']) enemies.push(BESTIARY['fire_ant']);
-        if(BESTIARY['fire_charm']) enemies.push(BESTIARY['fire_charm']);
-    } else if (raw.name.includes('塚') || raw.name.includes('墓') || raw.name.includes('屍') || raw.name.includes('葬') || raw.name.includes('崗')) {
-        if(BESTIARY['corpse']) enemies.push(BESTIARY['corpse']);
-        if(BESTIARY['ghost']) enemies.push(BESTIARY['ghost']);
-    } else if (raw.name.includes('星') || raw.name.includes('空') || raw.name.includes('虛') || raw.name.includes('道')) {
-        if(BESTIARY['void_ripper']) enemies.push(BESTIARY['void_ripper']);
-        if(BESTIARY['star_fragment']) enemies.push(BESTIARY['star_fragment']);
-    } else {
-        if(BESTIARY['grey_fox']) enemies.push(BESTIARY['grey_fox']);
+    // Map 0 is a Safe Zone (Village) - No monsters
+    if (id === '0') {
+        // Generate Portals from explicit positions for Map 0
+        const portals = raw.portals.map(p => {
+            const targetIdNum = p.target_id;
+            const targetMapRaw = RAW_MAPS_V60.find(m => m.id === targetIdNum);
+            
+            let targetX = 10;
+            let targetY = 10;
+            
+            if (targetMapRaw) {
+                 // Find portal in target that points back to current map to determine spawn point
+                 const returnPortal = targetMapRaw.portals.find(rp => rp.target_id === raw.id);
+                 if (returnPortal) {
+                     const tx = returnPortal.pos[0];
+                     const ty = returnPortal.pos[1];
+                     // Directly use the target's portal position as spawn
+                     // Clamp to be safe
+                     targetX = Math.max(0, Math.min(tx, targetMapRaw.size[0] - 1));
+                     targetY = Math.max(0, Math.min(ty, targetMapRaw.size[1] - 1));
+                 } else {
+                     // Default center fallback (Should not happen with complete data)
+                     targetX = Math.floor(targetMapRaw.size[0] / 2);
+                     targetY = Math.floor(targetMapRaw.size[1] / 2);
+                 }
+            }
+
+            // Clamp local portal position
+            const px = Math.max(0, Math.min(p.pos[0], width - 1));
+            const py = Math.max(0, Math.min(p.pos[1], height - 1));
+
+            return {
+                x: px,
+                y: py,
+                targetMapId: targetIdNum.toString(),
+                targetX: targetX,
+                targetY: targetY,
+                label: targetMapRaw ? `前往 [${targetMapRaw.name}]` : '未知區域'
+            };
+        });
+
+        return {
+            id,
+            name: raw.name,
+            minRealm: realm,
+            description: raw.description || '...',
+            introText: `踏入${raw.name}，${raw.description || '靈氣流動似乎有些不同...'}`,
+            width,
+            height,
+            worldX,
+            worldY,
+            enemies: [], // No monsters in village
+            portals: portals,
+            bossSpawn: null,
+            dropRateMultiplier: 1 // Default drop rate for safe zone
+        };
+    }
+
+    // Precise 1:1 Map-Monster Ecosystem Population
+    // Fetch common monsters for this map: m{id}_c1, m{id}_c2, ...
+    for (let i = 1; i <= 4; i++) {
+        const enemyId = `m${id}_c${i}`;
+        if (BESTIARY[enemyId]) {
+            enemies.push(BESTIARY[enemyId]);
+        }
+    }
+
+    // Fetch elite monsters for this map: m{id}_e1, m{id}_e2, ...
+    for (let i = 1; i <= 2; i++) {
+        const enemyId = `m${id}_e${i}`;
+        if (BESTIARY[enemyId]) {
+            enemies.push(BESTIARY[enemyId]);
+        }
+    }
+
+    // Fallback: If no monsters found for this specific map, use realm-wide defaults
+    if (enemies.length === 0) {
+        const allEnemies = Object.values(BESTIARY);
+        const commonForRealm = allEnemies.filter(e => e.realm === realm && e.rank === EnemyRank.Common);
+        if (commonForRealm.length > 0) {
+            enemies.push(commonForRealm[Math.floor(Math.random() * commonForRealm.length)]);
+        }
     }
 
     // Add Boss if defined (Use fixed position)
     let bossSpawn = undefined;
-    // @ts-ignore
-    if (raw.boss && raw.boss.name) {
-        // @ts-ignore
-        const bossNameKey = BOSS_MAPPING[raw.boss.name];
-        if (bossNameKey && BESTIARY[bossNameKey]) {
-             bossSpawn = {
-                 // @ts-ignore
+    // Boss handling via BOSS_MAPPING
+    if (raw.boss) {
+        const bossId = BOSS_MAPPING[raw.boss.name];
+        if (bossId && BESTIARY[bossId]) {
+            enemies.push(BESTIARY[bossId]);
+            bossSpawn = {
                  x: Math.max(0, Math.min(raw.boss.pos[0], width - 1)),
-                 // @ts-ignore
                  y: Math.max(0, Math.min(raw.boss.pos[1], height - 1)),
-                 enemyId: bossNameKey
+                 enemyId: bossId
              };
-             // Ensure Boss is in enemies list
-             enemies.push(BESTIARY[bossNameKey]);
         }
     }
 

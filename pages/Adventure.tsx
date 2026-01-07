@@ -13,6 +13,9 @@ import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType } from '../type
 import { MOVEMENT_SPEEDS, REALM_NAMES, ELEMENT_COLORS, ELEMENT_NAMES } from '../constants';
 import clsx from 'clsx';
 import { Modal } from '../components/Modal';
+import { getDropRewards } from '@/data/drop_tables';
+import { addSpiritStones } from '@/store/slices/characterSlice';
+import { formatSpiritStone } from '@/utils/currency';
 
 // --- VISUAL CONFIG ---
 const TARGET_CELL_SIZE_DESKTOP = 42; // px
@@ -349,7 +352,7 @@ export const Adventure: React.FC = () => {
         if (!isBattling && !showIntro && !portalModal) {
             dispatch(tickMonsters());
         }
-    }, 2000); 
+    }, 1000); 
     return () => clearInterval(interval);
   }, [dispatch, isBattling, showIntro, portalModal]);
 
@@ -400,9 +403,19 @@ export const Adventure: React.FC = () => {
           setTimeout(() => {
               dispatch(resolveBattle({ won, logs }));
               if (won) {
+                  // XP Logic
                   dispatch(addLog({ message: `擊敗 ${currentEnemy.name}，獲得經驗 ${currentEnemy.exp}`, type: 'gain' }));
+                  
+                  // Spirit Stones Drop
+                  const { spiritStones } = getDropRewards(currentEnemy);
+                  if (spiritStones > 0) {
+                      dispatch(addSpiritStones({ amount: spiritStones, source: 'battle' }));
+                      dispatch(addLog({ message: `獲得靈石 ${formatSpiritStone(spiritStones)}`, type: 'gain' }));
+                  }
+
+                  // Item Drops (Legacy - kept for compatibility)
                   currentEnemy.drops.forEach(dropId => {
-                      if (Math.random() < 0.5) { 
+                      if (Math.random() < 0.5) { // 50% for now
                           dispatch(addItem({ itemId: dropId, count: 1 }));
                           dispatch(addLog({ message: `獲得戰利品: ${ITEMS[dropId]?.name}`, type: 'gold' }));
                       }
@@ -496,11 +509,12 @@ export const Adventure: React.FC = () => {
               } else {
                   if (monster) {
                       if (monster.rank === EnemyRank.Boss) {
-                          content = <div className="w-4 h-4 md:w-6 md:h-6 rounded-full bg-red-600 shadow-[0_0_20px_red] animate-pulse border-2 border-red-400 z-10"></div>;
+                          content = <div className="w-4 h-4 md:w-6 md:h-6 rounded-full bg-red-600 shadow-[0_0_25px_rgba(220,38,38,0.8)] animate-pulse border-2 border-red-300 z-10"></div>;
                       } else if (monster.rank === EnemyRank.Elite) {
-                          content = <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-blue-500 shadow-[0_0_10px_blue] animate-bounce border border-blue-300 z-10"></div>;
+                          content = <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.6)] animate-bounce border border-blue-200 z-10"></div>;
                       } else {
-                          content = <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-stone-400 animate-pulse z-10"></div>;
+                          // Flashing Grey-White for Common
+                          content = <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-stone-400 shadow-[0_0_10px_rgba(168,162,158,0.4)] animate-pulse border border-stone-200 z-10"></div>;
                       }
                   } else if (portal) {
                       content = <div className="portal-vortex z-0 w-full h-full scale-75"></div>;

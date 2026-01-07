@@ -468,8 +468,7 @@ export const BREAKTHROUGH_CONFIG: Record<MajorRealm, BreakthroughRequirement> = 
     requiredItemId: 'bt_spirit_void', 
     tribulationName: '天人五衰劫', // 肉身崩解之劫
     penaltyType: 'major_unsafe',
-    bossHint: '虛空守衛 (破碎虛空)',
-    increment: 2 // Skip Void Refining (from Spirit Severing directly to Fusion)
+    bossHint: '虛空守衛 (破碎虛空)'
   },
   [MajorRealm.VoidRefining]: {
     baseRate: 0.45, 
@@ -490,8 +489,7 @@ export const BREAKTHROUGH_CONFIG: Record<MajorRealm, BreakthroughRequirement> = 
     requiredItemId: 'bt_maha_trib', 
     tribulationName: '心魔渡化劫', // 心魔入侵之劫
     penaltyType: 'major_unsafe',
-    bossHint: '接引使者 (飛升台)',
-    increment: 2 // Skip Tribulation realm (from Mahayana directly to Immortal)
+    bossHint: '接引使者 (飛升台)'
   },
   [MajorRealm.Tribulation]: {
     baseRate: 0.3, 

@@ -13,6 +13,7 @@ interface AdventureState {
   currentEnemy: Enemy | null;
   battleLogs: CombatLog[];
   lastBattleResult: 'won' | 'lost' | null;
+  tickCount: number;
 }
 
 const initialState: AdventureState = {
@@ -25,6 +26,7 @@ const initialState: AdventureState = {
   currentEnemy: null,
   battleLogs: [],
   lastBattleResult: null,
+  tickCount: 0,
 };
 
 const MAX_MONSTERS_PER_MAP = 20;
@@ -121,6 +123,47 @@ const adventureSlice = createSlice({
        const mapData = MAPS.find(m => m.id === state.currentMapId);
        if (!mapData) return;
 
+       state.tickCount += 1;
+
+       // --- Respawn Logic ---
+       const commonPool = mapData.enemies.filter(e => e.rank === EnemyRank.Common);
+       const elitePool = mapData.enemies.filter(e => e.rank === EnemyRank.Elite);
+
+       const spawnMonster = (template: Enemy) => {
+           // Simple collision-free spawn
+           let rx = Math.floor(Math.random() * mapData.width);
+           let ry = Math.floor(Math.random() * mapData.height);
+           
+           // Evade player and portals
+           const isInvalid = (x: number, y: number) => 
+               (x === state.playerPosition.x && y === state.playerPosition.y) || 
+               mapData.portals.some(p => p.x === x && p.y === y);
+
+           if (isInvalid(rx, ry)) {
+               rx = (rx + 2) % mapData.width;
+               ry = (ry + 2) % mapData.height;
+           }
+
+           state.activeMonsters.push({
+               instanceId: Math.random().toString(36),
+               templateId: template.id,
+               x: rx,
+               y: ry,
+               currentHp: template.maxHp,
+               rank: template.rank
+           });
+       };
+
+       // Respawn Common (5s)
+       if (state.tickCount % 5 === 0 && state.activeMonsters.filter(m => m.rank === EnemyRank.Common).length < 12) {
+           if (commonPool.length > 0) spawnMonster(commonPool[Math.floor(Math.random() * commonPool.length)]);
+       }
+       // Respawn Elite (30s)
+       if (state.tickCount % 30 === 0 && state.activeMonsters.filter(m => m.rank === EnemyRank.Elite).length < 3) {
+           if (elitePool.length > 0) spawnMonster(elitePool[Math.floor(Math.random() * elitePool.length)]);
+       }
+
+       // --- Movement Logic ---
        state.activeMonsters.forEach(monster => {
            if (monster.rank === EnemyRank.Boss) return; // Boss stationary
 
@@ -139,7 +182,7 @@ const adventureSlice = createSlice({
 
            // Common AI (or Elite not tracking): Random
            if (dx === 0 && dy === 0) {
-                const move = Math.floor(Math.random() * 5); 
+                const move = Math.floor(Math.random() * 8); // Less frequent random move
                 if (move === 0) dx = 1;
                 else if (move === 1) dx = -1;
                 else if (move === 2) dy = 1;
