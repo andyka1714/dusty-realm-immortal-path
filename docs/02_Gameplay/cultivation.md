@@ -22,3 +22,30 @@
 
 ## 4. 離線收益
 - 見 [01_Core/persistence.md](../01_Core/persistence.md)
+
+## 5. 修煉日誌與年歲系統 (Log & Age Events)
+
+隨著角色年齡增長，每年觸發一次年歲事件 (`currentYear > lastProcessedYear`)。
+
+### 5.1 事件類型
+
+#### A. 歲月感悟 (Narrative Reflection)
+- **機率**: 99%
+- **效果**: 顯示一段與當前境界相關的文字（青色/灰色）。
+- **目的**: 增強修仙歲月流逝的沉浸感。
+- **資料源**: `data/age_content.ts` (AGE_FLAVOR_TEXTS)
+
+#### B. 靈光一閃 (Epiphany)
+- **機率**: 1%
+- **效果**: 
+    - 隨機 **永久增加 1 點基礎屬性** (體魄、根骨、悟性、神識、福緣、魅力)。
+    - 顯示特殊紫色視覺日誌。
+- **資料源**: `data/age_content.ts` (EPIPHANY_LOGS)
+
+#### C. 壽元警告 (Lifespan Warning)
+- **條件**: `(壽命上限 - 當前年齡) <= 5 年`
+- **效果**: 每年觸發紅色警告日誌，提醒突破。
+
+### 5.2 系統邏輯
+- 狀態追蹤: `character.lastProcessedYear` 記錄最後處理的年份。
+- 離線計算: 上線時若經過多年，會依序觸發多次事件（上限 50 次以防洗屏）。

@@ -503,37 +503,4 @@ export const BREAKTHROUGH_CONFIG: Record<MajorRealm, BreakthroughRequirement> = 
   },
 };
 
-export const AGE_MILESTONE_MESSAGES: Partial<Record<MajorRealm, string[]>> = {
-    // ... (Keep existing messages) ...
-    [MajorRealm.Mortal]: [
-        "春去秋來，花開花落。你摸了摸眼角的皺紋，感嘆凡人百年終是黃土，必須加緊修煉了。",
-        "山下的桃樹開了又謝，這是你踏入仙途的第 ${year} 個年頭，引氣入體時感覺經脈隱隱發燙。",
-        "鄰家的孩童已成家立業，你卻仍在洞府中枯坐。修仙之路，孤獨才是常態。",
-        "清晨的露水滴在手背，你猛然驚覺：原來自己已踏入 ${age} 歲。練氣尚未圓滿，天命不等人。",
-        "你試圖捕捉那一絲縹緲的靈氣，雖然進展微小，但你感覺生命之火燃燒得更旺了一些。",
-        "時光荏苒，你已 ${age} 歲，感嘆肉身凡胎，歲月不饒人。"
-    ],
-    // ... Keep others as is for brevity in this output block, assume they are there in real file ... 
-};
 
-export const ATTRIBUTE_EPIPHANY_MESSAGES: Record<keyof BaseAttributes, string[]> = {
-  // ... (Keep existing messages) ...
-    physique: ["你於雷雨之夜感悟雷霆生滅，一絲細微電弧淬鍊了你的皮肉，體質更勝從前。"],
-    rootBone: ["你在懸崖邊觀松樹紮根石縫，對『堅韌』二字有了全新體悟，丹田道基愈發沉穩。"],
-    insight: ["你於靜室中點燃一盞青燈，觀燈火明滅，神魂竟隨著火光收縮凝練。"],
-    comprehension: ["你觀看兩名凡人老者對弈七日，忽覺萬物如棋，天地為局，心中阻滯豁然開朗。"],
-    fortune: ["你在後山散步時被一枚石子絆倒，挖開一看竟是早已滅絕的古玉殘片，當真是運氣。"],
-    charm: ["隨著修為精進，你皮膚表層隱有月華流轉，舉手投足間盡顯飄逸仙姿。"]
-};
-
-export const LIFESPAN_WARNINGS = {
-  low: [
-    "【天命】你忽然感覺心跳漏了一拍，體內生機隱隱有乾涸之象。此時距離壽元大限，僅剩 ${years} 年。",
-  ],
-  med: [
-    "【大限】你呼吸沈重，每一次吐納都顯得極其艱難。死神已在門外徘徊，距離大限僅剩 12 個月。",
-  ],
-  critical: [
-    "【死亡】你的肉身散發出淡淡的腐朽氣息，這是天人五衰的預兆。剩餘：${days} 天。",
-  ]
-};

@@ -4,6 +4,7 @@ import { getRealmLabel } from '../utils/realm';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/store';
 import { manualCultivate, attemptBreakthrough, toggleSeclusion, reincarnate } from '../store/slices/characterSlice';
+import { checkTimeEvents } from '../store/actions/timeActions';
 import { removeItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
 import { REALM_NAMES, SPIRIT_ROOT_MULTIPLIERS, REALM_MODIFIERS, MINOR_REALM_CAP, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG } from '../constants';
@@ -28,6 +29,14 @@ export const Dashboard: React.FC = () => {
 
   const [isBreakthroughModalOpen, setIsBreakthroughModalOpen] = useState(false);
   const processedBreakthroughRef = useRef<number>(0);
+
+  // Monitor Age for Year Events
+  useEffect(() => {
+     if (isInitialized && !isDead) {
+         // @ts-ignore - Thunk typing mismatch often happens with simple dispatch usage, ignore for now
+         dispatch(checkTimeEvents());
+     }
+  }, [age, isInitialized, isDead, dispatch]);
 
   // Monitor breakthrough result
   useEffect(() => {

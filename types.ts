@@ -119,6 +119,9 @@ export interface CharacterState {
   lastBreakthroughResult?: BreakthroughResult;
   
   itemConsumption: Record<string, number>; // Track how many times an item was consumed
+  
+  lastProcessedYear: number;
+  lastWarningAge?: number; // For yearly events
 }
 
 export interface LogEntry {

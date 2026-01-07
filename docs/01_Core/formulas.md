@@ -107,7 +107,7 @@ Damage = (Attacker.Atk * Random(0.9, 1.1)) - (Defender.Def * 0.5)
 - **煉虛 (Void Refining)**: +2,500 歲
 - **合體 (Fusion)**: +5,000 歲
 - **大乘 (Mahayana)**: +10,000 歲
-- **渡劫 (Tribulation)**: +0 歲 (生死劫難)
+- **渡劫 (Tribulation)**: +200,000 歲 (生死劫難)
 - **仙人 (Immortal)**: +500,000 歲 (晉升人仙時獲得)
 - **仙帝 (Immortal Emperor)**: +1,000,000 歲 (長生久視)
 

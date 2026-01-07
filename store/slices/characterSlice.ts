@@ -119,6 +119,7 @@ const initialState: CharacterState = {
   // Last Line of initialState
   lastBreakthroughResult: undefined,
   itemConsumption: {},
+  lastProcessedYear: 10, // Starts at age 10
 };
 
 const characterSlice = createSlice({
@@ -146,6 +147,7 @@ const characterSlice = createSlice({
       state.lastSaveTime = Date.now();
       state.lastBreakthroughResult = undefined;
       state.itemConsumption = {};
+      state.lastProcessedYear = 10;
 
       // Generate Spirit Root First to determine potential
       const generatedRootId = action.payload.spiritRootId || generateSpiritRoot();
@@ -181,6 +183,15 @@ const characterSlice = createSlice({
        state.isInitialized = false;
        state.isDead = false;
        state.itemConsumption = {};
+       state.lastProcessedYear = 10;
+    },
+
+    updateLastProcessedYear: (state, action: PayloadAction<number>) => {
+        state.lastProcessedYear = action.payload;
+    },
+
+    updateLastWarningAge: (state, action: PayloadAction<number>) => {
+        state.lastWarningAge = action.payload;
     },
 
     // ... (Keep processOfflineGains, tickCultivation, toggleSeclusion, manualCultivate, gainAttribute, attemptBreakthrough) ...
@@ -451,5 +462,5 @@ const characterSlice = createSlice({
   },
 });
 
-export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, toggleSeclusion, processOfflineGains, reincarnate, gainAttribute, consumeItem } = characterSlice.actions;
+export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, toggleSeclusion, processOfflineGains, reincarnate, gainAttribute, consumeItem, updateLastProcessedYear, updateLastWarningAge } = characterSlice.actions;
 export default characterSlice.reducer;
