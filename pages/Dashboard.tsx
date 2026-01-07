@@ -28,7 +28,7 @@ export const Dashboard: React.FC = () => {
   } = character;
 
   const [isBreakthroughModalOpen, setIsBreakthroughModalOpen] = useState(false);
-  const processedBreakthroughRef = useRef<number>(0);
+  const processedBreakthroughRef = useRef<number>(lastBreakthroughResult?.timestamp || 0);
 
   // Monitor Age for Year Events
   useEffect(() => {
@@ -44,7 +44,11 @@ export const Dashboard: React.FC = () => {
         processedBreakthroughRef.current = lastBreakthroughResult.timestamp;
         
         if (lastBreakthroughResult.success) {
-             dispatch(addLog({ message: "金光乍現，瓶頸轟然破碎！壽元大增，修為更進一步！", type: 'success' }));
+             if (lastBreakthroughResult.isMajor) {
+                dispatch(addLog({ message: "金光乍現，瓶頸轟然破碎！壽元大增，修為更進一步！", type: 'gold' }));
+             } else {
+                dispatch(addLog({ message: "靈氣運轉周天，修為精進，突破小境界！", type: 'success' }));
+             }
         } else {
              if (lastBreakthroughResult.isTribulation) {
                  dispatch(addLog({ message: "天劫降臨！雷霆貫體，你雖勉強保住性命，但修為盡失...", type: 'tribulation' }));

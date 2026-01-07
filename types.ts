@@ -80,6 +80,7 @@ export interface BreakthroughResult {
   success: boolean;
   dropRealm: boolean;
   isTribulation: boolean; // Is it a major realm tribulation?
+  isMajor?: boolean;
   timestamp: number;
 }
 

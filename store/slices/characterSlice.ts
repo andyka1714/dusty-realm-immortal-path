@@ -406,10 +406,12 @@ const characterSlice = createSlice({
         state.maxExp = calculateMaxExp(state.majorRealm, state.minorRealm);
         state.isBreakthroughAvailable = false;
         
+        
         state.lastBreakthroughResult = { 
             success: true, 
             dropRealm: false, 
             isTribulation: false, 
+            isMajor: isMajorBreakthrough,
             timestamp: Date.now() 
         };
 
