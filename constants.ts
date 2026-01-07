@@ -114,14 +114,17 @@ interface SpiritRootDef {
     cultivationMult: number;
     initialLifespan?: number; // Years
     initialStats?: Partial<BaseAttributes>;
+    spiritStoneGainPercent?: number; // %
     battle?: {
       atkPercent?: number;
       hpPercent?: number;
       mpPercent?: number;
       defPercent?: number;
+      resPercent?: number; // Magic Defense
       critRate?: number; // Flat %
       dodgeRate?: number; // Flat %
       damageReduction?: number; // %
+      hpRegen?: number; // % per turn
     }
   }
 }
@@ -133,10 +136,10 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     type: SpiritRootType.Heavenly,
     colorClass: 'text-yellow-500',
     glowClass: 'shadow-yellow-500/50 bg-yellow-500',
-    comment: "這、這是...金芒刺眼！竟是傳說中的庚金天靈根！林凡，你注定為劍而生！",
+    comment: "這、這是...金芒刺眼！竟是傳說中的庚金天靈根！你注定為劍而生！",
     destiny: "庚金之體",
     description: "銳利無匹，萬物皆可為劍。",
-    statsDescription: "攻擊力 +15% / 修煉效率 2.5x",
+    statsDescription: "攻擊力 +15% / 修煉效率 2.0x",
     tags: ["戰力無雙", "修煉極快", "劍修奇才"],
     weights: { cultivation: 100, battle: 100, utility: 40 },
     bonuses: { cultivationMult: 2.0, battle: { atkPercent: 15 } }
@@ -149,10 +152,10 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     comment: "生機如潮汐噴湧...天靈根！只要你還有一口氣在，上蒼便不許你枯萎。",
     destiny: "長青之體",
     description: "生機盎然，與天地同壽。",
-    statsDescription: "初始壽元 +5歲 / 修煉效率 2.5x",
-    tags: ["壽元綿長", "修煉極快", "恢復力強"],
+    statsDescription: "氣血 +10% / 回血 / 修煉效率 2.0x",
+    tags: ["修煉極快", "恢復力強", "肉盾潛力"],
     weights: { cultivation: 100, battle: 60, utility: 90 },
-    bonuses: { cultivationMult: 2.0, initialLifespan: 5 }
+    bonuses: { cultivationMult: 2.0, battle: { hpPercent: 10, hpRegen: 1 } }
   },
   [SpiritRootId.HEAVENLY_WATER]: {
     name: '水系天靈根',
@@ -162,23 +165,23 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     comment: "感靈石竟化作一汪清泉...至柔天靈根！你的靈力將如大江之水，綿延不絕。",
     destiny: "上善若水",
     description: "至柔之質，納百川之靈。",
-    statsDescription: "靈力上限 +20% / 修煉效率 2.5x",
-    tags: ["靈力浩瀚", "修煉極快", "法術連發"],
+    statsDescription: "靈力上限 +20% / 法防 +10% / 修煉 2.0x",
+    tags: ["靈力浩瀚", "修煉極快", "法術防禦"],
     weights: { cultivation: 100, battle: 80, utility: 70 },
-    bonuses: { cultivationMult: 2.0, battle: { mpPercent: 20 } }
+    bonuses: { cultivationMult: 2.0, battle: { mpPercent: 20, resPercent: 10 } }
   },
   [SpiritRootId.HEAVENLY_FIRE]: {
     name: '火系天靈根',
     type: SpiritRootType.Heavenly,
     colorClass: 'text-red-500',
     glowClass: 'shadow-red-500/50 bg-red-500',
-    comment: "赤炎焚天！這等熾熱的靈壓...你便是天生的煉丹大師，火中至尊！",
+    comment: "赤炎焚天！這等熾熱的靈壓...火中至尊，毀滅一切！",
     destiny: "至陽之體",
     description: "烈焰焚天，丹火自生。",
-    statsDescription: "煉丹成功率 +20% / 修煉效率 2.5x",
+    statsDescription: "暴擊率 +15% / 修煉效率 2.0x",
     tags: ["煉丹宗師", "修煉極快", "爆發傷害"],
     weights: { cultivation: 100, battle: 90, utility: 80 },
-    bonuses: { cultivationMult: 2.0 } // Battle crit dmg not implemented yet
+    bonuses: { cultivationMult: 2.0, battle: { critRate: 15 } }
   },
   [SpiritRootId.HEAVENLY_EARTH]: {
     name: '土系天靈根',
@@ -188,10 +191,10 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     comment: "感靈石沉重如山，動彈不得...厚德天靈根！你的根基將比這大地還要穩固。",
     destiny: "不滅之基",
     description: "厚德載物，穩如泰山。",
-    statsDescription: "體魄上限 +20% / 修煉效率 2.5x",
+    statsDescription: "物防 +15% / 減傷 +5% / 修煉 2.0x",
     tags: ["肉身成聖", "修煉極快", "防禦無敵"],
     weights: { cultivation: 100, battle: 70, utility: 60 },
-    bonuses: { cultivationMult: 2.0, battle: { hpPercent: 20, damageReduction: 5 } }
+    bonuses: { cultivationMult: 2.0, battle: { defPercent: 15, damageReduction: 5 } }
   },
 
   // --- Variant (2.0x) ---
@@ -203,7 +206,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     comment: "靈氣如疾風掠過，抓不住、摸不著...異靈根【風】，這世間凡塵難以束縛你的腳步。",
     destiny: "御風而行",
     description: "縹緲無蹤，瞬息千里。",
-    statsDescription: "閃避率 +10% / 修煉效率 2.0x",
+    statsDescription: "閃避率 +10% / 修煉效率 1.7x",
     tags: ["身法超絕", "修煉甚快", "地圖神行"],
     weights: { cultivation: 80, battle: 90, utility: 70 },
     bonuses: { cultivationMult: 1.7, battle: { dodgeRate: 10 } }
@@ -213,13 +216,13 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     type: SpiritRootType.Variant,
     colorClass: 'text-purple-500',
     glowClass: 'shadow-purple-500/50 bg-purple-500',
-    comment: "狂暴的雷霆！這是...天道化身？林凡，你的修仙之路註定伴隨著雷劫與天威。",
+    comment: "狂暴的雷霆！這是...天道化身？你的修仙之路註定伴隨著雷劫與天威。",
     destiny: "雷罰之子",
     description: "天威難犯，執掌懲戒。",
-    statsDescription: "突破損失減半 / 修煉效率 2.0x",
-    tags: ["渡劫保送", "修煉甚快", "戰鬥麻痺"],
+    statsDescription: "突破損失減半 / 攻爆 +5% / 修煉效率 1.7x",
+    tags: ["渡劫保送", "修煉甚快", "攻暴雙修"],
     weights: { cultivation: 85, battle: 95, utility: 50 },
-    bonuses: { cultivationMult: 1.7 } // Breakthrough bonus logic in slice
+    bonuses: { cultivationMult: 1.7, battle: { atkPercent: 5, critRate: 5 } }
   },
   [SpiritRootId.VARIANT_ICE]: {
     name: '冰系異靈根',
@@ -229,10 +232,10 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     comment: "寒氣透骨...感靈石都被凍住了！異靈根【冰】，你擁有一顆冷徹萬物的道心。",
     destiny: "極寒之心",
     description: "萬里冰封，神識清冷。",
-    statsDescription: "暴擊率 +10% / 修煉效率 2.0x",
-    tags: ["神識強大", "修煉甚快", "致命一擊"],
+    statsDescription: "暴擊率 +8% / 法防 +8% / 修煉效率 1.7x",
+    tags: ["法防特化", "修煉甚快", "致命一擊"],
     weights: { cultivation: 80, battle: 90, utility: 60 },
-    bonuses: { cultivationMult: 1.7, battle: { critRate: 10 } }
+    bonuses: { cultivationMult: 1.7, battle: { critRate: 8, resPercent: 8 } }
   },
 
   // --- True (1.5x) ---
@@ -244,10 +247,10 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     comment: "木助火勢，靈光流轉。真靈根！雖然資質不敵天才，但你具備極佳的煉丹天賦。",
     destiny: "丹火長燃",
     description: "相生相旺，生生不息。",
-    statsDescription: "煉丹產量提升 / 修煉效率 1.5x",
+    statsDescription: "氣血+5% 暴擊+3% / 戰鬥靈石+10% / 修煉效率 1.3x",
     tags: ["煉丹輔助", "修煉尚可", "生財有道"],
     weights: { cultivation: 60, battle: 50, utility: 90 },
-    bonuses: { cultivationMult: 1.3 }
+    bonuses: { cultivationMult: 1.3, spiritStoneGainPercent: 10, battle: { hpPercent: 5, critRate: 3 } }
   },
   [SpiritRootId.TRUE_METAL_EARTH]: { // Gold-Earth
     name: '金土真靈根',
@@ -257,7 +260,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     comment: "金石為開，厚積薄發。真靈根！你的道基穩固，極適合苦修。",
     destiny: "堅不可摧",
     description: "砂中淘金，道基穩固。",
-    statsDescription: "雙防 +10% / 修煉效率 1.5x",
+    statsDescription: "雙防 +10% / 修煉效率 1.3x",
     tags: ["防禦加成", "修煉尚可", "生存力強"],
     weights: { cultivation: 60, battle: 70, utility: 50 },
     bonuses: { cultivationMult: 1.3, battle: { defPercent: 10 } } // Applied to magic res too in logic
@@ -270,10 +273,10 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     comment: "水潤木長，生機勃勃。真靈根！你的道基之穩固，遠超常人預期。",
     destiny: "澤潤萬物",
     description: "溫潤如玉，生命頑強。",
-    statsDescription: "抗性 +15% / 修煉效率 1.5x",
-    tags: ["百毒不侵", "修煉尚可", "回復力UP"],
+    statsDescription: "HP/MP +10% / 修煉效率 1.3x",
+    tags: ["根基深厚", "修煉尚可", "雙池加成"],
     weights: { cultivation: 60, battle: 50, utility: 80 },
-    bonuses: { cultivationMult: 1.3 }
+    bonuses: { cultivationMult: 1.3, battle: { hpPercent: 10, mpPercent: 10 } }
   },
   [SpiritRootId.TRUE_TRI]: {
     name: '隨機三靈根',
@@ -283,7 +286,7 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     comment: "三色匯聚，五行有序。真靈根！資質尚可，只要勤勉修煉，築基金丹指日可待。",
     destiny: "三才合一",
     description: "氣息平穩，循環往復。",
-    statsDescription: "突破成功率 +5% / 修煉效率 1.5x",
+    statsDescription: "突破成功率 +5% / 修煉效率 1.3x",
     tags: ["突破加成", "修煉尚可", "均衡發展"],
     weights: { cultivation: 65, battle: 55, utility: 55 },
     bonuses: { cultivationMult: 1.3 }
@@ -298,10 +301,10 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     comment: "四色雜亂...哎，靈氣入體如亂麻纏繞。你的求道之路將會極度艱難。",
     destiny: "求道艱辛",
     description: "駁雜不純，意志磨礪。",
-    statsDescription: "傷害抗性 +8% / 修煉效率 1.0x",
+    statsDescription: "傷害減免 +3% / 修煉 1.0x",
     tags: ["抗性提升", "修煉緩慢", "大器晚成"],
     weights: { cultivation: 20, battle: 40, utility: 60 },
-    bonuses: { cultivationMult: 1.0, battle: { damageReduction: 8 } }
+    bonuses: { cultivationMult: 1.0, battle: { damageReduction: 3 } }
   },
   [SpiritRootId.MIXED_FIVE]: {
     name: '五行全靈根',
@@ -311,10 +314,10 @@ export const SPIRIT_ROOT_DETAILS: Record<SpiritRootId, SpiritRootDef> = {
     comment: "五行全雜...這是廢靈根中的極品。除非有逆天奇遇，否則這輩子恐難望金丹之境。",
     destiny: "五行雜陳",
     description: "大道難尋，氣運莫測。",
-    statsDescription: "福緣 +10 / 修煉效率 1.0x",
+    statsDescription: "福緣 +10 / 掉寶 +10% / 修煉 1.0x",
     tags: ["氣運之子", "掉寶UP", "奇遇連連"],
     weights: { cultivation: 10, battle: 30, utility: 100 },
-    bonuses: { cultivationMult: 1.0, initialStats: { fortune: 10 } }
+    bonuses: { cultivationMult: 1.0, initialStats: { fortune: 10 } } // dropRate not in battle bonus yet, need to check adventure slice or map logic
   },
 };
 

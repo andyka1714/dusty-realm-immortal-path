@@ -355,6 +355,23 @@ const characterSlice = createSlice({
       }
     },
 
+    addSpiritStones: (state, action: PayloadAction<{ amount: number, source?: 'battle' | 'sale' | 'other' }>) => {
+      const { amount, source } = action.payload;
+      
+      let finalAmount = amount;
+      
+      // Bonus only applies to Battle Drops
+      if (source === 'battle') {
+          const rootDetails = SPIRIT_ROOT_DETAILS[state.spiritRootId];
+          const bonusPercent = rootDetails.bonuses.spiritStoneGainPercent || 0;
+          if (bonusPercent > 0) {
+              finalAmount = Math.floor(amount * (1 + bonusPercent / 100));
+          }
+      }
+      
+      state.spiritStones += finalAmount;
+    },
+
     gainAttribute: (state, action: PayloadAction<keyof BaseAttributes>) => {
       const attr = action.payload;
       state.attributes[attr] += 1;
@@ -490,5 +507,5 @@ const characterSlice = createSlice({
   },
 });
 
-export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, toggleSeclusion, processOfflineGains, reincarnate, gainAttribute, consumeItem, updateLastProcessedYear, updateLastWarningAge } = characterSlice.actions;
+export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, toggleSeclusion, processOfflineGains, reincarnate, gainAttribute, consumeItem, updateLastProcessedYear, updateLastWarningAge, addSpiritStones } = characterSlice.actions;
 export default characterSlice.reducer;

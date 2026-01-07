@@ -17,6 +17,7 @@ interface PlayerCombatStats {
   name: string;
   damageReduction: number; // %
   element: ElementType;
+  regenHp: number; // % MaxHP per turn
 }
 
 // Elemental Restriction Logic (Attacker > Defender)
@@ -54,8 +55,12 @@ export const calculatePlayerStats = (attributes: BaseAttributes, majorRealm: Maj
   if (rootBonuses.hpPercent) maxHp *= (1 + rootBonuses.hpPercent / 100);
   if (rootBonuses.mpPercent) maxMp *= (1 + rootBonuses.mpPercent / 100);
   if (rootBonuses.atkPercent) attack *= (1 + rootBonuses.atkPercent / 100);
-  if (rootBonuses.defPercent) {
-      defense *= (1 + rootBonuses.defPercent / 100);
+  if (rootBonuses.defPercent) defense *= (1 + rootBonuses.defPercent / 100);
+  
+  // Res uses resPercent if available, otherwise shares defPercent (for backward compatibility if any)
+  if (rootBonuses.resPercent) {
+      res *= (1 + rootBonuses.resPercent / 100);
+  } else if (rootBonuses.defPercent) {
       res *= (1 + rootBonuses.defPercent / 100);
   }
 
@@ -74,10 +79,11 @@ export const calculatePlayerStats = (attributes: BaseAttributes, majorRealm: Maj
   if (rootBonuses.dodgeRate) dodge += rootBonuses.dodgeRate;
 
   const damageReduction = rootBonuses.damageReduction || 0;
+  const regenHp = rootBonuses.hpRegen || 0;
   const element = SPIRIT_ROOT_TO_ELEMENT[spiritRootId] || ElementType.None;
 
   return {
-    hp: maxHp, maxHp, mp: maxMp, maxMp, attack, magic, defense, res, speed, crit, dodge, damageReduction, name: '道友', element,
+    hp: maxHp, maxHp, mp: maxMp, maxMp, attack, magic, defense, res, speed, crit, dodge, damageReduction, name: '道友', element, regenHp
   };
 };
 
@@ -146,6 +152,17 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
     if (enemy.name === '幽谷巨蟒' && player.element === ElementType.Earth && turn % 5 === 0) skipPlayer = true;
 
     if (!skipPlayer) {
+        // Regen Logic
+        if (player.regenHp > 0 && playerHp < player.maxHp) {
+            const healAmount = Math.floor(player.maxHp * (player.regenHp / 100));
+            playerHp = Math.min(player.maxHp, playerHp + healAmount);
+             // Optional: Log regen? Might clutter. Let's log only if significant? 
+             // Actually, for turn-based log, it's better to show it.
+             if (healAmount > 0) {
+                 logs.push({ turn, isPlayer: true, message: `生機盎然！你的長青之體自動回復了 ${healAmount} 點氣血。`, damage: -healAmount });
+             }
+        }
+
         const isCrit = Math.random() * 100 < player.crit;
         let rawDmg = Math.max(1, player.attack - enemy.defense);
         
