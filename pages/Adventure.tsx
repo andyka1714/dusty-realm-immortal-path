@@ -226,6 +226,59 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     {nodes}
                 </div>
             </div>
+
+
+            {/* Map Info Tooltip */}
+            {hoveredMapId && (() => {
+                const map = MAPS.find(m => m.id === hoveredMapId);
+                if (!map) return null;
+                
+                // Get unique monster info (deduplicate by name)
+                const uniqueMonstersMap = new Map();
+                map.enemies.forEach(e => {
+                    if (!uniqueMonstersMap.has(e.name)) {
+                        uniqueMonstersMap.set(e.name, e);
+                    }
+                });
+                const uniqueMonsters = Array.from(uniqueMonstersMap.values());
+                
+                return (
+                    <div className="absolute top-4 left-4 z-50 p-4 bg-stone-900/95 border border-amber-500/50 rounded-lg shadow-2xl backdrop-blur max-w-xs animate-fade-in pointer-events-none">
+                        <div className="flex items-center justify-between mb-2 pb-2 border-b border-stone-800">
+                            <h3 className="text-lg font-bold text-amber-500">{map.name}</h3>
+                            <span className="text-xs px-2 py-0.5 rounded bg-stone-800 text-stone-400 border border-stone-700">
+                                {REALM_NAMES[map.minRealm]}
+                            </span>
+                        </div>
+                        <p className="text-sm text-stone-400 mb-4 font-serif leading-relaxed line-clamp-3">
+                            {map.introText.replace(/踏入.*?，/, '') /* Clean up generic prefix for cleaner tooltip */}
+                        </p>
+                        
+                        <div className="space-y-2">
+                            <div className="text-xs font-bold text-stone-500 uppercase tracking-wider flex items-center gap-1">
+                                <Skull size={12} /> 區域妖獸
+                            </div>
+                            {uniqueMonsters.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                    {uniqueMonsters.map(monster => {
+                                        let styleClass = "text-stone-400 bg-stone-950 border-stone-800"; // Common
+                                        if (monster.rank === EnemyRank.Elite) styleClass = "text-blue-400 bg-blue-950/30 border-blue-800";
+                                        if (monster.rank === EnemyRank.Boss) styleClass = "text-red-500 bg-red-950/30 border-red-800";
+                                        
+                                        return (
+                                            <span key={monster.name} className={`text-xs px-1.5 py-0.5 rounded border ${styleClass}`}>
+                                                {monster.name}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <span className="text-xs text-stone-600 italic">此地似乎安全...</span>
+                            )}
+                        </div>
+                    </div>
+                );
+            })()}
         </div>
     );
 };
