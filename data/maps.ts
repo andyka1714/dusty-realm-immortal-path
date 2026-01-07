@@ -784,9 +784,11 @@ export const MAPS: MapData[] = RAW_MAPS_V60.map((raw, index) => {
         }
     }
 
-    // Default Fallback
-    if (enemies.length === 0) {
-        enemies.push(BESTIARY['grey_fox']);
+    // Default Fallback (Skip Map 0 as it is Safe Zone)
+    if (enemies.length === 0 && raw.id !== 0) {
+        if (BESTIARY['m1_c1']) {
+            enemies.push(BESTIARY['m1_c1']);
+        }
     }
 
     // Generate Portals from explicit positions
@@ -829,7 +831,7 @@ export const MAPS: MapData[] = RAW_MAPS_V60.map((raw, index) => {
     });
 
     return {
-        id: id,
+        id: id.toString(),
         name: raw.name,
         minRealm: realm,
         description: raw.description || '...', 

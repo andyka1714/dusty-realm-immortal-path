@@ -114,6 +114,12 @@ const adventureSlice = createSlice({
               state.battleLogs = [];
               state.lastBattleResult = null;
               state.activeMonsters.splice(collidedMonsterIndex, 1);
+          } else {
+              // Template not found (invalid/outdated monster), remove it silently
+              console.warn(`[Collision] Template not found for monster: ${monster.templateId} on map ${state.currentMapId}`, {
+                  enemiesOnMap: mapData.enemies.map(e => e.id)
+              });
+              state.activeMonsters.splice(collidedMonsterIndex, 1);
           }
       }
     },
