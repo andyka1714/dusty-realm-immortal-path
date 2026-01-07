@@ -421,11 +421,13 @@ interface BreakthroughRequirement {
   tribulationName?: string; // If set, this breakthrough is a Tribulation
   bossHint?: string; // Hint where to find the item
   penaltyType: 'minor' | 'major_safe' | 'major_unsafe'; 
+  increment?: number; // Optional: skip realms (e.g., 2 to skip one)
 }
 
 // Config for MAJOR Boundaries (transitioning FROM this realm TO next)
 // e.g. Mortal -> Qi Refining is defined under Mortal
 export const BREAKTHROUGH_CONFIG: Record<MajorRealm, BreakthroughRequirement> = {
+  // === 無天劫 (No Tribulation) ===
   [MajorRealm.Mortal]: { 
     baseRate: 1.0, 
     requiredItemId: 'bt_mortal_qi', 
@@ -438,72 +440,76 @@ export const BREAKTHROUGH_CONFIG: Record<MajorRealm, BreakthroughRequirement> = 
     penaltyType: 'major_safe',
     bossHint: '寒潭蛟龍 (寒潭深處)'
   },
+
+  // === 天劫開始 (Tribulation Begins from Golden Core) ===
   [MajorRealm.Foundation]: { 
     baseRate: 0.8, 
     requiredItemId: 'bt_foundation_gold', 
-    tribulationName: '三九小雷劫',
+    tribulationName: '三九小雷劫', // 27道天雷
     penaltyType: 'major_unsafe', 
-    bossHint: '烈焰妖王 (極熱深淵)'
+    bossHint: '烈焰妖王 (熔岩地窟)'
   },
   [MajorRealm.GoldenCore]: { 
     baseRate: 0.7, 
     requiredItemId: 'bt_gold_nascent', 
-    tribulationName: '六九中雷劫',
+    tribulationName: '六九中雷劫', // 54道天雷
     penaltyType: 'major_unsafe',
-    bossHint: '幻境之主 (幻夢神海)'
+    bossHint: '幻境之主 (迷霧幻海)'
   },
   [MajorRealm.NascentSoul]: { 
     baseRate: 0.6, 
     requiredItemId: 'bt_nascent_spirit', 
-    tribulationName: '九九大雷劫',
+    tribulationName: '九九大雷劫', // 81道天雷
     penaltyType: 'major_unsafe',
     bossHint: '萬年屍王 (荒古墓塚)'
   },
   [MajorRealm.SpiritSevering]: { 
     baseRate: 0.5, 
     requiredItemId: 'bt_spirit_void', 
-    tribulationName: '天人五衰劫', // Placeholder name
+    tribulationName: '天人五衰劫', // 肉身崩解之劫
     penaltyType: 'major_unsafe',
-    bossHint: '虛空守衛 (破碎虛空)'
+    bossHint: '虛空守衛 (破碎虛空)',
+    increment: 2 // Skip Void Refining (from Spirit Severing directly to Fusion)
   },
-  [MajorRealm.VoidRefining]: { // NEW
+  [MajorRealm.VoidRefining]: {
     baseRate: 0.45, 
     requiredItemId: 'bt_void_fusion', 
-    tribulationName: '虛空混沌劫',
+    tribulationName: '虛空破碎劫', // 虛空法則之劫
     penaltyType: 'major_unsafe',
     bossHint: '混沌古獸 (混沌邊緣)'
   },
   [MajorRealm.Fusion]: { 
     baseRate: 0.4, 
     requiredItemId: 'bt_fusion_maha', 
-    tribulationName: '五行混元劫',
+    tribulationName: '五行混元劫', // 五行相生相剋之劫
     penaltyType: 'major_unsafe',
     bossHint: '五行尊者 (五行神殿)'
   },
   [MajorRealm.Mahayana]: { 
     baseRate: 0.35, 
     requiredItemId: 'bt_maha_trib', 
-    tribulationName: '真仙降世劫',
+    tribulationName: '心魔渡化劫', // 心魔入侵之劫
     penaltyType: 'major_unsafe',
-    bossHint: '接引使者 (飛升台)'
+    bossHint: '接引使者 (飛升台)',
+    increment: 2 // Skip Tribulation realm (from Mahayana directly to Immortal)
   },
-  [MajorRealm.Tribulation]: { // NEW
+  [MajorRealm.Tribulation]: {
     baseRate: 0.3, 
     requiredItemId: 'bt_trib_immortal', 
-    tribulationName: '九天玄雷劫', // The "Final" tribulation
+    tribulationName: '九天玄雷劫', // 飛升前最終一劫
     penaltyType: 'major_unsafe',
     bossHint: '天道意志 (天門)'
   },
   [MajorRealm.Immortal]: { 
     baseRate: 0.1, 
     requiredItemId: 'bt_immortal_emperor', 
-    tribulationName: '滅世虛無劫',
+    tribulationName: '滅世虛無劫', // 仙人晉階帝君的終極考驗
     penaltyType: 'major_unsafe',
     bossHint: '鴻蒙之影 (混沌源頭)'
   },
   [MajorRealm.ImmortalEmperor]: { 
-    baseRate: 0.0, 
-    tribulationName: '終極因果劫',
+    baseRate: 0.0, // 已達頂峰
+    tribulationName: '終極因果劫', // 世界毀滅級別 (不可觸發)
     penaltyType: 'major_unsafe',
     bossHint: '天道化身 (彼岸終點)'
   },

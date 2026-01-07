@@ -428,7 +428,7 @@ const characterSlice = createSlice({
       if (roll <= successRate) {
         // --- SUCCESS ---
         if (isMajorBreakthrough) {
-          state.majorRealm += 1;
+          state.majorRealm += (config.increment ?? 1);
           state.minorRealm = 0;
           
           const bonusLife = LIFESPAN_BONUS[state.majorRealm] || 0;
@@ -448,7 +448,6 @@ const characterSlice = createSlice({
         state.currentExp = 0;
         state.maxExp = calculateMaxExp(state.majorRealm, state.minorRealm);
         state.isBreakthroughAvailable = false;
-        
         
         state.lastBreakthroughResult = { 
             success: true, 
@@ -472,33 +471,41 @@ const characterSlice = createSlice({
 
         // Penalty Logic
         if (penaltyType === 'major_unsafe') {
-            // TRIBULATION FAILURE: -100% Exp
+            // TRIBULATION FAILURE (Golden Core+): -100% Exp, Item Lost
             state.currentExp = 0; 
-        } else {
-            // Standard Failure: -30% Exp
+        } else if (penaltyType === 'major_safe') {
+            // MAJOR SAFE (Mortal/Qi): -30% Exp, Item Lost
             const lossPct = 0.3 * riskReducer;
-            state.currentExp = Math.floor(state.maxExp * (1 - lossPct)); 
+            state.currentExp = Math.floor(state.maxExp * (1 - lossPct));
+        } else {
+            // MINOR (Lv 1-9): -30% Exp, No Item Loss (Handled by UI not dispatching remove, but verify here?)
+            // Actually 'consumedItem' payload handles if item was consumed *before*.
+            // But for Minor, no item required usually.
+            const lossPct = 0.3 * riskReducer;
+            state.currentExp = Math.floor(state.currentExp * (1 - lossPct)); // Wait! User said "Current Exp -30%".
+            // Previous code used maxExp * (1-loss). That sets it to 70% of MAX.
+            // If user has 100% (ready to break), they drop to 70%.
+            // If user text says "Deduct 30% of current exp".
+            // Since breakthrough requires 100% exp (maxExp), "Current" is "Max".
+            // So result is 70% of Max. Logic holds.
+            if (state.currentExp > state.maxExp) state.currentExp = state.maxExp; // Clamp
+            state.currentExp = Math.floor(state.currentExp * (1 - lossPct));
         }
 
-        // Minor Realm Drop Logic (Optional, keep low chance)
-        const safetyChance = state.attributes.fortune * 0.005; 
-        const deviationRoll = Math.random();
-        
-        // Only drop realm if not unsafe tribulation (tribulation is already punish enough with 0 exp)
-        // actually spec says "Drop Realm" chance is separate.
-        // Let's keep existing drop logic but reduce chance for tribulation since exp is wiped
-        if (deviationRoll > safetyChance && deviationRoll < (0.05 * riskReducer)) {
-            dropRealm = true;
-             if (state.minorRealm > 0) {
-                state.minorRealm -= 1;
-            }
-        }
+        // Minor Realm Drop Logic (Only for Minor Breakdowns as per specs? Table says "Item Lost? No". "Drop Realm? No column").
+        // But "突破失敗後果" section mentions "道基受損 (Debuff)" but not realm drop.
+        // However, existing code had realm drop. 
+        // User spec "Table 1-100" doesn't mention realm drop.
+        // I will DISABLE realm drop to follow spec strictly, OR keep it minimal.
+        // User didn't explicitly ban it, but "失敗後果" list 1,2,3,4 doesn't mention "Realm Drop".
+        // It says "Exp Deduct".
+        // So I will REMOVE Realm Drop logic to be safe.
         
         state.isBreakthroughAvailable = false;
         
         state.lastBreakthroughResult = { 
             success: false, 
-            dropRealm, 
+            dropRealm: false, 
             isTribulation,
             timestamp: Date.now() 
         };
