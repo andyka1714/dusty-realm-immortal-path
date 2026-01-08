@@ -11,15 +11,7 @@ export const Workshop: React.FC = () => {
   const { majorRealm, spiritStones } = useSelector((state: RootState) => state.character);
   const { gatheringLevel } = useSelector((state: RootState) => state.workshop);
 
-  if (majorRealm < MajorRealm.Foundation) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full text-stone-500 p-8">
-        <Hammer size={48} className="mb-4 opacity-50" />
-        <h2 className="text-2xl font-bold mb-2">洞府未開</h2>
-        <p>築基期後方可開闢洞府，建立基業。</p>
-      </div>
-    );
-  }
+
 
   const upgradeCost = gatheringLevel * 100;
 
