@@ -363,7 +363,7 @@ export const Adventure: React.FC = () => {
   } = useSelector((state: RootState) => state.adventure);
   
   const [showIntro, setShowIntro] = useState(false);
-  const [portalModal, setPortalModal] = useState<{ targetMapId: string, targetX: number, targetY: number, label: string } | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false); // Transition Overlay
   
   // Expanded Map State
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
@@ -478,15 +478,15 @@ export const Adventure: React.FC = () => {
 
   // Stop auto-move if battle starts or map changes
   useEffect(() => {
-      if (isBattling || showIntro || portalModal) {
+      if (isBattling || showIntro) {
           setAutoMovePath([]);
           if (moveTimerRef.current) clearTimeout(moveTimerRef.current);
       }
-  }, [isBattling, showIntro, portalModal, currentMapId]);
+  }, [isBattling, showIntro, currentMapId]);
 
   // 1. Dynamic Tracking Logic (Effect: Updates autoMovePath)
   useEffect(() => {
-      if (isBattling || portalModal || showIntro || !mapData || !targetMonsterId) return;
+      if (isBattling || showIntro || !mapData || !targetMonsterId) return;
 
       const targetMonster = activeMonsters.find(m => m.instanceId === targetMonsterId);
       if (targetMonster) {
@@ -503,11 +503,11 @@ export const Adventure: React.FC = () => {
           // Monster dead or gone? Stop targeting.
           setTargetMonsterId(null);
       }
-  }, [targetMonsterId, activeMonsters, mapData, isBattling, portalModal, showIntro, playerPosition, autoMovePath]);
+  }, [targetMonsterId, activeMonsters, mapData, isBattling, showIntro, playerPosition, autoMovePath]);
 
   // 2. Movement Execution Logic (Effect: Runs Timer)
   useEffect(() => {
-      if (!isBattling && !portalModal && !showIntro && autoMovePath.length > 0) {
+      if (!isBattling && !showIntro && autoMovePath.length > 0) {
           const nextStep = autoMovePath[0];
           const speed = MOVEMENT_SPEEDS[character.majorRealm] || 500;
 
@@ -524,23 +524,23 @@ export const Adventure: React.FC = () => {
           }, speed);
       }
       return () => { if (moveTimerRef.current) clearTimeout(moveTimerRef.current); };
-  }, [autoMovePath, playerPosition, isBattling, character.majorRealm, dispatch, portalModal, showIntro]);
+  }, [autoMovePath, playerPosition, isBattling, character.majorRealm, dispatch, showIntro]);
 
   // Monster Ticker
   useEffect(() => {
     const interval = setInterval(() => {
-        if (!isBattling && !showIntro && !portalModal) {
+        if (!isBattling && !showIntro) {
             dispatch(tickMonsters());
         }
     }, 1000); 
     return () => clearInterval(interval);
-  }, [dispatch, isBattling, showIntro, portalModal]);
+  }, [dispatch, isBattling, showIntro]);
 
   // --- Auto-Battle Logic ---
   
   // 1. Auto-Target: Find nearest monster when idle
   useEffect(() => {
-      if (!isAutoBattling || isBattling || targetMonsterId || showIntro || portalModal || activeMonsters.length === 0) return;
+      if (!isAutoBattling || isBattling || targetMonsterId || showIntro || activeMonsters.length === 0) return;
 
       // Find nearest
       let nearestId: string | null = null;
@@ -558,7 +558,7 @@ export const Adventure: React.FC = () => {
       if (nearestId) {
           setTargetMonsterId(nearestId);
       }
-  }, [isAutoBattling, isBattling, targetMonsterId, activeMonsters, playerPosition, showIntro, portalModal]);
+  }, [isAutoBattling, isBattling, targetMonsterId, activeMonsters, playerPosition, showIntro]);
 
   // 2. Auto-Close Battle Report
   useEffect(() => {
@@ -584,7 +584,7 @@ export const Adventure: React.FC = () => {
   // Keyboard Controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-        if (isBattling || showIntro || portalModal || isMapModalOpen) return;
+        if (isBattling || showIntro || isMapModalOpen) return;
         
         const isMoveKey = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(e.key);
         if (isMoveKey) setAutoMovePath([]); 
@@ -598,7 +598,7 @@ export const Adventure: React.FC = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [dispatch, isBattling, showIntro, portalModal, isMapModalOpen]);
+  }, [dispatch, isBattling, showIntro, isMapModalOpen]);
 
   // Map Intro
   useEffect(() => {
@@ -610,15 +610,50 @@ export const Adventure: React.FC = () => {
       setShowIntro(false);
   };
 
-  // Portal Check
+  // Event Driven Portal Logic
+  const handlePlayerArrive = (x: number, y: number) => {
+      if (!mapData || isBattling) return;
+      const portal = mapData.portals.find(p => p.x === x && p.y === y);
+      if (portal) {
+           // 1. Fade to Black first
+           setIsTransitioning(true);
+           
+           // 2. Wait for fade (500ms), THEN warp
+           setTimeout(() => {
+               dispatch(enterMap({ mapId: portal.targetMapId, startX: portal.targetX, startY: portal.targetY }));
+               // Note: The useEffect below will handle the Fade In logic once mapId changes
+           }, 500);
+      }
+  };
+
+  // Map Change Transition / Intro
+  const prevMapIdRef = useRef<string | null>(currentMapId);
+
   useEffect(() => {
-    if (mapData && !isBattling) {
-        const portal = mapData.portals.find(p => p.x === playerPosition.x && p.y === playerPosition.y);
-        if (portal) {
-             setPortalModal(portal);
-        }
-    }
-  }, [playerPosition, mapData, isBattling]);
+      if (!currentMapId) return;
+      
+      const prevId = prevMapIdRef.current;
+      if (currentMapId === prevId) return;
+      
+      prevMapIdRef.current = currentMapId;
+
+      if (!mapData || showIntro) return; 
+
+      const hasVisitedMap = mapHistory[currentMapId];
+      
+      if (!hasVisitedMap && currentMapId !== '0') {
+           setShowIntro(true);
+           dispatch(markMapVisited(currentMapId));
+      } else {
+           // Only trigger blink if this is a REAL map switch (prevId existed)
+           // If prevId was null (App Boot), skip the black blink for visited maps.
+           if (prevId) {
+               setIsTransitioning(true);
+               const timer = setTimeout(() => setIsTransitioning(false), 500);
+               return () => clearTimeout(timer);
+           }
+      }
+  }, [currentMapId, mapData, showIntro, mapHistory]);
 
   // Battle Logic Effect
   const battleProcessedRef = useRef(false);
@@ -677,7 +712,7 @@ export const Adventure: React.FC = () => {
   }, [isBattling, currentEnemy, lastBattleResult, character, dispatch]);
 
   const handleGridClick = (targetX: number, targetY: number) => {
-      if (isBattling || showIntro || portalModal || !mapData) return;
+      if (isBattling || showIntro || !mapData) return;
       
       // Check if clicking on a monster
       const targetMonster = activeMonsters.find(m => m.x === targetX && m.y === targetY);
@@ -768,6 +803,12 @@ export const Adventure: React.FC = () => {
             ref={containerRef}
             className="flex-1 flex items-center justify-center bg-stone-950/80 relative overflow-hidden"
         >
+            {/* Transition Overlay */}
+            <div className={clsx(
+                "absolute inset-0 z-50 bg-black pointer-events-none transition-opacity duration-500",
+                isTransitioning ? "opacity-100" : "opacity-0"
+            )}></div>
+
             {/* PixiJS Stage */}
             {gridMetrics.pixelWidth > 0 && mapData && (
                  <AdventureStage
@@ -776,6 +817,7 @@ export const Adventure: React.FC = () => {
                     activeMonsters={activeMonsters}
                     portals={mapData.portals}
                     onTileClick={handleGridClick}
+                    onPlayerArrive={handlePlayerArrive}
                     width={gridMetrics.pixelWidth}
                     height={gridMetrics.pixelHeight}
                     cellSize={gridMetrics.cellSize}
@@ -825,28 +867,7 @@ export const Adventure: React.FC = () => {
             </div>
         )}
 
-        {/* Portal Modal */}
-        {portalModal && (
-            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 bg-stone-900 border border-blue-500/50 p-4 rounded-xl shadow-2xl z-50 w-64 text-center animate-fade-in">
-                <h3 className="text-blue-400 font-bold mb-2 flex items-center justify-center gap-2"><Navigation size={16} /> 傳送陣</h3>
-                <p className="text-sm text-stone-300 mb-4">{portalModal.label}</p>
-                <div className="flex gap-2">
-                    <button onClick={() => {
-                            const targetMap = MAPS.find(m => m.id === portalModal.targetMapId);
-                            if (targetMap && character.majorRealm < targetMap.minRealm) {
-                                dispatch(addLog({ message: "修為不足，無法傳送！", type: 'danger' }));
-                                return;
-                            }
-                            dispatch(enterMap({ mapId: portalModal.targetMapId, startX: portalModal.targetX, startY: portalModal.targetY }));
-                            setPortalModal(null);
-                        }} className="flex-1 bg-blue-700 hover:bg-blue-600 text-white py-2 rounded">前往</button>
-                    <button onClick={() => { 
-                        // Just close modal, let player move freely
-                        setPortalModal(null); 
-                    }} className="flex-1 bg-stone-800 text-stone-400 py-2 rounded">離開</button>
-                </div>
-            </div>
-        )}
+
 
         {/* EXPANDED MAP MODAL */}
         <Modal 

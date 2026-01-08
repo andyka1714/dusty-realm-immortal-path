@@ -13,6 +13,7 @@ interface AdventureStageProps {
   majorRealm: MajorRealm;
   isBattling: boolean;
   onTileClick: (x: number, y: number) => void;
+  onPlayerArrive?: (x: number, y: number) => void; // New Callback
   width: number;
   height: number;
   cellSize: number;
@@ -33,10 +34,17 @@ export default function AdventureStage({
   onTileClick,
   width,
   height,
-  cellSize,
+  cellSize = 40,
+  onPlayerArrive,
 }: AdventureStageProps) {
   
   const moveTimerRef = useRef<number>(0);
+  const isMovingRef = useRef(false);
+  const onPlayerArriveRef = useRef(onPlayerArrive);
+  
+  useEffect(() => {
+      onPlayerArriveRef.current = onPlayerArrive;
+  }, [onPlayerArrive]);
   const containerRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<PIXI.Application | null>(null);
   
@@ -44,7 +52,7 @@ export default function AdventureStage({
   const visualRef = useRef({
       player: { x: playerPosition.x, y: playerPosition.y },
       monsters: new Map<string, { x: number, y: number }>(),
-      cam: { x: 0, y: 0 },
+      cam: { x: (playerPosition.x + 0.5) * cellSize, y: (playerPosition.y + 0.5) * cellSize },
       rotation: 0
   });
 
@@ -62,8 +70,16 @@ export default function AdventureStage({
     entitiesRef.current.portals = portals;
     latestDataRef.current = { mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling };
   }, [mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling]);
+
+  // Force Snap Camera on Map Change (Prevent Drift)
+  useEffect(() => {
+       visualRef.current.cam.x = (playerPosition.x + 0.5) * cellSize;
+       visualRef.current.cam.y = (playerPosition.y + 0.5) * cellSize;
+       visualRef.current.player.x = playerPosition.x;
+       visualRef.current.player.y = playerPosition.y;
+  }, [mapData.id]);
   
-  // Snap on Map Change
+  // Snap on Map Change (Legacy - kept for safety but simplified)
   useEffect(() => {
      visualRef.current.player = { x: playerPosition.x, y: playerPosition.y };
      visualRef.current.monsters.clear();
@@ -180,9 +196,16 @@ export default function AdventureStage({
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist > 0.001) {
+              isMovingRef.current = true;
+
               if (dist <= MOVE_SPEED) {
                   visualRef.current.player.x = targetPx;
                   visualRef.current.player.y = targetPy;
+                  
+                  if (isMovingRef.current) {
+                      isMovingRef.current = false;
+                      onPlayerArriveRef.current?.(latestDataRef.current.playerPosition.x, latestDataRef.current.playerPosition.y);
+                  }
               } else {
                   const ratio = MOVE_SPEED / dist;
                   visualRef.current.player.x += dx * ratio;
@@ -191,6 +214,7 @@ export default function AdventureStage({
           } else {
               visualRef.current.player.x = targetPx;
               visualRef.current.player.y = targetPy;
+              isMovingRef.current = false; 
           }
           
           // 2. Camera Follow Visual Player
