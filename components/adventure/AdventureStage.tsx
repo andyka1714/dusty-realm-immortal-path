@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 import { MapData, Coordinate, Portal, EnemyRank, ActiveMonster } from '../../types';
 import { MOVEMENT_SPEEDS } from '../../constants';
+import { current } from '@reduxjs/toolkit';
 
 interface AdventureStageProps {
   mapData: MapData | null;
@@ -13,6 +14,7 @@ interface AdventureStageProps {
   height: number;
   cellSize: number;
   majorRealm: number;
+  targetMonsterId?: string | null;
 }
 
 // --- Constants ---
@@ -27,7 +29,8 @@ export default function AdventureStage({
   width,
   height,
   cellSize,
-  majorRealm
+  majorRealm,
+  targetMonsterId
 }: AdventureStageProps) {
   
   const moveTimerRef = useRef<number>(0);
@@ -44,7 +47,7 @@ export default function AdventureStage({
 
   const onTileClickRef = useRef(onTileClick);
   const entitiesRef = useRef({ monsters: activeMonsters, portals: mapData ? mapData.portals : [] });
-  const latestDataRef = useRef({ playerPosition, majorRealm });
+  const latestDataRef = useRef({ playerPosition, majorRealm, targetMonsterId });
 
   // Sync latest props
   useEffect(() => {
@@ -53,7 +56,8 @@ export default function AdventureStage({
       if (mapData) entitiesRef.current.portals = mapData.portals;
       latestDataRef.current.playerPosition = playerPosition;
       latestDataRef.current.majorRealm = majorRealm;
-  }, [activeMonsters, mapData, onTileClick, playerPosition, majorRealm]);
+      latestDataRef.current.targetMonsterId = targetMonsterId;
+  }, [activeMonsters, mapData, onTileClick, playerPosition, majorRealm, targetMonsterId]);
   
   // Snap on Map Change
   useEffect(() => {
@@ -277,8 +281,35 @@ export default function AdventureStage({
               entityGraphics.beginFill(color);
               entityGraphics.drawCircle(mx, my, size / 2);
               entityGraphics.endFill();
-              entityGraphics.lineStyle(2, 0xffffff, 0.5);
-              entityGraphics.drawCircle(mx, my, size / 2);
+
+              // Target Marker
+              if (latestDataRef.current.targetMonsterId === m.instanceId) {
+                   const R = cellSize * 0.45; // Radius
+                   const L = cellSize * 0.15; // Log length
+                   const color = 0xef4444; // Red-500
+
+                   entityGraphics.lineStyle(2, color, 1);
+                   
+                   // Top Left
+                   entityGraphics.moveTo(mx - R, my - R + L);
+                   entityGraphics.lineTo(mx - R, my - R);
+                   entityGraphics.lineTo(mx - R + L, my - R);
+
+                   // Top Right
+                   entityGraphics.moveTo(mx + R - L, my - R);
+                   entityGraphics.lineTo(mx + R, my - R);
+                   entityGraphics.lineTo(mx + R, my - R + L);
+
+                   // Bottom Right
+                   entityGraphics.moveTo(mx + R, my + R - L);
+                   entityGraphics.lineTo(mx + R, my + R);
+                   entityGraphics.lineTo(mx + R - L, my + R);
+
+                   // Bottom Left
+                   entityGraphics.moveTo(mx - R + L, my + R);
+                   entityGraphics.lineTo(mx - R, my + R);
+                   entityGraphics.lineTo(mx - R, my + R - L);
+              }
           });
           
           // Cleanup Dead Monsters

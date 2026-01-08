@@ -8,7 +8,7 @@ import { enterMap, movePlayer, tickMonsters, resolveBattle, closeBattleReport, m
 import { runAutoBattle, calculatePlayerStats } from '../utils/battleSystem';
 import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
-import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move } from 'lucide-react';
+import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move, Swords } from 'lucide-react';
 import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory } from '../types';
 import { MOVEMENT_SPEEDS, REALM_NAMES, ELEMENT_COLORS, ELEMENT_NAMES } from '../constants';
 import clsx from 'clsx';
@@ -372,6 +372,8 @@ export const Adventure: React.FC = () => {
   // Auto-Movement State
   const [autoMovePath, setAutoMovePath] = useState<Coordinate[]>([]);
   const moveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [targetMonsterId, setTargetMonsterId] = useState<string | null>(null);
+  const [isAutoBattling, setIsAutoBattling] = useState(false);
   
   // Dynamic Viewport Logic
   const containerRef = useRef<HTMLDivElement>(null); // Ref for Grid Counter-Act
@@ -482,9 +484,30 @@ export const Adventure: React.FC = () => {
       }
   }, [isBattling, showIntro, portalModal, currentMapId]);
 
-  // Handle Auto-Movement Loop
+  // 1. Dynamic Tracking Logic (Effect: Updates autoMovePath)
   useEffect(() => {
-      if (autoMovePath.length > 0 && !isBattling && !portalModal && !showIntro) {
+      if (isBattling || portalModal || showIntro || !mapData || !targetMonsterId) return;
+
+      const targetMonster = activeMonsters.find(m => m.instanceId === targetMonsterId);
+      if (targetMonster) {
+          const currentDest = autoMovePath.length > 0 ? autoMovePath[autoMovePath.length - 1] : null;
+          
+          if (!currentDest || currentDest.x !== targetMonster.x || currentDest.y !== targetMonster.y) {
+               // Target moved or new target! Recalculate path.
+               const newPath = findPath(playerPosition, { x: targetMonster.x, y: targetMonster.y }, mapData.width, mapData.height);
+               if (newPath.length > 0) {
+                   setAutoMovePath(newPath);
+               }
+          }
+      } else {
+          // Monster dead or gone? Stop targeting.
+          setTargetMonsterId(null);
+      }
+  }, [targetMonsterId, activeMonsters, mapData, isBattling, portalModal, showIntro, playerPosition, autoMovePath]);
+
+  // 2. Movement Execution Logic (Effect: Runs Timer)
+  useEffect(() => {
+      if (!isBattling && !portalModal && !showIntro && autoMovePath.length > 0) {
           const nextStep = autoMovePath[0];
           const speed = MOVEMENT_SPEEDS[character.majorRealm] || 500;
 
@@ -512,6 +535,40 @@ export const Adventure: React.FC = () => {
     }, 1000); 
     return () => clearInterval(interval);
   }, [dispatch, isBattling, showIntro, portalModal]);
+
+  // --- Auto-Battle Logic ---
+  
+  // 1. Auto-Target: Find nearest monster when idle
+  useEffect(() => {
+      if (!isAutoBattling || isBattling || targetMonsterId || showIntro || portalModal || activeMonsters.length === 0) return;
+
+      // Find nearest
+      let nearestId: string | null = null;
+      let minDist = Infinity;
+
+      activeMonsters.forEach(m => {
+          // Verify path exists? For now just euclidean distance is enough approximation
+          const dist = Math.abs(m.x - playerPosition.x) + Math.abs(m.y - playerPosition.y);
+          if (dist < minDist) {
+              minDist = dist;
+              nearestId = m.instanceId;
+          }
+      });
+
+      if (nearestId) {
+          setTargetMonsterId(nearestId);
+      }
+  }, [isAutoBattling, isBattling, targetMonsterId, activeMonsters, playerPosition, showIntro, portalModal]);
+
+  // 2. Auto-Close Battle Report
+  useEffect(() => {
+      if (isAutoBattling && lastBattleResult) {
+          const timer = setTimeout(() => {
+              dispatch(closeBattleReport());
+          }, 1500); // 1.5s delay to see loot
+          return () => clearTimeout(timer);
+      }
+  }, [isAutoBattling, lastBattleResult, dispatch]);
 
   // Keyboard Controls
   useEffect(() => {
@@ -610,6 +667,15 @@ export const Adventure: React.FC = () => {
 
   const handleGridClick = (targetX: number, targetY: number) => {
       if (isBattling || showIntro || portalModal || !mapData) return;
+      
+      // Check if clicking on a monster
+      const targetMonster = activeMonsters.find(m => m.x === targetX && m.y === targetY);
+      if (targetMonster) {
+          setTargetMonsterId(targetMonster.instanceId);
+      } else {
+          setTargetMonsterId(null);
+      }
+
       const path = findPath(playerPosition, { x: targetX, y: targetY }, mapData.width, mapData.height);
       if (path.length > 0) setAutoMovePath(path);
   };
@@ -665,8 +731,26 @@ export const Adventure: React.FC = () => {
                      {playerPosition.x},{playerPosition.y}
                  </div>
             </button>
-            <div className="text-stone-400 text-xs bg-black/50 px-2 py-1 rounded backdrop-blur border border-stone-800 font-bold tracking-wider">{mapData?.name}</div>
-        </div>
+            <div className="flex items-center gap-2">
+                 <button
+                    onClick={() => setIsAutoBattling(!isAutoBattling)}
+                    className={clsx(
+                        "p-1.5 rounded backdrop-blur border transition-all group relative",
+                        isAutoBattling 
+                            ? "bg-red-900/80 border-red-500 text-red-200 shadow-[0_0_10px_rgba(220,38,38,0.5)] animate-pulse" 
+                            : "bg-black/50 border-stone-800 text-stone-500 hover:text-stone-300 hover:border-stone-600"
+                    )}
+                 >
+                     <Swords size={14} />
+                     
+                     {/* Tooltip */}
+                     <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 bg-black/90 border border-stone-800 text-[10px] text-stone-300 px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                        {isAutoBattling ? "停止掛機" : "自動戰鬥"}
+                     </span>
+                 </button>
+                 <div className="text-stone-400 text-xs bg-black/50 px-2 py-1 rounded backdrop-blur border border-stone-800 font-bold tracking-wider">{mapData?.name}</div>
+             </div>
+         </div>
 
         {/* Main Grid Render - FILLS AVAILABLE SPACE */}
         <div 
@@ -685,6 +769,7 @@ export const Adventure: React.FC = () => {
                     height={gridMetrics.pixelHeight}
                     cellSize={gridMetrics.cellSize}
                     majorRealm={character.majorRealm}
+                    targetMonsterId={targetMonsterId}
                  />
             )}
         </div>
