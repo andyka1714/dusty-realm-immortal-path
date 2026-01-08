@@ -113,6 +113,7 @@ export interface CharacterState {
   isBreakthroughAvailable: boolean;
   
   isInSeclusion: boolean;
+  seclusionEndTime?: number; // Timestamp when seclusion ends
   
   gatheringLevel: number; 
   

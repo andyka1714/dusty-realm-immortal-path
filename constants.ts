@@ -347,6 +347,23 @@ export const SPIRIT_ROOT_MULTIPLIERS: Record<SpiritRootType, number> = {
 export const MANUAL_CULTIVATE_COOLDOWN = 3000; // 3 seconds
 export const PASSIVE_CULTIVATION_PENALTY = 0.3; // 30% Efficiency for passive
 
+export const SECLUSION_DURATION_MS = 30000; // 30 seconds
+
+export const SECLUSION_BASE_COST: Record<MajorRealm, number> = {
+  [MajorRealm.Mortal]: 100,
+  [MajorRealm.QiRefining]: 500,
+  [MajorRealm.Foundation]: 2500,
+  [MajorRealm.GoldenCore]: 50000,
+  [MajorRealm.NascentSoul]: 150000,
+  [MajorRealm.SpiritSevering]: 2000000,
+  [MajorRealm.VoidRefining]: 10000000,
+  [MajorRealm.Fusion]: 50000000,
+  [MajorRealm.Mahayana]: 200000000,
+  [MajorRealm.Tribulation]: 1000000000,
+  [MajorRealm.Immortal]: 25000000000,
+  [MajorRealm.ImmortalEmperor]: 500000000000,
+};
+
 // ... (Keep Realm Modifiers and Base Stats) ...
 
 export const REALM_MODIFIERS: Record<MajorRealm, number> = {

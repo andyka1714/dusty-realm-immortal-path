@@ -3,11 +3,11 @@ import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { getRealmLabel } from '../utils/realm';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store/store';
-import { manualCultivate, attemptBreakthrough, toggleSeclusion, reincarnate } from '../store/slices/characterSlice';
+import { manualCultivate, attemptBreakthrough, reincarnate, startSeclusion } from '../store/slices/characterSlice';
 import { checkTimeEvents } from '../store/actions/timeActions';
 import { removeItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
-import { REALM_NAMES, SPIRIT_ROOT_MULTIPLIERS, REALM_MODIFIERS, MINOR_REALM_CAP, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN } from '../constants';
+import { REALM_NAMES, SPIRIT_ROOT_MULTIPLIERS, REALM_MODIFIERS, MINOR_REALM_CAP, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN, SECLUSION_BASE_COST, SECLUSION_DURATION_MS } from '../constants';
 import { ITEMS } from '../data/items';
 import { ProgressBar } from '../components/ProgressBar';
 import { LogPanel } from '../components/LogPanel';
@@ -22,8 +22,8 @@ export const Dashboard: React.FC = () => {
   const character = useSelector((state: RootState) => state.character);
   const inventory = useSelector((state: RootState) => state.inventory.items);
   const { 
-    isInitialized, isDead, name, gender, majorRealm, minorRealm, currentExp, maxExp, 
-    cultivationRate, isBreakthroughAvailable, isInSeclusion, attributes, spiritRoot,
+    isInitialized, isDead, name, gender, majorRealm, minorRealm, currentExp, maxExp, spiritStones, 
+    cultivationRate, isBreakthroughAvailable, isInSeclusion, seclusionEndTime, attributes, spiritRoot,
     lastBreakthroughResult, age, lifespan, gatheringLevel, lastManualCultivateTime
   } = character;
 
@@ -126,14 +126,22 @@ export const Dashboard: React.FC = () => {
     setIsBreakthroughModalOpen(false);
   };
 
+  // Seclusion Logic
+  const seclusionBaseCost = SECLUSION_BASE_COST[majorRealm] || 100;
+  const seclusionCost = Math.floor(seclusionBaseCost * (1 + minorRealm * 0.1));
+  const canAffordSeclusion = spiritStones >= seclusionCost;
+
   const handleSeclusion = () => {
-      dispatch(toggleSeclusion());
-      if (!isInSeclusion) {
-          dispatch(addLog({ message: "進入閉關狀態，心無旁騖，修煉速度倍增(5.0x)。", type: 'success' }));
-      } else {
-          dispatch(addLog({ message: "結束閉關，準備入世歷練。", type: 'info' }));
+      if (isInSeclusion) return;
+      if (!canAffordSeclusion) {
+          dispatch(addLog({ message: "靈石不足，無法開啟閉關陣法。", type: 'danger' }));
+          return;
       }
+      dispatch(startSeclusion());
+      dispatch(addLog({ message: `消耗 ${seclusionCost} 靈石，開啟閉關陣法(30秒)，修煉速度倍增！`, type: 'success' }));
   };
+
+  const timeLeft = seclusionEndTime ? Math.max(0, Math.ceil((seclusionEndTime - Date.now()) / 1000)) : 0;
 
   const calculateSuccessRate = () => {
       // Replicate logic for display
@@ -302,17 +310,26 @@ export const Dashboard: React.FC = () => {
 
                  <button
                    onClick={handleSeclusion}
-                   disabled={isBreakthroughAvailable}
+                   disabled={isBreakthroughAvailable || isInSeclusion || (!isInSeclusion && !canAffordSeclusion)}
                    className={`flex-1 py-4 rounded-lg border transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed
                      ${isInSeclusion 
                             ? "bg-amber-900/30 border-amber-500/50 text-amber-200 shadow-[inset_0_0_20px_rgba(245,158,11,0.2)]" 
-                            : "bg-stone-800 hover:bg-stone-700 border-stone-700 text-stone-200"
+                            : canAffordSeclusion
+                                ? "bg-stone-800 hover:bg-stone-700 border-stone-700 text-stone-200"
+                                : "bg-stone-900 border-stone-800 text-stone-500 opacity-60"
                      }`}
                  >
                    <Moon size={20} className={isInSeclusion ? "text-amber-400 animate-pulse" : "text-indigo-400"} />
-                   <span className="font-bold tracking-widest">{isInSeclusion ? "出關" : "閉關"}</span>
-                   <span className="text-[10px] text-stone-500 font-normal">心無旁騖 (2.0x)</span>
-                   {isInSeclusion && !isBreakthroughAvailable && <div className="absolute bottom-0 left-0 w-full h-1 bg-amber-500 animate-pulse"></div>}
+                   <span className="font-bold tracking-widest">{isInSeclusion ? "閉關中" : "閉關修煉"}</span>
+                   <span className="text-[10px] text-stone-500 font-normal">
+                       {isInSeclusion ? `剩餘 ${timeLeft} 秒 (2.0x)` : `需 ${seclusionCost} 靈石`}
+                   </span>
+                   {isInSeclusion && !isBreakthroughAvailable && (
+                       <div 
+                         className="absolute bottom-0 left-0 h-1 bg-amber-500 transition-all duration-100 ease-linear"
+                         style={{ width: `${(timeLeft / (SECLUSION_DURATION_MS/1000)) * 100}%` }}
+                       ></div>
+                   )}
                  </button>
               </div>
 

@@ -1,7 +1,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CharacterState, MajorRealm, SpiritRootType, SpiritRootId, ProfessionType, Gender, BaseAttributes } from '../../types';
-import { calculateMaxExp, INITIAL_BASE_STATS, MINOR_REALM_CAP, REALM_MODIFIERS, SPIRIT_ROOT_DETAILS, LIFESPAN_BONUS, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN, PASSIVE_CULTIVATION_PENALTY } from '../../constants';
+import { calculateMaxExp, INITIAL_BASE_STATS, MINOR_REALM_CAP, REALM_MODIFIERS, SPIRIT_ROOT_DETAILS, LIFESPAN_BONUS, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN, PASSIVE_CULTIVATION_PENALTY, SECLUSION_BASE_COST, SECLUSION_DURATION_MS } from '../../constants';
 import { addLog } from './logSlice';
 
 // ... (Keep helpers generateSpiritRoot, generateInitialStats, calculateInitialLifespan) ...
@@ -282,12 +282,19 @@ const characterSlice = createSlice({
     tickCultivation: (state) => {
       if (!state.isInitialized || state.isDead) return;
       
-      state.lastSaveTime = Date.now();
+      const now = Date.now();
+      state.lastSaveTime = now;
       state.age += 1; 
 
       if (state.age >= state.lifespan) {
           state.isDead = true;
           return;
+      }
+
+      // Auto-expire Seclusion
+      if (state.isInSeclusion && state.seclusionEndTime && now >= state.seclusionEndTime) {
+          state.isInSeclusion = false;
+          state.seclusionEndTime = undefined;
       }
 
       const rootBone = state.attributes.rootBone;
@@ -320,8 +327,19 @@ const characterSlice = createSlice({
       }
     },
 
-    toggleSeclusion: (state) => {
-      state.isInSeclusion = !state.isInSeclusion;
+    startSeclusion: (state) => {
+      if (state.isInSeclusion) return;
+      
+      const baseCost = SECLUSION_BASE_COST[state.majorRealm] || 100;
+      const cost = Math.floor(baseCost * (1 + state.minorRealm * 0.1));
+      
+      if (state.spiritStones < cost) {
+          return;
+      }
+      
+      state.spiritStones -= cost;
+      state.isInSeclusion = true;
+      state.seclusionEndTime = Date.now() + SECLUSION_DURATION_MS;
     },
 
     manualCultivate: (state) => {
@@ -514,5 +532,5 @@ const characterSlice = createSlice({
   },
 });
 
-export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, toggleSeclusion, processOfflineGains, reincarnate, gainAttribute, consumeItem, updateLastProcessedYear, updateLastWarningAge, addSpiritStones } = characterSlice.actions;
+export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, startSeclusion, processOfflineGains, reincarnate, gainAttribute, consumeItem, updateLastProcessedYear, updateLastWarningAge, addSpiritStones } = characterSlice.actions;
 export default characterSlice.reducer;
