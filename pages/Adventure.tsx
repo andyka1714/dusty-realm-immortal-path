@@ -286,6 +286,8 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 export const Adventure: React.FC = () => {
   const dispatch = useDispatch();
   const character = useSelector((state: RootState) => state.character);
+  const { attributes, majorRealm, spiritRootId, isInitialized } = character;
+  const { equipmentStats } = useSelector((state: RootState) => state.inventory);
   const { 
     currentMapId, playerPosition, activeMonsters, visitedCells, 
     mapHistory, isBattling, currentEnemy, battleLogs, lastBattleResult 
@@ -461,7 +463,8 @@ export const Adventure: React.FC = () => {
 
       if (isBattling && currentEnemy && !lastBattleResult && !battleProcessedRef.current) {
           battleProcessedRef.current = true;
-          const playerStats = calculatePlayerStats(character.attributes, character.majorRealm, character.spiritRootId);
+    // Calculate Stats
+    const playerStats = calculatePlayerStats(attributes, majorRealm, spiritRootId, equipmentStats);
           const { won, logs, rewards } = runAutoBattle(playerStats, currentEnemy);
           
           setTimeout(() => {
@@ -477,10 +480,26 @@ export const Adventure: React.FC = () => {
                   }
 
                   // Item Drops (From Battle Calculation)
-                  rewards.items.forEach(dropId => {
-                      dispatch(addItem({ itemId: dropId, count: 1 }));
-                      dispatch(addLog({ message: `獲得戰利品: ${ITEMS[dropId]?.name}`, type: 'gold' }));
-                  });
+                  if (rewards.drops) {
+                      rewards.drops.forEach(drop => {
+                          dispatch(addItem({ itemId: drop.itemId, count: drop.count, instance: drop.instance }));
+                          
+                          const item = ITEMS[drop.itemId];
+                          if (item) {
+                              let msg = `獲得戰利品: ${item.name}`;
+                              if (drop.instance) {
+                                  // Quality Display
+                                  const q = drop.instance.quality;
+                                  if (q === 1) msg += ' (中品)'; // Medium
+                                  if (q === 2) msg += ' (上品)'; // High
+                                  if (q === 3) msg += ' (仙品)'; // Immortal
+                              } else if (drop.count > 1) {
+                                  msg += ` x${drop.count}`;
+                              }
+                              dispatch(addLog({ message: msg, type: 'gold' }));
+                          }
+                      });
+                  }
               } else if (!won) {
                   dispatch(addLog({ message: `不敵 ${currentEnemy.name}，狼狽逃回。`, type: 'danger' }));
               }

@@ -289,13 +289,29 @@ export enum EquipmentType {
   Shield = 'Shield'
 }
 
+export interface EquipmentStats extends Partial<BaseAttributes> {
+  hp?: number;
+  maxHp?: number;
+  mp?: number;
+  maxMp?: number;
+  attack?: number;
+  defense?: number;
+  magic?: number;
+  res?: number;
+  speed?: number;
+  crit?: number;
+  critDamage?: number;
+  dodge?: number;
+  blockRate?: number;
+}
+
 export interface EquipmentItem extends BaseItem {
   category: ItemCategory.Equipment;
   slot: EquipmentSlot;
   subType: EquipmentType;
   
   // Stats
-  stats: Partial<Record<keyof BaseAttributes | 'attack' | 'defense' | 'speed' | 'hp' | 'maxHp' | 'mp' | 'maxMp', number>>;
+  stats: EquipmentStats;
   
   // Requirements
   reqRealm?: MajorRealm;
@@ -303,19 +319,29 @@ export interface EquipmentItem extends BaseItem {
 
 export type Item = ConsumableItem | MaterialItem | EquipmentItem;
 
-export interface InventoryItem {
+export interface ItemInstance {
+  instanceId: string;
+  templateId: string; // The original Item ID
+  quality: ItemQuality;
+  stats: EquipmentStats;
+  affixes?: { name: string, description: string }[];
+}
+
+export interface InventorySlot {
   itemId: string;
   count: number;
+  // If present, this slot represents a single unique item instance (non-stackable)
+  instanceId?: string;
+  instance?: ItemInstance;
 }
 
 export interface EquipmentState {
-  [EquipmentSlot.Weapon]: string | null; // itemId
+  [EquipmentSlot.Weapon]: string | null; // instanceId
   [EquipmentSlot.Head]: string | null;
   [EquipmentSlot.Body]: string | null;
   [EquipmentSlot.Legs]: string | null;
   [EquipmentSlot.Accessory]: string | null;
-  // Legacy support or extra slots can be added here
-  offhand?: string | null;
+  [EquipmentSlot.Offhand]: string | null;
 }
 
 // --- Workshop ---
