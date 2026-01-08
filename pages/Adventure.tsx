@@ -16,6 +16,7 @@ import { Modal } from '../components/Modal';
 import { getDropRewards } from '@/data/drop_tables';
 import { addSpiritStones } from '@/store/slices/characterSlice';
 import { formatSpiritStone } from '@/utils/currency';
+import AdventureStage from '../components/adventure/AdventureStage';
 
 // --- VISUAL CONFIG ---
 const TARGET_CELL_SIZE_DESKTOP = 42; // px
@@ -37,7 +38,10 @@ const findPath = (start: Coordinate, end: Coordinate, width: number, height: num
         const { pos, path } = queue.shift()!;
         if (pos.x === end.x && pos.y === end.y) return path;
 
-        const dirs = [{ x: 0, y: -1 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 1, y: 0 }];
+        const dirs = [
+            { x: 0, y: -1 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 1, y: 0 },
+            { x: -1, y: -1 }, { x: 1, y: -1 }, { x: -1, y: 1 }, { x: 1, y: 1 }
+        ];
         // Heuristic sort to prioritize direction towards target
         dirs.sort((a, b) => {
              const distA = Math.abs((pos.x + a.x) - end.x) + Math.abs((pos.y + a.y) - end.y);
@@ -370,8 +374,7 @@ export const Adventure: React.FC = () => {
   const moveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Dynamic Viewport Logic
-  const containerRef = useRef<HTMLDivElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null); // Ref for Grid Counter-Act
+  const containerRef = useRef<HTMLDivElement>(null); // Ref for Grid Counter-Act
   const prevStartRef = useRef({ x: 0, y: 0 }); // Track previous viewport origin
   
   // Precise Grid Metrics for perfect centering
@@ -391,6 +394,7 @@ export const Adventure: React.FC = () => {
         
         const entry = entries[0];
         const { width, height } = entry.contentRect;
+        console.log('[Adventure] Resize:', width, height);
         
         if (width === 0 || height === 0) return;
 
@@ -487,7 +491,8 @@ export const Adventure: React.FC = () => {
           moveTimerRef.current = setTimeout(() => {
               const dx = nextStep.x - playerPosition.x;
               const dy = nextStep.y - playerPosition.y;
-              if (Math.abs(dx) + Math.abs(dy) === 1) {
+              // Allow diagonal (max diff 1)
+              if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && (dx !== 0 || dy !== 0)) {
                   dispatch(movePlayer({ dx, dy }));
                   setAutoMovePath(prev => prev.slice(1));
               } else {
@@ -609,113 +614,10 @@ export const Adventure: React.FC = () => {
       if (path.length > 0) setAutoMovePath(path);
   };
 
-  // --- Viewport & Smooth Scrolling Logic ---
-  const { cols, rows, pixelWidth, pixelHeight, cellSize } = gridMetrics;
-  let startX = 0;
-  let startY = 0;
-  let drawW = 0;
-  let drawH = 0;
-
-  if (mapData) {
-      startX = Math.max(0, Math.min(mapData.width - cols, playerPosition.x - Math.floor(cols/2)));
-      startY = Math.max(0, Math.min(mapData.height - rows, playerPosition.y - Math.floor(rows/2)));
-      drawW = Math.min(cols, mapData.width);
-      drawH = Math.min(rows, mapData.height);
-  }
-
-  // Ensure strict squareness by rendering exactly what we draw
-  const finalPixelWidth = cellSize * drawW;
-  const finalPixelHeight = cellSize * drawH;
-
-  // Counter-Act Animation for Smooth Scroll
-  useLayoutEffect(() => {
-    if (!gridRef.current) return;
-
-    const dx = startX - prevStartRef.current.x;
-    const dy = startY - prevStartRef.current.y;
-
-    if ((dx !== 0 || dy !== 0) && Math.abs(dx) < 5 && Math.abs(dy) < 5) {
-        const moveSpeed = MOVEMENT_SPEEDS[character.majorRealm] || 500;
-
-        // Since we are using exact pixels, we can't use percentages of drawW if it changes (but it's stable mostly)
-        // However, standard percentage based on grid tracks works perfectly if grid is consistent
-        const xPct = (dx / drawW) * 100;
-        const yPct = (dy / drawH) * 100;
-
-        gridRef.current.style.transition = 'none';
-        gridRef.current.style.transform = `translate(${xPct}%, ${yPct}%)`;
-
-        void gridRef.current.offsetHeight;
-
-        gridRef.current.style.transition = `transform ${moveSpeed}ms linear`;
-        gridRef.current.style.transform = 'translate(0, 0)';
-    } else {
-        gridRef.current.style.transition = 'none';
-        gridRef.current.style.transform = 'translate(0, 0)';
-    }
-
-    prevStartRef.current = { x: startX, y: startY };
-  }, [startX, startY, drawW, drawH, character.majorRealm]);
+    // PixiJS handles rendering and camera movement now.
+    // We retain gridMetrics for proper sizing.
 
 
-  // Helper to render Grid Cells
-  const renderCells = () => {
-      if (!mapData) return null;
-
-      const isInPath = (cx: number, cy: number) => autoMovePath.some(p => p.x === cx && p.y === cy);
-      const cells = [];
-
-      // We render exactly the number of cells defined by gridMetrics (or less if near map edge, handled by grid layout)
-      for (let y = startY; y < startY + drawH; y++) {
-          for (let x = startX; x < startX + drawW; x++) {
-              const monster = activeMonsters.find(m => m.x === x && m.y === y);
-              const portal = mapData.portals.find(p => p.x === x && p.y === y);
-              const isTargetInPath = isInPath(x, y);
-              
-              // Fog of War Removed: All cells are visible
-              const isVisible = true; 
-              
-              let content = null;
-              let bgClass = "bg-stone-900";
-              let borderClass = "border-stone-800";
-
-              if (monster) {
-                  if (monster.rank === EnemyRank.Boss) {
-                      content = <div className="w-4 h-4 md:w-6 md:h-6 rounded-full bg-red-600 shadow-[0_0_25px_rgba(220,38,38,0.8)] animate-pulse border-2 border-red-300 z-10"></div>;
-                  } else if (monster.rank === EnemyRank.Elite) {
-                      content = <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.6)] animate-bounce border border-blue-200 z-10"></div>;
-                  } else {
-                      // Flashing Grey-White for Common
-                      content = <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-stone-400 shadow-[0_0_10px_rgba(168,162,158,0.4)] animate-pulse border border-stone-200 z-10"></div>;
-                  }
-              } else if (portal) {
-                  content = <div className="portal-vortex z-0 w-full h-full scale-75"></div>;
-              } else if (isTargetInPath) {
-                  content = <div className="w-1.5 h-1.5 rounded-full bg-stone-600 opacity-50"></div>;
-              }
-
-              cells.push(
-                  <div 
-                    key={`${x}-${y}`} 
-                    onClick={() => handleGridClick(x, y)}
-                    // Removed aspect-ratio: 1/1 here because the container is now pixel-perfectly sized
-                    // and grid-template-columns will handle the square shape naturally.
-                    className={`border ${borderClass} ${bgClass} flex items-center justify-center relative cursor-pointer hover:border-stone-500 hover:bg-stone-800 transition-colors`} 
-                    style={{ width: '100%', height: '100%' }}
-                  >
-                      <div className="absolute inset-0 flex items-center justify-center">{content}</div>
-                  </div>
-              );
-          }
-      }
-      return cells;
-  };
-
-  const moveSpeed = MOVEMENT_SPEEDS[character.majorRealm] || 500;
-  // Calculate Player Relative Position for Overlay
-  const playerRelX = playerPosition.x - startX;
-  const playerRelY = playerPosition.y - startY;
-  const isPlayerVisible = playerRelX >= 0 && playerRelX < drawW && playerRelY >= 0 && playerRelY < drawH;
 
 
 
@@ -769,50 +671,22 @@ export const Adventure: React.FC = () => {
         {/* Main Grid Render - FILLS AVAILABLE SPACE */}
         <div 
             ref={containerRef}
-            className="flex-1 flex items-center justify-center bg-stone-950/80 relative overflow-hidden p-1 md:p-4"
+            className="flex-1 flex items-center justify-center bg-stone-950/80 relative overflow-hidden"
         >
-            {/* The Grid itself - Now constrained by exact pixels calculated from containerRef */}
-            <div 
-              className="relative shadow-2xl bg-black transition-none ease-out overflow-hidden" 
-              style={{ 
-                 width: finalPixelWidth, 
-                 height: finalPixelHeight,
-                 margin: '0 auto',
-                 border: '1px solid #44403c',
-                 lineHeight: 0, 
-                 fontSize: 0,   
-              }}
-            >
-                {/* Background Layer */}
-                <div 
-                    ref={gridRef}
-                    className="grid gap-0 w-full h-full will-change-transform"
-                    style={{ 
-                        gridTemplateColumns: `repeat(${drawW}, 1fr)`, 
-                        // gridTemplateRows will be implicit based on children, but since height is fixed, 1fr works automatically
-                        gridTemplateRows: `repeat(${drawH}, 1fr)` 
-                    }}
-                >
-                    {renderCells()}
-                </div>
-
-                {/* Player Overlay - Sibling Layer */}
-                {isPlayerVisible && (
-                  <div 
-                    className="absolute z-30 pointer-events-none flex items-center justify-center will-change-[top,left]"
-                    style={{
-                        left: `${(playerRelX / drawW) * 100}%`,
-                        top: `${(playerRelY / drawH) * 100}%`,
-                        width: `${100 / drawW}%`,
-                        height: `${100 / drawH}%`,
-                        // Use linear easing and match duration to game tick for continuous feel
-                        transition: `left ${moveSpeed}ms linear, top ${moveSpeed}ms linear`
-                    }}
-                  >
-                     <div className="w-3 h-3 md:w-5 md:h-5 rounded-full bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.8)] animate-pulse border-2 border-green-300"></div>
-                  </div>
-                )}
-            </div>
+            {/* PixiJS Stage */}
+            {gridMetrics.pixelWidth > 0 && mapData && (
+                 <AdventureStage
+                    mapData={mapData}
+                    playerPosition={playerPosition}
+                    activeMonsters={activeMonsters}
+                    autoMovePath={autoMovePath}
+                    onTileClick={handleGridClick}
+                    width={gridMetrics.pixelWidth}
+                    height={gridMetrics.pixelHeight}
+                    cellSize={gridMetrics.cellSize}
+                    majorRealm={character.majorRealm}
+                 />
+            )}
         </div>
 
 

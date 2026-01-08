@@ -176,24 +176,25 @@ const adventureSlice = createSlice({
 
            let dx = 0, dy = 0;
 
-           // Elite AI: Track Player if nearby (radius 5)
+           // Elite AI: Track Player freely (8-way)
            if (monster.rank === EnemyRank.Elite) {
                const dist = Math.abs(monster.x - state.playerPosition.x) + Math.abs(monster.y - state.playerPosition.y);
-               if (dist <= 5) {
+               if (dist <= 6) {
                    if (monster.x < state.playerPosition.x) dx = 1;
                    else if (monster.x > state.playerPosition.x) dx = -1;
-                   else if (monster.y < state.playerPosition.y) dy = 1;
+                   
+                   if (monster.y < state.playerPosition.y) dy = 1;
                    else if (monster.y > state.playerPosition.y) dy = -1;
                }
            }
 
-           // Common AI (or Elite not tracking): Random
+           // Common AI (or Elite not tracking): Random 8-way
            if (dx === 0 && dy === 0) {
-                const move = Math.floor(Math.random() * 8); // Less frequent random move
-                if (move === 0) dx = 1;
-                else if (move === 1) dx = -1;
-                else if (move === 2) dy = 1;
-                else if (move === 3) dy = -1;
+                // ~20% chance to move each tick
+                if (Math.random() < 0.2) {
+                     dx = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
+                     dy = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
+                }
            }
 
            const nx = monster.x + dx;
