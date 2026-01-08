@@ -161,10 +161,9 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const nodes = MAPS.map(map => {
         const pos = getPos(map);
         const isCurrent = currentMapId === map.id;
-        const isVisited = mapHistory[map.id];
-        const isLocked = character.majorRealm < map.minRealm;
-        const isAdjacent = currentMapData?.portals.some(p => p.targetMapId === map.id);
-        const canEnter = !isLocked && (isVisited || isAdjacent);
+        const isVisited = !!mapHistory[map.id]; 
+        // Fast Travel Rule: Must have visited the map to teleport.
+        const canEnter = isVisited; 
         const isHovered = hoveredMapId === map.id;
 
         return (
@@ -214,7 +213,7 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     {map.name}
                 </div>
                 {isCurrent && <MapPin size={16} className="absolute -right-2 -bottom-2 text-amber-500 animate-bounce drop-shadow" />}
-                {isLocked && <Lock size={14} className="mt-1 text-stone-600" />}
+                {!canEnter && <Lock size={14} className="mt-1 text-stone-600" />}
                 {isCurrent && <div className="absolute -inset-1 border border-amber-500/50 rounded animate-ping"></div>}
             </div>
         );
@@ -911,8 +910,13 @@ export const Adventure: React.FC = () => {
                                  const rect = e.currentTarget.getBoundingClientRect();
                                  const x = e.clientX - rect.left;
                                  const y = e.clientY - rect.top;
-                                 const targetX = Math.floor((x / rect.width) * mapData.width);
-                                 const targetY = Math.floor((y / rect.height) * mapData.height);
+                                 let targetX = Math.floor((x / rect.width) * mapData.width);
+                                 let targetY = Math.floor((y / rect.height) * mapData.height);
+                                 
+                                 // Clamp to bounds
+                                 targetX = Math.max(0, Math.min(targetX, mapData.width - 1));
+                                 targetY = Math.max(0, Math.min(targetY, mapData.height - 1));
+
                                  handleGridClick(targetX, targetY);
                                  setIsMapModalOpen(false); // Close map on click to move
                              }}
