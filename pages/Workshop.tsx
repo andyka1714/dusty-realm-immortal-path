@@ -4,7 +4,7 @@ import { RootState } from '../store/store';
 import { upgradeGatheringArray } from '../store/slices/workshopSlice';
 import { addLog } from '../store/slices/logSlice';
 import { MajorRealm } from '../types';
-import { Hammer, CircleDashed, ArrowUpCircle } from 'lucide-react';
+import { Hammer, CircleDashed, ArrowUpCircle, Flame } from 'lucide-react';
 
 export const Workshop: React.FC = () => {
   const dispatch = useDispatch();
@@ -13,7 +13,9 @@ export const Workshop: React.FC = () => {
 
 
 
-  const upgradeCost = gatheringLevel * 100;
+  // Exponential Cost Curve: 100 * 1.5^(Level-1)
+  // Lv1: 100, Lv10: ~3.8k, Lv20: ~220k, Lv30: ~12M
+  const upgradeCost = Math.floor(100 * Math.pow(1.5, gatheringLevel - 1));
 
   const handleUpgradeGathering = () => {
      if (spiritStones >= upgradeCost) {
@@ -26,6 +28,8 @@ export const Workshop: React.FC = () => {
      }
   };
 
+  const canAfford = spiritStones >= upgradeCost;
+
   return (
     <div className="p-6 h-full flex flex-col gap-6">
       <h2 className="text-2xl font-bold text-stone-200 tracking-widest flex items-center gap-2">
@@ -35,8 +39,8 @@ export const Workshop: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
          {/* Gathering Array */}
          <div className="bg-stone-900 border border-stone-800 rounded-xl p-6 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-               <CircleDashed size={100} />
+            <div className="absolute top-4 right-4 pointer-events-none">
+               <Flame size={80} className="text-blue-500 animate-breathing drop-shadow-[0_0_25px_rgba(59,130,246,0.9)]" />
             </div>
             
             <h3 className="text-xl font-bold text-emerald-500 mb-2">聚靈陣</h3>
@@ -44,22 +48,34 @@ export const Workshop: React.FC = () => {
             
             <div className="flex justify-between items-end mb-4">
                <div>
-                  <div className="text-stone-400 text-xs uppercase">Current Level</div>
-                  <div className="text-3xl font-mono text-stone-200">Lv. {gatheringLevel}</div>
+                  <div className="text-stone-400 text-xs uppercase">目前等級</div>
+                  <div className="text-3xl font-mono text-stone-200">{gatheringLevel} 層</div>
                </div>
                <div className="text-right">
-                  <div className="text-stone-400 text-xs uppercase">Effect</div>
-                  <div className="text-xl font-mono text-emerald-400">+{gatheringLevel * 10}%</div>
+                  <div className="text-stone-400 text-xs uppercase">修煉加成</div>
+                  <div className="text-xl font-mono text-emerald-400">+{gatheringLevel * 5}%</div>
                </div>
             </div>
 
-            <button 
-               onClick={handleUpgradeGathering}
-               className="w-full py-3 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-lg flex items-center justify-center gap-2 transition-colors"
-            >
-               <ArrowUpCircle size={16} className="text-amber-500" />
-               <span>升級 (消耗 {upgradeCost} 靈石)</span>
-            </button>
+            <div className="relative group/btn w-full">
+                <button 
+                   onClick={handleUpgradeGathering}
+                   disabled={!canAfford}
+                   className="w-full bg-stone-800 hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed text-stone-200 py-3 rounded-lg border border-stone-700 transition-all flex items-center justify-center gap-2"
+                >
+                   <ArrowUpCircle size={16} className={canAfford ? "text-amber-500" : "text-stone-600"} />
+                   <span>升級</span>
+                </button>
+                
+                {/* Tooltip */}
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-stone-950 border border-stone-800 text-xs text-stone-300 rounded-lg shadow-xl opacity-0 group-hover/btn:opacity-100 pointer-events-none transition-opacity z-[100] whitespace-nowrap">
+                   <div className={canAfford ? "text-emerald-400" : "text-red-400"}>
+                       {canAfford ? "點擊升級" : "靈石不足"}
+                   </div>
+                   <div className="text-stone-500">消耗: {upgradeCost.toLocaleString()} 靈石</div>
+                   {!canAfford && <div className="text-stone-600">擁有: {spiritStones.toLocaleString()}</div>}
+                </div>
+            </div>
          </div>
 
          {/* Alchemy (Placeholder) */}

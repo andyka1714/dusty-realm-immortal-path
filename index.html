@@ -117,6 +117,15 @@
       @keyframes fadeIn {
         to { opacity: 1; }
       }
+
+      @keyframes breathing {
+        0%, 100% { transform: scale(1); opacity: 0.4; }
+        50% { transform: scale(1.1); opacity: 1; }
+      }
+
+      .animate-breathing {
+        animation: breathing 3s ease-in-out infinite;
+      }
     </style>
   <script type="importmap">
 {

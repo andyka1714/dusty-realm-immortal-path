@@ -7,7 +7,7 @@ import { manualCultivate, attemptBreakthrough, reincarnate, startSeclusion } fro
 import { checkTimeEvents } from '../store/actions/timeActions';
 import { removeItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
-import { REALM_NAMES, SPIRIT_ROOT_MULTIPLIERS, REALM_MODIFIERS, MINOR_REALM_CAP, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN, SECLUSION_BASE_COST, SECLUSION_DURATION_MS } from '../constants';
+import { REALM_NAMES, REALM_MODIFIERS, MINOR_REALM_CAP, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN, SECLUSION_BASE_COST, SECLUSION_DURATION_MS, SPIRIT_ROOT_DETAILS, PASSIVE_CULTIVATION_PENALTY } from '../constants';
 import { ITEMS } from '../data/items';
 import { ProgressBar } from '../components/ProgressBar';
 import { LogPanel } from '../components/LogPanel';
@@ -23,9 +23,11 @@ export const Dashboard: React.FC = () => {
   const inventory = useSelector((state: RootState) => state.inventory.items);
   const { 
     isInitialized, isDead, name, gender, majorRealm, minorRealm, currentExp, maxExp, spiritStones, 
-    cultivationRate, isBreakthroughAvailable, isInSeclusion, seclusionEndTime, attributes, spiritRoot,
+    cultivationRate, isBreakthroughAvailable, isInSeclusion, seclusionEndTime, attributes, spiritRootId,
     lastBreakthroughResult, age, lifespan, gatheringLevel, lastManualCultivateTime
   } = character;
+  
+  const spiritRoot = spiritRootId;
 
   const [isBreakthroughModalOpen, setIsBreakthroughModalOpen] = useState(false);
   const processedBreakthroughRef = useRef<number>(lastBreakthroughResult?.timestamp || 0);
@@ -151,7 +153,7 @@ export const Dashboard: React.FC = () => {
       
       rate += attributes.comprehension * 0.002;
       rate += attributes.fortune * 0.001;
-      if (!isMajorBreakthrough && spiritRoot === SpiritRootType.Heavenly) {
+      if (!isMajorBreakthrough && SPIRIT_ROOT_DETAILS[spiritRoot]?.type === SpiritRootType.Heavenly) {
           rate += 0.05;
       }
       return Math.min(0.95, rate) * 100;
@@ -163,12 +165,18 @@ export const Dashboard: React.FC = () => {
   const currentAgeYearStr = (age / DAYS_PER_YEAR).toFixed(2);
   const maxAgeYearStr = (lifespan / DAYS_PER_YEAR).toFixed(0);
   
-  const baseRate = attributes.rootBone * 0.1;
-  const spiritMult = SPIRIT_ROOT_MULTIPLIERS[spiritRoot];
-  const realmMult = REALM_MODIFIERS[majorRealm];
-  const gatherMult = 1 + (gatheringLevel * 0.05);
-  const stateMult = isInSeclusion ? 5.0 : 1.0;
-  const finalDisplayRate = (baseRate * spiritMult * realmMult * gatherMult * stateMult).toFixed(1);
+  // Correct Calculation matching Redux Store
+  const baseRate = attributes.rootBone;
+  // Use REALM_MODIFIERS if imported, else fallback or use config. But store uses REALM_MODIFIERS.
+  // Assuming REALM_MODIFIERS is imported or I'll fix imports next.
+  const realmMult = REALM_MODIFIERS[majorRealm] || 0.1; 
+  const spiritMult = SPIRIT_ROOT_DETAILS[spiritRoot]?.bonuses.cultivationMult || 1.0;
+  const gatherMult = 1 + (gatheringLevel * 0.05); // Match store 5%
+  const stateMult = isInSeclusion ? 2.0 : 1.0;
+  // Apply Passive Penalty for visual accuracy (since standard tick is passive)
+  const efficiency = PASSIVE_CULTIVATION_PENALTY; 
+  
+  const finalDisplayRate = (baseRate * realmMult * spiritMult * gatherMult * stateMult * efficiency).toFixed(1);
 
   const isCriticalLifespan = (lifespan - age) <= 365 && !isDead;
 
@@ -260,17 +268,28 @@ export const Dashboard: React.FC = () => {
               <div className="flex justify-between items-end mb-2">
                 <span className="text-stone-400 text-xs">修為進度</span>
                 <div className="group relative cursor-help">
-                   <span className={`text-lg font-mono font-bold ${isInSeclusion ? "text-amber-400 animate-pulse" : "text-emerald-400"}`}>
-                     +{Number(cultivationRate.toFixed(1))} /秒
-                   </span>
-                   {isInSeclusion && <span className="text-[10px] ml-1 text-amber-500 border border-amber-900 px-1 rounded">閉關 x5</span>}
-                   <div className="absolute bottom-full right-0 mb-2 px-4 py-3 bg-stone-950 border border-stone-700 text-xs text-stone-300 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-[100] w-72">
+                    {isBreakthroughAvailable ? (
+                        <span className="text-lg font-bold text-amber-500 animate-pulse tracking-widest">
+                            修為已滿
+                        </span>
+                    ) : (
+                        <>
+                           <span className={`text-lg font-mono font-bold ${isInSeclusion ? "text-amber-400 animate-pulse" : "text-emerald-400"}`}>
+                             +{Number(cultivationRate.toFixed(1))} /秒
+                           </span>
+                           {isInSeclusion && <span className="text-[10px] ml-1 text-amber-500 border border-amber-900 px-1 rounded">閉關 x2.0</span>}
+                        </>
+                    )}
+                   <div className="absolute top-full right-0 mt-2 px-4 py-3 bg-stone-950 border border-stone-700 text-xs text-stone-300 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-[100] w-72">
                       <div className="mb-2 font-bold text-stone-200">修煉效率</div>
                       <div className="font-mono text-xs space-y-1">
-                        <div>基礎吸收 ({baseRate.toFixed(2)}) × 靈根加成 ({spiritMult.toFixed(1)}x) × 狀態倍率 ({stateMult.toFixed(1)}x)</div>
+                      <div className="font-mono text-xs space-y-1">
+                        <div>根骨({baseRate}) × 境界({realmMult.toFixed(2)}) × 靈根({spiritMult.toFixed(1)}) × 聚靈({gatherMult.toFixed(2)}) × 狀態({stateMult.toFixed(1)})</div>
+                        <div className="text-stone-400">× 自然運轉效率 ({efficiency * 100}%)</div>
                         <div className="border-t border-stone-700 mt-1 pt-1 text-right text-emerald-400 font-bold">
                           = {finalDisplayRate} /秒
                         </div>
+                      </div>
                       </div>
                    </div>
                 </div>
@@ -286,51 +305,68 @@ export const Dashboard: React.FC = () => {
 
         {/* 2. Action Buttons Area */}
         <div className="bg-stone-900 border border-stone-800 rounded-xl p-6 relative z-20 hover:z-50 transition-all duration-200">
-           <h3 className="text-stone-500 text-xs font-bold mb-4 uppercase tracking-widest">Actions</h3>
            
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex gap-2">
-                 <button
-                   onClick={handleManualCultivate}
-                   disabled={isBreakthroughAvailable || isInSeclusion || manualCooldown > 0}
-                   className="flex-1 bg-stone-800 hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed text-stone-200 py-4 rounded-lg border border-stone-700 transition-all flex flex-col items-center justify-center gap-2 group relative overflow-hidden"
-                 >
-                   {manualCooldown > 0 && (
-                       <div 
-                         className="absolute bottom-0 left-0 h-1 bg-emerald-500 transition-all duration-100 ease-linear"
-                         style={{ width: `${(1 - manualCooldown / MANUAL_CULTIVATE_COOLDOWN) * 100}%` }}
-                       ></div>
-                   )}
-                   <Play size={20} className={`${isInSeclusion ? "text-stone-600" : "text-emerald-500"} ${manualCooldown > 0 ? "opacity-50" : ""}`} />
-                   <span className="font-bold tracking-widest">{manualCooldown > 0 ? "回氣中..." : "運功"}</span>
-                   <span className="text-[10px] text-stone-500 font-normal">
-                       {manualCooldown > 0 ? `${(manualCooldown/1000).toFixed(1)}s` : "日常修煉 (1.0x)"}
-                   </span>
-                 </button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="flex gap-2">
+                 {/* 1. Manual Cultivate */}
+                 <div className="flex-1 relative group">
+                     <button
+                       onClick={handleManualCultivate}
+                       disabled={isBreakthroughAvailable || isInSeclusion || manualCooldown > 0}
+                       className="w-full bg-stone-800 hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed text-stone-200 py-4 rounded-lg border border-stone-700 transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden"
+                     >
+                       {manualCooldown > 0 && (
+                           <div 
+                             className="absolute bottom-0 left-0 h-1 bg-emerald-500 transition-all duration-100 ease-linear"
+                             style={{ width: `${(1 - manualCooldown / MANUAL_CULTIVATE_COOLDOWN) * 100}%` }}
+                           ></div>
+                       )}
+                       <Play size={20} className={`${isInSeclusion ? "text-stone-600" : "text-emerald-500"} ${manualCooldown > 0 ? "opacity-50" : ""}`} />
+                       <span className="font-bold tracking-widest">{manualCooldown > 0 ? "回氣中..." : "運功"}</span>
+                       <span className="text-[10px] text-stone-500 font-normal">
+                           {manualCooldown > 0 ? `${(manualCooldown/1000).toFixed(1)}s` : "日常修煉 (1.0x)"}
+                       </span>
+                     </button>
+                     
+                     {/* Tooltip - Shows when disabled */}
+                     {(isBreakthroughAvailable || isInSeclusion) && (
+                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-stone-950 border border-stone-700 text-xs text-stone-300 rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
+                             {isBreakthroughAvailable ? "修為已滿，請先突破" : "閉關中無法運功"}
+                         </div>
+                     )}
+                 </div>
 
-                 <button
-                   onClick={handleSeclusion}
-                   disabled={isBreakthroughAvailable || isInSeclusion || (!isInSeclusion && !canAffordSeclusion)}
-                   className={`flex-1 py-4 rounded-lg border transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed
-                     ${isInSeclusion 
-                            ? "bg-amber-900/30 border-amber-500/50 text-amber-200 shadow-[inset_0_0_20px_rgba(245,158,11,0.2)]" 
-                            : canAffordSeclusion
-                                ? "bg-stone-800 hover:bg-stone-700 border-stone-700 text-stone-200"
-                                : "bg-stone-900 border-stone-800 text-stone-500 opacity-60"
-                     }`}
-                 >
-                   <Moon size={20} className={isInSeclusion ? "text-amber-400 animate-pulse" : "text-indigo-400"} />
-                   <span className="font-bold tracking-widest">{isInSeclusion ? "閉關中" : "閉關修煉"}</span>
-                   <span className="text-[10px] text-stone-500 font-normal">
-                       {isInSeclusion ? `剩餘 ${timeLeft} 秒 (2.0x)` : `需 ${seclusionCost} 靈石`}
-                   </span>
-                   {isInSeclusion && !isBreakthroughAvailable && (
-                       <div 
-                         className="absolute bottom-0 left-0 h-1 bg-amber-500 transition-all duration-100 ease-linear"
-                         style={{ width: `${(timeLeft / (SECLUSION_DURATION_MS/1000)) * 100}%` }}
-                       ></div>
-                   )}
-                 </button>
+                 {/* 2. Seclusion */}
+                 <div className="flex-1 relative group">
+                     <button
+                       onClick={handleSeclusion}
+                       disabled={isBreakthroughAvailable || isInSeclusion || (!isInSeclusion && !canAffordSeclusion)}
+                       className={`w-full py-4 rounded-lg border transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed
+                         ${isInSeclusion 
+                                ? "bg-amber-900/30 border-amber-500/50 text-amber-200 shadow-[inset_0_0_20px_rgba(245,158,11,0.2)]" 
+                                : "bg-stone-800 hover:bg-stone-700 border-stone-700 text-stone-200"
+                         }`}
+                     >
+                       <Moon size={20} className={isInSeclusion ? "text-amber-400 animate-pulse" : "text-indigo-400"} />
+                       <span className="font-bold tracking-widest">{isInSeclusion ? "閉關中" : "閉關修煉"}</span>
+                       <span className="text-[10px] text-stone-500 font-normal">
+                           {isInSeclusion ? `剩餘 ${timeLeft} 秒 (2.0x)` : `需 ${seclusionCost} 靈石`}
+                       </span>
+                       {isInSeclusion && !isBreakthroughAvailable && (
+                           <div 
+                             className="absolute bottom-0 left-0 h-1 bg-amber-500 transition-all duration-100 ease-linear"
+                             style={{ width: `${(timeLeft / (SECLUSION_DURATION_MS/1000)) * 100}%` }}
+                           ></div>
+                       )}
+                     </button>
+
+                     {/* Tooltip - Shows when disabled */}
+                     {(isBreakthroughAvailable || isInSeclusion || !canAffordSeclusion) && (
+                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-stone-950 border border-stone-700 text-xs text-stone-300 rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
+                             {isBreakthroughAvailable ? "修為已滿，請先突破" : isInSeclusion ? "閉關修煉進行中" : "靈石不足"}
+                         </div>
+                     )}
+                 </div>
               </div>
 
               <button

@@ -195,6 +195,10 @@ const characterSlice = createSlice({
         state.lastWarningAge = action.payload;
     },
 
+    deductSpiritStones: (state, action: PayloadAction<number>) => {
+      state.spiritStones = Math.max(0, state.spiritStones - action.payload);
+    },
+    
     // ... (Keep processOfflineGains, tickCultivation, toggleSeclusion, manualCultivate, gainAttribute, attemptBreakthrough) ...
 
     consumeItem: (state, action: PayloadAction<{ itemId: string, effects: any, maxConsumption?: number }>) => {
@@ -532,5 +536,5 @@ const characterSlice = createSlice({
   },
 });
 
-export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, startSeclusion, processOfflineGains, reincarnate, gainAttribute, consumeItem, updateLastProcessedYear, updateLastWarningAge, addSpiritStones } = characterSlice.actions;
+export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, startSeclusion, processOfflineGains, reincarnate, gainAttribute, consumeItem, updateLastProcessedYear, updateLastWarningAge, addSpiritStones, deductSpiritStones } = characterSlice.actions;
 export default characterSlice.reducer;
