@@ -390,37 +390,68 @@ export const Adventure: React.FC = () => {
         if (!entries || entries.length === 0) return;
         
         const entry = entries[0];
-        // contentRect provides the size of the content box (excluding padding)
         const { width, height } = entry.contentRect;
         
         if (width === 0 || height === 0) return;
 
         const isMobile = window.innerWidth < 768;
-        const targetSize = isMobile ? TARGET_CELL_SIZE_MOBILE : TARGET_CELL_SIZE_DESKTOP;
+        
+        if (isMobile) {
+            // Mobile Strategy: Fill the screen completely (Fill & Crop)
+            // 1. Determine base columns to fit width (Odd number)
+            const targetSize = TARGET_CELL_SIZE_MOBILE;
+            let cols = Math.round(width / targetSize);
+            if (cols % 2 === 0) cols += 1; // Ensure Odd
+            
+            // 2. Force exact cell size to fill width 100%
+            // This eliminates left/right whitespace
+            const finalCellSize = width / cols;
+            
+            // 3. Determine rows to cover height 
+            let rows = Math.ceil(height / finalCellSize);
+            if (rows % 2 === 0) rows += 1; // Ensure Odd
+            
+            // 4. If this row count is slightly less than height (due to odd adjustment), add 2 more
+            if (rows * finalCellSize < height) rows += 2;
 
-        // Calculate potential columns/rows based on target size
-        let cols = Math.floor(width / targetSize);
-        let rows = Math.floor(height / targetSize);
+            // Result: Width is exact, Height is >= container
+            setGridMetrics({ 
+                cols, 
+                rows, 
+                cellSize: finalCellSize, 
+                pixelWidth: width, 
+                pixelHeight: rows * finalCellSize 
+            });
 
-        // Ensure odd numbers for centering
-        if (cols % 2 === 0) cols -= 1;
-        if (rows % 2 === 0) rows -= 1;
+        } else {
+            // Desktop Strategy: Square Viewport (1:1), Contained
+            const targetSize = TARGET_CELL_SIZE_DESKTOP;
+            let cols = Math.floor(width / targetSize);
+            let rows = Math.floor(height / targetSize);
+            
+            // Enforce Square
+            const minDim = Math.min(cols, rows);
+            cols = minDim;
+            rows = minDim;
 
-        // Min bounds
-        cols = Math.max(7, cols);
-        rows = Math.max(7, rows);
+            // Ensure odd
+            if (cols % 2 === 0) cols -= 1;
+            if (rows % 2 === 0) rows -= 1;
+            
+            cols = Math.max(7, cols);
+            rows = Math.max(7, rows);
 
-        // Calculate exact cell size that fits both dimensions
-        // We find the limiting dimension
-        const maxCellW = width / cols;
-        const maxCellH = height / rows;
-        const finalCellSize = Math.floor(Math.min(maxCellW, maxCellH)); // floor to avoid sub-pixel gaps
+            // Calculate integer cell size to fit
+            const finalCellSize = Math.floor(Math.min(width / cols, height / rows));
 
-        // Calculate final exact dimensions
-        const pixelWidth = finalCellSize * cols;
-        const pixelHeight = finalCellSize * rows;
-
-        setGridMetrics({ cols, rows, cellSize: finalCellSize, pixelWidth, pixelHeight });
+            setGridMetrics({ 
+                cols, 
+                rows, 
+                cellSize: finalCellSize, 
+                pixelWidth: cols * finalCellSize, 
+                pixelHeight: rows * finalCellSize 
+            });
+        }
     });
     
     if (containerRef.current) {
@@ -641,35 +672,26 @@ export const Adventure: React.FC = () => {
               const portal = mapData.portals.find(p => p.x === x && p.y === y);
               const isTargetInPath = isInPath(x, y);
               
-              const isVisited = visitedCells[`${x},${y}`];
-              const isVisible = Math.abs(x - playerPosition.x) <= 2 && Math.abs(y - playerPosition.y) <= 2;
+              // Fog of War Removed: All cells are visible
+              const isVisible = true; 
               
               let content = null;
               let bgClass = "bg-stone-900";
               let borderClass = "border-stone-800";
 
-              if (!isVisited && !isVisible) {
-                  bgClass = "bg-black";
-                  borderClass = "border-stone-900";
-              } else if (!isVisible) {
-                  bgClass = "bg-stone-900/50";
-                  if (portal) content = <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-blue-900/50"></div>;
-                  else if (monster?.rank === EnemyRank.Boss) content = <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-red-900/50"></div>;
-              } else {
-                  if (monster) {
-                      if (monster.rank === EnemyRank.Boss) {
-                          content = <div className="w-4 h-4 md:w-6 md:h-6 rounded-full bg-red-600 shadow-[0_0_25px_rgba(220,38,38,0.8)] animate-pulse border-2 border-red-300 z-10"></div>;
-                      } else if (monster.rank === EnemyRank.Elite) {
-                          content = <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.6)] animate-bounce border border-blue-200 z-10"></div>;
-                      } else {
-                          // Flashing Grey-White for Common
-                          content = <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-stone-400 shadow-[0_0_10px_rgba(168,162,158,0.4)] animate-pulse border border-stone-200 z-10"></div>;
-                      }
-                  } else if (portal) {
-                      content = <div className="portal-vortex z-0 w-full h-full scale-75"></div>;
-                  } else if (isTargetInPath) {
-                      content = <div className="w-1.5 h-1.5 rounded-full bg-stone-600 opacity-50"></div>;
+              if (monster) {
+                  if (monster.rank === EnemyRank.Boss) {
+                      content = <div className="w-4 h-4 md:w-6 md:h-6 rounded-full bg-red-600 shadow-[0_0_25px_rgba(220,38,38,0.8)] animate-pulse border-2 border-red-300 z-10"></div>;
+                  } else if (monster.rank === EnemyRank.Elite) {
+                      content = <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.6)] animate-bounce border border-blue-200 z-10"></div>;
+                  } else {
+                      // Flashing Grey-White for Common
+                      content = <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-stone-400 shadow-[0_0_10px_rgba(168,162,158,0.4)] animate-pulse border border-stone-200 z-10"></div>;
                   }
+              } else if (portal) {
+                  content = <div className="portal-vortex z-0 w-full h-full scale-75"></div>;
+              } else if (isTargetInPath) {
+                  content = <div className="w-1.5 h-1.5 rounded-full bg-stone-600 opacity-50"></div>;
               }
 
               cells.push(
@@ -695,33 +717,7 @@ export const Adventure: React.FC = () => {
   const playerRelY = playerPosition.y - startY;
   const isPlayerVisible = playerRelX >= 0 && playerRelX < drawW && playerRelY >= 0 && playerRelY < drawH;
 
-  if (isBattling) {
-      return (
-          <div className="h-full flex flex-col p-6 items-center justify-center relative overflow-hidden bg-black">
-               <div className="absolute inset-0 bg-red-900/10 animate-pulse z-0"></div>
-               <div className="relative z-10 w-full max-w-2xl bg-stone-900 border border-red-900 rounded-xl p-6 shadow-2xl flex flex-col h-[80vh]">
-                   <div className="flex justify-between items-center mb-4 border-b border-red-900/50 pb-4">
-                       <h2 className={`text-2xl font-bold flex items-center gap-2 ${currentEnemy?.rank === EnemyRank.Boss ? 'text-red-500 uppercase tracking-widest' : 'text-stone-300'}`}>
-                           <Skull /> {currentEnemy?.rank === EnemyRank.Boss ? '守關妖王' : '遭遇強敵'}：{currentEnemy?.name}
-                       </h2>
-                       <div className="text-stone-500 text-sm">Lv.{currentEnemy?.realm}</div>
-                   </div>
-                   <div className="flex-1 overflow-y-auto space-y-2 font-mono text-sm p-4 bg-black/30 rounded inner-shadow custom-scrollbar">
-                       {battleLogs.map((log, i) => (
-                           <div key={i} className={log.isPlayer ? "text-blue-300" : "text-red-300"}>{log.message}</div>
-                       ))}
-                   </div>
-                   {lastBattleResult && (
-                       <div className="mt-4 flex justify-center">
-                           <button onClick={() => dispatch(closeBattleReport())} className="px-8 py-3 bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-600 rounded-lg">
-                               {lastBattleResult === 'won' ? '戰鬥勝利' : '戰鬥失敗'}
-                           </button>
-                       </div>
-                   )}
-               </div>
-          </div>
-      );
-  }
+
 
   if (showIntro && mapData) {
       return (
@@ -733,10 +729,10 @@ export const Adventure: React.FC = () => {
   }
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-black overflow-hidden select-none">
+    <div className="fixed top-0 left-0 w-full h-[100dvh] flex flex-col bg-black overflow-hidden select-none pt-16 md:pt-0">
         
         {/* Top Right Mini-Map */}
-        <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-2">
+        <div className="absolute top-20 md:top-4 right-4 z-20 flex flex-col items-end gap-2">
             <button 
               onClick={() => { setIsMapModalOpen(true); setMapTab('area'); }}
               className="bg-black/90 border border-stone-600 p-1 w-24 h-24 md:w-32 md:h-32 rounded shadow-lg backdrop-blur relative overflow-hidden group hover:border-amber-500 transition-colors"
@@ -819,26 +815,44 @@ export const Adventure: React.FC = () => {
             </div>
         </div>
 
-        {/* Control Pad */}
-        <div className="p-3 md:p-4 bg-stone-900 border-t border-stone-800 flex justify-between items-center z-10 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.5)]">
-            <div className="text-[10px] md:text-xs text-stone-500 space-y-1 font-mono">
-                <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div> <span>吾身</span></div>
-                <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div> <span>精英</span></div>
-                <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div> <span>妖王</span></div>
+
+
+
+        {/* Battle Layout Overlay */}
+        {isBattling && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-6 animate-fade-in">
+               <div className="absolute inset-0 bg-red-900/5 animate-pulse z-0 pointer-events-none"></div>
+               
+               <div className="relative z-10 w-full max-w-2xl bg-stone-900 border border-red-900 rounded-xl p-6 shadow-2xl flex flex-col h-[70vh] max-h-[600px] animate-scale-in">
+                   <div className="flex justify-between items-center mb-4 border-b border-red-900/50 pb-4">
+                       {currentEnemy ? (
+                           <>
+                               <h2 className={`text-2xl font-bold flex items-center gap-2 ${currentEnemy.rank === EnemyRank.Boss ? 'text-red-500 uppercase tracking-widest' : 'text-stone-300'}`}>
+                                   <Skull /> {currentEnemy.rank === EnemyRank.Boss ? '守關妖王' : '遭遇強敵'}：{currentEnemy.name}
+                               </h2>
+                               <div className="text-stone-500 text-sm">Lv.{currentEnemy.realm}</div>
+                           </>
+                       ) : (
+                           <h2 className="text-2xl font-bold flex items-center gap-2 text-amber-500 uppercase tracking-widest">
+                               <Skull /> 戰鬥結束
+                           </h2>
+                       )}
+                   </div>
+                   <div className="flex-1 overflow-y-auto space-y-2 font-mono text-sm p-4 bg-black/30 rounded inner-shadow custom-scrollbar">
+                       {battleLogs.map((log, i) => (
+                           <div key={i} className={log.isPlayer ? "text-blue-300" : "text-red-300"}>{log.message}</div>
+                       ))}
+                   </div>
+                   {lastBattleResult && (
+                       <div className="mt-4 flex justify-center">
+                           <button onClick={() => dispatch(closeBattleReport())} className="px-8 py-3 bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-600 rounded-lg">
+                               {lastBattleResult === 'won' ? '戰鬥勝利' : '戰鬥失敗'}
+                           </button>
+                       </div>
+                   )}
+               </div>
             </div>
-            
-            <div className="grid grid-cols-3 gap-1 md:gap-2 scale-90 md:scale-100 origin-right">
-                <div></div>
-                <button className="w-10 h-10 md:w-12 md:h-12 bg-stone-800 rounded flex items-center justify-center border border-stone-700 active:bg-stone-700 hover:border-stone-500 transition-colors shadow" onClick={() => { setAutoMovePath([]); dispatch(movePlayer({ dx: 0, dy: -1 })); }}><ArrowUp size={20}/></button>
-                <div></div>
-                <button className="w-10 h-10 md:w-12 md:h-12 bg-stone-800 rounded flex items-center justify-center border border-stone-700 active:bg-stone-700 hover:border-stone-500 transition-colors shadow" onClick={() => { setAutoMovePath([]); dispatch(movePlayer({ dx: -1, dy: 0 })); }}><ArrowLeft size={20}/></button>
-                <div className="w-10 h-10 md:w-12 md:h-12 bg-stone-900 rounded flex items-center justify-center border border-stone-800"><Footprints size={18} className="text-stone-600" /></div>
-                <button className="w-10 h-10 md:w-12 md:h-12 bg-stone-800 rounded flex items-center justify-center border border-stone-700 active:bg-stone-700 hover:border-stone-500 transition-colors shadow" onClick={() => { setAutoMovePath([]); dispatch(movePlayer({ dx: 1, dy: 0 })); }}><ArrowRight size={20}/></button>
-                <div></div>
-                <button className="w-10 h-10 md:w-12 md:h-12 bg-stone-800 rounded flex items-center justify-center border border-stone-700 active:bg-stone-700 hover:border-stone-500 transition-colors shadow" onClick={() => { setAutoMovePath([]); dispatch(movePlayer({ dx: 0, dy: 1 })); }}><ArrowDown size={20}/></button>
-                <div></div>
-            </div>
-        </div>
+        )}
 
         {/* Portal Modal */}
         {portalModal && (

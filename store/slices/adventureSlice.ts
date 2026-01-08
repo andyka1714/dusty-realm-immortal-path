@@ -171,6 +171,7 @@ const adventureSlice = createSlice({
 
        // --- Movement Logic ---
        state.activeMonsters.forEach(monster => {
+           if (state.isBattling) return; // Stop processing if battle started
            if (monster.rank === EnemyRank.Boss) return; // Boss stationary
 
            let dx = 0, dy = 0;
