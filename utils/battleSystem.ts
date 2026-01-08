@@ -1,8 +1,9 @@
 
-import { BaseAttributes, Enemy, CombatLog, MajorRealm, SpiritRootId, ElementType, EnemyRank } from '../types';
+import { BaseAttributes, Enemy, CombatLog, MajorRealm, SpiritRootId, ElementType, EnemyRank, ItemInstance, ItemQuality } from '../types';
 import { REALM_BASE_STATS, SPIRIT_ROOT_DETAILS, SPIRIT_ROOT_TO_ELEMENT, ELEMENT_NAMES } from '../constants';
 import { getItem } from '../data/items';
 import { getDropRewards } from '../data/drop_tables';
+import { generateDrops } from './dropSystem';
 
 interface PlayerCombatStats {
   hp: number;
@@ -53,18 +54,40 @@ const getRestriction = (attacker: ElementType, defender: ElementType): { isEffec
     return { isEffective: false, isResisted: false };
 };
 
-export const calculatePlayerStats = (attributes: BaseAttributes, majorRealm: MajorRealm, spiritRootId: SpiritRootId): PlayerCombatStats => {
+export const calculatePlayerStats = (
+    attributes: BaseAttributes, 
+    majorRealm: MajorRealm, 
+    spiritRootId: SpiritRootId,
+    equipmentStats: Partial<BaseAttributes & { attack: number, defense: number, speed: number, hp: number, maxHp: number, mp: number, maxMp: number, crit: number, dodge: number }> = {}
+): PlayerCombatStats => {
   const base = REALM_BASE_STATS[majorRealm];
   const rootDetails = SPIRIT_ROOT_DETAILS[spiritRootId];
   const rootBonuses = rootDetails.bonuses.battle || {};
 
-  let maxHp = attributes.physique * 15 + base.hp;
-  let maxMp = attributes.insight * 10 + base.mp;
-  let attack = attributes.rootBone * 2;
-  let magic = attributes.insight * 2;
-  let defense = attributes.physique * 1.5;
-  let res = attributes.insight * 1.5;
+  // 1. Calculate Effective Base Attributes (Base + Equipment)
+  const effectivePhysique = attributes.physique + (equipmentStats.physique || 0);
+  const effectiveRootBone = attributes.rootBone + (equipmentStats.rootBone || 0);
+  const effectiveInsight = attributes.insight + (equipmentStats.insight || 0);
+  const effectiveComprehension = attributes.comprehension + (equipmentStats.comprehension || 0);
+  const effectiveFortune = attributes.fortune + (equipmentStats.fortune || 0);
+  // charm usually doesn't affect combat directly
 
+  // 2. Base Calculations from Effective Attributes
+  let maxHp = effectivePhysique * 15 + base.hp;
+  let maxMp = effectiveInsight * 10 + base.mp;
+  let attack = effectiveRootBone * 2;
+  let magic = effectiveInsight * 2;
+  let defense = effectivePhysique * 1.5;
+  let res = effectiveInsight * 1.5;
+
+  // 3. Add Flat Bonuses from Equipment
+  maxHp += (equipmentStats.maxHp || 0) + (equipmentStats.hp || 0); // Some items might use 'hp' for max hp bonus
+  maxMp += (equipmentStats.maxMp || 0) + (equipmentStats.mp || 0);
+  attack += (equipmentStats.attack || 0);
+  defense += (equipmentStats.defense || 0);
+  // magic += (equipmentStats.magic || 0); // If items add magic atk specifically
+
+  // 4. Percentage Multipliers (Spirit Root, etc.)
   if (rootBonuses.hpPercent) maxHp *= (1 + rootBonuses.hpPercent / 100);
   if (rootBonuses.mpPercent) maxMp *= (1 + rootBonuses.mpPercent / 100);
   if (rootBonuses.atkPercent) attack *= (1 + rootBonuses.atkPercent / 100);
@@ -77,32 +100,36 @@ export const calculatePlayerStats = (attributes: BaseAttributes, majorRealm: Maj
       res *= (1 + rootBonuses.defPercent / 100);
   }
 
+  // Floor final values
   maxHp = Math.floor(maxHp);
   maxMp = Math.floor(maxMp);
   attack = Math.floor(attack);
   magic = Math.floor(magic);
   defense = Math.floor(defense);
 
-  const speed = attributes.comprehension;
+  // Speed
+  const speed = effectiveComprehension + (equipmentStats.speed || 0);
   
-  let crit = attributes.insight * 0.1;
+  // Crit
+  let crit = effectiveInsight * 0.1 + (equipmentStats.crit || 0);
   if (rootBonuses.critRate) crit += rootBonuses.critRate;
   
-  let dodge = attributes.fortune * 0.1;
+  // Dodge
+  let dodge = effectiveFortune * 0.1 + (equipmentStats.dodge || 0);
   if (rootBonuses.dodgeRate) dodge += rootBonuses.dodgeRate;
 
   // New Derived Stats
-  const critDamage = 150 + (attributes.insight * 0.2); // Base 150%, +0.2% per Insight
-  const blockRate = attributes.physique * 0.1; // 0.1% per Physique
+  const critDamage = 150 + (effectiveInsight * 0.2); // Base 150%, +0.2% per Insight
+  const blockRate = effectivePhysique * 0.1; // 0.1% per Physique
   
   // Alchemy & Crafting (Defined in Spirit Root Bonuses)
   const alchemyBonus = rootDetails.bonuses.alchemyBonus || 0;
   const craftingBonus = rootDetails.bonuses.craftingBonus || 0;
   
   const breakthroughBonus = 0; // Removed Attribute dependency
-  const dropRateBonus = attributes.fortune * 0.1; // Keep Fortune dependency
+  const dropRateBonus = effectiveFortune * 0.1; // Keep Fortune dependency
   
-  // Cultivation Speed: Base 0 (User requested 0 base, purely equipment/method based)
+  // Cultivation Speed
   const cultivationSpeedBonus = 0;
 
   const damageReduction = rootBonuses.damageReduction || 0;
@@ -117,7 +144,7 @@ export const calculatePlayerStats = (attributes: BaseAttributes, majorRealm: Maj
   };
 };
 
-export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: boolean; logs: CombatLog[], rewards?: { spiritStones: number, items: string[] } } => {
+export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: boolean; logs: CombatLog[], rewards?: { spiritStones: number, drops: { itemId: string, count: number, instance?: ItemInstance }[] } } => {
   let playerHp = player.hp;
   let enemyHp = enemy.hp;
   const logs: CombatLog[] = [];
@@ -261,24 +288,28 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
   if (won) {
     logs.push({ turn, isPlayer: true, message: `你擊敗了 [${enemy.name}]！`, damage: 0 });
     
-    // Drop Logic (Deterministic for Log & State)
+    // Drop Logic
     const { spiritStones } = getDropRewards(enemy);
-    
-    // Item Drops (50% chance per item - moved from Adventure.tsx)
-    const droppedItemIds = enemy.drops.filter(() => Math.random() < 0.5);
-    
-    const droppedItemNames = droppedItemIds.map(id => {
-        const item = getItem(id);
-        return item ? item.name : id;
-    });
+    const drops = generateDrops(enemy);
 
     let dropMsg = `獲得戰利品：靈石 x${spiritStones}`;
-    if (droppedItemNames.length > 0) {
-        dropMsg += `，${droppedItemNames.join('，')}`;
+    if (drops.length > 0) {
+        const dropNames = drops.map(d => {
+            const item = getItem(d.itemId);
+            const name = item ? item.name : d.itemId;
+            let qStr = '';
+            if (d.instance) {
+                if (d.instance.quality === ItemQuality.Medium) qStr = '(中品)';
+                if (d.instance.quality === ItemQuality.High) qStr = '(上品)';
+                if (d.instance.quality === ItemQuality.Immortal) qStr = '(仙品)';
+            }
+            return `${name}${qStr}`;
+        });
+        dropMsg += `，${dropNames.join('，')}`;
     }
     logs.push({ turn, isPlayer: true, message: dropMsg, damage: 0 });
 
-    return { won, logs, rewards: { spiritStones, items: droppedItemIds } };
+    return { won, logs, rewards: { spiritStones, drops } };
 
   } else {
     logs.push({ turn, isPlayer: false, message: `你不敵 [${enemy.name}]，身受重傷...`, damage: 0 });

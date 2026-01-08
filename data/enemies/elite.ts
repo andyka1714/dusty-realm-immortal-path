@@ -4,8 +4,8 @@ import { createEnemy } from './utils';
 
 export const ELITE_ENEMIES: Record<string, Enemy> = {
     // mortal
-    'm6_e1': createEnemy('m6_e1', '石屋守衛屍', MajorRealm.Mortal, EnemyRank.Elite, 1000, 45, 40, ElementType.Earth, [], 150),
-    'm7_e1': createEnemy('m7_e1', '腐爛力士', MajorRealm.Mortal, EnemyRank.Elite, 800, 55, 30, ElementType.Earth, [], 150),
+    'm6_e1': createEnemy('m6_e1', '石屋守衛屍', MajorRealm.Mortal, EnemyRank.Elite, 1000, 45, 40, ElementType.Earth, ['novice_sword', 'wooden_shield', 'straw_hat', 'novice_robe', 'straw_sandals', 'wooden_charm', 'spirit_stone'], 150),
+    'm7_e1': createEnemy('m7_e1', '腐爛力士', MajorRealm.Mortal, EnemyRank.Elite, 800, 55, 30, ElementType.Earth, ['novice_sword', 'wooden_shield', 'straw_hat', 'novice_robe', 'straw_sandals', 'wooden_charm', 'spirit_stone'], 150),
     
     // qi
     'm8_e1': createEnemy('m8_e1', '碧眼魔虎', MajorRealm.QiRefining, EnemyRank.Elite, 6000, 320, 150, ElementType.Wood, [], 500),

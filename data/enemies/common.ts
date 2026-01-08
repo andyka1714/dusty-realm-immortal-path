@@ -4,19 +4,20 @@ import { createEnemy } from './utils';
 
 export const COMMON_ENEMIES: Record<string, Enemy> = {
     // === [0] Mortal (凡人) ===
-    'm1_c1': createEnemy('m1_c1', '後山走兔', MajorRealm.Mortal, EnemyRank.Common, 60, 22, 2, ElementType.None, [], 8),
-    'm1_c2': createEnemy('m1_c2', '幼獸灰偶', MajorRealm.Mortal, EnemyRank.Common, 120, 25, 8, ElementType.Earth, [], 15),
-    'm2_c1': createEnemy('m2_c1', '討飯小乞', MajorRealm.Mortal, EnemyRank.Common, 100, 24, 4, ElementType.None, [], 12),
-    'm2_c2': createEnemy('m2_c2', '仙緣地鼠', MajorRealm.Mortal, EnemyRank.Common, 70, 30, 0, ElementType.Earth, [], 10),
-    'm3_c1': createEnemy('m3_c1', '青竹靈蛛', MajorRealm.Mortal, EnemyRank.Common, 90, 26, 6, ElementType.Wood, [], 14),
-    'm3_c2': createEnemy('m3_c2', '林間幼狐', MajorRealm.Mortal, EnemyRank.Common, 80, 24, 4, ElementType.None, [], 12),
-    'm4_c1': createEnemy('m4_c1', '餓狼坡野犬', MajorRealm.Mortal, EnemyRank.Common, 130, 32, 8, ElementType.None, [], 20),
-    'm4_c2': createEnemy('m4_c2', '坡底潛伏者', MajorRealm.Mortal, EnemyRank.Common, 110, 35, 5, ElementType.Earth, [], 22),
-    'm5_c1': createEnemy('m5_c1', '崖邊鷦鷯', MajorRealm.Mortal, EnemyRank.Common, 70, 40, 0, ElementType.Metal, [], 20),
-    'm5_c2': createEnemy('m5_c2', '斷崖峭石精', MajorRealm.Mortal, EnemyRank.Common, 150, 28, 15, ElementType.Earth, [], 25),
-    'm6_c1': createEnemy('m6_c1', '石屋幽影', MajorRealm.Mortal, EnemyRank.Common, 120, 35, 10, ElementType.None, [], 25),
-    'm7_c1': createEnemy('m7_c1', '荒塚行屍', MajorRealm.Mortal, EnemyRank.Common, 180, 30, 15, ElementType.Earth, [], 30),
-    'm7_c2': createEnemy('m7_c2', '墓園殘魂', MajorRealm.Mortal, EnemyRank.Common, 100, 45, 2, ElementType.Water, [], 35),
+    'm1_c1': createEnemy('m1_c1', '後山走兔', MajorRealm.Mortal, EnemyRank.Common, 60, 22, 2, ElementType.None, ['straw_sandals', 'wooden_charm'], 8),
+    'm1_c2': createEnemy('m1_c2', '幼獸灰偶', MajorRealm.Mortal, EnemyRank.Common, 120, 25, 8, ElementType.Earth, ['straw_sandals', 'wooden_charm'], 15),
+    'm2_c1': createEnemy('m2_c1', '討飯小乞', MajorRealm.Mortal, EnemyRank.Common, 100, 24, 4, ElementType.None, ['wooden_charm', 'straw_sandals'], 12),
+    'm2_c2': createEnemy('m2_c2', '仙緣地鼠', MajorRealm.Mortal, EnemyRank.Common, 70, 30, 0, ElementType.Earth, ['wooden_charm', 'straw_sandals'], 10),
+    'm3_c1': createEnemy('m3_c1', '青竹靈蛛', MajorRealm.Mortal, EnemyRank.Common, 90, 26, 6, ElementType.Wood, ['straw_hat', 'novice_robe'], 14),
+    'm3_c2': createEnemy('m3_c2', '林間幼狐', MajorRealm.Mortal, EnemyRank.Common, 80, 24, 4, ElementType.None, ['straw_hat', 'novice_robe'], 12),
+    'm4_c1': createEnemy('m4_c1', '餓狼坡野犬', MajorRealm.Mortal, EnemyRank.Common, 130, 32, 8, ElementType.None, ['novice_sword', 'wooden_shield'], 20),
+    'm4_c2': createEnemy('m4_c2', '坡底潛伏者', MajorRealm.Mortal, EnemyRank.Common, 110, 35, 5, ElementType.Earth, ['novice_sword', 'wooden_shield'], 22),
+    'm5_c1': createEnemy('m5_c1', '崖邊鷦鷯', MajorRealm.Mortal, EnemyRank.Common, 70, 40, 0, ElementType.Metal, ['wooden_shield', 'straw_hat'], 20),
+    'm5_c2': createEnemy('m5_c2', '斷崖峭石精', MajorRealm.Mortal, EnemyRank.Common, 150, 28, 15, ElementType.Earth, ['wooden_shield', 'straw_hat'], 25),
+    'm6_c1': createEnemy('m6_c1', '石屋幽影', MajorRealm.Mortal, EnemyRank.Common, 120, 35, 10, ElementType.None, ['novice_robe', 'novice_sword'], 25),
+    // Late Mortal mobs drop mixed gear
+    'm7_c1': createEnemy('m7_c1', '荒塚行屍', MajorRealm.Mortal, EnemyRank.Common, 180, 30, 15, ElementType.Earth, ['novice_robe', 'novice_sword', 'spirit_stone'], 30),
+    'm7_c2': createEnemy('m7_c2', '墓園殘魂', MajorRealm.Mortal, EnemyRank.Common, 100, 45, 2, ElementType.Water, ['novice_sword', 'novice_robe', 'spirit_stone'], 35),
 
     // === [1] Qi Refining (練氣) ===
     'm8_c1': createEnemy('m8_c1', '萬獸林斑豹', MajorRealm.QiRefining, EnemyRank.Common, 1200, 150, 40, ElementType.Wood, [], 80),
