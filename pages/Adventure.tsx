@@ -363,7 +363,13 @@ export const Adventure: React.FC = () => {
   } = useSelector((state: RootState) => state.adventure);
   
   const [showIntro, setShowIntro] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false); // Transition Overlay
+  const [isTransitioning, setIsTransitioning] = useState(true); // Default to true (Black) for smooth entry
+  
+  // Initial Entry Fade In
+  useEffect(() => {
+     const timer = setTimeout(() => setIsTransitioning(false), 100);
+     return () => clearTimeout(timer);
+  }, []);
   
   // Expanded Map State
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
@@ -812,6 +818,7 @@ export const Adventure: React.FC = () => {
             {/* PixiJS Stage */}
             {gridMetrics.pixelWidth > 0 && mapData && (
                  <AdventureStage
+                    key={currentMapId} // Force Remount on Map Change to prevent visual drift
                     mapData={mapData}
                     playerPosition={playerPosition}
                     activeMonsters={activeMonsters}

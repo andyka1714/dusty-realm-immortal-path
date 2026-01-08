@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useLayoutEffect } from 'react';
 import * as PIXI from 'pixi.js';
 import { MapData, Coordinate, Portal, EnemyRank, ActiveMonster, MajorRealm } from '../../types';
 import { MOVEMENT_SPEEDS } from '../../constants';
@@ -17,6 +17,7 @@ interface AdventureStageProps {
   width: number;
   height: number;
   cellSize: number;
+  key?: React.Key;
 }
 
 // --- Constants ---
@@ -41,6 +42,7 @@ export default function AdventureStage({
   const moveTimerRef = useRef<number>(0);
   const isMovingRef = useRef(false);
   const onPlayerArriveRef = useRef(onPlayerArrive);
+  const framesRenderedRef = useRef(0);
   
   useEffect(() => {
       onPlayerArriveRef.current = onPlayerArrive;
@@ -65,25 +67,21 @@ export default function AdventureStage({
       onTileClickRef.current = onTileClick;
   }, [onTileClick]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     entitiesRef.current.monsters = activeMonsters;
     entitiesRef.current.portals = portals;
     latestDataRef.current = { mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling };
   }, [mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling]);
 
   // Force Snap Camera on Map Change (Prevent Drift)
-  useEffect(() => {
+  useLayoutEffect(() => {
+       // Synchronously snap visual state to new map data BEFORE paint
        visualRef.current.cam.x = (playerPosition.x + 0.5) * cellSize;
        visualRef.current.cam.y = (playerPosition.y + 0.5) * cellSize;
        visualRef.current.player.x = playerPosition.x;
        visualRef.current.player.y = playerPosition.y;
+       visualRef.current.monsters.clear();
   }, [mapData.id]);
-  
-  // Snap on Map Change (Legacy - kept for safety but simplified)
-  useEffect(() => {
-     visualRef.current.player = { x: playerPosition.x, y: playerPosition.y };
-     visualRef.current.monsters.clear();
-  }, [mapData?.id]);
 
 
   // Initialize Pixi App
@@ -166,6 +164,28 @@ export default function AdventureStage({
 
       // --- Animation Loop ---
       const ticker = (delta: number) => {
+          // Warmup: Force Snap for first few frames to ensure visual stability
+          if (framesRenderedRef.current < 5) {
+               visualRef.current.player.x = latestDataRef.current.playerPosition.x;
+               visualRef.current.player.y = latestDataRef.current.playerPosition.y;
+               visualRef.current.cam.x = (latestDataRef.current.playerPosition.x + 0.5) * cellSize;
+               visualRef.current.cam.y = (latestDataRef.current.playerPosition.y + 0.5) * cellSize;
+               framesRenderedRef.current++;
+               
+               // Apply Camera immediate
+               world.x = width / 2 - visualRef.current.cam.x;
+               world.y = height / 2 - visualRef.current.cam.y;
+               
+               // Render static entity positions too
+               const px = (visualRef.current.player.x + 0.5) * cellSize;
+               const py = (visualRef.current.player.y + 0.5) * cellSize;
+               playerGraphics.clear();
+               playerGraphics.beginFill(0x22c55e); 
+               playerGraphics.drawCircle(px, py, cellSize * 0.4);
+               playerGraphics.endFill();
+               return;
+          }
+
           if (latestDataRef.current.isBattling) {
                // Force snap to actual position to stop wandering/floating
                visualRef.current.player.x = latestDataRef.current.playerPosition.x;
