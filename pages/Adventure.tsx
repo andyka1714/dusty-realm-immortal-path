@@ -9,7 +9,7 @@ import { runAutoBattle, calculatePlayerStats } from '../utils/battleSystem';
 import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move } from 'lucide-react';
-import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType } from '../types';
+import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory } from '../types';
 import { MOVEMENT_SPEEDS, REALM_NAMES, ELEMENT_COLORS, ELEMENT_NAMES } from '../constants';
 import clsx from 'clsx';
 import { Modal } from '../components/Modal';
@@ -242,6 +242,25 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 });
                 const uniqueMonsters = Array.from(uniqueMonstersMap.values());
                 
+                // Calculate Drops
+                const dropsSet = new Set<string>();
+                uniqueMonsters.forEach(m => {
+                    m.drops.forEach(d => dropsSet.add(d));
+                });
+                
+                const drops = Array.from(dropsSet).map(id => ITEMS[id]).filter(Boolean);
+                
+                const hasSpiritStones = drops.some(d => d.id === 'spirit_stone');
+                const breakthroughItems = drops.filter(d => d.category === ItemCategory.Breakthrough);
+                const equipmentItems = drops.filter(d => d.category === ItemCategory.Equipment);
+                const materialItems = drops.filter(d => d.category === ItemCategory.Material);
+                const otherItems = drops.filter(d => 
+                    d.category !== ItemCategory.Breakthrough && 
+                    d.category !== ItemCategory.Equipment && 
+                    d.category !== ItemCategory.Material && 
+                    d.id !== 'spirit_stone'
+                );
+
                 return (
                     <div className="absolute top-4 left-4 z-50 p-4 bg-stone-900/95 border border-amber-500/50 rounded-lg shadow-2xl backdrop-blur max-w-xs animate-fade-in pointer-events-none">
                         <div className="flex items-center justify-between mb-2 pb-2 border-b border-stone-800">
@@ -251,31 +270,77 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             </span>
                         </div>
                         <p className="text-sm text-stone-400 mb-4 font-serif leading-relaxed line-clamp-3">
-                            {map.introText.replace(/踏入.*?，/, '') /* Clean up generic prefix for cleaner tooltip */}
+                            {map.introText.replace(/踏入.*?，/, '')}
                         </p>
                         
-                        <div className="space-y-2">
-                            <div className="text-xs font-bold text-stone-500 uppercase tracking-wider flex items-center gap-1">
-                                <Skull size={12} /> 區域妖獸
-                            </div>
-                            {uniqueMonsters.length > 0 ? (
-                                <div className="flex flex-wrap gap-1">
-                                    {uniqueMonsters.map(monster => {
-                                        let styleClass = "text-stone-400 bg-stone-950 border-stone-800"; // Common
-                                        if (monster.rank === EnemyRank.Elite) styleClass = "text-blue-400 bg-blue-950/30 border-blue-800";
-                                        if (monster.rank === EnemyRank.Boss) styleClass = "text-red-500 bg-red-950/30 border-red-800";
-                                        
-                                        return (
-                                            <span key={monster.name} className={`text-xs px-1.5 py-0.5 rounded border ${styleClass}`}>
-                                                {monster.name}
-                                            </span>
-                                        );
-                                    })}
+                        {uniqueMonsters.length > 0 && (
+                            <div className="space-y-4">
+                                {/* Monsters */}
+                                <div className="space-y-1">
+                                    <div className="text-xs font-bold text-stone-500 uppercase tracking-wider flex items-center gap-1">
+                                        <Skull size={12} /> 區域妖獸
+                                    </div>
+                                    <div className="flex flex-wrap gap-1">
+                                        {uniqueMonsters.map(monster => {
+                                            let styleClass = "text-stone-400 bg-stone-950 border-stone-800"; // Common
+                                            if (monster.rank === EnemyRank.Elite) styleClass = "text-blue-400 bg-blue-950/30 border-blue-800";
+                                            if (monster.rank === EnemyRank.Boss) styleClass = "text-red-500 bg-red-950/30 border-red-800";
+                                            
+                                            return (
+                                                <span key={monster.name} className={`text-xs px-1.5 py-0.5 rounded border ${styleClass}`}>
+                                                    {monster.name}
+                                                </span>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                            ) : (
-                                <span className="text-xs text-stone-600 italic">此地似乎安全...</span>
-                            )}
-                        </div>
+
+                                {/* Drops */}
+                                <div className="space-y-1 pt-2 border-t border-stone-800/50">
+                                    <div className="text-xs font-bold text-stone-500 uppercase tracking-wider flex items-center gap-1">
+                                        <Target size={12} /> 掉落情報
+                                    </div>
+                                    
+                                    <div className="space-y-2">
+                                        {hasSpiritStones && (
+                                            <div className="text-xs text-amber-400 flex items-center gap-1.5 bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-900/30 w-fit">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_5px_rgba(245,158,11,0.8)]"></div> 靈石
+                                            </div>
+                                        )}
+                                        
+                                        {breakthroughItems.length > 0 && (
+                                            <div className="flex flex-wrap gap-1">
+                                                {breakthroughItems.map(item => (
+                                                    <span key={item.id} className="text-[10px] px-1.5 py-0.5 rounded border border-purple-800 bg-purple-950/30 text-purple-300 shadow-[0_0_8px_rgba(147,51,234,0.2)]">
+                                                        {item.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {equipmentItems.length > 0 && (
+                                            <div className="flex flex-wrap gap-1">
+                                                {equipmentItems.map(item => (
+                                                    <span key={item.id} className="text-[10px] px-1.5 py-0.5 rounded border border-stone-600 bg-stone-800 text-stone-300">
+                                                        {item.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                        
+                                        {(materialItems.length > 0 || otherItems.length > 0) && (
+                                            <div className="flex flex-wrap gap-1">
+                                                {[...materialItems, ...otherItems].map(item => (
+                                                    <span key={item.id} className="text-[10px] px-1.5 py-0.5 rounded border border-slate-700 bg-slate-800 text-slate-400">
+                                                        {item.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 );
             })()}
