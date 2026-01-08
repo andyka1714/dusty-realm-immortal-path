@@ -90,8 +90,6 @@ export default function AdventureStage({
   useEffect(() => {
       if (!containerRef.current || !mapData) return;
       
-      console.log('[AdventureStage] Init Pixi', width, height);
-
       // Create App
       const app = new PIXI.Application({
           width,
@@ -123,7 +121,6 @@ export default function AdventureStage({
           const local = e.getLocalPosition(world);
           const gx = Math.floor(local.x / cellSize);
           const gy = Math.floor(local.y / cellSize);
-          console.log('[Pixi] Click:', gx, gy, 'Player:', latestDataRef.current.playerPosition);
           onTileClickRef.current(gx, gy);
       });
 
@@ -369,7 +366,6 @@ export default function AdventureStage({
 
       // Cleanup
       return () => {
-          console.log('[AdventureStage] Destroy Pixi');
           app.destroy(true, { children: true });
       };
   }, [width, height, cellSize, mapData?.id]); // Re-init on resize or map change

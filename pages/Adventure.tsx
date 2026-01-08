@@ -396,7 +396,7 @@ export const Adventure: React.FC = () => {
         
         const entry = entries[0];
         const { width, height } = entry.contentRect;
-        console.log('[Adventure] Resize:', width, height);
+        // Resized
         
         if (width === 0 || height === 0) return;
 
