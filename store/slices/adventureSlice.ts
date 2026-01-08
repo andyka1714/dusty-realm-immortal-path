@@ -301,14 +301,23 @@ const adventureSlice = createSlice({
                     !(m.x === state.playerPosition.x && m.y === state.playerPosition.y && m.templateId === state.currentEnemy!.id)
                 );
             }
-            state.currentEnemy = null;
+            // state.currentEnemy = null; // Keep currentEnemy for the report UI. Cleared in closeBattleReport.
         } else {
             // Player Lost: Teleport to Qingyun Sect (Map 0)
             state.currentMapId = '0';
             state.playerPosition = { x: 20, y: 20 }; // Safe center of Start Map
             state.visitedCells = { '20,20': true };
             state.activeMonsters = []; // Map 0 is safe zone
-            state.battleLogs.push({ turn: 0, isPlayer: false, message: "戰敗重傷，已被傳送回青雲仙宗修養。", damage: 0 });
+            state.battleLogs.push({ 
+                turn: 0, 
+                isPlayer: false, 
+                message: "戰敗重傷，已被傳送回青雲仙宗修養。", 
+                damage: 0,
+                playerHp: 0,
+                playerMaxHp: 0,
+                enemyHp: state.currentEnemy?.hp || 0,
+                enemyMaxHp: state.currentEnemy?.maxHp || 0
+            });
         }
     },
     

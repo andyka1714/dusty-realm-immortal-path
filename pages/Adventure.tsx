@@ -9,6 +9,7 @@ import { runAutoBattle, calculatePlayerStats } from '../utils/battleSystem';
 import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move, Swords } from 'lucide-react';
+import { parseBattleLog } from '../utils/logParser';
 import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory } from '../types';
 import { MOVEMENT_SPEEDS, REALM_NAMES, ELEMENT_COLORS, ELEMENT_NAMES } from '../constants';
 import clsx from 'clsx';
@@ -364,6 +365,16 @@ export const Adventure: React.FC = () => {
   const [showIntro, setShowIntro] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(true); // Default to true (Black) for smooth entry
   
+  // Battle Replay State
+  const [isReplayingBattle, setIsReplayingBattle] = useState(false);
+  const [replayQueue, setReplayQueue] = useState<any[]>([]);
+  const [displayedLogs, setDisplayedLogs] = useState<any[]>([]);
+  const [battleSnapshot, setBattleSnapshot] = useState<{
+      playerHp: number; playerMaxHp: number;
+      enemyHp: number; enemyMaxHp: number;
+      won: boolean; rewards?: any;
+  } | null>(null);
+
   // Initial Entry Fade In
   useEffect(() => {
      const timer = setTimeout(() => setIsTransitioning(false), 100);
@@ -382,6 +393,7 @@ export const Adventure: React.FC = () => {
   
   // Dynamic Viewport Logic
   const containerRef = useRef<HTMLDivElement>(null); // Ref for Grid Counter-Act
+  const battleLogRef = useRef<HTMLDivElement>(null); // Ref for Battle Log Auto-Scroll
   const prevStartRef = useRef({ x: 0, y: 0 }); // Track previous viewport origin
   
   // Precise Grid Metrics for perfect centering
@@ -613,6 +625,8 @@ export const Adventure: React.FC = () => {
   const finishIntro = () => {
       if (currentMapId) dispatch(markMapVisited(currentMapId));
       setShowIntro(false);
+      // Ensure transition overlay is removed when intro finishes
+      setIsTransitioning(false);
   };
 
   // Event Driven Portal Logic
@@ -663,45 +677,37 @@ export const Adventure: React.FC = () => {
   // Battle Logic Effect
   const battleProcessedRef = useRef(false);
 
+  // Replay Effect
   useEffect(() => {
-      // Reset ref when battle ends
-      if (!isBattling) {
-          battleProcessedRef.current = false;
-          return;
-      }
-
-      if (isBattling && currentEnemy && !lastBattleResult && !battleProcessedRef.current) {
-          battleProcessedRef.current = true;
-    // Calculate Stats
-    const playerStats = calculatePlayerStats(attributes, majorRealm, spiritRootId, equipmentStats);
-          const { won, logs, rewards } = runAutoBattle(playerStats, currentEnemy);
-          
-          setTimeout(() => {
-              dispatch(resolveBattle({ won, logs }));
-              if (won && rewards) {
+    if (!isReplayingBattle || replayQueue.length === 0) {
+        if (isReplayingBattle && replayQueue.length === 0 && battleSnapshot) {
+             // Replay Finished -> Apply Final Results
+             setIsReplayingBattle(false);
+             dispatch(resolveBattle({ won: battleSnapshot.won, logs: displayedLogs })); // Use displayed logs as final source of truth for Redux if needed (or just use original)
+             
+             // Process Rewards
+              if (battleSnapshot.won && battleSnapshot.rewards) {
+                   const { rewards } = battleSnapshot;
                   // XP Logic
-                  dispatch(addLog({ message: `擊敗 ${currentEnemy.name}，獲得經驗 ${currentEnemy.exp}`, type: 'gain' }));
+                  if (currentEnemy) dispatch(addLog({ message: `擊敗 ${currentEnemy.name}，獲得經驗 ${currentEnemy.exp}`, type: 'gain' }));
                   
-                  // Spirit Stones Drop (From Battle Calculation)
                   if (rewards.spiritStones > 0) {
                       dispatch(addSpiritStones({ amount: rewards.spiritStones, source: 'battle' }));
                       dispatch(addLog({ message: `獲得靈石 ${formatSpiritStone(rewards.spiritStones)}`, type: 'gain' }));
                   }
 
-                  // Item Drops (From Battle Calculation)
                   if (rewards.drops) {
-                      rewards.drops.forEach(drop => {
+                      rewards.drops.forEach((drop: any) => {
                           dispatch(addItem({ itemId: drop.itemId, count: drop.count, instance: drop.instance }));
                           
                           const item = ITEMS[drop.itemId];
                           if (item) {
                               let msg = `獲得戰利品: ${item.name}`;
                               if (drop.instance) {
-                                  // Quality Display
                                   const q = drop.instance.quality;
-                                  if (q === 1) msg += ' (中品)'; // Medium
-                                  if (q === 2) msg += ' (上品)'; // High
-                                  if (q === 3) msg += ' (仙品)'; // Immortal
+                                  if (q === 1) msg += ' (中品)';
+                                  if (q === 2) msg += ' (上品)';
+                                  if (q === 3) msg += ' (仙品)';
                               } else if (drop.count > 1) {
                                   msg += ` x${drop.count}`;
                               }
@@ -709,10 +715,73 @@ export const Adventure: React.FC = () => {
                           }
                       });
                   }
-              } else if (!won) {
+              } else if (!battleSnapshot.won && currentEnemy) {
                   dispatch(addLog({ message: `不敵 ${currentEnemy.name}，狼狽逃回。`, type: 'danger' }));
               }
-          }, 500);
+        }
+        return;
+    }
+
+    const timer = setTimeout(() => {
+        const nextLog = replayQueue[0];
+        setDisplayedLogs(prev => [...prev, nextLog]);
+        setReplayQueue(prev => prev.slice(1));
+        
+        // Update Snapshot for UI
+        if (nextLog.playerHp !== undefined) {
+             setBattleSnapshot(prev => prev ? { ...prev, playerHp: nextLog.playerHp, enemyHp: nextLog.enemyHp } : null);
+        }
+
+        // Auto Scroll
+        const logContainer = document.getElementById('battle-log-container');
+        if (logContainer) logContainer.scrollTop = logContainer.scrollHeight;
+
+    }, 1000); // 1 Second Delay per turn
+
+    return () => clearTimeout(timer);
+  }, [isReplayingBattle, replayQueue, battleSnapshot]);
+
+  // Auto-Scroll Battle Logs
+  useEffect(() => {
+    if (battleLogRef.current) {
+        battleLogRef.current.scrollTop = battleLogRef.current.scrollHeight;
+    }
+  }, [displayedLogs, isReplayingBattle, lastBattleResult]);
+
+  useEffect(() => {
+      // Reset ref when battle ends
+      if (!isBattling) {
+          battleProcessedRef.current = false;
+          setDisplayedLogs([]);
+          setReplayQueue([]);
+          setIsReplayingBattle(false);
+          setBattleSnapshot(null);
+          return;
+      }
+
+      if (isBattling && currentEnemy && !lastBattleResult && !battleProcessedRef.current) {
+          battleProcessedRef.current = true;
+          // Calculate Stats
+          const playerStats = calculatePlayerStats(attributes, majorRealm, spiritRootId, equipmentStats, character.name);
+          const { won, logs, rewards } = runAutoBattle(playerStats, currentEnemy);
+          
+          // Start Replay
+          // Pre-fill first log immediately so screen isn't empty
+          const firstLog = logs[0];
+          const remainingLogs = logs.slice(1);
+
+          setDisplayedLogs([firstLog]);
+          setReplayQueue(remainingLogs);
+          
+          setBattleSnapshot({
+              playerHp: firstLog.playerHp ?? playerStats.hp,
+              playerMaxHp: firstLog.playerMaxHp ?? playerStats.maxHp,
+              enemyHp: firstLog.enemyHp ?? currentEnemy.hp,
+              enemyMaxHp: firstLog.enemyMaxHp ?? currentEnemy.maxHp,
+              won,
+              rewards
+          });
+          setIsReplayingBattle(true);
       }
   }, [isBattling, currentEnemy, lastBattleResult, character, dispatch]);
 
@@ -837,34 +906,63 @@ export const Adventure: React.FC = () => {
 
 
 
-        {/* Battle Layout Overlay */}
-        {isBattling && (
-            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-6 animate-fade-in">
-               <div className="absolute inset-0 bg-red-900/5 animate-pulse z-0 pointer-events-none"></div>
+        {/* Battle Layout Overlay - UNIFIED */}
+        {(isBattling || lastBattleResult) && currentEnemy && (
+            <div className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-6 animate-fade-in">
+               <div className="absolute inset-0 bg-red-900/10 animate-pulse z-0 pointer-events-none"></div>
                
-               <div className="relative z-10 w-full max-w-2xl bg-stone-900 border border-red-900 rounded-xl p-6 shadow-2xl flex flex-col h-[70vh] max-h-[600px] animate-scale-in">
-                   <div className="flex justify-between items-center mb-4 border-b border-red-900/50 pb-4">
-                       {currentEnemy ? (
-                           <>
-                               <h2 className={`text-2xl font-bold flex items-center gap-2 ${currentEnemy.rank === EnemyRank.Boss ? 'text-red-500 uppercase tracking-widest' : 'text-stone-300'}`}>
-                                   <Skull /> {currentEnemy.rank === EnemyRank.Boss ? '守關妖王' : '遭遇強敵'}：{currentEnemy.name}
-                               </h2>
-                               <div className="text-stone-500 text-sm">Lv.{currentEnemy.realm}</div>
-                           </>
-                       ) : (
-                           <h2 className="text-2xl font-bold flex items-center gap-2 text-amber-500 uppercase tracking-widest">
-                               <Skull /> 戰鬥結束
+               <div className="relative z-10 w-full max-w-2xl bg-stone-950 border border-red-900/50 rounded-xl p-6 shadow-2xl flex flex-col h-[70vh] max-h-[600px] animate-scale-in">
+                   <div className="flex justify-between items-center mb-4 border-b border-stone-800 pb-4">
+                       <>
+                           <h2 className={`text-2xl font-bold flex items-center gap-2 ${currentEnemy.rank === EnemyRank.Boss ? 'text-red-500 uppercase tracking-widest' : 'text-stone-300'}`}>
+                               <Skull /> {currentEnemy.rank === EnemyRank.Boss ? '守關妖王' : '遭遇強敵'}：{currentEnemy.name}
                            </h2>
+                           <div className="text-stone-500 text-sm">Lv.{currentEnemy.realm}</div>
+                       </>
+                   </div>
+                   
+                   {/* Battle Status / HP Bars - Always show snapshot if available, or current logs imply it */}
+                   {battleSnapshot && (
+                        <div className="mb-4 grid grid-cols-2 gap-4">
+                             {/* Player HP */}
+                             <div className="bg-stone-900/80 p-3 rounded border border-stone-700">
+                                 <div className="flex justify-between text-xs mb-1 text-emerald-400 font-bold">
+                                     <span>{character.name}</span>
+                                     <span>{Math.floor(battleSnapshot.playerHp)} / {Math.floor(battleSnapshot.playerMaxHp)}</span>
+                                 </div>
+                                 <div className="h-2 bg-stone-950 rounded-full overflow-hidden">
+                                     <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${Math.max(0, (battleSnapshot.playerHp / battleSnapshot.playerMaxHp) * 100)}%` }}></div>
+                                 </div>
+                             </div>
+
+                             {/* Enemy HP */}
+                             <div className="bg-stone-900/80 p-3 rounded border border-stone-700">
+                                 <div className="flex justify-between text-xs mb-1 text-rose-400 font-bold">
+                                     <span>{currentEnemy.name}</span>
+                                     <span>{Math.floor(battleSnapshot.enemyHp)} / {Math.floor(battleSnapshot.enemyMaxHp)}</span>
+                                 </div>
+                                 <div className="h-2 bg-stone-950 rounded-full overflow-hidden">
+                                     <div className="h-full bg-rose-500 transition-all duration-300" style={{ width: `${Math.max(0, (battleSnapshot.enemyHp / battleSnapshot.enemyMaxHp) * 100)}%` }}></div>
+                                 </div>
+                             </div>
+                        </div>
+                    )}
+
+                   <div id="battle-log-container" ref={battleLogRef} className="flex-1 overflow-y-auto space-y-2 font-mono text-sm p-4 bg-black/30 rounded inner-shadow custom-scrollbar">
+                       {displayedLogs.length > 0 ? displayedLogs.map((log, i) => (
+                           <div key={i} className={log.isPlayer ? "text-stone-300" : "text-stone-400"}>
+                               {parseBattleLog(log.message)}
+                           </div>
+                       )) : (
+                            <div className="text-stone-600 text-center mt-10 italic">戰鬥開始...</div>
                        )}
+
                    </div>
-                   <div className="flex-1 overflow-y-auto space-y-2 font-mono text-sm p-4 bg-black/30 rounded inner-shadow custom-scrollbar">
-                       {battleLogs.map((log, i) => (
-                           <div key={i} className={log.isPlayer ? "text-blue-300" : "text-red-300"}>{log.message}</div>
-                       ))}
-                   </div>
-                   {lastBattleResult && (
-                       <div className="mt-4 flex justify-center">
-                           <button onClick={() => dispatch(closeBattleReport())} className="px-8 py-3 bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-600 rounded-lg">
+                   
+                   {/* Action Footer - Only shows when result is ready */}
+                   {lastBattleResult && !isReplayingBattle && (
+                       <div className="mt-4 flex justify-center animate-fade-in">
+                           <button onClick={() => dispatch(closeBattleReport())} className="px-8 py-3 bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-600 rounded-lg shadow-lg hover:border-amber-500 transition-colors">
                                {lastBattleResult === 'won' ? '戰鬥勝利' : '戰鬥失敗'}
                            </button>
                        </div>

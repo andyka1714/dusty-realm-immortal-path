@@ -201,6 +201,10 @@ export interface CombatLog {
   message: string;
   isPlayer: boolean;
   damage?: number;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
 }
 
 // --- Item & Inventory ---

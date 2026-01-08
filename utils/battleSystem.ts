@@ -58,9 +58,11 @@ export const calculatePlayerStats = (
     attributes: BaseAttributes, 
     majorRealm: MajorRealm, 
     spiritRootId: SpiritRootId,
-    equipmentStats: Partial<BaseAttributes & { attack: number, defense: number, speed: number, hp: number, maxHp: number, mp: number, maxMp: number, crit: number, dodge: number }> = {}
+    equipmentStats: Partial<BaseAttributes & { attack: number, defense: number, speed: number, hp: number, maxHp: number, mp: number, maxMp: number, crit: number, dodge: number }> = {},
+    name: string = '道友'
 ): PlayerCombatStats => {
   const base = REALM_BASE_STATS[majorRealm];
+
   const rootDetails = SPIRIT_ROOT_DETAILS[spiritRootId];
   const rootBonuses = rootDetails.bonuses.battle || {};
 
@@ -140,7 +142,7 @@ export const calculatePlayerStats = (
     hp: maxHp, maxHp, mp: maxMp, maxMp, attack, magic, defense, res, speed, 
     crit, critDamage, dodge, blockRate, damageReduction, 
     alchemyBonus, craftingBonus, breakthroughBonus, dropRateBonus, cultivationSpeedBonus,
-    name: '道友', element, regenHp
+    name, element, regenHp
   };
 };
 
@@ -162,10 +164,10 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
   // Initial Log
   if (player.element !== ElementType.None && enemy.element !== ElementType.None) {
       if (pVsE.isEffective) {
-          logs.push({ turn: 0, isPlayer: true, message: `屬性克制：你的【${ELEMENT_NAMES[player.element]}】克制了敵方的【${ELEMENT_NAMES[enemy.element]}】！傷害+30%，承傷-20%`, damage: 0 });
+          logs.push({ turn: 0, isPlayer: true, message: `屬性克制：你的【${ELEMENT_NAMES[player.element]}】克制了敵方的【${ELEMENT_NAMES[enemy.element]}】！傷害+30%，承傷-20%`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
       }
       if (pVsE.isResisted) {
-          logs.push({ turn: 0, isPlayer: true, message: `屬性被克：你的【${ELEMENT_NAMES[player.element]}】被敵方的【${ELEMENT_NAMES[enemy.element]}】克制！傷害-30%，承傷+20%`, damage: 0 });
+          logs.push({ turn: 0, isPlayer: true, message: `屬性被克：你的【${ELEMENT_NAMES[player.element]}】被敵方的【${ELEMENT_NAMES[enemy.element]}】克制！傷害-30%，承傷+20%`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
       }
   }
 
@@ -190,7 +192,7 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
     if (enemy.rank === EnemyRank.Boss && pVsE.isEffective && !bossBroken && !bossStunned) {
         if (Math.random() < 0.15) { // 15% chance per turn to break
             bossBroken = true;
-            logs.push({ turn, isPlayer: true, message: `【破招】你抓住 ${enemy.name} 的破綻，一擊破防！Boss 進入虛弱狀態！` });
+            logs.push({ turn, isPlayer: true, message: `【破招】你抓住 <enemy rank="${enemy.rank}">${enemy.name}</enemy> 的破綻，一擊破防！Boss 進入虛弱狀態！`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
         }
     }
 
@@ -198,7 +200,7 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
     if (enemy.rank === EnemyRank.Boss && turn % 4 === 0 && !bossStunned) { // Every 4 turns
         const skillMsg = triggerBossSkill(enemy.name, player.element);
         if (skillMsg) {
-             logs.push({ turn, isPlayer: false, message: skillMsg });
+             logs.push({ turn, isPlayer: false, message: skillMsg, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
              playerDebuffed = true; // Simple debuff flag
         }
     }
@@ -216,27 +218,36 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
              // Optional: Log regen? Might clutter. Let's log only if significant? 
              // Actually, for turn-based log, it's better to show it.
              if (healAmount > 0) {
-                 logs.push({ turn, isPlayer: true, message: `生機盎然！你的長青之體自動回復了 ${healAmount} 點氣血。`, damage: -healAmount });
+                 logs.push({ turn, isPlayer: true, message: `生機盎然！你的長青之體自動回復了 ${healAmount} 點氣血。`, damage: -healAmount, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
              }
         }
 
         const isCrit = Math.random() * 100 < player.crit;
-        let rawDmg = Math.max(1, player.attack - enemy.defense);
+        // Raw Damage Calculation
+        let rawDmg = player.attack - enemy.defense;
         
+        // Critical Hit (Before Base reduction or Logic)
         if (isCrit) rawDmg = Math.floor(rawDmg * 1.5);
-
+        
         // Modifiers
-        if (pVsE.isEffective) rawDmg = Math.floor(rawDmg * 1.3); // +30%
-        if (pVsE.isResisted) rawDmg = Math.floor(rawDmg * 0.7); // -30%
-        if (bossBroken) rawDmg = Math.floor(rawDmg * 1.5); // Break Bonus
-        if (playerDebuffed) rawDmg = Math.floor(rawDmg * 0.8); // Debuff Penalty
+        if (pVsE.isEffective) rawDmg = Math.floor(rawDmg * 1.3); 
+        if (pVsE.isResisted) rawDmg = Math.floor(rawDmg * 0.7); 
+        if (bossBroken) rawDmg = Math.floor(rawDmg * 1.5); 
+        if (playerDebuffed) rawDmg = Math.floor(rawDmg * 0.8); 
+        
+        // Ensure Minimum Damage of 1 FINAL check
+        rawDmg = Math.max(1, Math.floor(rawDmg));
 
-        enemyHp -= rawDmg;
+        enemyHp = Math.max(0, enemyHp - rawDmg);
         logs.push({
             turn,
             isPlayer: true,
-            message: `${player.name} 發動攻擊，${isCrit ? '暴擊！' : ''}造成 ${rawDmg} 點傷害！`,
-            damage: rawDmg
+            message: `<player>${player.name}</player> 發動攻擊，${isCrit ? '暴擊！' : ''}造成 <dmg>${rawDmg}</dmg> 點傷害！`,
+            damage: rawDmg,
+            playerHp,
+            playerMaxHp: player.maxHp,
+            enemyHp,
+            enemyMaxHp: enemy.maxHp
         });
     }
 
@@ -244,33 +255,36 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
 
     // --- Enemy Turn ---
     if (!bossStunned) {
-        let enemyDmg = Math.max(1, Math.floor(enemy.attack - player.defense));
+        let enemyDmg = enemy.attack - player.defense;
         
-        // Element Modifiers (Enemy Attacking Player)
-        // If Boss Counters Player (e.g. Boss Water vs Player Fire)
-        if (eVsP.isEffective) enemyDmg = Math.floor(enemyDmg * 1.2); // Boss deals +20%
-        // If Player Counters Boss (e.g. Player Earth vs Boss Water)
-        if (eVsP.isResisted) enemyDmg = Math.floor(enemyDmg * 0.8); // Boss deals -20%
+        if (eVsP.isEffective) enemyDmg = Math.floor(enemyDmg * 1.2); 
+        if (eVsP.isResisted) enemyDmg = Math.floor(enemyDmg * 0.8); 
 
         if (player.damageReduction > 0) {
             enemyDmg = Math.floor(enemyDmg * (1 - player.damageReduction / 100));
         }
+        
+        enemyDmg = Math.max(1, Math.floor(enemyDmg));
 
         const isDodge = Math.random() * 100 < player.dodge;
         
         if (isDodge) {
-            logs.push({ turn, isPlayer: false, message: `[${enemy.name}] 發動攻擊，但被你靈巧地閃過了！`, damage: 0 });
+            logs.push({ turn, isPlayer: false, message: `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 發動攻擊，但被你靈巧地閃過了！`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
         } else {
-             playerHp -= enemyDmg;
+             playerHp = Math.max(0, playerHp - enemyDmg);
              logs.push({
                 turn,
                 isPlayer: false,
-                message: `[${enemy.name}] 反擊，造成 ${enemyDmg} 點傷害！`,
-                damage: enemyDmg
+                message: `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 反擊，造成 <dmg>${enemyDmg}</dmg> 點傷害！`,
+                damage: enemyDmg,
+                playerHp,
+                playerMaxHp: player.maxHp,
+                enemyHp,
+                enemyMaxHp: enemy.maxHp
             });
         }
     } else {
-        logs.push({ turn, isPlayer: false, message: `[${enemy.name}] 處於暈眩狀態，無法行動！` });
+        logs.push({ turn, isPlayer: false, message: `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 處於暈眩狀態，無法行動！`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
         bossStunned = false; // Recover next turn
     }
     
@@ -282,33 +296,40 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
 
   const won = playerHp > 0 && enemyHp <= 0;
   if (won) {
-    logs.push({ turn, isPlayer: true, message: `你擊敗了 [${enemy.name}]！`, damage: 0 });
+    logs.push({ turn, isPlayer: true, message: `<acc>擊敗了</acc> <enemy rank="${enemy.rank}">${enemy.name}</enemy>！`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
     
     // Drop Logic
     const { spiritStones } = getDropRewards(enemy);
     const drops = generateDrops(enemy);
 
-    let dropMsg = `獲得戰利品：靈石 x${spiritStones}`;
-    if (drops.length > 0) {
-        const dropNames = drops.map(d => {
-            const item = getItem(d.itemId);
-            const name = item ? item.name : d.itemId;
-            let qStr = '';
-            if (d.instance) {
-                if (d.instance.quality === ItemQuality.Medium) qStr = '(中品)';
-                if (d.instance.quality === ItemQuality.High) qStr = '(上品)';
-                if (d.instance.quality === ItemQuality.Immortal) qStr = '(仙品)';
-            }
-            return `${name}${qStr}`;
-        });
-        dropMsg += `，${dropNames.join('，')}`;
+    if (spiritStones > 0 || drops.length > 0) {
+        let itemsMsg = '';
+        if (spiritStones > 0) itemsMsg += `<stones>${spiritStones} 靈石</stones>`;
+        
+        if (drops.length > 0) {
+            if (itemsMsg) itemsMsg += '，';
+            const dropNames = drops.map(d => {
+                const item = getItem(d.itemId);
+                const name = item ? item.name : d.itemId;
+                let qStr = '';
+                let qVal = 0;
+                if (d.instance) {
+                    qVal = d.instance.quality;
+                    if (qVal === ItemQuality.Medium) qStr = '(中品)';
+                    if (qVal === ItemQuality.High) qStr = '(上品)';
+                    if (qVal === ItemQuality.Immortal) qStr = '(仙品)';
+                }
+                return `<item q="${qVal}">${name}${qStr}</item>`;
+            });
+            itemsMsg += dropNames.join('，');
+        }
+        logs.push({ turn, isPlayer: true, message: `獲得戰利品：${itemsMsg}`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
     }
-    logs.push({ turn, isPlayer: true, message: dropMsg, damage: 0 });
 
     return { won, logs, rewards: { spiritStones, drops } };
 
   } else {
-    logs.push({ turn, isPlayer: false, message: `你不敵 [${enemy.name}]，身受重傷...`, damage: 0 });
+    logs.push({ turn, isPlayer: false, message: `不敵 [${enemy.name}]，身受重傷...`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
   }
 
   return { won, logs };
