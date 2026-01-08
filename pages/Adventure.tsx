@@ -570,6 +570,17 @@ export const Adventure: React.FC = () => {
       }
   }, [isAutoBattling, lastBattleResult, dispatch]);
 
+  // 3. Handle Battle Result (Clear State on Loss)
+  useEffect(() => {
+      if (lastBattleResult === 'lost') {
+          setTargetMonsterId(null);
+          setAutoMovePath([]);
+          setIsAutoBattling(false);
+      } else if (lastBattleResult === 'won') {
+         setAutoMovePath([]); 
+      }
+  }, [lastBattleResult]);
+
   // Keyboard Controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -763,13 +774,14 @@ export const Adventure: React.FC = () => {
                     mapData={mapData}
                     playerPosition={playerPosition}
                     activeMonsters={activeMonsters}
-                    autoMovePath={autoMovePath}
+                    portals={mapData.portals}
                     onTileClick={handleGridClick}
                     width={gridMetrics.pixelWidth}
                     height={gridMetrics.pixelHeight}
                     cellSize={gridMetrics.cellSize}
                     majorRealm={character.majorRealm}
                     targetMonsterId={targetMonsterId}
+                    isBattling={isBattling}
                  />
             )}
         </div>
@@ -909,7 +921,7 @@ export const Adventure: React.FC = () => {
                                   <div key={m.instanceId} 
                                     className={clsx(
                                         "absolute rounded-full z-10 transition-all duration-1000", 
-                                        m.rank === EnemyRank.Boss ? "w-2 h-2 md:w-3 md:h-3 bg-red-600 border border-red-400" : m.rank === EnemyRank.Elite ? "w-1.5 h-1.5 md:w-2 md:h-2 bg-red-500" : "w-1 h-1 bg-red-400/70"
+                                        m.rank === EnemyRank.Boss ? "w-2 h-2 md:w-3 md:h-3 bg-red-600 border border-red-400" : m.rank === EnemyRank.Elite ? "w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-500 shadow-[0_0_5px_blue]" : "w-1 h-1 bg-stone-500"
                                     )}
                                     style={{ left: `${(m.x / mapData.width) * 100}%`, top: `${(m.y / mapData.height) * 100}%`, transform: 'translate(-50%, -50%)' }}
                                   ></div>

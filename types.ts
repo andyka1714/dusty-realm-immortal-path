@@ -175,6 +175,9 @@ export interface ActiveMonster extends Coordinate {
     templateId: string;
     currentHp: number;
     rank: EnemyRank; // Cached for quick rendering logic
+    spawnX: number;
+    spawnY: number;
+    nextMoveTime?: number; // Timestamp for next move
 }
 
 export interface MapData {

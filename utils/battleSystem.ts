@@ -183,7 +183,7 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
       return null;
   };
 
-  while (playerHp > 0 && enemyHp > 0 && turn <= 100) {
+  while (playerHp > 0 && enemyHp > 0) {
     
     // --- Special: Break Check (Player hits Boss) ---
     // If player counters boss, small chance to "Break"
@@ -281,10 +281,6 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
   }
 
   const won = playerHp > 0 && enemyHp <= 0;
-  if (turn > 30 && !won) {
-      logs.push({ turn, isPlayer: true, message: "戰鬥陷入僵局，你決定暫時撤退。", damage: 0 });
-      return { won: false, logs };
-  }
   if (won) {
     logs.push({ turn, isPlayer: true, message: `你擊敗了 [${enemy.name}]！`, damage: 0 });
     

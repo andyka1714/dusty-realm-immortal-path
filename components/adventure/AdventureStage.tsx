@@ -1,20 +1,21 @@
 import React, { useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
-import { MapData, Coordinate, Portal, EnemyRank, ActiveMonster } from '../../types';
+import { MapData, Coordinate, Portal, EnemyRank, ActiveMonster, MajorRealm } from '../../types';
 import { MOVEMENT_SPEEDS } from '../../constants';
 import { current } from '@reduxjs/toolkit';
 
 interface AdventureStageProps {
-  mapData: MapData | null;
+  mapData: MapData;
   playerPosition: Coordinate;
   activeMonsters: ActiveMonster[];
-  autoMovePath: Coordinate[];
+  portals: Portal[];
+  targetMonsterId: string | null;
+  majorRealm: MajorRealm;
+  isBattling: boolean;
   onTileClick: (x: number, y: number) => void;
   width: number;
   height: number;
   cellSize: number;
-  majorRealm: number;
-  targetMonsterId?: string | null;
 }
 
 // --- Constants ---
@@ -25,12 +26,14 @@ export default function AdventureStage({
   mapData,
   playerPosition,
   activeMonsters,
+  portals,
+  targetMonsterId,
+  majorRealm,
+  isBattling,
   onTileClick,
   width,
   height,
   cellSize,
-  majorRealm,
-  targetMonsterId
 }: AdventureStageProps) {
   
   const moveTimerRef = useRef<number>(0);
@@ -46,18 +49,19 @@ export default function AdventureStage({
   });
 
   const onTileClickRef = useRef(onTileClick);
-  const entitiesRef = useRef({ monsters: activeMonsters, portals: mapData ? mapData.portals : [] });
-  const latestDataRef = useRef({ playerPosition, majorRealm, targetMonsterId });
+  const entitiesRef = useRef({ monsters: activeMonsters, portals: portals });
+  const latestDataRef = useRef({ mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling });
 
   // Sync latest props
   useEffect(() => {
       onTileClickRef.current = onTileClick;
-      entitiesRef.current.monsters = activeMonsters;
-      if (mapData) entitiesRef.current.portals = mapData.portals;
-      latestDataRef.current.playerPosition = playerPosition;
-      latestDataRef.current.majorRealm = majorRealm;
-      latestDataRef.current.targetMonsterId = targetMonsterId;
-  }, [activeMonsters, mapData, onTileClick, playerPosition, majorRealm, targetMonsterId]);
+  }, [onTileClick]);
+
+  useEffect(() => {
+    entitiesRef.current.monsters = activeMonsters;
+    entitiesRef.current.portals = portals;
+    latestDataRef.current = { mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling };
+  }, [mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling]);
   
   // Snap on Map Change
   useEffect(() => {
@@ -149,6 +153,12 @@ export default function AdventureStage({
 
       // --- Animation Loop ---
       const ticker = (delta: number) => {
+          if (latestDataRef.current.isBattling) {
+               // Force snap to actual position to stop wandering/floating
+               visualRef.current.player.x = latestDataRef.current.playerPosition.x;
+               visualRef.current.player.y = latestDataRef.current.playerPosition.y;
+          }
+
           // Dynamic Speed Calculation designed for Continuous Movement
           // Logic Tick: Every X ms. Visual Move: Should take ~X ms.
           const msPerTile = MOVEMENT_SPEEDS[latestDataRef.current.majorRealm] || 500;
