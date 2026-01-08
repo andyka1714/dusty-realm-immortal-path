@@ -917,7 +917,9 @@ export const Adventure: React.FC = () => {
                            <h2 className={`text-2xl font-bold flex items-center gap-2 ${currentEnemy.rank === EnemyRank.Boss ? 'text-red-500 uppercase tracking-widest' : 'text-stone-300'}`}>
                                <Skull /> {currentEnemy.rank === EnemyRank.Boss ? '守關妖王' : '遭遇強敵'}：{currentEnemy.name}
                            </h2>
-                           <div className="text-stone-500 text-sm">Lv.{currentEnemy.realm}</div>
+                           <div className="text-stone-500 font-mono text-lg font-semibold tracking-wider">
+                                {REALM_NAMES[currentEnemy.realm]} <span className="text-stone-400">{currentEnemy.minorRealm}</span>
+                            </div>
                        </>
                    </div>
                    
