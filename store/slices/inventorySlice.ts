@@ -98,7 +98,7 @@ const inventorySlice = createSlice({
         // Remove specific instance
         state.items = state.items.filter(i => i.instanceId !== instanceId);
       } else {
-        // Remove from stack
+        // Remove stackable count
         const existing = state.items.find(i => i.itemId === itemId && !i.instanceId);
         if (existing) {
           existing.count -= count;
@@ -107,6 +107,47 @@ const inventorySlice = createSlice({
           }
         }
       }
+    },
+    // Batch Remove (safe check against equipment)
+    removeItems: (state, action: PayloadAction<string[]>) => {
+        const idsToRemove = new Set(action.payload);
+        const equippedIds = new Set(Object.values(state.equipment).filter(Boolean) as string[]);
+        
+        // Filter out equipped items from deletion set just in case
+        const safeToDelete = new Set([...idsToRemove].filter(id => !equippedIds.has(id)));
+        
+        if (safeToDelete.size > 0) {
+            state.items = state.items.filter(item => {
+                // Keep item if it has no instanceId (stackable) OR if its instanceId is NOT in deletion set
+                return !item.instanceId || !safeToDelete.has(item.instanceId);
+            });
+        }
+    },
+    // Sort Items
+    sortItems: (state) => {
+        state.items.sort((a, b) => {
+            const itemA = ITEMS[a.itemId];
+            const itemB = ITEMS[b.itemId];
+            if(!itemA || !itemB) return 0;
+
+            // 1. Category Priority (Equip > Consumable > Material > Other)
+            const catOrder: Record<string, number> = { 
+                [ItemCategory.Equipment]: 0, 
+                [ItemCategory.Consumable]: 1, 
+                [ItemCategory.Material]: 2 
+            };
+            const catA = catOrder[itemA.category] ?? 99;
+            const catB = catOrder[itemB.category] ?? 99;
+            if(catA !== catB) return catA - catB;
+
+            // 2. Quality (High to Low)
+            const qualA = a.instance?.quality ?? itemA.quality;
+            const qualB = b.instance?.quality ?? itemB.quality;
+            if(qualA !== qualB) return qualB - qualA;
+            
+            // 3. Name
+            return itemA.name.localeCompare(itemB.name);
+        });
     },
     equipItem: (state, action: PayloadAction<string>) => {
       const instanceId = action.payload;
@@ -136,5 +177,5 @@ const inventorySlice = createSlice({
   },
 });
 
-export const { addItem, removeItem, equipItem, unequipItem } = inventorySlice.actions;
+export const { addItem, removeItem, removeItems, sortItems, equipItem, unequipItem } = inventorySlice.actions;
 export default inventorySlice.reducer;
