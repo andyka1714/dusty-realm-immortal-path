@@ -17,7 +17,8 @@ interface AdventureStageProps {
   height: number;
   cellSize: number;
   key?: React.Key;
-  playerName: string; // Add playerName prop
+  playerName: string;
+  moveDestination?: Coordinate | null;
 }
 
 // --- Constants ---
@@ -44,7 +45,8 @@ export default function AdventureStage({
   height,
   cellSize = 40,
   onPlayerArrive,
-  playerName
+  playerName,
+  moveDestination
 }: AdventureStageProps) {
   
   const moveTimerRef = useRef<number>(0);
@@ -74,11 +76,12 @@ export default function AdventureStage({
       entityLayer: null as PIXI.Container | null,
       portalsLayer: null as PIXI.Container | null,
       targetMarker: null as PIXI.Graphics | null,
+      destinationMarker: null as PIXI.Graphics | null,
   });
 
   const onTileClickRef = useRef(onTileClick);
   const entitiesRef = useRef({ monsters: activeMonsters, portals: portals });
-  const latestDataRef = useRef({ mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName });
+  const latestDataRef = useRef({ mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName, moveDestination });
 
   // Sync latest props
   useEffect(() => {
@@ -88,8 +91,8 @@ export default function AdventureStage({
   useLayoutEffect(() => {
     entitiesRef.current.monsters = activeMonsters;
     entitiesRef.current.portals = portals;
-    latestDataRef.current = { mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName };
-  }, [mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName]);
+    latestDataRef.current = { mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName, moveDestination };
+  }, [mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName, moveDestination]);
 
   // Force Snap (New Map)
   useLayoutEffect(() => {
@@ -188,6 +191,30 @@ export default function AdventureStage({
       targetMarker.moveTo(-R + L, R); targetMarker.lineTo(-R, R); targetMarker.lineTo(-R, R - L);
       entityLayer.addChild(targetMarker);
       displayRefs.current.targetMarker = targetMarker;
+
+      // --- Destination Marker (Green Bracket/Pulse) ---
+      const destMarker = new PIXI.Graphics();
+      destMarker.visible = false;
+      const dS = cellSize * 0.4;
+      const dL = cellSize * 0.15;
+      destMarker.lineStyle(2, 0x4ade80, 0.8); // Green
+      // Corners
+      // TL
+      destMarker.moveTo(-dS, -dS + dL); destMarker.lineTo(-dS, -dS); destMarker.lineTo(-dS + dL, -dS);
+      // TR
+      destMarker.moveTo(dS - dL, -dS); destMarker.lineTo(dS, -dS); destMarker.lineTo(dS, -dS + dL);
+      // BR
+      destMarker.moveTo(dS, dS - dL); destMarker.lineTo(dS, dS); destMarker.lineTo(dS - dL, dS);
+      // BL
+      destMarker.moveTo(-dS + dL, dS); destMarker.lineTo(-dS, dS); destMarker.lineTo(-dS, dS - dL);
+      
+      // Center Dot
+      destMarker.beginFill(0x4ade80, 0.5);
+      destMarker.drawCircle(0, 0, 3);
+      destMarker.endFill();
+
+      entityLayer.addChild(destMarker);
+      displayRefs.current.destinationMarker = destMarker;
 
       // Interactions
       hitArea.on('pointertap', (e) => {
@@ -398,16 +425,43 @@ export default function AdventureStage({
               const mPulse = 1 + Math.sin(time * 3 + phase) * 0.05;
               container.scale.set(mPulse);
 
-              // Update Target Marker
+              // Update Target Marker (Red for Monster)
               if (latestDataRef.current.targetMonsterId === m.instanceId && displayRefs.current.targetMarker) {
                    displayRefs.current.targetMarker.visible = true;
                    displayRefs.current.targetMarker.x = container.x;
                    displayRefs.current.targetMarker.y = container.y;
-                   // Pulse Marker too
+                   displayRefs.current.targetMarker.tint = 0xffffff; // Reset tint
                    displayRefs.current.targetMarker.scale.set(1 + Math.sin(time * 10) * 0.1); 
                    displayRefs.current.targetMarker.rotation += 0.05 * delta;
               }
           });
+
+          // Update Move Destination Marker (Green for Location)
+          if (latestDataRef.current.moveDestination && displayRefs.current.destinationMarker) {
+              const dest = latestDataRef.current.moveDestination;
+              // Check if we also have a target monster at this location? 
+              // If targetMonsterId is set, usually we don't need this, BUT user might want to see path end regardless.
+              // However, if targetMonsterId IS set, the Red Marker overrides/overlaps.
+              // Let's only show Green Marker if NO targetMonsterId is active OR if the destination is NOT the monster.
+              // Actually, simply showing it is fine, maybe slightly different visual.
+              
+              const mId = latestDataRef.current.targetMonsterId;
+              const isMonsterTarget = mId && visualRef.current.monsterCoords.has(mId);
+              
+              if (!isMonsterTarget) {
+                  displayRefs.current.destinationMarker.visible = true;
+                  displayRefs.current.destinationMarker.x = (dest.x + 0.5) * cellSize;
+                  displayRefs.current.destinationMarker.y = (dest.y + 0.5) * cellSize;
+                  
+                  // Pulse
+                  displayRefs.current.destinationMarker.alpha = 0.5 + Math.sin(time * 8) * 0.3;
+                  displayRefs.current.destinationMarker.scale.set(1 + Math.sin(time * 5) * 0.1);
+              } else {
+                  displayRefs.current.destinationMarker.visible = false;
+              }
+          } else if (displayRefs.current.destinationMarker) {
+              displayRefs.current.destinationMarker.visible = false;
+          }
 
           // Cleanup Dead Monsters
           const containers = displayRefs.current.monsterContainers;

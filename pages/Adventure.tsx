@@ -842,6 +842,15 @@ export const Adventure: React.FC = () => {
       
       // Check if clicking on a monster
       const targetMonster = activeMonsters.find(m => m.x === targetX && m.y === targetY);
+      
+      // Auto-Battle Override: Stop if manual interaction occurs
+      if (isAutoBattling) {
+           // If clicking a different monster, or clicking empty ground (manual move)
+           if (!targetMonster || (targetMonster && targetMonster.instanceId !== targetMonsterId)) {
+               setIsAutoBattling(false);
+           }
+      }
+
       if (targetMonster) {
           setTargetMonsterId(targetMonster.instanceId);
       } else {
@@ -952,6 +961,7 @@ export const Adventure: React.FC = () => {
                     targetMonsterId={targetMonsterId}
                     isBattling={isBattling}
                     playerName={character.name}
+                    moveDestination={autoMovePath.length > 0 ? autoMovePath[autoMovePath.length - 1] : null}
                  />
             )}
         </div>
