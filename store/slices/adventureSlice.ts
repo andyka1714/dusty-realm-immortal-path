@@ -35,7 +35,18 @@ const initialState: AdventureState = {
   lastBossSpawnCheckTime: 0,
 };
 
-const MAX_MONSTERS_PER_MAP = 20;
+const getMapPopulationCaps = (width: number, height: number, hasElites: boolean) => {
+    let totalCap = 30; // Small (<100)
+    if (width >= 200 || height >= 200) totalCap = 100; // Huge
+    else if (width >= 150 || height >= 150) totalCap = 75; // Large
+    else if (width >= 100 || height >= 100) totalCap = 50; // Standard
+
+    // Elite Ratio: 20%
+    const eliteCap = hasElites ? Math.floor(totalCap * 0.2) : 0;
+    const commonCap = totalCap - eliteCap;
+
+    return { commonCap, eliteCap };
+};
 
 const adventureSlice = createSlice({
   name: 'adventure',
@@ -53,32 +64,45 @@ const adventureSlice = createSlice({
       // Spawn Monsters Logic
       state.activeMonsters = [];
       
-      // Filter templates
       const commonPool = mapData.enemies.filter(e => e.rank === EnemyRank.Common);
       const elitePool = mapData.enemies.filter(e => e.rank === EnemyRank.Elite);
+      
+      const { commonCap, eliteCap } = getMapPopulationCaps(mapData.width, mapData.height, elitePool.length > 0);
 
-      // Spawn Logic: 80% Common, 20% Elite roughly, capped at MAX
-      for(let i=0; i<MAX_MONSTERS_PER_MAP; i++) {
-          const isElite = Math.random() < 0.2 && elitePool.length > 0;
-          const template = isElite 
-              ? elitePool[Math.floor(Math.random() * elitePool.length)]
-              : commonPool.length > 0 ? commonPool[Math.floor(Math.random() * commonPool.length)] : null;
-          
-          if (template) {
+      // 1. Spawn Common
+      if (commonPool.length > 0) {
+          for(let i=0; i<commonCap; i++) {
+              const template = commonPool[Math.floor(Math.random() * commonPool.length)];
               const rx = Math.floor(Math.random() * mapData.width);
               const ry = Math.floor(Math.random() * mapData.height);
               state.activeMonsters.push({
-                  instanceId: Math.random().toString(36),
-                  templateId: template.id,
-                  name: template.name,
-                  symbol: template.symbol,
-                  x: rx,
-                  y: ry,
-                  spawnX: rx,
-                  spawnY: ry,
-                  currentHp: template.maxHp,
-                  rank: template.rank,
-                  nextMoveTime: Date.now() + Math.random() * 2000 + 2000 // 2-4s initial delay
+                   instanceId: Math.random().toString(36),
+                   templateId: template.id,
+                   name: template.name,
+                   symbol: template.symbol,
+                   x: rx, y: ry, spawnX: rx, spawnY: ry,
+                   currentHp: template.maxHp,
+                   rank: template.rank,
+                   nextMoveTime: Date.now() + Math.random() * 2000 + 2000
+              });
+          }
+      }
+
+      // 2. Spawn Elite
+      if (elitePool.length > 0) {
+          for(let i=0; i<eliteCap; i++) {
+              const template = elitePool[Math.floor(Math.random() * elitePool.length)];
+              const rx = Math.floor(Math.random() * mapData.width);
+              const ry = Math.floor(Math.random() * mapData.height);
+              state.activeMonsters.push({
+                   instanceId: Math.random().toString(36),
+                   templateId: template.id,
+                   name: template.name,
+                   symbol: template.symbol,
+                   x: rx, y: ry, spawnX: rx, spawnY: ry,
+                   currentHp: template.maxHp,
+                   rank: template.rank,
+                   nextMoveTime: Date.now() + Math.random() * 2000 + 2000
               });
           }
       }
@@ -153,6 +177,9 @@ const adventureSlice = createSlice({
        const elitePool = mapData.enemies.filter(e => e.rank === EnemyRank.Elite);
        const bossTemplate = mapData.enemies.find(e => e.rank === EnemyRank.Boss);
 
+       // Reconfigure Caps based on same logic
+       const { commonCap, eliteCap } = getMapPopulationCaps(mapData.width, mapData.height, elitePool.length > 0);
+
        const spawnMonster = (template: Enemy, isBoss: boolean = false) => {
            let rx, ry;
            if (isBoss && mapData.bossSpawn) {
@@ -183,23 +210,31 @@ const adventureSlice = createSlice({
            });
        };
 
-       // 1. Common Respawn (Every 1 min if < 12)
-       if (now - state.lastCommonSpawnTime > 60000 && commonCount < 12 && commonPool.length > 0) {
-           spawnMonster(commonPool[Math.floor(Math.random() * commonPool.length)]);
+       // 1. Common Respawn (Refill every 60s, Max 20% of Total Cap)
+       if (now - state.lastCommonSpawnTime > 60000 && commonCount < commonCap && commonPool.length > 0) {
+           const maxSpawn = Math.max(1, Math.floor(commonCap * 0.2)); // Cap at 20%
+           let spawned = 0;
+           while(commonCount + spawned < commonCap && spawned < maxSpawn) {
+                spawnMonster(commonPool[Math.floor(Math.random() * commonPool.length)]);
+                spawned++;
+           }
            state.lastCommonSpawnTime = now;
        }
 
-       // 2. Elite Respawn (Every 2 min if < 3)
-       if (now - state.lastEliteSpawnTime > 120000 && eliteCount < 3 && elitePool.length > 0) {
-           spawnMonster(elitePool[Math.floor(Math.random() * elitePool.length)]);
+       // 2. Elite Respawn (Refill every 3 mins, Max 20% of Total Cap)
+       if (now - state.lastEliteSpawnTime > 180000 && eliteCount < eliteCap && elitePool.length > 0) {
+           const maxSpawn = Math.max(1, Math.floor(eliteCap * 0.2)); // Cap at 20%
+           let spawned = 0;
+           while(eliteCount + spawned < eliteCap && spawned < maxSpawn) {
+                spawnMonster(elitePool[Math.floor(Math.random() * elitePool.length)]);
+                spawned++;
+           }
            state.lastEliteSpawnTime = now;
        }
 
-       // 3. Boss Respawn (At 00, 15, 30, 45 mins of current hour)
+       // 3. Boss Respawn (At 00, 15, 30, 45 mins)
        const currentMinute = new Date(now).getMinutes();
        if ([0, 15, 30, 45].includes(currentMinute)) {
-           // Only check if time advanced to a new check window
-           // Prevent multiple checks within the same minute frame, or just simplistic check
            const lastCheckDate = new Date(state.lastBossSpawnCheckTime);
            const isDifferentMinute = lastCheckDate.getMinutes() !== currentMinute || (now - state.lastBossSpawnCheckTime > 60000);
            

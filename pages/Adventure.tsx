@@ -761,7 +761,7 @@ export const Adventure: React.FC = () => {
         const logContainer = document.getElementById('battle-log-container');
         if (logContainer) logContainer.scrollTop = logContainer.scrollHeight;
 
-    }, 1000); // 1 Second Delay per turn
+    }, 500); // 0.5 Second Delay per turn
 
     return () => clearTimeout(timer);
   }, [isReplayingBattle, replayQueue, battleSnapshot]);
