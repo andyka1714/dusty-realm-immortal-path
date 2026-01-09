@@ -171,20 +171,6 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
       }
   }
 
-  // --- Boss Skill Check Function ---
-  const triggerBossSkill = (bossName: string, pElem: ElementType): string | null => {
-      // 1. Mortal Boss: Python (Wood) -> Entangle Earth
-      if (bossName === '幽谷巨蟒' && pElem === ElementType.Earth) return '【纏繞】巨蟒死死纏住你的土靈護盾，令你動彈不得！(暈眩1回合)';
-      // 2. Qi Boss: Dragon (Water) -> Frost Fire
-      if (bossName === '寒潭蛟龍' && pElem === ElementType.Fire) return '【寒霜】極寒之氣凍結了你的丹火！(攻擊力下降)';
-      // 3. Foundation Boss: Demon (Fire) -> Burn Metal
-      if (bossName === '烈焰妖王' && pElem === ElementType.Metal) return '【焚天】高溫熔化了你的金屬法器！(防禦力下降)';
-      // 4. Golden Core Boss: Illusion (Wood) -> Dodge Earth
-      if (bossName === '幻境之主' && pElem === ElementType.Earth) return '【幻影】迷霧重重，你的土系法術頻頻落空！(命中率下降)';
-      // ... Add more per specs
-      return null;
-  };
-
   while (playerHp > 0 && enemyHp > 0) {
     
     // --- Special: Break Check (Player hits Boss) ---
@@ -196,19 +182,9 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
         }
     }
 
-    // --- Special: Boss Skill Trigger (Boss hits Player) ---
-    if (enemy.rank === EnemyRank.Boss && turn % 4 === 0 && !bossStunned) { // Every 4 turns
-        const skillMsg = triggerBossSkill(enemy.name, player.element);
-        if (skillMsg) {
-             logs.push({ turn, isPlayer: false, message: skillMsg, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
-             playerDebuffed = true; // Simple debuff flag
-        }
-    }
-
     // --- Player Turn ---
     // If Entangled (Python vs Earth), skip turn logic simplified
     let skipPlayer = false;
-    if (enemy.name === '幽谷巨蟒' && player.element === ElementType.Earth && turn % 5 === 0) skipPlayer = true;
 
     if (!skipPlayer) {
         // Regen Logic

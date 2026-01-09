@@ -84,9 +84,54 @@ FinalStats = (BaseStats * QualityMultiplier) + AffixStats
 
 ---
 
-## 5. 系統實作要求 (Implementation Requirements)
+## 5. 練氣期掉落分佈 (Qi Refining Drops)
 
-為支援上述設計，系統需具備以下功能：
+練氣期裝備分為 **靈劍 (攻)**、**鍛體 (防)**、**五行 (法)** 三大套裝。
+普通怪物僅會掉落基本的 **2 種** 部位，想要湊齊套裝或獲得飾品，需挑戰精英與 Boss。
+
+### 小怪 (Common) - 掉落率 10%
+
+| 區域 | 怪物 (Common) | 主要掉落 (Primary) | 次要掉落 (Secondary) | 收集目標 |
+| :--- | :--- | :--- | :--- | :--- |
+| **萬獸林** | 萬獸林斑豹 | `spirit_iron_sword` (紋鐵劍) | `light_boots` (輕靈靴) | 劍修武/速 |
+| | 林間影殺蜂 | `sword_tassel` (劍穗) | `whetstone_ring` (礪劍戒) | 劍修副/戒 |
+| | 萬獸林狂牛 | `bear_paw_gauntlet` (熊力拳套) | `heavy_iron_shield` (玄鐵盾) | 體修武/副 |
+| | 林中樹妖 | `boar_skin_armor` (蠻皮甲) | `vitality_beads` (氣血珠) | 體修衣/飾 |
+| **猿鳴雪峰** | 雪線冰蝶 | `spirit_wood_staff` (靈木杖) | `cloud_step_shoes` (踏雲履) | 法修武/速 |
+| | 古道殘兵 | `taoist_vestment` (八卦法衣) | `elemental_ring` (五行戒) | 法修衣/戒 |
+| **北天門關** | 北關戍衛傀儡 | `wolf_skull_helm` (狼首盔) | `battle_boots` (戰靴) | 頭/鞋 (重) |
+| | 關外暴猿 | `heavy_iron_shield` (玄鐵盾) | `boar_skin_armor` (蠻皮甲) | 副/衣 (重) |
+| **蘆葦腐澤** | 腐澤巨蟒 | `spirit_wood_staff` (靈木杖) | `azure_robe` (青雲衫) | 法修武/衣 |
+| | 沼澤泥妖 | `bear_paw_gauntlet` (熊力拳套) | `wolf_skull_helm` (狼首盔) | 體修武/頭 |
+| **陰風谷** | 陰風谷小鬼 | `spirit_orb` (聚靈珠) | `mystic_crown` (道冠) | 法修副/頭 |
+| | 谷口怨念 | `taoist_vestment` (八卦法衣) | `elemental_ring` (五行戒) | 法修衣/戒 |
+| **寒潭** | 寒潭鐵甲龜 | `heavy_iron_shield` (玄鐵盾) | `boar_skin_armor` (蠻皮甲) | 體修副/衣 |
+| | 潭底水猴 | `spirit_iron_sword` (紋鐵劍) | `light_boots` (輕靈靴) | 劍修武/速 |
+| **東郊廢墟** | 廢墟渡鴉 | `focus_headband` (凝神帶) | `whetstone_ring` (礪劍戒) | 劍修頭/戒 |
+| | 殘破甲冑 | `bear_paw_gauntlet` (熊力拳套) | `battle_boots` (戰靴) | 體修武/鞋 |
+| **雷暴荒原** | 雷暴閃靈 | `cloud_step_shoes` (踏雲履) | `sword_tassel` (劍穗) | 法修鞋/副 |
+| | 荒原烈馬 | `azure_robe` (青雲衫) | `focus_headband` (凝神帶) | 劍修衣/頭 |
+| **寂滅雷澤** | 雷澤蟹將 | `bear_paw_gauntlet` (熊力拳套) | `wolf_skull_helm` (狼首盔) | 體修武/頭 |
+| | 電光游魚 | `spirit_wood_staff` (靈木杖) | `cloud_step_shoes` (踏雲履) | 法修武/速 |
+| **迷影叢林** | 迷影猴妖 | `spirit_orb` (聚靈珠) | `mystic_crown` (道冠) | 法修副/頭 |
+| | 叢林食人花 | `boar_skin_armor` (蠻皮甲) | `vitality_beads` (氣血珠) | 體修衣/飾 |
+| **萬獸林外** | 林外嗜血狼 | `spirit_iron_sword` (紋鐵劍) | `light_boots` (輕靈靴) | 劍修武/速 |
+| | 巡山鬣狗 | `wolf_skull_helm` (狼首盔) | `battle_boots` (戰靴) | 體修頭/鞋 |
+
+> **分佈原則**: 每一件練氣期裝備都至少有 **2~3 種** 普通怪物掉落，確保玩家在不同區域探索時都有收穫。
+
+### 精英 (Elite) - 掉落率 35%
+*   **所有練氣期精英** (如狂牛首領、碧眼魔虎) 皆有機會掉落 **所有練氣期裝備** 中的任意 1~3 件。
+*   包含稀有飾品與各套裝核心部位。
+
+### Boss - 掉落率 100%
+*   **區域領主** (如裂風狼王、寒潭蛟龍) 必定掉落 **所有練氣期裝備** 中的任意 3~4 件。
+*   這是獲取「上品」與「仙品」裝備的最佳途徑。
+
+---
+
+## 6. 系統實作要求 (Implementation Requirements)
+
 1.  **實例化背包 (Inventory Instancing)**: 背包需支援存儲具有唯一 ID (`uuid`) 的物品實例，而非僅存儲數量。
 2.  **動態屬性生成 (Dynamic Stats)**: 獲得物品時，需即時運算品質與隨機詞條，並寫入實例數據中。
 3.  **裝備比較**: 提示介面需能顯示從「背包物品」替換「身上裝備」的數值變化差異。
