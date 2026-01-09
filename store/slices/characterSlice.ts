@@ -1,7 +1,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CharacterState, MajorRealm, SpiritRootType, SpiritRootId, ProfessionType, Gender, BaseAttributes } from '../../types';
-import { calculateMaxExp, INITIAL_BASE_STATS, MINOR_REALM_CAP, REALM_MODIFIERS, SPIRIT_ROOT_DETAILS, LIFESPAN_BONUS, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN, PASSIVE_CULTIVATION_PENALTY, SECLUSION_BASE_COST, SECLUSION_DURATION_MS } from '../../constants';
+import { calculateMaxExp, INITIAL_BASE_STATS, MINOR_REALM_CAP, REALM_MODIFIERS, SPIRIT_ROOT_DETAILS, LIFESPAN_BONUS, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN, PASSIVE_CULTIVATION_PENALTY, SECLUSION_BASE_COST, SECLUSION_DURATION_MS, REALM_ATTRIBUTE_GROWTH } from '../../constants';
 import { addLog } from './logSlice';
 
 // ... (Keep helpers generateSpiritRoot, generateInitialStats, calculateInitialLifespan) ...
@@ -470,16 +470,22 @@ const characterSlice = createSlice({
           const bonusLife = LIFESPAN_BONUS[state.majorRealm] || 0;
           state.lifespan += bonusLife * DAYS_PER_YEAR;
 
-          state.attributes.physique += 10;
-          state.attributes.rootBone += 10;
-          state.attributes.insight += 10;
-          state.attributes.comprehension += 10;
-          state.attributes.fortune += 5;
-          state.attributes.charm += 5;
+          // Major Realm Unlocks & Base Stat Corrections are handled by derived stats in battleSystem.
+          // No direct attribute injection here unless specified (e.g. initial major bonus).
+          // Per doc, only Base Stats + Unlocks happen here.
         } else {
           state.minorRealm += 1;
-          state.attributes.physique += 2;
-          state.attributes.rootBone += 2;
+          
+          // Apply Minor Realm Attribute Growth based on Realm & Profession (Default: None)
+          // TODO: Implement Profession/Class selection in State
+          const growthConfig = REALM_ATTRIBUTE_GROWTH[state.majorRealm]?.['None'] || REALM_ATTRIBUTE_GROWTH[MajorRealm.Mortal]['None'];
+          
+          state.attributes.physique += growthConfig.physique;
+          state.attributes.rootBone += growthConfig.rootBone;
+          state.attributes.insight += growthConfig.insight;
+          state.attributes.comprehension += growthConfig.comprehension;
+          state.attributes.fortune += growthConfig.fortune;
+          state.attributes.charm += growthConfig.charm;
         }
         state.currentExp = 0;
         state.maxExp = calculateMaxExp(state.majorRealm, state.minorRealm);

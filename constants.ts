@@ -393,32 +393,32 @@ export const REALM_MODIFIERS: Record<MajorRealm, number> = {
 
 export const LIFESPAN_BONUS: Record<MajorRealm, number> = {
   [MajorRealm.Mortal]: 0,
-  [MajorRealm.QiRefining]: 50,
-  [MajorRealm.Foundation]: 150,
-  [MajorRealm.GoldenCore]: 300,
-  [MajorRealm.NascentSoul]: 600,
-  [MajorRealm.SpiritSevering]: 1200,
-  [MajorRealm.VoidRefining]: 2500,
-  [MajorRealm.Fusion]: 5000,
-  [MajorRealm.Mahayana]: 10000, // Approaching immortal
-  [MajorRealm.Tribulation]: 200000,  // Survival phase
-  [MajorRealm.Immortal]: 500000, // Massive boost once Immortal
+  [MajorRealm.QiRefining]: 20,
+  [MajorRealm.Foundation]: 50,
+  [MajorRealm.GoldenCore]: 100,
+  [MajorRealm.NascentSoul]: 200,
+  [MajorRealm.SpiritSevering]: 500,
+  [MajorRealm.VoidRefining]: 1000,
+  [MajorRealm.Fusion]: 2000,
+  [MajorRealm.Mahayana]: 5000,
+  [MajorRealm.Tribulation]: 10000,
+  [MajorRealm.Immortal]: 100000, // Conceptually infinite
   [MajorRealm.ImmortalEmperor]: 999999,
 };
 
 export const REALM_BASE_STATS: Record<MajorRealm, { hp: number; mp: number }> = {
   [MajorRealm.Mortal]: { hp: 100, mp: 0 },
-  [MajorRealm.QiRefining]: { hp: 500, mp: 200 },
-  [MajorRealm.Foundation]: { hp: 2000, mp: 1000 },
-  [MajorRealm.GoldenCore]: { hp: 10000, mp: 5000 },
-  [MajorRealm.NascentSoul]: { hp: 50000, mp: 25000 },
-  [MajorRealm.SpiritSevering]: { hp: 200000, mp: 100000 },
-  [MajorRealm.VoidRefining]: { hp: 500000, mp: 250000 },
-  [MajorRealm.Fusion]: { hp: 1000000, mp: 500000 },
-  [MajorRealm.Mahayana]: { hp: 5000000, mp: 2500000 },
-  [MajorRealm.Tribulation]: { hp: 10000000, mp: 5000000 },
-  [MajorRealm.Immortal]: { hp: 100000000, mp: 50000000 },
-  [MajorRealm.ImmortalEmperor]: { hp: 1000000000, mp: 500000000 },
+  [MajorRealm.QiRefining]: { hp: 300, mp: 100 },
+  [MajorRealm.Foundation]: { hp: 1300, mp: 600 },
+  [MajorRealm.GoldenCore]: { hp: 6300, mp: 2600 },
+  [MajorRealm.NascentSoul]: { hp: 26300, mp: 12600 },
+  [MajorRealm.SpiritSevering]: { hp: 126300, mp: 62600 },
+  [MajorRealm.VoidRefining]: { hp: 626300, mp: 312600 },
+  [MajorRealm.Fusion]: { hp: 3126300, mp: 1312600 },
+  [MajorRealm.Mahayana]: { hp: 13126300, mp: 6312600 },
+  [MajorRealm.Tribulation]: { hp: 63126300, mp: 26312600 },
+  [MajorRealm.Immortal]: { hp: 563126300, mp: 226312600 },
+  [MajorRealm.ImmortalEmperor]: { hp: 5563126300, mp: 2226312600 },
 };
 
 export const REALM_EXP_CONFIG: Record<MajorRealm, { base: number; growth: number; isLinear?: boolean }> = {
@@ -435,6 +435,83 @@ export const REALM_EXP_CONFIG: Record<MajorRealm, { base: number; growth: number
   [MajorRealm.Immortal]: { base: 100000000000, growth: 1.06 },
   [MajorRealm.ImmortalEmperor]: { base: 0, growth: 0 }, // No Exp
 };
+
+// Growth Config for Minor Realm Breakthroughs
+export const REALM_ATTRIBUTE_GROWTH: Record<MajorRealm, Record<'None' | 'Sword' | 'Body' | 'Magic', BaseAttributes>> = {
+  [MajorRealm.Mortal]: {
+    None: { physique: 2, rootBone: 2, insight: 2, comprehension: 0, fortune: 0, charm: 0 },
+    Sword: { physique: 2, rootBone: 2, insight: 2, comprehension: 0, fortune: 0, charm: 0 },
+    Body: { physique: 2, rootBone: 2, insight: 2, comprehension: 0, fortune: 0, charm: 0 },
+    Magic: { physique: 2, rootBone: 2, insight: 2, comprehension: 0, fortune: 0, charm: 0 },
+  },
+  [MajorRealm.QiRefining]: {
+    None: { physique: 7, rootBone: 7, insight: 7, comprehension: 0, fortune: 0, charm: 0 },
+    Sword: { physique: 7, rootBone: 7, insight: 7, comprehension: 0, fortune: 0, charm: 0 },
+    Body: { physique: 7, rootBone: 7, insight: 7, comprehension: 0, fortune: 0, charm: 0 },
+    Magic: { physique: 7, rootBone: 7, insight: 7, comprehension: 0, fortune: 0, charm: 0 },
+  },
+  [MajorRealm.Foundation]: {
+    None: { physique: 15, rootBone: 15, insight: 15, comprehension: 0, fortune: 0, charm: 0 },
+    Sword: { physique: 12, rootBone: 22, insight: 11, comprehension: 0, fortune: 0, charm: 0 },
+    Body: { physique: 25, rootBone: 12, insight: 8, comprehension: 0, fortune: 0, charm: 0 },
+    Magic: { physique: 8, rootBone: 10, insight: 27, comprehension: 0, fortune: 0, charm: 0 },
+  },
+  [MajorRealm.GoldenCore]: {
+    None: { physique: 33, rootBone: 33, insight: 33, comprehension: 0, fortune: 0, charm: 0 },
+    Sword: { physique: 25, rootBone: 50, insight: 25, comprehension: 0, fortune: 0, charm: 0 },
+    Body: { physique: 60, rootBone: 25, insight: 15, comprehension: 0, fortune: 0, charm: 0 },
+    Magic: { physique: 20, rootBone: 20, insight: 60, comprehension: 0, fortune: 0, charm: 0 },
+  },
+  [MajorRealm.NascentSoul]: {
+    None: { physique: 83, rootBone: 83, insight: 83, comprehension: 0, fortune: 0, charm: 0 },
+    Sword: { physique: 65, rootBone: 120, insight: 65, comprehension: 0, fortune: 0, charm: 0 },
+    Body: { physique: 150, rootBone: 60, insight: 40, comprehension: 0, fortune: 0, charm: 0 },
+    Magic: { physique: 50, rootBone: 50, insight: 150, comprehension: 0, fortune: 0, charm: 0 },
+  },
+  [MajorRealm.SpiritSevering]: {
+    None: { physique: 200, rootBone: 200, insight: 200, comprehension: 0, fortune: 0, charm: 0 },
+    Sword: { physique: 150, rootBone: 300, insight: 150, comprehension: 0, fortune: 0, charm: 0 },
+    Body: { physique: 350, rootBone: 150, insight: 100, comprehension: 0, fortune: 0, charm: 0 },
+    Magic: { physique: 130, rootBone: 120, insight: 350, comprehension: 0, fortune: 0, charm: 0 },
+  },
+  [MajorRealm.VoidRefining]: {
+     None: { physique: 500, rootBone: 500, insight: 500, comprehension: 0, fortune: 0, charm: 0 },
+     Sword: { physique: 375, rootBone: 750, insight: 375, comprehension: 0, fortune: 0, charm: 0 },
+     Body: { physique: 900, rootBone: 300, insight: 300, comprehension: 0, fortune: 0, charm: 0 },
+     Magic: { physique: 300, rootBone: 300, insight: 900, comprehension: 0, fortune: 0, charm: 0 },
+  },
+  [MajorRealm.Fusion]: {
+     None: { physique: 1250, rootBone: 1250, insight: 1250, comprehension: 0, fortune: 0, charm: 0 },
+     Sword: { physique: 950, rootBone: 1900, insight: 950, comprehension: 0, fortune: 0, charm: 0 },
+     Body: { physique: 2200, rootBone: 800, insight: 800, comprehension: 0, fortune: 0, charm: 0 },
+     Magic: { physique: 800, rootBone: 800, insight: 2200, comprehension: 0, fortune: 0, charm: 0 },
+  },
+  [MajorRealm.Mahayana]: {
+     None: { physique: 3300, rootBone: 3300, insight: 3300, comprehension: 0, fortune: 0, charm: 0 },
+     Sword: { physique: 2500, rootBone: 5000, insight: 2500, comprehension: 0, fortune: 0, charm: 0 },
+     Body: { physique: 6000, rootBone: 2000, insight: 2000, comprehension: 0, fortune: 0, charm: 0 },
+     Magic: { physique: 2000, rootBone: 2000, insight: 6000, comprehension: 0, fortune: 0, charm: 0 },
+  },
+  [MajorRealm.Tribulation]: {
+     None: { physique: 8300, rootBone: 8300, insight: 8300, comprehension: 0, fortune: 0, charm: 0 },
+     Sword: { physique: 6250, rootBone: 12500, insight: 6250, comprehension: 0, fortune: 0, charm: 0 },
+     Body: { physique: 15000, rootBone: 5000, insight: 5000, comprehension: 0, fortune: 0, charm: 0 },
+     Magic: { physique: 5000, rootBone: 5000, insight: 15000, comprehension: 0, fortune: 0, charm: 0 },
+  },
+  [MajorRealm.Immortal]: {
+     None: { physique: 33000, rootBone: 33000, insight: 33000, comprehension: 0, fortune: 0, charm: 0 },
+     Sword: { physique: 25000, rootBone: 50000, insight: 25000, comprehension: 0, fortune: 0, charm: 0 },
+     Body: { physique: 60000, rootBone: 20000, insight: 20000, comprehension: 0, fortune: 0, charm: 0 },
+     Magic: { physique: 20000, rootBone: 20000, insight: 60000, comprehension: 0, fortune: 0, charm: 0 },
+  },
+  [MajorRealm.ImmortalEmperor]: {
+     None: { physique: 99999, rootBone: 99999, insight: 99999, comprehension: 0, fortune: 0, charm: 0 },
+     Sword: { physique: 99999, rootBone: 99999, insight: 99999, comprehension: 0, fortune: 0, charm: 0 },
+     Body: { physique: 99999, rootBone: 99999, insight: 99999, comprehension: 0, fortune: 0, charm: 0 },
+     Magic: { physique: 99999, rootBone: 99999, insight: 99999, comprehension: 0, fortune: 0, charm: 0 },
+  },
+};
+
 
 export const calculateMaxExp = (major: number, minor: number): number => {
   const config = REALM_EXP_CONFIG[major as MajorRealm];
