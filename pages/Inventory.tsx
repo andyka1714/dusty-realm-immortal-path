@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/store';
 import { ITEMS } from '../data/items';
-import { equipItem, unequipItem, sortItems, removeItems } from '../store/slices/inventorySlice';
-import { Package, Shield, Sword, FlaskConical, CircleDashed, Footprints, Crown, MinusCircle, Shirt, Medal, ArrowUpDown, Trash2, LayoutGrid, CheckSquare } from 'lucide-react';
+import { equipItem, unequipItem, sortItems, removeItems, removeItem } from '../store/slices/inventorySlice';
+import { Package, Shield, Sword, FlaskConical, CircleDashed, Footprints, Crown, MinusCircle, Shirt, Medal, ArrowUpDown, Trash2, LayoutGrid, CheckSquare, Plus, Minus } from 'lucide-react';
 import { ItemCategory, ItemQuality, EquipmentSlot, ConsumableItem, InventorySlot, ItemInstance } from '../types';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
@@ -18,6 +18,15 @@ export const Inventory: React.FC = () => {
   // Batch Management State
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState<Set<string>>(new Set());
+
+  // Quantity Delete State
+  const [itemToDelete, setItemToDelete] = useState<{
+      itemId: string;
+      name: string;
+      count: number;
+      max: number;
+      quality: ItemQuality;
+  } | null>(null);
 
   // Confirm Modal State
   const [confirmModal, setConfirmModal] = useState<{
@@ -111,7 +120,9 @@ export const Inventory: React.FC = () => {
                const qualityText = getQualityTextColor(quality);
 
                // Delete Mode Logic
-               const isMarkedForDelete = slot.instanceId ? selectedForDelete.has(slot.instanceId) : false;
+               // Key is instanceId if available, else itemId
+               const deleteKey = slot.instanceId || slot.itemId;
+               const isMarkedForDelete = selectedForDelete.has(deleteKey);
                const canDelete = !equipped; // Cannot delete equipped items
 
                return (
@@ -119,11 +130,12 @@ export const Inventory: React.FC = () => {
                     key={`${slot.itemId}-${idx}`}
                     onClick={() => {
                         if (isDeleteMode) {
-                            if (!canDelete || !slot.instanceId) return; // Only support deleting instances or check logic
-                            // For simplicity, support Instance Delete first.
+                            if (!canDelete) return; 
+                            
+                            const key = slot.instanceId || slot.itemId;
                             const newSet = new Set(selectedForDelete);
-                            if (newSet.has(slot.instanceId)) newSet.delete(slot.instanceId);
-                            else newSet.add(slot.instanceId);
+                            if (newSet.has(key)) newSet.delete(key);
+                            else newSet.add(key);
                             setSelectedForDelete(newSet);
                         } else {
                             setSelectedSlot(slot);
@@ -261,6 +273,71 @@ export const Inventory: React.FC = () => {
                         已選擇 <span className="text-red-400 font-bold text-lg">{selectedForDelete.size}</span> 個物品
                     </p>
                     
+                    {/* Quick Select Buttons */}
+                    <div className="flex flex-col gap-2 w-full px-4">
+                        <div className="text-xs text-stone-500 font-bold border-b border-stone-800 pb-1 mb-1">
+                            快速選擇 ({filter === 'all' ? '全部類別' : getCategoryName(filter)})
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                             <button
+                                onClick={() => {
+                                    const toSelect = filteredItems
+                                        .filter(slot => !isEquipped(slot.instanceId) && (slot.instance?.quality === ItemQuality.Low || (!slot.instance && ITEMS[slot.itemId]?.quality === ItemQuality.Low)))
+                                        .map(slot => slot.instanceId || slot.itemId);
+                                    
+                                    const newSet = new Set(selectedForDelete);
+                                    toSelect.forEach(id => newSet.add(id));
+                                    setSelectedForDelete(newSet);
+                                }}
+                                className="text-xs py-1.5 rounded bg-stone-900 border border-stone-700 hover:border-stone-500 text-stone-400"
+                             >
+                                 全選凡品 (下)
+                             </button>
+                             <button
+                                onClick={() => {
+                                    const toSelect = filteredItems
+                                        .filter(slot => !isEquipped(slot.instanceId) && (slot.instance?.quality === ItemQuality.Medium || (!slot.instance && ITEMS[slot.itemId]?.quality === ItemQuality.Medium)))
+                                        .map(slot => slot.instanceId || slot.itemId);
+                                    
+                                    const newSet = new Set(selectedForDelete);
+                                    toSelect.forEach(id => newSet.add(id));
+                                    setSelectedForDelete(newSet);
+                                }}
+                                className="text-xs py-1.5 rounded bg-emerald-950/30 border border-emerald-900 hover:border-emerald-500 text-emerald-600 hover:text-emerald-400"
+                             >
+                                 全選靈品 (中)
+                             </button>
+                             <button
+                                onClick={() => {
+                                    const toSelect = filteredItems
+                                        .filter(slot => !isEquipped(slot.instanceId) && (slot.instance?.quality === ItemQuality.High || (!slot.instance && ITEMS[slot.itemId]?.quality === ItemQuality.High)))
+                                        .map(slot => slot.instanceId || slot.itemId);
+                                    
+                                    const newSet = new Set(selectedForDelete);
+                                    toSelect.forEach(id => newSet.add(id));
+                                    setSelectedForDelete(newSet);
+                                }}
+                                className="text-xs py-1.5 rounded bg-blue-950/30 border border-blue-900 hover:border-blue-500 text-blue-500 hover:text-blue-400"
+                             >
+                                 全選仙品 (上)
+                             </button>
+                             <button
+                                onClick={() => {
+                                    // Select ALL visible
+                                    const toSelect = filteredItems
+                                        .filter(slot => !isEquipped(slot.instanceId))
+                                        .map(slot => slot.instanceId || slot.itemId);
+                                    
+                                    const newSet = new Set(selectedForDelete);
+                                    toSelect.forEach(id => newSet.add(id));
+                                    setSelectedForDelete(newSet);
+                                }}
+                                className="text-xs py-1.5 rounded bg-red-950/30 border border-red-900 hover:border-red-500 text-red-500 hover:text-red-400"
+                             >
+                                 全選當前頁
+                             </button>
+                        </div>
+                    </div>
                     <button 
                         disabled={selectedForDelete.size === 0}
                         onClick={() => {
@@ -382,19 +459,33 @@ export const Inventory: React.FC = () => {
                       )}
 
                       {/* Single Item Delete Button */}
-                      {selectedSlot.instanceId && (
+                      {(selectedSlot.instanceId || selectedSlot.itemId) && (
                           <button 
-                             disabled={isEquipped(selectedSlot.instanceId)}
+                             disabled={selectedSlot.instanceId ? isEquipped(selectedSlot.instanceId) : false}
                              onClick={() => {
-                                 if (selectedSlot.instanceId && !isEquipped(selectedSlot.instanceId)) {
+                                 // Stackable Item (No instanceId)
+                                 if (!selectedSlot.instanceId && selectedSlot.itemId) {
+                                     setItemToDelete({
+                                         itemId: selectedSlot.itemId,
+                                         name: selectedItemDef.name,
+                                         count: selectedSlot.count, // Default to Max
+                                         max: selectedSlot.count,
+                                         quality: ITEMS[selectedSlot.itemId].quality
+                                     });
+                                     return;
+                                 }
+
+                                 // Instance Item (Existing Logic)
+                                 const idToDelete = selectedSlot.instanceId;
+                                 if (idToDelete && !isEquipped(idToDelete)) {
                                      setConfirmModal({
                                          isOpen: true,
                                          title: '丟棄確認',
                                          message: (
-                                             <span>確定要丟棄 <span className={getQualityTextColor(selectedSlot.instance!.quality)}>{selectedItemDef.name}</span> 嗎？此操作無法復原！</span>
+                                             <span>確定要丟棄 <span className={getQualityTextColor(selectedSlot.instance?.quality ?? selectedItemDef.quality)}>{selectedItemDef.name}</span> 嗎？此操作無法復原！</span>
                                          ),
                                          onConfirm: () => {
-                                             dispatch(removeItems([selectedSlot.instanceId!]));
+                                             dispatch(removeItems([idToDelete]));
                                              setSelectedSlot(null);
                                          }
                                      });
@@ -402,7 +493,7 @@ export const Inventory: React.FC = () => {
                              }}
                              className={clsx(
                                  "p-2 rounded border transition-all flex-none",
-                                 isEquipped(selectedSlot.instanceId)
+                                 (selectedSlot.instanceId && isEquipped(selectedSlot.instanceId))
                                      ? "bg-stone-900 border-stone-800 text-stone-600 cursor-not-allowed"
                                      : "bg-red-950/30 border-red-900/50 text-red-500 hover:bg-red-900/80 hover:text-red-200"
                              )}
@@ -415,43 +506,121 @@ export const Inventory: React.FC = () => {
                 </div>
              </div>
                ) : (
-                 <div className="bg-stone-900/30 border border-stone-800 border-dashed rounded-xl p-4 flex-1 flex items-center justify-center text-stone-600 text-sm min-h-[200px]">
-                   選擇物品查看詳情
-                 </div>
-               )
-           )}
+                    <div className="bg-stone-900/50 border border-stone-800 rounded-xl p-4 flex-1 flex flex-col min-h-[300px] items-center justify-center text-stone-600">
+                         <div className="w-16 h-16 rounded-full bg-stone-900 flex items-center justify-center mb-4">
+                             <LayoutGrid size={32} />
+                         </div>
+                         <p>選擇一個物品查看詳情</p>
+                    </div>
+                )
+            )}
         </div>
       </div>
-
-      {/* Confirmation Modal */}
+      
+      {/* Confirm Modal (Standard) */}
       <Modal
         isOpen={confirmModal.isOpen}
-        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
         title={confirmModal.title}
-        size="default"
         actions={
             <>
                 <button 
-                    onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
-                    className="px-4 py-2 rounded border border-stone-700 text-stone-400 hover:text-stone-200 hover:bg-stone-800 transition-colors"
+                    onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                    className="px-4 py-2 rounded border border-stone-600 text-stone-400 hover:text-stone-200"
                 >
                     取消
                 </button>
                 <button 
                     onClick={() => {
                         confirmModal.onConfirm();
-                        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                        setConfirmModal({ ...confirmModal, isOpen: false });
                     }}
-                    className="px-4 py-2 rounded bg-red-900/80 hover:bg-red-800 text-red-100 border border-red-800 transition-colors shadow-lg font-bold"
+                    className="px-4 py-2 rounded bg-red-800 text-stone-100 hover:bg-red-700"
                 >
-                    確定丟棄
+                    確認
                 </button>
             </>
         }
       >
-        <div className="p-4 text-stone-300 text-center">
+        <div className="p-4 text-center">
             {confirmModal.message}
         </div>
+      </Modal>
+
+      {/* Partial Delete Modal (Quantity) */}
+      <Modal
+        isOpen={!!itemToDelete}
+        onClose={() => setItemToDelete(null)}
+        title="丟棄物品"
+        actions={
+            <>
+                <button 
+                    onClick={() => setItemToDelete(null)}
+                    className="px-4 py-2 rounded border border-stone-600 text-stone-400 hover:text-stone-200"
+                >
+                    取消
+                </button>
+                <button 
+                    onClick={() => {
+                        if(itemToDelete) {
+                            dispatch(removeItem({ itemId: itemToDelete.itemId, count: itemToDelete.count }));
+                            setItemToDelete(null);
+                            setSelectedSlot(null);
+                        }
+                    }}
+                    className="px-4 py-2 rounded bg-red-800 text-stone-100 hover:bg-red-700"
+                >
+                    確認丟棄
+                </button>
+            </>
+        }
+      >
+        {itemToDelete && (
+            <div className="flex flex-col items-center gap-6 p-4">
+                <div className="text-center">
+                    <div className={`text-xl font-bold mb-2 ${getQualityTextColor(itemToDelete.quality)}`}>{itemToDelete.name}</div>
+                    <div className="text-stone-500 text-sm">當前擁有: {itemToDelete.max}</div>
+                </div>
+
+                <div className="flex items-center gap-4 bg-stone-950 p-2 rounded-lg border border-stone-800">
+                    <button 
+                        onClick={() => setItemToDelete(prev => prev ? ({ ...prev, count: Math.max(1, prev.count - 1) }) : null)}
+                        className="w-10 h-10 rounded bg-stone-900 border border-stone-700 hover:border-amber-500 text-stone-300 flex items-center justify-center font-bold text-xl transition-colors"
+                    >
+                        -
+                    </button>
+                    <div className="w-20 text-center">
+                         <input 
+                            type="number"
+                            value={itemToDelete.count}
+                            onChange={(e) => {
+                                const val = parseInt(e.target.value) || 0;
+                                setItemToDelete(prev => prev ? ({ ...prev, count: Math.min(prev.max, Math.max(1, val)) }) : null);
+                            }}
+                            className="w-full bg-transparent text-center text-xl font-bold text-amber-500 focus:outline-none"
+                         />
+                    </div>
+                    <button 
+                        onClick={() => setItemToDelete(prev => prev ? ({ ...prev, count: Math.min(prev.max, prev.count + 1) }) : null)}
+                        className="w-10 h-10 rounded bg-stone-900 border border-stone-700 hover:border-amber-500 text-stone-300 flex items-center justify-center font-bold text-xl transition-colors"
+                    >
+                        +
+                    </button>
+                </div>
+                
+                <div className="flex gap-2 text-xs text-stone-500">
+                    <button onClick={() => setItemToDelete(prev => prev ? ({ ...prev, count: 1 }) : null)} className="hover:text-amber-500 underline">最小</button>
+                    <span>|</span>
+                    <button onClick={() => setItemToDelete(prev => prev ? ({ ...prev, count: Math.floor(prev.max / 2) }) : null)} className="hover:text-amber-500 underline">一半</button>
+                    <span>|</span>
+                    <button onClick={() => setItemToDelete(prev => prev ? ({ ...prev, count: prev.max }) : null)} className="hover:text-amber-500 underline">最大</button>
+                </div>
+
+                <div className="text-red-400 text-sm animate-pulse">
+                    此操作將永久移除物品，無法復原！
+                </div>
+            </div>
+        )}
       </Modal>
     </div>
   );

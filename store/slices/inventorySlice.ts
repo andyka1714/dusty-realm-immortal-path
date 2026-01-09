@@ -118,8 +118,12 @@ const inventorySlice = createSlice({
         
         if (safeToDelete.size > 0) {
             state.items = state.items.filter(item => {
-                // Keep item if it has no instanceId (stackable) OR if its instanceId is NOT in deletion set
-                return !item.instanceId || !safeToDelete.has(item.instanceId);
+                // If it's an instance, delete if instanceId is in set
+                if (item.instanceId) {
+                    return !safeToDelete.has(item.instanceId);
+                }
+                // If it's a stackable (no instanceId), delete if itemId is in set
+                return !safeToDelete.has(item.itemId);
             });
         }
     },

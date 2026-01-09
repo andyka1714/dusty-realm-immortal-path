@@ -49,7 +49,7 @@ export const COMMON_ENEMIES: Record<string, Enemy> = {
     'm16_c1': createEnemy('m16_c1', '雷暴閃靈', MajorRealm.QiRefining, EnemyRank.Common, 1200, 260, 40, ElementType.Metal, ['cloud_step_shoes', 'sword_tassel'], 150, MINOR_REALM.LATE, '靈'),
     'm16_c2': createEnemy('m16_c2', '荒原烈馬', MajorRealm.QiRefining, EnemyRank.Common, 1800, 220, 90, ElementType.Fire, ['azure_robe', 'focus_headband'], 155, MINOR_REALM.LATE, '馬'),
     
-    'm17_c1': createEnemy('m17_c1', '雷澤蟹將', MajorRealm.QiRefining, EnemyRank.Common, 2500, 200, 180, ElementType.Water, ['bear_paw_gauntlet', 'wolf_skull_helm'], 160, MINOR_REALM.PEAK, '蟹'),
+    'm17_c1': createEnemy('m17_c1', '雷澤蟹將', MajorRealm.QiRefining, EnemyRank.Common, 2500, 200, 140, ElementType.Water, ['bear_paw_gauntlet', 'wolf_skull_helm'], 160, MINOR_REALM.PEAK, '蟹'),
     'm17_c2': createEnemy('m17_c2', '電光游魚', MajorRealm.QiRefining, EnemyRank.Common, 1100, 280, 30, ElementType.Metal, ['spirit_wood_staff', 'cloud_step_shoes'], 165, MINOR_REALM.PEAK, '魚'),
     
     'm18_c1': createEnemy('m18_c1', '迷影猴妖', MajorRealm.QiRefining, EnemyRank.Common, 1400, 220, 60, ElementType.Wood, ['spirit_orb', 'mystic_crown'], 170, MINOR_REALM.PEAK, '猴'),
