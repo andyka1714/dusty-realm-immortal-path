@@ -899,6 +899,7 @@ export const Adventure: React.FC = () => {
                     majorRealm={character.majorRealm}
                     targetMonsterId={targetMonsterId}
                     isBattling={isBattling}
+                    playerName={character.name}
                  />
             )}
         </div>

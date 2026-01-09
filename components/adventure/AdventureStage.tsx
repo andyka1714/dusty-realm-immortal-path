@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useLayoutEffect } from 'react';
 import * as PIXI from 'pixi.js';
 import { MapData, Coordinate, Portal, EnemyRank, ActiveMonster, MajorRealm } from '../../types';
 import { MOVEMENT_SPEEDS } from '../../constants';
-import { current } from '@reduxjs/toolkit';
 
 interface AdventureStageProps {
   mapData: MapData;
@@ -13,16 +12,24 @@ interface AdventureStageProps {
   majorRealm: MajorRealm;
   isBattling: boolean;
   onTileClick: (x: number, y: number) => void;
-  onPlayerArrive?: (x: number, y: number) => void; // New Callback
+  onPlayerArrive?: (x: number, y: number) => void;
   width: number;
   height: number;
   cellSize: number;
   key?: React.Key;
+  playerName: string; // Add playerName prop
 }
 
 // --- Constants ---
 const GRID_COLOR = 0x44403c;
 const GRID_BG = 0x0c0a09; // stone-950
+
+const THEME_COLORS = {
+    [EnemyRank.Common]: 0x9ca3af, // Gray-400
+    [EnemyRank.Elite]:  0x60a5fa, // Blue-400
+    [EnemyRank.Boss]:   0xf87171, // Red-400
+};
+const PLAYER_COLOR = 0x4ade80; // Green-400
 
 export default function AdventureStage({
   mapData,
@@ -37,6 +44,7 @@ export default function AdventureStage({
   height,
   cellSize = 40,
   onPlayerArrive,
+  playerName
 }: AdventureStageProps) {
   
   const moveTimerRef = useRef<number>(0);
@@ -47,20 +55,30 @@ export default function AdventureStage({
   useEffect(() => {
       onPlayerArriveRef.current = onPlayerArrive;
   }, [onPlayerArrive]);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<PIXI.Application | null>(null);
   
-  // Visual State for Interpolation
+  // Visual State for Interpolation (Virtual Position)
   const visualRef = useRef({
       player: { x: playerPosition.x, y: playerPosition.y },
-      monsters: new Map<string, { x: number, y: number }>(),
       cam: { x: (playerPosition.x + 0.5) * cellSize, y: (playerPosition.y + 0.5) * cellSize },
+      monsterCoords: new Map<string, { x: number, y: number }>(), 
       rotation: 0
+  });
+
+  // Retained Display Objects
+  const displayRefs = useRef({
+      playerContainer: null as PIXI.Container | null,
+      monsterContainers: new Map<string, PIXI.Container>(),
+      entityLayer: null as PIXI.Container | null,
+      portalsLayer: null as PIXI.Container | null,
+      targetMarker: null as PIXI.Graphics | null,
   });
 
   const onTileClickRef = useRef(onTileClick);
   const entitiesRef = useRef({ monsters: activeMonsters, portals: portals });
-  const latestDataRef = useRef({ mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling });
+  const latestDataRef = useRef({ mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName });
 
   // Sync latest props
   useEffect(() => {
@@ -70,17 +88,20 @@ export default function AdventureStage({
   useLayoutEffect(() => {
     entitiesRef.current.monsters = activeMonsters;
     entitiesRef.current.portals = portals;
-    latestDataRef.current = { mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling };
-  }, [mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling]);
+    latestDataRef.current = { mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName };
+  }, [mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName]);
 
-  // Force Snap Camera on Map Change (Prevent Drift)
+  // Force Snap (New Map)
   useLayoutEffect(() => {
-       // Synchronously snap visual state to new map data BEFORE paint
        visualRef.current.cam.x = (playerPosition.x + 0.5) * cellSize;
        visualRef.current.cam.y = (playerPosition.y + 0.5) * cellSize;
        visualRef.current.player.x = playerPosition.x;
        visualRef.current.player.y = playerPosition.y;
-       visualRef.current.monsters.clear();
+       visualRef.current.monsterCoords.clear();
+       
+       // Clear retained containers on map change to be safe
+       displayRefs.current.monsterContainers.forEach(c => c.destroy());
+       displayRefs.current.monsterContainers.clear();
   }, [mapData.id]);
 
 
@@ -88,7 +109,6 @@ export default function AdventureStage({
   useEffect(() => {
       if (!containerRef.current || !mapData) return;
       
-      // Create App
       const app = new PIXI.Application({
           width,
           height,
@@ -105,16 +125,71 @@ export default function AdventureStage({
       const world = new PIXI.Container();
       app.stage.addChild(world);
 
-      // 1. Grid Background
+      // Layers
       const gridGraphics = new PIXI.Graphics();
       world.addChild(gridGraphics);
 
-      // 2. Interactive Layer
       const hitArea = new PIXI.Graphics();
       hitArea.interactive = true;
       hitArea.alpha = 0; 
       world.addChild(hitArea);
+
+      // Portals Layer
+      const portalsLayer = new PIXI.Container();
+      world.addChild(portalsLayer);
+      displayRefs.current.portalsLayer = portalsLayer;
+
+      // Entities Layer (Monsters + Player)
+      const entityLayer = new PIXI.Container();
+      world.addChild(entityLayer);
+      displayRefs.current.entityLayer = entityLayer;
+
+      // --- Create Player Avatar ---
+      const playerContainer = new PIXI.Container();
+      // BG (Border Only)
+      const pBg = new PIXI.Graphics();
+      pBg.lineStyle(2, PLAYER_COLOR, 1);
+      pBg.beginFill(0x000000, 0.01); // Minimal fill for hit testing if needed, or practically transparent
+      pBg.drawRoundedRect(-cellSize/2 + 2, -cellSize/2 + 2, cellSize - 4, cellSize - 4, 8);
+      pBg.endFill();
       
+      // Text
+      const pText = new PIXI.Text(latestDataRef.current.playerName[0] || '?', {
+          fontFamily: 'Arial',
+          fontSize: cellSize * 0.6,
+          fontWeight: 'bold',
+          fill: 0xffffff,
+          stroke: PLAYER_COLOR,
+          strokeThickness: 4,
+          align: 'center',
+          lineJoin: 'round',
+      });
+      pText.anchor.set(0.5);
+      
+      playerContainer.addChild(pBg);
+      playerContainer.addChild(pText);
+      entityLayer.addChild(playerContainer); // Add to layer
+      displayRefs.current.playerContainer = playerContainer;
+
+      // --- Target Marker (Shared instance, moved around) ---
+      const targetMarker = new PIXI.Graphics();
+      targetMarker.visible = false;
+      // Draw Logic
+      const R = cellSize * 0.45;
+      const L = cellSize * 0.15;
+      targetMarker.lineStyle(2, 0xef4444, 1);
+      // TL
+      targetMarker.moveTo(-R, -R + L); targetMarker.lineTo(-R, -R); targetMarker.lineTo(-R + L, -R);
+      // TR
+      targetMarker.moveTo(R - L, -R); targetMarker.lineTo(R, -R); targetMarker.lineTo(R, -R + L);
+      // BR
+      targetMarker.moveTo(R, R - L); targetMarker.lineTo(R, R); targetMarker.lineTo(R - L, R);
+      // BL
+      targetMarker.moveTo(-R + L, R); targetMarker.lineTo(-R, R); targetMarker.lineTo(-R, R - L);
+      entityLayer.addChild(targetMarker);
+      displayRefs.current.targetMarker = targetMarker;
+
+      // Interactions
       hitArea.on('pointertap', (e) => {
           const local = e.getLocalPosition(world);
           const gx = Math.floor(local.x / cellSize);
@@ -122,18 +197,7 @@ export default function AdventureStage({
           onTileClickRef.current(gx, gy);
       });
 
-      // 3. Entity Layer
-      const entityGraphics = new PIXI.Graphics();
-      world.addChild(entityGraphics);
-
-      // 4. Player Graphics
-      const playerGraphics = new PIXI.Graphics();
-      world.addChild(playerGraphics);
-
-
-
-
-      // --- Render Static ---
+      // --- Render Static Grid ---
       const renderStatic = () => {
           if (!mapData) return;
           const drawW = mapData.width;
@@ -159,239 +223,260 @@ export default function AdventureStage({
           hitArea.drawRect(0, 0, drawW * cellSize, drawH * cellSize);
           hitArea.endFill();
       };
-      
       renderStatic();
 
-      // --- Animation Loop ---
+      // --- Helper: Create Monster Avatar ---
+      const createMonsterAvatar = (m: ActiveMonster) => {
+          const container = new PIXI.Container();
+          const color = THEME_COLORS[m.rank];
+          
+          // BG (Border Only)
+          const bg = new PIXI.Graphics();
+          const size = cellSize; 
+          
+          bg.lineStyle(2, color, 1);
+          bg.beginFill(0x000000, 0.01);
+          bg.drawRoundedRect(-size/2 + 2, -size/2 + 2, size - 4, size - 4, 8);
+          bg.endFill();
+          
+          // Text
+          let symbol = m.symbol || (m.name && m.name[0]);
+          if (!symbol) {
+              const template = mapData.enemies.find(e => e.id === m.templateId);
+              symbol = template?.symbol || (template?.name && template.name[0]) || '?';
+          }
+          
+          const text = new PIXI.Text(symbol, {
+              fontFamily: 'Arial',
+              fontSize: cellSize * 0.6,
+              fontWeight: m.rank === EnemyRank.Common ? 'normal' : 'bold',
+              fill: 0xffffff,
+              stroke: color,
+              strokeThickness: 4,
+              align: 'center',
+              lineJoin: 'round',
+          });
+          text.anchor.set(0.5);
+
+          container.addChild(bg);
+          container.addChild(text);
+          return container;
+      };
+
+      // --- Ticker ---
       const ticker = (delta: number) => {
-          // Warmup: Force Snap for first few frames to ensure visual stability
+          // Warmup
           if (framesRenderedRef.current < 5) {
-               visualRef.current.player.x = latestDataRef.current.playerPosition.x;
-               visualRef.current.player.y = latestDataRef.current.playerPosition.y;
-               visualRef.current.cam.x = (latestDataRef.current.playerPosition.x + 0.5) * cellSize;
-               visualRef.current.cam.y = (latestDataRef.current.playerPosition.y + 0.5) * cellSize;
+               // Snap Logic
+               const snapX = latestDataRef.current.playerPosition.x;
+               const snapY = latestDataRef.current.playerPosition.y;
+               visualRef.current.player.x = snapX;
+               visualRef.current.player.y = snapY;
+               visualRef.current.cam.x = (snapX + 0.5) * cellSize;
+               visualRef.current.cam.y = (snapY + 0.5) * cellSize;
                framesRenderedRef.current++;
                
-               // Apply Camera immediate
+               // Apply to Container
+               if (playerContainer) {
+                   playerContainer.x = (snapX + 0.5) * cellSize;
+                   playerContainer.y = (snapY + 0.5) * cellSize;
+               }
+               // Update Camera
                world.x = width / 2 - visualRef.current.cam.x;
                world.y = height / 2 - visualRef.current.cam.y;
-               
-               // Render static entity positions too
-               const px = (visualRef.current.player.x + 0.5) * cellSize;
-               const py = (visualRef.current.player.y + 0.5) * cellSize;
-               playerGraphics.clear();
-               playerGraphics.beginFill(0x22c55e); 
-               playerGraphics.drawCircle(px, py, cellSize * 0.4);
-               playerGraphics.endFill();
                return;
           }
 
+          // --- 1. Player Movement ---
           if (latestDataRef.current.isBattling) {
-               // Force snap to actual position to stop wandering/floating
                visualRef.current.player.x = latestDataRef.current.playerPosition.x;
                visualRef.current.player.y = latestDataRef.current.playerPosition.y;
           }
-
-          // Dynamic Speed Calculation designed for Continuous Movement
-          // Logic Tick: Every X ms. Visual Move: Should take ~X ms.
+          
           const msPerTile = MOVEMENT_SPEEDS[latestDataRef.current.majorRealm] || 500;
-          
-          // We assume delta=1 is 16.66ms. 
-          // We want to cross 1.0 tile in (msPerTile) ms.
-          // speed (tiles/tick) = 1 / (msPerTile / 16.66)
-          // We speed it up by 5% (multiply by 1.05) to ensure we arrive just before the next tick.
           const MOVE_SPEED = (16.66 / msPerTile) * 1.05 * delta;
-          
-          const CAM_LERP = 0.06 * delta;
-
-          // 1. Interpolate Player (Linear MoveTowards)
           const targetPx = latestDataRef.current.playerPosition.x;
           const targetPy = latestDataRef.current.playerPosition.y;
           
-          const dx = targetPx - visualRef.current.player.x;
-          const dy = targetPy - visualRef.current.player.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+          const pdx = targetPx - visualRef.current.player.x;
+          const pdy = targetPy - visualRef.current.player.y;
+          const pDist = Math.sqrt(pdx * pdx + pdy * pdy);
 
-          if (dist > 0.001) {
+          if (pDist > 0.001) {
               isMovingRef.current = true;
-
-              if (dist <= MOVE_SPEED) {
+              if (pDist <= MOVE_SPEED) {
                   visualRef.current.player.x = targetPx;
                   visualRef.current.player.y = targetPy;
-                  
                   if (isMovingRef.current) {
                       isMovingRef.current = false;
-                      onPlayerArriveRef.current?.(latestDataRef.current.playerPosition.x, latestDataRef.current.playerPosition.y);
+                      onPlayerArriveRef.current?.(targetPx, targetPy);
                   }
               } else {
-                  const ratio = MOVE_SPEED / dist;
-                  visualRef.current.player.x += dx * ratio;
-                  visualRef.current.player.y += dy * ratio;
+                  const ratio = MOVE_SPEED / pDist;
+                  visualRef.current.player.x += pdx * ratio;
+                  visualRef.current.player.y += pdy * ratio;
               }
           } else {
               visualRef.current.player.x = targetPx;
               visualRef.current.player.y = targetPy;
-              isMovingRef.current = false; 
+              isMovingRef.current = false;
           }
+
+
+          // --- Animation Pulse ---
+          // ~1.5s per cycle. Range 0.95 to 1.05
+          const time = Date.now() / 1000;
+          const pulse = 1 + Math.sin(time * 4) * 0.05; 
           
-          // 2. Camera Follow Visual Player
+          if (playerContainer) {
+              playerContainer.x = (visualRef.current.player.x + 0.5) * cellSize;
+              playerContainer.y = (visualRef.current.player.y + 0.5) * cellSize;
+              playerContainer.scale.set(pulse); // Apply Pulse
+          }
+
+          // --- 2. Camera ---
+          const CAM_LERP = 0.06 * delta;
           const targetCamX = (visualRef.current.player.x + 0.5) * cellSize;
           const targetCamY = (visualRef.current.player.y + 0.5) * cellSize;
-          
           visualRef.current.cam.x += (targetCamX - visualRef.current.cam.x) * CAM_LERP;
           visualRef.current.cam.y += (targetCamY - visualRef.current.cam.y) * CAM_LERP;
-
-          // Apply Camera
+          
           world.x = width / 2 - visualRef.current.cam.x;
           world.y = height / 2 - visualRef.current.cam.y;
 
-          // --- Draw Entities ---
-          entityGraphics.clear();
-          
-          visualRef.current.rotation += 0.05 * delta;
-          const rot = visualRef.current.rotation;
 
-          // A. Portals (Blue + Rotate + Shadow + Flash)
-          entitiesRef.current.portals.forEach(p => {
-              const cx = (p.x + 0.5) * cellSize;
-              const cy = (p.y + 0.5) * cellSize;
-              const size = cellSize * 0.45;
-
-              // Shadow
-              entityGraphics.beginFill(0x000000, 0.4);
-              entityGraphics.drawEllipse(cx, cy + size * 0.6, size, size * 0.3);
-              entityGraphics.endFill();
-              
-              const alpha = 0.6 + Math.sin(rot * 0.5) * 0.4; // Flash
-
-              // Outer Ring
-              entityGraphics.lineStyle(2, 0x3b82f6, alpha);
-              entityGraphics.drawCircle(cx, cy, size);
-              
-              // Rotating Square/Diamond
-              entityGraphics.lineStyle(2, 0x60a5fa, 0.8);
-              // Calculate rotating points
-              const corners = [0, Math.PI/2, Math.PI, Math.PI*1.5].map(offset => ({
-                  x: cx + Math.cos(rot + offset) * size * 0.8,
-                  y: cy + Math.sin(rot + offset) * size * 0.8
-              }));
-              entityGraphics.moveTo(corners[0].x, corners[0].y);
-              corners.slice(1).forEach(c => entityGraphics.lineTo(c.x, c.y));
-              entityGraphics.lineTo(corners[0].x, corners[0].y); // Close path
-              
-              // Core
-              entityGraphics.lineStyle(0);
-              entityGraphics.beginFill(0x93c5fd, 0.9);
-              entityGraphics.drawCircle(cx, cy, size * 0.3);
-              entityGraphics.endFill();
-          });
-
-          // B. Monsters (Interpolated)
+          // --- 3. Monster Management ---
           const activeIds = new Set<string>();
           entitiesRef.current.monsters.forEach(m => {
               activeIds.add(m.instanceId);
-              let vis = visualRef.current.monsters.get(m.instanceId);
-              if (!vis) {
-                  vis = { x: m.x, y: m.y };
-                  visualRef.current.monsters.set(m.instanceId, vis);
-              }
               
-              // Linear MoveTowards
-              const dx = m.x - vis.x;
-              const dy = m.y - vis.y;
+              // A. Logic/Visual Coords
+              let visCoords = visualRef.current.monsterCoords.get(m.instanceId);
+              if (!visCoords) {
+                  visCoords = { x: m.x, y: m.y };
+                  visualRef.current.monsterCoords.set(m.instanceId, visCoords);
+              }
+
+              // Interpolation
+              const dx = m.x - visCoords.x;
+              const dy = m.y - visCoords.y;
               const dist = Math.sqrt(dx*dx + dy*dy);
-              // Monsters update every 1000ms. We want to take ~800ms to move.
-              // That is ~1.25 tiles/sec. 
-              // MOVE_SPEED is 2.7. So factor 0.45.
-              const mSpeed = MOVE_SPEED * 0.45;
+              const mSpeed = MOVE_SPEED * 0.45; 
 
               if (dist > 0.001) {
                   if (dist <= mSpeed) {
-                      vis.x = m.x;
-                      vis.y = m.y;
+                      visCoords.x = m.x;
+                      visCoords.y = m.y;
                   } else {
                       const ratio = mSpeed / dist;
-                      vis.x += dx * ratio;
-                      vis.y += dy * ratio;
+                      visCoords.x += dx * ratio;
+                      visCoords.y += dy * ratio;
                   }
               } else {
-                 vis.x = m.x;
-                 vis.y = m.y;
+                 visCoords.x = m.x;
+                 visCoords.y = m.y;
               }
+
+              // B. Container Management
+              let container = displayRefs.current.monsterContainers.get(m.instanceId);
+              if (!container) {
+                  // Create New
+                  container = createMonsterAvatar(m);
+                  if (displayRefs.current.entityLayer) {
+                      displayRefs.current.entityLayer.addChild(container);
+                  }
+                  displayRefs.current.monsterContainers.set(m.instanceId, container);
+              }
+
+              // Update Container Pos & Anim
+              container.x = (visCoords.x + 0.5) * cellSize;
+              container.y = (visCoords.y + 0.5) * cellSize;
               
-              // Draw
-              let color = 0xa8a29e;
-              let size = cellSize * 0.4;
-              if (m.rank === EnemyRank.Boss) { color = 0xdc2626; size = cellSize * 0.6; }
-              else if (m.rank === EnemyRank.Elite) { color = 0x3b82f6; size = cellSize * 0.5; }
+              // Random Phase Pulse
+              // Simple hash from instanceId for phase
+              const phase = m.instanceId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 10;
+              const mPulse = 1 + Math.sin(time * 3 + phase) * 0.05;
+              container.scale.set(mPulse);
 
-              const mx = (vis.x + 0.5) * cellSize;
-              const my = (vis.y + 0.5) * cellSize;
-
-              entityGraphics.lineStyle(0);
-              entityGraphics.beginFill(color);
-              entityGraphics.drawCircle(mx, my, size / 2);
-              entityGraphics.endFill();
-
-              // Target Marker
-              if (latestDataRef.current.targetMonsterId === m.instanceId) {
-                   const R = cellSize * 0.45; // Radius
-                   const L = cellSize * 0.15; // Log length
-                   const color = 0xef4444; // Red-500
-
-                   entityGraphics.lineStyle(2, color, 1);
-                   
-                   // Top Left
-                   entityGraphics.moveTo(mx - R, my - R + L);
-                   entityGraphics.lineTo(mx - R, my - R);
-                   entityGraphics.lineTo(mx - R + L, my - R);
-
-                   // Top Right
-                   entityGraphics.moveTo(mx + R - L, my - R);
-                   entityGraphics.lineTo(mx + R, my - R);
-                   entityGraphics.lineTo(mx + R, my - R + L);
-
-                   // Bottom Right
-                   entityGraphics.moveTo(mx + R, my + R - L);
-                   entityGraphics.lineTo(mx + R, my + R);
-                   entityGraphics.lineTo(mx + R - L, my + R);
-
-                   // Bottom Left
-                   entityGraphics.moveTo(mx - R + L, my + R);
-                   entityGraphics.lineTo(mx - R, my + R);
-                   entityGraphics.lineTo(mx - R, my + R - L);
+              // Update Target Marker
+              if (latestDataRef.current.targetMonsterId === m.instanceId && displayRefs.current.targetMarker) {
+                   displayRefs.current.targetMarker.visible = true;
+                   displayRefs.current.targetMarker.x = container.x;
+                   displayRefs.current.targetMarker.y = container.y;
+                   // Pulse Marker too
+                   displayRefs.current.targetMarker.scale.set(1 + Math.sin(time * 10) * 0.1); 
+                   displayRefs.current.targetMarker.rotation += 0.05 * delta;
               }
           });
-          
+
           // Cleanup Dead Monsters
-          for (const id of visualRef.current.monsters.keys()) {
-              if (!activeIds.has(id)) visualRef.current.monsters.delete(id);
+          const containers = displayRefs.current.monsterContainers;
+          for (const [id, container] of containers.entries()) {
+              if (!activeIds.has(id)) {
+                  container.destroy(); // Remove from PIXI
+                  containers.delete(id); // Remove from Map
+                  visualRef.current.monsterCoords.delete(id); // Remove coords
+              }
           }
-          
-          // --- Draw Player (Visual Pos) ---
-          playerGraphics.clear();
-          const px = (visualRef.current.player.x + 0.5) * cellSize;
-          const py = (visualRef.current.player.y + 0.5) * cellSize;
-          
-          playerGraphics.beginFill(0x22c55e); 
-          playerGraphics.drawCircle(px, py, cellSize * 0.4);
-          playerGraphics.endFill();
-          
-          const pulse = (Math.sin(Date.now() / 200) + 1) * 0.5; 
-          playerGraphics.lineStyle(2, 0x86efac, 0.5 + (pulse * 0.5));
-          playerGraphics.drawCircle(px, py, cellSize * 0.4 + (pulse * 2));
+           
+          // Hide marker if target invalid
+          if (displayRefs.current.targetMarker && !activeIds.has(latestDataRef.current.targetMonsterId || '')) {
+              displayRefs.current.targetMarker.visible = false;
+          }
+
+          // --- 4. Portals ---
+          if (portalsLayer) {
+            // Note: Retained mode means we only create/destroy portals if list changes. 
+            // For simplicity in this specific component (portals rarely move), we can simple-clear or diff.
+            // Given portals are static, clearing/redrawing GRAPHICS inside ONE container is fine, 
+            // OR managing Children. Let's do simple Clear+Draw on a Graphics object for Portals to save complexity,
+            // since they don't have text or complex composition.
+            // ... Actually, let's just make them retained too for consistency, or keep them as Graphics.
+            // Let's use a single Graphics for portals for now as they are simple shapes.
+            portalsLayer.removeChildren(); // clear old graphics
+            const pG = new PIXI.Graphics();
+            portalsLayer.addChild(pG);
+            
+            visualRef.current.rotation += 0.05 * delta;
+            const rot = visualRef.current.rotation;
+
+            entitiesRef.current.portals.forEach(p => {
+                const cx = (p.x + 0.5) * cellSize;
+                const cy = (p.y + 0.5) * cellSize;
+                const size = cellSize * 0.45;
+                
+                 // Shadow
+                pG.beginFill(0x000000, 0.4);
+                pG.drawEllipse(cx, cy + size * 0.6, size, size * 0.3);
+                pG.endFill();
+                
+                const alpha = 0.6 + Math.sin(rot * 0.5) * 0.4;
+                pG.lineStyle(2, 0x3b82f6, alpha);
+                pG.drawCircle(cx, cy, size);
+                
+                pG.lineStyle(2, 0x60a5fa, 0.8);
+                const corners = [0, Math.PI/2, Math.PI, Math.PI*1.5].map(offset => ({
+                    x: cx + Math.cos(rot + offset) * size * 0.8,
+                    y: cy + Math.sin(rot + offset) * size * 0.8
+                }));
+                pG.moveTo(corners[0].x, corners[0].y);
+                corners.slice(1).forEach(c => pG.lineTo(c.x, c.y));
+                pG.lineTo(corners[0].x, corners[0].y);
+                
+                pG.lineStyle(0);
+                pG.beginFill(0x93c5fd, 0.9);
+                pG.drawCircle(cx, cy, size * 0.3);
+                pG.endFill();
+            });
+          }
       };
       
       app.ticker.add(ticker);
 
-      // Cleanup
       return () => {
           app.destroy(true, { children: true });
       };
-  }, [width, height, cellSize, mapData?.id]); // Re-init on resize or map change
-
-
-
+  }, [width, height, cellSize, mapData?.id]); 
 
   return <div ref={containerRef} />;
 }

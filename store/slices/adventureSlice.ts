@@ -70,6 +70,8 @@ const adventureSlice = createSlice({
               state.activeMonsters.push({
                   instanceId: Math.random().toString(36),
                   templateId: template.id,
+                  name: template.name,
+                  symbol: template.symbol,
                   x: rx,
                   y: ry,
                   spawnX: rx,
@@ -88,6 +90,8 @@ const adventureSlice = createSlice({
              state.activeMonsters.push({
                   instanceId: 'boss_instance',
                   templateId: bossTemplate.id,
+                  name: bossTemplate.name,
+                  symbol: bossTemplate.symbol,
                   x: mapData.bossSpawn.x,
                   y: mapData.bossSpawn.y,
                   spawnX: mapData.bossSpawn.x,
@@ -167,6 +171,8 @@ const adventureSlice = createSlice({
            state.activeMonsters.push({
                instanceId: isBoss ? 'boss_instance' : Math.random().toString(36),
                templateId: template.id,
+               name: template.name,
+               symbol: template.symbol,
                x: rx, 
                y: ry,
                spawnX: rx,

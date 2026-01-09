@@ -162,6 +162,7 @@ export interface Enemy {
   name: string;
   realm: MajorRealm;
   minorRealm?: MinorRealmType; // e.g. '初期', '中期', '後期', '圓滿'
+  symbol?: string; // Single character for map display
   rank: EnemyRank;
   hp: number;
   maxHp: number;
@@ -176,6 +177,8 @@ export interface Enemy {
 export interface ActiveMonster extends Coordinate {
     instanceId: string;
     templateId: string;
+    name: string; // Synced for display
+    symbol?: string; // Synced for display
     currentHp: number;
     rank: EnemyRank; // Cached for quick rendering logic
     spawnX: number;
