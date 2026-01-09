@@ -235,7 +235,7 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-full p-4 md:p-6 gap-6 overflow-hidden relative">
+    <div className="flex flex-col md:flex-row h-full p-4 md:p-6 gap-6 overflow-y-auto md:overflow-hidden relative">
       
       {isCriticalLifespan && (
          <div className="absolute inset-0 z-[90] pointer-events-none overflow-hidden rounded-xl">
