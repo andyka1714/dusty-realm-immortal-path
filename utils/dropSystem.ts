@@ -36,7 +36,7 @@ const AFFIX_DATA = [
     { prefix: '鋒利', attr: 'attack', val: 3 },
     { prefix: '堅固', attr: 'defense', val: 2 },
     { prefix: '輕靈', attr: 'speed', val: 1 },
-    { prefix: '厚重', attr: 'maxHp', val: 30 },
+    { prefix: '厚重', attr: 'hp', val: 30 },
     { prefix: '嗜血', attr: 'attack', val: 2 },
     { prefix: '寒冰', attr: 'defense', val: 1 },
 ];

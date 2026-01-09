@@ -108,7 +108,7 @@ export const StatsPanel: React.FC = () => {
                   onMouseEnter={(e) => handleMouseEnter(e, { 
                     label: "氣血 (HP)", 
                     desc: `肉身承載上限。回復：${combatStats.regenHp}%/回合。`, 
-                    subDesc: `基礎: 體魄${attributes.physique}×15 + 境界${baseRealmStats.hp} | 裝備: +${(equipmentStats.hp||0)+(equipmentStats.maxHp||0)}`, 
+                    subDesc: `基礎: 體魄${attributes.physique}×15 + 境界${baseRealmStats.hp} | 裝備: +${(equipmentStats.hp||0)}`, 
                     highlightColor: "text-emerald-400" 
                   })}
                   onMouseLeave={handleMouseLeave}
@@ -121,7 +121,7 @@ export const StatsPanel: React.FC = () => {
                   onMouseEnter={(e) => handleMouseEnter(e, { 
                     label: "靈力 (MP)", 
                     desc: "施展功法與術法的能量來源，受靈根深度影響。", 
-                    subDesc: `基礎: 神識${attributes.insight}×10 + 境界${baseRealmStats.mp} | 裝備: +${(equipmentStats.mp||0)+(equipmentStats.maxMp||0)}`, 
+                    subDesc: `基礎: 神識${attributes.insight}×10 + 境界${baseRealmStats.mp} | 裝備: +${(equipmentStats.mp||0)}`, 
                     highlightColor: "text-blue-400" 
                   })}
                   onMouseLeave={handleMouseLeave}

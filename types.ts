@@ -306,9 +306,7 @@ export enum EquipmentType {
 
 export interface EquipmentStats extends Partial<BaseAttributes> {
   hp?: number;
-  maxHp?: number;
   mp?: number;
-  maxMp?: number;
   attack?: number;
   defense?: number;
   magic?: number;

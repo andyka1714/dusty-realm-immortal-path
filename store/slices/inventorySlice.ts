@@ -36,9 +36,9 @@ const createBasicInstance = (itemId: string): ItemInstance => {
 };
 
 const calculateStats = (items: InventorySlot[], equipment: EquipmentState) => {
-  const stats: Partial<BaseAttributes & { attack: number, defense: number, speed: number, hp: number, maxHp: number, mp: number, maxMp: number }> = { 
+  const stats: Partial<BaseAttributes & { attack: number, defense: number, speed: number, hp: number, mp: number }> = { 
     physique: 0, rootBone: 0, insight: 0, comprehension: 0, fortune: 0, charm: 0,
-    attack: 0, defense: 0, speed: 0, hp: 0, maxHp: 0, mp: 0, maxMp: 0
+    attack: 0, defense: 0, speed: 0, hp: 0, mp: 0
   };
   
   Object.values(equipment).forEach(instanceId => {

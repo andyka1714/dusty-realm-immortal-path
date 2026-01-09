@@ -58,7 +58,7 @@ export const calculatePlayerStats = (
     attributes: BaseAttributes, 
     majorRealm: MajorRealm, 
     spiritRootId: SpiritRootId,
-    equipmentStats: Partial<BaseAttributes & { attack: number, defense: number, speed: number, hp: number, maxHp: number, mp: number, maxMp: number, crit: number, dodge: number }> = {},
+    equipmentStats: Partial<BaseAttributes & { attack: number, defense: number, speed: number, hp: number, mp: number, crit: number, dodge: number }> = {},
     name: string = '道友'
 ): PlayerCombatStats => {
   const base = REALM_BASE_STATS[majorRealm];
@@ -83,8 +83,8 @@ export const calculatePlayerStats = (
   let res = effectiveInsight * 1.5;
 
   // 3. Add Flat Bonuses from Equipment
-  maxHp += (equipmentStats.maxHp || 0) + (equipmentStats.hp || 0); // Some items might use 'hp' for max hp bonus
-  maxMp += (equipmentStats.maxMp || 0) + (equipmentStats.mp || 0);
+  maxHp += (equipmentStats.hp || 0); 
+  maxMp += (equipmentStats.mp || 0);
   attack += (equipmentStats.attack || 0);
   defense += (equipmentStats.defense || 0);
   // magic += (equipmentStats.magic || 0); // If items add magic atk specifically
