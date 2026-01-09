@@ -193,31 +193,61 @@ export const Inventory: React.FC = () => {
                  label="武器" icon={Sword} 
                  instance={getEquippedInstance(EquipmentSlot.Weapon)} 
                  onUnequip={() => dispatch(unequipItem(EquipmentSlot.Weapon))}
+                 onClick={() => {
+                    const id = equipment[EquipmentSlot.Weapon];
+                    const slot = items.find(s => s.instanceId === id);
+                    if (slot) setSelectedSlot(slot);
+                 }}
                />
                <EquipSlot 
                  label="副手" icon={Shield} 
                  instance={getEquippedInstance(EquipmentSlot.Offhand)} 
                  onUnequip={() => dispatch(unequipItem(EquipmentSlot.Offhand))}
+                 onClick={() => {
+                    const id = equipment[EquipmentSlot.Offhand];
+                    const slot = items.find(s => s.instanceId === id);
+                    if (slot) setSelectedSlot(slot);
+                 }}
                />
                <EquipSlot 
                  label="頭部" icon={Crown} 
                  instance={getEquippedInstance(EquipmentSlot.Head)} 
                  onUnequip={() => dispatch(unequipItem(EquipmentSlot.Head))}
+                 onClick={() => {
+                    const id = equipment[EquipmentSlot.Head];
+                    const slot = items.find(s => s.instanceId === id);
+                    if (slot) setSelectedSlot(slot);
+                 }}
                />
                <EquipSlot 
                  label="身軀" icon={Shirt} 
                  instance={getEquippedInstance(EquipmentSlot.Body)} 
                  onUnequip={() => dispatch(unequipItem(EquipmentSlot.Body))}
+                 onClick={() => {
+                    const id = equipment[EquipmentSlot.Body];
+                    const slot = items.find(s => s.instanceId === id);
+                    if (slot) setSelectedSlot(slot);
+                 }}
                />
                <EquipSlot 
                  label="腿部" icon={Footprints} 
                  instance={getEquippedInstance(EquipmentSlot.Legs)} 
                  onUnequip={() => dispatch(unequipItem(EquipmentSlot.Legs))}
+                 onClick={() => {
+                    const id = equipment[EquipmentSlot.Legs];
+                    const slot = items.find(s => s.instanceId === id);
+                    if (slot) setSelectedSlot(slot);
+                 }}
                />
                <EquipSlot 
                  label="飾品" icon={Medal} 
                  instance={getEquippedInstance(EquipmentSlot.Accessory)} 
                  onUnequip={() => dispatch(unequipItem(EquipmentSlot.Accessory))}
+                 onClick={() => {
+                    const id = equipment[EquipmentSlot.Accessory];
+                    const slot = items.find(s => s.instanceId === id);
+                    if (slot) setSelectedSlot(slot);
+                 }}
                />
              </div>
            </div>
@@ -440,11 +470,14 @@ const FilterButton = ({ active, onClick, label }: { active: boolean, onClick: ()
     </button>
 );
 
-const EquipSlot = ({ label, icon: Icon, instance, onUnequip }: { label: string, icon: any, instance: ItemInstance | null, onUnequip: () => void }) => {
+const EquipSlot = ({ label, icon: Icon, instance, onUnequip, onClick }: { label: string, icon: any, instance: ItemInstance | null, onUnequip: () => void, onClick?: () => void }) => {
   const item = instance ? ITEMS[instance.templateId] : null;
 
   return (
-    <div className="flex items-center gap-2 p-2 md:p-3 bg-stone-900/80 rounded border border-stone-800 relative group h-full transition-colors hover:border-stone-700">
+    <div 
+        onClick={onClick}
+        className={`flex items-center gap-2 p-2 md:p-3 bg-stone-900/80 rounded border border-stone-800 relative group h-full transition-colors hover:border-stone-700 ${item ? 'cursor-pointer hover:bg-stone-800/80' : ''}`}
+    >
        <div className={`p-1.5 md:p-2.5 rounded border ${instance ? 'border-amber-900/50 bg-amber-950/20' : 'border-stone-800 bg-stone-950'} text-stone-500`}>
          <Icon className={`w-4 h-4 md:w-6 md:h-6 ${instance ? getQualityTextColor(instance.quality) : ''}`} />
        </div>
@@ -455,7 +488,13 @@ const EquipSlot = ({ label, icon: Icon, instance, onUnequip }: { label: string, 
          </div>
        </div>
        {item && (
-         <button onClick={onUnequip} className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-red-900/90 text-red-100 text-[10px] md:text-xs px-2 py-1 rounded shadow-lg transition-all hover:bg-red-800 z-10 flex items-center gap-1">
+         <button 
+            onClick={(e) => {
+                e.stopPropagation();
+                onUnequip();
+            }} 
+            className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-red-900/90 text-red-100 text-[10px] md:text-xs px-2 py-1 rounded shadow-lg transition-all hover:bg-red-800 z-10 flex items-center gap-1"
+         >
            <MinusCircle className="w-3 h-3 md:w-4 md:h-4" /> 卸下
          </button>
        )}
