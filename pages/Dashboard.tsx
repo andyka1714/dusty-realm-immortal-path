@@ -343,6 +343,11 @@ export const Dashboard: React.FC = () => {
                    </div>
                 )}
               </div>
+              <div className="flex justify-end mt-1 px-1">
+                 <span className="text-[10px] text-stone-500 font-mono tracking-wide">
+                    {Math.floor(currentExp).toLocaleString()} <span className="text-stone-600">/</span> {Math.floor(maxExp).toLocaleString()}
+                 </span>
+              </div>
             </div>
           </div>
         </div>
