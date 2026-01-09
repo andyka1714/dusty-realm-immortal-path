@@ -423,17 +423,17 @@ export const REALM_BASE_STATS: Record<MajorRealm, { hp: number; mp: number }> = 
 
 export const REALM_EXP_CONFIG: Record<MajorRealm, { base: number; growth: number; isLinear?: boolean }> = {
     [MajorRealm.Mortal]: { base: 100, growth: 1, isLinear: true },
-    [MajorRealm.QiRefining]: { base: 1000, growth: 1.25 },
-    [MajorRealm.Foundation]: { base: 15000, growth: 1.15 },
-    [MajorRealm.GoldenCore]: { base: 100000, growth: 1.14 },
-    [MajorRealm.NascentSoul]: { base: 1000000, growth: 1.13 },
-    [MajorRealm.SpiritSevering]: { base: 10000000, growth: 1.12 },
-    [MajorRealm.VoidRefining]: { base: 50000000, growth: 1.11 },
-    [MajorRealm.Fusion]: { base: 200000000, growth: 1.10 },
-    [MajorRealm.Mahayana]: { base: 1000000000, growth: 1.09 },
-    [MajorRealm.Tribulation]: { base: 5000000000, growth: 1.08 },
-  [MajorRealm.Immortal]: { base: 100000000000, growth: 1.06 },
-  [MajorRealm.ImmortalEmperor]: { base: 0, growth: 0 }, // No Exp
+    [MajorRealm.QiRefining]: { base: 2500, growth: 1.25 },
+    [MajorRealm.Foundation]: { base: 75000, growth: 1.15 },
+    [MajorRealm.GoldenCore]: { base: 1250000, growth: 1.14 },
+    [MajorRealm.NascentSoul]: { base: 20000000, growth: 1.13 },
+    [MajorRealm.SpiritSevering]: { base: 300000000, growth: 1.12 },
+    [MajorRealm.VoidRefining]: { base: 5000000000, growth: 1.11 },
+    [MajorRealm.Fusion]: { base: 75000000000, growth: 1.10 },
+    [MajorRealm.Mahayana]: { base: 1000000000000, growth: 1.09 },
+    [MajorRealm.Tribulation]: { base: 15000000000000, growth: 1.08 },
+    [MajorRealm.Immortal]: { base: 50000000000000, growth: 1.06 },
+    [MajorRealm.ImmortalEmperor]: { base: 0, growth: 0 }, // No Exp
 };
 
 // Growth Config for Minor Realm Breakthroughs
