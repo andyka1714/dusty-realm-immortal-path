@@ -200,6 +200,10 @@ const characterSlice = createSlice({
     deductSpiritStones: (state, action: PayloadAction<number>) => {
       state.spiritStones = Math.max(0, state.spiritStones - action.payload);
     },
+
+    upgradeGatheringLevel: (state) => {
+        state.gatheringLevel += 1;
+    },
     
     // ... (Keep processOfflineGains, tickCultivation, toggleSeclusion, manualCultivate, gainAttribute, attemptBreakthrough) ...
 
@@ -374,6 +378,9 @@ const characterSlice = createSlice({
 
       let rate = rootBone * realmMod * spiritMod * gatheringMod;
       if (state.isInSeclusion) rate *= 2.0;
+
+      // Manual Efficiency: 33%
+      rate *= 0.33;
 
       state.currentExp += rate;
       state.lastManualCultivateTime = now;
@@ -554,5 +561,5 @@ const characterSlice = createSlice({
   },
 });
 
-export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, startSeclusion, processOfflineGains, reincarnate, gainAttribute, gainExperience, consumeItem, updateLastProcessedYear, updateLastWarningAge, addSpiritStones, deductSpiritStones } = characterSlice.actions;
+export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, startSeclusion, processOfflineGains, reincarnate, gainAttribute, gainExperience, consumeItem, updateLastProcessedYear, updateLastWarningAge, addSpiritStones, deductSpiritStones, upgradeGatheringLevel } = characterSlice.actions;
 export default characterSlice.reducer;

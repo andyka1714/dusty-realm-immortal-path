@@ -175,9 +175,11 @@ export const Dashboard: React.FC = () => {
   const prevExpRef = React.useRef(currentExp);
   const [showGain, setShowGain] = React.useState(false);
   const [gainKey, setGainKey] = React.useState(0);
+  const [gainedAmount, setGainedAmount] = React.useState(0);
 
   React.useEffect(() => {
     if (currentExp > prevExpRef.current) {
+         setGainedAmount(currentExp - prevExpRef.current);
          setShowGain(true);
          setGainKey(k => k + 1); 
     }
@@ -339,7 +341,7 @@ export const Dashboard: React.FC = () => {
                      className="absolute bottom-full left-1/2 mb-1 text-emerald-400 font-bold font-mono text-lg pointer-events-none z-20"
                      style={{ animation: 'floatUpFade 1.5s ease-out forwards' }}
                    >
-                     +{Number(cultivationRate.toFixed(1))}
+                     +{Number(gainedAmount.toFixed(1))}
                    </div>
                 )}
               </div>

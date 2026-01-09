@@ -1,17 +1,14 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/store';
-import { upgradeGatheringArray } from '../store/slices/workshopSlice';
+import { upgradeGatheringLevel, deductSpiritStones } from '../store/slices/characterSlice';
 import { addLog } from '../store/slices/logSlice';
 import { MajorRealm } from '../types';
 import { Hammer, CircleDashed, ArrowUpCircle, Flame } from 'lucide-react';
 
 export const Workshop: React.FC = () => {
   const dispatch = useDispatch();
-  const { majorRealm, spiritStones } = useSelector((state: RootState) => state.character);
-  const { gatheringLevel } = useSelector((state: RootState) => state.workshop);
-
-
+  const { majorRealm, spiritStones, gatheringLevel } = useSelector((state: RootState) => state.character);
 
   // Exponential Cost Curve: 100 * 1.5^(Level-1)
   // Lv1: 100, Lv10: ~3.8k, Lv20: ~220k, Lv30: ~12M
@@ -19,9 +16,8 @@ export const Workshop: React.FC = () => {
 
   const handleUpgradeGathering = () => {
      if (spiritStones >= upgradeCost) {
-         // Need a deductSpiritStones action, simulating logic here
-         // In real app, dispatch(deductMoney(cost))
-         dispatch(upgradeGatheringArray());
+         dispatch(deductSpiritStones(upgradeCost));
+         dispatch(upgradeGatheringLevel());
          dispatch(addLog({ message: `消耗 ${upgradeCost} 靈石，聚靈陣升級至 Lv.${gatheringLevel + 1}`, type: 'success' }));
      } else {
          dispatch(addLog({ message: "靈石不足，無法升級聚靈陣。", type: 'danger' }));
