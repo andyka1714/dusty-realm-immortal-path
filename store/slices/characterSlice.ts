@@ -112,6 +112,7 @@ const initialState: CharacterState = {
   attributes: { ...INITIAL_BASE_STATS },
   spiritStones: 0,
   cultivationRate: 0,
+  cultivationCycle: 0,
   isBreakthroughAvailable: false,
   isInSeclusion: false,
   gatheringLevel: 1, 
@@ -143,6 +144,7 @@ const characterSlice = createSlice({
       state.currentExp = 0;
       state.maxExp = calculateMaxExp(MajorRealm.Mortal, 0);
       state.spiritStones = 0;
+      state.cultivationCycle = 0;
       state.isInSeclusion = false;
       state.lastSaveTime = Date.now();
       state.lastBreakthroughResult = undefined;
@@ -319,15 +321,20 @@ const characterSlice = createSlice({
       rate *= PASSIVE_CULTIVATION_PENALTY;
 
       state.cultivationRate = parseFloat(rate.toFixed(1));
-
+      
       if (state.isBreakthroughAvailable) return;
 
-      state.currentExp += state.cultivationRate;
-
-      if (state.currentExp >= state.maxExp) {
-        state.currentExp = state.maxExp;
-        state.isBreakthroughAvailable = true;
-        state.isInSeclusion = false;
+      // 5-second Cycle Logic
+      state.cultivationCycle = (state.cultivationCycle || 0) + 1;
+      if (state.cultivationCycle >= 5) {
+          state.cultivationCycle = 0;
+          state.currentExp += state.cultivationRate; 
+          
+          if (state.currentExp >= state.maxExp) {
+            state.currentExp = state.maxExp;
+            state.isBreakthroughAvailable = true;
+            state.isInSeclusion = false;
+          }
       }
     },
 

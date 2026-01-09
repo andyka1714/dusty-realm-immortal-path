@@ -110,6 +110,7 @@ export interface CharacterState {
   spiritStones: number;
   
   cultivationRate: number;
+  cultivationCycle: number; // For 5s tick logic
   isBreakthroughAvailable: boolean;
   
   isInSeclusion: boolean;

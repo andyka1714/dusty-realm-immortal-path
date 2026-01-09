@@ -17,6 +17,16 @@ import { IntroSequence } from '../components/IntroSequence';
 import { Play, ChevronsUp, Moon, Info, Skull, AlertTriangle, Zap, Lock } from 'lucide-react';
 import { MajorRealm, SpiritRootType } from '../types';
 
+
+// Custom Animation Style
+const floatUpStyle = `
+@keyframes floatUpFade {
+  0% { transform: translate(-50%, 0); opacity: 0; }
+  10% { transform: translate(-50%, -10px); opacity: 1; }
+  100% { transform: translate(-50%, -30px); opacity: 0; }
+}
+`;
+
 export const Dashboard: React.FC = () => {
   const dispatch = useDispatch();
   const character = useSelector((state: RootState) => state.character);
@@ -160,6 +170,22 @@ export const Dashboard: React.FC = () => {
   };
 
   const successRate = calculateSuccessRate();
+  
+  // Floating Gain Animation Logic
+  const prevExpRef = React.useRef(currentExp);
+  const [showGain, setShowGain] = React.useState(false);
+  const [gainKey, setGainKey] = React.useState(0);
+
+  React.useEffect(() => {
+    if (currentExp > prevExpRef.current) {
+         setShowGain(true);
+         setGainKey(k => k + 1); 
+    }
+    prevExpRef.current = currentExp;
+  }, [currentExp]);
+
+  // Calculate Exp Percentage for display
+  const expPercentage = Math.min(100, Math.max(0, (currentExp / maxExp) * 100));
 
   // Calculations for tooltips
   const currentAgeYearStr = (age / DAYS_PER_YEAR).toFixed(2);
@@ -265,9 +291,15 @@ export const Dashboard: React.FC = () => {
             </div>
 
             <div>
-              <div className="flex justify-between items-end mb-2">
-                <span className="text-stone-400 text-xs">修為進度</span>
-                <div className="group relative cursor-help">
+              <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center gap-3">
+                    <span className="text-stone-400 text-xs">修為進度</span>
+                    <span className="text-emerald-400 font-bold font-mono text-lg tracking-wider">
+                        {expPercentage.toFixed(1)}%
+                    </span>
+                </div>
+                <div className="group relative cursor-help flex items-center gap-3">
+                    <span className="text-stone-400 text-xs">修練速度</span>
                     {isBreakthroughAvailable ? (
                         <span className="text-lg font-bold text-amber-500 animate-pulse tracking-widest">
                             修為已滿
@@ -275,7 +307,7 @@ export const Dashboard: React.FC = () => {
                     ) : (
                         <>
                            <span className={`text-lg font-mono font-bold ${isInSeclusion ? "text-amber-400 animate-pulse" : "text-emerald-400"}`}>
-                             +{Number(cultivationRate.toFixed(1))} /秒
+                             {Number(cultivationRate.toFixed(1))}
                            </span>
                            {isInSeclusion && <span className="text-[10px] ml-1 text-amber-500 border border-amber-900 px-1 rounded">閉關 x2.0</span>}
                         </>
@@ -287,18 +319,30 @@ export const Dashboard: React.FC = () => {
                         <div>根骨({baseRate}) × 境界({realmMult.toFixed(2)}) × 靈根({spiritMult.toFixed(1)}) × 聚靈({gatherMult.toFixed(2)}) × 狀態({stateMult.toFixed(1)})</div>
                         <div className="text-stone-400">× 自然運轉效率 ({efficiency * 100}%)</div>
                         <div className="border-t border-stone-700 mt-1 pt-1 text-right text-emerald-400 font-bold">
-                          = {finalDisplayRate} /秒
+                          = {finalDisplayRate}
                         </div>
                       </div>
                       </div>
                    </div>
                 </div>
               </div>
-              <ProgressBar 
-                current={currentExp} 
-                max={maxExp} 
-                colorClass={isBreakthroughAvailable ? "bg-amber-400 animate-pulse shadow-[0_0_10px_#f59e0b]" : "bg-gradient-to-r from-emerald-800 to-emerald-500"}
-              />
+              <div className="relative">
+                <style>{floatUpStyle}</style>
+                <ProgressBar 
+                   current={currentExp} 
+                   max={maxExp} 
+                   colorClass={isBreakthroughAvailable ? "bg-amber-400 animate-pulse shadow-[0_0_10px_#f59e0b]" : "bg-gradient-to-r from-emerald-800 to-emerald-500"}
+                />
+                {!isBreakthroughAvailable && showGain && (
+                   <div 
+                     key={gainKey} 
+                     className="absolute bottom-full left-1/2 mb-1 text-emerald-400 font-bold font-mono text-lg pointer-events-none z-20"
+                     style={{ animation: 'floatUpFade 1.5s ease-out forwards' }}
+                   >
+                     +{Number(cultivationRate.toFixed(1))}
+                   </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -306,14 +350,14 @@ export const Dashboard: React.FC = () => {
         {/* 2. Action Buttons Area */}
         <div className="bg-stone-900 border border-stone-800 rounded-xl p-6 relative z-20 hover:z-50 transition-all duration-200">
            
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <div className="flex gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
                  {/* 1. Manual Cultivate */}
                  <div className="flex-1 relative group">
                      <button
                        onClick={handleManualCultivate}
                        disabled={isBreakthroughAvailable || isInSeclusion || manualCooldown > 0}
-                       className="w-full bg-stone-800 hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed text-stone-200 py-4 rounded-lg border border-stone-700 transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden"
+                       className="w-full bg-stone-800 hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed text-stone-200 py-4 rounded-lg border border-stone-700 transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden h-[120px]"
                      >
                        {manualCooldown > 0 && (
                            <div 
@@ -341,7 +385,7 @@ export const Dashboard: React.FC = () => {
                      <button
                        onClick={handleSeclusion}
                        disabled={isBreakthroughAvailable || isInSeclusion || (!isInSeclusion && !canAffordSeclusion)}
-                       className={`w-full py-4 rounded-lg border transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed
+                       className={`w-full py-4 rounded-lg border transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed h-[120px]
                          ${isInSeclusion 
                                 ? "bg-amber-900/30 border-amber-500/50 text-amber-200 shadow-[inset_0_0_20px_rgba(245,158,11,0.2)]" 
                                 : "bg-stone-800 hover:bg-stone-700 border-stone-700 text-stone-200"
@@ -367,8 +411,6 @@ export const Dashboard: React.FC = () => {
                          </div>
                      )}
                  </div>
-              </div>
-
               <button
                 onClick={handleBreakthroughClick}
                 disabled={!isBreakthroughAvailable}
@@ -377,7 +419,7 @@ export const Dashboard: React.FC = () => {
                 `}
               >
                 <div className={`
-                    w-full py-4 rounded-lg border transition-all flex flex-col items-center justify-center gap-2
+                    w-full py-4 rounded-lg border transition-all flex flex-col items-center justify-center gap-2 h-[120px]
                     ${isBreakthroughAvailable 
                         ? "bg-gradient-to-br from-amber-700 to-amber-900 border-amber-500 text-amber-100 shadow-[0_0_15px_rgba(245,158,11,0.4)] animate-pulse hover:scale-[1.02]" 
                         : "bg-stone-950 border-stone-800 text-stone-700 opacity-60"
