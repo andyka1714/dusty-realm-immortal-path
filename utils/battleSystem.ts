@@ -58,7 +58,7 @@ export const calculatePlayerStats = (
     attributes: BaseAttributes, 
     majorRealm: MajorRealm, 
     spiritRootId: SpiritRootId,
-    equipmentStats: Partial<BaseAttributes & { attack: number, defense: number, speed: number, hp: number, mp: number, crit: number, dodge: number }> = {},
+    equipmentStats: Partial<BaseAttributes & { attack: number, defense: number, speed: number, hp: number, mp: number, crit: number, dodge: number, magic: number, blockRate: number, regenHp: number }> = {},
     name: string = '道友'
 ): PlayerCombatStats => {
   const base = REALM_BASE_STATS[majorRealm];
@@ -87,7 +87,7 @@ export const calculatePlayerStats = (
   maxMp += (equipmentStats.mp || 0);
   attack += (equipmentStats.attack || 0);
   defense += (equipmentStats.defense || 0);
-  // magic += (equipmentStats.magic || 0); // If items add magic atk specifically
+  magic += (equipmentStats.magic || 0);
 
   // 4. Percentage Multipliers (Spirit Root, etc.)
   if (rootBonuses.hpPercent) maxHp *= (1 + rootBonuses.hpPercent / 100);
@@ -122,7 +122,7 @@ export const calculatePlayerStats = (
 
   // New Derived Stats
   const critDamage = 150 + (effectiveInsight * 0.2); // Base 150%, +0.2% per Insight
-  const blockRate = effectivePhysique * 0.1; // 0.1% per Physique
+  const blockRate = (effectivePhysique * 0.1) + (equipmentStats.blockRate || 0); // 0.1% per Physique + Equipment
   
   // Alchemy & Crafting (Defined in Spirit Root Bonuses)
   const alchemyBonus = rootDetails.bonuses.alchemyBonus || 0;
@@ -135,7 +135,7 @@ export const calculatePlayerStats = (
   const cultivationSpeedBonus = 0;
 
   const damageReduction = rootBonuses.damageReduction || 0;
-  const regenHp = rootBonuses.hpRegen || 0;
+  const regenHp = (rootBonuses.hpRegen || 0) + (equipmentStats.regenHp || 0);
   const element = SPIRIT_ROOT_TO_ELEMENT[spiritRootId] || ElementType.None;
 
   return {
@@ -267,15 +267,23 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
         enemyDmg = Math.max(1, Math.floor(enemyDmg));
 
         const isDodge = Math.random() * 100 < player.dodge;
-        
+        const isBlock = Math.random() * 100 < player.blockRate;
+
         if (isDodge) {
             logs.push({ turn, isPlayer: false, message: `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 發動攻擊，但被你靈巧地閃過了！`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
         } else {
+             if (isBlock) {
+                 enemyDmg = Math.floor(enemyDmg * 0.5); // Block reduces damage by 50%
+                 logs.push({ turn, isPlayer: false, message: `【格擋】你舉盾擋下了部分攻擊！傷害減半。`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp }); // Log block separately or combine? Prefer combine in next log.
+                 // Actually let's just modify the damage and append "(Blocked)" to the message below or log it distinctively.
+                 // Let's log a block message FIRST, then the damage log.
+             }
+
              playerHp = Math.max(0, playerHp - enemyDmg);
              logs.push({
                 turn,
                 isPlayer: false,
-                message: `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 反擊，造成 <dmg>${enemyDmg}</dmg> 點傷害！`,
+                message: `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 反擊，${isBlock ? '被你格擋，' : ''}造成 <dmg>${enemyDmg}</dmg> 點傷害！`,
                 damage: enemyDmg,
                 playerHp,
                 playerMaxHp: player.maxHp,

@@ -316,6 +316,7 @@ export interface EquipmentStats extends Partial<BaseAttributes> {
   critDamage?: number;
   dodge?: number;
   blockRate?: number;
+  regenHp?: number;
 }
 
 export interface EquipmentItem extends BaseItem {

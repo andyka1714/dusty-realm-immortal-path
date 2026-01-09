@@ -9,18 +9,18 @@ export const ELITE_ENEMIES: Record<string, Enemy> = {
     'm7_e1': createEnemy('m7_e1', '腐爛力士', MajorRealm.Mortal, EnemyRank.Elite, 800, 55, 30, ElementType.Earth, ['novice_sword', 'wooden_shield', 'straw_hat', 'novice_robe', 'straw_sandals', 'wooden_charm', 'spirit_stone'], 150, MINOR_REALM.PEAK, '力'),
     
     // qi
-    'm8_e1': createEnemy('m8_e1', '碧眼魔虎', MajorRealm.QiRefining, EnemyRank.Elite, 6000, 320, 150, ElementType.Wood, [], 500, MINOR_REALM.LATE, '虎'),
-    'm9_e1': createEnemy('m9_e1', '狂牛首領', MajorRealm.QiRefining, EnemyRank.Elite, 8000, 300, 200, ElementType.Earth, [], 600, MINOR_REALM.LATE, '牛'),
-    'm10_e1': createEnemy('m10_e1', '古道殘將', MajorRealm.QiRefining, EnemyRank.Elite, 7500, 350, 250, ElementType.Metal, [], 650, MINOR_REALM.LATE, '將'),
-    'm11_e1': createEnemy('m11_e1', '雪山巨猿', MajorRealm.QiRefining, EnemyRank.Elite, 12000, 320, 250, ElementType.Water, [], 700, MINOR_REALM.LATE, '猿'),
-    'm12_e1': createEnemy('m12_e1', '腐澤巨蟒首領', MajorRealm.QiRefining, EnemyRank.Elite, 9000, 320, 180, ElementType.Water, [], 700, MINOR_REALM.LATE, '蟒'),
-    'm13_e1': createEnemy('m13_e1', '陰風谷大鬼', MajorRealm.QiRefining, EnemyRank.Elite, 8500, 380, 120, ElementType.Water, [], 750, MINOR_REALM.LATE, '鬼'),
-    'm14_e1': createEnemy('m14_e1', '寒潭水怪衛士', MajorRealm.QiRefining, EnemyRank.Elite, 11000, 350, 220, ElementType.Water, [], 800, MINOR_REALM.PEAK, '怪'),
-    'm15_e1': createEnemy('m15_e1', '廢墟將軍', MajorRealm.QiRefining, EnemyRank.Elite, 10000, 340, 300, ElementType.Metal, [], 800, MINOR_REALM.PEAK, '將'),
-    'm16_e1': createEnemy('m16_e1', '雷暴閃靈王', MajorRealm.QiRefining, EnemyRank.Elite, 9500, 420, 150, ElementType.Metal, [], 850, MINOR_REALM.PEAK, '靈'),
-    'm17_e1': createEnemy('m17_e1', '雷澤隼王', MajorRealm.QiRefining, EnemyRank.Elite, 13000, 400, 180, ElementType.Metal, [], 900, MINOR_REALM.PEAK, '隼'),
-    'm18_e1': createEnemy('m18_e1', '迷影猴王', MajorRealm.QiRefining, EnemyRank.Elite, 9000, 360, 200, ElementType.Wood, [], 900, MINOR_REALM.PEAK, '猴'),
-    'm19_e1': createEnemy('m19_e1', '虎嘯守衛虎', MajorRealm.QiRefining, EnemyRank.Elite, 15000, 450, 280, ElementType.Wood, [], 1000, MINOR_REALM.PEAK, '虎'),
+    'm8_e1': createEnemy('m8_e1', '碧眼魔虎', MajorRealm.QiRefining, EnemyRank.Elite, 3800, 330, 140, ElementType.Wood, [], 500, MINOR_REALM.LATE, '虎'), // High Atk
+    'm9_e1': createEnemy('m9_e1', '狂牛首領', MajorRealm.QiRefining, EnemyRank.Elite, 4600, 270, 160, ElementType.Earth, [], 600, MINOR_REALM.LATE, '牛'), // Tank
+    'm10_e1': createEnemy('m10_e1', '古道殘將', MajorRealm.QiRefining, EnemyRank.Elite, 4000, 300, 150, ElementType.Metal, [], 650, MINOR_REALM.LATE, '將'), // Balanced
+    'm11_e1': createEnemy('m11_e1', '雪山巨猿', MajorRealm.QiRefining, EnemyRank.Elite, 4500, 280, 150, ElementType.Water, [], 700, MINOR_REALM.LATE, '猿'), // High HP
+    'm12_e1': createEnemy('m12_e1', '腐澤巨蟒首領', MajorRealm.QiRefining, EnemyRank.Elite, 4100, 310, 140, ElementType.Water, [], 700, MINOR_REALM.LATE, '蟒'), // Balanced
+    'm13_e1': createEnemy('m13_e1', '陰風谷大鬼', MajorRealm.QiRefining, EnemyRank.Elite, 3200, 360, 120, ElementType.Water, [], 750, MINOR_REALM.LATE, '鬼'), // Glass Cannon (-20% HP/Def, +20% Atk)
+    'm14_e1': createEnemy('m14_e1', '寒潭水怪衛士', MajorRealm.QiRefining, EnemyRank.Elite, 4400, 270, 170, ElementType.Water, [], 800, MINOR_REALM.PEAK, '怪'), // Tank
+    'm15_e1': createEnemy('m15_e1', '廢墟將軍', MajorRealm.QiRefining, EnemyRank.Elite, 4100, 310, 150, ElementType.Metal, [], 800, MINOR_REALM.PEAK, '將'), // Strong Balanced
+    'm16_e1': createEnemy('m16_e1', '雷暴閃靈王', MajorRealm.QiRefining, EnemyRank.Elite, 3500, 350, 130, ElementType.Metal, [], 850, MINOR_REALM.PEAK, '靈'), // High Atk
+    'm17_e1': createEnemy('m17_e1', '雷澤隼王', MajorRealm.QiRefining, EnemyRank.Elite, 3600, 340, 140, ElementType.Metal, [], 900, MINOR_REALM.PEAK, '隼'), // Fast
+    'm18_e1': createEnemy('m18_e1', '迷影猴王', MajorRealm.QiRefining, EnemyRank.Elite, 3800, 320, 140, ElementType.Wood, [], 900, MINOR_REALM.PEAK, '猴'), // Agile
+    'm19_e1': createEnemy('m19_e1', '虎嘯守衛虎', MajorRealm.QiRefining, EnemyRank.Elite, 4000, 300, 150, ElementType.Wood, [], 1000, MINOR_REALM.PEAK, '虎'), // Standard
 
     // foundation
     'm20_e1': createEnemy('m20_e1', '古道狼王', MajorRealm.Foundation, EnemyRank.Elite, 30000, 1500, 800, ElementType.Water, [], 2000, MINOR_REALM.LATE, '狼'),
