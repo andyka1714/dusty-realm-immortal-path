@@ -715,14 +715,32 @@ const getCategoryName = (category: ItemCategory) => {
 
 const getAttributeName = (key: string) => {
     switch(key) {
+        // Base Stats
         case 'attack': return '攻擊';
         case 'defense': return '防禦';
         case 'hp': return '氣血';
         case 'maxHp': return '氣血上限';
+        case 'mp': return '真元';
+        case 'maxMp': return '真元上限';
         case 'speed': return '速度';
+        
+        // Advanced Combat Stats
         case 'crit': return '暴擊';
-        case 'physique': return '體魄'; // Added translation
-        case 'fortune': return '氣運';   // Added translation
+        case 'critDamage': return '暴傷';
+        case 'dodge': return '閃避';
+        case 'blockRate': return '格擋';
+        case 'res': return '抗性'; // Resistance
+        case 'magic': return '術法'; // Magic Attack
+        case 'regenHp': return '回春'; // HP Regen
+
+        // Primary Attributes
+        case 'physique': return '體魄';
+        case 'rootBone': return '根骨';
+        case 'insight': return '神識';
+        case 'comprehension': return '悟性';
+        case 'fortune': return '福緣';
+        case 'charm': return '魅力';
+        
         default: return key;
     }
 }
