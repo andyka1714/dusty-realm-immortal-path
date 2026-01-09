@@ -27,11 +27,11 @@ export const CONSUMABLE_ITEMS: Record<string, Item> = {
   // --- Breakthrough Items ---
   'bt_mortal_qi': { 
     id: 'bt_mortal_qi', name: '引氣洗髓丹', category: ItemCategory.Breakthrough, subType: ConsumableType.Pill,
-    description: '伐毛洗髓，開啟丹田納氣之能。突破練氣期必備。', price: 100, quality: ItemQuality.Medium, maxStack: 1,
+    description: '伐毛洗髓，開啟丹田納氣之能。突破練氣期必備。', price: 100, quality: ItemQuality.Immortal, maxStack: 1,
     effects: [] 
   },
-  'bt_qi_foundation': { id: 'bt_qi_foundation', name: '五行築基臺', category: ItemCategory.Breakthrough, subType: ConsumableType.Other, description: '將氣態靈力築成穩固基石的陣法核心。突破築基期必備。', price: 500, quality: ItemQuality.Medium, maxStack: 1, effects: [] },
-  'bt_foundation_gold': { id: 'bt_foundation_gold', name: '混沌降塵丹', category: ItemCategory.Breakthrough, subType: ConsumableType.Pill, description: '凝液成丹，抵禦凝丹時的靈力反噬。突破金丹期必備。', price: 2000, quality: ItemQuality.High, maxStack: 1, effects: [] },
+  'bt_qi_foundation': { id: 'bt_qi_foundation', name: '五行築基臺', category: ItemCategory.Breakthrough, subType: ConsumableType.Other, description: '將氣態靈力築成穩固基石的陣法核心。突破築基期必備。', price: 500, quality: ItemQuality.Immortal, maxStack: 1, effects: [] },
+  'bt_foundation_gold': { id: 'bt_foundation_gold', name: '混沌降塵丹', category: ItemCategory.Breakthrough, subType: ConsumableType.Pill, description: '凝液成丹，抵禦凝丹時的靈力反噬。突破金丹期必備。', price: 2000, quality: ItemQuality.Immortal, maxStack: 1, effects: [] },
   'bt_gold_nascent': { id: 'bt_gold_nascent', name: '七彩結嬰寶丹', category: ItemCategory.Breakthrough, subType: ConsumableType.Pill, description: '碎丹成嬰，賦予元嬰五彩神光。突破元嬰期必備。', price: 10000, quality: ItemQuality.Immortal, maxStack: 1, effects: [] },
   'bt_nascent_spirit': { id: 'bt_nascent_spirit', name: '定神混元香', category: ItemCategory.Breakthrough, subType: ConsumableType.Other, description: '助神識與肉體分離，遨遊虛空而不散。突破化神期必備。', price: 50000, quality: ItemQuality.Immortal, maxStack: 1, effects: [] },
   'bt_spirit_void': { id: 'bt_spirit_void', name: '太虛破障丹', category: ItemCategory.Breakthrough, subType: ConsumableType.Pill, description: '觸摸虛空壁壘，以虛化實。突破煉虛期必備。', price: 150000, quality: ItemQuality.Immortal, maxStack: 1, effects: [] },

@@ -734,6 +734,11 @@ export const Adventure: React.FC = () => {
                                       if (qVal === 1) itemStr += '(中品)';
                                       if (qVal === 2) itemStr += '(上品)';
                                       if (qVal === 3) itemStr += '(仙品)';
+                                  } else {
+                                      qVal = item.quality || 0;
+                                      if (qVal === 1) itemStr += '(中品)';
+                                      if (qVal === 2) itemStr += '(上品)';
+                                      if (qVal === 3) itemStr += '(仙品)';
                                   } 
                                   
                                   let finalStr = `<item q="${qVal}">${itemStr}</item>`;

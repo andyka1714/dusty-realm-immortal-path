@@ -78,6 +78,17 @@ export const generateDrops = (enemy: Enemy): { itemId: string, count: number, in
     const possibleDrops = enemy.drops;
     if (possibleDrops.length === 0) return [];
 
+    // GUARANTEED DROPS (Boss Only)
+    // Always drop Breakthrough items if present in the drop table
+    if (enemy.rank === EnemyRank.Boss) {
+        possibleDrops.forEach(pId => {
+            const t = ITEMS[pId];
+            if (t && t.category === ItemCategory.Breakthrough) {
+                 drops.push({ itemId: pId, count: 1 });
+            }
+        });
+    }
+
     for (let i = 0; i < count; i++) {
         // Roll for item
         const itemId = possibleDrops[Math.floor(Math.random() * possibleDrops.length)];

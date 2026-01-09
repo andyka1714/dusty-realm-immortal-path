@@ -308,6 +308,13 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
                     if (qVal === ItemQuality.Medium) qStr = '(中品)';
                     if (qVal === ItemQuality.High) qStr = '(上品)';
                     if (qVal === ItemQuality.Immortal) qStr = '(仙品)';
+                } else if (item) {
+                     qVal = item.quality || 0;
+                     if (qVal >= ItemQuality.Medium) {
+                        if (qVal === ItemQuality.Medium) qStr = '(中品)';
+                        if (qVal === ItemQuality.High) qStr = '(上品)';
+                        if (qVal === ItemQuality.Immortal) qStr = '(仙品)';
+                     }
                 }
                 return `<item q="${qVal}">${name}${qStr}</item>`;
             });
