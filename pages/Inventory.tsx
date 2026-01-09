@@ -391,13 +391,57 @@ export const Inventory: React.FC = () => {
                             {/* Base Stats */}
                             {Object.keys(selectedSlot.instance.stats).length > 0 && (
                                  <div className="text-sm text-stone-300">
-                                    <div className="text-xs text-stone-500 mb-1">基礎屬性</div>
-                                    {Object.entries(selectedSlot.instance.stats).map(([key, val]) => (
-                                        <div key={key} className="flex justify-between">
-                                            <span>{getAttributeName(key)}</span>
-                                            <span className="font-mono text-amber-500">+{val}</span>
-                                        </div>
-                                    ))}
+                                    <div className="flex justify-between items-center mb-1">
+                                        <div className="text-xs text-stone-500">基礎屬性</div>
+                                        {/* Comparison Header */}
+                                        {(() => {
+                                            if (selectedItemDef.category !== ItemCategory.Equipment) return null;
+                                            if (isEquipped(selectedSlot.instanceId)) return null;
+                                            
+                                            // Find equipped item for comparison
+                                            const equipSlot = (selectedItemDef as any).slot as EquipmentSlot;
+                                            const equippedInstanceId = equipment[equipSlot];
+                                            if (!equippedInstanceId) return null;
+                                            const equippedItem = items.find(i => i.instanceId === equippedInstanceId);
+                                            if (!equippedItem) return null;
+
+                                            return (
+                                                <div className="text-xs text-stone-600">
+                                                    比較: <span className="text-stone-400">{ITEMS[equippedItem.itemId].name}</span>
+                                                </div>
+                                            );
+                                        })()}
+                                    </div>
+
+                                    {Object.entries(selectedSlot.instance.stats).map(([key, val]) => {
+                                        // Calculate Diff
+                                        let diff = null;
+                                        if (selectedItemDef.category === ItemCategory.Equipment && !isEquipped(selectedSlot.instanceId)) {
+                                            const equipSlot = (selectedItemDef as any).slot as EquipmentSlot;
+                                            const equippedInstanceId = equipment[equipSlot];
+                                            if (equippedInstanceId) {
+                                                const equippedItem = items.find(i => i.instanceId === equippedInstanceId);
+                                                if (equippedItem && equippedItem.instance?.stats) {
+                                                     const eqVal = (equippedItem.instance.stats as any)[key] || 0;
+                                                     diff = (val as number) - eqVal;
+                                                }
+                                            }
+                                        }
+
+                                        return (
+                                            <div key={key} className="flex justify-between items-center">
+                                                <span>{getAttributeName(key)}</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-mono text-amber-500">+{val}</span>
+                                                    {diff !== null && diff !== 0 && (
+                                                        <span className={clsx("font-mono text-xs", diff > 0 ? "text-emerald-500" : "text-red-500")}>
+                                                            ({diff > 0 ? '+' : ''}{diff})
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                  </div>
                             )}
                             {/* Affixes */}
