@@ -82,7 +82,7 @@ const RAW_MAPS_V60 = [
       { "target_id": 3, "dir": "North", "pos": [30, 0] },
       { "target_id": 15, "dir": "East", "pos": [60, 30] }
     ],
-    "boss": { "name": "守塚老屍", "realm": "凡人巔峰", "element": "陰", "pos": [30, 30] }
+    "boss": { "name": "守塚老屍", "realm": "凡人巔峰", "element": "陰", "pos": [45, 45] }
   },
   {
     "id": 8, "name": "萬獸林入口", "realm": "練氣", "size": [100, 100], "pos": [-2, 0], "theme": "West",
@@ -520,7 +520,7 @@ const RAW_MAPS_V60 = [
       { "target_id": 53, "dir": "South", "pos": [75, 150] },
       { "target_id": 55, "dir": "North", "pos": [75, 0] }
     ],
-    "boss": { "name": "太虛夢魘", "realm": "煉虛圓滿", "element": "虛空", "pos": [75, 75] }
+    "boss": { "name": "太虛夢魘", "realm": "煉虛圓滿", "element": "虛空", "pos": [120, 120] }
   },
 
   // --- Fusion (55-57) ---
@@ -549,7 +549,7 @@ const RAW_MAPS_V60 = [
       { "target_id": 56, "dir": "South", "pos": [0, 120] },
       { "target_id": 58, "dir": "North", "pos": [0, 0] }
     ],
-    "boss": { "name": "虛空守衛", "realm": "合體大圓滿", "element": "空/混元", "pos": [90, 90] }
+    "boss": { "name": "虛空守衛", "realm": "合體大圓滿", "element": "空/混元", "pos": [150, 150] }
   },
 
   // --- Mahayana (58-59) ---
@@ -569,7 +569,7 @@ const RAW_MAPS_V60 = [
       { "target_id": 58, "dir": "South", "pos": [100, 200] },
       { "target_id": 60, "dir": "North", "pos": [100, 0] }
     ],
-    "boss": { "name": "古神 · 星緯", "realm": "大乘巔峰", "element": "星辰", "pos": [100, 100] }
+    "boss": { "name": "古神 · 星緯", "realm": "大乘巔峰", "element": "星辰", "pos": [160, 160] }
   },
 
   // --- Tribulation (60-61) ---
@@ -589,7 +589,7 @@ const RAW_MAPS_V60 = [
       { "target_id": 60, "dir": "South", "pos": [100, 200] },
       { "target_id": 62, "dir": "North", "pos": [100, 0] }
     ],
-    "boss": { "name": "劫灰守衛", "realm": "渡劫圓滿", "element": "火/劫", "pos": [100, 100] }
+    "boss": { "name": "劫灰守衛", "realm": "渡劫圓滿", "element": "火/劫", "pos": [160, 40] }
   },
 
   // --- Immortal (62-64) ---
@@ -618,7 +618,7 @@ const RAW_MAPS_V60 = [
       { "target_id": 63, "dir": "South", "pos": [125, 250] },
       { "target_id": 65, "dir": "North", "pos": [125, 0] }
     ],
-    "boss": { "name": "巡天神將", "realm": "天仙圓滿", "element": "金/天", "pos": [125, 125] }
+    "boss": { "name": "巡天神將", "realm": "天仙圓滿", "element": "金/天", "pos": [200, 200] }
   },
 
   // --- Golden Immortal (65-66) ---
@@ -648,7 +648,7 @@ const RAW_MAPS_V60 = [
     "portals": [
       { "target_id": 66, "dir": "South", "pos": [150, 300] }
     ],
-    "boss": { "name": "天道意志 · 因果法身", "realm": "仙帝", "element": "全系/天道", "pos": [150, 50] }
+    "boss": { "name": "天道意志 · 因果法身", "realm": "仙帝", "element": "全系/天道", "pos": [250, 50] }
   }
 ];
 
