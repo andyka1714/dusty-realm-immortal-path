@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
 import clsx from 'clsx';
+import { parseBattleLog } from '../utils/logParser';
 
 export const LogPanel: React.FC = () => {
   const logs = useSelector((state: RootState) => state.logs.logs);
@@ -32,7 +33,7 @@ export const LogPanel: React.FC = () => {
             <span className={clsx(
               "leading-relaxed break-words",
               log.type === 'info' && "text-stone-400",
-              log.type === 'gain' && "text-emerald-400", 
+              log.type === 'gain' && "text-stone-300", // Default to neutral for rich text, green handled by tags usually
               log.type === 'danger' && "text-red-400 font-bold", 
               log.type === 'success' && "text-amber-300 font-bold", 
               log.type === 'gold' && "text-yellow-400 font-bold",
@@ -44,7 +45,7 @@ export const LogPanel: React.FC = () => {
               log.type === 'warning-med' && "text-orange-500 font-bold",
               log.type === 'warning-critical' && "text-red-600 font-extrabold animate-pulse drop-shadow-[0_0_5px_rgba(220,38,38,0.8)]"
             )}>
-              {log.message}
+              {parseBattleLog(log.message)}
             </span>
           </div>
         ))}

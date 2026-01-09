@@ -146,7 +146,7 @@ export const calculatePlayerStats = (
   };
 };
 
-export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: boolean; logs: CombatLog[], rewards?: { spiritStones: number, drops: { itemId: string, count: number, instance?: ItemInstance }[] } } => {
+export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: boolean; logs: CombatLog[], rewards?: { spiritStones: number, exp: number, drops: { itemId: string, count: number, instance?: ItemInstance }[] } } => {
   let playerHp = player.hp;
   let enemyHp = enemy.hp;
   const logs: CombatLog[] = [];
@@ -300,11 +300,17 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
     
     // Drop Logic
     const { spiritStones } = getDropRewards(enemy);
+    const exp = enemy.exp || 0;
     const drops = generateDrops(enemy);
 
-    if (spiritStones > 0 || drops.length > 0) {
+    if (spiritStones > 0 || drops.length > 0 || exp > 0) {
         let itemsMsg = '';
-        if (spiritStones > 0) itemsMsg += `<stones>${spiritStones} 靈石</stones>`;
+        if (exp > 0) itemsMsg += `<exp>${exp} 修為</exp>`;
+
+        if (spiritStones > 0) {
+            if (itemsMsg) itemsMsg += '，';
+            itemsMsg += `<stones>${spiritStones} 靈石</stones>`;
+        }
         
         if (drops.length > 0) {
             if (itemsMsg) itemsMsg += '，';
@@ -326,7 +332,7 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
         logs.push({ turn, isPlayer: true, message: `獲得戰利品：${itemsMsg}`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
     }
 
-    return { won, logs, rewards: { spiritStones, drops } };
+    return { won, logs, rewards: { spiritStones, exp, drops } };
 
   } else {
     logs.push({ turn, isPlayer: false, message: `不敵 [${enemy.name}]，身受重傷...`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });

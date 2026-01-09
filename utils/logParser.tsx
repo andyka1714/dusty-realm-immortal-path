@@ -33,10 +33,10 @@ export const parseBattleLog = (message: string) => {
                 const q = parseInt(match[1]);
                 const content = match[2];
                 let color = "text-stone-400";
-                if (q === 1) color = "text-emerald-400";
-                if (q === 2) color = "text-blue-400";
-                if (q === 3) color = "text-purple-400";
-                if (q >= 4) color = "text-amber-500";
+                if (q === 1) color = "text-emerald-400"; // Medium (Green)
+                if (q === 2) color = "text-blue-400";    // High (Blue)
+                if (q === 3) color = "text-amber-400";   // Immortal (Gold)
+                if (q >= 4) color = "text-purple-400";   // Future/Special?
                 return <span key={index} className={`${color} font-bold`}>[{content}]</span>;
             }
         }
@@ -51,6 +51,11 @@ export const parseBattleLog = (message: string) => {
         if (part.startsWith('<acc>')) {
              const content = part.replace(/<\/?acc>/g, '');
              return <span key={index} className="text-amber-500 font-bold">{content}</span>;
+        }
+        
+        if (part.startsWith('<exp>')) {
+             const content = part.replace(/<\/?exp>/g, '');
+             return <span key={index} className="text-emerald-400 font-bold">{content}</span>;
         }
         
         return <span key={index}>{part}</span>;

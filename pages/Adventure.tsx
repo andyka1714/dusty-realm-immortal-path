@@ -15,7 +15,7 @@ import { MOVEMENT_SPEEDS, REALM_NAMES, ELEMENT_COLORS, ELEMENT_NAMES } from '../
 import clsx from 'clsx';
 import { Modal } from '../components/Modal';
 import { getDropRewards } from '@/data/drop_tables';
-import { addSpiritStones } from '@/store/slices/characterSlice';
+import { addSpiritStones, gainExperience } from '@/store/slices/characterSlice';
 import { formatSpiritStone } from '@/utils/currency';
 import AdventureStage from '../components/adventure/AdventureStage';
 
@@ -688,32 +688,57 @@ export const Adventure: React.FC = () => {
              // Process Rewards
               if (battleSnapshot.won && battleSnapshot.rewards) {
                    const { rewards } = battleSnapshot;
-                  // XP Logic
-                  if (currentEnemy) dispatch(addLog({ message: `擊敗 ${currentEnemy.name}，獲得經驗 ${currentEnemy.exp}`, type: 'gain' }));
-                  
-                  if (rewards.spiritStones > 0) {
-                      dispatch(addSpiritStones({ amount: rewards.spiritStones, source: 'battle' }));
-                      dispatch(addLog({ message: `獲得靈石 ${formatSpiritStone(rewards.spiritStones)}`, type: 'gain' }));
+                  // 1. EXP Log
+                  if (currentEnemy) {
+                      const expAmount = rewards.exp > 0 ? rewards.exp : currentEnemy.exp; // Fallback
+                      if (expAmount > 0) {
+                          dispatch(gainExperience(expAmount));
+                          dispatch(addLog({ 
+                              message: `擊敗 <enemy rank="${currentEnemy.rank}">${currentEnemy.name}</enemy>，獲得 <exp>${expAmount} 修為</exp>`, 
+                              type: 'gain' 
+                          }));
+                      }
                   }
 
-                  if (rewards.drops) {
-                      rewards.drops.forEach((drop: any) => {
-                          dispatch(addItem({ itemId: drop.itemId, count: drop.count, instance: drop.instance }));
-                          
-                          const item = ITEMS[drop.itemId];
-                          if (item) {
-                              let msg = `獲得戰利品: ${item.name}`;
-                              if (drop.instance) {
-                                  const q = drop.instance.quality;
-                                  if (q === 1) msg += ' (中品)';
-                                  if (q === 2) msg += ' (上品)';
-                                  if (q === 3) msg += ' (仙品)';
-                              } else if (drop.count > 1) {
-                                  msg += ` x${drop.count}`;
+                  // 2. Loot Log (Combine Stones + Items)
+                  const hasLoot = rewards.spiritStones > 0 || (rewards.drops && rewards.drops.length > 0);
+                  
+                  if (hasLoot) {
+                      let lootMsg = '獲得戰利品：';
+                      const lootParts: string[] = [];
+                      
+                      if (rewards.spiritStones > 0) {
+                          dispatch(addSpiritStones({ amount: rewards.spiritStones, source: 'battle' }));
+                          lootParts.push(`<stones>${formatSpiritStone(rewards.spiritStones)} 靈石</stones>`);
+                      }
+
+                      if (rewards.drops) {
+                          rewards.drops.forEach((drop: any) => {
+                              dispatch(addItem({ itemId: drop.itemId, count: drop.count, instance: drop.instance }));
+                              
+                              const item = ITEMS[drop.itemId];
+                              if (item) {
+                                  let itemStr = item.name;
+                                  let qVal = 0;
+                                  
+                                  if (drop.instance) {
+                                      qVal = drop.instance.quality;
+                                      if (qVal === 0) itemStr += '(下品)';
+                                      if (qVal === 1) itemStr += '(中品)';
+                                      if (qVal === 2) itemStr += '(上品)';
+                                      if (qVal === 3) itemStr += '(仙品)';
+                                  } 
+                                  
+                                  let finalStr = `<item q="${qVal}">${itemStr}</item>`;
+                                  if (drop.count > 1) {
+                                      finalStr += ` x${drop.count}`;
+                                  }
+                                  lootParts.push(finalStr);
                               }
-                              dispatch(addLog({ message: msg, type: 'gold' }));
-                          }
-                      });
+                          });
+                      }
+                      
+                      dispatch(addLog({ message: lootMsg + lootParts.join('，'), type: 'gain' })); // Use 'gain' for neutral grey base
                   }
               } else if (!battleSnapshot.won && currentEnemy) {
                   dispatch(addLog({ message: `不敵 ${currentEnemy.name}，狼狽逃回。`, type: 'danger' }));

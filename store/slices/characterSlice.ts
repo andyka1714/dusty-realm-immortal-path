@@ -540,8 +540,19 @@ const characterSlice = createSlice({
         };
       }
     },
+
+    gainExperience: (state, action: PayloadAction<number>) => {
+      const amount = action.payload;
+      if (state.isBreakthroughAvailable || state.isDead) return;
+      
+      state.currentExp += amount;
+      if (state.currentExp >= state.maxExp) {
+        state.currentExp = state.maxExp;
+        state.isBreakthroughAvailable = true;
+      }
+    },
   },
 });
 
-export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, startSeclusion, processOfflineGains, reincarnate, gainAttribute, consumeItem, updateLastProcessedYear, updateLastWarningAge, addSpiritStones, deductSpiritStones } = characterSlice.actions;
+export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, startSeclusion, processOfflineGains, reincarnate, gainAttribute, gainExperience, consumeItem, updateLastProcessedYear, updateLastWarningAge, addSpiritStones, deductSpiritStones } = characterSlice.actions;
 export default characterSlice.reducer;
