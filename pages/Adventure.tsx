@@ -912,24 +912,57 @@ export const Adventure: React.FC = () => {
                      {playerPosition.x},{playerPosition.y}
                  </div>
             </button>
-            <div className="flex items-center gap-2">
-                 <button
-                    onClick={() => setIsAutoBattling(!isAutoBattling)}
-                    className={clsx(
-                        "p-1.5 rounded backdrop-blur border transition-all group relative",
-                        isAutoBattling 
-                            ? "bg-red-900/80 border-red-500 text-red-200 shadow-[0_0_10px_rgba(220,38,38,0.5)] animate-pulse" 
-                            : "bg-black/50 border-stone-800 text-stone-500 hover:text-stone-300 hover:border-stone-600"
-                    )}
-                 >
-                     <Swords size={14} />
-                     
-                     {/* Tooltip */}
-                     <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 bg-black/90 border border-stone-800 text-[10px] text-stone-300 px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                        {isAutoBattling ? "停止掛機" : "自動戰鬥"}
-                     </span>
-                 </button>
-                 <div className="text-stone-400 text-xs bg-black/50 px-2 py-1 rounded backdrop-blur border border-stone-800 font-bold tracking-wider">{mapData?.name}</div>
+             <div className="flex flex-col items-end gap-1">
+                 <div className="flex items-center gap-2">
+                     <button
+                        onClick={() => setIsAutoBattling(!isAutoBattling)}
+                        className={clsx(
+                            "h-8 w-8 flex items-center justify-center rounded backdrop-blur border transition-all group relative",
+                            isAutoBattling 
+                                ? "bg-red-900/80 border-red-500 text-red-200 shadow-[0_0_10px_rgba(220,38,38,0.5)] animate-pulse" 
+                                : "bg-black/50 border-stone-800 text-stone-500 hover:text-stone-300 hover:border-stone-600"
+                        )}
+                     >
+                         <Swords size={16} />
+                         
+                         {/* Tooltip */}
+                         <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 bg-black/90 border border-stone-800 text-[10px] text-stone-300 px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                            {isAutoBattling ? "停止掛機" : "自動戰鬥"}
+                         </span>
+                     </button>
+                     <div className="h-8 flex items-center text-stone-400 text-xs bg-black/50 px-3 rounded backdrop-blur border border-stone-800 font-bold tracking-wider">
+                        {mapData?.name}
+                     </div>
+                 </div>
+                 
+                 {/* Boss Timer */}
+                 {mapData?.enemies.some(e => e.rank === EnemyRank.Boss) && (
+                     <div className="text-[10px] font-mono bg-black/40 px-2 py-0.5 rounded border border-stone-800/50 text-stone-500">
+                         {activeMonsters.some(m => m.rank === EnemyRank.Boss) ? (
+                             <span className="text-red-500 animate-pulse">BOSS 已出現</span>
+                         ) : (
+                             (() => {
+                                 const now = new Date();
+                                 const min = now.getMinutes();
+                                 const sec = now.getSeconds();
+                                 const nextSpawnMin = Math.ceil((min + 1) / 15) * 15;
+                                 let diffMin = nextSpawnMin - min - 1;
+                                 let diffSec = 60 - sec;
+                                 if (diffSec === 60) { diffSec = 0; diffMin += 1; }
+                                 if (diffMin < 0) diffMin += 60; // Wrap around hour
+
+                                 // Special case: if exactly on spawn time (00, 15, etc) but delay hasn't spawned yet
+                                 if (min % 15 === 0 && sec < 10) return <span className="text-stone-400">正在刷新...</span>;
+
+                                 return (
+                                     <span>
+                                         Boss 刷新: <span className="text-amber-500">{diffMin.toString().padStart(2, '0')}:{diffSec.toString().padStart(2, '0')}</span>
+                                     </span>
+                                 );
+                             })()
+                         )}
+                     </div>
+                 )}
              </div>
          </div>
 
