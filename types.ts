@@ -155,11 +155,13 @@ export enum EnemyRank {
   Boss = 'Boss'
 }
 
+export type MinorRealmType = '初期' | '中期' | '後期' | '圓滿';
+
 export interface Enemy {
   id: string;
   name: string;
   realm: MajorRealm;
-  minorRealm?: string; // e.g. '初期', '中期', '後期', '圓滿'
+  minorRealm?: MinorRealmType; // e.g. '初期', '中期', '後期', '圓滿'
   rank: EnemyRank;
   hp: number;
   maxHp: number;

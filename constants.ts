@@ -19,6 +19,16 @@ export const REALM_NAMES: Record<MajorRealm, string> = {
   [MajorRealm.ImmortalEmperor]: '仙帝',
 };
 
+export const MINOR_REALM = {
+  INITIAL: '初期',
+  MID: '中期',
+  LATE: '後期',
+  PEAK: '圓滿',
+} as const;
+
+export type MinorRealmType = typeof MINOR_REALM[keyof typeof MINOR_REALM];
+
+
 // --- MOVEMENT SPEEDS (ms per cell) ---
 export const MOVEMENT_SPEEDS: Record<MajorRealm, number> = {
   [MajorRealm.Mortal]: 500,
