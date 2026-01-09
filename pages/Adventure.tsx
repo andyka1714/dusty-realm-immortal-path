@@ -714,6 +714,13 @@ export const Adventure: React.FC = () => {
 
                       if (rewards.drops) {
                           rewards.drops.forEach((drop: any) => {
+                              // Special Handling: Spirit Stones should be currency, not item
+                              if (drop.itemId === 'spirit_stone') {
+                                  dispatch(addSpiritStones({ amount: drop.count, source: 'battle' }));
+                                  lootParts.push(`<stones>${drop.count} 靈石</stones>`);
+                                  return;
+                              }
+
                               dispatch(addItem({ itemId: drop.itemId, count: drop.count, instance: drop.instance }));
                               
                               const item = ITEMS[drop.itemId];
