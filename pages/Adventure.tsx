@@ -701,57 +701,72 @@ export const Adventure: React.FC = () => {
                   }
 
                   // 2. Loot Log (Combine Stones + Items)
-                  const hasLoot = rewards.spiritStones > 0 || (rewards.drops && rewards.drops.length > 0);
-                  
-                  if (hasLoot) {
-                      let lootMsg = '獲得戰利品：';
-                      const lootParts: string[] = [];
-                      
-                      if (rewards.spiritStones > 0) {
-                          dispatch(addSpiritStones({ amount: rewards.spiritStones, source: 'battle' }));
-                          lootParts.push(`<stones>${formatSpiritStone(rewards.spiritStones)} 靈石</stones>`);
-                      }
 
-                      if (rewards.drops) {
-                          rewards.drops.forEach((drop: any) => {
-                              // Special Handling: Spirit Stones should be currency, not item
-                              if (drop.itemId === 'spirit_stone') {
-                                  dispatch(addSpiritStones({ amount: drop.count, source: 'battle' }));
-                                  lootParts.push(`<stones>${drop.count} 靈石</stones>`);
-                                  return;
-                              }
+                   let spiritStones = rewards.spiritStones || 0;
+                   const drops = rewards.drops || [];
+                   const finalDrops: any[] = [];
+                   let stonesFromDrops = 0;
 
-                              dispatch(addItem({ itemId: drop.itemId, count: drop.count, instance: drop.instance }));
-                              
-                              const item = ITEMS[drop.itemId];
-                              if (item) {
-                                  let itemStr = item.name;
-                                  let qVal = 0;
-                                  
-                                  if (drop.instance) {
-                                      qVal = drop.instance.quality;
-                                      if (qVal === 0) itemStr += '(下品)';
-                                      if (qVal === 1) itemStr += '(中品)';
-                                      if (qVal === 2) itemStr += '(上品)';
-                                      if (qVal === 3) itemStr += '(仙品)';
-                                  } else {
-                                      qVal = item.quality || 0;
-                                      if (qVal === 1) itemStr += '(中品)';
-                                      if (qVal === 2) itemStr += '(上品)';
-                                      if (qVal === 3) itemStr += '(仙品)';
-                                  } 
-                                  
-                                  let finalStr = `<item q="${qVal}">${itemStr}</item>`;
-                                  if (drop.count > 1) {
-                                      finalStr += ` x${drop.count}`;
-                                  }
-                                  lootParts.push(finalStr);
-                              }
-                          });
-                      }
-                      
-                      dispatch(addLog({ message: lootMsg + lootParts.join('，'), type: 'gain' })); // Use 'gain' for neutral grey base
-                  }
+                   drops.forEach((d: any) => {
+                       if (d.itemId === 'spirit_stone') {
+                           stonesFromDrops += d.count;
+                       } else {
+                           finalDrops.push(d);
+                       }
+                   });
+                   
+                   const totalStones = spiritStones + stonesFromDrops;
+
+                   if (totalStones > 0 || finalDrops.length > 0) {
+                       const lootParts: string[] = [];
+
+                       if (totalStones > 0) {
+                           const high = Math.floor(totalStones / 1000000);
+                           const medium = Math.floor((totalStones % 1000000) / 1000);
+                           const low = totalStones % 1000;
+                           
+                           if (high > 0) lootParts.push(`<stones q="2">${high} 上品 靈石</stones>`);
+                           if (medium > 0) lootParts.push(`<stones q="1">${medium} 中品 靈石</stones>`);
+                           if (low > 0) lootParts.push(`<stones q="0">${low} 下品 靈石</stones>`);
+                       }
+
+                       finalDrops.forEach((drop: any) => {
+                           dispatch(addItem({ itemId: drop.itemId, count: drop.count, instance: drop.instance }));
+                           
+                           const item = ITEMS[drop.itemId];
+                           if (item) {
+                               let itemStr = item.name;
+                               let qVal = 0;
+                               
+                               if (drop.instance) {
+                                   qVal = drop.instance.quality;
+                               } else {
+                                   qVal = item ? (item.quality || 0) : 0;
+                               }
+                               
+                                if (qVal === 0) itemStr += '(下品)';
+                                if (qVal === 1) itemStr += '(中品)';
+                                if (qVal === 2) itemStr += '(上品)';
+                                if (qVal === 3) itemStr += '(仙品)';
+                               
+                               let finalStr = `<item q="${qVal}">${itemStr}</item>`;
+                               if (drop.count > 1) {
+                                   finalStr += ` x${drop.count}`;
+                               }
+                               lootParts.push(finalStr);
+                           }
+                       });
+                       
+                       dispatch(addLog({
+                           message: `獲得戰利品：${lootParts.join('，')}`,
+                           type: 'gold' 
+                       }));
+                       
+                       // Dispatch Currency Updates
+                       if (spiritStones > 0) dispatch(addSpiritStones({ amount: spiritStones, source: 'battle' }));
+                       if (stonesFromDrops > 0) dispatch(addSpiritStones({ amount: stonesFromDrops, source: 'battle' }));
+                   }
+
               } else if (!battleSnapshot.won && currentEnemy) {
                   dispatch(addLog({ message: `不敵 ${currentEnemy.name}，狼狽逃回。`, type: 'danger' }));
               }

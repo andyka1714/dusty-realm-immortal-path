@@ -40,7 +40,31 @@ export const parseBattleLog = (message: string) => {
                 return <span key={index} className={`${color} font-bold`}>[{content}]</span>;
             }
         }
-        if (part.startsWith('<stones>')) {
+        if (part.startsWith('<stones')) {
+             const match = part.match(/<stones(?: q="(\d+)")?>(.+?)<\/stones>/);
+             if (match) {
+                 const q = match[1] ? parseInt(match[1]) : 0;
+                 const content = match[2];
+                 let color = "text-stone-400"; // Low/Default
+                 if (q === 1) color = "text-sky-300"; // Medium (Blue-ish) 
+                 // Wait, Medium Item is Emerald(Green), High is Blue.
+                 // Spirit Stones: Low=Stone, Medium=Sky?, High=Purple? 
+                 // Let's align with user expectation or standard wuxia.
+                 // Usually: Low(White/Grey), Med(Green/Blue), High(Purple/Gold)
+                 
+                 // Existing Items: Med=Emerald, High=Blue, Immortal=Amber.
+                 // Let's use:
+                 // Low (q=0): text-stone-400 (Grey)
+                 // Med (q=1): text-sky-300 (Light Blue) - Distinct from Emerald Items
+                 // High (q=2): text-purple-400 (Purple)
+                 // Immortal/Top (q=3): text-amber-400 (Gold)
+                 
+                 if (q === 1) color = "text-sky-300";
+                 if (q === 2) color = "text-purple-400";
+                 
+                 return <span key={index} className={`${color} font-bold`}>{content}</span>;
+             }
+             // Fallback for old simple tags if any
              const content = part.replace(/<\/?stones>/g, '');
              return <span key={index} className="text-sky-300 font-bold">{content}</span>;
         }

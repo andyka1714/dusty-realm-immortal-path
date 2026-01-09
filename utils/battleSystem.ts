@@ -5,6 +5,22 @@ import { getItem } from '../data/items';
 import { getDropRewards } from '../data/drop_tables';
 import { generateDrops } from './dropSystem';
 
+// Helper for Spirit Stone Formatting (1000 conversion)
+const formatSpiritStones = (amount: number): string => {
+    if (amount <= 0) return '';
+    
+    const high = Math.floor(amount / 1000000);
+    const medium = Math.floor((amount % 1000000) / 1000);
+    const low = amount % 1000;
+    
+    let parts: string[] = [];
+    if (high > 0) parts.push(`<stones q="2">${high} 上品 靈石</stones>`);
+    if (medium > 0) parts.push(`<stones q="1">${medium} 中品 靈石</stones>`);
+    if (low > 0) parts.push(`<stones q="0">${low} 下品 靈石</stones>`);
+    
+    return parts.join('，');
+};
+
 interface PlayerCombatStats {
   hp: number;
   maxHp: number;
@@ -278,53 +294,59 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
     turn++;
   }
 
-  const won = playerHp > 0 && enemyHp <= 0;
+    const won = playerHp > 0 && enemyHp <= 0;
   if (won) {
-    logs.push({ turn, isPlayer: true, message: `<acc>擊敗了</acc> <enemy rank="${enemy.rank}">${enemy.name}</enemy>！`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
+    const exp = enemy.exp || 0;
+    logs.push({ turn, isPlayer: true, message: `<acc>擊敗了</acc> <enemy rank="${enemy.rank}">${enemy.name}</enemy>，獲得 <exp>${exp} 修為</exp>`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
     
     // Drop Logic
-    const { spiritStones } = getDropRewards(enemy);
-    const exp = enemy.exp || 0;
+    let { spiritStones } = getDropRewards(enemy);
     const drops = generateDrops(enemy);
+    
+    // Merge Spirit Stone Items into Currency
+    const finalDrops: { itemId: string, count: number, instance?: ItemInstance }[] = [];
+    drops.forEach(d => {
+        if (d.itemId === 'spirit_stone') {
+            spiritStones += d.count;
+        } else {
+            finalDrops.push(d);
+        }
+    });
 
-    if (spiritStones > 0 || drops.length > 0 || exp > 0) {
-        let itemsMsg = '';
-        if (exp > 0) itemsMsg += `<exp>${exp} 修為</exp>`;
+    if (spiritStones > 0 || finalDrops.length > 0) {
+        let lootMsg = '';
 
         if (spiritStones > 0) {
-            if (itemsMsg) itemsMsg += '，';
-            itemsMsg += `<stones>${spiritStones} 靈石</stones>`;
+            lootMsg += formatSpiritStones(spiritStones);
         }
         
-        if (drops.length > 0) {
-            if (itemsMsg) itemsMsg += '，';
-            const dropNames = drops.map(d => {
+        if (finalDrops.length > 0) {
+            if (lootMsg) lootMsg += '，';
+            const dropNames = finalDrops.map(d => {
                 const item = getItem(d.itemId);
                 const name = item ? item.name : d.itemId;
                 let qStr = '';
                 let qVal = 0;
+                
                 if (d.instance) {
                     qVal = d.instance.quality;
-                    if (qVal === ItemQuality.Medium) qStr = '(中品)';
-                    if (qVal === ItemQuality.High) qStr = '(上品)';
-                    if (qVal === ItemQuality.Immortal) qStr = '(仙品)';
                 } else if (item) {
                      qVal = item.quality || 0;
-                     if (qVal >= ItemQuality.Medium) {
-                        if (qVal === ItemQuality.Medium) qStr = '(中品)';
-                        if (qVal === ItemQuality.High) qStr = '(上品)';
-                        if (qVal === ItemQuality.Immortal) qStr = '(仙品)';
-                     }
                 }
+                
+                if (qVal === ItemQuality.Low) qStr = '(下品)'; // Force Low display
+                if (qVal === ItemQuality.Medium) qStr = '(中品)';
+                if (qVal === ItemQuality.High) qStr = '(上品)';
+                if (qVal === ItemQuality.Immortal) qStr = '(仙品)';
+
                 return `<item q="${qVal}">${name}${qStr}</item>`;
             });
-            itemsMsg += dropNames.join('，');
+            lootMsg += dropNames.join('，');
         }
-        logs.push({ turn, isPlayer: true, message: `獲得戰利品：${itemsMsg}`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
+        logs.push({ turn, isPlayer: true, message: `獲得戰利品：${lootMsg}`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
     }
-
+    
     return { won, logs, rewards: { spiritStones, exp, drops } };
-
   } else {
     logs.push({ turn, isPlayer: false, message: `不敵 [${enemy.name}]，身受重傷...`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
   }
