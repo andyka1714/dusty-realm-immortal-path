@@ -19,8 +19,8 @@ export const StatsPanel: React.FC = () => {
 
   // Derived Stats Calculations for Display
   const combatStats = calculatePlayerStats(attributes, majorRealm, spiritRootId, equipmentStats);
-  const hp = combatStats.hp;
-  const mp = combatStats.mp;
+  const hp = Math.floor(combatStats.hp);
+  const mp = Math.floor(combatStats.mp);
   
   const rootDetails = SPIRIT_ROOT_DETAILS[spiritRootId];
   const baseRealmStats = REALM_BASE_STATS[majorRealm];
@@ -158,23 +158,23 @@ export const StatsPanel: React.FC = () => {
             <div>
               <h4 className="text-stone-500 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-2 border-l-2 border-stone-700 pl-2">戰鬥能力</h4>
               <div className="grid grid-cols-2 gap-2">
-                 <StatRow icon={Sword} label="攻擊" value={combatStats.attack} 
+                 <StatRow icon={Sword} label="攻擊" value={Math.floor(combatStats.attack)} 
                    desc="物理攻擊力，影響普通攻擊與物理技能傷害。" highlightColor="text-amber-200" 
                    subDesc={`根骨(${attributes.rootBone})×2 = ${attributes.rootBone*2} | 裝備: +${equipmentStats.attack||0}`} 
                  />
-                 <StatRow icon={Shield} label="防禦" value={combatStats.defense} 
+                 <StatRow icon={Shield} label="防禦" value={Math.floor(combatStats.defense)} 
                    desc="物理防禦力，直接抵扣受到的物理傷害。" highlightColor="text-stone-300" 
                    subDesc={`體魄(${attributes.physique})×1.5 = ${(attributes.physique*1.5).toFixed(1)} | 裝備: +${equipmentStats.defense||0}`} 
                  />
-                 <StatRow icon={Zap} label="法攻" value={combatStats.magic} 
+                 <StatRow icon={Zap} label="法攻" value={Math.floor(combatStats.magic)} 
                    desc="法術攻擊力，影響五行法術的基礎傷害。" highlightColor="text-blue-300" 
                    subDesc={`神識(${attributes.insight})×2 = ${attributes.insight*2} | 裝備: +${equipmentStats.magic||0}`} 
                  />
-                 <StatRow icon={ShieldAlert} label="法防" value={combatStats.res} 
+                 <StatRow icon={ShieldAlert} label="法防" value={Math.floor(combatStats.res)} 
                    desc="法術抗性，抵扣受到的法術與屬性傷害。" highlightColor="text-indigo-300" 
                    subDesc={`神識(${attributes.insight})×1.5 = ${(attributes.insight*1.5).toFixed(1)} | 裝備: +${equipmentStats.res||0}`} 
                  />
-                 <StatRow icon={Wind} label="速度" value={combatStats.speed} 
+                 <StatRow icon={Wind} label="速度" value={Math.floor(combatStats.speed)} 
                    desc="身法速度，決定出手順序與逃跑成功率。" highlightColor="text-cyan-200" 
                    subDesc={`悟性(${attributes.comprehension})×1 = ${attributes.comprehension} | 裝備: +${equipmentStats.speed||0}`} 
                  />
