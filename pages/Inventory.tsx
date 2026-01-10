@@ -59,7 +59,7 @@ export const Inventory: React.FC = () => {
   };
 
   return (
-    <div className="h-full p-6 flex flex-col gap-6 overflow-hidden">
+    <div className="min-h-full md:h-full p-6 flex flex-col gap-6 md:overflow-hidden">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2 md:mb-0">
         <h2 className="text-2xl md:text-3xl font-bold text-stone-200 tracking-widest flex items-center gap-2 shrink-0">
@@ -104,7 +104,7 @@ export const Inventory: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full md:flex-1 md:overflow-hidden">
         {/* Left: Inventory Grid */}
         <div className="md:col-span-2 bg-stone-900/50 border border-stone-800 rounded-xl p-4 md:p-6 overflow-y-auto min-h-[400px]">
            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
@@ -194,7 +194,7 @@ export const Inventory: React.FC = () => {
         </div>
 
         {/* Right: Equipment & Details */}
-        <div className="flex flex-col gap-4 overflow-y-auto">
+        <div className="flex flex-col gap-4 md:overflow-y-auto">
            {/* Equipment Slots */}
            <div className="bg-stone-900 border border-stone-800 rounded-xl p-4 shrink-0">
              <h3 className="text-stone-400 text-sm md:text-base mb-3 font-bold border-b border-stone-800 pb-2 flex justify-between tracking-wider">
