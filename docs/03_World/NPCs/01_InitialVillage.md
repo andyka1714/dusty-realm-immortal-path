@@ -26,7 +26,14 @@
 
 ---
 
-## 3. NPC 列表與詳細規格
+### 3. NPC 列表與詳細規格
+
+Locations relative to **Spawn Point (20, 20)**:
+
+*   **Top-Left (15, 15)**: **General Store (珍寶閣分號)**
+*   **Top-Right (25, 15)**: **Blacksmith (鐵匠鋪)**
+*   **Bottom-Left (15, 25)**: **Scripture Pavilion (藏經閣)**
+*   **Bottom-Right (25, 25)**: **Village Chief (村長家)**
 
 ### A. 雜貨舖 (General Store)
 *   **店名**: 珍寶閣分號 (Treasure Pavilion - Branch)
@@ -54,7 +61,6 @@
 | `novice_sword` | 鏽鐵劍(下品) | 60 | 攻擊+8。符合 20x 掉落比 (3*20=60)。 |
 | `novice_robe` | 粗布衣(下品) | 60 | 防禦+10。符合 20x 掉落比。 |
 | `wooden_shield`| 木鍋蓋(下品) | 40 | 防禦+5。稍低於標準，作為入門副手。 |
-| `whetstone` | 磨刀石 | 10 | 消耗品，短暫增傷。 |
 
 > **設計備註**: 
 > *   商店僅販售**下品 (Low Quality)** 裝備，作為保底手段。
@@ -63,9 +69,10 @@
 
 ---
 
-### C. 技能店 (Skill Shop) -> 建議改為「藏經閣」
+### C. 藏經閣 (Scripture Pavilion)
 *   **店名**: 藏經閣 (Scripture Pavilion)
 *   **NPC**: 傳功長老 (Elder of Techniques)
+*   **位置**: 村莊左下方 (15, 25)
 *   **功能**: 販售基礎功法(被動/主動技能書)。
 *   **現狀分析**: 目前代碼尚未實作主動技能體系，建議透過「持有即生效」或「消耗學習」的道具來呈現。
 
@@ -107,14 +114,7 @@
 
 除了上述基礎 NPC 外，建議新增以下功能型 NPC 以豐富遊戲性：
 
-### E. 客棧 (Inn)
-*   **店名**: 悅來客棧
-*   **NPC**: 賽西施 (Innkeeper Sai)
-*   **功能**:
-    *   **住宿 (Rest)**: 消耗靈石 (e.g. 20)，瞬間恢復 100% HP/MP。比吃藥便宜且快，適合回城整補。
-    *   **打聽消息 (Rumors)**: 花費少量靈石，得知某個地圖 Boss 的刷新時間或特殊掉落資訊。
-
-### F. 遊方郎中/煉丹師 (Alchemist)
+### E. 遊方郎中/煉丹師 (Alchemist)
 *   **位置**: 村口大樹下
 *   **功能**:
     *   **煉丹服務 (Crafting)**: 玩家提供材料 (如 `herb_basic` + `monster_core`) + 手續費，製作成丹藥。

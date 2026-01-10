@@ -1154,6 +1154,26 @@ export const Adventure: React.FC = () => {
                                     style={{ left: `${(m.x / mapData.width) * 100}%`, top: `${(m.y / mapData.height) * 100}%`, transform: 'translate(-50%, -50%)' }}
                                   ></div>
                               ))}
+
+                              {/* NPCs (Brown w/ Text) */}
+                              {mapData.npcs && mapData.npcs.map(npc => (
+                                  <div key={npc.id} 
+                                    className="absolute z-15 flex items-center justify-center bg-[#a0522d] border border-orange-900/50 shadow-sm rounded-sm"
+                                    style={{ 
+                                        left: `${(npc.x / mapData.width) * 100}%`, 
+                                        top: `${(npc.y / mapData.height) * 100}%`, 
+                                        transform: 'translate(-50%, -50%)',
+                                        width: '18px',
+                                        height: '18px',
+                                        fontSize: '10px',
+                                        color: '#ffd700', // Gold text
+                                        fontWeight: 'bold'
+                                    }}
+                                    title={npc.name}
+                                  >
+                                      {npc.symbol}
+                                  </div>
+                              ))}
                            </div>
                            <div className="absolute top-4 right-4 bg-black/70 p-2 rounded text-xs text-stone-400 pointer-events-none border border-stone-800 backdrop-blur">
                               點擊任意位置移動

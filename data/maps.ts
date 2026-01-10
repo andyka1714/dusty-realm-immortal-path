@@ -1,5 +1,6 @@
 import { MapData, MajorRealm, ElementType, Enemy, EnemyRank } from '../types';
 import { BESTIARY, BOSS_MAPPING } from './enemies';
+import { INITIAL_VILLAGE_NPCS } from './npcs';
 import { REALM_NAMES } from '../constants';
 
 // Merged Data from V60 Specification
@@ -738,6 +739,7 @@ export const MAPS: MapData[] = RAW_MAPS_V60.map((raw, index) => {
             worldY,
             enemies: [], // No monsters in village
             portals: portals,
+            npcs: INITIAL_VILLAGE_NPCS,
             bossSpawn: null,
             dropRateMultiplier: 1 // Default drop rate for safe zone
         };
@@ -841,6 +843,7 @@ export const MAPS: MapData[] = RAW_MAPS_V60.map((raw, index) => {
         worldX: worldX,
         worldY: worldY,
         portals: portals,
+        npcs: [],
         bossSpawn: bossSpawn,
         enemies: enemies,
         dropRateMultiplier: 1 + (index * 0.05)

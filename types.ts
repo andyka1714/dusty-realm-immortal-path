@@ -187,6 +187,25 @@ export interface ActiveMonster extends Coordinate {
     nextMoveTime?: number; // Timestamp for next move
 }
 
+export enum NPCType {
+  Shop = 'Shop',
+  Quest = 'Quest',
+  Healer = 'Healer',
+  Crafting = 'Crafting',
+  Info = 'Info', // rumors
+}
+
+export interface NPC extends Coordinate {
+  id: string;
+  name: string;
+  symbol: string; // e.g. '商'
+  type: NPCType;
+  description: string;
+  // Placeholder for future functionality
+  shopId?: string;
+  questIds?: string[];
+}
+
 export interface MapData {
   id: string;
   name: string;
@@ -198,6 +217,7 @@ export interface MapData {
   worldX: number; // Global Map X
   worldY: number; // Global Map Y
   portals: Portal[];
+  npcs: NPC[]; // New field
   bossSpawn?: { x: number, y: number, enemyId: string };
   enemies: Enemy[];
   dropRateMultiplier: number;

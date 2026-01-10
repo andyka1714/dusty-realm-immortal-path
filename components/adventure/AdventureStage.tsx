@@ -252,6 +252,59 @@ export default function AdventureStage({
       };
       renderStatic();
 
+      // --- Render NPCs (Static) ---
+      const NPC_COLOR = 0xa0522d; // Sienna
+      const npcLayer = new PIXI.Container();
+      world.addChild(npcLayer);
+      // Move NPC layer below Entity Layer (Monsters/Player) but above grid
+      // Current order: Grid, HitArea, Portals, Entities.
+      // Insert after Portals?
+      
+      if (mapData && mapData.npcs) {
+         mapData.npcs.forEach(npc => {
+             const container = new PIXI.Container();
+             const cx = (npc.x + 0.5) * cellSize;
+             const cy = (npc.y + 0.5) * cellSize;
+             
+             container.x = cx;
+             container.y = cy;
+             
+             // BG
+             const bg = new PIXI.Graphics();
+             const size = cellSize;
+             bg.lineStyle(2, NPC_COLOR, 1);
+             bg.beginFill(0x3e2723, 0.8); // Dark Brown Fill
+             bg.drawRoundedRect(-size/2 + 4, -size/2 + 4, size - 8, size - 8, 6);
+             bg.endFill();
+             
+             // Text
+             const text = new PIXI.Text(npc.symbol, {
+                 fontFamily: 'Arial',
+                 fontSize: cellSize * 0.5,
+                 fontWeight: 'bold',
+                 fill: 0xffd700, // Gold text
+                 align: 'center',
+             });
+             text.anchor.set(0.5);
+             
+             container.addChild(bg);
+             container.addChild(text);
+             
+             // Name Label (Above)
+             const label = new PIXI.Text(npc.name, {
+                 fontFamily: 'Arial',
+                 fontSize: cellSize * 0.3,
+                 fill: 0xcccccc,
+                 align: 'center',
+             });
+             label.anchor.set(0.5);
+             label.y = -size/2 - 5;
+             container.addChild(label);
+
+             npcLayer.addChild(container);
+         });
+      }
+
       // --- Helper: Create Monster Avatar ---
       const createMonsterAvatar = (m: ActiveMonster) => {
           const container = new PIXI.Container();
