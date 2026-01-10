@@ -180,10 +180,10 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
   // Initial Log
   if (player.element !== ElementType.None && enemy.element !== ElementType.None) {
       if (pVsE.isEffective) {
-          logs.push({ turn: 0, isPlayer: true, message: `屬性克制：你的【${ELEMENT_NAMES[player.element]}】克制了敵方的【${ELEMENT_NAMES[enemy.element]}】！傷害+30%，承傷-20%`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
+          logs.push({ turn: 0, isPlayer: true, message: `屬性克制：你的【${ELEMENT_NAMES[player.element]}】克制了敵方的【${ELEMENT_NAMES[enemy.element]}】！攻擊+15%，承傷-15%`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
       }
       if (pVsE.isResisted) {
-          logs.push({ turn: 0, isPlayer: true, message: `屬性被克：你的【${ELEMENT_NAMES[player.element]}】被敵方的【${ELEMENT_NAMES[enemy.element]}】克制！傷害-30%，承傷+20%`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
+          logs.push({ turn: 0, isPlayer: true, message: `屬性被克：你的【${ELEMENT_NAMES[player.element]}】被敵方的【${ELEMENT_NAMES[enemy.element]}】克制！攻擊-15%，承傷+15%`, damage: 0, playerHp, playerMaxHp: player.maxHp, enemyHp, enemyMaxHp: enemy.maxHp });
       }
   }
 
@@ -215,17 +215,19 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
         }
 
         const isCrit = Math.random() * 100 < player.crit;
-        // Raw Damage Calculation
-        let rawDmg = player.attack - enemy.defense;
         
-        // Critical Hit (Before Base reduction or Logic)
+        // Calculate Effective Attack (Attribute Modifier)
+        let effectiveAttack = player.attack;
+        if (pVsE.isEffective) effectiveAttack = Math.floor(effectiveAttack * 1.15); 
+        if (pVsE.isResisted) effectiveAttack = Math.floor(effectiveAttack * 0.85);
+        if (bossBroken) effectiveAttack = Math.floor(effectiveAttack * 1.5); // Boss Break is likely huge vulnerability, keep as is or move to raw? Let's treat as Attack multiplier for consistency.
+        if (playerDebuffed) effectiveAttack = Math.floor(effectiveAttack * 0.8);
+
+        // Raw Damage Calculation: (Effective Atk - Def)
+        let rawDmg = effectiveAttack - enemy.defense;
+        
+        // Critical Hit (Applied to final damage as standard RPG convention, or can be Applied to Attack? Usually damage.)
         if (isCrit) rawDmg = Math.floor(rawDmg * 1.5);
-        
-        // Modifiers
-        if (pVsE.isEffective) rawDmg = Math.floor(rawDmg * 1.3); 
-        if (pVsE.isResisted) rawDmg = Math.floor(rawDmg * 0.7); 
-        if (bossBroken) rawDmg = Math.floor(rawDmg * 1.5); 
-        if (playerDebuffed) rawDmg = Math.floor(rawDmg * 0.8); 
         
         // Ensure Minimum Damage of 1 FINAL check
         rawDmg = Math.max(1, Math.floor(rawDmg));
@@ -247,10 +249,13 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
 
     // --- Enemy Turn ---
     if (!bossStunned) {
-        let enemyDmg = enemy.attack - player.defense;
         
-        if (eVsP.isEffective) enemyDmg = Math.floor(enemyDmg * 1.2); 
-        if (eVsP.isResisted) enemyDmg = Math.floor(enemyDmg * 0.8); 
+        // Calculate Effective Enemy Attack
+        let effectiveEnemyAttack = enemy.attack;
+        if (eVsP.isEffective) effectiveEnemyAttack = Math.floor(effectiveEnemyAttack * 1.15); // Enemy counters Player
+        if (eVsP.isResisted) effectiveEnemyAttack = Math.floor(effectiveEnemyAttack * 0.85); // Enemy resisted by Player
+
+        let enemyDmg = effectiveEnemyAttack - player.defense;
 
         if (player.damageReduction > 0) {
             enemyDmg = Math.floor(enemyDmg * (1 - player.damageReduction / 100));
