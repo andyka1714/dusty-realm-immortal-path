@@ -59,7 +59,7 @@ export const Inventory: React.FC = () => {
   };
 
   return (
-    <div className="min-h-full md:h-full p-6 flex flex-col gap-6 md:overflow-hidden">
+    <div className="h-full p-6 flex flex-col gap-6 overflow-y-auto md:overflow-hidden">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2 md:mb-0">
         <h2 className="text-2xl md:text-3xl font-bold text-stone-200 tracking-widest flex items-center gap-2 shrink-0">

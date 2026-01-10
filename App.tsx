@@ -59,7 +59,7 @@ const App: React.FC = () => {
 
   // --- 2. MAIN GAME LAYOUT ---
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-stone-950 text-stone-200 font-serif overflow-hidden">
+    <div className="flex flex-col md:flex-row h-[100dvh] w-screen bg-stone-950 text-stone-200 font-serif overflow-hidden">
       
       {/* Mobile Header (Only visible on mobile) */}
       <div className="md:hidden flex-none bg-stone-900 border-b border-stone-800 p-4 flex justify-between items-center z-40 relative shadow-md">
@@ -86,7 +86,7 @@ const App: React.FC = () => {
       />
       
       {/* Main Content Area */}
-      <main className="flex-1 h-[calc(100dvh-65px)] md:h-screen overflow-hidden relative transition-all duration-300">
+      <main className="flex-1 h-full overflow-hidden relative transition-all duration-300">
         {renderContent()}
       </main>
     </div>

@@ -27,7 +27,7 @@ export const Workshop: React.FC = () => {
   const canAfford = spiritStones >= upgradeCost;
 
   return (
-    <div className="p-6 min-h-full flex flex-col gap-6">
+    <div className="p-6 h-full flex flex-col gap-6 overflow-y-auto">
       <h2 className="text-2xl font-bold text-stone-200 tracking-widest flex items-center gap-2">
          <Hammer size={24} className="text-amber-600" /> 洞府百業
       </h2>
