@@ -246,7 +246,7 @@ export const Dashboard: React.FC = () => {
       )}
 
       {/* LEFT COLUMN: Status & Actions */}
-      <div className="flex-1 flex flex-col gap-6 overflow-y-auto">
+      <div className="w-full md:flex-1 flex flex-col gap-6 md:overflow-y-auto">
         
         {/* 1. Character Status Card */}
         <div className="bg-stone-900 border border-stone-800 rounded-xl relative shadow-lg z-20 hover:z-50 transition-all duration-200">
