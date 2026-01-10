@@ -9,7 +9,7 @@ import { formatSpiritStone } from '../../utils/currency';
 import { spendSpiritStones } from '../../store/slices/characterSlice';
 import { addItem } from '../../store/slices/inventorySlice';
 import { addLog } from '../../store/slices/logSlice';
-import { X, ShoppingBag, Coins, Package, Shield, Sword, FlaskConical, CircleDashed, Footprints, Crown, Shirt, Medal } from 'lucide-react';
+import { X, ShoppingBag, Coins, Package, Shield, Sword, FlaskConical, CircleDashed, Footprints, Crown, Shirt, Medal, Check } from 'lucide-react';
 import clsx from 'clsx';
 import { Modal } from '../Modal';
 
@@ -54,6 +54,10 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
     const character = useSelector((state: RootState) => state.character);
     const shop = SHOPS[shopId];
     
+    // UI Effects State
+    const [floatingTexts, setFloatingTexts] = useState<{id: number, text: string}[]>([]);
+    const [recentlyPurchased, setRecentlyPurchased] = useState<string | null>(null);
+
     // Safety check
     if (!shop) return null;
 
@@ -78,6 +82,20 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
             message: `花費 ${price} 靈石購買了 [${item.name}]。`, 
             type: 'gold'
         }));
+
+        // Trigger Effects
+        const effectId = Date.now();
+        setFloatingTexts(prev => [...prev, { id: effectId, text: `-${price}` }]);
+        setRecentlyPurchased(shopItem.itemId);
+
+        // Cleanup effects
+        setTimeout(() => {
+            setFloatingTexts(prev => prev.filter(t => t.id !== effectId));
+        }, 1000);
+
+        setTimeout(() => {
+            setRecentlyPurchased(prev => prev === shopItem.itemId ? null : prev);
+        }, 1000);
     };
 
     return (
@@ -90,11 +108,19 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
         >
             <div className="flex flex-col h-full bg-stone-900/50">
                 {/* Header Info */}
-                <div className="p-4 border-b border-stone-800 flex flex-col md:flex-row gap-3 md:gap-0 md:justify-between items-start md:items-center bg-stone-950/80">
+                <div className="p-4 border-b border-stone-800 flex flex-col md:flex-row gap-3 md:gap-0 md:justify-between items-start md:items-center bg-stone-950/80 relative">
                     <p className="text-stone-400 text-sm italic">{shop.description}</p>
-                    <div className="flex items-center gap-2 text-amber-500 font-mono font-bold bg-black/40 px-3 py-1 rounded border border-amber-900/30 self-end md:self-auto">
-                        <Coins size={14} />
-                        {formatSpiritStone(character.spiritStones)}
+                    <div className="relative">
+                        <div className="flex items-center gap-2 text-amber-500 font-mono font-bold bg-black/40 px-3 py-1 rounded border border-amber-900/30 self-end md:self-auto transition-all duration-300">
+                            <Coins size={14} />
+                            {formatSpiritStone(character.spiritStones)}
+                        </div>
+                        {/* Floating Cost Effects */}
+                        {floatingTexts.map(ft => (
+                           <div key={ft.id} className="absolute right-0 top-full mt-1 text-red-400 font-mono font-bold text-sm pointer-events-none animate-float-down">
+                               {ft.text}
+                           </div>
+                        ))}
                     </div>
                 </div>
 
@@ -111,6 +137,7 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                         
                         const price = shopItem.price ?? item.price;
                         const canAfford = character.spiritStones >= price;
+                        const isJustPurchased = recentlyPurchased === shopItem.itemId;
                         
                         const qualityBorder = getQualityBorderColor(item.quality);
                         const qualityText = getQualityTextColor(item.quality);
@@ -149,24 +176,49 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                                 </div>
 
                                 {/* Buy Action */}
-                                <button 
-                                    onClick={() => handleBuy(shopItem)}
-                                    disabled={!canAfford}
-                                    className={clsx(
-                                        "px-3 py-1.5 rounded flex items-center gap-1.5 font-mono text-sm border transition-all shrink-0 min-w-[80px] justify-center",
-                                        canAfford 
-                                            ? "bg-amber-900/20 border-amber-800 text-amber-500 hover:bg-amber-900/40 hover:border-amber-500 hover:shadow-[0_0_8px_rgba(245,158,11,0.3)]" 
-                                            : "bg-stone-950 border-stone-800 text-stone-600 cursor-not-allowed grayscale"
-                                    )}
-                                >
-                                    {price}
-                                    <Coins size={12} />
-                                </button>
+                                {/* Price & Action */}
+                                <div className="flex flex-col items-end gap-2 shrink-0 ml-2">
+                                    <div className="text-sm font-mono text-amber-500 flex items-center gap-1 whitespace-nowrap">
+                                        {formatSpiritStone(price)}
+                                        <Coins size={12} />
+                                    </div>
+                                    <button 
+                                        onClick={() => handleBuy(shopItem)}
+                                        disabled={!canAfford || isJustPurchased}
+                                        className={clsx(
+                                            "px-4 py-1.5 rounded flex items-center justify-center gap-1 font-bold text-sm border transition-all w-full active:scale-95 min-w-[60px]",
+                                            isJustPurchased
+                                                ? "bg-emerald-900/30 border-emerald-600 text-emerald-400 scale-105"
+                                                : canAfford 
+                                                    ? "bg-amber-900/20 border-amber-800 text-amber-500 hover:bg-amber-900/40 hover:border-amber-500 hover:shadow-[0_0_8px_rgba(245,158,11,0.3)]" 
+                                                    : "bg-stone-950 border-stone-800 text-stone-600 cursor-not-allowed grayscale"
+                                        )}
+                                    >
+                                        {isJustPurchased ? (
+                                            <>
+                                                <Check size={14} className="animate-bounce" />
+                                                <span className="text-xs">已購</span>
+                                            </>
+                                        ) : (
+                                            "購買"
+                                        )}
+                                    </button>
+                                </div>
                             </div>
                         );
                     })}
                 </div>
             </div>
+            
+            <style>{`
+                @keyframes floatDown {
+                    0% { transform: translateY(0); opacity: 1; }
+                    100% { transform: translateY(20px); opacity: 0; }
+                }
+                .animate-float-down {
+                    animation: floatDown 1s ease-out forwards;
+                }
+            `}</style>
         </Modal>
     );
 };
