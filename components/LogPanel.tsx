@@ -9,7 +9,9 @@ export const LogPanel: React.FC = () => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (bottomRef.current) {
+        bottomRef.current.scrollTop = bottomRef.current.scrollHeight;
+    }
   }, [logs]);
 
   // Logs are stored Newest First in state for efficiency if we cap it, 
@@ -21,7 +23,10 @@ export const LogPanel: React.FC = () => {
       <h3 className="text-stone-300 font-bold mb-3 border-b border-stone-800 pb-2 tracking-widest">
         修煉日誌
       </h3>
-      <div className="flex-1 overflow-y-auto space-y-2 pr-2 font-mono text-sm">
+      <div 
+        ref={bottomRef} // Reuse bottomRef as container ref for simplicity, though name is mismatch
+        className="flex-1 overflow-y-auto space-y-2 pr-2 font-mono text-sm scroll-smooth"
+      >
         {displayLogs.length === 0 && (
           <p className="text-stone-600 text-center italic mt-10">暫無消息...</p>
         )}
@@ -33,7 +38,7 @@ export const LogPanel: React.FC = () => {
             <span className={clsx(
               "leading-relaxed break-words",
               log.type === 'info' && "text-stone-400",
-              log.type === 'gain' && "text-stone-300", // Default to neutral for rich text, green handled by tags usually
+              log.type === 'gain' && "text-stone-300",
               log.type === 'danger' && "text-red-400 font-bold", 
               log.type === 'success' && "text-amber-300 font-bold", 
               log.type === 'gold' && "text-yellow-400 font-bold",
@@ -49,7 +54,7 @@ export const LogPanel: React.FC = () => {
             </span>
           </div>
         ))}
-        <div ref={bottomRef} />
+        {/* Removed empty div ref */}
       </div>
     </div>
   );
