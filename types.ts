@@ -261,12 +261,15 @@ export interface BaseItem {
   quality: ItemQuality;
   price: number;
   maxStack: number;
+  minRealm?: MajorRealm;
 }
 
 // -- Consumables --
 export enum ConsumableType {
   Pill = 'Pill',             // 丹藥
   Fateful = 'Fateful',       // 機緣物品
+  Manual = 'Manual',         // 功法秘籍
+  Map = 'Map',               // 地圖
   Other = 'Other'
 }
 
@@ -321,7 +324,8 @@ export enum EquipmentType {
   Boots = 'Boots',
   Ring = 'Ring',         // 戒指 (Accessory)
   SimpleRobe = 'SimpleRobe', // Novice
-  Shield = 'Shield'
+  Shield = 'Shield',
+  Accessory = 'Accessory' // Add missing value
 }
 
 export interface EquipmentStats extends Partial<BaseAttributes> {

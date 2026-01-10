@@ -10,7 +10,7 @@ import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move, Swords } from 'lucide-react';
 import { parseBattleLog } from '../utils/logParser';
-import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory } from '../types';
+import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory, NPC, NPCType } from '../types';
 import { MOVEMENT_SPEEDS, REALM_NAMES, ELEMENT_COLORS, ELEMENT_NAMES } from '../constants';
 import clsx from 'clsx';
 import { Modal } from '../components/Modal';
@@ -18,6 +18,9 @@ import { getDropRewards } from '@/data/drop_tables';
 import { addSpiritStones, gainExperience } from '@/store/slices/characterSlice';
 import { formatSpiritStone } from '@/utils/currency';
 import AdventureStage from '../components/adventure/AdventureStage';
+import ShopPanel from '../components/adventure/ShopPanel';
+import { SHOPS } from '../data/shops';
+
 
 // --- VISUAL CONFIG ---
 const TARGET_CELL_SIZE_DESKTOP = 42; // px
@@ -391,6 +394,10 @@ export const Adventure: React.FC = () => {
   const [targetMonsterId, setTargetMonsterId] = useState<string | null>(null);
   const [isAutoBattling, setIsAutoBattling] = useState(false);
   
+  // NPC Interaction State
+  const [interactingNPC, setInteractingNPC] = useState<NPC | null>(null);
+  const [targetNPCId, setTargetNPCId] = useState<string | null>(null);
+  
   // Dynamic Viewport Logic
   const containerRef = useRef<HTMLDivElement>(null); // Ref for Grid Counter-Act
   const battleLogRef = useRef<HTMLDivElement>(null); // Ref for Battle Log Auto-Scroll
@@ -534,14 +541,31 @@ export const Adventure: React.FC = () => {
               // Allow diagonal (max diff 1)
               if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && (dx !== 0 || dy !== 0)) {
                   dispatch(movePlayer({ dx, dy }));
-                  setAutoMovePath(prev => prev.slice(1));
+                  // Check if this was the last step
+                  if (autoMovePath.length === 1) {
+                        setAutoMovePath([]);
+                        // Check NPC Interaction on arrival
+                        if (targetNPCId && mapData) {
+                            const npc = mapData.npcs?.find(n => n.id === targetNPCId);
+                            if (npc) {
+                                const dist = Math.abs(nextStep.x - npc.x) + Math.abs(nextStep.y - npc.y);
+                                if (dist <= 1) {
+                                    setInteractingNPC(npc);
+                                    setTargetNPCId(null);
+                                }
+                            }
+                        }
+                  } else {
+                      setAutoMovePath(prev => prev.slice(1));
+                  }
               } else {
+                  // Invalid step (teleport?), clear path
                   setAutoMovePath([]);
               }
           }, speed);
       }
       return () => { if (moveTimerRef.current) clearTimeout(moveTimerRef.current); };
-  }, [autoMovePath, playerPosition, isBattling, character.majorRealm, dispatch, showIntro]);
+  }, [autoMovePath, playerPosition, isBattling, character.majorRealm, dispatch, showIntro, targetNPCId, mapData]);
 
   // Monster Ticker
   useEffect(() => {
@@ -840,15 +864,25 @@ export const Adventure: React.FC = () => {
   const handleGridClick = (targetX: number, targetY: number) => {
       if (isBattling || showIntro || !mapData) return;
       
-      // Check if clicking on a monster
+      // 1. Check Monster
       const targetMonster = activeMonsters.find(m => m.x === targetX && m.y === targetY);
       
-      // Auto-Battle Override: Stop if manual interaction occurs
+      // Auto-Battle Override
       if (isAutoBattling) {
-           // If clicking a different monster, or clicking empty ground (manual move)
            if (!targetMonster || (targetMonster && targetMonster.instanceId !== targetMonsterId)) {
                setIsAutoBattling(false);
            }
+      }
+
+      // 2. Check NPC
+      const targetNPC = mapData.npcs && mapData.npcs.find(n => n.x === targetX && n.y === targetY);
+      
+      if (targetNPC) {
+          setTargetNPCId(targetNPC.id);
+          // Set visible target indicator? Maybe reusing targetMonsterId variable is confusing.
+          // Just auto-move to it.
+      } else {
+          setTargetNPCId(null);
       }
 
       if (targetMonster) {
@@ -857,8 +891,17 @@ export const Adventure: React.FC = () => {
           setTargetMonsterId(null);
       }
 
+      // Pathfinding
       const path = findPath(playerPosition, { x: targetX, y: targetY }, mapData.width, mapData.height);
-      if (path.length > 0) setAutoMovePath(path);
+      if (path.length > 0) {
+          setAutoMovePath(path);
+      } else if (targetNPC) {
+          // You might be clicking the NPC while standing next to it
+           if (Math.abs(playerPosition.x - targetX) + Math.abs(playerPosition.y - targetY) <= 1) {
+               setInteractingNPC(targetNPC);
+               setTargetNPCId(null); // Done
+           }
+      }
   };
 
     // PixiJS handles rendering and camera movement now.
@@ -1070,6 +1113,34 @@ export const Adventure: React.FC = () => {
         )}
 
 
+
+        {/* NPC Interaction - Shop Panel */}
+        {interactingNPC && interactingNPC.type === NPCType.Shop && interactingNPC.shopId && (
+            <ShopPanel 
+                shopId={interactingNPC.shopId} 
+                onClose={() => setInteractingNPC(null)} 
+            />
+        )}
+
+        {/* NPC Interaction - Quest/Talk Dialog (Generic) */}
+        {interactingNPC && interactingNPC.type !== NPCType.Shop && (
+             <Modal
+                isOpen={true}
+                onClose={() => setInteractingNPC(null)}
+                title={interactingNPC.name}
+                size="small"
+                actions={
+                    <button onClick={() => setInteractingNPC(null)} className="px-4 py-2 bg-stone-800 text-stone-300 rounded hover:bg-stone-700 border border-stone-700">
+                        離開
+                    </button>
+                }
+             >
+                 <div className="p-4 text-stone-300 italic">
+                     "{interactingNPC.description}"
+                     <div className="mt-4 text-xs text-stone-500">[任務系統尚未開放]</div>
+                 </div>
+             </Modal>
+        )}
 
         {/* EXPANDED MAP MODAL */}
         <Modal 

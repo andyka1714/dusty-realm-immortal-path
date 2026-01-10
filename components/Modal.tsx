@@ -25,12 +25,12 @@ export const Modal: React.FC<ModalProps> = ({
   // Determine container classes based on size
   const containerClasses = size === 'large'
     ? "w-full h-full md:w-[90vw] md:h-[90vh] md:max-w-[1400px] bg-stone-900 border-0 md:border md:border-stone-700 md:rounded-xl shadow-2xl flex flex-col"
-    : "bg-stone-900 border border-stone-700 rounded-xl shadow-2xl max-w-lg w-full flex flex-col max-h-[90vh]";
+    : "bg-stone-900 border border-stone-700 rounded-xl shadow-2xl max-w-lg w-full flex flex-col max-h-[calc(100vh-105px)] md:max-h-[90vh]";
 
   // Wrapper padding: Remove padding on mobile for large modals to ensure full screen
   const wrapperClasses = size === 'large'
-    ? "fixed inset-0 z-[1000] flex items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
-    : "fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in";
+    ? "fixed inset-x-0 bottom-0 top-[73px] md:inset-0 z-[5000] flex items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+    : "fixed inset-x-0 bottom-0 top-[73px] md:inset-0 z-[5000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in";
 
   return (
     <div className={wrapperClasses}>

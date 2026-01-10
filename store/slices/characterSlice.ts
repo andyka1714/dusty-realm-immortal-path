@@ -408,6 +408,13 @@ const characterSlice = createSlice({
       state.spiritStones += finalAmount;
     },
 
+    spendSpiritStones: (state, action: PayloadAction<number>) => {
+        const amount = action.payload;
+        if (state.spiritStones >= amount) {
+            state.spiritStones -= amount;
+        }
+    },
+
     gainAttribute: (state, action: PayloadAction<keyof BaseAttributes>) => {
       const attr = action.payload;
       state.attributes[attr] += 1;
@@ -567,5 +574,5 @@ const characterSlice = createSlice({
   },
 });
 
-export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, startSeclusion, processOfflineGains, reincarnate, gainAttribute, gainExperience, consumeItem, updateLastProcessedYear, updateLastWarningAge, addSpiritStones, deductSpiritStones, upgradeGatheringLevel } = characterSlice.actions;
+export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, startSeclusion, processOfflineGains, reincarnate, gainAttribute, gainExperience, consumeItem, updateLastProcessedYear, updateLastWarningAge, addSpiritStones, spendSpiritStones, deductSpiritStones, upgradeGatheringLevel } = characterSlice.actions;
 export default characterSlice.reducer;
