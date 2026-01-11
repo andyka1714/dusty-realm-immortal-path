@@ -13,6 +13,34 @@ import { X, ShoppingBag, Coins, Package, Shield, Sword, FlaskConical, CircleDash
 import clsx from 'clsx';
 import { Modal } from '../Modal';
 
+
+// Helper for attribute names (Moved from Inventory to be shared concept ideally, but kept here for now)
+const getAttributeName = (key: string) => {
+    switch(key) {
+        case 'attack': return '攻擊';
+        case 'defense': return '防禦';
+        case 'hp': return '氣血';
+        case 'maxHp': return '氣血上限';
+        case 'mp': return '真元';
+        case 'maxMp': return '真元上限';
+        case 'speed': return '速度';
+        case 'crit': return '暴擊';
+        case 'critDamage': return '暴傷';
+        case 'dodge': return '閃避';
+        case 'blockRate': return '格擋';
+        case 'res': return '抗性'; 
+        case 'magic': return '術法'; 
+        case 'regenHp': return '回春';
+        case 'physique': return '體魄';
+        case 'rootBone': return '根骨';
+        case 'insight': return '神識';
+        case 'comprehension': return '悟性';
+        case 'fortune': return '福緣';
+        case 'charm': return '魅力';
+        default: return key;
+    }
+};
+
 interface ShopPanelProps {
     shopId: string;
     onClose: () => void;
@@ -52,11 +80,15 @@ const getQualityName = (quality: ItemQuality) => {
 const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
     const dispatch = useDispatch();
     const character = useSelector((state: RootState) => state.character);
+    const { equipment, items: inventoryItems } = useSelector((state: RootState) => state.inventory);
     const shop = SHOPS[shopId];
     
     // UI Effects State
     const [floatingTexts, setFloatingTexts] = useState<{id: number, text: string}[]>([]);
     const [recentlyPurchased, setRecentlyPurchased] = useState<string | null>(null);
+    
+    // Tooltip State
+    const [hoveredItem, setHoveredItem] = useState<{ itemId: string, style: React.CSSProperties } | null>(null);
 
     // Safety check
     if (!shop) return null;
@@ -147,7 +179,42 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                         const realmName = item.minRealm !== undefined ? REALM_NAMES[item.minRealm] : '';
 
                         return (
-                            <div key={idx} className={`bg-stone-900 border rounded p-3 flex items-center gap-4 hover:border-stone-600 transition-colors group ${qualityBorder}`}>
+                            <div 
+                                key={idx} 
+                                className={`bg-stone-900 border rounded p-3 flex items-center gap-4 hover:border-stone-600 transition-colors group relative ${qualityBorder}`}
+                                onMouseEnter={(e) => {
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    const tooltipWidth = 256; 
+                                    const isMobile = window.innerWidth < 768;
+                                    
+                                    let style: React.CSSProperties = {};
+                                    
+                                    if (isMobile) {
+                                        // Mobile: Center horizontally
+                                        style.left = (window.innerWidth - tooltipWidth) / 2;
+                                        
+                                        // Prefer Bottom if space > 320px
+                                        if (window.innerHeight - rect.bottom > 320) {
+                                            style.top = rect.bottom + 10;
+                                        } else {
+                                            // Else Top
+                                            style.bottom = window.innerHeight - rect.top + 10;
+                                        }
+                                    } else {
+                                        // Desktop: Default Right
+                                        style.left = rect.right + 10;
+                                        style.top = rect.top;
+                                        
+                                        // Check overflow Right
+                                        if (rect.right + tooltipWidth + 20 > window.innerWidth) {
+                                            style.left = rect.left - tooltipWidth - 10;
+                                        }
+                                    }
+                                    
+                                    setHoveredItem({ itemId: item.id, style });
+                                }}
+                                onMouseLeave={() => setHoveredItem(null)}
+                            >
                                 {/* Icon / Visual */}
                                 <div className="w-12 h-12 flex items-center justify-center rounded bg-stone-950/30 shrink-0">
                                     {item.category === ItemCategory.Equipment && (
@@ -210,6 +277,97 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                 </div>
             </div>
             
+
+            
+            {/* Hover Tooltip */}
+            {hoveredItem && ITEMS[hoveredItem.itemId] && (
+                <div 
+                    className="fixed z-50 w-64 bg-stone-950 border border-stone-700 rounded-lg shadow-xl p-4 pointer-events-none"
+                    style={hoveredItem.style}
+                >
+                    {(() => {
+                        const item = ITEMS[hoveredItem.itemId];
+                        const qualityColor = getQualityTextColor(item.quality);
+                        
+                        return (
+                            <div className="flex flex-col gap-2">
+                                {/* Header */}
+                                <div>
+                                    <h4 className={`text-lg font-bold ${qualityColor}`}>{item.name}</h4>
+                                    <span className="text-xs text-stone-500">{getQualityName(item.quality)}</span>
+                                </div>
+                                <p className="text-sm text-stone-400 italic">{item.description}</p>
+                                
+                                {/* Stats */}
+                                {item.category === ItemCategory.Equipment && (item as any).stats && (
+                                    <div className="mt-2 space-y-1">
+                                        <div className="flex justify-between items-center text-xs text-stone-500 mb-1">
+                                            <span>基礎屬性</span>
+                                            {/* Comparison Header */}
+                                    {(() => {
+                                                const slot = (item as any).slot as EquipmentSlot;
+                                                const equippedId = equipment[slot];
+                                                const equippedItem = equippedId ? inventoryItems.find(i => i.instanceId === equippedId) : null;
+                                                 if (equippedItem) {
+                                                    const eqDef = ITEMS[equippedItem.itemId];
+                                                    return (
+                                                        <span className="text-stone-600">比較: {eqDef?.name}</span>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
+                                        </div>
+                                        
+                                        {Object.entries((item as any).stats).map(([key, val]) => {
+                                            const value = val as number;
+                                            // Calculate Diff
+                                            let diff = null;
+                                            const slot = (item as any).slot as EquipmentSlot;
+                                            const equippedId = equipment[slot];
+                                            const equippedItem = equippedId ? inventoryItems.find(i => i.instanceId === equippedId) : null;
+                                            
+                                            if (equippedItem && equippedItem.instance?.stats) {
+                                                const eqVal = (equippedItem.instance.stats as any)[key] || 0;
+                                                diff = value - eqVal;
+                                            }
+
+                                            return (
+                                                <div key={key} className="flex justify-between items-center text-sm">
+                                                    <span className="text-stone-300">{getAttributeName(key)}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-mono text-amber-500">+{value}</span>
+                                                        {diff !== null && diff !== 0 && (
+                                                            <span className={clsx("font-mono text-xs", diff > 0 ? "text-emerald-500" : "text-red-500")}>
+                                                                ({diff > 0 ? '+' : ''}{diff})
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                                
+                                {/* Consumable Effects */}
+                                {item.category === ItemCategory.Consumable && (item as any).effects && (
+                                     <div className="mt-2 space-y-1 text-xs text-stone-400">
+                                        {(item as any).effects.map((effect: any, i: number) => (
+                                            <div key={i}>
+                                                {effect.type === 'full_restore' && '完全恢復狀態'}
+                                                {effect.type === 'heal_hp' && `恢復氣血: ${effect.value}`}
+                                                {effect.type === 'heal_mp' && `恢復真元: ${effect.value}`}
+                                                {effect.type === 'buff_stat' && `提升${effect.stat}: +${effect.value}`}
+                                                {effect.type === 'breakthrough_chance' && `突破機率: +${effect.value}%`}
+                                            </div>
+                                        ))}
+                                     </div>
+                                )}
+                            </div>
+                        );
+                    })()}
+                </div>
+            )}
+
             <style>{`
                 @keyframes floatDown {
                     0% { transform: translateY(0); opacity: 1; }
