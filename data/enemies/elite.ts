@@ -45,11 +45,11 @@ export const ELITE_ENEMIES: Record<string, Enemy> = {
     
     // North
     'm31_e1': createEnemy('m31_e1', '寒冰巨人', MajorRealm.Foundation, EnemyRank.Elite, 12000, 850, 540, ElementType.Water, [], 1500, MINOR_REALM.MID, '巨'),
-    'm32_e1': createEnemy('m32_e1', '雷獸', MajorRealm.Foundation, EnemyRank.Elite, 14400, 1200, 630, ElementType.Metal, [], 2000, MINOR_REALM.LATE, '雷'),
+    'm32_e1': createEnemy('m32_e1', '奔雷古獸', MajorRealm.Foundation, EnemyRank.Elite, 14400, 1200, 630, ElementType.Metal, [], 2000, MINOR_REALM.LATE, '雷'),
     
     // West
     'm41_e1': createEnemy('m41_e1', '樹妖姥姥', MajorRealm.Foundation, EnemyRank.Elite, 13200, 935, 500, ElementType.Wood, [], 1800, MINOR_REALM.MID, '姥'),
-    'm42_e1': createEnemy('m42_e1', '炎魔', MajorRealm.Foundation, EnemyRank.Elite, 18000, 1360, 720, ElementType.Fire, [], 2500, MINOR_REALM.LATE, '炎'),
+    'm42_e1': createEnemy('m42_e1', '煉獄炎魔', MajorRealm.Foundation, EnemyRank.Elite, 18000, 1360, 720, ElementType.Fire, [], 2500, MINOR_REALM.LATE, '炎'),
 
     // East
     'm51_e1': createEnemy('m51_e1', '沼澤巨鱷', MajorRealm.Foundation, EnemyRank.Elite, 14400, 1020, 900, ElementType.Water, [], 2000, MINOR_REALM.MID, '鱷'),
@@ -80,13 +80,13 @@ export const ELITE_ENEMIES: Record<string, Enemy> = {
     'm101_e1': createEnemy('m101_e1', '龍血戰士', MajorRealm.NascentSoul, EnemyRank.Elite, 420000, 25500, 16200, ElementType.Fire, [], 70000, MINOR_REALM.MID, '戰'),
     'm102_e1': createEnemy('m102_e1', '祭司亡魂', MajorRealm.NascentSoul, EnemyRank.Elite, 540000, 34000, 10800, ElementType.Earth, [], 90000, MINOR_REALM.LATE, '祭'),
     // East
-    'm111_e1': createEnemy('m111_e1', '羅剎女', MajorRealm.NascentSoul, EnemyRank.Elite, 390000, 27000, 9000, ElementType.Fire, [], 65000, MINOR_REALM.MID, '羅'),
+    'm111_e1': createEnemy('m111_e1', '幽冥羅剎', MajorRealm.NascentSoul, EnemyRank.Elite, 390000, 27000, 9000, ElementType.Fire, [], 65000, MINOR_REALM.MID, '羅'),
     'm112_e1': createEnemy('m112_e1', '虛空領主', MajorRealm.NascentSoul, EnemyRank.Elite, 600000, 37500, 18000, ElementType.Metal, [], 100000, MINOR_REALM.LATE, '領'),
 
     // === [5] Spirit Severing (化神) ===
     // Common Early: HP 400k, Atk 25k, Def 12k
     // Elite: HP 1.4M, Atk 68k, Def 36k
-    'm120_e1': createEnemy('m120_e1', '戰場絞肉機', MajorRealm.SpiritSevering, EnemyRank.Elite, 1440000, 68000, 36000, ElementType.Metal, [], 200000, MINOR_REALM.MID, '絞'),
+    'm120_e1': createEnemy('m120_e1', '百戰魔傀', MajorRealm.SpiritSevering, EnemyRank.Elite, 1440000, 68000, 36000, ElementType.Metal, [], 200000, MINOR_REALM.MID, '傀'),
     'm121_e1': createEnemy('m121_e1', '墮落仙人', MajorRealm.SpiritSevering, EnemyRank.Elite, 1800000, 85000, 45000, ElementType.Wood, [], 300000, MINOR_REALM.LATE, '墮'),
 
     // === [6] Void Refining (煉虛) ===
@@ -117,7 +117,7 @@ export const ELITE_ENEMIES: Record<string, Enemy> = {
     // Common: HP 1B, Atk 60M, Def 20M
     // Elite: HP 3.6B, Atk 170M, Def 72M
     'm170_e1': createEnemy('m170_e1', '巡天仙吏', MajorRealm.Immortal, EnemyRank.Elite, 3600000000, 170000000, 72000000, ElementType.Metal, [], 100000000, MINOR_REALM.MID, '吏'),
-    'm171_e1': createEnemy('m171_e1', '天將', MajorRealm.Immortal, EnemyRank.Elite, 6000000000, 340000000, 144000000, ElementType.Metal, [], 150000000, MINOR_REALM.LATE, '將'),
+    'm171_e1': createEnemy('m171_e1', '鎮天神將', MajorRealm.Immortal, EnemyRank.Elite, 6000000000, 340000000, 144000000, ElementType.Metal, [], 150000000, MINOR_REALM.LATE, '將'),
 
     // === [11] Immortal Emperor (仙帝) ===
     // Elite: HP 36B, Atk 1.7B, Def 720M
