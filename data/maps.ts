@@ -1,5 +1,5 @@
 import { MapData, MajorRealm, ElementType, Enemy, EnemyRank } from '../types';
-import { BESTIARY, BOSS_MAPPING } from './enemies';
+import { BESTIARY } from './enemies';
 
 // Raw Map Data Interface
 interface RawPortal {
@@ -72,7 +72,8 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 3, name: "青雲山腳", realm: "凡人", size: [80, 80], pos: [0, 3], theme: "North",
         description: "抬頭仰望，可見雲端之上的宏偉宗門。",
-        portals: [{ target_id: 2, dir: "South", pos: [40, 80] }, { target_id: 4, dir: "North", pos: [40, 0] }], boss: null
+        portals: [{ target_id: 2, dir: "South", pos: [40, 80] }, { target_id: 4, dir: "North", pos: [40, 0] }],
+        boss: { name: "守山靈虎", pos: [40, 40] }
     },
     // Sect (y=4)
     {
@@ -116,7 +117,7 @@ const RAW_MAPS_V60: RawMap[] = [
             { target_id: 6, dir: "East", pos: [100, 50] },
             { target_id: 32, dir: "North", pos: [50, 0] }
         ], 
-        boss: null
+        boss: { name: "萬劍劍意", pos: [50, 50] }
     },
 
     // --- West Path (Body) x=-2 ---
@@ -134,7 +135,8 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 12, name: "獸王谷口", realm: "凡人", size: [80, 80], pos: [-3, 0], theme: "West",
         description: "崖壁上的爪痕，預示著前方的危險。",
-        portals: [{ target_id: 11, dir: "East", pos: [80, 40] }, { target_id: 13, dir: "West", pos: [0, 40] }], boss: null
+        portals: [{ target_id: 11, dir: "East", pos: [80, 40] }, { target_id: 13, dir: "West", pos: [0, 40] }], 
+        boss: { name: "赤火猿", pos: [40, 40] }
     },
     // Sect (y=4)
     {
@@ -192,7 +194,8 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 22, name: "靈湖草甸", realm: "凡人", size: [80, 80], pos: [3, 0], theme: "East",
         description: "碧草如茵，遠處湖泊波光粼粼。",
-        portals: [{ target_id: 21, dir: "West", pos: [0, 40] }, { target_id: 23, dir: "East", pos: [80, 40] }], boss: null
+        portals: [{ target_id: 21, dir: "West", pos: [0, 40] }, { target_id: 23, dir: "East", pos: [80, 40] }],
+        boss: { name: "靈湖巨蟹", pos: [40, 40] }
     },
     // Sect (y=4)
     {
@@ -233,7 +236,7 @@ const RAW_MAPS_V60: RawMap[] = [
             { target_id: 23, dir: "South", pos: [50, 100] },
             { target_id: 51, dir: "North", pos: [50, 0] }
         ], 
-        boss: null
+        boss: { name: "靈湖水蛟", pos: [50, 50] }
     },
 
     // --- Foundation Establishment ---
@@ -358,7 +361,7 @@ const RAW_MAPS_V60: RawMap[] = [
             { target_id: 32, dir: "South", pos: [65, 130] }, 
             { target_id: 90, dir: "North", pos: [65, 0] }
         ], 
-        boss: null
+        boss: { name: "金翅大鵬", pos: [65, 65] }
     },
     // West
     {
@@ -387,7 +390,7 @@ const RAW_MAPS_V60: RawMap[] = [
             { target_id: 71, dir: "South", pos: [65, 130] }, 
             { target_id: 100, dir: "North", pos: [65, 0] }
         ], 
-        boss: null
+        boss: { name: "厄難毒體", pos: [65, 65] }
     },
     // East
     {
@@ -417,7 +420,7 @@ const RAW_MAPS_V60: RawMap[] = [
             { target_id: 81, dir: "South", pos: [65, 130] }, 
             { target_id: 110, dir: "North", pos: [65, 0] }
         ], 
-        boss: null
+        boss: { name: "覆海蛟龍", pos: [65, 65] }
     },
 
     // --- Nascent Soul ---
@@ -435,7 +438,8 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 92, name: "碎星劍垣", realm: "元嬰", size: [140, 140], pos: [0, 10], theme: "North",
         description: "上古劍仙斬落星辰之地，劍意永存。",
-        portals: [{ target_id: 91, dir: "South", pos: [70, 140] }, { target_id: 120, dir: "North", pos: [70, 0] }], boss: null
+        portals: [{ target_id: 91, dir: "South", pos: [70, 140] }, { target_id: 120, dir: "North", pos: [70, 0] }],
+        boss: { name: "北寒劍尊", pos: [70, 70] }
     },
     // West
     {
@@ -451,7 +455,8 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 102, name: "蠻荒祖廟", realm: "元嬰", size: [140, 140], pos: [-3, 7], theme: "West",
         description: "供奉遠古巫神，記載肉身成聖之秘。",
-        portals: [{ target_id: 101, dir: "South", pos: [70, 140] }, { target_id: 120, dir: "North", pos: [70, 0] }], boss: null
+        portals: [{ target_id: 101, dir: "South", pos: [70, 140] }, { target_id: 120, dir: "North", pos: [70, 0] }],
+        boss: { name: "刑天殘軀", pos: [70, 70] }
     },
     // East
     {
@@ -467,7 +472,8 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 112, name: "虛空裂隙", realm: "元嬰", size: [140, 140], pos: [3, 7], theme: "East",
         description: "空間極不穩定，域外天魔入侵。",
-        portals: [{ target_id: 111, dir: "South", pos: [70, 140] }, { target_id: 120, dir: "North", pos: [70, 0] }], boss: null
+        portals: [{ target_id: 111, dir: "South", pos: [70, 140] }, { target_id: 120, dir: "North", pos: [70, 0] }],
+        boss: { name: "九幽鬼帝", pos: [70, 70] }
     },
 
     // --- Spirit Severing (Convergence) ---
@@ -485,7 +491,8 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 121, name: "隕仙深淵", realm: "化神", size: [150, 150], pos: [0, 12], theme: "Center",
         description: "深淵怨氣化作黑霧，傳說有仙人隕落。",
-        portals: [{ target_id: 120, dir: "South", pos: [75, 150] }, { target_id: 130, dir: "North", pos: [75, 0] }], boss: null
+        portals: [{ target_id: 120, dir: "South", pos: [75, 150] }, { target_id: 130, dir: "North", pos: [75, 0] }],
+        boss: { name: "修羅魔尊", pos: [75, 75] }
     },
 
     // --- Void Refining ---
@@ -497,7 +504,8 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 131, name: "破碎虛空", realm: "煉虛", size: [160, 160], pos: [0, 14], theme: "Void",
         description: "世界碎片漂浮，前往靈界的必經路。",
-        portals: [{ target_id: 130, dir: "South", pos: [80, 160] }, { target_id: 140, dir: "North", pos: [80, 0] }], boss: null
+        portals: [{ target_id: 130, dir: "South", pos: [80, 160] }, { target_id: 140, dir: "North", pos: [80, 0] }],
+        boss: { name: "時空之主", pos: [80, 80] }
     },
 
     // --- Fusion ---
@@ -509,7 +517,8 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 141, name: "靈界中樞", realm: "合體", size: [160, 160], pos: [0, 16], theme: "Spirit",
         description: "靈氣濃厚，維持靈界運轉的核心。",
-        portals: [{ target_id: 140, dir: "South", pos: [80, 160] }, { target_id: 150, dir: "North", pos: [80, 0] }], boss: null
+        portals: [{ target_id: 140, dir: "South", pos: [80, 160] }, { target_id: 150, dir: "North", pos: [80, 0] }],
+        boss: { name: "靈皇", pos: [80, 80] }
     },
 
     // --- Mahayana ---
@@ -521,7 +530,8 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 151, name: "登仙天梯", realm: "大乘", size: [180, 180], pos: [0, 18], theme: "Sky",
         description: "通往天界的巨大石階，承受天地威壓。",
-        portals: [{ target_id: 150, dir: "South", pos: [90, 180] }, { target_id: 160, dir: "North", pos: [90, 0] }], boss: null
+        portals: [{ target_id: 150, dir: "South", pos: [90, 180] }, { target_id: 160, dir: "North", pos: [90, 0] }],
+        boss: { name: "守界者", pos: [90, 90] }
     },
 
     // --- Tribulation ---
@@ -533,7 +543,8 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 161, name: "九天雷池", realm: "渡劫", size: [200, 200], pos: [0, 20], theme: "Thunder",
         description: "雷霆化液，脫胎換骨之地。",
-        portals: [{ target_id: 160, dir: "South", pos: [100, 200] }, { target_id: 170, dir: "North", pos: [100, 0] }], boss: null
+        portals: [{ target_id: 160, dir: "South", pos: [100, 200] }, { target_id: 170, dir: "North", pos: [100, 0] }],
+        boss: { name: "天道化身", pos: [100, 100] }
     },
 
     // --- Immortal ---
@@ -545,12 +556,14 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 171, name: "九重天闕", realm: "仙人", size: [200, 200], pos: [0, 22], theme: "Immortal",
         description: "仙界權力核心，宮殿懸浮雲端。",
-        portals: [{ target_id: 170, dir: "South", pos: [100, 200] }, { target_id: 180, dir: "North", pos: [100, 0] }], boss: null
+        portals: [{ target_id: 170, dir: "South", pos: [100, 200] }, { target_id: 180, dir: "North", pos: [100, 0] }],
+        boss: { name: "九天仙尊", pos: [100, 100] }
     },
     {
         id: 180, name: "鴻蒙道宮", realm: "仙帝", size: [200, 200], pos: [0, 23], theme: "Ultimate",
         description: "宇宙終極，大道起源。",
-        portals: [{ target_id: 171, dir: "South", pos: [100, 200] }], boss: null
+        portals: [{ target_id: 171, dir: "South", pos: [100, 200] }],
+        boss: { name: "鴻蒙道祖", pos: [100, 100] }
     }
 ];
 
@@ -600,17 +613,15 @@ export const MAPS: MapData[] = RAW_MAPS_V60.map((raw, index) => {
 
     // Add Boss if defined (Use fixed position)
     let bossSpawn = undefined;
-    // Boss handling via BOSS_MAPPING
-    if (raw.boss) {
-        const bossId = BOSS_MAPPING[raw.boss.name];
-        if (bossId && BESTIARY[bossId]) {
-            enemies.push(BESTIARY[bossId]);
-            bossSpawn = {
-                 x: Math.max(0, Math.min(raw.boss.pos[0], width - 1)),
-                 y: Math.max(0, Math.min(raw.boss.pos[1], height - 1)),
-                 enemyId: bossId
-             };
-        }
+    // Boss handling: Check for m{id}_b1
+    const bossId = `m${id}_b1`;
+    if (BESTIARY[bossId] && raw.boss) {
+        enemies.push(BESTIARY[bossId]);
+        bossSpawn = {
+             x: Math.max(0, Math.min(raw.boss.pos[0], width - 1)),
+             y: Math.max(0, Math.min(raw.boss.pos[1], height - 1)),
+             enemyId: bossId
+         };
     }
 
     // Default Fallback (Skip Safe Zones)
