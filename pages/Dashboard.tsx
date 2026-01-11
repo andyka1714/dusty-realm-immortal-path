@@ -357,7 +357,7 @@ export const Dashboard: React.FC = () => {
         {/* 2. Action Buttons Area */}
         <div className="bg-stone-900 border border-stone-800 rounded-xl p-6 relative z-20 hover:z-50 transition-all duration-200">
            
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 
                  {/* 1. Manual Cultivate */}
                  <div className="flex-1 relative group">
@@ -421,7 +421,7 @@ export const Dashboard: React.FC = () => {
               <button
                 onClick={handleBreakthroughClick}
                 disabled={!isBreakthroughAvailable}
-                className={`col-span-1 group relative outline-none w-full
+                className={`col-span-2 md:col-span-1 group relative outline-none w-full
                   ${isBreakthroughAvailable ? "cursor-pointer" : "cursor-not-allowed"}
                 `}
               >
