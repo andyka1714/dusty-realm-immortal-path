@@ -567,31 +567,36 @@ export const MAPS: MapData[] = RAW_MAPS_V60.map((raw, index) => {
     
     // Populate Enemies
     const enemies: Enemy[] = [];
-    
-    // Fetch common monsters for this map: m{id}_c1, m{id}_c2, ...
-    for (let i = 1; i <= 4; i++) {
-        const enemyId = `m${id}_c${i}`;
-        if (BESTIARY[enemyId]) {
-            enemies.push(BESTIARY[enemyId]);
+    const SAFE_MAP_IDS = [0, 4, 13, 23];
+
+    // Skip enemy generation for safe maps
+    if (!SAFE_MAP_IDS.includes(id)) {
+        // Fetch common monsters for this map: m{id}_c1, m{id}_c2, ...
+        for (let i = 1; i <= 4; i++) {
+            const enemyId = `m${id}_c${i}`;
+            if (BESTIARY[enemyId]) {
+                enemies.push(BESTIARY[enemyId]);
+            }
+        }
+
+        // Fetch elite monsters for this map: m{id}_e1, m{id}_e2, ...
+        for (let i = 1; i <= 2; i++) {
+            const enemyId = `m${id}_e${i}`;
+            if (BESTIARY[enemyId]) {
+                enemies.push(BESTIARY[enemyId]);
+            }
+        }
+
+        // Fallback: If no monsters found for this specific map, use realm-wide defaults
+        if (enemies.length === 0) {
+            const allEnemies = Object.values(BESTIARY);
+            const commonForRealm = allEnemies.filter(e => e.realm === realm && e.rank === EnemyRank.Common);
+            if (commonForRealm.length > 0) {
+                enemies.push(commonForRealm[Math.floor(Math.random() * commonForRealm.length)]);
+            }
         }
     }
 
-    // Fetch elite monsters for this map: m{id}_e1, m{id}_e2, ...
-    for (let i = 1; i <= 2; i++) {
-        const enemyId = `m${id}_e${i}`;
-        if (BESTIARY[enemyId]) {
-            enemies.push(BESTIARY[enemyId]);
-        }
-    }
-
-    // Fallback: If no monsters found for this specific map, use realm-wide defaults
-    if (enemies.length === 0) {
-        const allEnemies = Object.values(BESTIARY);
-        const commonForRealm = allEnemies.filter(e => e.realm === realm && e.rank === EnemyRank.Common);
-        if (commonForRealm.length > 0) {
-            enemies.push(commonForRealm[Math.floor(Math.random() * commonForRealm.length)]);
-        }
-    }
 
     // Add Boss if defined (Use fixed position)
     let bossSpawn = undefined;
@@ -608,8 +613,8 @@ export const MAPS: MapData[] = RAW_MAPS_V60.map((raw, index) => {
         }
     }
 
-    // Default Fallback (Skip Map 0 as it is Safe Zone)
-    if (enemies.length === 0 && raw.id !== 0) {
+    // Default Fallback (Skip Safe Zones)
+    if (enemies.length === 0 && !SAFE_MAP_IDS.includes(id)) {
         if (BESTIARY['m1_c1']) {
             enemies.push(BESTIARY['m1_c1']);
         }

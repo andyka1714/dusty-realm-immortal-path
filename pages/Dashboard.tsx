@@ -10,6 +10,7 @@ import { addLog } from '../store/slices/logSlice';
 import { REALM_NAMES, REALM_MODIFIERS, MINOR_REALM_CAP, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN, SECLUSION_BASE_COST, SECLUSION_DURATION_MS, SPIRIT_ROOT_DETAILS, PASSIVE_CULTIVATION_PENALTY } from '../constants';
 import { ITEMS } from '../data/items';
 import { ProgressBar } from '../components/ProgressBar';
+import { BREAKTHROUGH_TEXTS, GENERIC_BREAKTHROUGH_TEXT } from '../data/game_text';
 import { LogPanel } from '../components/LogPanel';
 import { StatsPanel } from '../components/StatsPanel';
 import { Modal } from '../components/Modal';
@@ -57,21 +58,32 @@ export const Dashboard: React.FC = () => {
         
         if (lastBreakthroughResult.success) {
              if (lastBreakthroughResult.isMajor) {
-                dispatch(addLog({ message: "金光乍現，瓶頸轟然破碎！壽元大增，修為更進一步！", type: 'gold' }));
+                // Use refined story text for major realm breakthrough
+                const text = BREAKTHROUGH_TEXTS[majorRealm]?.success || "金光乍現，瓶頸轟然破碎！壽元大增，修為更進一步！";
+                dispatch(addLog({ message: text, type: 'gold' }));
              } else {
-                dispatch(addLog({ message: "靈氣運轉周天，修為精進，突破小境界！", type: 'success' }));
+                dispatch(addLog({ message: GENERIC_BREAKTHROUGH_TEXT.minorSuccess, type: 'success' }));
              }
         } else {
-             if (lastBreakthroughResult.isTribulation) {
-                 dispatch(addLog({ message: "天劫降臨！雷霆貫體，你雖勉強保住性命，但修為盡失...", type: 'tribulation' }));
-             } else if (lastBreakthroughResult.dropRealm) {
-                 dispatch(addLog({ message: "突破失敗，氣血逆行，走火入魔！境界跌落...", type: 'danger' }));
+             if (lastBreakthroughResult.isMajor) {
+                 // Use refined story text for major realm failure
+                 const text = BREAKTHROUGH_TEXTS[majorRealm]?.failure || (lastBreakthroughResult.isTribulation ? GENERIC_BREAKTHROUGH_TEXT.tribulationFailure : "突破失敗，心魔干擾...");
+                 
+                 // If tribulation specifically failed (and text includes generic warning), maybe append?
+                 // But refined text covers it.
+                 const logType = lastBreakthroughResult.isTribulation ? 'tribulation' : 'danger';
+                 dispatch(addLog({ message: text, type: logType }));
              } else {
-                 dispatch(addLog({ message: "突破失敗，經脈受損，需修養時日。", type: 'danger' }));
+                 // Minor failure
+                 if (lastBreakthroughResult.dropRealm) {
+                     dispatch(addLog({ message: GENERIC_BREAKTHROUGH_TEXT.realmDropFailure, type: 'danger' }));
+                 } else {
+                     dispatch(addLog({ message: GENERIC_BREAKTHROUGH_TEXT.minorFailure, type: 'danger' }));
+                 }
              }
         }
     }
-  }, [lastBreakthroughResult, dispatch]);
+  }, [lastBreakthroughResult, dispatch, majorRealm]);
 
   const [manualCooldown, setManualCooldown] = useState(0);
 
