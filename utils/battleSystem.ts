@@ -229,6 +229,10 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
         // Critical Hit (Applied to final damage as standard RPG convention, or can be Applied to Attack? Usually damage.)
         if (isCrit) rawDmg = Math.floor(rawDmg * 1.5);
         
+        // Variance: +/- 10%
+        const variance = 0.9 + Math.random() * 0.2;
+        rawDmg = rawDmg * variance;
+
         // Ensure Minimum Damage of 1 FINAL check
         rawDmg = Math.max(1, Math.floor(rawDmg));
 
@@ -236,8 +240,8 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
         logs.push({
             turn,
             isPlayer: true,
-            message: `<player>${player.name}</player> 發動攻擊，${isCrit ? '暴擊！' : ''}造成 <dmg>${rawDmg}</dmg> 點傷害！`,
-            damage: rawDmg,
+            message: `<player>${player.name}</player> 發動攻擊，${isCrit ? '暴擊！' : ''}造成 <dmg>${Math.floor(rawDmg)}</dmg> 點傷害！`,
+            damage: Math.floor(rawDmg),
             playerHp,
             playerMaxHp: player.maxHp,
             enemyHp,
@@ -261,6 +265,10 @@ export const runAutoBattle = (player: PlayerCombatStats, enemy: Enemy): { won: b
             enemyDmg = Math.floor(enemyDmg * (1 - player.damageReduction / 100));
         }
         
+        // Variance: +/- 10%
+        const enemyVariance = 0.9 + Math.random() * 0.2;
+        enemyDmg = enemyDmg * enemyVariance;
+
         enemyDmg = Math.max(1, Math.floor(enemyDmg));
 
         const isDodge = Math.random() * 100 < player.dodge;
