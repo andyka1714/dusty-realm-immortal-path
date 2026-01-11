@@ -100,25 +100,48 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         };
     };
 
-    const getSmartConnection = (sourceMap: MapData, targetMap: MapData) => {
+    const getSmartConnection = (sourceMap: MapData, targetMap: MapData, explicitDir?: string) => {
         const sourcePos = getPos(sourceMap);
         const targetPos = getPos(targetMap);
-        
-        const dx = targetPos.x - sourcePos.x;
-        const dy = targetPos.y - sourcePos.y;
         
         const halfW = NODE_WIDTH / 2;
         const halfH = NODE_HEIGHT / 2;
         
-        let x1, y1, x2, y2;
+        let x1 = sourcePos.x;
+        let y1 = sourcePos.y;
+        let x2 = targetPos.x;
+        let y2 = targetPos.y;
 
-        if (Math.abs(dx) > Math.abs(dy)) {
-            if (dx > 0) { x1 = sourcePos.x + halfW; y1 = sourcePos.y; x2 = targetPos.x - halfW; y2 = targetPos.y; }
-            else { x1 = sourcePos.x - halfW; y1 = sourcePos.y; x2 = targetPos.x + halfW; y2 = targetPos.y; }
-        } else {
-            if (dy > 0) { x1 = sourcePos.x; y1 = sourcePos.y + halfH; x2 = targetPos.x; y2 = targetPos.y - halfH; }
-            else { x1 = sourcePos.x; y1 = sourcePos.y - halfH; x2 = targetPos.x; y2 = targetPos.y + halfH; }
+        // Determine Start Point based on Explicit Direction
+        if (explicitDir === "North") { y1 -= halfH; }
+        else if (explicitDir === "South") { y1 += halfH; }
+        else if (explicitDir === "West") { x1 -= halfW; }
+        else if (explicitDir === "East") { x1 += halfW; }
+        else if (explicitDir === "NorthWest") { x1 -= halfW; y1 -= halfH; }
+        else if (explicitDir === "NorthEast") { x1 += halfW; y1 -= halfH; }
+        else if (explicitDir === "SouthWest") { x1 -= halfW; y1 += halfH; }
+        else if (explicitDir === "SouthEast") { x1 += halfW; y1 += halfH; }
+        else {
+            // Default heuristic if no dir (or for Target end if we don't look up reciprocal yet)
+            const dx = targetPos.x - sourcePos.x;
+            const dy = targetPos.y - sourcePos.y;
+            if (Math.abs(dx) > Math.abs(dy)) {
+                x1 = dx > 0 ? sourcePos.x + halfW : sourcePos.x - halfW;
+            } else {
+                y1 = dy > 0 ? sourcePos.y + halfH : sourcePos.y - halfH;
+            }
         }
+
+        // Determine End Point (Simple nearest edge heuristic)
+        // Ideally we would look up the reciprocal portal, but nearest edge works for visual lines
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        if (Math.abs(dx) > Math.abs(dy)) {
+             x2 = dx > 0 ? targetPos.x - halfW : targetPos.x + halfW;
+        } else {
+             y2 = dy > 0 ? targetPos.y - halfH : targetPos.y + halfH;
+        }
+
         return { x1, y1, x2, y2 };
     };
 
@@ -143,7 +166,11 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     const strokeColor = (isVisitedSource && isVisitedTarget) ? "#f59e0b" : "#44403c"; 
                     const opacity = isVisible ? 1 : 0.15;
                     
-                    const { x1, y1, x2, y2 } = getSmartConnection(map, targetMap);
+                    // Find the specific portal to get direction
+                    const portal = map.portals.find(p => p.targetMapId === targetId);
+                    const portalDir = portal?.dir;
+
+                    const { x1, y1, x2, y2 } = getSmartConnection(map, targetMap, portalDir);
 
                     connections.push(
                         <line 

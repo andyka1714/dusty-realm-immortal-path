@@ -1,160 +1,100 @@
 # 02. 築基期 (Foundation Establishment)
 
-本區域包含地圖 ID 20-34，分為四個極端環境，對應四種屬性試煉。
+築基期地圖分為三條獨立的修練路線，對應劍、體、法三系。
 
-## 20. 雪線古道
-- **Realm**: 築基
-- **Size**: 180x180
-- **Position**: [0, 4]
-- **Theme**: North
-- **Description**: 風雪漫卷，古道蒼茫。這裡是分割凡俗與極寒禁區的界線，每一步都踏在歷史的塵埃之上。
-- **Connections**:
-    - South -> 11 (北天門關)
-    - East -> 21 (冰封峽谷)
+## 北方：劍修路線 (Sword/Ice/Thunder)
+*連接自：萬劍塚 [0, 7]*
 
-## 21. 冰封峽谷
+### 30. 雪線古道
 - **Realm**: 築基
-- **Size**: 180x180
-- **Position**: [1, 4]
-- **Theme**: North
-- **Description**: 兩側冰壁如刀劈斧削，晶瑩剔透中封印著遠古的生靈。寒氣透骨，似要凍結闖入者的靈魂。
+- **Position**: [0, 8]
+- **Theme**: North - Snow
+- **Description**: 跨過萬劍塚，氣溫驟降。風雪掩埋了古道，這裡是凡俗與極寒禁區的界線。
 - **Connections**:
-    - West -> 20 (雪線古道)
-    - North -> 22 (落雷懸崖)
+    - South -> 7 (萬劍塚 - 練氣)
+    - North -> 31 (冰封峽谷)
 
-## 22. 落雷懸崖
+### 31. 冰封峽谷
 - **Realm**: 築基
-- **Size**: 180x180
-- **Position**: [1, 5]
-- **Theme**: North
-- **Description**: 崖頂常年雷雲低垂，銀蛇狂舞。雷鳴與雪崩之聲交織，奏響一曲毀滅的樂章。
+- **Position**: [0, 9]
+- **Theme**: North - Ice Canyon
+- **Description**: 兩側冰壁如刀劈斧削，晶瑩剔透中封印著遠古的生靈。
 - **Connections**:
-    - South -> 21 (冰封峽谷)
-    - North -> 35 (迷霧幻海)
-- **Boss**: 極地劍靈 (築基圓滿 / 冰) @ [90, 40]
+    - South -> 30 (雪線古道)
+    - North -> 32 (落雷懸崖)
 
-## 23. 烈焰荒原
+### 32. 落雷懸崖
 - **Realm**: 築基
-- **Size**: 180x180
-- **Position**: [0, -4]
-- **Theme**: South
-- **Description**: 熱浪扭曲了空間，大地龜裂如網。硫磺氣息撲面而來，這裡是火修的天堂，凡人的煉獄。
+- **Position**: [0, 10]
+- **Theme**: North - Thunder Cliff
+- **Description**: 崖頂常年雷雲低垂，銀蛇狂舞。雷鳴與雪崩之聲交織，是淬鍊飛劍的絕佳場所。
 - **Connections**:
-    - North -> 14 (寒潭入口) - *Note: Logical connection from previously explored area*
-    - East -> 24 (熔岩流道)
-    - West -> 27 (焦土小徑)
+    - South -> 31 (冰封峽谷)
+    - North -> 60 (罡風層 - 金丹)
+- **Boss**: 極地劍靈
 
-## 24. 熔岩流道
-- **Realm**: 築基
-- **Size**: 180x180
-- **Position**: [1, -4]
-- **Theme**: South
-- **Description**: 赤紅的岩漿如火龍般蜿蜒流淌，將黑暗地底映照得如同白晝。稍有踏錯，便會屍骨無存。
-- **Connections**:
-    - West -> 23 (烈焰荒原)
-    - South -> 25 (地底暗河)
+---
 
-## 25. 地底暗河
-- **Realm**: 築基
-- **Size**: 180x180
-- **Position**: [1, -5]
-- **Theme**: South
-- **Description**: 河水漆黑如墨，寂靜無聲。不知流向何方的暗流中，似乎隱藏著來自地心的窺視。
-- **Connections**:
-    - North -> 24 (熔岩流道)
-    - West -> 26 (赤紅裂谷)
+## 西方：體修路線 (Body/Fire/Earth)
+*連接自：獸王谷 [-10, 7]*
 
-## 26. 赤紅裂谷
+### 40. 狂獸巢穴
 - **Realm**: 築基
-- **Size**: 180x180
-- **Position**: [0, -5]
-- **Theme**: South
-- **Description**: 大地裂開的傷口，噴湧著來自地心的怒火。高溫讓周圍的岩石都化作了琉璃般的結晶。
+- **Position**: [-10, 8]
+- **Theme**: West - Lair
+- **Description**: 遍地白骨，腥氣沖天。這裡是真正的殺戮場，只有強者生存。
 - **Connections**:
-    - East -> 25 (地底暗河)
-    - South -> 38 (腐蝕灘塗)
-- **Boss**: 烈焰妖王 (築基圓滿 / 火) @ [90, 140]
+    - East -> 16 (獸王谷 - 練氣)
+    - West -> 41 (食人叢林)
 
-## 27. 焦土小徑
+### 41. 食人叢林
 - **Realm**: 築基
-- **Size**: 180x180
-- **Position**: [-1, -4]
-- **Theme**: South
-- **Description**: 曾被天火肆虐之地，寸草不生。只有炭黑的枯木如鬼爪般伸向天空，訴說著昔日的絕望。
+- **Position**: [-10, 9]
+- **Theme**: West - Dangerous Forest
+- **Description**: 這些植物似乎有了意識，貪婪地渴望著血肉的滋養。
 - **Connections**:
-    - East -> 14 (寒潭入口)
-    - South -> 23 (烈焰荒原)
+    - East -> 40 (狂獸巢穴)
+    - West -> 42 (烈焰荒原)
 
-## 28. 古戰場遺跡
+### 42. 烈焰荒原
 - **Realm**: 築基
-- **Size**: 180x180
-- **Position**: [4, 1]
-- **Theme**: East
-- **Description**: 殘戟斷劍，埋於黃沙。千萬年前的喊殺聲似乎仍在風中迴盪，經久不散的殺氣令人心驚。
+- **Position**: [-10, 10]
+- **Theme**: West - Fire Wasteland
+- **Description**: 熱浪扭曲了空間，大地龜裂。地火噴湧，是對肉身極限的考驗。
 - **Connections**:
-    - West -> 17 (寂滅雷澤口)
-    - North -> 29 (沉沒石塔)
+    - East -> 41 (食人叢林)
+    - West -> 70 (重力黑山 - 金丹)
+- **Boss**: 烈焰妖王
 
-## 29. 沉沒石塔
-- **Realm**: 築基
-- **Size**: 180x180
-- **Position**: [4, 2]
-- **Theme**: East
-- **Description**: 半截塔身斜插大地，爬滿了歲月的青苔。塔內隱隱透出的神秘氣息，引誘著貪婪的探險者。
-- **Connections**:
-    - South -> 28 (古戰場遺跡)
-    - North -> 41 (古禁制廢墟)
-    - West -> 30 (陰風窟深處)
-- **Boss**: 雷澤領主 (築基圓滿 / 雷) @ [140, 90]
+---
 
-## 30. 陰風窟深處
-- **Realm**: 築基
-- **Size**: 180x180
-- **Position**: [3, 2]
-- **Theme**: East
-- **Description**: 風聲呼嘯，如萬鬼齊哭。這裡的光線都被吞噬，唯有靈魂的微光在黑暗中搖曳。
-- **Connections**:
-    - South -> 17 (寂滅雷澤口)
-    - East -> 29 (沉沒石塔)
+## 東方：法修路線 (Magic/Water/Poison)
+*連接自：靈源仙湖 [10, 7]*
 
-## 31. 幽暗密林
+### 50. 幽暗密林
 - **Realm**: 築基
-- **Size**: 180x180
-- **Position**: [-4, -1]
-- **Theme**: West
-- **Description**: 古木參天，枝葉交織成網，終年不見天日。腐葉下潛伏著劇毒與陰影。
+- **Position**: [10, 8]
+- **Theme**: East - Dark Forest
+- **Description**: 古木參天，遮雲蔽日。腐葉下潛伏著劇毒的蟲豸。
 - **Connections**:
-    - East -> 19 (萬獸林外圍)
-    - South -> 32 (盤龍岩窟)
+    - West -> 26 (靈源仙湖 - 練氣)
+    - East -> 51 (瘴氣沼澤)
 
-## 32. 盤龍岩窟
+### 51. 瘴氣沼澤
 - **Realm**: 築基
-- **Size**: 180x180
-- **Position**: [-4, -2]
-- **Theme**: West
-- **Description**: 岩洞千折百轉，宛如盤龍蟄伏。錯綜複雜的通道中，風聲嗚咽，似在訴說古老的秘密。
+- **Position**: [10, 9]
+- **Theme**: East - Poison Swamp
+- **Description**: 五彩斑斕的霧氣最是致命。稍有不慎吸入一口，便會化為膿血。
 - **Connections**:
-    - North -> 31 (幽暗密林)
-    - West -> 34 (狂獸巢穴)
-    - East -> 33 (虎嘯深林)
+    - West -> 50 (幽暗密林)
+    - East -> 52 (寂滅雷澤)
 
-## 33. 虎嘯深林
+### 52. 寂滅雷澤
 - **Realm**: 築基
-- **Size**: 180x180
-- **Position**: [-3, -2]
-- **Theme**: West
-- **Description**: 山林震顫，百獸噤聲。這裡是王者的領地，每一縷空氣都瀰漫著殘暴的威壓。
+- **Position**: [10, 10]
+- **Theme**: East - Thunder Swamp
+- **Description**: 雷水交加，天地之威在此匯聚。法修可在此感悟雷霆法則。
 - **Connections**:
-    - North -> 19 (萬獸林外圍)
-    - West -> 32 (盤龍岩窟)
-
-## 34. 狂獸巢穴
-- **Realm**: 築基
-- **Size**: 180x180
-- **Position**: [-5, -2]
-- **Theme**: West
-- **Description**: 遍地白骨，腥氣沖天。森林的最深處，只有強者才能在無盡的殺戮中生存。
-- **Connections**:
-    - East -> 32 (盤龍岩窟)
-    - West -> 42 (萬妖石窟)
-- **Boss**: 萬獸獸王 (築基圓滿 / 物理) @ [40, 90]
+    - West -> 51 (瘴氣沼澤)
+    - East -> 80 (風暴洋 - 金丹)
+- **Boss**: 雷澤領主

@@ -1,34 +1,21 @@
 # 07. 合體期 (Fusion)
 
-本區域包含地圖 ID 55-57，身魂合一，準備迎接天劫。
+正式進入靈界範疇。
 
-## 55. 空間崩壞裂縫
+## 140. 萬法聖城 (City of Ten Thousand Laws)
 - **Realm**: 合體
-- **Size**: 120x120
-- **Position**: [1, 11]
-- **Theme**: North
-- **Description**: 時空錯亂，碎片翻飛。巨大的裂縫如同蒼穹的傷疤，吞噬著一切敢於靠近的存在。
+- **Position**: [0, 21]
+- **Theme**: Spirit World - City
+- **Description**: 靈界最繁華的都市，萬族共存。在這裡可以找到世間罕見的寶物。
 - **Connections**:
-    - South -> 54 (太虛幻境)
-    - North -> 56 (天罰之巔)
+    - South -> 131 (破碎虛空 - 煉虛)
+    - North -> 141 (靈界中樞)
 
-## 56. 天罰之巔
+## 141. 靈界中樞 (Spirit World Nexus)
 - **Realm**: 合體
-- **Size**: 120x120
-- **Position**: [1, 12]
-- **Theme**: South
-- **Description**: 雷雲壓頂，神威如獄。這裡是天道意志最為強烈之處，每一道雷霆都蘊含著毀滅法則。
+- **Position**: [0, 22]
+- **Theme**: Spirit World - Core
+- **Description**: 靈氣最為濃鬱之地，也是維持靈界運轉的核心。
 - **Connections**:
-    - South -> 55 (空間崩壞裂縫)
-    - North -> 57 (虛空樞紐)
-
-## 57. 虛空樞紐
-- **Realm**: 合體
-- **Size**: 120x120
-- **Position**: [2, 12]
-- **Theme**: East
-- **Description**: 萬界交匯，亂流激盪。無數位面的通道在此開啟，虛空生物在此築巢。
-- **Connections**:
-    - South -> 56 (天罰之巔)
-    - North -> 58 (墜星之地)
-- **Boss**: 虛空守衛 (合體大圓滿 / 空/混元) @ [90, 90]
+    - South -> 140 (萬法聖城)
+    - North -> 150 (無盡海 - 大乘)

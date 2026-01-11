@@ -1,24 +1,19 @@
 # 09. 渡劫期 (Tribulation)
 
-本區域包含地圖 ID 60-61，直面天道，歷經九死一生。
-
-## 60. 劫雲深處
+## 160. 劫雲荒原 (Tribulation Wasteland)
 - **Realm**: 渡劫
-- **Size**: 200x200
-- **Position**: [0, 15]
-- **Theme**: Ascent
-- **Description**: 墨色劫雲，遮天蔽日。毀滅的氣息令人窒息，這裡是修仙者最後的修羅場。
+- **Position**: [0, 25]
+- **Theme**: Dark
+- **Description**: 烏雲壓頂，雷聲轟鳴。空氣中充滿了毀滅的氣息，這裡是迎接天劫的最後準備地。
 - **Connections**:
-    - South -> 59 (星辰盡頭)
-    - North -> 61 (天道祭壇)
+    - South -> 151 (登仙天梯 - 大乘)
+    - North -> 161 (九天雷池)
 
-## 61. 天道祭壇
+## 161. 九天雷池 (Nine Heavens Thunder Pool)
 - **Realm**: 渡劫
-- **Size**: 200x200
-- **Position**: [0, 16]
-- **Theme**: Ascent
-- **Description**: 古樸蒼涼，道韻天成。祭壇之上，直面天道拷問，一步登天，或萬劫不復。
+- **Position**: [0, 26]
+- **Theme**: Thunder
+- **Description**: 天劫的核心，雷霆化作池水。只有沐浴雷劫不死，方能脫胎換骨，成就仙身。
 - **Connections**:
-    - South -> 60 (劫雲深處)
-    - North -> 62 (飛昇台)
-- **Boss**: 劫灰守衛 (渡劫圓滿 / 火/劫) @ [100, 100]
+    - South -> 160 (劫雲荒原)
+    - North -> 170 (接引仙殿 - 仙人)

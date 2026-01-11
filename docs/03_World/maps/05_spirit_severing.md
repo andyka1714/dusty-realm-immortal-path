@@ -1,33 +1,23 @@
 # 05. 化神期 (Spirit Severing)
 
-本區域包含地圖 ID 49-51，挑戰天地規則，準備踏入虛空。
+從此境界開始，三方勢力匯聚，進入更高層次的爭奪。
 
-## 49. 碎星浮空島
+## 120. 三界戰場 (The Three Realms Battlefield)
 - **Realm**: 化神
-- **Size**: 120x120
-- **Position**: [-1, 8]
-- **Theme**: North
-- **Description**: 星河破碎，島嶼懸空。這裡是離天最近的地方，舉手可摘星辰，低頭可見蒼生。
+- **Position**: [0, 17]
+- **Theme**: Center - Battlefield
+- **Description**: 劍修、體修、法修三條道路在此交匯。無數強者為了爭奪進入上層的資格，在此廝殺。
 - **Connections**:
-    - East -> 43 (荒古遺地)
+    - South -> 92 (碎星劍垣 - 劍)
+    - SouthWest -> 102 (蠻荒祖廟 - 體)
+    - SouthEast -> 112 (虛空裂隙 - 法)
+    - North -> 121 (隕仙深淵)
 
-## 50. 乾坤倒置界
+## 121. 隕仙深淵 (Abyss of Fallen Immortals)
 - **Realm**: 化神
-- **Size**: 120x120
-- **Position**: [-7, -3]
-- **Theme**: West
-- **Description**: 陰陽逆亂，天地倒懸。重力在此失去了意義，每一步都在挑戰常理的認知。
+- **Position**: [0, 18]
+- **Theme**: Center - Abyss
+- **Description**: 戰場中央的巨大深淵，深不見底。傳說曾有仙人隕落於此，怨氣化作了致命的黑霧。
 - **Connections**:
-    - East -> 42 (萬妖石窟)
-    - West -> 51 (九天劫海)
-
-## 51. 九天劫海
-- **Realm**: 化神
-- **Size**: 120x120
-- **Position**: [-8, -4]
-- **Theme**: West
-- **Description**: 雷漿化海，咆哮不息。這是天道對化神修士最後的考驗，渡過即為仙途。
-- **Connections**:
-    - East -> 50 (乾坤倒置界)
-    - North -> 52 (虛無裂隙)
-- **Boss**: 霆祖 (化神圓滿 / 雷/罰) @ [30, 60]
+    - South -> 120 (三界戰場)
+    - North -> 130 (時光長河 - 煉虛)

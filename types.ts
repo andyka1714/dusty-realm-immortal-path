@@ -148,6 +148,7 @@ export interface Portal extends Coordinate {
   targetX: number;
   targetY: number;
   label: string; // e.g., "前往 [野狼原]"
+  dir?: string; // Direction hint for visualization (North, South, etc.)
 }
 
 export enum EnemyRank {

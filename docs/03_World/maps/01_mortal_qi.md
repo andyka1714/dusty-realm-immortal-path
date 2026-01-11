@@ -1,216 +1,226 @@
 # 01. 凡人與練氣期 (Mortal & Qi Refining)
 
-本區域包含地圖 ID 0-19，是修仙之路的起點。
+本階段包含遊戲起點、三大門派以及初期的修煉地圖。
 
-## 0. 青雲仙宗
+## 起點 (Starting Point)
+
+### 0. 仙緣鎮 (Xianyuan Town)
 - **Realm**: 凡人
-- **Size**: 40x40
+- **Size**: 60x60
 - **Position**: [0, 0]
-- **Theme**: Center
-- **Description**: 仙門巍峨，紫氣東來。千年護宗大陣流轉不息，隱隱傳來大道梵音，令人心神嚮往。
+- **Theme**: Center - Town
+- **Description**: 紅塵滾滾，人聲鼎沸。這裡是所有修仙者夢想開始的地方，南來北往的商旅與尋仙者在此匯聚。
 - **Connections**:
-    - North -> 1 (宗門後山)
-    - South -> 2 (仙緣鎮)
-    - East -> 3 (靈湖草甸)
-    - West -> 4 (外門試煉場)
+    - North -> 1 (北郊荒徑 - 劍修路)
+    - West -> 10 (西郊密林 - 體修路)
+    - East -> 20 (東郊靈田 - 法修路)
+- **NPCs**:
+    - 村長 (引導)
+    - 雜貨商 (基礎物資)
 
-## 1. 宗門後山
+---
+
+## 北方：青雲劍宗 (Sword Path)
+*風格：凜冽寒風，殘劍古道。*
+
+### 1. 北郊荒徑
 - **Realm**: 凡人
-- **Size**: 60x60
 - **Position**: [0, 1]
-- **Theme**: North
-- **Description**: 林深徑幽，靈藥遍地。這裡是弟子們初識草木、吞吐朝霞的靜謐之地。
+- **Theme**: North - Wasteland
+- **Description**: 離開城鎮向北的荒涼小徑，寒風漸起，路邊偶有凍死骨。
 - **Connections**:
-    - South -> 0 (青雲仙宗)
-    - North -> 5 (北郊碎石坡)
-    - SouthEast -> 3 (靈湖草甸)
+    - South -> 0 (仙緣鎮)
+    - North -> 2 (劍門古道)
 
-## 2. 仙緣鎮
+### 2. 劍門古道
 - **Realm**: 凡人
-- **Size**: 60x60
-- **Position**: [0, -1]
-- **Theme**: South
-- **Description**: 紅塵滾滾，人聲鼎沸。凡人在此處仰望仙門，只求那一絲渺茫的仙緣。
-- **Connections**:
-    - North -> 0 (青雲仙宗)
-    - South -> 6 (南郊蘆葦蕩)
-    - NorthWest -> 4 (外門試煉場)
-
-## 3. 靈湖草甸
-- **Realm**: 凡人
-- **Size**: 60x60
-- **Position**: [1, 0]
-- **Theme**: East
-- **Description**: 煙波浩渺，碧草連天。微風拂過，靈湖泛起層層漣漪，似有靈鯉躍出水面。
-- **Connections**:
-    - West -> 0 (青雲仙宗)
-    - NorthWest -> 1 (宗門後山)
-    - SouthWest -> 2 (仙緣鎮)
-    - South -> 7 (東郊荒塚)
-
-## 4. 外門試煉場
-- **Realm**: 凡人
-- **Size**: 60x60
-- **Position**: [-1, 0]
-- **Theme**: West
-- **Description**: 黃沙漫天，殺聲震野。石柱林立間，依稀可見無數弟子揮灑的汗水與熱血。
-- **Connections**:
-    - East -> 0 (青雲仙宗)
-    - SouthEast -> 2 (仙緣鎮)
-    - West -> 8 (萬獸林入口)
-
-## 5. 北郊碎石坡
-- **Realm**: 凡人
-- **Size**: 60x60
-- **Position**: [1, 1]
-- **Theme**: North
-- **Description**: 怪石嶙峋，荊棘叢生。此處山勢陡峭，常有猛獸出沒於亂石之間。
-- **Connections**:
-    - West -> 1 (宗門後山)
-    - North -> 9 (猿鳴雪峰底)
-
-## 6. 南郊蘆葦蕩
-- **Realm**: 凡人
-- **Size**: 60x60
-- **Position**: [-1, -1]
-- **Theme**: South
-- **Description**: 蘆花飛雪，水澤迷離。看似平靜的盪漾深處，隱藏著致命的殺機。
-- **Connections**:
-    - East -> 2 (仙緣鎮)
-    - South -> 12 (蘆葦腐澤區)
-
-## 7. 東郊荒塚
-- **Realm**: 凡人
-- **Size**: 60x60
-- **Position**: [1, -1]
-- **Theme**: East
-- **Description**: 斷碑殘垣，鬼火森森。昔日的戰場已被歲月掩埋，只餘下無盡的淒涼與怨念。
-- **Connections**:
-    - North -> 3 (靈湖草甸)
-    - East -> 15 (東郊廢墟)
-- **Boss**: 守塚老屍 (凡人巔峰 / 陰) @ [30, 30]
-
-## 8. 萬獸林入口
-- **Realm**: 練氣
-- **Size**: 100x100
-- **Position**: [-2, 0]
-- **Theme**: West
-- **Description**: 古木參天，遮雲蔽日。深處傳來的陣陣獸吼，彷彿在警告著所有踏入者。
-- **Connections**:
-    - East -> 4 (外門試煉場)
-    - South -> 18 (迷影叢林)
-- **Boss**: 裂風狼王 (練氣初期 / 風) @ [20, 50]
-
-## 9. 猿鳴雪峰底
-- **Realm**: 練氣
-- **Size**: 100x100
 - **Position**: [0, 2]
-- **Theme**: North
-- **Description**: 寒氣逼人，雪峰入雲。淒厲的猿聲迴盪在空谷之中，更添幾分肅殺。
+- **Theme**: North - Mountain Path
+- **Description**: 兩側石壁如削，傳說曾有仙人試劍於此。甚至能感覺到岩石中殘留的劍意。
 - **Connections**:
-    - South -> 5 (北郊碎石坡)
-    - West -> 10 (雲海棧道)
+    - South -> 1 (北郊荒徑)
+    - North -> 3 (青雲山腳)
 
-## 10. 雲海棧道
-- **Realm**: 練氣
-- **Size**: 100x100
-- **Position**: [-1, 2]
-- **Theme**: North
-- **Description**: 懸空棧道，步步驚心。腳下是萬丈深淵，身周是翻湧雲海。
+### 3. 青雲山腳
+- **Realm**: 凡人
+- **Position**: [0, 3]
+- **Theme**: North - Mountain Base
+- **Description**: 抬頭仰望，可見雲端之上的宏偉宗門。想要入門，需先登上這萬級石階。
 - **Connections**:
-    - East -> 9 (猿鳴雪峰底)
-    - North -> 11 (北天門關)
+    - South -> 2 (劍門古道)
+    - North -> 4 (青雲劍宗)
 
-## 11. 北天門關
-- **Realm**: 練氣
-- **Size**: 100x100
-- **Position**: [-1, 3]
-- **Theme**: North
-- **Description**: 極北門戶，風雪交加。巨大的關隘聳立在風雪中，守護著通往極寒之地的道路。
+### 4. 青雲劍宗 (Sect)
+- **Realm**: 練氣 (轉職點)
+- **Position**: [0, 4]
+- **Theme**: North - Sect
+- **Description**: 劍氣沖霄，樓閣懸空。無數飛劍在空中穿梭，這裡是劍修的聖地。
 - **Connections**:
-    - South -> 10 (雲海棧道)
-    - North -> 20 (雪線古道)
-- **Boss**: 寒霜白猿 (練氣圓滿 / 冰) @ [50, 20]
+    - South -> 3 (青雲山腳)
+    - North -> 5 (試劍台)
+- **Features**: 劍修轉職、宗門商店、藏經閣。
 
-## 12. 蘆葦腐澤區
+### 5. 試劍台
 - **Realm**: 練氣
-- **Size**: 100x100
-- **Position**: [0, -2]
-- **Theme**: South
-- **Description**: 淤泥遍地，毒瘴瀰漫。腐爛的氣息令人作嘔，每一步都可能驚動潛伏的毒蟲。
+- **Position**: [0, 5]
+- **Theme**: North - Arena
+- **Description**: 宗門弟子切磋之地，石台染血，見證了無數天驕的崛起。
 - **Connections**:
-    - North -> 6 (南郊蘆葦蕩)
-    - East -> 13 (陰風谷口)
+    - South -> 4 (青雲劍宗)
+    - North -> 6 (藏劍谷)
 
-## 13. 陰風谷口
+### 6. 藏劍谷
 - **Realm**: 練氣
-- **Size**: 100x100
-- **Position**: [1, -2]
-- **Theme**: South
-- **Description**: 陰風呼嘯，直刺神魂。谷口彷彿一張吞噬光明的巨口，令人不寒而慄。
+- **Position**: [0, 6]
+- **Theme**: North - Valley
+- **Description**: 谷中插滿了廢棄的兵刃，每一把劍都有它的故事，等待有緣人喚醒。
 - **Connections**:
-    - West -> 12 (蘆葦腐澤區)
-    - South -> 14 (寒潭入口)
+    - South -> 5 (試劍台)
+    - North -> 7 (萬劍塚)
 
-## 14. 寒潭入口
+### 7. 萬劍塚
 - **Realm**: 練氣
-- **Size**: 100x100
-- **Position**: [0, -3]
-- **Theme**: South
-- **Description**: 潭水幽黑，深不可測。刺骨的寒氣撲面而來，傳說潭底有巨獸潛伏。
+- **Position**: [0, 7]
+- **Theme**: North - Graveyard
+- **Description**: 劍意最盛之地，也是最凶險之地。只有真正的劍修才能在此存活。
 - **Connections**:
-    - North -> 13 (陰風谷口)
-    - West -> 27 (焦土小徑)
-- **Boss**: 墨色水怪 (練氣圓滿 / 水/毒) @ [50, 80]
+    - South -> 6 (藏劍谷)
+    - North -> 30 (雪線古道 - 築基)
 
-## 15. 東郊廢墟
-- **Realm**: 練氣
-- **Size**: 100x100
-- **Position**: [2, 0]
-- **Theme**: East
-- **Description**: 殘桓斷壁，荒草淒淒。昔日的繁華已隨風而逝，只剩下死一般的寂靜。
-- **Connections**:
-    - West -> 7 (東郊荒塚)
-    - North -> 16 (雷暴荒原)
+---
 
-## 16. 雷暴荒原
-- **Realm**: 練氣
-- **Size**: 100x100
-- **Position**: [2, 1]
-- **Theme**: East
-- **Description**: 烏雲壓頂，雷蛇狂舞。狂暴的雷屬性靈氣充斥著每一寸空間，寸草不生。
-- **Connections**:
-    - South -> 15 (東郊廢墟)
-    - East -> 17 (寂滅雷澤口)
+## 西方：萬獸體宗 (Body Path)
+*風格：原始蠻荒，巨木叢林。*
 
-## 17. 寂滅雷澤口
-- **Realm**: 練氣
-- **Size**: 100x100
-- **Position**: [3, 1]
-- **Theme**: East
-- **Description**: 雷鳴電閃，步步驚心。這裡是雷修的修煉聖地，也是凡人的死亡禁區。
+### 10. 西郊密林
+- **Realm**: 凡人
+- **Position**: [-10, 1]
+- **Theme**: West - Forest
+- **Description**: 城鎮西側的茂密樹林，雖然不算危險，但已能聽到遠處的獸吼。
 - **Connections**:
-    - West -> 16 (雷暴荒原)
-    - North -> 30 (陰風窟深處)
-- **Boss**: 雷翼大隼 (練氣圓滿 / 雷) @ [80, 50]
+    - East -> 0 (仙緣鎮)
+    - West -> 11 (蠻荒徑)
 
-## 18. 迷影叢林
-- **Realm**: 練氣
-- **Size**: 100x100
-- **Position**: [-2, -1]
-- **Theme**: West
-- **Description**: 樹影婆娑，迷霧重重。光線在這裡被扭曲，極易讓人迷失方向。
+### 11. 蠻荒徑
+- **Realm**: 凡人
+- **Position**: [-10, 2]
+- **Theme**: West - Jungle Path
+- **Description**: 雜草叢生，幾乎掩蓋了路徑。這是獵人們踩出來的小道，通往危險的深處。
 - **Connections**:
-    - North -> 8 (萬獸林入口)
-    - West -> 19 (萬獸林外圍)
+    - East -> 10 (西郊密林)
+    - West -> 12 (獸王谷口)
 
-## 19. 萬獸林外圍
-- **Realm**: 練氣
-- **Size**: 100x100
-- **Position**: [-3, -1]
-- **Theme**: West
-- **Description**: 妖氣瀰漫，危機四伏。強大的妖獸在此徘徊，宣誓著它們的領地主權。
+### 12. 獸王谷口
+- **Realm**: 凡人
+- **Position**: [-10, 3]
+- **Theme**: West - Valley Entrance
+- **Description**: 兩側崖壁上有巨大的爪痕，空氣中瀰漫著野性的氣息。
 - **Connections**:
-    - East -> 18 (迷影叢林)
-    - South -> 33 (虎嘯深林)
-- **Boss**: 金睛虎王 (練氣圓滿 / 物理) @ [20, 50]
+    - East -> 11 (蠻荒徑)
+    - West -> 13 (萬獸體宗)
+
+### 13. 萬獸體宗 (Sect)
+- **Realm**: 練氣 (轉職點)
+- **Position**: [-10, 4]
+- **Theme**: West - Sect
+- **Description**: 依山而建的粗獷寨落，巨大的獸骨裝飾著大門。這裡崇尚最原始的力量。
+- **Connections**:
+    - East -> 12 (獸王谷口)
+    - West -> 14 (淬體潭)
+- **Features**: 體修轉職、宗門商店 (氣血)。
+
+### 14. 淬體潭
+- **Realm**: 練氣
+- **Position**: [-10, 5]
+- **Theme**: West - Pool
+- **Description**: 一潭赤紅的藥液，散發著刺鼻的氣味。弟子們在此浸泡，打磨肉身。
+- **Connections**:
+    - East -> 13 (萬獸體宗)
+    - West -> 15 (百獸林)
+
+### 15. 百獸林
+- **Realm**: 練氣
+- **Position**: [-10, 6]
+- **Theme**: West - Deep Forest
+- **Description**: 真正的獵場，每一棵樹後都可能藏著致命的捕食者。
+- **Connections**:
+    - East -> 14 (淬體潭)
+    - West -> 16 (獸王谷)
+
+### 16. 獸王谷
+- **Realm**: 練氣
+- **Position**: [-10, 7]
+- **Theme**: West - Boss Area
+- **Description**: 谷底據說沉睡著練氣期的獸王，挑戰它證明你的力量。
+- **Connections**:
+    - East -> 15 (百獸林)
+    - West -> 40 (狂獸巢穴 - 築基)
+
+---
+
+## 東方：玄道法宗 (Magic Path)
+*風格：迷霧沼澤，靈氣氤氳。*
+
+### 20. 東郊靈田
+- **Realm**: 凡人
+- **Position**: [10, 1]
+- **Theme**: East - Field
+- **Description**: 曾經的靈田，如今已荒廢，但仍生長著不少具有微弱靈氣的草藥。
+- **Connections**:
+    - West -> 0 (仙緣鎮)
+    - East -> 21 (迷霧澤)
+
+### 21. 迷霧澤
+- **Realm**: 凡人
+- **Position**: [10, 2]
+- **Theme**: East - Swamp
+- **Description**: 終年不散的白霧，容易讓人迷失方向。腳下的泥沼深不可測。
+- **Connections**:
+    - West -> 20 (東郊靈田)
+    - East -> 22 (靈湖草甸)
+
+### 22. 靈湖草甸
+- **Realm**: 凡人
+- **Position**: [10, 3]
+- **Theme**: East - Lake Side
+- **Description**: 碧草如茵，遠處的湖泊波光粼粼，景色優美卻暗藏玄機。
+- **Connections**:
+    - West -> 21 (迷霧澤)
+    - East -> 23 (玄道法宗)
+
+### 23. 玄道法宗 (Sect)
+- **Realm**: 練氣 (轉職點)
+- **Position**: [10, 4]
+- **Theme**: East - Sect
+- **Description**: 建於湖心島上的樓閣，陣法光芒流轉。法修們在此探究天地的奧秘。
+- **Connections**:
+    - West -> 22 (靈湖草甸)
+    - East -> 24 (試煉迷宮)
+- **Features**: 法修轉職、宗門商店 (神識/法術)。
+
+### 24. 試煉迷宮
+- **Realm**: 練氣
+- **Position**: [10, 5]
+- **Theme**: East - Maze
+- **Description**: 由幻陣構成的迷宮，考驗著弟子的神識與定力。
+- **Connections**:
+    - West -> 23 (玄道法宗)
+    - East -> 25 (藥王谷)
+
+### 25. 藥王谷
+- **Realm**: 練氣
+- **Position**: [10, 6]
+- **Theme**: East - Valley
+- **Description**: 靈氣充沛，生長著珍稀的練氣期靈草，是煉丹師的後花園。
+- **Connections**:
+    - West -> 24 (試煉迷宮)
+    - East -> 26 (靈源仙湖)
+
+### 26. 靈源仙湖
+- **Realm**: 練氣
+- **Position**: [10, 7]
+- **Theme**: East - Lake
+- **Description**: 湖水深處蘊含著精純的水靈氣，但也潛伏著強大的水生妖獸。
+- **Connections**:
+    - West -> 25 (藥王谷)
+    - East -> 50 (幽暗密林 - 築基)

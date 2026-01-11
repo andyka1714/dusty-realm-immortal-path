@@ -1,24 +1,21 @@
 # 08. 大乘期 (Mahayana)
 
-本區域包含地圖 ID 58-59，飛昇前的準備，探索星辰真理。
+接近飛昇的最後階段。
 
-## 58. 墜星之地
+## 150. 無盡海 (Endless Sea)
 - **Realm**: 大乘
-- **Size**: 200x200
-- **Position**: [0, 13]
-- **Theme**: Ascent
-- **Description**: 星辰同悲，大道哀鳴。無數衝擊仙道失敗的強者隕落於此，化作永恆的星塵。
+- **Position**: [0, 23]
+- **Theme**: Sea
+- **Description**: 分隔靈界與登仙路的浩瀚海洋。海水中蘊含著大道法則，非大乘期不可渡。
 - **Connections**:
-    - South -> 57 (虛空樞紐)
-    - North -> 59 (星辰盡頭)
+    - South -> 141 (靈界中樞 - 合體)
+    - North -> 151 (登仙天梯)
 
-## 59. 星辰盡頭
+## 151. 登仙天梯 (Stairway to Heaven)
 - **Realm**: 大乘
-- **Size**: 200x200
-- **Position**: [0, 14]
-- **Theme**: Ascent
-- **Description**: 銀河斷流，星光寂滅。再向前一步，便是凡塵的終點，未知的起點。
+- **Position**: [0, 24]
+- **Theme**: Sky
+- **Description**: 通往天界的巨大石階，每一步都承受著天地的威壓。
 - **Connections**:
-    - South -> 58 (墜星之地)
-    - North -> 60 (劫雲深處)
-- **Boss**: 古神 · 星緯 (大乘巔峰 / 星辰) @ [100, 100]
+    - South -> 150 (無盡海)
+    - North -> 160 (劫雲荒原 - 渡劫)
