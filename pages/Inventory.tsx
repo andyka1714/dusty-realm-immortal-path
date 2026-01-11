@@ -5,6 +5,7 @@ import { ITEMS } from '../data/items';
 import { equipItem, unequipItem, sortItems, removeItems, removeItem } from '../store/slices/inventorySlice';
 import { Package, Shield, Sword, FlaskConical, CircleDashed, Footprints, Crown, MinusCircle, Shirt, Medal, ArrowUpDown, Trash2, LayoutGrid, CheckSquare, Plus, Minus } from 'lucide-react';
 import { ItemCategory, ItemQuality, EquipmentSlot, ConsumableItem, InventorySlot, ItemInstance } from '../types';
+import { REALM_NAMES } from '../constants';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
 
@@ -373,6 +374,11 @@ export const Inventory: React.FC = () => {
                        <div className="flex flex-col">
                             <h3 className={`text-lg font-bold ${getQualityTextColor(selectedSlot.instance?.quality ?? selectedItemDef.quality)}`}>
                                 {selectedItemDef.name}
+                                {selectedItemDef.minRealm !== undefined && (
+                                    <span className="text-xs text-amber-500 font-mono ml-2">
+                                        [{REALM_NAMES[selectedItemDef.minRealm]}期]
+                                    </span>
+                                )}
                             </h3>
                             {selectedSlot.instance && (
                                 <span className="text-xs text-stone-500">
