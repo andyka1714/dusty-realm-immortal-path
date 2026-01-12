@@ -33,6 +33,7 @@ store.subscribe(() => {
         adventure: store.getState().adventure,
         inventory: store.getState().inventory,
         workshop: store.getState().workshop,
+        quest: store.getState().quest,
     });
     lastSave = now;
   }
