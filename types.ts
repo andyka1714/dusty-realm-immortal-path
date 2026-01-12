@@ -202,6 +202,7 @@ export interface NPC extends Coordinate {
   symbol: string; // e.g. '商'
   type: NPCType;
   description: string;
+  dialogue?: string[];
   // Placeholder for future functionality
   shopId?: string;
   questIds?: string[];

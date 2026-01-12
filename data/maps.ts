@@ -1,5 +1,6 @@
 import { MapData, MajorRealm, ElementType, Enemy, EnemyRank } from '../types';
 import { BESTIARY } from './enemies';
+import { VILLAGE_NPCS, SWORD_SECT_NPCS, BEAST_SECT_NPCS, MYSTIC_SECT_NPCS } from './npcs';
 
 // Raw Map Data Interface
 interface RawPortal {
@@ -70,15 +71,15 @@ const RAW_MAPS_V60: RawMap[] = [
         portals: [{ target_id: 1, dir: "South", pos: [40, 80] }, { target_id: 3, dir: "North", pos: [40, 0] }], boss: null
     },
     {
-        id: 3, name: "青雲山腳", realm: "凡人", size: [80, 80], pos: [0, 3], theme: "North",
+        id: 3, name: "凌霄山腳", realm: "凡人", size: [80, 80], pos: [0, 3], theme: "North",
         description: "抬頭仰望，可見雲端之上的宏偉宗門。",
         portals: [{ target_id: 2, dir: "South", pos: [40, 80] }, { target_id: 4, dir: "North", pos: [40, 0] }],
         boss: { name: "守山靈虎", pos: [40, 40] }
     },
     // Sect (y=4)
     {
-        id: 4, name: "青雲劍宗", realm: "練氣", size: [40, 40], pos: [0, 4], theme: "Sect",
-        description: "劍氣沖霄，樓閣懸空。這裡是劍修的聖地。",
+        id: 4, name: "凌霄劍宗", realm: "練氣", size: [40, 40], pos: [0, 4], theme: "Sect",
+        description: "群峰如劍直插雲霄，無數飛劍化作流光環繞主峰。宗門大殿懸浮於九天之上，凜冽的劍意令方圓百里妖邪退避。",
         portals: [
             { target_id: 3, dir: "South", pos: [20, 40] }, 
             { target_id: 5, dir: "West", pos: [0, 20] },
@@ -140,8 +141,8 @@ const RAW_MAPS_V60: RawMap[] = [
     },
     // Sect (y=4)
     {
-        id: 13, name: "萬獸體宗", realm: "練氣", size: [40, 40], pos: [-4, 0], theme: "Sect",
-        description: "依山而建的粗獷寨落，崇尚最原始的力量。",
+        id: 13, name: "萬獸山莊", realm: "練氣", size: [40, 40], pos: [-4, 0], theme: "Sect",
+        description: "依憑上古蠻荒巨獸的骸骨而建，巨大的圖騰柱上燃燒著不滅的獸火。鼓聲如雷，獸吼震天，空氣中瀰漫著原始狂野的氣息。",
         portals: [
             { target_id: 12, dir: "East", pos: [40, 20] }, 
             { target_id: 14, dir: "West", pos: [0, 20] },
@@ -199,8 +200,8 @@ const RAW_MAPS_V60: RawMap[] = [
     },
     // Sect (y=4)
     {
-        id: 23, name: "玄道法宗", realm: "練氣", size: [40, 40], pos: [4, 0], theme: "Sect",
-        description: "湖心島上的樓閣，陣法光芒流轉。",
+        id: 23, name: "縹緲仙宮", realm: "練氣", size: [40, 40], pos: [4, 0], theme: "Sect",
+        description: "終年雲霧繚繞，亦真亦幻。湖心島上瓊樓玉宇若隱若現，護宗大陣流轉著五彩琉璃之光，如入鏡花水月之境。",
         portals: [
             { target_id: 22, dir: "West", pos: [0, 20] }, 
             { target_id: 24, dir: "East", pos: [40, 20] },
@@ -682,7 +683,10 @@ export const MAPS: MapData[] = RAW_MAPS_V60.map((raw, index) => {
         worldX: worldX,
         worldY: worldY,
         portals: portals,
-        npcs: [],
+        npcs: id === 0 ? VILLAGE_NPCS : 
+             id === 4 ? SWORD_SECT_NPCS : 
+             id === 13 ? BEAST_SECT_NPCS :
+             id === 23 ? MYSTIC_SECT_NPCS : [],
         bossSpawn: bossSpawn,
         enemies: enemies,
         dropRateMultiplier: 1 + (index * 0.05)

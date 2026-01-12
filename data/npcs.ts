@@ -1,18 +1,37 @@
 import { NPC, NPCType } from '../types';
 
-// Map 0 Definition: 40x40. Center is (20, 20).
-const SPAWN_X = 20;
-const SPAWN_Y = 20;
-const OFFSET = 5;
+// Standard 40x40 Map Layout
+// Center: 20, 20
+// North: 20, 15
+// West: 15, 20
+// East: 25, 20
+// South: 20, 25
 
-export const INITIAL_VILLAGE_NPCS: NPC[] = [
+// --- Map 0: Xianyuan Town (仙緣鎮) ---
+export const VILLAGE_NPCS: NPC[] = [
+    {
+        id: 'village_chief',
+        name: '村長',
+        symbol: '長',
+        type: NPCType.Quest,
+        x: 20,
+        y: 15,
+        description: '仙緣鎮的村長，負責引導新人。',
+        questIds: ['tutorial_01'],
+        dialogue: [
+            "孩子，你既然覺醒了靈根，便不再是凡人了。",
+            "三大門派雖然求賢若渴，但也不養閒人。他們立下規矩，凡欲入門者，需先證明自己有跨入「練氣期」的潛力。",
+            "你若有意，可依此指引前行：\n\n【劍修之路 (北)】\n向北穿過北郊荒徑，前往凌霄山腳。傳聞那裡有守山靈虎守護著「引氣洗髓丹」，得之可入凌霄劍宗。\n\n【體修之路 (西)】\n向西深入西郊密林，前往獸王谷口。擊敗那裡的赤火猿，奪取「引氣洗髓丹」，便有資格拜入萬獸山莊。\n\n【法修之路 (東)】\n向東跨越東郊靈田，前往靈湖草甸。若能從靈湖巨蟹手中取得「引氣洗髓丹」，縹緲仙宮的大門將為你敞開。",
+            "切記，修仙之路本就是逆天而行，充滿兇險。去吧，孩子，去爭那一線機緣！"
+        ]
+    },
     {
         id: 'shop_general',
-        name: '珍寶閣分號',
+        name: '萬寶閣',
         symbol: '商',
-        type: NPCType.Shop, // General Store
-        x: SPAWN_X - OFFSET, // 15
-        y: SPAWN_Y - OFFSET, // 15 (Up is negative)
+        type: NPCType.Shop, // General
+        x: 15,
+        y: 20,
         description: '王掌櫃經營的雜貨舖，童叟無欺。',
         shopId: 'general_store_mortal'
     },
@@ -21,29 +40,150 @@ export const INITIAL_VILLAGE_NPCS: NPC[] = [
         name: '鐵匠鋪',
         symbol: '匠',
         type: NPCType.Shop, // Equipment
-        x: SPAWN_X + OFFSET, // 25
-        y: SPAWN_Y - OFFSET, // 15
+        x: 25,
+        y: 20,
         description: '傳來陣陣打鐵聲，鐵匠張正揮汗如雨。',
+        shopId: 'blacksmith_mortal'
+    }
+];
+
+// --- Map 4: Northern Sword Sect (凌霄劍宗) ---
+export const SWORD_SECT_NPCS: NPC[] = [
+    {
+        id: 'sect_sword_elder',
+        name: '劍宗長老',
+        symbol: '老',
+        type: NPCType.Quest,
+        x: 20, 
+        y: 15,
+        description: '劍氣內斂，不怒自威的長老。',
+        dialogue: [
+            "劍者，寧折不彎。唯有大毅力者，方能登臨絕頂。",
+            "若你已突破至練氣期，便是我宗門弟子。"
+        ]
+    },
+    {
+        id: 'sect_sword_wanbao',
+        name: '萬寶閣',
+        symbol: '商',
+        type: NPCType.Shop, // General
+        x: 15,
+        y: 20,
+        description: '宗門補給之處，丹藥靈材應有盡有。',
+        shopId: 'general_store_mortal'
+    },
+    {
+        id: 'sect_sword_lingbao',
+        name: '靈寶閣',
+        symbol: '劍',
+        type: NPCType.Shop, // Equipment
+        x: 25,
+        y: 20,
+        description: '宗門打造靈劍之地，爐火終年不熄。',
         shopId: 'blacksmith_mortal'
     },
     {
-        id: 'village_chief',
-        name: '村長家',
-        symbol: '長',
-        type: NPCType.Quest, // Quest Giver
-        x: SPAWN_X + OFFSET, // 25
-        y: SPAWN_Y + OFFSET, // 25
-        description: '李村長的居所，門口總是聚集著求助的村民。',
-        questIds: ['tutorial_01']
+        id: 'sect_sword_skills',
+        name: '藏經閣',
+        symbol: '經',
+        type: NPCType.Shop, // Skills
+        x: 20,
+        y: 25,
+        description: '收藏無數劍譜，是劍修的知識寶庫。',
+        shopId: 'skill_shop_mortal'
+    }
+];
+
+// --- Map 13: Western Beast Sect (萬獸山莊) ---
+export const BEAST_SECT_NPCS: NPC[] = [
+    {
+        id: 'sect_beast_elder',
+        name: '煉體長老',
+        symbol: '獸',
+        type: NPCType.Quest,
+        x: 20,
+        y: 15,
+        description: '身披獸皮，肌肉虯結，渾身散發著狂野的氣血之力。',
+        dialogue: [
+            "肉身是渡世寶筏，唯有千錘百煉，方能肉身成聖。",
+            "汲取萬獸精血，鑄就無堅不摧之軀，方為我輩修士之本。"
+        ]
     },
     {
-        id: 'skill_pavilion',
+        id: 'sect_beast_wanbao',
+        name: '萬寶閣',
+        symbol: '商',
+        type: NPCType.Shop, // General
+        x: 15,
+        y: 20,
+        description: '交易蠻荒特產與補給丹藥。',
+        shopId: 'general_store_mortal'
+    },
+    {
+        id: 'sect_beast_lingbao',
+        name: '靈寶閣',
+        symbol: '寨',
+        type: NPCType.Shop, // Equipment
+        x: 25,
+        y: 20,
+        description: '懸掛著各種獸骨與獸皮打造的兵刃防具。',
+        shopId: 'blacksmith_mortal'
+    },
+    {
+        id: 'sect_beast_skills',
         name: '藏經閣',
-        symbol: '經', // Scripture
-        type: NPCType.Shop, // Skill Shop
-        x: SPAWN_X - OFFSET, // 15
-        y: SPAWN_Y + OFFSET, // 25
-        description: '村中收藏武學典籍之地。',
+        symbol: '殿',
+        type: NPCType.Shop, // Skills
+        x: 20,
+        y: 25,
+        description: '供奉獸神圖騰，傳承煉體秘術。',
+        shopId: 'skill_shop_mortal'
+    }
+];
+
+// --- Map 23: Eastern Mystic Sect (縹緲仙宮) ---
+export const MYSTIC_SECT_NPCS: NPC[] = [
+    {
+        id: 'sect_mystic_elder',
+        name: '傳法長老',
+        symbol: '法',
+        type: NPCType.Quest,
+        x: 20,
+        y: 15,
+        description: '仙風道骨，周身靈氣繚繞。',
+        dialogue: [
+            "道法自然，萬物皆有靈。感悟天地，方能御使五行。",
+            "修仙修心，心若冰清，天塌不驚。"
+        ]
+    },
+    {
+        id: 'sect_mystic_wanbao',
+        name: '萬寶閣',
+        symbol: '商',
+        type: NPCType.Shop, // General
+        x: 15,
+        y: 20,
+        description: '藥香撲鼻，是煉丹師的聖地。',
+        shopId: 'general_store_mortal'
+    },
+    {
+        id: 'sect_mystic_lingbao',
+        name: '靈寶閣',
+        symbol: '劍',
+        type: NPCType.Shop, // Equipment
+        x: 25,
+        y: 20,
+        description: '收藏著各式法寶法器。',
+        shopId: 'blacksmith_mortal'
+    },
+    {
+        id: 'sect_mystic_skills',
+        name: '藏經閣',
+        symbol: '閣',
+        type: NPCType.Shop, // Skills
+        x: 20,
+        y: 25,
+        description: '雲霧中的藏書閣，記載著玄妙法術。',
         shopId: 'skill_shop_mortal'
     }
 ];
