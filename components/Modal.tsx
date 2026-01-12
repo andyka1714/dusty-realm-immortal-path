@@ -1,5 +1,5 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 import { X } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -9,7 +9,7 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   actions?: React.ReactNode;
-  size?: 'default' | 'large'; // Added size prop
+  size?: 'default' | 'large';
 }
 
 export const Modal: React.FC<ModalProps> = ({ 
@@ -20,7 +20,14 @@ export const Modal: React.FC<ModalProps> = ({
   actions, 
   size = 'default' 
 }) => {
-  if (!isOpen) return null;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   // Determine container classes based on size
   const containerClasses = size === 'large'
@@ -32,7 +39,7 @@ export const Modal: React.FC<ModalProps> = ({
     ? "fixed inset-x-0 bottom-0 top-[73px] md:inset-0 z-[5000] flex items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
     : "fixed inset-x-0 bottom-0 top-[73px] md:inset-0 z-[5000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in";
 
-  return (
+  const modalContent = (
     <div className={wrapperClasses}>
       <div className={containerClasses}>
         {/* Header */}
@@ -60,4 +67,6 @@ export const Modal: React.FC<ModalProps> = ({
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };

@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/store';
 import { MAPS } from '../data/maps';
@@ -1079,8 +1080,8 @@ export const Adventure: React.FC = () => {
 
 
         {/* Battle Layout Overlay - UNIFIED */}
-        {(isBattling || lastBattleResult) && currentEnemy && (
-            <div className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-6 animate-fade-in">
+        {(isBattling || lastBattleResult) && currentEnemy && ReactDOM.createPortal(
+            <div className="fixed inset-0 z-[5002] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-6 animate-fade-in">
                <div className="absolute inset-0 bg-red-900/10 animate-pulse z-0 pointer-events-none"></div>
                
                <div className="relative z-10 w-full max-w-2xl bg-stone-950 border border-red-900/50 rounded-xl p-6 shadow-2xl flex flex-col h-[70vh] max-h-[600px] animate-scale-in">
@@ -1120,7 +1121,7 @@ export const Adventure: React.FC = () => {
                                  </div>
                              </div>
                         </div>
-                    )}
+                   )}
 
                    <div id="battle-log-container" ref={battleLogRef} className="flex-1 overflow-y-auto space-y-2 font-mono text-sm p-4 bg-black/30 rounded inner-shadow custom-scrollbar">
                        {displayedLogs.length > 0 ? displayedLogs.map((log, i) => (
@@ -1142,7 +1143,8 @@ export const Adventure: React.FC = () => {
                        </div>
                    )}
                </div>
-            </div>
+            </div>,
+            document.body
         )}
 
 
