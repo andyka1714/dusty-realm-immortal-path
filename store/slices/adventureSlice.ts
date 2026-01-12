@@ -370,6 +370,14 @@ const adventureSlice = createSlice({
         state.battleLogs = [];
         state.lastBattleResult = null;
     },
+
+    cancelBattle: (state) => {
+        state.isBattling = false;
+        state.currentEnemy = null;
+        state.battleLogs = [];
+        state.lastBattleResult = null;
+        // Monster is preserved in activeMonsters array automatically
+    },
     
     addVisualEffect: (state, action: PayloadAction<Omit<VisualEffect, 'id'>>) => {
         if (!state.visualEffects) state.visualEffects = [];
@@ -386,5 +394,5 @@ const adventureSlice = createSlice({
   },
 });
 
-export const { enterMap, movePlayer, tickMonsters, resolveBattle, closeBattleReport, markMapVisited, addVisualEffect, clearVisualEffect } = adventureSlice.actions;
+export const { enterMap, movePlayer, tickMonsters, resolveBattle, closeBattleReport, cancelBattle, markMapVisited, addVisualEffect, clearVisualEffect } = adventureSlice.actions;
 export default adventureSlice.reducer;

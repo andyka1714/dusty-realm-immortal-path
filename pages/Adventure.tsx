@@ -6,7 +6,7 @@ import { RootState } from '../store/store';
 import { MAPS } from '../data/maps';
 import { ITEMS } from '../data/items';
 import { QUESTS } from '../data/quests';
-import { enterMap, movePlayer, tickMonsters, resolveBattle, closeBattleReport, markMapVisited } from '../store/slices/adventureSlice';
+import { enterMap, movePlayer, tickMonsters, resolveBattle, closeBattleReport, cancelBattle, markMapVisited } from '../store/slices/adventureSlice';
 import { runAutoBattle, calculatePlayerStats } from '../utils/battleSystem';
 import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
@@ -415,6 +415,13 @@ export const Adventure: React.FC = () => {
      const timer = setTimeout(() => setIsTransitioning(false), 100);
      return () => clearTimeout(timer);
   }, []);
+
+  // Cancel Battle on Unmount (Tab Switch)
+  useEffect(() => {
+    return () => {
+        dispatch(cancelBattle());
+    };
+  }, [dispatch]);
   
   // Expanded Map State
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
