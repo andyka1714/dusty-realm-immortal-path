@@ -31,11 +31,11 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     
     // North
     // North
-    'm7_b1': createEnemy('m7_b1', '萬劍劍意', MajorRealm.QiRefining, EnemyRank.Boss, 4800, 340, 120, ElementType.Metal, [...QI_SWORD_SET, 'bt_qi_foundation'], 1000, MINOR_REALM.PEAK, '劍'),
+    'm7_b1': createEnemy('m7_b1', '萬劍劍意', MajorRealm.QiRefining, EnemyRank.Boss, 4800, 300, 120, ElementType.Metal, [...QI_SWORD_SET, 'bt_qi_foundation'], 1000, MINOR_REALM.PEAK, '劍'),
     // West
-    'm16_b1': createEnemy('m16_b1', '萬獸獸王', MajorRealm.QiRefining, EnemyRank.Boss, 6000, 300, 150, ElementType.Earth, [...QI_BODY_SET, 'bt_qi_foundation'], 1000, MINOR_REALM.PEAK, '王'),
+    'm16_b1': createEnemy('m16_b1', '萬獸獸王', MajorRealm.QiRefining, EnemyRank.Boss, 6200, 290, 180, ElementType.Earth, [...QI_BODY_SET, 'bt_qi_foundation'], 1000, MINOR_REALM.PEAK, '王'),
     // East
-    'm26_b1': createEnemy('m26_b1', '靈湖水蛟', MajorRealm.QiRefining, EnemyRank.Boss, 5400, 320, 130, ElementType.Water, [...QI_MAGIC_SET, 'bt_qi_foundation'], 1000, MINOR_REALM.PEAK, '蛟'),
+    'm26_b1': createEnemy('m26_b1', '靈湖水蛟', MajorRealm.QiRefining, EnemyRank.Boss, 4200, 350, 120, ElementType.Water, [...QI_MAGIC_SET, 'bt_qi_foundation'], 1000, MINOR_REALM.PEAK, '蛟'),
 
     // === [2] Foundation (築基) ===
     // Elite: HP 12k, Atk 850

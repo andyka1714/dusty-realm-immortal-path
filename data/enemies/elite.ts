@@ -28,16 +28,16 @@ export const ELITE_ENEMIES: Record<string, Enemy> = {
     // -> Monster: HP 1300-1800, Atk 100+, Def 60+.
     
     // North
-    'm5_e1': createEnemy('m5_e1', '劍氣魁儡', MajorRealm.QiRefining, EnemyRank.Elite, 1320, 100, 60, ElementType.Metal, QI_SWORD_SET, 200, MINOR_REALM.INITIAL, '魁'),
-    'm7_e1': createEnemy('m7_e1', '嗜血劍魔', MajorRealm.QiRefining, EnemyRank.Elite, 2100, 180, 100, ElementType.Fire, QI_SWORD_SET, 300, MINOR_REALM.LATE, '魔'),
+    'm5_e1': createEnemy('m5_e1', '劍氣魁儡', MajorRealm.QiRefining, EnemyRank.Elite, 2000, 160, 90, ElementType.Metal, QI_SWORD_SET, 200, MINOR_REALM.INITIAL, '魁'),
+    'm7_e1': createEnemy('m7_e1', '嗜血劍魔', MajorRealm.QiRefining, EnemyRank.Elite, 2800, 180, 100, ElementType.Fire, QI_SWORD_SET, 300, MINOR_REALM.LATE, '魔'),
     
     // West
-    'm15_e1': createEnemy('m15_e1', '狂暴棕熊', MajorRealm.QiRefining, EnemyRank.Elite, 1800, 145, 90, ElementType.Earth, QI_BODY_SET, 250, MINOR_REALM.MID, '熊'),
-    'm16_e1': createEnemy('m16_e1', '雙頭狼王', MajorRealm.QiRefining, EnemyRank.Elite, 2160, 200, 100, ElementType.Metal, QI_BODY_SET, 320, MINOR_REALM.LATE, '狼'),
+    'm15_e1': createEnemy('m15_e1', '狂暴棕熊', MajorRealm.QiRefining, EnemyRank.Elite, 2400, 180, 120, ElementType.Earth, QI_BODY_SET, 250, MINOR_REALM.MID, '熊'),
+    'm16_e1': createEnemy('m16_e1', '雙頭狼王', MajorRealm.QiRefining, EnemyRank.Elite, 3000, 220, 140, ElementType.Metal, QI_BODY_SET, 320, MINOR_REALM.LATE, '狼'),
 
     // East
-    'm25_e1': createEnemy('m25_e1', '丹爐精', MajorRealm.QiRefining, EnemyRank.Elite, 1500, 160, 110, ElementType.Fire, QI_MAGIC_SET, 220, MINOR_REALM.MID, '爐'),
-    'm26_e1': createEnemy('m26_e1', '寒冰龜', MajorRealm.QiRefining, EnemyRank.Elite, 2500, 120, 140, ElementType.Water, QI_MAGIC_SET, 350, MINOR_REALM.LATE, '龜'),
+    'm25_e1': createEnemy('m25_e1', '丹爐精', MajorRealm.QiRefining, EnemyRank.Elite, 1900, 210, 130, ElementType.Fire, QI_MAGIC_SET, 220, MINOR_REALM.MID, '爐'),
+    'm26_e1': createEnemy('m26_e1', '寒冰龜', MajorRealm.QiRefining, EnemyRank.Elite, 3200, 150, 180, ElementType.Water, QI_MAGIC_SET, 350, MINOR_REALM.LATE, '龜'),
 
     // === [2] Foundation (築基) ===
     // Common Early: HP 3000, Atk 300, Def 150

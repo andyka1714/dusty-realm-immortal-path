@@ -50,26 +50,26 @@ export const COMMON_ENEMIES: Record<string, Enemy> = {
     // Late (Map 7, 16, 26): Target Qi Mid Gear -> Monster: HP 1200, Atk 120, Def 60
 
     // North
-    'm5_c1': createEnemy('m5_c1', '劍木樁妖', MajorRealm.QiRefining, EnemyRank.Common, 500, 50, 25, ElementType.Wood, ['spirit_iron_sword', 'sword_tassel'], 50, MINOR_REALM.INITIAL, '樁'),
-    'm5_c2': createEnemy('m5_c2', '遊蕩劍魂', MajorRealm.QiRefining, EnemyRank.Common, 480, 60, 20, ElementType.Metal, ['focus_headband', 'azure_robe'], 55, MINOR_REALM.INITIAL, '魂'),
-    'm6_c1': createEnemy('m6_c1', '鏽劍甲蟲', MajorRealm.QiRefining, EnemyRank.Common, 800, 75, 45, ElementType.Earth, ['light_boots', 'whetstone_ring'], 80, MINOR_REALM.MID, '蟲'),
-    'm6_c2': createEnemy('m6_c2', '斷刃狼', MajorRealm.QiRefining, EnemyRank.Common, 750, 90, 35, ElementType.Metal, ['spirit_iron_sword', 'focus_headband'], 85, MINOR_REALM.MID, '狼'),
-    'm7_c1': createEnemy('m7_c1', '劍煞邪靈', MajorRealm.QiRefining, EnemyRank.Common, 1200, 120, 60, ElementType.Metal, ['azure_robe', 'light_boots'], 120, MINOR_REALM.LATE, '靈'),
-    'm7_c2': createEnemy('m7_c2', '劍塚守衛', MajorRealm.QiRefining, EnemyRank.Common, 1100, 125, 65, ElementType.Metal, ['whetstone_ring', 'spirit_iron_sword'], 125, MINOR_REALM.LATE, '衛'),
+    'm5_c1': createEnemy('m5_c1', '劍木樁妖', MajorRealm.QiRefining, EnemyRank.Common, 800, 77, 50, ElementType.Wood, ['spirit_iron_sword', 'sword_tassel'], 50, MINOR_REALM.INITIAL, '樁'),
+    'm5_c2': createEnemy('m5_c2', '遊蕩劍魂', MajorRealm.QiRefining, EnemyRank.Common, 700, 84, 45, ElementType.Metal, ['focus_headband', 'azure_robe'], 55, MINOR_REALM.INITIAL, '魂'),
+    'm6_c1': createEnemy('m6_c1', '鏽劍甲蟲', MajorRealm.QiRefining, EnemyRank.Common, 1000, 92, 75, ElementType.Earth, ['light_boots', 'whetstone_ring'], 80, MINOR_REALM.MID, '蟲'),
+    'm6_c2': createEnemy('m6_c2', '斷刃狼', MajorRealm.QiRefining, EnemyRank.Common, 1155, 100, 55, ElementType.Metal, ['spirit_iron_sword', 'focus_headband'], 85, MINOR_REALM.MID, '狼'),
+    'm7_c1': createEnemy('m7_c1', '劍煞邪靈', MajorRealm.QiRefining, EnemyRank.Common, 1550, 140, 90, ElementType.Metal, ['azure_robe', 'light_boots'], 120, MINOR_REALM.LATE, '靈'),
+    'm7_c2': createEnemy('m7_c2', '劍塚守衛', MajorRealm.QiRefining, EnemyRank.Common, 1730, 155, 100, ElementType.Metal, ['whetstone_ring', 'spirit_iron_sword'], 125, MINOR_REALM.LATE, '衛'),
     // West
-    'm14_c1': createEnemy('m14_c1', '赤血水怪', MajorRealm.QiRefining, EnemyRank.Common, 550, 45, 30, ElementType.Water, ['bear_paw_gauntlet', 'heavy_iron_shield'], 50, MINOR_REALM.INITIAL, '怪'),
-    'm14_c2': createEnemy('m14_c2', '蠻力巨猿', MajorRealm.QiRefining, EnemyRank.Common, 600, 40, 40, ElementType.Earth, ['wolf_skull_helm', 'boar_skin_armor'], 55, MINOR_REALM.INITIAL, '猿'),
-    'm15_c1': createEnemy('m15_c1', '鐵皮野豬', MajorRealm.QiRefining, EnemyRank.Common, 900, 65, 60, ElementType.Earth, ['battle_boots', 'vitality_beads'], 80, MINOR_REALM.MID, '豬'),
-    'm15_c2': createEnemy('m15_c2', '疾風豹', MajorRealm.QiRefining, EnemyRank.Common, 700, 95, 35, ElementType.Wood, ['bear_paw_gauntlet', 'boar_skin_armor'], 85, MINOR_REALM.MID, '豹'),
-    'm16_c1': createEnemy('m16_c1', '獅蠍獸', MajorRealm.QiRefining, EnemyRank.Common, 1300, 130, 70, ElementType.Fire, ['heavy_iron_shield', 'wolf_skull_helm'], 120, MINOR_REALM.LATE, '蠍'),
-    'm16_c2': createEnemy('m16_c2', '狂暴棕熊', MajorRealm.QiRefining, EnemyRank.Common, 1250, 110, 80, ElementType.Earth, ['vitality_beads', 'bear_paw_gauntlet'], 115, MINOR_REALM.LATE, '熊'),
+    'm14_c1': createEnemy('m14_c1', '赤血水怪', MajorRealm.QiRefining, EnemyRank.Common, 850, 60, 55, ElementType.Water, ['bear_paw_gauntlet', 'heavy_iron_shield'], 50, MINOR_REALM.INITIAL, '怪'),
+    'm14_c2': createEnemy('m14_c2', '蠻力巨猿', MajorRealm.QiRefining, EnemyRank.Common, 900, 55, 65, ElementType.Earth, ['wolf_skull_helm', 'boar_skin_armor'], 55, MINOR_REALM.INITIAL, '猿'),
+    'm15_c1': createEnemy('m15_c1', '鐵皮野豬', MajorRealm.QiRefining, EnemyRank.Common, 1200, 80, 90, ElementType.Earth, ['battle_boots', 'vitality_beads'], 80, MINOR_REALM.MID, '豬'),
+    'm15_c2': createEnemy('m15_c2', '疾風豹', MajorRealm.QiRefining, EnemyRank.Common, 1000, 110, 60, ElementType.Wood, ['bear_paw_gauntlet', 'boar_skin_armor'], 85, MINOR_REALM.MID, '豹'),
+    'm16_c1': createEnemy('m16_c1', '獅蠍獸', MajorRealm.QiRefining, EnemyRank.Common, 1700, 150, 100, ElementType.Fire, ['heavy_iron_shield', 'wolf_skull_helm'], 120, MINOR_REALM.LATE, '蠍'),
+    'm16_c2': createEnemy('m16_c2', '狂暴棕熊', MajorRealm.QiRefining, EnemyRank.Common, 1800, 130, 130, ElementType.Earth, ['vitality_beads', 'bear_paw_gauntlet'], 115, MINOR_REALM.LATE, '熊'),
     // East
-    'm24_c1': createEnemy('m24_c1', '幻影靈貓', MajorRealm.QiRefining, EnemyRank.Common, 450, 55, 20, ElementType.Wood, ['spirit_wood_staff', 'spirit_orb'], 50, MINOR_REALM.INITIAL, '貓'),
-    'm24_c2': createEnemy('m24_c2', '符紙人', MajorRealm.QiRefining, EnemyRank.Common, 400, 65, 15, ElementType.Fire, ['mystic_crown', 'taoist_vestment'], 55, MINOR_REALM.INITIAL, '紙'),
-    'm25_c1': createEnemy('m25_c1', '食藥鼠', MajorRealm.QiRefining, EnemyRank.Common, 750, 75, 40, ElementType.Earth, ['cloud_step_shoes', 'elemental_ring'], 80, MINOR_REALM.MID, '鼠'),
-    'm25_c2': createEnemy('m25_c2', '毒荊棘妖', MajorRealm.QiRefining, EnemyRank.Common, 850, 80, 50, ElementType.Wood, ['spirit_wood_staff', 'mystic_crown'], 85, MINOR_REALM.MID, '棘'),
-    'm26_c1': createEnemy('m26_c1', '靈水蟒', MajorRealm.QiRefining, EnemyRank.Common, 1400, 115, 65, ElementType.Water, ['spirit_orb', 'taoist_vestment'], 120, MINOR_REALM.LATE, '蟒'),
-    'm26_c2': createEnemy('m26_c2', '水靈龜', MajorRealm.QiRefining, EnemyRank.Common, 1300, 100, 90, ElementType.Water, ['elemental_ring', 'spirit_wood_staff'], 125, MINOR_REALM.LATE, '龜'),
+    'm24_c1': createEnemy('m24_c1', '幻影靈貓', MajorRealm.QiRefining, EnemyRank.Common, 650, 85, 35, ElementType.Wood, ['spirit_wood_staff', 'spirit_orb'], 50, MINOR_REALM.INITIAL, '貓'),
+    'm24_c2': createEnemy('m24_c2', '符紙人', MajorRealm.QiRefining, EnemyRank.Common, 600, 95, 30, ElementType.Fire, ['mystic_crown', 'taoist_vestment'], 55, MINOR_REALM.INITIAL, '紙'),
+    'm25_c1': createEnemy('m25_c1', '食藥鼠', MajorRealm.QiRefining, EnemyRank.Common, 900, 105, 60, ElementType.Earth, ['cloud_step_shoes', 'elemental_ring'], 80, MINOR_REALM.MID, '鼠'),
+    'm25_c2': createEnemy('m25_c2', '毒荊棘妖', MajorRealm.QiRefining, EnemyRank.Common, 1000, 110, 70, ElementType.Wood, ['spirit_wood_staff', 'mystic_crown'], 85, MINOR_REALM.MID, '棘'),
+    'm26_c1': createEnemy('m26_c1', '靈水蟒', MajorRealm.QiRefining, EnemyRank.Common, 1400, 165, 80, ElementType.Water, ['spirit_orb', 'taoist_vestment'], 120, MINOR_REALM.LATE, '蟒'),
+    'm26_c2': createEnemy('m26_c2', '水靈龜', MajorRealm.QiRefining, EnemyRank.Common, 2000, 140, 120, ElementType.Water, ['elemental_ring', 'spirit_wood_staff'], 125, MINOR_REALM.LATE, '龜'),
 
     // === [2] Foundation (築基) ===
     // Stats Ref: Base HP 1300. Gear + Breakthrought ~ 4000-5000 HP. Atk ~400-500.
