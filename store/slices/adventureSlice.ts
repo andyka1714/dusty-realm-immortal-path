@@ -1,6 +1,6 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Enemy, CombatLog, Coordinate, ActiveMonster, EnemyRank } from '../../types';
+import { Enemy, CombatLog, Coordinate, ActiveMonster, EnemyRank, VisualEffect } from '../../types';
 import { MAPS } from '../../data/maps';
 
 interface AdventureState {
@@ -17,6 +17,7 @@ interface AdventureState {
   lastCommonSpawnTime: number;
   lastEliteSpawnTime: number;
   lastBossSpawnCheckTime: number;
+  visualEffects: VisualEffect[];
 }
 
 const initialState: AdventureState = {
@@ -33,6 +34,7 @@ const initialState: AdventureState = {
   lastCommonSpawnTime: 0,
   lastEliteSpawnTime: 0,
   lastBossSpawnCheckTime: 0,
+  visualEffects: []
 };
 
 const getMapPopulationCaps = (width: number, height: number, hasElites: boolean) => {
@@ -367,9 +369,22 @@ const adventureSlice = createSlice({
         state.currentEnemy = null;
         state.battleLogs = [];
         state.lastBattleResult = null;
+    },
+    
+    addVisualEffect: (state, action: PayloadAction<Omit<VisualEffect, 'id'>>) => {
+        if (!state.visualEffects) state.visualEffects = [];
+        state.visualEffects.push({
+            id: Math.random().toString(36),
+            ...action.payload
+        });
+    },
+
+    clearVisualEffect: (state, action: PayloadAction<string>) => {
+        if (!state.visualEffects) return;
+        state.visualEffects = state.visualEffects.filter(e => e.id !== action.payload);
     }
   },
 });
 
-export const { enterMap, movePlayer, tickMonsters, resolveBattle, closeBattleReport, markMapVisited } = adventureSlice.actions;
+export const { enterMap, movePlayer, tickMonsters, resolveBattle, closeBattleReport, markMapVisited, addVisualEffect, clearVisualEffect } = adventureSlice.actions;
 export default adventureSlice.reducer;

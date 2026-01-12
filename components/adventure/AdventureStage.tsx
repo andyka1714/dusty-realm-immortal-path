@@ -1,7 +1,12 @@
-import React, { useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useEffect, useRef, useLayoutEffect, useState } from 'react';
 import * as PIXI from 'pixi.js';
-import { MapData, Coordinate, Portal, EnemyRank, ActiveMonster, MajorRealm } from '../../types';
+import { useSelector, useDispatch } from 'react-redux'; // Added Redux hooks
+import { RootState } from '../../store/store'; // Fixed import path
+import { clearVisualEffect } from '../../store/slices/adventureSlice';
+import { MapData, Coordinate, Portal, EnemyRank, ActiveMonster, MajorRealm, Quest, QuestStatus } from '../../types';
 import { MOVEMENT_SPEEDS } from '../../constants';
+import { QUESTS } from '../../data/quests'; // Import QUESTS
+import { current } from '@reduxjs/toolkit';
 
 interface AdventureStageProps {
   mapData: MapData;
@@ -19,6 +24,8 @@ interface AdventureStageProps {
   key?: React.Key;
   playerName: string;
   moveDestination?: Coordinate | null;
+  activeQuests: Record<string, any>; // Passed from parent
+  completedQuests: string[]; // Passed from parent
 }
 
 // --- Constants ---
@@ -46,14 +53,80 @@ export default function AdventureStage({
   cellSize = 40,
   onPlayerArrive,
   playerName,
-  moveDestination
+  moveDestination,
+  activeQuests,
+  completedQuests
 }: AdventureStageProps) {
-  
+  const dispatch = useDispatch();
+  const visualEffects = useSelector((state: RootState) => state.adventure.visualEffects);
+  const activeEffectsRef = useRef<Map<string, { text: PIXI.Text, startTime: number, startY: number, lifeTime: number }>>(new Map());
+  const lastSpawnTimeRef = useRef<number>(0);
+
   const moveTimerRef = useRef<number>(0);
   const isMovingRef = useRef(false);
   const onPlayerArriveRef = useRef(onPlayerArrive);
   const framesRenderedRef = useRef(0);
   
+  const [isPixiReady, setIsPixiReady] = useState(false);
+
+  // --- Effects Sync ---
+  useEffect(() => {
+      if (!isPixiReady || !displayRefs.current.effectsLayer) return;
+      
+      (visualEffects || []).forEach(eff => {
+          if (!activeEffectsRef.current.has(eff.id)) {
+               // Create Text
+               const text = new PIXI.Text(eff.text, {
+                   fontFamily: 'Arial',
+                   fontSize: 16,
+                   fontWeight: 'bold',
+                   fill: eff.colorInt || 0xffffff, // Use numeric color
+                   stroke: 0x000000,
+                   strokeThickness: 3,
+                   dropShadow: true,
+                   dropShadowColor: 0x000000,
+                   dropShadowBlur: 2,
+                   dropShadowDistance: 1
+               });
+               text.anchor.set(0.5);
+               
+               // Position relative to player (default) or specific coord
+               const startX = (eff.x !== undefined ? eff.x : visualRef.current.player.x + 0.5) * cellSize;
+               const startY = (eff.y !== undefined ? eff.y : visualRef.current.player.y) * cellSize - 40; // Start above head
+               
+               text.x = startX;
+               text.y = startY;
+               
+               // Stagger overlapping effects? 
+               // Simple stagger based on active count? 
+               // For now, let's just stack them slightly if many spawn at once? 
+               // Actually, just spawning them is fine.
+               
+               displayRefs.current.effectsLayer!.addChild(text);
+               
+               // Schedule start time
+               const now = Date.now();
+               const spawnTime = Math.max(now, lastSpawnTimeRef.current + 500);
+               lastSpawnTimeRef.current = spawnTime;
+
+               activeEffectsRef.current.set(eff.id, {
+                   text,
+                   startTime: spawnTime,
+                   startY: startY,
+                   lifeTime: 1500 // 1.5s
+               });
+               
+               // Initially hide if future
+               if (spawnTime > now) {
+                   text.visible = false;
+               }
+               
+               // Clear from Redux so we don't re-process
+               dispatch(clearVisualEffect(eff.id));
+          }
+      });
+  }, [visualEffects, isPixiReady, cellSize, dispatch]);
+
   useEffect(() => {
       onPlayerArriveRef.current = onPlayerArrive;
   }, [onPlayerArrive]);
@@ -77,11 +150,15 @@ export default function AdventureStage({
       portalsLayer: null as PIXI.Container | null,
       targetMarker: null as PIXI.Graphics | null,
       destinationMarker: null as PIXI.Graphics | null,
+      npcLayer: null as PIXI.Container | null,
+      effectsLayer: null as PIXI.Container | null,
   });
+
+
 
   const onTileClickRef = useRef(onTileClick);
   const entitiesRef = useRef({ monsters: activeMonsters, portals: portals });
-  const latestDataRef = useRef({ mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName, moveDestination });
+  const latestDataRef = useRef({ mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName, moveDestination, activeQuests, completedQuests });
 
   // Sync latest props
   useEffect(() => {
@@ -91,8 +168,8 @@ export default function AdventureStage({
   useLayoutEffect(() => {
     entitiesRef.current.monsters = activeMonsters;
     entitiesRef.current.portals = portals;
-    latestDataRef.current = { mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName, moveDestination };
-  }, [mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName, moveDestination]);
+    latestDataRef.current = { mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName, moveDestination, activeQuests, completedQuests };
+  }, [mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName, moveDestination, activeQuests, completedQuests]);
 
   // Force Snap (New Map)
   useLayoutEffect(() => {
@@ -107,10 +184,157 @@ export default function AdventureStage({
        displayRefs.current.monsterContainers.clear();
   }, [mapData.id]);
 
+  // --- Dynamic NPC Rendering (Quest Markers) ---
+  const renderNPCs = React.useCallback(() => {
+     const npcLayer = displayRefs.current.npcLayer;
+     if (!npcLayer || !mapData || !mapData.npcs) return;
+     
+     const NPC_COLOR = 0xa0522d; // Sienna
+     npcLayer.removeChildren();
+
+     mapData.npcs.forEach(npc => {
+         const container = new PIXI.Container();
+         const cx = (npc.x + 0.5) * cellSize;
+         const cy = (npc.y + 0.5) * cellSize;
+         
+         container.x = cx;
+         container.y = cy;
+         
+         // BG
+         const bg = new PIXI.Graphics();
+         const size = cellSize;
+         bg.lineStyle(2, NPC_COLOR, 1);
+         bg.beginFill(0x3e2723, 0.8);
+         bg.drawRoundedRect(-size/2 + 4, -size/2 + 4, size - 8, size - 8, 6);
+         bg.endFill();
+         
+         // Text
+         const text = new PIXI.Text(npc.symbol, {
+             fontFamily: 'Arial',
+             fontSize: cellSize * 0.5,
+             fontWeight: 'bold',
+             fill: 0xffd700,
+             align: 'center',
+         });
+         text.anchor.set(0.5);
+         
+         container.addChild(bg);
+         container.addChild(text);
+         
+         // Name Label (Above)
+         const label = new PIXI.Text(npc.name, {
+             fontFamily: 'Arial',
+             fontSize: cellSize * 0.3,
+             fill: 0xcccccc,
+             align: 'center',
+         });
+         label.anchor.set(0.5);
+         label.y = -size/2 - 5;
+         container.addChild(label);
+         
+         // --- QUEST MARKER LOGIC ---
+         let markerSymbol = '';
+         let markerColor = 0xffffff;
+         
+         // 1. Check for Submit (Green ?)
+         const submitQuestId = Object.keys(activeQuests).find(qid => {
+            const q = QUESTS[qid];
+            if (!q) return false;
+            const isSubmitTarget = (q.submitNpcId === npc.id) || (!q.submitNpcId && q.giverId === npc.id);
+            if (!isSubmitTarget) return false;
+            return true;
+         });
+         
+         if (submitQuestId) {
+             const isReady = activeQuests[submitQuestId].isReadyToComplete;
+             const q = QUESTS[submitQuestId];
+             let visualReady = isReady;
+             
+             if (!isReady) {
+                 const dialogueReq = q.requirements.find(r => r.type === 'dialogue' && (r.targetNpcId === npc.id || (!r.targetNpcId && q.submitNpcId === npc.id)));
+                 if (dialogueReq) visualReady = true; 
+             }
+
+             if (visualReady) {
+                 markerSymbol = '?';
+                 markerColor = 0x4ade80; // Green
+             } else {
+                 markerSymbol = '?';
+                 markerColor = 0x9ca3af; // Grey (Not ready yet)
+             }
+         }
+         
+         // 2. Check for New Quest (Yellow !)
+         if (!markerSymbol && npc.questIds) {
+             const availableQuestId = npc.questIds.find(qid => {
+                 if (activeQuests[qid] || completedQuests.includes(qid)) return false;
+                 const q = QUESTS[qid];
+                 if (!q) return false;
+                 if (q.prerequisiteQuestId && !completedQuests.includes(q.prerequisiteQuestId)) return false;
+                 const realmReq = q.requirements.find(r => r.type === 'level');
+                 if (realmReq && realmReq.minRealm !== undefined && majorRealm < realmReq.minRealm) return false;
+                 return true;
+             });
+             
+             if (availableQuestId) {
+                 markerSymbol = '!';
+                 markerColor = 0xfacc15; // Yellow
+             }
+         }
+
+         if (markerSymbol) {
+             // Pulse Animation container
+             const mCont = new PIXI.Container();
+             mCont.name = 'quest_marker_container';
+             mCont.y = -size/2 - 30; // Increased spacing (Base pos)
+
+             // Ripple (Water wave)
+             const ripple = new PIXI.Graphics();
+             ripple.lineStyle(2, markerColor, 1);
+             ripple.drawCircle(0, 0, 8); // Base radius same as marker
+             ripple.endFill();
+             ripple.name = 'ripple';
+             ripple.alpha = 0;
+             mCont.addChild(ripple);
+
+             const mG = new PIXI.Graphics();
+             mG.beginFill(0x000000, 0.8);
+             mG.lineStyle(1, markerColor, 1);
+             mG.drawCircle(0, 0, 8);
+             mG.endFill();
+             
+             const mT = new PIXI.Text(markerSymbol, {
+                 fontFamily: 'Arial',
+                 fontSize: 12,
+                 fontWeight: 'bold',
+                 fill: markerColor,
+                 align: 'center'
+             });
+             mT.anchor.set(0.5);
+             
+             mCont.addChild(mG);
+             mCont.addChild(mT);
+             
+             container.addChild(mCont);
+         }
+
+         npcLayer.addChild(container);
+     });
+  }, [mapData, cellSize, activeQuests, completedQuests, majorRealm]);
+
+  // Trigger Render on State Changes (if Pixi ready)
+  useEffect(() => {
+     if (isPixiReady) renderNPCs();
+  }, [renderNPCs, isPixiReady]);
 
   // Initialize Pixi App
   useEffect(() => {
       if (!containerRef.current || !mapData) return;
+
+      // Brute-force clear any existing canvases (Fixes duplicate canvas issue)
+      while (containerRef.current.firstChild) {
+          containerRef.current.removeChild(containerRef.current.firstChild);
+      }
       
       const app = new PIXI.Application({
           width,
@@ -124,6 +348,13 @@ export default function AdventureStage({
       containerRef.current.appendChild(app.view as HTMLCanvasElement);
       appRef.current = app;
 
+      // Pre-cache monster textures/styles
+      mapData.enemies.forEach(m => {
+          // pre-cache textures or styles if we wanted, for now just create raw
+      });
+      
+      setIsPixiReady(true);
+      
       // --- Scene Graph ---
       const world = new PIXI.Container();
       app.stage.addChild(world);
@@ -141,6 +372,14 @@ export default function AdventureStage({
       const portalsLayer = new PIXI.Container();
       world.addChild(portalsLayer);
       displayRefs.current.portalsLayer = portalsLayer;
+
+      // NPC Layer
+      const npcLayer = new PIXI.Container();
+      world.addChild(npcLayer);
+      displayRefs.current.npcLayer = npcLayer;
+      
+      // Force Initial Render of NPCs immediately
+      renderNPCs();
 
       // Entities Layer (Monsters + Player)
       const entityLayer = new PIXI.Container();
@@ -252,58 +491,14 @@ export default function AdventureStage({
       };
       renderStatic();
 
-      // --- Render NPCs (Static) ---
-      const NPC_COLOR = 0xa0522d; // Sienna
-      const npcLayer = new PIXI.Container();
-      world.addChild(npcLayer);
-      // Move NPC layer below Entity Layer (Monsters/Player) but above grid
-      // Current order: Grid, HitArea, Portals, Entities.
-      // Insert after Portals?
-      
-      if (mapData && mapData.npcs) {
-         mapData.npcs.forEach(npc => {
-             const container = new PIXI.Container();
-             const cx = (npc.x + 0.5) * cellSize;
-             const cy = (npc.y + 0.5) * cellSize;
-             
-             container.x = cx;
-             container.y = cy;
-             
-             // BG
-             const bg = new PIXI.Graphics();
-             const size = cellSize;
-             bg.lineStyle(2, NPC_COLOR, 1);
-             bg.beginFill(0x3e2723, 0.8); // Dark Brown Fill
-             bg.drawRoundedRect(-size/2 + 4, -size/2 + 4, size - 8, size - 8, 6);
-             bg.endFill();
-             
-             // Text
-             const text = new PIXI.Text(npc.symbol, {
-                 fontFamily: 'Arial',
-                 fontSize: cellSize * 0.5,
-                 fontWeight: 'bold',
-                 fill: 0xffd700, // Gold text
-                 align: 'center',
-             });
-             text.anchor.set(0.5);
-             
-             container.addChild(bg);
-             container.addChild(text);
-             
-             // Name Label (Above)
-             const label = new PIXI.Text(npc.name, {
-                 fontFamily: 'Arial',
-                 fontSize: cellSize * 0.3,
-                 fill: 0xcccccc,
-                 align: 'center',
-             });
-             label.anchor.set(0.5);
-             label.y = -size/2 - 5;
-             container.addChild(label);
+      // Render NPCs logic moved to separate effect
 
-             npcLayer.addChild(container);
-         });
-      }
+      const effectsLayer = new PIXI.Container();
+      world.addChild(effectsLayer);
+      displayRefs.current.effectsLayer = effectsLayer;
+
+
+      // ... (Rest of setup: MonsterAvatar, Ticker ...)
 
       // --- Helper: Create Monster Avatar ---
       const createMonsterAvatar = (m: ActiveMonster) => {
@@ -477,27 +672,56 @@ export default function AdventureStage({
               const phase = m.instanceId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 10;
               const mPulse = 1 + Math.sin(time * 3 + phase) * 0.05;
               container.scale.set(mPulse);
+          });
 
-              // Update Target Marker (Red for Monster)
-              if (latestDataRef.current.targetMonsterId === m.instanceId && displayRefs.current.targetMarker) {
+
+          // Cleanup missing monsters (visuals)
+          // 4. Duplicate cleanup block removed from here.
+
+          // --- 4. Effects Animation ---
+          if (displayRefs.current.effectsLayer) {
+              const now = Date.now();
+              activeEffectsRef.current.forEach((effect, id) => {
+                  const elapsed = now - effect.startTime;
+                  if (elapsed > effect.lifeTime) {
+                      effect.text.destroy();
+                      activeEffectsRef.current.delete(id);
+                  } else if (elapsed >= 0) {
+                      // Float Up
+                      effect.text.visible = true;
+                      const progress = elapsed / effect.lifeTime;
+                      const yOffset = progress * 60; // Float up 60px
+                      effect.text.y = effect.startY - yOffset;
+                      effect.text.alpha = 1 - Math.pow(progress, 3); // Fade out cubic
+                  } else {
+                      // Waiting to start
+                      effect.text.visible = false;
+                  }
+              });
+          }
+
+          // Update Target Marker (Red for Monster)
+          if (latestDataRef.current.targetMonsterId && displayRefs.current.targetMarker) {
+               // Find current position of the target monster container
+               const mContainer = displayRefs.current.monsterContainers.get(latestDataRef.current.targetMonsterId);
+               
+               if (mContainer) {
                    displayRefs.current.targetMarker.visible = true;
-                   displayRefs.current.targetMarker.x = container.x;
-                   displayRefs.current.targetMarker.y = container.y;
+                   displayRefs.current.targetMarker.x = mContainer.x;
+                   displayRefs.current.targetMarker.y = mContainer.y;
                    displayRefs.current.targetMarker.tint = 0xffffff; // Reset tint
                    displayRefs.current.targetMarker.scale.set(1 + Math.sin(time * 10) * 0.1); 
                    displayRefs.current.targetMarker.rotation += 0.05 * delta;
-              }
-          });
+               } else {
+                   displayRefs.current.targetMarker.visible = false;
+               }
+          } else if (displayRefs.current.targetMarker) {
+              displayRefs.current.targetMarker.visible = false;
+          }
 
           // Update Move Destination Marker (Green for Location)
           if (latestDataRef.current.moveDestination && displayRefs.current.destinationMarker) {
               const dest = latestDataRef.current.moveDestination;
-              // Check if we also have a target monster at this location? 
-              // If targetMonsterId is set, usually we don't need this, BUT user might want to see path end regardless.
-              // However, if targetMonsterId IS set, the Red Marker overrides/overlaps.
-              // Let's only show Green Marker if NO targetMonsterId is active OR if the destination is NOT the monster.
-              // Actually, simply showing it is fine, maybe slightly different visual.
-              
               const mId = latestDataRef.current.targetMonsterId;
               const isMonsterTarget = mId && visualRef.current.monsterCoords.has(mId);
               
@@ -525,21 +749,15 @@ export default function AdventureStage({
                   visualRef.current.monsterCoords.delete(id); // Remove coords
               }
           }
-           
-          // Hide marker if target invalid
+            
+          // Hide marker if target invalid (Redundant check but safe)
           if (displayRefs.current.targetMarker && !activeIds.has(latestDataRef.current.targetMonsterId || '')) {
               displayRefs.current.targetMarker.visible = false;
           }
 
-          // --- 4. Portals ---
+           // --- 5. Portals ---
+          const portalsLayer = displayRefs.current.portalsLayer;
           if (portalsLayer) {
-            // Note: Retained mode means we only create/destroy portals if list changes. 
-            // For simplicity in this specific component (portals rarely move), we can simple-clear or diff.
-            // Given portals are static, clearing/redrawing GRAPHICS inside ONE container is fine, 
-            // OR managing Children. Let's do simple Clear+Draw on a Graphics object for Portals to save complexity,
-            // since they don't have text or complex composition.
-            // ... Actually, let's just make them retained too for consistency, or keep them as Graphics.
-            // Let's use a single Graphics for portals for now as they are simple shapes.
             portalsLayer.removeChildren(); // clear old graphics
             const pG = new PIXI.Graphics();
             portalsLayer.addChild(pG);
@@ -576,12 +794,38 @@ export default function AdventureStage({
                 pG.endFill();
             });
           }
+
+          // --- 6. Animate NPC Quest Markers ---
+          const npcLayer = displayRefs.current.npcLayer; // Now accessed from ref
+          if (npcLayer) {
+             npcLayer.children.forEach((npcCont: PIXI.Container) => {
+                 const marker = npcCont.getChildByName('quest_marker_container') as PIXI.Container;
+                 if (marker) {
+                     // Floating effect
+                     marker.y = -cellSize/2 - 30 + Math.sin(time * 3) * 3;
+
+                     // Ripple effect
+                     const ripple = marker.getChildByName('ripple') as PIXI.Graphics;
+                     if (ripple) {
+                         const rScale = (time * 2) % 1.5; // 0 to 1.5
+                         ripple.scale.set(1 + rScale);
+                         ripple.alpha = 1 - (rScale / 1.5);
+                     }
+                 }
+             });
+          }
       };
       
       app.ticker.add(ticker);
 
       return () => {
-          app.destroy(true, { children: true });
+          setIsPixiReady(false);
+          try {
+            app.destroy(true, { children: true, texture: true, baseTexture: true });
+          } catch (e) {
+            console.warn('PIXI Destroy Error:', e);
+          }
+          appRef.current = null;
       };
   }, [width, height, cellSize, mapData?.id]); 
 

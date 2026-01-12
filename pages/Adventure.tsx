@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/store';
 import { MAPS } from '../data/maps';
 import { ITEMS } from '../data/items';
+import { QUESTS } from '../data/quests';
 import { enterMap, movePlayer, tickMonsters, resolveBattle, closeBattleReport, markMapVisited } from '../store/slices/adventureSlice';
 import { runAutoBattle, calculatePlayerStats } from '../utils/battleSystem';
 import { addItem } from '../store/slices/inventorySlice';
@@ -19,6 +20,7 @@ import { addSpiritStones, gainExperience } from '@/store/slices/characterSlice';
 import { formatSpiritStone } from '@/utils/currency';
 import AdventureStage from '../components/adventure/AdventureStage';
 import ShopPanel from '../components/adventure/ShopPanel';
+import { QuestModal } from '../components/adventure/QuestModal';
 import { SHOPS } from '../data/shops';
 
 
@@ -72,6 +74,7 @@ const findPath = (start: Coordinate, end: Coordinate, width: number, height: num
 const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const dispatch = useDispatch();
     const character = useSelector((state: RootState) => state.character);
+
     const { currentMapId, mapHistory } = useSelector((state: RootState) => state.adventure);
     const [hoveredMapId, setHoveredMapId] = useState<string | null>(null);
     
@@ -391,6 +394,7 @@ export const Adventure: React.FC = () => {
     currentMapId, playerPosition, activeMonsters, visitedCells, 
     mapHistory, isBattling, currentEnemy, battleLogs, lastBattleResult 
   } = useSelector((state: RootState) => state.adventure);
+  const { activeQuests, completedQuests } = useSelector((state: RootState) => state.quest);
   
   const [showIntro, setShowIntro] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(true); // Default to true (Black) for smooth entry
@@ -1065,6 +1069,8 @@ export const Adventure: React.FC = () => {
                     isBattling={isBattling}
                     playerName={character.name}
                     moveDestination={autoMovePath.length > 0 ? autoMovePath[autoMovePath.length - 1] : null}
+                    activeQuests={activeQuests}
+                    completedQuests={completedQuests}
                  />
             )}
         </div>
@@ -1142,32 +1148,64 @@ export const Adventure: React.FC = () => {
 
 
         {/* NPC Interaction - Shop Panel */}
-        {interactingNPC && interactingNPC.type === NPCType.Shop && interactingNPC.shopId && (
-            <ShopPanel 
-                shopId={interactingNPC.shopId} 
-                onClose={() => setInteractingNPC(null)} 
-            />
-        )}
+        {/* NPC Interaction Logic */}
+        {(() => {
+            if (!interactingNPC) return null;
 
-        {/* NPC Interaction - Quest/Talk Dialog (Generic) */}
-        {interactingNPC && interactingNPC.type !== NPCType.Shop && (
-             <Modal
-                isOpen={true}
-                onClose={() => setInteractingNPC(null)}
-                title={interactingNPC.name}
-                size="small"
-                actions={
-                    <button onClick={() => setInteractingNPC(null)} className="px-4 py-2 bg-stone-800 text-stone-300 rounded hover:bg-stone-700 border border-stone-700">
-                        離開
-                    </button>
-                }
-             >
-                 <div className="p-4 text-stone-300 italic">
-                     "{interactingNPC.description}"
-                     <div className="mt-4 text-xs text-stone-500">[任務系統尚未開放]</div>
-                 </div>
-             </Modal>
-        )}
+            // Helper: Check if there is a priority Quest Interaction?
+            const hasQuestAction = (() => {
+                 // 1. Submit?
+                 const submitQuestId = Object.keys(activeQuests).find(qid => {
+                    const q = QUESTS[qid];
+                    if (!q) return false;
+                    return (q.submitNpcId === interactingNPC.id) || (!q.submitNpcId && q.giverId === interactingNPC.id);
+                 });
+                 if (submitQuestId) return true;
+
+                 // 2. New?
+                 if (interactingNPC.questIds) {
+                     const availableQuestId = interactingNPC.questIds.find(qid => {
+                         if (activeQuests[qid] || completedQuests.includes(qid)) return false;
+                         const q = QUESTS[qid];
+                         if (!q) return false;
+                         if (q.prerequisiteQuestId && !completedQuests.includes(q.prerequisiteQuestId)) return false;
+                         const realmReq = q.requirements.find(r => r.type === 'level');
+                         if (realmReq && realmReq.minRealm !== undefined && majorRealm < realmReq.minRealm) return false;
+                         return true;
+                     });
+                     if (availableQuestId) return true;
+                 }
+                 return false;
+            })();
+
+            // Logic:
+            // 1. If Quest Action -> QuestModal
+            // 2. Else If Shop -> ShopPanel
+            // 3. Else -> QuestModal (Default Dialogue)
+
+            if (hasQuestAction) {
+                return (
+                    <QuestModal
+                        npc={interactingNPC}
+                        onClose={() => setInteractingNPC(null)}
+                    />
+                );
+            } else if (interactingNPC.type === NPCType.Shop && interactingNPC.shopId) {
+                return (
+                    <ShopPanel 
+                        shopId={interactingNPC.shopId} 
+                        onClose={() => setInteractingNPC(null)} 
+                    />
+                );
+            } else {
+                 return (
+                    <QuestModal
+                        npc={interactingNPC}
+                        onClose={() => setInteractingNPC(null)}
+                    />
+                );
+            }
+        })()}
 
         {/* EXPANDED MAP MODAL */}
         <Modal 

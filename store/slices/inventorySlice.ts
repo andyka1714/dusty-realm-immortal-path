@@ -24,12 +24,12 @@ const initialState: InventoryState = {
 };
 
 // Helper: Generate a basic instance for an item ID
-const createBasicInstance = (itemId: string): ItemInstance => {
+const createBasicInstance = (itemId: string, qualityOverride?: ItemQuality): ItemInstance => {
   const template = ITEMS[itemId];
   return {
     instanceId: `inst_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     templateId: itemId,
-    quality: ItemQuality.Low,
+    quality: qualityOverride ?? template?.quality ?? ItemQuality.Low,
     stats: (template && template.category === ItemCategory.Equipment) ? (template as any).stats || {} : {},
     affixes: []
   };
@@ -60,8 +60,8 @@ const inventorySlice = createSlice({
   name: 'inventory',
   initialState,
   reducers: {
-    addItem: (state, action: PayloadAction<{ itemId: string; count: number; instance?: ItemInstance }>) => {
-      const { itemId, count, instance } = action.payload;
+    addItem: (state, action: PayloadAction<{ itemId: string; count: number; instance?: ItemInstance; quality?: ItemQuality }>) => {
+      const { itemId, count, instance, quality } = action.payload;
       const itemDef = ITEMS[itemId];
       if (!itemDef) return;
 
@@ -72,7 +72,7 @@ const inventorySlice = createSlice({
         if (itemDef.category === ItemCategory.Equipment) {
           // Auto-generate instance for equipment if missing
           for(let i=0; i<count; i++) {
-            const newInst = createBasicInstance(itemId);
+            const newInst = createBasicInstance(itemId, quality);
             state.items.push({ itemId, count: 1, instanceId: newInst.instanceId, instance: newInst });
           }
         } else {

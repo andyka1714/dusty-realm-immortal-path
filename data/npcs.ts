@@ -17,16 +17,16 @@ export const VILLAGE_NPCS: NPC[] = [
         x: 20,
         y: 15,
         description: '仙緣鎮的村長，負責引導新人。',
-        questIds: ['tutorial_01'],
+        questIds: ['tutorial_01', 'tutorial_02_get_sword'],
         dialogue: [
-            "孩子，你既然覺醒了靈根，便不再是凡人了。",
-            "三大門派雖然求賢若渴，但也不養閒人。他們立下規矩，凡欲入門者，需先證明自己有跨入「練氣期」的潛力。",
-            "你若有意，可依此指引前行：\n\n【劍修之路 (北)】\n向北穿過北郊荒徑，前往凌霄山腳。傳聞那裡有守山靈虎守護著「引氣洗髓丹」，得之可入凌霄劍宗。\n\n【體修之路 (西)】\n向西深入西郊密林，前往獸王谷口。擊敗那裡的赤火猿，奪取「引氣洗髓丹」，便有資格拜入萬獸山莊。\n\n【法修之路 (東)】\n向東跨越東郊靈田，前往靈湖草甸。若能從靈湖巨蟹手中取得「引氣洗髓丹」，縹緲仙宮的大門將為你敞開。",
-            "切記，修仙之路本就是逆天而行，充滿兇險。去吧，孩子，去爭那一線機緣！"
+            "（村長撫鬚長嘆，目光深邃地望著遠方雲霧繚繞的山巔）",
+            "又一個被天道選中的孩子嗎... 仙緣鎮已經很久沒有像你這般資質的年輕人了。",
+            "修仙，修的是長生，求的是大道，但這一路上的腥風血雨，你可做好了準備？",
+            "若心意已決，便去吧。莫回頭，仙路漫漫，唯有道心永恆。"
         ]
     },
     {
-        id: 'shop_general',
+        id: 'village_wanbao',
         name: '萬寶閣',
         symbol: '商',
         type: NPCType.Shop, // General
@@ -36,7 +36,7 @@ export const VILLAGE_NPCS: NPC[] = [
         shopId: 'general_store_mortal'
     },
     {
-        id: 'shop_blacksmith',
+        id: 'village_blacksmith',
         name: '鐵匠鋪',
         symbol: '匠',
         type: NPCType.Shop, // Equipment
@@ -57,6 +57,7 @@ export const SWORD_SECT_NPCS: NPC[] = [
         x: 20, 
         y: 15,
         description: '劍氣內斂，不怒自威的長老。',
+        questIds: ['sect_sword_join', 'sect_sword_task_01'],
         dialogue: [
             "劍者，寧折不彎。唯有大毅力者，方能登臨絕頂。",
             "若你已突破至練氣期，便是我宗門弟子。"

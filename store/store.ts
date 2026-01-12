@@ -4,6 +4,7 @@ import logReducer from './slices/logSlice';
 import adventureReducer from './slices/adventureSlice';
 import inventoryReducer from './slices/inventorySlice';
 import workshopReducer from './slices/workshopSlice';
+import questReducer from './slices/questSlice'; // 1. Import questReducer
 import { loadState, saveState } from './localStorage';
 
 const rootReducer = combineReducers({
@@ -12,6 +13,7 @@ const rootReducer = combineReducers({
   adventure: adventureReducer,
   inventory: inventoryReducer,
   workshop: workshopReducer,
+  quest: questReducer, // 2. Add quest: questReducer
 });
 
 const preloadedState = loadState();

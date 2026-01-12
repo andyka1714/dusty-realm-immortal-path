@@ -392,3 +392,69 @@ export interface WorkshopState {
   blacksmithLevel: number;
   unlockedRecipes: string[];
 }
+
+// --- Quest System ---
+
+export enum QuestType {
+    Main = 'main',       // 主線
+    Side = 'side',       // 支線
+    Sect = 'sect'        // 門派任務 (長老發布)
+}
+
+export enum QuestStatus {
+    Available = 'available', // 可接取
+    Active = 'active',       // 進行中
+    Completed = 'completed'  // 已完成
+}
+
+export interface QuestRequirement {
+    type: 'level' | 'item' | 'kill' | 'dialogue'; // dialogue 代表純對話任務
+    targetId?: string; // 物品ID 或 怪物ID
+    targetNpcId?: string; // 對話對象 NPC ID (For 'dialogue' requirements)
+    count?: number;    // 數量
+    minRealm?: number; // 等級需求
+}
+
+export interface QuestReward {
+    exp?: number;
+    spiritStones?: number;
+    items?: { itemId: string, count: number, quality?: ItemQuality }[];
+}
+
+export interface Quest {
+    id: string;
+    type: QuestType;
+    title: string;
+    description: string;
+    giverId: string; // 發布 NPC ID
+    
+    // 需求條件
+    requirements: QuestRequirement[];
+    
+    // 獎勵
+    rewards: QuestReward[];
+
+    // 對話配置 (支持多段對話)
+    dialogue: {
+        start: string[];    // 接任務時的對話
+        progress: string[]; // 任務進行中的對話 (未完成)
+        complete: string[]; // 完成任務時的對話
+    };
+    
+    // 前置任務 ID
+    prerequisiteQuestId?: string;
+
+    // 交付任務 NPC ID (若為空則預設為 giverId)
+    // 用於 A 發布 -> B 交付 的流程
+    submitNpcId?: string;
+}
+
+export interface VisualEffect {
+    id: string;
+    type: 'text';
+    text: string;
+    color: string; // hex string: '#ff0000' or numeric 0xff0000? Let's use string for CSS or PIXI interop, probably numeric is better for PIXI but string is versatile. Let's use numeric.
+    colorInt: number; 
+    x?: number; // fallback or override
+    y?: number;
+}

@@ -391,7 +391,7 @@ const characterSlice = createSlice({
       }
     },
 
-    addSpiritStones: (state, action: PayloadAction<{ amount: number, source?: 'battle' | 'sale' | 'other' }>) => {
+    addSpiritStones: (state, action: PayloadAction<{ amount: number, source?: 'battle' | 'sale' | 'other' | 'quest' }>) => {
       const { amount, source } = action.payload;
       
       let finalAmount = amount;
