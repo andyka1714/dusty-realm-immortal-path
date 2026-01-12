@@ -333,7 +333,7 @@ const adventureSlice = createSlice({
        state.activeMonsters = state.activeMonsters.filter(m => m.currentHp > 0);
     },
 
-    resolveBattle: (state, action: PayloadAction<{ won: boolean; logs: CombatLog[] }>) => {
+    resolveBattle: (state, action: PayloadAction<{ won: boolean; logs: CombatLog[]; respawnMapId?: string }>) => {
         state.battleLogs = action.payload.logs;
         state.lastBattleResult = action.payload.won ? 'won' : 'lost';
         
@@ -346,15 +346,18 @@ const adventureSlice = createSlice({
             }
             // state.currentEnemy = null; // Keep currentEnemy for the report UI. Cleared in closeBattleReport.
         } else {
-            // Player Lost: Teleport to Qingyun Sect (Map 0)
-            state.currentMapId = '0';
-            state.playerPosition = { x: 20, y: 20 }; // Safe center of Start Map
+            // Player Lost: Teleport to Respawn Point (Sect or Start)
+            const respawnId = action.payload.respawnMapId || '0';
+            const respawnName = respawnId === '0' ? '仙緣鎮' : (respawnId === '4' ? '凌霄劍宗' : (respawnId === '23' ? '縹緲仙宮' : (respawnId === '14' ? '萬獸山莊' : '安全區域')));
+
+            state.currentMapId = respawnId;
+            state.playerPosition = { x: 20, y: 20 }; // Safe center for 40x40+ maps
             state.visitedCells = { '20,20': true };
-            state.activeMonsters = []; // Map 0 is safe zone
+            state.activeMonsters = []; // Safe zone reset
             state.battleLogs.push({ 
                 turn: 0, 
                 isPlayer: false, 
-                message: "戰敗重傷，已被傳送回青雲仙宗修養。", 
+                message: `戰敗重傷，已被傳送回${respawnName}修養。`, 
                 damage: 0,
                 playerHp: 0,
                 playerMaxHp: 0,

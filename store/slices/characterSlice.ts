@@ -411,8 +411,12 @@ const characterSlice = createSlice({
     spendSpiritStones: (state, action: PayloadAction<number>) => {
         const amount = action.payload;
         if (state.spiritStones >= amount) {
-            state.spiritStones -= amount;
+          state.spiritStones -= amount;
         }
+    },
+
+    setProfession: (state, action: PayloadAction<ProfessionType>) => {
+        state.profession = action.payload;
     },
 
     gainAttribute: (state, action: PayloadAction<keyof BaseAttributes>) => {
@@ -574,5 +578,5 @@ const characterSlice = createSlice({
   },
 });
 
-export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, startSeclusion, processOfflineGains, reincarnate, gainAttribute, gainExperience, consumeItem, updateLastProcessedYear, updateLastWarningAge, addSpiritStones, spendSpiritStones, deductSpiritStones, upgradeGatheringLevel } = characterSlice.actions;
+export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, startSeclusion, processOfflineGains, reincarnate, gainAttribute, gainExperience, consumeItem, updateLastProcessedYear, updateLastWarningAge, addSpiritStones, spendSpiritStones, deductSpiritStones, upgradeGatheringLevel, setProfession } = characterSlice.actions;
 export default characterSlice.reducer;

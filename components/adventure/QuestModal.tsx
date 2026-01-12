@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/store';
-import { NPC, Quest, QuestStatus, ItemQuality, Item } from '../../types';
+import { NPC, Quest, QuestStatus, ItemQuality, Item, ProfessionType } from '../../types';
 import { QUESTS } from '../../data/quests';
 import { ITEMS } from '../../data/items';
 import { acceptQuest, updateQuestProgress, completeQuest } from '../../store/slices/questSlice';
-import { addSpiritStones, gainExperience } from '../../store/slices/characterSlice';
+import { addSpiritStones, gainExperience, setProfession } from '../../store/slices/characterSlice';
 import { addItem } from '../../store/slices/inventorySlice';
 import { addLog } from '../../store/slices/logSlice';
 import { addVisualEffect } from '../../store/slices/adventureSlice'; // Import addVisualEffect
@@ -190,6 +190,11 @@ export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
                 // Complete Quest
                 dispatch(completeQuest({ questId: currentQuest.id }));
                 
+                // Handle Sect Joining
+                if (currentQuest.id === 'sect_sword_join') dispatch(setProfession(ProfessionType.Sword));
+                if (currentQuest.id === 'sect_beast_join') dispatch(setProfession(ProfessionType.Body));
+                if (currentQuest.id === 'sect_mystic_join') dispatch(setProfession(ProfessionType.Mage));
+
                 // Rewards
                 const rewards = currentQuest.rewards;
                 const rewardLogParts: string[] = [];

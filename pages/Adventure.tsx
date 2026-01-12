@@ -12,12 +12,12 @@ import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move, Swords } from 'lucide-react';
 import { parseBattleLog } from '../utils/logParser';
-import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory, NPC, NPCType } from '../types';
+import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory, NPC, NPCType, ProfessionType } from '../types';
 import { MOVEMENT_SPEEDS, REALM_NAMES, ELEMENT_COLORS, ELEMENT_NAMES } from '../constants';
 import clsx from 'clsx';
 import { Modal } from '../components/Modal';
 import { getDropRewards } from '@/data/drop_tables';
-import { addSpiritStones, gainExperience } from '@/store/slices/characterSlice';
+import { addSpiritStones, gainExperience, setProfession } from '@/store/slices/characterSlice';
 import { formatSpiritStone } from '@/utils/currency';
 import AdventureStage from '../components/adventure/AdventureStage';
 import ShopPanel from '../components/adventure/ShopPanel';
@@ -88,21 +88,31 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        if (scrollContainerRef.current) {
-            const startY = centerY - (scrollContainerRef.current.clientHeight / 2);
-            const startX = centerX - (scrollContainerRef.current.clientWidth / 2);
-            scrollContainerRef.current.scrollTop = startY;
-            scrollContainerRef.current.scrollLeft = startX;
-        }
-    }, []);
-
     const getPos = (map: MapData) => {
         return {
             x: centerX + (map.worldX * GRID_SCALE_X),
             y: centerY - (map.worldY * GRID_SCALE_Y) // Invert Y for screen coords
         };
     };
+
+    useEffect(() => {
+        if (scrollContainerRef.current) {
+            let targetX = centerX;
+            let targetY = centerY;
+
+            const currentMap = MAPS.find(m => m.id === currentMapId);
+            if (currentMap) {
+                const pos = getPos(currentMap);
+                targetX = pos.x;
+                targetY = pos.y;
+            }
+
+            const startY = targetY - (scrollContainerRef.current.clientHeight / 2);
+            const startX = targetX - (scrollContainerRef.current.clientWidth / 2);
+            scrollContainerRef.current.scrollTop = startY;
+            scrollContainerRef.current.scrollLeft = startX;
+        }
+    }, []);
 
     const getSmartConnection = (sourceMap: MapData, targetMap: MapData, explicitDir?: string) => {
         const sourcePos = getPos(sourceMap);
@@ -389,7 +399,7 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 export const Adventure: React.FC = () => {
   const dispatch = useDispatch();
   const character = useSelector((state: RootState) => state.character);
-  const { attributes, majorRealm, spiritRootId, isInitialized } = character;
+  const { attributes, majorRealm, spiritRootId, isInitialized, profession } = character;
   const { equipmentStats } = useSelector((state: RootState) => state.inventory);
   const { 
     currentMapId, playerPosition, activeMonsters, visitedCells, 
@@ -422,6 +432,15 @@ export const Adventure: React.FC = () => {
         dispatch(cancelBattle());
     };
   }, [dispatch]);
+  
+  // Auto-Repair Profession State (Fix for existing users)
+  useEffect(() => {
+    if (profession === ProfessionType.None) {
+        if (completedQuests.includes('sect_sword_join')) dispatch(setProfession(ProfessionType.Sword));
+        else if (completedQuests.includes('sect_beast_join')) dispatch(setProfession(ProfessionType.Body));
+        else if (completedQuests.includes('sect_mystic_join')) dispatch(setProfession(ProfessionType.Mage));
+    }
+  }, [profession, completedQuests, dispatch]);
   
   // Expanded Map State
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
@@ -746,7 +765,17 @@ export const Adventure: React.FC = () => {
         if (isReplayingBattle && replayQueue.length === 0 && battleSnapshot) {
              // Replay Finished -> Apply Final Results
              setIsReplayingBattle(false);
-             dispatch(resolveBattle({ won: battleSnapshot.won, logs: displayedLogs })); // Use displayed logs as final source of truth for Redux if needed (or just use original)
+
+             // Calculate Respawn ID based on Profession if lost
+             let respawnMapId: string | undefined;
+             if (!battleSnapshot.won) {
+                 if (profession === ProfessionType.Sword) respawnMapId = '4'; // 凌霄劍宗
+                 else if (profession === ProfessionType.Mage) respawnMapId = '23'; // 縹緲仙宮
+                 else if (profession === ProfessionType.Body) respawnMapId = '14'; // 萬獸山莊 (Base)
+                 else respawnMapId = '0'; // 仙緣鎮
+             }
+
+             dispatch(resolveBattle({ won: battleSnapshot.won, logs: displayedLogs, respawnMapId })); // Use displayed logs as final source of truth for Redux if needed (or just use original)
              
              // Process Rewards
               if (battleSnapshot.won && battleSnapshot.rewards) {
