@@ -43,7 +43,7 @@ export const VILLAGE_NPCS: NPC[] = [
         x: 25,
         y: 20,
         description: '傳來陣陣打鐵聲，鐵匠張正揮汗如雨。',
-        shopId: 'blacksmith_mortal'
+        shopId: 'blacksmith_village'
     }
 ];
 
@@ -80,7 +80,7 @@ export const SWORD_SECT_NPCS: NPC[] = [
         x: 25,
         y: 20,
         description: '宗門打造靈劍之地，爐火終年不熄。',
-        shopId: 'blacksmith_mortal'
+        shopId: 'sect_shop_sword'
     },
     {
         id: 'sect_sword_skills',
@@ -90,7 +90,7 @@ export const SWORD_SECT_NPCS: NPC[] = [
         x: 20,
         y: 25,
         description: '收藏無數劍譜，是劍修的知識寶庫。',
-        shopId: 'skill_shop_mortal'
+        shopId: 'sect_skill_sword'
     }
 ];
 
@@ -127,7 +127,7 @@ export const BEAST_SECT_NPCS: NPC[] = [
         x: 25,
         y: 20,
         description: '懸掛著各種獸骨與獸皮打造的兵刃防具。',
-        shopId: 'blacksmith_mortal'
+        shopId: 'sect_shop_beast'
     },
     {
         id: 'sect_beast_skills',
@@ -137,7 +137,7 @@ export const BEAST_SECT_NPCS: NPC[] = [
         x: 20,
         y: 25,
         description: '供奉獸神圖騰，傳承煉體秘術。',
-        shopId: 'skill_shop_mortal'
+        shopId: 'sect_skill_beast'
     }
 ];
 
@@ -174,7 +174,7 @@ export const MYSTIC_SECT_NPCS: NPC[] = [
         x: 25,
         y: 20,
         description: '收藏著各式法寶法器。',
-        shopId: 'blacksmith_mortal'
+        shopId: 'sect_shop_mystic'
     },
     {
         id: 'sect_mystic_skills',
@@ -184,6 +184,6 @@ export const MYSTIC_SECT_NPCS: NPC[] = [
         x: 20,
         y: 25,
         description: '雲霧中的藏書閣，記載著玄妙法術。',
-        shopId: 'skill_shop_mortal'
+        shopId: 'sect_skill_mystic'
     }
 ];
