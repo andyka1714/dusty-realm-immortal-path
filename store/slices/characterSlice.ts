@@ -1,32 +1,68 @@
-
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CharacterState, MajorRealm, SpiritRootType, SpiritRootId, ProfessionType, Gender, BaseAttributes } from '../../types';
-import { calculateMaxExp, INITIAL_BASE_STATS, MINOR_REALM_CAP, REALM_MODIFIERS, SPIRIT_ROOT_DETAILS, LIFESPAN_BONUS, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN, PASSIVE_CULTIVATION_PENALTY, SECLUSION_BASE_COST, SECLUSION_DURATION_MS, REALM_ATTRIBUTE_GROWTH } from '../../constants';
-import { addLog } from './logSlice';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  CharacterState,
+  MajorRealm,
+  SpiritRootType,
+  SpiritRootId,
+  ProfessionType,
+  Gender,
+  BaseAttributes,
+} from "../../types";
+import {
+  calculateMaxExp,
+  INITIAL_BASE_STATS,
+  MINOR_REALM_CAP,
+  REALM_MODIFIERS,
+  SPIRIT_ROOT_DETAILS,
+  LIFESPAN_BONUS,
+  DAYS_PER_YEAR,
+  BREAKTHROUGH_CONFIG,
+  MANUAL_CULTIVATE_COOLDOWN,
+  PASSIVE_CULTIVATION_PENALTY,
+  SECLUSION_BASE_COST,
+  SECLUSION_DURATION_MS,
+  REALM_ATTRIBUTE_GROWTH,
+} from "../../constants";
+import { addLog } from "./logSlice";
 
 // ... (Keep helpers generateSpiritRoot, generateInitialStats, calculateInitialLifespan) ...
 export const generateSpiritRoot = (): SpiritRootId => {
   const rand = Math.random() * 100;
-  let tier: 'heavenly' | 'variant' | 'true' | 'mixed';
-  if (rand < 70) tier = 'mixed';         
-  else if (rand < 90) tier = 'true';     
-  else if (rand < 98) tier = 'heavenly'; 
-  else tier = 'variant';                 
+  let tier: "heavenly" | "variant" | "true" | "mixed";
+  if (rand < 70) tier = "mixed";
+  else if (rand < 90) tier = "true";
+  else if (rand < 98) tier = "heavenly";
+  else tier = "variant";
 
   switch (tier) {
-    case 'heavenly': {
-      const roots = [SpiritRootId.HEAVENLY_GOLD, SpiritRootId.HEAVENLY_WOOD, SpiritRootId.HEAVENLY_WATER, SpiritRootId.HEAVENLY_FIRE, SpiritRootId.HEAVENLY_EARTH];
+    case "heavenly": {
+      const roots = [
+        SpiritRootId.HEAVENLY_GOLD,
+        SpiritRootId.HEAVENLY_WOOD,
+        SpiritRootId.HEAVENLY_WATER,
+        SpiritRootId.HEAVENLY_FIRE,
+        SpiritRootId.HEAVENLY_EARTH,
+      ];
       return roots[Math.floor(Math.random() * roots.length)];
     }
-    case 'variant': {
-      const roots = [SpiritRootId.VARIANT_WIND, SpiritRootId.VARIANT_THUNDER, SpiritRootId.VARIANT_ICE];
+    case "variant": {
+      const roots = [
+        SpiritRootId.VARIANT_WIND,
+        SpiritRootId.VARIANT_THUNDER,
+        SpiritRootId.VARIANT_ICE,
+      ];
       return roots[Math.floor(Math.random() * roots.length)];
     }
-    case 'true': {
-      const roots = [SpiritRootId.TRUE_WOOD_FIRE, SpiritRootId.TRUE_METAL_EARTH, SpiritRootId.TRUE_WATER_WOOD, SpiritRootId.TRUE_TRI];
+    case "true": {
+      const roots = [
+        SpiritRootId.TRUE_WOOD_FIRE,
+        SpiritRootId.TRUE_METAL_EARTH,
+        SpiritRootId.TRUE_WATER_WOOD,
+        SpiritRootId.TRUE_TRI,
+      ];
       return roots[Math.floor(Math.random() * roots.length)];
     }
-    case 'mixed': {
+    case "mixed": {
       const roots = [SpiritRootId.MIXED_FOUR, SpiritRootId.MIXED_FIVE];
       return roots[Math.floor(Math.random() * roots.length)];
     }
@@ -49,64 +85,64 @@ export const generateInitialStats = (spiritRootId?: SpiritRootId) => {
   // Determine Target Total based on Spirit Root Tier
   let targetTotal = 70; // Default Mixed
   if (spiritRootId) {
-      const tier = SPIRIT_ROOT_DETAILS[spiritRootId]?.type;
-      // Map type to target total
-      // Heavenly/Variant -> 90
-      // True -> 80
-      // Mixed -> 70
-      if (tier === SpiritRootType.Heavenly || tier === SpiritRootType.Variant) {
-          targetTotal = 90;
-      } else if (tier === SpiritRootType.True) {
-          targetTotal = 80;
-      }
+    const tier = SPIRIT_ROOT_DETAILS[spiritRootId]?.type;
+    // Map type to target total
+    // Heavenly/Variant -> 90
+    // True -> 80
+    // Mixed -> 70
+    if (tier === SpiritRootType.Heavenly || tier === SpiritRootType.Variant) {
+      targetTotal = 90;
+    } else if (tier === SpiritRootType.True) {
+      targetTotal = 80;
+    }
   }
 
   let pointsToDistribute = targetTotal - 60; // e.g. 10, 20, or 30
   const keys = Object.keys(stats) as Array<keyof typeof stats>;
 
   // Distribute points randomly
-  // Constraint: Single attribute max is 20? User said "Generation range 10~20". 
+  // Constraint: Single attribute max is 20? User said "Generation range 10~20".
   // So we must ensure no stat exceeds 20.
   // With base 10, max add is 10 per stat.
-  
+
   while (pointsToDistribute > 0) {
-      const randomKey = keys[Math.floor(Math.random() * keys.length)];
-      if (stats[randomKey] < 20) {
-          stats[randomKey]++;
-          pointsToDistribute--;
-      } else {
-          // If all are capped (shouldn't happen with max total 90 and 6*20=120), continue search
-          // But to avoid infinite loop if logic changes:
-          const uncapped = keys.filter(k => stats[k] < 20);
-          if (uncapped.length === 0) break; 
-      }
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    if (stats[randomKey] < 20) {
+      stats[randomKey]++;
+      pointsToDistribute--;
+    } else {
+      // If all are capped (shouldn't happen with max total 90 and 6*20=120), continue search
+      // But to avoid infinite loop if logic changes:
+      const uncapped = keys.filter((k) => stats[k] < 20);
+      if (uncapped.length === 0) break;
+    }
   }
-  
+
   return stats;
 };
 
 export const calculateInitialLifespan = (physique: number) => {
-    const baseLifespan = 100;
-    const variation = Math.floor(Math.random() * 21) - 10; 
-    const physiqueBonus = Math.floor((physique - 10) / 2); 
-    return (baseLifespan + variation + physiqueBonus) * DAYS_PER_YEAR;
+  const baseLifespan = 100;
+  const variation = Math.floor(Math.random() * 21) - 10;
+  const physiqueBonus = Math.floor((physique - 10) / 2);
+  return (baseLifespan + variation + physiqueBonus) * DAYS_PER_YEAR;
 };
 
 const initialState: CharacterState = {
   isInitialized: false,
   isDead: false,
-  name: '無名道友',
+  name: "無名道友",
   gender: Gender.Male,
-  title: '初入江湖',
+  title: "初入江湖",
   spiritRoot: SpiritRootType.Heterogenous,
   spiritRootId: SpiritRootId.MIXED_FIVE,
   profession: ProfessionType.None,
   majorRealm: MajorRealm.Mortal,
   minorRealm: 0,
-  
-  age: 10 * DAYS_PER_YEAR, 
-  lifespan: 100 * DAYS_PER_YEAR, 
-  
+
+  age: 10 * DAYS_PER_YEAR,
+  lifespan: 100 * DAYS_PER_YEAR,
+
   currentExp: 0,
   maxExp: calculateMaxExp(MajorRealm.Mortal, 0),
   attributes: { ...INITIAL_BASE_STATS },
@@ -115,30 +151,34 @@ const initialState: CharacterState = {
   cultivationCycle: 0,
   isBreakthroughAvailable: false,
   isInSeclusion: false,
-  gatheringLevel: 1, 
+  gatheringLevel: 1,
   lastSaveTime: Date.now(),
   // Last Line of initialState
   lastBreakthroughResult: undefined,
   itemConsumption: {},
   lastProcessedYear: 10, // Starts at age 10
+  skills: [],
 };
 
 const characterSlice = createSlice({
-  name: 'character',
+  name: "character",
   initialState,
   reducers: {
-    initializeCharacter: (state, action: PayloadAction<{ 
-        name: string; 
+    initializeCharacter: (
+      state,
+      action: PayloadAction<{
+        name: string;
         gender: Gender;
         spiritRootId?: SpiritRootId;
         attributes?: BaseAttributes;
         lifespan?: number;
-    }>) => {
+      }>
+    ) => {
       state.isInitialized = true;
       state.isDead = false;
-      state.name = action.payload.name || '無名道友';
+      state.name = action.payload.name || "無名道友";
       state.gender = action.payload.gender;
-      
+
       state.majorRealm = MajorRealm.Mortal;
       state.minorRealm = 0;
       state.currentExp = 0;
@@ -153,48 +193,52 @@ const characterSlice = createSlice({
       state.lastManualCultivateTime = 0;
 
       // Generate Spirit Root First to determine potential
-      const generatedRootId = action.payload.spiritRootId || generateSpiritRoot();
+      const generatedRootId =
+        action.payload.spiritRootId || generateSpiritRoot();
       state.spiritRootId = generatedRootId;
-      
+
       const rootDetails = SPIRIT_ROOT_DETAILS[generatedRootId];
       state.spiritRoot = rootDetails.type;
 
       // Generate Attributes based on Spirit Root
-      state.attributes = action.payload.attributes || generateInitialStats(generatedRootId);
+      state.attributes =
+        action.payload.attributes || generateInitialStats(generatedRootId);
 
       if (rootDetails.bonuses.initialStats) {
-         const bonusStats = rootDetails.bonuses.initialStats;
-         (Object.keys(bonusStats) as Array<keyof BaseAttributes>).forEach(key => {
+        const bonusStats = rootDetails.bonuses.initialStats;
+        (Object.keys(bonusStats) as Array<keyof BaseAttributes>).forEach(
+          (key) => {
             if (bonusStats[key]) {
-                state.attributes[key] += bonusStats[key]!;
+              state.attributes[key] += bonusStats[key]!;
             }
-         });
+          }
+        );
       }
-      
+
       let finalLifespan = action.payload.lifespan;
       if (!finalLifespan) {
-          finalLifespan = calculateInitialLifespan(state.attributes.physique);
+        finalLifespan = calculateInitialLifespan(state.attributes.physique);
       }
       if (rootDetails.bonuses.initialLifespan) {
-          finalLifespan += rootDetails.bonuses.initialLifespan * DAYS_PER_YEAR;
+        finalLifespan += rootDetails.bonuses.initialLifespan * DAYS_PER_YEAR;
       }
       state.lifespan = finalLifespan;
-      state.age = 10 * DAYS_PER_YEAR; 
+      state.age = 10 * DAYS_PER_YEAR;
     },
 
     reincarnate: (state) => {
-       state.isInitialized = false;
-       state.isDead = false;
-       state.itemConsumption = {};
-       state.lastProcessedYear = 10;
+      state.isInitialized = false;
+      state.isDead = false;
+      state.itemConsumption = {};
+      state.lastProcessedYear = 10;
     },
 
     updateLastProcessedYear: (state, action: PayloadAction<number>) => {
-        state.lastProcessedYear = action.payload;
+      state.lastProcessedYear = action.payload;
     },
 
     updateLastWarningAge: (state, action: PayloadAction<number>) => {
-        state.lastWarningAge = action.payload;
+      state.lastWarningAge = action.payload;
     },
 
     deductSpiritStones: (state, action: PayloadAction<number>) => {
@@ -202,88 +246,107 @@ const characterSlice = createSlice({
     },
 
     upgradeGatheringLevel: (state) => {
-        state.gatheringLevel += 1;
+      state.gatheringLevel += 1;
     },
-    
+
     // ... (Keep processOfflineGains, tickCultivation, toggleSeclusion, manualCultivate, gainAttribute, attemptBreakthrough) ...
 
-    consumeItem: (state, action: PayloadAction<{ itemId: string, effects: any, maxConsumption?: number }>) => {
-        const { itemId, effects, maxConsumption } = action.payload;
-        
-        // Check Limit
-        const currentUses = state.itemConsumption[itemId] || 0;
-        if (maxConsumption && currentUses >= maxConsumption) {
-             return; // Silent fail or handled by UI check
+    consumeItem: (
+      state,
+      action: PayloadAction<{
+        itemId: string;
+        effects: any;
+        maxConsumption?: number;
+      }>
+    ) => {
+      const { itemId, effects, maxConsumption } = action.payload;
+
+      // Check Limit
+      const currentUses = state.itemConsumption[itemId] || 0;
+      if (maxConsumption && currentUses >= maxConsumption) {
+        return; // Silent fail or handled by UI check
+      }
+
+      // Apply Effects
+      if (effects) {
+        if (effects.lifespan) {
+          state.lifespan += effects.lifespan;
         }
-        
-        // Apply Effects
-        if (effects) {
-            if (effects.lifespan) {
-                state.lifespan += effects.lifespan;
-            }
-            if (effects.cultivationSpeed) {
-                // Assuming it adds instant Exp for now, as speed is calculated per tick based on stats
-                state.currentExp += effects.cultivationSpeed; 
-                // Or if it's meant to be permanent speed buff, we need a new state field.
-                // Given standard pills, usually it's Exp.
-                if (state.currentExp >= state.maxExp && !state.isBreakthroughAvailable) {
-                    state.currentExp = state.maxExp;
-                    state.isBreakthroughAvailable = true;
-                }
-            }
-            if (effects.healHp) {
-                // HP concept doesn't exist yet in char state (only stats). 
-                // Maybe useful for "Injuries" later.
-            }
-            if (effects.stat && effects.value) {
-                // Permanent Stat Boost
-                const statKey = effects.stat as keyof BaseAttributes;
-                if (state.attributes[statKey] !== undefined) {
-                    state.attributes[statKey] += effects.value;
-                }
-            }
+        if (effects.cultivationSpeed) {
+          // Assuming it adds instant Exp for now, as speed is calculated per tick based on stats
+          state.currentExp += effects.cultivationSpeed;
+          // Or if it's meant to be permanent speed buff, we need a new state field.
+          // Given standard pills, usually it's Exp.
+          if (
+            state.currentExp >= state.maxExp &&
+            !state.isBreakthroughAvailable
+          ) {
+            state.currentExp = state.maxExp;
+            state.isBreakthroughAvailable = true;
+          }
         }
-        
-        // Increment Counter
-        state.itemConsumption[itemId] = currentUses + 1;
+        if (effects.healHp) {
+          // HP concept doesn't exist yet in char state (only stats).
+          // Maybe useful for "Injuries" later.
+        }
+        if (effects.stat && effects.value) {
+          // Permanent Stat Boost
+          const statKey = effects.stat as keyof BaseAttributes;
+          if (state.attributes[statKey] !== undefined) {
+            state.attributes[statKey] += effects.value;
+          }
+        }
+        if (effects.skillId) {
+          if (!state.skills.includes(effects.skillId)) {
+            state.skills.push(effects.skillId);
+            addLog({
+              message: `習得技能：${effects.skillId}`, // Ideally resolve name, but logic is in reducer
+              type: "success",
+            });
+          }
+        }
+      }
+
+      // Increment Counter
+      state.itemConsumption[itemId] = currentUses + 1;
     },
 
     processOfflineGains: (state) => {
       if (!state.isInitialized || state.isDead) return;
       const now = Date.now();
       const diffSeconds = (now - state.lastSaveTime) / 1000;
-      const validSeconds = Math.min(diffSeconds, 43200); 
-      
+      const validSeconds = Math.min(diffSeconds, 43200);
+
       if (validSeconds > 1) {
         state.age += Math.floor(validSeconds);
-        
+
         const rootBone = state.attributes.rootBone;
         const realmMod = REALM_MODIFIERS[state.majorRealm];
         const rootDetails = SPIRIT_ROOT_DETAILS[state.spiritRootId];
         const spiritMod = rootDetails.bonuses.cultivationMult;
-        
-        const gatheringMod = 1 + (state.gatheringLevel * 0.05);
-        
+
+        const gatheringMod = 1 + state.gatheringLevel * 0.05;
+
         let rate = rootBone * realmMod * spiritMod * gatheringMod;
-        
+
         if (state.isInSeclusion) {
-            rate *= 2.0;
+          rate *= 2.0;
         }
 
         const gain = rate * validSeconds;
-        
+
         if (!state.isBreakthroughAvailable) {
-            state.currentExp += gain;
-            if (state.currentExp >= state.maxExp) {
-                state.currentExp = state.maxExp;
-                state.isBreakthroughAvailable = true;
-                state.isInSeclusion = false; 
-            }
+          state.currentExp += gain;
+          if (state.currentExp >= state.maxExp) {
+            state.currentExp = state.maxExp;
+            state.isBreakthroughAvailable = true;
+            state.isInSeclusion = false;
+          }
         }
-        
+
         if (state.age >= state.lifespan) {
-            state.isDead = true;
-            state.age = state.lifespan;
+          state.isDead = true;
+          state.age = state.lifespan;
         }
       }
       state.lastSaveTime = now;
@@ -291,32 +354,36 @@ const characterSlice = createSlice({
 
     tickCultivation: (state) => {
       if (!state.isInitialized || state.isDead) return;
-      
+
       const now = Date.now();
       state.lastSaveTime = now;
-      state.age += 1; 
+      state.age += 1;
 
       if (state.age >= state.lifespan) {
-          state.isDead = true;
-          return;
+        state.isDead = true;
+        return;
       }
 
       // Auto-expire Seclusion
-      if (state.isInSeclusion && state.seclusionEndTime && now >= state.seclusionEndTime) {
-          state.isInSeclusion = false;
-          state.seclusionEndTime = undefined;
+      if (
+        state.isInSeclusion &&
+        state.seclusionEndTime &&
+        now >= state.seclusionEndTime
+      ) {
+        state.isInSeclusion = false;
+        state.seclusionEndTime = undefined;
       }
 
       const rootBone = state.attributes.rootBone;
       const realmMod = REALM_MODIFIERS[state.majorRealm];
-      
+
       const rootDetails = SPIRIT_ROOT_DETAILS[state.spiritRootId];
       const spiritMod = rootDetails.bonuses.cultivationMult;
-      
-      const gatheringMod = 1 + (state.gatheringLevel * 0.05);
-      
+
+      const gatheringMod = 1 + state.gatheringLevel * 0.05;
+
       let rate = rootBone * realmMod * spiritMod * gatheringMod;
-      
+
       if (state.isInSeclusion) {
         rate *= 0.5; // Seclusion Multiplier (50% Base)
       } else {
@@ -324,12 +391,12 @@ const characterSlice = createSlice({
       }
 
       state.cultivationRate = parseFloat(rate.toFixed(1));
-      
+
       if (state.isBreakthroughAvailable) return;
 
       // Update Every Tick (1 Second)
-      state.currentExp += state.cultivationRate; 
-      
+      state.currentExp += state.cultivationRate;
+
       if (state.currentExp >= state.maxExp) {
         state.currentExp = state.maxExp;
         state.isBreakthroughAvailable = true;
@@ -339,14 +406,14 @@ const characterSlice = createSlice({
 
     startSeclusion: (state) => {
       if (state.isInSeclusion) return;
-      
+
       const baseCost = SECLUSION_BASE_COST[state.majorRealm] || 100;
       const cost = Math.floor(baseCost * (1 + state.minorRealm * 0.1));
-      
+
       if (state.spiritStones < cost) {
-          return;
+        return;
       }
-      
+
       state.spiritStones -= cost;
       state.isInSeclusion = true;
       state.seclusionEndTime = Date.now() + SECLUSION_DURATION_MS;
@@ -354,22 +421,22 @@ const characterSlice = createSlice({
 
     manualCultivate: (state) => {
       if (state.isBreakthroughAvailable || state.isDead) return;
-      
+
       const now = Date.now();
       const lastTime = state.lastManualCultivateTime || 0;
 
       if (now - lastTime < MANUAL_CULTIVATE_COOLDOWN) {
-          return;
+        return;
       }
 
       // Manual Click gets 1x Rate (no 0.3 penalty)
-      // Recalculate Base Rate 
+      // Recalculate Base Rate
       // (Ideally we should cache 'raw rate' separate from 'passive rate' in state, but recalculating is cheap here)
       const rootBone = state.attributes.rootBone;
       const realmMod = REALM_MODIFIERS[state.majorRealm];
       const rootDetails = SPIRIT_ROOT_DETAILS[state.spiritRootId];
       const spiritMod = rootDetails.bonuses.cultivationMult;
-      const gatheringMod = 1 + (state.gatheringLevel * 0.05);
+      const gatheringMod = 1 + state.gatheringLevel * 0.05;
 
       let rate = rootBone * realmMod * spiritMod * gatheringMod;
       if (state.isInSeclusion) rate *= 2.0;
@@ -386,79 +453,107 @@ const characterSlice = createSlice({
       }
     },
 
-    addSpiritStones: (state, action: PayloadAction<{ amount: number, source?: 'battle' | 'sale' | 'other' | 'quest' }>) => {
+    addSpiritStones: (
+      state,
+      action: PayloadAction<{
+        amount: number;
+        source?: "battle" | "sale" | "other" | "quest";
+      }>
+    ) => {
       const { amount, source } = action.payload;
-      
+
       let finalAmount = amount;
-      
+
       // Bonus only applies to Battle Drops
-      if (source === 'battle') {
-          const rootDetails = SPIRIT_ROOT_DETAILS[state.spiritRootId];
-          const bonusPercent = rootDetails.bonuses.spiritStoneGainPercent || 0;
-          if (bonusPercent > 0) {
-              finalAmount = Math.floor(amount * (1 + bonusPercent / 100));
-          }
+      if (source === "battle") {
+        const rootDetails = SPIRIT_ROOT_DETAILS[state.spiritRootId];
+        const bonusPercent = rootDetails.bonuses.spiritStoneGainPercent || 0;
+        if (bonusPercent > 0) {
+          finalAmount = Math.floor(amount * (1 + bonusPercent / 100));
+        }
       }
-      
+
       state.spiritStones += finalAmount;
     },
 
     spendSpiritStones: (state, action: PayloadAction<number>) => {
-        const amount = action.payload;
-        if (state.spiritStones >= amount) {
-          state.spiritStones -= amount;
-        }
+      const amount = action.payload;
+      if (state.spiritStones >= amount) {
+        state.spiritStones -= amount;
+      }
     },
 
     setProfession: (state, action: PayloadAction<ProfessionType>) => {
-        state.profession = action.payload;
+      state.profession = action.payload;
+    },
+
+    learnSkill: (state, action: PayloadAction<string>) => {
+      if (!state.skills.includes(action.payload)) {
+        state.skills.push(action.payload);
+      }
     },
 
     gainAttribute: (state, action: PayloadAction<keyof BaseAttributes>) => {
       const attr = action.payload;
       state.attributes[attr] += 1;
-      
-      if (attr === 'physique') {
-        state.lifespan += 365; 
+
+      if (attr === "physique") {
+        state.lifespan += 365;
       }
     },
 
-    attemptBreakthrough: (state, action: PayloadAction<{ successChanceBonus: number, consumedItem?: boolean }>) => {
+    attemptBreakthrough: (
+      state,
+      action: PayloadAction<{
+        successChanceBonus: number;
+        consumedItem?: boolean;
+      }>
+    ) => {
       if (!state.isBreakthroughAvailable) return;
 
       const isMajorBreakthrough = state.minorRealm >= MINOR_REALM_CAP;
       const config = BREAKTHROUGH_CONFIG[state.majorRealm];
 
-      if (state.majorRealm >= MajorRealm.ImmortalEmperor && state.minorRealm >= MINOR_REALM_CAP) {
-          // Max Level Reached
-          return;
+      if (
+        state.majorRealm >= MajorRealm.ImmortalEmperor &&
+        state.minorRealm >= MINOR_REALM_CAP
+      ) {
+        // Max Level Reached
+        return;
       }
 
       // 1. Check Requirement (Double check logic for safety)
-      if (isMajorBreakthrough && config.requiredItemId && !action.payload.consumedItem) {
-          // Should have been handled by UI dispatching removeItem, but if logic fails here, we abort or fail
-          return;
+      if (
+        isMajorBreakthrough &&
+        config.requiredItemId &&
+        !action.payload.consumedItem
+      ) {
+        // Should have been handled by UI dispatching removeItem, but if logic fails here, we abort or fail
+        return;
       }
 
       // 2. Calculate Success Rate
       // Formula: Major Base Rate * (0.95 ^ minorRealm)
       // e.g. Mortal (1.0) * 0.95^9 (approx 0.63)
       let baseRate = config.baseRate;
-      
+
       // Decay for minor realms
       const decay = Math.pow(0.95, state.minorRealm);
       let successRate = baseRate * decay;
 
       // Stat Bonuses
-      successRate += (state.attributes.comprehension * 0.002); // 0.2% per point
-      successRate += (state.attributes.fortune * 0.001); // 0.1% per point
+      successRate += state.attributes.comprehension * 0.002; // 0.2% per point
+      successRate += state.attributes.fortune * 0.001; // 0.1% per point
 
       // Spirit Root Bonus
-      if (!isMajorBreakthrough && state.spiritRoot === SpiritRootType.Heavenly) {
-          successRate += 0.05;
+      if (
+        !isMajorBreakthrough &&
+        state.spiritRoot === SpiritRootType.Heavenly
+      ) {
+        successRate += 0.05;
       }
       if (state.spiritRootId === SpiritRootId.TRUE_TRI) {
-          successRate += 0.05;
+        successRate += 0.05;
       }
 
       // External Bonus (Pills)
@@ -470,9 +565,9 @@ const characterSlice = createSlice({
       if (roll <= successRate) {
         // --- SUCCESS ---
         if (isMajorBreakthrough) {
-          state.majorRealm += (config.increment ?? 1);
+          state.majorRealm += config.increment ?? 1;
           state.minorRealm = 0;
-          
+
           const bonusLife = LIFESPAN_BONUS[state.majorRealm] || 0;
           state.lifespan += bonusLife * DAYS_PER_YEAR;
 
@@ -481,11 +576,13 @@ const characterSlice = createSlice({
           // Per doc, only Base Stats + Unlocks happen here.
         } else {
           state.minorRealm += 1;
-          
+
           // Apply Minor Realm Attribute Growth based on Realm & Profession (Default: None)
           // TODO: Implement Profession/Class selection in State
-          const growthConfig = REALM_ATTRIBUTE_GROWTH[state.majorRealm]?.['None'] || REALM_ATTRIBUTE_GROWTH[MajorRealm.Mortal]['None'];
-          
+          const growthConfig =
+            REALM_ATTRIBUTE_GROWTH[state.majorRealm]?.["None"] ||
+            REALM_ATTRIBUTE_GROWTH[MajorRealm.Mortal]["None"];
+
           state.attributes.physique += growthConfig.physique;
           state.attributes.rootBone += growthConfig.rootBone;
           state.attributes.insight += growthConfig.insight;
@@ -496,66 +593,65 @@ const characterSlice = createSlice({
         state.currentExp = 0;
         state.maxExp = calculateMaxExp(state.majorRealm, state.minorRealm);
         state.isBreakthroughAvailable = false;
-        
-        state.lastBreakthroughResult = { 
-            success: true, 
-            dropRealm: false, 
-            isTribulation: false, 
-            isMajor: isMajorBreakthrough,
-            timestamp: Date.now() 
-        };
 
+        state.lastBreakthroughResult = {
+          success: true,
+          dropRealm: false,
+          isTribulation: false,
+          isMajor: isMajorBreakthrough,
+          timestamp: Date.now(),
+        };
       } else {
         // --- FAILURE ---
-        const penaltyType = isMajorBreakthrough ? config.penaltyType : 'minor';
-        const isTribulation = penaltyType === 'major_unsafe';
-        
+        const penaltyType = isMajorBreakthrough ? config.penaltyType : "minor";
+        const isTribulation = penaltyType === "major_unsafe";
+
         let dropRealm = false;
         // Thunder Root Risk Reduction
         let riskReducer = 1.0;
         if (state.spiritRootId === SpiritRootId.VARIANT_THUNDER) {
-            riskReducer = 0.5; 
+          riskReducer = 0.5;
         }
 
         // Penalty Logic
-        if (penaltyType === 'major_unsafe') {
-            // TRIBULATION FAILURE (Golden Core+): -100% Exp, Item Lost
-            state.currentExp = 0; 
-        } else if (penaltyType === 'major_safe') {
-            // MAJOR SAFE (Mortal/Qi): -30% Exp, Item Lost
-            const lossPct = 0.3 * riskReducer;
-            state.currentExp = Math.floor(state.maxExp * (1 - lossPct));
+        if (penaltyType === "major_unsafe") {
+          // TRIBULATION FAILURE (Golden Core+): -100% Exp, Item Lost
+          state.currentExp = 0;
+        } else if (penaltyType === "major_safe") {
+          // MAJOR SAFE (Mortal/Qi): -30% Exp, Item Lost
+          const lossPct = 0.3 * riskReducer;
+          state.currentExp = Math.floor(state.maxExp * (1 - lossPct));
         } else {
-            // MINOR (Lv 1-9): -30% Exp, No Item Loss (Handled by UI not dispatching remove, but verify here?)
-            // Actually 'consumedItem' payload handles if item was consumed *before*.
-            // But for Minor, no item required usually.
-            const lossPct = 0.3 * riskReducer;
-            state.currentExp = Math.floor(state.currentExp * (1 - lossPct)); // Wait! User said "Current Exp -30%".
-            // Previous code used maxExp * (1-loss). That sets it to 70% of MAX.
-            // If user has 100% (ready to break), they drop to 70%.
-            // If user text says "Deduct 30% of current exp".
-            // Since breakthrough requires 100% exp (maxExp), "Current" is "Max".
-            // So result is 70% of Max. Logic holds.
-            if (state.currentExp > state.maxExp) state.currentExp = state.maxExp; // Clamp
-            state.currentExp = Math.floor(state.currentExp * (1 - lossPct));
+          // MINOR (Lv 1-9): -30% Exp, No Item Loss (Handled by UI not dispatching remove, but verify here?)
+          // Actually 'consumedItem' payload handles if item was consumed *before*.
+          // But for Minor, no item required usually.
+          const lossPct = 0.3 * riskReducer;
+          state.currentExp = Math.floor(state.currentExp * (1 - lossPct)); // Wait! User said "Current Exp -30%".
+          // Previous code used maxExp * (1-loss). That sets it to 70% of MAX.
+          // If user has 100% (ready to break), they drop to 70%.
+          // If user text says "Deduct 30% of current exp".
+          // Since breakthrough requires 100% exp (maxExp), "Current" is "Max".
+          // So result is 70% of Max. Logic holds.
+          if (state.currentExp > state.maxExp) state.currentExp = state.maxExp; // Clamp
+          state.currentExp = Math.floor(state.currentExp * (1 - lossPct));
         }
 
         // Minor Realm Drop Logic (Only for Minor Breakdowns as per specs? Table says "Item Lost? No". "Drop Realm? No column").
         // But "突破失敗後果" section mentions "道基受損 (Debuff)" but not realm drop.
-        // However, existing code had realm drop. 
+        // However, existing code had realm drop.
         // User spec "Table 1-100" doesn't mention realm drop.
         // I will DISABLE realm drop to follow spec strictly, OR keep it minimal.
         // User didn't explicitly ban it, but "失敗後果" list 1,2,3,4 doesn't mention "Realm Drop".
         // It says "Exp Deduct".
         // So I will REMOVE Realm Drop logic to be safe.
-        
+
         state.isBreakthroughAvailable = false;
-        
-        state.lastBreakthroughResult = { 
-            success: false, 
-            dropRealm: false, 
-            isTribulation,
-            timestamp: Date.now() 
+
+        state.lastBreakthroughResult = {
+          success: false,
+          dropRealm: false,
+          isTribulation,
+          timestamp: Date.now(),
         };
       }
     },
@@ -563,7 +659,7 @@ const characterSlice = createSlice({
     gainExperience: (state, action: PayloadAction<number>) => {
       const amount = action.payload;
       if (state.isBreakthroughAvailable || state.isDead) return;
-      
+
       state.currentExp += amount;
       if (state.currentExp >= state.maxExp) {
         state.currentExp = state.maxExp;
@@ -573,5 +669,23 @@ const characterSlice = createSlice({
   },
 });
 
-export const { initializeCharacter, tickCultivation, manualCultivate, attemptBreakthrough, startSeclusion, processOfflineGains, reincarnate, gainAttribute, gainExperience, consumeItem, updateLastProcessedYear, updateLastWarningAge, addSpiritStones, spendSpiritStones, deductSpiritStones, upgradeGatheringLevel, setProfession } = characterSlice.actions;
+export const {
+  initializeCharacter,
+  tickCultivation,
+  manualCultivate,
+  attemptBreakthrough,
+  startSeclusion,
+  processOfflineGains,
+  reincarnate,
+  gainAttribute,
+  gainExperience,
+  consumeItem,
+  updateLastProcessedYear,
+  updateLastWarningAge,
+  addSpiritStones,
+  spendSpiritStones,
+  deductSpiritStones,
+  upgradeGatheringLevel,
+  setProfession,
+} = characterSlice.actions;
 export default characterSlice.reducer;

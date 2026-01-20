@@ -1,80 +1,79 @@
-
 export enum MajorRealm {
-  Mortal = 0,         // 凡人
-  QiRefining = 1,     // 練氣
-  Foundation = 2,     // 築基
-  GoldenCore = 3,     // 金丹
-  NascentSoul = 4,    // 元嬰
+  Mortal = 0, // 凡人
+  QiRefining = 1, // 練氣
+  Foundation = 2, // 築基
+  GoldenCore = 3, // 金丹
+  NascentSoul = 4, // 元嬰
   SpiritSevering = 5, // 化神
-  VoidRefining = 6,   // 煉虛
-  Fusion = 7,         // 合體
-  Mahayana = 8,       // 大乘
-  Tribulation = 9,    // 渡劫
-  Immortal = 10,      // 仙人 (Includes Human, Earth, Heaven, Golden)
-  ImmortalEmperor = 11// 仙帝 (Max)
+  VoidRefining = 6, // 煉虛
+  Fusion = 7, // 合體
+  Mahayana = 8, // 大乘
+  Tribulation = 9, // 渡劫
+  Immortal = 10, // 仙人 (Includes Human, Earth, Heaven, Golden)
+  ImmortalEmperor = 11, // 仙帝 (Max)
 }
 
 export enum ElementType {
-  Metal = 'Metal', // 金
-  Wood = 'Wood',   // 木
-  Water = 'Water', // 水
-  Fire = 'Fire',   // 火
-  Earth = 'Earth', // 土
-  None = 'None'    // 無/雜
+  Metal = "Metal", // 金
+  Wood = "Wood", // 木
+  Water = "Water", // 水
+  Fire = "Fire", // 火
+  Earth = "Earth", // 土
+  None = "None", // 無/雜
 }
 
 export enum SpiritRootType {
-  Heterogenous = 'Heterogenous', // 雜靈根 (1.0x) - 70%
-  True = 'True',                 // 真靈根 (1.5x) - 20%
-  Heavenly = 'Heavenly',         // 天靈根 (2.5x) - 8%
-  Variant = 'Variant'            // 變異靈根 (2.0x, +Battle Stats) - 2%
+  Heterogenous = "Heterogenous", // 雜靈根 (1.0x) - 70%
+  True = "True", // 真靈根 (1.5x) - 20%
+  Heavenly = "Heavenly", // 天靈根 (2.5x) - 8%
+  Variant = "Variant", // 變異靈根 (2.0x, +Battle Stats) - 2%
 }
 
 // Detailed Spirit Root IDs based on the spec
 export enum SpiritRootId {
   // Heavenly (2.5x)
-  HEAVENLY_GOLD = 'heavenly_gold',
-  HEAVENLY_WOOD = 'heavenly_wood',
-  HEAVENLY_WATER = 'heavenly_water',
-  HEAVENLY_FIRE = 'heavenly_fire',
-  HEAVENLY_EARTH = 'heavenly_earth',
+  HEAVENLY_GOLD = "heavenly_gold",
+  HEAVENLY_WOOD = "heavenly_wood",
+  HEAVENLY_WATER = "heavenly_water",
+  HEAVENLY_FIRE = "heavenly_fire",
+  HEAVENLY_EARTH = "heavenly_earth",
 
   // Variant (2.0x)
-  VARIANT_WIND = 'variant_wind',
-  VARIANT_THUNDER = 'variant_thunder',
-  VARIANT_ICE = 'variant_ice',
+  VARIANT_WIND = "variant_wind",
+  VARIANT_THUNDER = "variant_thunder",
+  VARIANT_ICE = "variant_ice",
 
   // True (1.5x)
-  TRUE_WOOD_FIRE = 'true_wood_fire',
-  TRUE_FIRE_METAL = 'true_fire_metal',
-  TRUE_METAL_EARTH = 'true_metal_earth',
-  TRUE_WATER_WOOD = 'true_water_wood',
-  TRUE_TRI = 'true_tri',
+  TRUE_WOOD_FIRE = "true_wood_fire",
+  TRUE_FIRE_METAL = "true_fire_metal",
+  TRUE_METAL_EARTH = "true_metal_earth",
+  TRUE_WATER_WOOD = "true_water_wood",
+  TRUE_TRI = "true_tri",
 
   // Mixed (1.0x)
-  MIXED_FOUR = 'mixed_four',
-  MIXED_FIVE = 'mixed_five',
+  MIXED_FOUR = "mixed_four",
+  MIXED_FIVE = "mixed_five",
 }
 
 export enum ProfessionType {
-  None = 'None',
-  Sword = 'Sword',     // 劍修
-  Body = 'Body',       // 體修
-  Mage = 'Mage',       // 法修
+  None = "None",
+  Sword = "Sword", // 劍修
+  Body = "Body", // 體修
+  Mage = "Mage", // 法修
 }
 
 export enum Gender {
-  Male = 'Male',
-  Female = 'Female'
+  Male = "Male",
+  Female = "Female",
 }
 
 export interface BaseAttributes {
-  physique: number;   // 體魄 (HP/Def)
-  rootBone: number;   // 根骨 (Atk/Cultivation Base)
-  insight: number;    // 神識 (MP/Crit/Craft)
+  physique: number; // 體魄 (HP/Def)
+  rootBone: number; // 根骨 (Atk/Cultivation Base)
+  insight: number; // 神識 (MP/Crit/Craft)
   comprehension: number; // 悟性 (Speed/Breakthrough)
-  fortune: number;    // 福緣 (Luck/Dodge)
-  charm: number;      // 魅力 (Shop/Event) - New
+  fortune: number; // 福緣 (Luck/Dodge)
+  charm: number; // 魅力 (Shop/Event) - New
 }
 
 export interface BreakthroughResult {
@@ -91,49 +90,84 @@ export interface CharacterState {
   name: string;
   gender: Gender;
   title: string;
-  
+
   spiritRoot: SpiritRootType; // The Category (Tier)
   spiritRootId: SpiritRootId; // The Specific Flavor
-  
+
   profession: ProfessionType;
-  
+
   majorRealm: MajorRealm;
   minorRealm: number; // 0-9
-  
-  age: number;      // Days
+
+  age: number; // Days
   lifespan: number; // Days
-  
+
   currentExp: number;
   maxExp: number;
-  
+
   attributes: BaseAttributes;
   spiritStones: number;
-  
+
   cultivationRate: number;
   cultivationCycle: number; // For 5s tick logic
   isBreakthroughAvailable: boolean;
-  
+
   isInSeclusion: boolean;
   seclusionEndTime?: number; // Timestamp when seclusion ends
-  
-  gatheringLevel: number; 
-  
-  lastSaveTime: number; 
-  
+
+  gatheringLevel: number;
+
+  lastSaveTime: number;
+
   lastBreakthroughResult?: BreakthroughResult;
-  
+
   itemConsumption: Record<string, number>; // Track how many times an item was consumed
-  
+
   lastProcessedYear: number;
   lastWarningAge?: number; // For yearly events
   lastManualCultivateTime?: number;
+  skills: string[]; // Learned Skill IDs
 }
 
 export interface LogEntry {
   id: string;
   timestamp: number;
   message: string;
-  type: 'info' | 'gain' | 'danger' | 'success' | 'gold' | 'age' | 'epiphany' | 'warning-low' | 'warning-med' | 'warning-critical' | 'tribulation';
+  type:
+    | "info"
+    | "gain"
+    | "danger"
+    | "success"
+    | "gold"
+    | "age"
+    | "epiphany"
+    | "warning-low"
+    | "warning-med"
+    | "warning-critical"
+    | "tribulation";
+}
+
+export interface Skill {
+  id: string;
+  name: string;
+  description: string;
+  type: "Active" | "Passive";
+  cooldown: number; // Turns
+  minRealm: MajorRealm;
+  profession?: ProfessionType; // Specific to a profession or general (None)
+
+  // Battle Logic Descriptors
+  damageMultiplier?: number; // e.g. 1.5 for 150%
+  healMultiplier?: number;
+  effectType?: "damage" | "heal" | "buff" | "debuff" | "summon" | "special";
+  targetType?: "single" | "all" | "self";
+  statusEffect?: {
+    id: string; // e.g. 'stun', 'poison'
+    duration: number;
+    chance: number;
+    value?: number; // e.g. Poison damage %
+  };
+  cost?: number; // MP cost usually, or special resource
 }
 
 // --- Combat & Map ---
@@ -152,12 +186,12 @@ export interface Portal extends Coordinate {
 }
 
 export enum EnemyRank {
-  Common = 'Common',
-  Elite = 'Elite',
-  Boss = 'Boss'
+  Common = "Common",
+  Elite = "Elite",
+  Boss = "Boss",
 }
 
-export type MinorRealmType = '初期' | '中期' | '後期' | '圓滿';
+export type MinorRealmType = "初期" | "中期" | "後期" | "圓滿";
 
 export interface Enemy {
   id: string;
@@ -177,23 +211,23 @@ export interface Enemy {
 }
 
 export interface ActiveMonster extends Coordinate {
-    instanceId: string;
-    templateId: string;
-    name: string; // Synced for display
-    symbol?: string; // Synced for display
-    currentHp: number;
-    rank: EnemyRank; // Cached for quick rendering logic
-    spawnX: number;
-    spawnY: number;
-    nextMoveTime?: number; // Timestamp for next move
+  instanceId: string;
+  templateId: string;
+  name: string; // Synced for display
+  symbol?: string; // Synced for display
+  currentHp: number;
+  rank: EnemyRank; // Cached for quick rendering logic
+  spawnX: number;
+  spawnY: number;
+  nextMoveTime?: number; // Timestamp for next move
 }
 
 export enum NPCType {
-  Shop = 'Shop',
-  Quest = 'Quest',
-  Healer = 'Healer',
-  Crafting = 'Crafting',
-  Info = 'Info', // rumors
+  Shop = "Shop",
+  Quest = "Quest",
+  Healer = "Healer",
+  Crafting = "Crafting",
+  Info = "Info", // rumors
 }
 
 export interface NPC extends Coordinate {
@@ -220,7 +254,7 @@ export interface MapData {
   worldY: number; // Global Map Y
   portals: Portal[];
   npcs: NPC[]; // New field
-  bossSpawn?: { x: number, y: number, enemyId: string };
+  bossSpawn?: { x: number; y: number; enemyId: string };
   enemies: Enemy[];
   dropRateMultiplier: number;
 }
@@ -241,18 +275,18 @@ export interface CombatLog {
 // --- Item & Inventory System ---
 
 export enum ItemCategory {
-  Equipment = 'Equipment',
-  Consumable = 'Consumable',
-  Material = 'Material',
-  SkillBook = 'SkillBook',
-  Breakthrough = 'Breakthrough'
+  Equipment = "Equipment",
+  Consumable = "Consumable",
+  Material = "Material",
+  SkillBook = "SkillBook",
+  Breakthrough = "Breakthrough",
 }
 
 export enum ItemQuality {
-  Low = 0,      // 下品 (Grey)
-  Medium = 1,   // 中品 (Green)
-  High = 2,     // 上品 (Blue)
-  Immortal = 3  // 仙品 (Gold)
+  Low = 0, // 下品 (Grey)
+  Medium = 1, // 中品 (Green)
+  High = 2, // 上品 (Blue)
+  Immortal = 3, // 仙品 (Gold)
 }
 
 export interface BaseItem {
@@ -268,18 +302,27 @@ export interface BaseItem {
 
 // -- Consumables --
 export enum ConsumableType {
-  Pill = 'Pill',             // 丹藥
-  Fateful = 'Fateful',       // 機緣物品
-  Manual = 'Manual',         // 功法秘籍
-  Map = 'Map',               // 地圖
-  Other = 'Other'
+  Pill = "Pill", // 丹藥
+  Fateful = "Fateful", // 機緣物品
+  Manual = "Manual", // 功法秘籍
+  Map = "Map", // 地圖
+  Other = "Other",
 }
 
 export interface ConsumableEffect {
-  type: 'full_restore' | 'heal_hp' | 'heal_mp' | 'gain_exp' | 'buff_stat' | 'lifespan' | 'breakthrough_chance';
+  type:
+    | "full_restore"
+    | "heal_hp"
+    | "heal_mp"
+    | "gain_exp"
+    | "buff_stat"
+    | "lifespan"
+    | "breakthrough_chance"
+    | "learn_skill";
   value: number;
   duration?: number; // seconds, 0 for instant
   stat?: keyof BaseAttributes;
+  skillId?: string; // For learn_skill
 }
 
 export interface ConsumableItem extends BaseItem {
@@ -292,10 +335,10 @@ export interface ConsumableItem extends BaseItem {
 
 // -- Materials --
 export enum MaterialType {
-  Herb = 'Herb',         // 藥草
-  MonsterPart = 'MonsterPart', // 妖獸素材
-  Ore = 'Ore',           // 礦石
-  Other = 'Other'
+  Herb = "Herb", // 藥草
+  MonsterPart = "MonsterPart", // 妖獸素材
+  Ore = "Ore", // 礦石
+  Other = "Other",
 }
 
 export interface MaterialItem extends BaseItem {
@@ -306,28 +349,28 @@ export interface MaterialItem extends BaseItem {
 
 // -- Equipment --
 export enum EquipmentSlot {
-  Weapon = 'Weapon',
-  Head = 'Head',
-  Body = 'Body',
-  Legs = 'Legs',
-  Accessory = 'Accessory',
-  Offhand = 'Offhand'
+  Weapon = "Weapon",
+  Head = "Head",
+  Body = "Body",
+  Legs = "Legs",
+  Accessory = "Accessory",
+  Offhand = "Offhand",
 }
 
 export enum EquipmentType {
   // Weapon
-  Sword = 'Sword',     // 劍修
-  Gauntlet = 'Gauntlet', // 體修
-  Staff = 'Staff',     // 法修
-  
+  Sword = "Sword", // 劍修
+  Gauntlet = "Gauntlet", // 體修
+  Staff = "Staff", // 法修
+
   // Defense
-  Helmet = 'Helmet',
-  Armor = 'Armor', 
-  Boots = 'Boots',
-  Ring = 'Ring',         // 戒指 (Accessory)
-  SimpleRobe = 'SimpleRobe', // Novice
-  Shield = 'Shield',
-  Accessory = 'Accessory' // Add missing value
+  Helmet = "Helmet",
+  Armor = "Armor",
+  Boots = "Boots",
+  Ring = "Ring", // 戒指 (Accessory)
+  SimpleRobe = "SimpleRobe", // Novice
+  Shield = "Shield",
+  Accessory = "Accessory", // Add missing value
 }
 
 export interface EquipmentStats extends Partial<BaseAttributes> {
@@ -343,16 +386,17 @@ export interface EquipmentStats extends Partial<BaseAttributes> {
   dodge?: number;
   blockRate?: number;
   regenHp?: number;
+  damageReduction?: number;
 }
 
 export interface EquipmentItem extends BaseItem {
   category: ItemCategory.Equipment;
   slot: EquipmentSlot;
   subType: EquipmentType;
-  
+
   // Stats
   stats: EquipmentStats;
-  
+
   // Requirements
   reqRealm?: MajorRealm;
 }
@@ -364,7 +408,7 @@ export interface ItemInstance {
   templateId: string; // The original Item ID
   quality: ItemQuality;
   stats: EquipmentStats;
-  affixes?: { name: string, description: string }[];
+  affixes?: { name: string; description: string }[];
 }
 
 export interface InventorySlot {
@@ -396,65 +440,65 @@ export interface WorkshopState {
 // --- Quest System ---
 
 export enum QuestType {
-    Main = 'main',       // 主線
-    Side = 'side',       // 支線
-    Sect = 'sect'        // 門派任務 (長老發布)
+  Main = "main", // 主線
+  Side = "side", // 支線
+  Sect = "sect", // 門派任務 (長老發布)
 }
 
 export enum QuestStatus {
-    Available = 'available', // 可接取
-    Active = 'active',       // 進行中
-    Completed = 'completed'  // 已完成
+  Available = "available", // 可接取
+  Active = "active", // 進行中
+  Completed = "completed", // 已完成
 }
 
 export interface QuestRequirement {
-    type: 'level' | 'item' | 'kill' | 'dialogue'; // dialogue 代表純對話任務
-    targetId?: string; // 物品ID 或 怪物ID
-    targetNpcId?: string; // 對話對象 NPC ID (For 'dialogue' requirements)
-    count?: number;    // 數量
-    minRealm?: number; // 等級需求
+  type: "level" | "item" | "kill" | "dialogue"; // dialogue 代表純對話任務
+  targetId?: string; // 物品ID 或 怪物ID
+  targetNpcId?: string; // 對話對象 NPC ID (For 'dialogue' requirements)
+  count?: number; // 數量
+  minRealm?: number; // 等級需求
 }
 
 export interface QuestReward {
-    exp?: number;
-    spiritStones?: number;
-    items?: { itemId: string, count: number, quality?: ItemQuality }[];
+  exp?: number;
+  spiritStones?: number;
+  items?: { itemId: string; count: number; quality?: ItemQuality }[];
 }
 
 export interface Quest {
-    id: string;
-    type: QuestType;
-    title: string;
-    description: string;
-    giverId: string; // 發布 NPC ID
-    
-    // 需求條件
-    requirements: QuestRequirement[];
-    
-    // 獎勵
-    rewards: QuestReward[];
+  id: string;
+  type: QuestType;
+  title: string;
+  description: string;
+  giverId: string; // 發布 NPC ID
 
-    // 對話配置 (支持多段對話)
-    dialogue: {
-        start: string[];    // 接任務時的對話
-        progress: string[]; // 任務進行中的對話 (未完成)
-        complete: string[]; // 完成任務時的對話
-    };
-    
-    // 前置任務 ID
-    prerequisiteQuestId?: string;
+  // 需求條件
+  requirements: QuestRequirement[];
 
-    // 交付任務 NPC ID (若為空則預設為 giverId)
-    // 用於 A 發布 -> B 交付 的流程
-    submitNpcId?: string;
+  // 獎勵
+  rewards: QuestReward[];
+
+  // 對話配置 (支持多段對話)
+  dialogue: {
+    start: string[]; // 接任務時的對話
+    progress: string[]; // 任務進行中的對話 (未完成)
+    complete: string[]; // 完成任務時的對話
+  };
+
+  // 前置任務 ID
+  prerequisiteQuestId?: string;
+
+  // 交付任務 NPC ID (若為空則預設為 giverId)
+  // 用於 A 發布 -> B 交付 的流程
+  submitNpcId?: string;
 }
 
 export interface VisualEffect {
-    id: string;
-    type: 'text';
-    text: string;
-    color: string; // hex string: '#ff0000' or numeric 0xff0000? Let's use string for CSS or PIXI interop, probably numeric is better for PIXI but string is versatile. Let's use numeric.
-    colorInt: number; 
-    x?: number; // fallback or override
-    y?: number;
+  id: string;
+  type: "text";
+  text: string;
+  color: string; // hex string: '#ff0000' or numeric 0xff0000? Let's use string for CSS or PIXI interop, probably numeric is better for PIXI but string is versatile. Let's use numeric.
+  colorInt: number;
+  x?: number; // fallback or override
+  y?: number;
 }
