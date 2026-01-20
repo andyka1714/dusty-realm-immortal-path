@@ -355,7 +355,7 @@ export const SPIRIT_ROOT_MULTIPLIERS: Record<SpiritRootType, number> = {
 };
 
 export const MANUAL_CULTIVATE_COOLDOWN = 3000; // 3 seconds
-export const PASSIVE_CULTIVATION_PENALTY = 0.3; // 30% Efficiency for passive
+export const PASSIVE_CULTIVATION_PENALTY = 0.1; // 10% Efficiency for passive
 
 export const SECLUSION_DURATION_MS = 30000; // 30 seconds
 

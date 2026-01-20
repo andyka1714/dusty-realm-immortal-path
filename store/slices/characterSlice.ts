@@ -318,27 +318,22 @@ const characterSlice = createSlice({
       let rate = rootBone * realmMod * spiritMod * gatheringMod;
       
       if (state.isInSeclusion) {
-        rate *= 2.0; 
+        rate *= 0.5; // Seclusion Multiplier (50% Base)
+      } else {
+        rate *= PASSIVE_CULTIVATION_PENALTY; // Passive Multiplier (10% Base)
       }
-
-      // Apply Passive Penalty
-      rate *= PASSIVE_CULTIVATION_PENALTY;
 
       state.cultivationRate = parseFloat(rate.toFixed(1));
       
       if (state.isBreakthroughAvailable) return;
 
-      // 5-second Cycle Logic
-      state.cultivationCycle = (state.cultivationCycle || 0) + 1;
-      if (state.cultivationCycle >= 5) {
-          state.cultivationCycle = 0;
-          state.currentExp += state.cultivationRate; 
-          
-          if (state.currentExp >= state.maxExp) {
-            state.currentExp = state.maxExp;
-            state.isBreakthroughAvailable = true;
-            state.isInSeclusion = false;
-          }
+      // Update Every Tick (1 Second)
+      state.currentExp += state.cultivationRate; 
+      
+      if (state.currentExp >= state.maxExp) {
+        state.currentExp = state.maxExp;
+        state.isBreakthroughAvailable = true;
+        state.isInSeclusion = false;
       }
     },
 
