@@ -13,6 +13,21 @@ export enum MajorRealm {
   ImmortalEmperor = 11, // 仙帝 (Max)
 }
 
+export const MajorRealmCN: Record<MajorRealm, string> = {
+  [MajorRealm.Mortal]: "凡人",
+  [MajorRealm.QiRefining]: "練氣",
+  [MajorRealm.Foundation]: "築基",
+  [MajorRealm.GoldenCore]: "金丹",
+  [MajorRealm.NascentSoul]: "元嬰",
+  [MajorRealm.SpiritSevering]: "化神",
+  [MajorRealm.VoidRefining]: "煉虛",
+  [MajorRealm.Fusion]: "合體",
+  [MajorRealm.Mahayana]: "大乘",
+  [MajorRealm.Tribulation]: "渡劫",
+  [MajorRealm.Immortal]: "仙人",
+  [MajorRealm.ImmortalEmperor]: "仙帝",
+};
+
 export enum ElementType {
   Metal = "Metal", // 金
   Wood = "Wood", // 木
