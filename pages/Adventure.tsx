@@ -396,7 +396,13 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     );
 };
 
-export const Adventure: React.FC = () => {
+interface AdventureProps {
+  isInputBlocked?: boolean;
+}
+
+export const Adventure: React.FC<AdventureProps> = ({
+  isInputBlocked = false,
+}) => {
   const dispatch = useDispatch();
   const character = useSelector((state: RootState) => state.character);
   const { attributes, majorRealm, spiritRootId, isInitialized, profession } = character;
@@ -683,7 +689,7 @@ export const Adventure: React.FC = () => {
   // Keyboard Controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-        if (isBattling || showIntro || isMapModalOpen) return;
+        if (isInputBlocked || isBattling || showIntro || isMapModalOpen) return;
         
         const isMoveKey = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(e.key);
         if (isMoveKey) setAutoMovePath([]); 
@@ -697,7 +703,7 @@ export const Adventure: React.FC = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [dispatch, isBattling, showIntro, isMapModalOpen]);
+  }, [dispatch, isBattling, showIntro, isMapModalOpen, isInputBlocked]);
 
   // Map Intro
   useEffect(() => {
@@ -930,7 +936,7 @@ export const Adventure: React.FC = () => {
   }, [isBattling, currentEnemy, lastBattleResult, character, dispatch]);
 
   const handleGridClick = (targetX: number, targetY: number) => {
-      if (isBattling || showIntro || !mapData) return;
+      if (isInputBlocked || isBattling || showIntro || !mapData) return;
       
       // 1. Check Monster
       const targetMonster = activeMonsters.find(m => m.x === targetX && m.y === targetY);
@@ -989,10 +995,10 @@ export const Adventure: React.FC = () => {
   }
 
   return (
-    <div className="fixed top-0 left-0 w-full h-[100dvh] flex flex-col bg-black overflow-hidden select-none pt-16 md:pt-0">
+    <div className="fixed inset-0 flex h-[100dvh] w-full flex-col overflow-hidden bg-black select-none">
         
         {/* Top Right Mini-Map */}
-        <div className="absolute top-20 md:top-4 right-4 z-20 flex flex-col items-end gap-2">
+        <div className="absolute right-4 top-4 z-20 flex flex-col items-end gap-2">
             <button 
               onClick={() => { setIsMapModalOpen(true); setMapTab('area'); }}
               className="bg-black/90 border border-stone-600 p-1 w-24 h-24 md:w-32 md:h-32 rounded shadow-lg backdrop-blur relative overflow-hidden group hover:border-amber-500 transition-colors"

@@ -12,18 +12,21 @@ import {
   calculateMaxExp,
   INITIAL_BASE_STATS,
   MINOR_REALM_CAP,
-  REALM_MODIFIERS,
   SPIRIT_ROOT_DETAILS,
   LIFESPAN_BONUS,
   DAYS_PER_YEAR,
   BREAKTHROUGH_CONFIG,
   MANUAL_CULTIVATE_COOLDOWN,
-  PASSIVE_CULTIVATION_PENALTY,
-  SECLUSION_BASE_COST,
   SECLUSION_DURATION_MS,
   REALM_ATTRIBUTE_GROWTH,
 } from "../../constants";
 import { addLog } from "./logSlice";
+import { ConsumableEffect } from "../../types";
+import {
+  calculateSeclusionCost,
+  getManualCultivationGain,
+  getPassiveCultivationRate,
+} from "../../utils/cultivation";
 
 // ... (Keep helpers generateSpiritRoot, generateInitialStats, calculateInitialLifespan) ...
 export const generateSpiritRoot = (): SpiritRootId => {
@@ -255,7 +258,7 @@ const characterSlice = createSlice({
       state,
       action: PayloadAction<{
         itemId: string;
-        effects: any;
+        effects: ConsumableEffect[];
         maxConsumption?: number;
       }>
     ) => {
@@ -268,42 +271,33 @@ const characterSlice = createSlice({
       }
 
       // Apply Effects
-      if (effects) {
-        if (effects.lifespan) {
-          state.lifespan += effects.lifespan;
-        }
-        if (effects.cultivationSpeed) {
-          // Assuming it adds instant Exp for now, as speed is calculated per tick based on stats
-          state.currentExp += effects.cultivationSpeed;
-          // Or if it's meant to be permanent speed buff, we need a new state field.
-          // Given standard pills, usually it's Exp.
-          if (
-            state.currentExp >= state.maxExp &&
-            !state.isBreakthroughAvailable
-          ) {
-            state.currentExp = state.maxExp;
-            state.isBreakthroughAvailable = true;
-          }
-        }
-        if (effects.healHp) {
-          // HP concept doesn't exist yet in char state (only stats).
-          // Maybe useful for "Injuries" later.
-        }
-        if (effects.stat && effects.value) {
-          // Permanent Stat Boost
-          const statKey = effects.stat as keyof BaseAttributes;
-          if (state.attributes[statKey] !== undefined) {
-            state.attributes[statKey] += effects.value;
-          }
-        }
-        if (effects.skillId) {
-          if (!state.skills.includes(effects.skillId)) {
-            state.skills.push(effects.skillId);
-            addLog({
-              message: `習得技能：${effects.skillId}`, // Ideally resolve name, but logic is in reducer
-              type: "success",
-            });
-          }
+      for (const effect of effects) {
+        switch (effect.type) {
+          case "lifespan":
+            state.lifespan += effect.value;
+            break;
+          case "gain_exp":
+            state.currentExp += effect.value;
+            if (
+              state.currentExp >= state.maxExp &&
+              !state.isBreakthroughAvailable
+            ) {
+              state.currentExp = state.maxExp;
+              state.isBreakthroughAvailable = true;
+            }
+            break;
+          case "buff_stat":
+            if (effect.stat && state.attributes[effect.stat] !== undefined) {
+              state.attributes[effect.stat] += effect.value;
+            }
+            break;
+          case "learn_skill":
+            if (effect.skillId && !state.skills.includes(effect.skillId)) {
+              state.skills.push(effect.skillId);
+            }
+            break;
+          default:
+            break;
         }
       }
 
@@ -320,18 +314,15 @@ const characterSlice = createSlice({
       if (validSeconds > 1) {
         state.age += Math.floor(validSeconds);
 
-        const rootBone = state.attributes.rootBone;
-        const realmMod = REALM_MODIFIERS[state.majorRealm];
-        const rootDetails = SPIRIT_ROOT_DETAILS[state.spiritRootId];
-        const spiritMod = rootDetails.bonuses.cultivationMult;
-
-        const gatheringMod = 1 + state.gatheringLevel * 0.05;
-
-        let rate = rootBone * realmMod * spiritMod * gatheringMod;
-
-        if (state.isInSeclusion) {
-          rate *= 2.0;
-        }
+        const rate = getPassiveCultivationRate(
+          {
+            rootBone: state.attributes.rootBone,
+            majorRealm: state.majorRealm,
+            spiritRootId: state.spiritRootId,
+            gatheringLevel: state.gatheringLevel,
+          },
+          state.isInSeclusion
+        );
 
         const gain = rate * validSeconds;
 
@@ -374,21 +365,15 @@ const characterSlice = createSlice({
         state.seclusionEndTime = undefined;
       }
 
-      const rootBone = state.attributes.rootBone;
-      const realmMod = REALM_MODIFIERS[state.majorRealm];
-
-      const rootDetails = SPIRIT_ROOT_DETAILS[state.spiritRootId];
-      const spiritMod = rootDetails.bonuses.cultivationMult;
-
-      const gatheringMod = 1 + state.gatheringLevel * 0.05;
-
-      let rate = rootBone * realmMod * spiritMod * gatheringMod;
-
-      if (state.isInSeclusion) {
-        rate *= 0.5; // Seclusion Multiplier (50% Base)
-      } else {
-        rate *= PASSIVE_CULTIVATION_PENALTY; // Passive Multiplier (10% Base)
-      }
+      const rate = getPassiveCultivationRate(
+        {
+          rootBone: state.attributes.rootBone,
+          majorRealm: state.majorRealm,
+          spiritRootId: state.spiritRootId,
+          gatheringLevel: state.gatheringLevel,
+        },
+        state.isInSeclusion
+      );
 
       state.cultivationRate = parseFloat(rate.toFixed(1));
 
@@ -407,8 +392,7 @@ const characterSlice = createSlice({
     startSeclusion: (state) => {
       if (state.isInSeclusion) return;
 
-      const baseCost = SECLUSION_BASE_COST[state.majorRealm] || 100;
-      const cost = Math.floor(baseCost * (1 + state.minorRealm * 0.1));
+      const cost = calculateSeclusionCost(state.majorRealm, state.minorRealm);
 
       if (state.spiritStones < cost) {
         return;
@@ -432,17 +416,15 @@ const characterSlice = createSlice({
       // Manual Click gets 1x Rate (no 0.3 penalty)
       // Recalculate Base Rate
       // (Ideally we should cache 'raw rate' separate from 'passive rate' in state, but recalculating is cheap here)
-      const rootBone = state.attributes.rootBone;
-      const realmMod = REALM_MODIFIERS[state.majorRealm];
-      const rootDetails = SPIRIT_ROOT_DETAILS[state.spiritRootId];
-      const spiritMod = rootDetails.bonuses.cultivationMult;
-      const gatheringMod = 1 + state.gatheringLevel * 0.05;
-
-      let rate = rootBone * realmMod * spiritMod * gatheringMod;
-      if (state.isInSeclusion) rate *= 2.0;
-
-      // Manual Efficiency: 33%
-      rate *= 0.33;
+      const rate = getManualCultivationGain(
+        {
+          rootBone: state.attributes.rootBone,
+          majorRealm: state.majorRealm,
+          spiritRootId: state.spiritRootId,
+          gatheringLevel: state.gatheringLevel,
+        },
+        state.isInSeclusion
+      );
 
       state.currentExp += rate;
       state.lastManualCultivateTime = now;

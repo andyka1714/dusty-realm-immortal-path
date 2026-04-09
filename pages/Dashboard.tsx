@@ -2,12 +2,12 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { getRealmLabel } from '../utils/realm';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../store/store';
+import { AppDispatch, RootState } from '../store/store';
 import { manualCultivate, attemptBreakthrough, reincarnate, startSeclusion } from '../store/slices/characterSlice';
 import { checkTimeEvents } from '../store/actions/timeActions';
 import { removeItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
-import { REALM_NAMES, REALM_MODIFIERS, MINOR_REALM_CAP, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN, SECLUSION_BASE_COST, SECLUSION_DURATION_MS, SPIRIT_ROOT_DETAILS, PASSIVE_CULTIVATION_PENALTY } from '../constants';
+import { REALM_NAMES, REALM_MODIFIERS, MINOR_REALM_CAP, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN, SECLUSION_DURATION_MS, SPIRIT_ROOT_DETAILS } from '../constants';
 import { ITEMS } from '../data/items';
 import { ProgressBar } from '../components/ProgressBar';
 import { BREAKTHROUGH_TEXTS, GENERIC_BREAKTHROUGH_TEXT } from '../data/game_text';
@@ -17,6 +17,7 @@ import { Modal } from '../components/Modal';
 import { IntroSequence } from '../components/IntroSequence';
 import { Play, ChevronsUp, Moon, Info, Skull, AlertTriangle, Zap, Lock } from 'lucide-react';
 import { MajorRealm, SpiritRootType } from '../types';
+import { calculateSeclusionCost, getBaseCultivationRate, getGatheringMultiplier, getManualCultivateCooldown, getPassiveCultivationRate } from '../utils/cultivation';
 
 
 // Custom Animation Style
@@ -29,7 +30,7 @@ const floatUpStyle = `
 `;
 
 export const Dashboard: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const character = useSelector((state: RootState) => state.character);
   const inventory = useSelector((state: RootState) => state.inventory.items);
   const { 
@@ -46,7 +47,6 @@ export const Dashboard: React.FC = () => {
   // Monitor Age for Year Events
   useEffect(() => {
      if (isInitialized && !isDead) {
-         // @ts-ignore - Thunk typing mismatch often happens with simple dispatch usage, ignore for now
          dispatch(checkTimeEvents());
      }
   }, [age, isInitialized, isDead, dispatch]);
@@ -92,8 +92,9 @@ export const Dashboard: React.FC = () => {
         const now = Date.now();
         const lastTime = lastManualCultivateTime || 0;
         const diff = now - lastTime;
-        if (diff < MANUAL_CULTIVATE_COOLDOWN) {
-            setManualCooldown(MANUAL_CULTIVATE_COOLDOWN - diff);
+        const cooldown = getManualCultivateCooldown();
+        if (diff < cooldown) {
+            setManualCooldown(cooldown - diff);
         } else {
             setManualCooldown(0);
         }
@@ -151,8 +152,7 @@ export const Dashboard: React.FC = () => {
   };
 
   // Seclusion Logic
-  const seclusionBaseCost = SECLUSION_BASE_COST[majorRealm] || 100;
-  const seclusionCost = Math.floor(seclusionBaseCost * (1 + minorRealm * 0.1));
+  const seclusionCost = calculateSeclusionCost(majorRealm, minorRealm);
   const canAffordSeclusion = spiritStones >= seclusionCost;
 
   const handleSeclusion = () => {
@@ -206,17 +206,21 @@ export const Dashboard: React.FC = () => {
   const maxAgeYearStr = (lifespan / DAYS_PER_YEAR).toFixed(0);
   
   // Correct Calculation matching Redux Store
-  const baseRate = attributes.rootBone;
-  // Use REALM_MODIFIERS if imported, else fallback or use config. But store uses REALM_MODIFIERS.
-  // Assuming REALM_MODIFIERS is imported or I'll fix imports next.
-  const realmMult = REALM_MODIFIERS[majorRealm] || 0.1; 
-  const spiritMult = SPIRIT_ROOT_DETAILS[spiritRoot]?.bonuses.cultivationMult || 1.0;
-  const gatherMult = 1 + (gatheringLevel * 0.05); // Match store 5%
-  const stateMult = isInSeclusion ? 2.0 : 1.0;
-  // Apply Passive Penalty for visual accuracy (since standard tick is passive)
-  const efficiency = PASSIVE_CULTIVATION_PENALTY; 
-  
-  const finalDisplayRate = (baseRate * realmMult * spiritMult * gatherMult * stateMult * efficiency).toFixed(1);
+  const cultivationInput = {
+    rootBone: attributes.rootBone,
+    majorRealm,
+    spiritRootId: spiritRoot,
+    gatheringLevel,
+  };
+  const baseRate = getBaseCultivationRate(cultivationInput);
+  const spiritMultiplier = SPIRIT_ROOT_DETAILS[spiritRoot]?.bonuses.cultivationMult || 1;
+  const realmMultiplier = REALM_MODIFIERS[majorRealm] || 1;
+  const gatherMultiplier = getGatheringMultiplier(gatheringLevel);
+  const stateMultiplier = isInSeclusion ? 2 : 0.1;
+  const finalDisplayRate = getPassiveCultivationRate(
+    cultivationInput,
+    isInSeclusion
+  ).toFixed(1);
 
   const isCriticalLifespan = (lifespan - age) <= 365 && !isDead;
 
@@ -329,13 +333,12 @@ export const Dashboard: React.FC = () => {
                    <div className="absolute top-full right-0 mt-2 px-4 py-3 bg-stone-950 border border-stone-700 text-xs text-stone-300 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-[100] w-72">
                       <div className="mb-2 font-bold text-stone-200">修煉效率</div>
                       <div className="font-mono text-xs space-y-1">
-                      <div className="font-mono text-xs space-y-1">
-                        <div>根骨({baseRate}) × 境界({realmMult.toFixed(2)}) × 靈根({spiritMult.toFixed(1)}) × 聚靈({gatherMult.toFixed(2)}) × 狀態({stateMult.toFixed(1)})</div>
-                        <div className="text-stone-400">× 自然運轉效率 ({efficiency * 100}%)</div>
+                        <div>根骨({attributes.rootBone}) × 境界({realmMultiplier.toFixed(2)}) × 靈根({spiritMultiplier.toFixed(1)}) × 聚靈({gatherMultiplier.toFixed(2)})</div>
+                        <div className="text-stone-400">基礎速率：{baseRate.toFixed(1)}</div>
+                        <div className="text-stone-400">狀態倍率：{stateMultiplier.toFixed(1)} ({isInSeclusion ? '閉關' : '自然運轉'})</div>
                         <div className="border-t border-stone-700 mt-1 pt-1 text-right text-emerald-400 font-bold">
                           = {finalDisplayRate}
                         </div>
-                      </div>
                       </div>
                    </div>
                 </div>

@@ -2,6 +2,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Enemy, CombatLog, Coordinate, ActiveMonster, EnemyRank, VisualEffect } from '../../types';
 import { MAPS } from '../../data/maps';
+import {
+  BOSS_RESPAWN_MINUTES,
+  COMMON_MONSTER_RESPAWN_MS,
+  ELITE_MONSTER_RESPAWN_MS,
+  MONSTER_MOVE_MAX_DELAY_MS,
+  MONSTER_MOVE_MIN_DELAY_MS,
+} from '../../constants';
 
 interface AdventureState {
   currentMapId: string | null;
@@ -50,6 +57,10 @@ const getMapPopulationCaps = (width: number, height: number, hasElites: boolean)
     return { commonCap, eliteCap };
 };
 
+const getRandomMoveDelay = () =>
+  Math.random() * (MONSTER_MOVE_MAX_DELAY_MS - MONSTER_MOVE_MIN_DELAY_MS) +
+  MONSTER_MOVE_MIN_DELAY_MS;
+
 const adventureSlice = createSlice({
   name: 'adventure',
   initialState,
@@ -85,7 +96,7 @@ const adventureSlice = createSlice({
                    x: rx, y: ry, spawnX: rx, spawnY: ry,
                    currentHp: template.maxHp,
                    rank: template.rank,
-                   nextMoveTime: Date.now() + Math.random() * 2000 + 2000
+                   nextMoveTime: Date.now() + getRandomMoveDelay()
               });
           }
       }
@@ -104,7 +115,7 @@ const adventureSlice = createSlice({
                    x: rx, y: ry, spawnX: rx, spawnY: ry,
                    currentHp: template.maxHp,
                    rank: template.rank,
-                   nextMoveTime: Date.now() + Math.random() * 2000 + 2000
+                   nextMoveTime: Date.now() + getRandomMoveDelay()
               });
           }
       }
@@ -208,12 +219,12 @@ const adventureSlice = createSlice({
                spawnY: ry,
                currentHp: template.maxHp,
                rank: template.rank,
-               nextMoveTime: now + Math.random() * 2000 + 2000 // 2-4s delay
+               nextMoveTime: now + getRandomMoveDelay()
            });
        };
 
        // 1. Common Respawn (Refill every 60s, Max 20% of Total Cap)
-       if (now - state.lastCommonSpawnTime > 60000 && commonCount < commonCap && commonPool.length > 0) {
+       if (now - state.lastCommonSpawnTime > COMMON_MONSTER_RESPAWN_MS && commonCount < commonCap && commonPool.length > 0) {
            const maxSpawn = Math.max(1, Math.floor(commonCap * 0.2)); // Cap at 20%
            let spawned = 0;
            while(commonCount + spawned < commonCap && spawned < maxSpawn) {
@@ -224,7 +235,7 @@ const adventureSlice = createSlice({
        }
 
        // 2. Elite Respawn (Refill every 3 mins, Max 20% of Total Cap)
-       if (now - state.lastEliteSpawnTime > 180000 && eliteCount < eliteCap && elitePool.length > 0) {
+       if (now - state.lastEliteSpawnTime > ELITE_MONSTER_RESPAWN_MS && eliteCount < eliteCap && elitePool.length > 0) {
            const maxSpawn = Math.max(1, Math.floor(eliteCap * 0.2)); // Cap at 20%
            let spawned = 0;
            while(eliteCount + spawned < eliteCap && spawned < maxSpawn) {
@@ -236,7 +247,7 @@ const adventureSlice = createSlice({
 
        // 3. Boss Respawn (At 00, 15, 30, 45 mins)
        const currentMinute = new Date(now).getMinutes();
-       if ([0, 15, 30, 45].includes(currentMinute)) {
+       if (BOSS_RESPAWN_MINUTES.includes(currentMinute as (typeof BOSS_RESPAWN_MINUTES)[number])) {
            const lastCheckDate = new Date(state.lastBossSpawnCheckTime);
            const isDifferentMinute = lastCheckDate.getMinutes() !== currentMinute || (now - state.lastBossSpawnCheckTime > 60000);
            
@@ -315,7 +326,7 @@ const adventureSlice = createSlice({
            }
 
            // Set next move time (2-4s)
-           monster.nextMoveTime = now + Math.random() * 2000 + 2000;
+           monster.nextMoveTime = now + getRandomMoveDelay();
 
            // Check Collision (Monster hit Player)
            if (monster.x === state.playerPosition.x && monster.y === state.playerPosition.y) {

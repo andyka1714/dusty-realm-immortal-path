@@ -1,18 +1,16 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../store/store';
+import { AppDispatch, RootState } from '../store/store';
 import { upgradeGatheringLevel, deductSpiritStones } from '../store/slices/characterSlice';
 import { addLog } from '../store/slices/logSlice';
-import { MajorRealm } from '../types';
+import { calculateGatheringUpgradeCost } from '../constants';
 import { Hammer, CircleDashed, ArrowUpCircle, Flame } from 'lucide-react';
 
 export const Workshop: React.FC = () => {
-  const dispatch = useDispatch();
-  const { majorRealm, spiritStones, gatheringLevel } = useSelector((state: RootState) => state.character);
+  const dispatch = useDispatch<AppDispatch>();
+  const { spiritStones, gatheringLevel } = useSelector((state: RootState) => state.character);
 
-  // Exponential Cost Curve: 100 * 1.5^(Level-1)
-  // Lv1: 100, Lv10: ~3.8k, Lv20: ~220k, Lv30: ~12M
-  const upgradeCost = Math.floor(100 * Math.pow(1.5, gatheringLevel - 1));
+  const upgradeCost = calculateGatheringUpgradeCost(gatheringLevel);
 
   const handleUpgradeGathering = () => {
      if (spiritStones >= upgradeCost) {

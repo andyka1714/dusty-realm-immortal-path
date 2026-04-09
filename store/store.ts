@@ -16,11 +16,11 @@ const rootReducer = combineReducers({
   quest: questReducer, // 2. Add quest: questReducer
 });
 
-const preloadedState = loadState();
+const preloadedState = loadState() as Partial<ReturnType<typeof rootReducer>> | undefined;
 
 export const store = configureStore({
   reducer: rootReducer,
-  preloadedState: preloadedState as any,
+  preloadedState,
 });
 
 let lastSave = 0;

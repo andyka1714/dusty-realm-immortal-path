@@ -36,8 +36,8 @@ export const Modal: React.FC<ModalProps> = ({
 
   // Wrapper padding: Remove padding on mobile for large modals to ensure full screen
   const wrapperClasses = size === 'large'
-    ? "fixed inset-x-0 bottom-0 top-[73px] md:inset-0 z-[5000] flex items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
-    : "fixed inset-x-0 bottom-0 top-[73px] md:inset-0 z-[5000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in";
+    ? "fixed inset-0 z-[5000] flex items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+    : "fixed inset-0 z-[5000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in";
 
   const modalContent = (
     <div className={wrapperClasses}>

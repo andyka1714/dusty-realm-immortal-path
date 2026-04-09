@@ -36,7 +36,7 @@ const createBasicInstance = (itemId: string, qualityOverride?: ItemQuality): Ite
 };
 
 const calculateStats = (items: InventorySlot[], equipment: EquipmentState) => {
-  const stats: Partial<BaseAttributes & { attack: number, defense: number, speed: number, hp: number, mp: number }> = { 
+  const stats: EquipmentStats = {
     physique: 0, rootBone: 0, insight: 0, comprehension: 0, fortune: 0, charm: 0,
     attack: 0, defense: 0, speed: 0, hp: 0, mp: 0
   };
@@ -46,10 +46,8 @@ const calculateStats = (items: InventorySlot[], equipment: EquipmentState) => {
     const slot = items.find(i => i.instanceId === instanceId);
     if (slot && slot.instance && slot.instance.stats) {
       Object.entries(slot.instance.stats).forEach(([key, val]) => {
-        // @ts-ignore
-        if (stats[key] !== undefined) stats[key] += val;
-        // @ts-ignore
-        else stats[key] = val;
+        const statKey = key as keyof EquipmentStats;
+        stats[statKey] = (stats[statKey] || 0) + (val || 0);
       });
     }
   });

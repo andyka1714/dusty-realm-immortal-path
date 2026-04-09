@@ -446,7 +446,6 @@ export interface EquipmentState {
 // --- Workshop ---
 
 export interface WorkshopState {
-  gatheringLevel: number;
   alchemyLevel: number;
   blacksmithLevel: number;
   unlockedRecipes: string[];

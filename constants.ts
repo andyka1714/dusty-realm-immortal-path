@@ -358,6 +358,13 @@ export const MANUAL_CULTIVATE_COOLDOWN = 3000; // 3 seconds
 export const PASSIVE_CULTIVATION_PENALTY = 0.1; // 10% Efficiency for passive
 
 export const SECLUSION_DURATION_MS = 30000; // 30 seconds
+export const GATHERING_UPGRADE_BASE_COST = 100;
+export const GATHERING_UPGRADE_GROWTH = 1.5;
+export const COMMON_MONSTER_RESPAWN_MS = 60000;
+export const ELITE_MONSTER_RESPAWN_MS = 180000;
+export const MONSTER_MOVE_MIN_DELAY_MS = 2000;
+export const MONSTER_MOVE_MAX_DELAY_MS = 4000;
+export const BOSS_RESPAWN_MINUTES = [0, 15, 30, 45] as const;
 
 export const SECLUSION_BASE_COST: Record<MajorRealm, number> = {
   [MajorRealm.Mortal]: 100,
@@ -533,6 +540,11 @@ export const INITIAL_BASE_STATS = {
   charm: 10,
 };
 
+export const calculateGatheringUpgradeCost = (level: number): number =>
+  Math.floor(
+    GATHERING_UPGRADE_BASE_COST * Math.pow(GATHERING_UPGRADE_GROWTH, level - 1)
+  );
+
 // --- BREAKTHROUGH & TRIBULATION CONFIGURATION ---
 
 interface BreakthroughRequirement {
@@ -632,5 +644,4 @@ export const BREAKTHROUGH_CONFIG: Record<MajorRealm, BreakthroughRequirement> = 
     bossHint: '天道意志 · 因果法身 (彼岸)'
   },
 };
-
 
