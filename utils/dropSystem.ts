@@ -1,4 +1,4 @@
-import { Enemy, EnemyRank, ItemInstance, ItemQuality, ItemCategory, EquipmentSlot, BaseAttributes } from '../types';
+import { Enemy, EnemyRank, ItemInstance, ItemQuality, ItemCategory, EquipmentStats } from '../types';
 import { ITEMS } from '../data/items';
 
 // Quality Weights by Rank
@@ -103,8 +103,8 @@ export const generateDrops = (enemy: Enemy): { itemId: string, count: number, in
             const generatedAffixes = generateAffixes(quality);
             
             // Calculate Stats
-            const baseStats = (template as any).stats || {};
-            const finalStats: any = {};
+            const baseStats = (template as { stats?: EquipmentStats }).stats || {};
+            const finalStats: EquipmentStats = {};
             
             // Apply Multiplier
             for (const key in baseStats) {
@@ -114,8 +114,8 @@ export const generateDrops = (enemy: Enemy): { itemId: string, count: number, in
             // Apply Affix Stats
             generatedAffixes.forEach(affix => {
                 Object.entries(affix.stats).forEach(([key, val]) => {
-                    // @ts-ignore
-                    finalStats[key] = (finalStats[key] || 0) + val;
+                    const statKey = key as keyof EquipmentStats;
+                    finalStats[statKey] = (finalStats[statKey] || 0) + val;
                 });
             });
 
