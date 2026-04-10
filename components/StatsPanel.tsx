@@ -7,7 +7,11 @@ import { formatSpiritStone } from '../utils/currency';
 import { calculatePlayerStats } from '../utils/battleSystem';
 import clsx from 'clsx';
 
-export const StatsPanel: React.FC = () => {
+interface StatsPanelProps {
+  embedded?: boolean;
+}
+
+export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
   const { attributes, spiritStones, spiritRootId, isInitialized, majorRealm } = useSelector((state: RootState) => state.character);
   const { equipmentStats } = useSelector((state: RootState) => state.inventory);
   const [activeTab, setActiveTab] = useState<'basic' | 'combat'>('basic');
@@ -59,9 +63,16 @@ export const StatsPanel: React.FC = () => {
   );
 
   return (
-    <div className="bg-stone-900 border border-stone-800 rounded-lg h-full flex flex-col overflow-hidden relative">
+    <div
+      className={clsx(
+        "relative flex flex-col",
+        embedded
+          ? "overflow-visible rounded-none border-0 bg-transparent"
+          : "h-full overflow-hidden rounded-lg border border-stone-800 bg-stone-900"
+      )}
+    >
       {/* Header & Tabs */}
-      <div className="p-4 pb-0 border-b border-stone-800 bg-stone-900 z-10">
+      <div className={clsx("z-10 border-b border-stone-800 p-4 pb-0", embedded ? "bg-transparent" : "bg-stone-900")}>
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-stone-300 font-bold tracking-widest text-base md:text-lg">人物屬性</h3>
           <span className="text-amber-500 text-sm md:text-base font-normal flex items-center gap-1 bg-stone-950 px-2 py-1 rounded border border-stone-800">
@@ -96,7 +107,12 @@ export const StatsPanel: React.FC = () => {
       </div>
       
       {/* Scrollable Content Area */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+      <div
+        className={clsx(
+          "custom-scrollbar space-y-4 p-4",
+          embedded ? "overflow-visible px-4 pb-2 pt-4" : "flex-1 overflow-y-auto"
+        )}
+      >
         
         {/* === TAB: BASIC === */}
         {activeTab === 'basic' && (

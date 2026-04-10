@@ -1,5 +1,6 @@
 
 import React, { useCallback, useState, useEffect, useRef } from 'react';
+import clsx from 'clsx';
 import { getRealmLabel } from '../utils/realm';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store/store';
@@ -29,7 +30,11 @@ const floatUpStyle = `
 }
 `;
 
-export const Dashboard: React.FC = () => {
+interface DashboardProps {
+  embedded?: boolean;
+}
+
+export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
   const dispatch = useDispatch<AppDispatch>();
   const character = useSelector((state: RootState) => state.character);
   const inventory = useSelector((state: RootState) => state.inventory.items);
@@ -251,7 +256,14 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-full p-4 md:p-6 gap-6 overflow-y-auto md:overflow-hidden relative">
+    <div
+      className={clsx(
+        "relative h-full min-h-0",
+        embedded
+          ? "grid grid-cols-1 gap-5 overflow-hidden p-5 md:p-6 lg:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1.45fr)_380px]"
+          : "flex flex-col gap-6 overflow-y-auto p-4 md:flex-row md:overflow-hidden md:p-6"
+      )}
+    >
       
       {isCriticalLifespan && (
          <div className="absolute inset-0 z-[90] pointer-events-none overflow-hidden rounded-xl">
@@ -262,15 +274,14 @@ export const Dashboard: React.FC = () => {
       )}
 
       {/* LEFT COLUMN: Status & Actions */}
-      <div className="w-full md:flex-1 flex flex-col gap-6 md:overflow-y-auto">
-        
-        {/* 1. Character Status Card */}
-        <div className="bg-stone-900 border border-stone-800 rounded-xl relative shadow-lg z-20 hover:z-50 transition-all duration-200">
-          <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
-             <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-          </div>
-          
-          <div className="relative z-10 p-6 space-y-6">
+      <div
+        className={clsx(
+          "flex min-h-0 flex-col gap-6",
+          embedded ? "pr-1" : "w-full md:flex-1 md:overflow-y-auto"
+        )}
+      >
+        <div className={clsx("space-y-6", embedded ? "flex h-full min-h-0 flex-col" : "")}>
+            <div className={clsx(embedded ? "rounded-[20px] border border-stone-800/80 bg-stone-900/82 p-5 md:p-6" : "")}>
             <div className="flex justify-between items-start">
               <div className="group relative cursor-help">
                 <div className="flex items-center gap-2">
@@ -366,12 +377,9 @@ export const Dashboard: React.FC = () => {
                  </span>
               </div>
             </div>
-          </div>
-        </div>
+            </div>
 
-        {/* 2. Action Buttons Area */}
-        <div className="bg-stone-900 border border-stone-800 rounded-xl p-6 relative z-20 hover:z-50 transition-all duration-200">
-           
+            <div className={clsx(embedded ? "rounded-[20px] border border-stone-800/80 bg-stone-900/78 p-5 md:p-6" : "bg-stone-900 border border-stone-800 rounded-xl p-6 relative z-20 hover:z-50 transition-all duration-200")}>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 
                  {/* 1. Manual Cultivate */}
@@ -455,24 +463,49 @@ export const Dashboard: React.FC = () => {
                 </div>
               </button>
            </div>
-        </div>
+            </div>
 
-        <div className="bg-stone-900/50 border border-stone-800/50 rounded-lg p-4 flex items-start gap-3">
-          <Info size={16} className="text-stone-500 mt-1 flex-shrink-0" />
-          <p className="text-stone-500 text-xs leading-relaxed">
-             <span className="text-stone-400 font-bold">修煉指南：</span> 
-             閉關雖能大幅提升修為，但無法進行歷練或戰鬥。壽元有限，道友需在天人五衰之前突破桎梏，方能證道長生。
-          </p>
+            <div className={clsx(
+              "flex items-start gap-3 rounded-xl border p-4",
+              embedded
+                ? "border-stone-800/80 bg-black/18"
+                : "border-stone-800/50 bg-stone-900/50"
+            )}>
+              <Info size={16} className="text-stone-500 mt-1 flex-shrink-0" />
+              <p className="text-stone-500 text-xs leading-relaxed">
+                 <span className="text-stone-400 font-bold">修煉指南：</span> 
+                 閉關雖能大幅提升修為，但無法進行歷練或戰鬥。壽元有限，道友需在天人五衰之前突破桎梏，方能證道長生。
+              </p>
+            </div>
+
+            {embedded && (
+              <div className="min-h-0 flex-1 overflow-hidden rounded-[20px] border border-stone-800/80 bg-stone-900/70">
+                <LogPanel embedded />
+              </div>
+            )}
         </div>
       </div>
 
-      <div className="w-full md:w-80 lg:w-96 flex flex-col gap-6 relative z-30">
-         <div className="flex-none">
-            <StatsPanel />
-         </div>
-         <div className="flex-1 min-h-[300px]">
-            <LogPanel />
-         </div>
+      <div
+        className={clsx(
+          "relative z-30 flex min-h-0 flex-col gap-6",
+          embedded ? "overflow-y-auto pr-1" : "w-full md:w-80 lg:w-96"
+        )}
+      >
+         {embedded ? (
+           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto rounded-[20px] border border-stone-800/80 bg-stone-900/68">
+             <StatsPanel embedded />
+           </div>
+         ) : (
+           <>
+             <div className="flex-none">
+               <StatsPanel />
+             </div>
+             <div className="flex-1 min-h-[300px]">
+               <LogPanel />
+             </div>
+           </>
+         )}
       </div>
 
       {/* Breakthrough Confirmation Modal */}

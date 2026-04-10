@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useMemo, useState } from "react";
 import { FloatingDock, GamePanelId } from "./FloatingDock";
 import { GameHUD } from "./GameHUD";
 import { GamePanel } from "./GamePanel";
+import { BookOpen, Hammer, Home, Package } from "lucide-react";
 
 const Adventure = lazy(() =>
   import("../../pages/Adventure").then((module) => ({
@@ -31,19 +32,30 @@ const CompendiumModal = lazy(() =>
 
 const PANEL_CONFIG: Record<
   Exclude<GamePanelId, "compendium">,
-  { widthClassName: string; render: () => React.ReactNode }
+  {
+    widthClassName: string;
+    title: string;
+    icon: React.ReactNode;
+    render: () => React.ReactNode;
+  }
 > = {
   character: {
-    widthClassName: "md:w-[min(90vw,1320px)]",
-    render: () => <Dashboard />,
+    widthClassName: "md:w-[min(96vw,1480px)]",
+    title: "道途",
+    icon: <Home size={18} />,
+    render: () => <Dashboard embedded />,
   },
   inventory: {
-    widthClassName: "md:w-[min(92vw,1380px)]",
-    render: () => <Inventory />,
+    widthClassName: "md:w-[min(96vw,1500px)]",
+    title: "行囊空間",
+    icon: <Package size={18} />,
+    render: () => <Inventory embedded />,
   },
   workshop: {
-    widthClassName: "md:w-[min(88vw,1180px)]",
-    render: () => <Workshop />,
+    widthClassName: "md:w-[min(94vw,1320px)]",
+    title: "洞府百業",
+    icon: <Hammer size={18} />,
+    render: () => <Workshop embedded />,
   },
 };
 
@@ -82,15 +94,26 @@ export const GameShell: React.FC = () => {
             isOpen={!!activePanelConfig}
             onClose={() => setActivePanel(null)}
             widthClassName={activePanelConfig.widthClassName}
+            title={activePanelConfig.title}
+            titleIcon={activePanelConfig.icon}
           >
             {activePanelConfig.render()}
           </GamePanel>
         )}
 
-        <CompendiumModal
+        <GamePanel
           isOpen={isCompendiumOpen}
           onClose={() => setActivePanel(null)}
-        />
+          widthClassName="md:w-[min(96vw,1500px)]"
+          title="萬界圖鑑"
+          titleIcon={<BookOpen size={18} />}
+        >
+          <CompendiumModal
+            isOpen={isCompendiumOpen}
+            onClose={() => setActivePanel(null)}
+            embedded
+          />
+        </GamePanel>
       </Suspense>
     </div>
   );

@@ -5,8 +5,13 @@ import { upgradeGatheringLevel, deductSpiritStones } from '../store/slices/chara
 import { addLog } from '../store/slices/logSlice';
 import { calculateGatheringUpgradeCost } from '../constants';
 import { Hammer, CircleDashed, ArrowUpCircle, Flame } from 'lucide-react';
+import clsx from 'clsx';
 
-export const Workshop: React.FC = () => {
+interface WorkshopProps {
+  embedded?: boolean;
+}
+
+export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { spiritStones, gatheringLevel } = useSelector((state: RootState) => state.character);
 
@@ -25,10 +30,17 @@ export const Workshop: React.FC = () => {
   const canAfford = spiritStones >= upgradeCost;
 
   return (
-    <div className="p-6 h-full flex flex-col gap-6 overflow-y-auto">
-      <h2 className="text-2xl font-bold text-stone-200 tracking-widest flex items-center gap-2">
-         <Hammer size={24} className="text-amber-600" /> 洞府百業
-      </h2>
+    <div
+      className={clsx(
+        "flex h-full min-h-0 flex-col gap-6",
+        embedded ? "overflow-y-auto p-5 md:p-6" : "overflow-y-auto p-6"
+      )}
+    >
+      {!embedded && (
+        <h2 className="text-2xl font-bold text-stone-200 tracking-widest flex items-center gap-2">
+           <Hammer size={24} className="text-amber-600" /> 洞府百業
+        </h2>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
          {/* Gathering Array */}

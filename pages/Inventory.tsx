@@ -9,7 +9,11 @@ import { REALM_NAMES } from '../constants';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
 
-export const Inventory: React.FC = () => {
+interface InventoryProps {
+  embedded?: boolean;
+}
+
+export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
   const { items, equipment } = useSelector((state: RootState) => state.inventory);
   const dispatch = useDispatch();
   
@@ -59,55 +63,163 @@ export const Inventory: React.FC = () => {
       return items.find(i => i.instanceId === id)?.instance || null;
   };
 
-  return (
-    <div className="h-full p-6 flex flex-col gap-6 overflow-y-auto md:overflow-hidden">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2 md:mb-0">
-        <h2 className="text-2xl md:text-3xl font-bold text-stone-200 tracking-widest flex items-center gap-2 shrink-0">
-          <Package className="w-6 h-6 md:w-8 md:h-8 text-amber-600" /> 行囊空間
-        </h2>
-        
-        <div className="flex gap-2 md:gap-4 items-center flex-wrap">
-            {/* Management Toolbar */}
-            <div className="flex gap-2">
-                <button 
-                    onClick={() => dispatch(sortItems())}
-                    className="p-2 rounded bg-stone-900 border border-stone-800 text-stone-400 hover:text-amber-500 hover:border-amber-900 transition-colors"
-                    title="整理"
-                >
-                    <ArrowUpDown size={18} />
-                </button>
-                <button 
-                    onClick={() => {
-                        setIsDeleteMode(!isDeleteMode);
-                        setSelectedForDelete(new Set()); // Reset selection on toggle
-                        setSelectedSlot(null); // Clear detailed view
-                    }}
-                    className={clsx(
-                        "p-2 rounded border transition-all flex items-center gap-2 text-sm font-bold",
-                        isDeleteMode 
-                            ? "bg-red-900/50 border-red-500 text-red-200 animate-pulse" 
-                            : "bg-stone-900 border-stone-800 text-stone-400 hover:text-stone-200"
-                    )}
-                    title="批量管理"
-                >
-                    {isDeleteMode ? <CheckSquare size={18} /> : <Trash2 size={18} />}
-                    {isDeleteMode && <span className="hidden md:inline">選擇模式</span>}
-                </button>
-            </div>
+  const managementActions = (
+    <div className="flex gap-2">
+      <button 
+          onClick={() => dispatch(sortItems())}
+          className="p-2 rounded bg-stone-900 border border-stone-800 text-stone-400 hover:text-amber-500 hover:border-amber-900 transition-colors"
+          title="整理"
+      >
+          <ArrowUpDown size={18} />
+      </button>
+      <button 
+          onClick={() => {
+              setIsDeleteMode(!isDeleteMode);
+              setSelectedForDelete(new Set());
+              setSelectedSlot(null);
+          }}
+          className={clsx(
+              "p-2 rounded border transition-all flex items-center gap-2 text-sm font-bold",
+              isDeleteMode 
+                  ? "bg-red-900/50 border-red-500 text-red-200 animate-pulse" 
+                  : "bg-stone-900 border-stone-800 text-stone-400 hover:text-stone-200"
+          )}
+          title="批量管理"
+      >
+          {isDeleteMode ? <CheckSquare size={18} /> : <Trash2 size={18} />}
+          {isDeleteMode && <span className="hidden md:inline">選擇模式</span>}
+      </button>
+    </div>
+  );
 
-            <div className="flex bg-stone-900 rounded-lg p-1 md:p-1.5 border border-stone-800 gap-1 overflow-x-auto max-w-full">
-                <FilterButton active={filter === 'all'} onClick={() => setFilter('all')} label="全部" />
-                <FilterButton active={filter === ItemCategory.Equipment} onClick={() => setFilter(ItemCategory.Equipment)} label="裝備" />
-                <FilterButton active={filter === ItemCategory.Consumable} onClick={() => setFilter(ItemCategory.Consumable)} label="丹藥" />
-                <FilterButton active={filter === ItemCategory.Material} onClick={() => setFilter(ItemCategory.Material)} label="材料" />
-            </div>
-        </div>
+  const filterTabs = (
+    <div className="flex bg-stone-900 rounded-lg p-1 md:p-1.5 border border-stone-800 gap-1 overflow-x-auto max-w-full">
+      <FilterButton active={filter === 'all'} onClick={() => setFilter('all')} label="全部" />
+      <FilterButton active={filter === ItemCategory.Equipment} onClick={() => setFilter(ItemCategory.Equipment)} label="裝備" />
+      <FilterButton active={filter === ItemCategory.Consumable} onClick={() => setFilter(ItemCategory.Consumable)} label="丹藥" />
+      <FilterButton active={filter === ItemCategory.Material} onClick={() => setFilter(ItemCategory.Material)} label="材料" />
+    </div>
+  );
+
+  const equipmentSection = (
+    <div className={clsx("shrink-0 p-4", embedded ? "border-t border-stone-800/80" : "bg-stone-900 border border-stone-800 rounded-xl")}>
+      <h3 className="text-stone-400 text-sm md:text-base mb-3 font-bold border-b border-stone-800 pb-2 flex justify-between tracking-wider">
+         <span>當前裝備</span>
+      </h3>
+      <div className="grid grid-cols-2 gap-2 md:gap-3">
+        <EquipSlot 
+          label="武器" icon={Sword} 
+          instance={getEquippedInstance(EquipmentSlot.Weapon)} 
+          onUnequip={() => dispatch(unequipItem(EquipmentSlot.Weapon))}
+          onClick={() => {
+             const id = equipment[EquipmentSlot.Weapon];
+             const slot = items.find(s => s.instanceId === id);
+             if (slot) setSelectedSlot(slot);
+          }}
+        />
+        <EquipSlot 
+          label="副手" icon={Shield} 
+          instance={getEquippedInstance(EquipmentSlot.Offhand)} 
+          onUnequip={() => dispatch(unequipItem(EquipmentSlot.Offhand))}
+          onClick={() => {
+             const id = equipment[EquipmentSlot.Offhand];
+             const slot = items.find(s => s.instanceId === id);
+             if (slot) setSelectedSlot(slot);
+          }}
+        />
+        <EquipSlot 
+          label="頭部" icon={Crown} 
+          instance={getEquippedInstance(EquipmentSlot.Head)} 
+          onUnequip={() => dispatch(unequipItem(EquipmentSlot.Head))}
+          onClick={() => {
+             const id = equipment[EquipmentSlot.Head];
+             const slot = items.find(s => s.instanceId === id);
+             if (slot) setSelectedSlot(slot);
+          }}
+        />
+        <EquipSlot 
+          label="身軀" icon={Shirt} 
+          instance={getEquippedInstance(EquipmentSlot.Body)} 
+          onUnequip={() => dispatch(unequipItem(EquipmentSlot.Body))}
+          onClick={() => {
+             const id = equipment[EquipmentSlot.Body];
+             const slot = items.find(s => s.instanceId === id);
+             if (slot) setSelectedSlot(slot);
+          }}
+        />
+        <EquipSlot 
+          label="腿部" icon={Footprints} 
+          instance={getEquippedInstance(EquipmentSlot.Legs)} 
+          onUnequip={() => dispatch(unequipItem(EquipmentSlot.Legs))}
+          onClick={() => {
+             const id = equipment[EquipmentSlot.Legs];
+             const slot = items.find(s => s.instanceId === id);
+             if (slot) setSelectedSlot(slot);
+          }}
+        />
+        <EquipSlot 
+          label="飾品" icon={Medal} 
+          instance={getEquippedInstance(EquipmentSlot.Accessory)} 
+          onUnequip={() => dispatch(unequipItem(EquipmentSlot.Accessory))}
+          onClick={() => {
+             const id = equipment[EquipmentSlot.Accessory];
+             const slot = items.find(s => s.instanceId === id);
+             if (slot) setSelectedSlot(slot);
+          }}
+        />
       </div>
+    </div>
+  );
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full md:flex-1 md:overflow-hidden">
+  return (
+    <div
+      className={clsx(
+        "flex h-full min-h-0 flex-col",
+        embedded
+          ? "gap-5 overflow-hidden p-5 md:p-6"
+          : "gap-6 overflow-y-auto p-6 md:overflow-hidden"
+      )}
+    >
+      {!embedded && (
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2 md:mb-0">
+          <h2 className="text-2xl md:text-3xl font-bold text-stone-200 tracking-widest flex items-center gap-2 shrink-0">
+            <Package className="w-6 h-6 md:w-8 md:h-8 text-amber-600" /> 行囊空間
+          </h2>
+          
+          <div className="flex gap-2 md:gap-4 items-center flex-wrap">
+            {managementActions}
+            {filterTabs}
+          </div>
+        </div>
+      )}
+
+      <div
+        className={clsx(
+          "grid w-full min-h-0 gap-6",
+          embedded
+            ? "flex-1 grid-cols-1 overflow-hidden xl:grid-cols-[320px_minmax(0,1fr)]"
+            : "grid-cols-1 md:flex-1 md:grid-cols-3 md:overflow-hidden"
+        )}
+      >
         {/* Left: Inventory Grid */}
-        <div className="md:col-span-2 bg-stone-900/50 border border-stone-800 rounded-xl p-4 md:p-6 overflow-y-auto min-h-[400px]">
+        <div
+          className={clsx(
+            "min-h-[400px] overflow-y-auto rounded-xl border border-stone-800 bg-stone-900/50 p-4 md:p-6",
+            embedded ? "order-2 min-h-0" : "md:col-span-2"
+          )}
+        >
+           {embedded && (
+             <div className="mb-4 flex flex-col gap-3 border-b border-stone-800 pb-4 md:flex-row md:items-center md:justify-between">
+               <div className="flex items-center gap-2 text-stone-400">
+                 <Package className="h-5 w-5 text-amber-500" />
+                 <span className="text-sm font-bold tracking-[0.2em] text-stone-300">物品整備</span>
+               </div>
+               <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                 {managementActions}
+                 {filterTabs}
+               </div>
+             </div>
+           )}
            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
              {filteredItems.map((slot, idx) => {
                const item = ITEMS[slot.itemId];
@@ -195,79 +307,30 @@ export const Inventory: React.FC = () => {
         </div>
 
         {/* Right: Equipment & Details */}
-        <div className="flex flex-col gap-4 md:overflow-y-auto">
-           {/* Equipment Slots */}
-           <div className="bg-stone-900 border border-stone-800 rounded-xl p-4 shrink-0">
-             <h3 className="text-stone-400 text-sm md:text-base mb-3 font-bold border-b border-stone-800 pb-2 flex justify-between tracking-wider">
-                <span>當前裝備</span>
-             </h3>
-             <div className="grid grid-cols-2 gap-2 md:gap-3">
-               <EquipSlot 
-                 label="武器" icon={Sword} 
-                 instance={getEquippedInstance(EquipmentSlot.Weapon)} 
-                 onUnequip={() => dispatch(unequipItem(EquipmentSlot.Weapon))}
-                 onClick={() => {
-                    const id = equipment[EquipmentSlot.Weapon];
-                    const slot = items.find(s => s.instanceId === id);
-                    if (slot) setSelectedSlot(slot);
-                 }}
-               />
-               <EquipSlot 
-                 label="副手" icon={Shield} 
-                 instance={getEquippedInstance(EquipmentSlot.Offhand)} 
-                 onUnequip={() => dispatch(unequipItem(EquipmentSlot.Offhand))}
-                 onClick={() => {
-                    const id = equipment[EquipmentSlot.Offhand];
-                    const slot = items.find(s => s.instanceId === id);
-                    if (slot) setSelectedSlot(slot);
-                 }}
-               />
-               <EquipSlot 
-                 label="頭部" icon={Crown} 
-                 instance={getEquippedInstance(EquipmentSlot.Head)} 
-                 onUnequip={() => dispatch(unequipItem(EquipmentSlot.Head))}
-                 onClick={() => {
-                    const id = equipment[EquipmentSlot.Head];
-                    const slot = items.find(s => s.instanceId === id);
-                    if (slot) setSelectedSlot(slot);
-                 }}
-               />
-               <EquipSlot 
-                 label="身軀" icon={Shirt} 
-                 instance={getEquippedInstance(EquipmentSlot.Body)} 
-                 onUnequip={() => dispatch(unequipItem(EquipmentSlot.Body))}
-                 onClick={() => {
-                    const id = equipment[EquipmentSlot.Body];
-                    const slot = items.find(s => s.instanceId === id);
-                    if (slot) setSelectedSlot(slot);
-                 }}
-               />
-               <EquipSlot 
-                 label="腿部" icon={Footprints} 
-                 instance={getEquippedInstance(EquipmentSlot.Legs)} 
-                 onUnequip={() => dispatch(unequipItem(EquipmentSlot.Legs))}
-                 onClick={() => {
-                    const id = equipment[EquipmentSlot.Legs];
-                    const slot = items.find(s => s.instanceId === id);
-                    if (slot) setSelectedSlot(slot);
-                 }}
-               />
-               <EquipSlot 
-                 label="飾品" icon={Medal} 
-                 instance={getEquippedInstance(EquipmentSlot.Accessory)} 
-                 onUnequip={() => dispatch(unequipItem(EquipmentSlot.Accessory))}
-                 onClick={() => {
-                    const id = equipment[EquipmentSlot.Accessory];
-                    const slot = items.find(s => s.instanceId === id);
-                    if (slot) setSelectedSlot(slot);
-                 }}
-               />
+        <div
+          className={clsx(
+            "flex min-h-0 flex-col overflow-y-auto xl:overflow-hidden",
+            embedded
+              ? "order-1 rounded-[24px] border border-stone-800/90 bg-stone-950/32"
+              : "gap-4"
+          )}
+        >
+           {embedded && (
+             <div className="border-b border-stone-800/80 px-4 py-3">
+               <div className="text-xs font-bold tracking-[0.28em] text-stone-500">裝備與鑑別</div>
              </div>
-           </div>
+           )}
+
+           {!embedded && equipmentSection}
 
            {/* Selected Item Detail / Delete Confirmation */}
            {isDeleteMode ? (
-                <div className="bg-gradient-to-b from-red-950/20 to-stone-900 border border-red-900/30 rounded-xl p-6 flex-1 flex flex-col items-center justify-center text-center min-h-[300px] gap-4">
+                <div className={clsx(
+                  "flex-1 min-h-[300px] p-6 flex flex-col items-center justify-center text-center gap-4",
+                  embedded
+                    ? "bg-gradient-to-b from-red-950/20 to-transparent"
+                    : "bg-gradient-to-b from-red-950/20 to-stone-900 border border-red-900/30 rounded-xl"
+                )}>
                     <Trash2 size={48} className="text-red-500/50 mb-2" />
                     <h3 className="text-xl font-bold text-red-200">批量丟棄模式</h3>
                     <p className="text-stone-400 text-sm max-w-[200px]">
@@ -369,7 +432,10 @@ export const Inventory: React.FC = () => {
                 </div>
            ) : (
                selectedSlot && selectedItemDef ? (
-                 <div className="bg-stone-900 border border-stone-800 rounded-xl p-4 flex-1 flex flex-col min-h-[300px]">
+                 <div className={clsx(
+                   "flex-1 min-h-[300px] p-4 flex flex-col",
+                   embedded ? "" : "bg-stone-900 border border-stone-800 rounded-xl"
+                 )}>
                     <div className="flex justify-between items-start mb-2">
                        <div className="flex flex-col">
                             <h3 className={`text-lg font-bold ${getQualityTextColor(selectedSlot.instance?.quality ?? selectedItemDef.quality)}`}>
@@ -556,7 +622,10 @@ export const Inventory: React.FC = () => {
                 </div>
              </div>
                ) : (
-                    <div className="bg-stone-900/50 border border-stone-800 rounded-xl p-4 flex-1 flex flex-col min-h-[300px] items-center justify-center text-stone-600">
+                    <div className={clsx(
+                      "p-4 flex-1 min-h-[300px] flex flex-col items-center justify-center text-stone-600",
+                      embedded ? "" : "bg-stone-900/50 border border-stone-800 rounded-xl"
+                    )}>
                          <div className="w-16 h-16 rounded-full bg-stone-900 flex items-center justify-center mb-4">
                              <LayoutGrid size={32} />
                          </div>
@@ -564,6 +633,8 @@ export const Inventory: React.FC = () => {
                     </div>
                 )
             )}
+
+            {embedded && equipmentSection}
         </div>
       </div>
       

@@ -38,13 +38,76 @@ import clsx from "clsx";
 interface CompendiumModalProps {
   isOpen: boolean;
   onClose: () => void;
+  embedded?: boolean;
 }
 
 type TabType = "realm" | "map" | "item" | "skill" | "sect";
 
+const getSkillTypeLabel = (type: Skill["type"]): string =>
+  type === "Active" ? "主動" : "被動";
+
+const getProfessionLabel = (profession?: ProfessionType): string => {
+  switch (profession) {
+    case ProfessionType.Sword:
+      return "劍修";
+    case ProfessionType.Body:
+      return "體修";
+    case ProfessionType.Mage:
+      return "法修";
+    default:
+      return "通用";
+  }
+};
+
+const getItemSubtypeLabel = (item: Item): string => {
+  if ("subType" in item) {
+    switch (item.subType) {
+      case "Pill":
+        return "丹藥";
+      case "Fateful":
+        return "機緣";
+      case "Manual":
+        return "功法";
+      case "Map":
+        return "地圖";
+      case "Herb":
+        return "藥草";
+      case "MonsterPart":
+        return "妖獸素材";
+      case "Ore":
+        return "礦石";
+      case "Sword":
+        return "長劍";
+      case "Gauntlet":
+        return "拳套";
+      case "Staff":
+        return "法杖";
+      case "Helmet":
+        return "頭冠";
+      case "Armor":
+        return "護甲";
+      case "Boots":
+        return "靴履";
+      case "Ring":
+        return "戒飾";
+      case "SimpleRobe":
+        return "法袍";
+      case "Shield":
+        return "護盾";
+      case "Accessory":
+        return "飾品";
+      default:
+        return "其他";
+    }
+  }
+
+  return "其他";
+};
+
 export const CompendiumModal: React.FC<CompendiumModalProps> = ({
   isOpen,
   onClose,
+  embedded = false,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>("realm");
   const [selectedId, setSelectedId] = useState<string | null>(null); // For detailed view
@@ -94,9 +157,15 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[60] bg-stone-950/90 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
-      <div className="w-full max-w-6xl h-[90vh] bg-stone-900 border border-stone-700 rounded-lg shadow-2xl flex overflow-hidden flex-col md:flex-row relative">
+  const content = (
+      <div
+        className={clsx(
+          "relative flex h-full w-full overflow-hidden flex-col md:flex-row",
+          embedded
+            ? "bg-transparent"
+            : "rounded-[24px] border border-stone-700 bg-stone-900 shadow-2xl"
+        )}
+      >
         {/* Tooltip Portal (Quick implementation inside) */}
         {tooltip && tooltip.visible && (
           <div
@@ -108,18 +177,30 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
         )}
 
         {/* Sidebar Tabs */}
-        <div className="md:w-64 bg-stone-950 border-r border-stone-800 flex md:flex-col overflow-x-auto md:overflow-y-auto shrink-0">
-          <div className="p-4 border-b border-stone-800 flex items-center justify-between sticky left-0 top-0 bg-stone-950 z-10 md:static">
-            <div className="flex items-center gap-2">
-              <Book className="text-amber-500" />
-              <span className="text-xl font-bold text-stone-200">萬界圖鑑</span>
+        <div
+          className={clsx(
+            "flex shrink-0 overflow-x-auto border-r border-stone-800 md:flex-col md:overflow-y-auto",
+            embedded ? "bg-stone-950/60 md:w-56" : "bg-stone-950/90 md:w-64"
+          )}
+        >
+          {!embedded && (
+            <div
+              className={clsx(
+                "sticky left-0 top-0 z-10 flex items-center justify-between border-b border-stone-800 p-4 md:static",
+                "bg-stone-950/95"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <Book className="text-amber-500" />
+                <span className="text-xl font-bold text-stone-200">萬界圖鑑</span>
+              </div>
+              <button onClick={onClose} className="md:hidden p-1 text-stone-400">
+                <X />
+              </button>
             </div>
-            <button onClick={onClose} className="md:hidden p-1 text-stone-400">
-              <X />
-            </button>
-          </div>
+          )}
 
-          <nav className="flex md:flex-col p-2 gap-1">
+          <nav className={clsx("flex gap-1 p-2", embedded ? "pt-4 md:pt-5" : "", "md:flex-col")}>
             {[
               { id: "realm", label: "境界總覽", icon: Database },
               { id: "map", label: "山川妖獸", icon: MapIcon },
@@ -148,18 +229,28 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 bg-stone-900/50">
+        <div className={clsx("min-w-0 flex-1", embedded ? "bg-transparent" : "flex flex-col bg-stone-900/50")}>
           {/* Header */}
-          <div className="p-4 border-b border-stone-800 flex justify-end">
+          {!embedded && (
+          <div className="flex justify-end border-b border-stone-800 p-4">
             <button
               onClick={onClose}
-              className="hidden md:block p-2 text-stone-400 hover:text-stone-100"
+              className={clsx(
+                "p-2 text-stone-400 hover:text-stone-100",
+                embedded ? "hidden" : "hidden md:block"
+              )}
             >
               <X />
             </button>
           </div>
+          )}
 
-          <div className="flex-1 overflow-auto p-6 scrollbar-thin scrollbar-thumb-stone-700 scrollbar-track-transparent">
+          <div
+            className={clsx(
+              "scrollbar-thin scrollbar-thumb-stone-700 scrollbar-track-transparent",
+              embedded ? "h-full overflow-auto p-6 md:p-8" : "flex-1 overflow-auto p-6"
+            )}
+          >
             {/* --- Realm Tab --- */}
             {activeTab === "realm" && (
               <div className="space-y-8">
@@ -178,7 +269,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                           className="p-4 bg-stone-800 rounded border border-stone-700 hover:border-amber-500/50 transition-colors"
                         >
                           <h3 className="text-lg font-bold text-amber-400">
-                            {MajorRealmCN[realmId]} ({key})
+                            {MajorRealmCN[realmId]}
                           </h3>
                           <p className="text-sm text-stone-500 mt-1">
                             境界 ID: {realmId}
@@ -480,7 +571,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                                 </div>
                               </div>
                               <div className="text-xs text-stone-500 mb-1">
-                                {item.subType}
+                                {getItemSubtypeLabel(item)}
                               </div>
 
                               <p className="text-xs text-stone-400 mt-1 line-clamp-2 min-h-[2.5em]">
@@ -594,11 +685,11 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                         {skill.name}
                       </h4>
                       <span className="text-xs px-2 py-0.5 rounded bg-stone-700 text-stone-300">
-                        {skill.type}
+                        {getSkillTypeLabel(skill.type)}
                       </span>
                     </div>
                     <div className="text-xs text-stone-500 mt-1 mb-2">
-                      {skill.profession ? skill.profession : "通用"} |{" "}
+                      {getProfessionLabel(skill.profession)} |{" "}
                       {MajorRealmCN[skill.minRealm]}
                     </div>
                     <p className="text-sm text-stone-300">
@@ -722,6 +813,15 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
           </div>
         </div>
       </div>
+  );
+
+  if (embedded) {
+    return content;
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] bg-stone-950/90 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+      <div className="w-full max-w-6xl h-[90vh]">{content}</div>
     </div>
   );
 };

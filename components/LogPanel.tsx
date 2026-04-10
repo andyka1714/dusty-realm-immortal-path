@@ -4,7 +4,11 @@ import { RootState } from '../store/store';
 import clsx from 'clsx';
 import { parseBattleLog } from '../utils/logParser';
 
-export const LogPanel: React.FC = () => {
+interface LogPanelProps {
+  embedded?: boolean;
+}
+
+export const LogPanel: React.FC<LogPanelProps> = ({ embedded = false }) => {
   const logs = useSelector((state: RootState) => state.logs.logs);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -19,13 +23,23 @@ export const LogPanel: React.FC = () => {
   const displayLogs = [...logs].reverse();
 
   return (
-    <div className="bg-stone-900 border border-stone-800 rounded-lg p-4 h-64 md:h-full flex flex-col">
-      <h3 className="text-stone-300 font-bold mb-3 border-b border-stone-800 pb-2 tracking-widest">
+    <div
+      className={clsx(
+        "flex flex-col",
+        embedded
+          ? "h-full min-h-0 rounded-none border-0 bg-transparent p-0"
+          : "h-64 rounded-lg border border-stone-800 bg-stone-900 p-4 md:h-full"
+      )}
+    >
+      <h3 className={clsx("text-stone-300 font-bold tracking-widest", embedded ? "mb-3 px-4 pt-4" : "mb-3 border-b border-stone-800 pb-2")}>
         修煉日誌
       </h3>
       <div 
         ref={bottomRef} // Reuse bottomRef as container ref for simplicity, though name is mismatch
-        className="flex-1 overflow-y-auto space-y-2 pr-2 font-mono text-sm scroll-smooth"
+        className={clsx(
+          "flex-1 overflow-y-auto space-y-2 font-mono text-sm scroll-smooth",
+          embedded ? "px-4 pb-4 pr-3" : "pr-2"
+        )}
       >
         {displayLogs.length === 0 && (
           <p className="text-stone-600 text-center italic mt-10">暫無消息...</p>
