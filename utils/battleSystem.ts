@@ -565,6 +565,51 @@ const getEnemyWorldPassiveStatusNames = (
   return statusNames;
 };
 
+const getResolvedEnemyWorldIncomingStatuses = ({
+  special,
+  player,
+  passiveFlags,
+}: {
+  special?: Enemy["specialAttack"];
+  player: PlayerCombatStats;
+  passiveFlags: PlayerPassiveFlags;
+}) => {
+  const createdStatuses = resolveNormalizedEnemySpecialStatuses(
+    special,
+    player.maxHp,
+    0
+  );
+
+  const filteredStatuses = createdStatuses.filter((status) => {
+    if (passiveFlags.hasMageTribulationPassive && status.kind === "incapacitate") {
+      return false;
+    }
+    if (passiveFlags.hasSwordEmperorPassive && isNegativeStatusKind(status.kind)) {
+      return false;
+    }
+    if (passiveFlags.hasBodyImmortalPassive && isDotStatusKind(status.kind)) {
+      return false;
+    }
+    return true;
+  });
+
+  const bodyImmortalTriggered =
+    passiveFlags.hasBodyImmortalPassive &&
+    createdStatuses.some((status) => isDotStatusKind(status.kind)) &&
+    filteredStatuses.every((status) => !isDotStatusKind(status.kind));
+
+  const swordEmperorTriggered =
+    passiveFlags.hasSwordEmperorPassive &&
+    createdStatuses.some((status) => isNegativeStatusKind(status.kind)) &&
+    filteredStatuses.every((status) => !isNegativeStatusKind(status.kind));
+
+  return {
+    filteredStatuses,
+    bodyImmortalTriggered,
+    swordEmperorTriggered,
+  };
+};
+
 const getEnemyWorldPassiveTriggerState = (options: {
   enemy: Enemy;
   player: PlayerCombatStats;
@@ -2142,11 +2187,14 @@ export const resolveEnemyWorldStrike = (
     special,
   });
   damage = resolvedDamage;
+  const incomingStatuses = getResolvedEnemyWorldIncomingStatuses({
+    special,
+    player,
+    passiveFlags,
+  });
 
   const statusNames = [
-    ...resolveNormalizedEnemySpecialStatuses(special, player.maxHp, 0).map(
-      (status) => status.name
-    ),
+    ...incomingStatuses.filteredStatuses.map((status) => status.name),
     ...getEnemyWorldPassiveStatusNames({
       passiveFlags,
       prePassiveDamage: preBodySaintDamage,
@@ -2165,6 +2213,14 @@ export const resolveEnemyWorldStrike = (
       swordDeathWardTriggered,
     }),
   ];
+
+  if (incomingStatuses.bodyImmortalTriggered) {
+    statusNames.push("仙體無垢");
+  }
+
+  if (incomingStatuses.swordEmperorTriggered) {
+    statusNames.push("萬法皆空");
+  }
 
   return {
     damage,

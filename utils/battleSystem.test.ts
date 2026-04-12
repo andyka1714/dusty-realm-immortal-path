@@ -1408,6 +1408,37 @@ describe("battle system balance", () => {
     expect(strike.statusNames).toContain("元素護盾");
   });
 
+  it("surfaces body-immortal dot immunity on enemy special world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const enemy = BOSS_ENEMIES.m112_b1;
+    const body = calculatePlayerStats(
+      {
+        physique: 90,
+        rootBone: 78,
+        insight: 62,
+        comprehension: 22,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.Immortal,
+      SpiritRootId.MIXED_FIVE,
+      {
+        hp: 4200,
+        defense: 320,
+        regenHp: 6,
+        attack: 480,
+      },
+      "仙體無垢",
+      ProfessionType.Body,
+      ["b_im_passive"]
+    );
+
+    const strike = resolveEnemyWorldStrike(enemy, body, true);
+    expect(strike.statusNames).toContain("仙體無垢");
+    expect(strike.statusNames).not.toContain("燃燒");
+  });
+
   it("surfaces reflect stance on enemy melee world strikes", () => {
     fixedRandom.mockReturnValue(0.5);
 
@@ -1615,6 +1646,37 @@ describe("battle system balance", () => {
     const strike = resolveEnemyWorldStrike(enemy, woundedBody);
 
     expect(strike.statusNames).toContain("不死不滅");
+  });
+
+  it("surfaces sword-emperor negative-status immunity on enemy special world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const enemy = BOSS_ENEMIES.m180_b1;
+    const sword = calculatePlayerStats(
+      {
+        physique: 90,
+        rootBone: 108,
+        insight: 84,
+        comprehension: 30,
+        fortune: 18,
+        charm: 10,
+      },
+      MajorRealm.ImmortalEmperor,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 2200,
+        defense: 380,
+        hp: 9200,
+        crit: 15,
+      },
+      "萬法皆空",
+      ProfessionType.Sword,
+      ["s_ie_passive"]
+    );
+
+    const strike = resolveEnemyWorldStrike(enemy, sword, true);
+    expect(strike.statusNames).toContain("萬法皆空");
+    expect(strike.statusNames).not.toContain("破甲");
   });
 
   it("lets fusion mage passive cast without mana cost and regenerate hp/mp", () => {

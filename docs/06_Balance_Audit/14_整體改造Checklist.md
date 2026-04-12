@@ -303,11 +303,13 @@
 - [x] `b_g_passive` / `b_f_passive` / `b_q_passive` / `b_bi_passive` / `m_g_passive` 已補上 enemy world strike 對齊，正式回報 `反震` / `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `元素護盾`
 - [x] `b_tr_passive` / `m_tr_passive` 已補上 enemy world strike 對齊，正式回報 `萬劫不滅` / `雷劫煉心`
 - [x] `s_n_passive` / `b_ma_passive` / `b_ie_passive` 已補上 enemy world strike 對齊，正式回報 `護體劍罡` / `滴血重生` / `不死不滅`
+- [x] `b_im_passive` / `s_ie_passive` 已補上 enemy special world strike 對齊，正式回報 `仙體無垢` / `萬法皆空`
 - [x] 道途內的突破按鈕提示也已切到 `GameHintBubble`，再少一個原生 `title` 提示
 - [x] player world strike 的被動狀態回報已開始抽成共用 helper，並補上 `蠻荒血脈` / `靈潮循環` / `劍脈初成` / `法則之劍`
 - [x] `m_n_passive` / `m_f_passive` / `m_bi_passive` 已開始補齊 world strike 狀態回報，正式標出 `法力源泉` / `靈力湧動` / `五氣朝元`
 - [x] `s_ie_passive` 已開始補齊 player world strike 對齊，正式標出 `萬法皆空`
 - [x] enemy world strike 的減傷 / 保命被動判定已開始抽成共用 trigger helper，減少 `resolveEnemyWorldStrike()` 內的重複流程
+- [x] enemy world strike 的 incoming status 過濾已開始和 timeline combat 對齊，正式共用 DOT / 負面狀態免疫規則
 - [x] timeline combat 的致命保命流程已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`
 - [x] `StatsPanel / ShopPanel` 的主要資訊浮層已進一步對齊 `GameTooltip` 的標題 / 註腳結構
 - [x] `Adventure` 區域地圖情報與 `Compendium` 額外掉落來源浮層，已開始對齊同一套 `GameTooltip` 標題 / 註腳結構

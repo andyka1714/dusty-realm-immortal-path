@@ -37,7 +37,7 @@
 
 ### [06_Balance_Audit] 數值平衡審計
 本輪針對實作數值做的審計文件，重點在於比對文件與程式、驗算修為曲線、戰鬥曲線、裝備與技能落地狀態。
-- [README.md](06_Balance_Audit/README.md): 審計總覽與核心結論。
+- [README.md](06_Balance_Audit/README.md): 審計總覽、戰鬥 shared resolver 收斂進度與核心結論。
 - [01_修為與境界曲線審計.md](06_Balance_Audit/01_修為與境界曲線審計.md): 修為需求、通道效率與時長試算。
 - [02_戰鬥與裝備曲線審計.md](06_Balance_Audit/02_戰鬥與裝備曲線審計.md): 怪物、裝備、掉落與戰鬥實作審計。
 - [03_職業與技能審計.md](06_Balance_Audit/03_職業與技能審計.md): 三職業、技能資料與實戰接線現況。
