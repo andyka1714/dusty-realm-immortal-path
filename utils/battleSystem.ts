@@ -399,40 +399,48 @@ type PlayerPassiveFlags = {
   hasMageEmperorPassive: boolean;
 };
 
-const getPlayerPassiveFlags = (learnedSkills: Skill[]): PlayerPassiveFlags => ({
-  hasSwordQiPassive: hasPassiveSkillId(learnedSkills, "s_q_passive"),
-  hasBodyQiPassive: hasPassiveSkillId(learnedSkills, "b_q_passive"),
-  hasMageQiPassive: hasPassiveSkillId(learnedSkills, "m_q_passive"),
-  hasReflectPassive: hasPassiveSkillId(learnedSkills, "b_g_passive"),
-  hasInitialShieldPassive: hasPassiveSkillId(learnedSkills, "m_g_passive"),
-  hasSwordDeathWardPassive: hasPassiveSkillId(learnedSkills, "s_n_passive"),
-  hasBodyRebirthPassive: hasPassiveSkillId(learnedSkills, "b_n_passive"),
-  hasManaSpringPassive: hasPassiveSkillId(learnedSkills, "m_n_passive"),
-  hasBodyFoundationPassive: hasPassiveSkillId(learnedSkills, "b_f_passive"),
-  hasMageFoundationPassive: hasPassiveSkillId(learnedSkills, "m_f_passive"),
-  hasSwordGoldenPassive: hasPassiveSkillId(learnedSkills, "s_g_passive"),
-  hasSwordEchoPassive: hasPassiveSkillId(learnedSkills, "s_sf_passive"),
-  hasSwordHeartPassive: hasPassiveSkillId(learnedSkills, "s_f_passive"),
-  hasBodySaintPassive: hasPassiveSkillId(learnedSkills, "b_sf_passive"),
-  hasSwordFusionPassive: hasPassiveSkillId(learnedSkills, "s_bi_passive"),
-  hasSwordVoidPassive: hasPassiveSkillId(learnedSkills, "s_vr_passive"),
-  hasBodyFusionPassive: hasPassiveSkillId(learnedSkills, "b_bi_passive"),
-  hasMageFusionPassive: hasPassiveSkillId(learnedSkills, "m_bi_passive"),
-  hasBodyAncientPassive: hasPassiveSkillId(learnedSkills, "b_vr_passive"),
-  hasMageVoidPassive: hasPassiveSkillId(learnedSkills, "m_vr_passive"),
-  hasSwordTribulationPassive: hasPassiveSkillId(learnedSkills, "s_tr_passive"),
-  hasBodyTribulationPassive: hasPassiveSkillId(learnedSkills, "b_tr_passive"),
-  hasMageTribulationPassive: hasPassiveSkillId(learnedSkills, "m_tr_passive"),
-  hasBodyImmortalPassive: hasPassiveSkillId(learnedSkills, "b_im_passive"),
-  hasBodyRebirthTruePassive: hasPassiveSkillId(learnedSkills, "b_ma_passive"),
-  hasSwordMahayanaPassive: hasPassiveSkillId(learnedSkills, "s_ma_passive"),
-  hasMageMahayanaPassive: hasPassiveSkillId(learnedSkills, "m_ma_passive"),
-  hasMageImmortalPassive: hasPassiveSkillId(learnedSkills, "m_im_passive"),
-  hasSwordImmortalPassive: hasPassiveSkillId(learnedSkills, "s_im_passive"),
-  hasBodyEmperorPassive: hasPassiveSkillId(learnedSkills, "b_ie_passive"),
-  hasSwordEmperorPassive: hasPassiveSkillId(learnedSkills, "s_ie_passive"),
-  hasMageEmperorPassive: hasPassiveSkillId(learnedSkills, "m_ie_passive"),
-});
+const PLAYER_PASSIVE_FLAG_SKILL_IDS: Record<keyof PlayerPassiveFlags, string> = {
+  hasSwordQiPassive: "s_q_passive",
+  hasBodyQiPassive: "b_q_passive",
+  hasMageQiPassive: "m_q_passive",
+  hasReflectPassive: "b_g_passive",
+  hasInitialShieldPassive: "m_g_passive",
+  hasSwordDeathWardPassive: "s_n_passive",
+  hasBodyRebirthPassive: "b_n_passive",
+  hasManaSpringPassive: "m_n_passive",
+  hasBodyFoundationPassive: "b_f_passive",
+  hasMageFoundationPassive: "m_f_passive",
+  hasSwordGoldenPassive: "s_g_passive",
+  hasSwordEchoPassive: "s_sf_passive",
+  hasSwordHeartPassive: "s_f_passive",
+  hasBodySaintPassive: "b_sf_passive",
+  hasSwordFusionPassive: "s_bi_passive",
+  hasSwordVoidPassive: "s_vr_passive",
+  hasBodyFusionPassive: "b_bi_passive",
+  hasMageFusionPassive: "m_bi_passive",
+  hasBodyAncientPassive: "b_vr_passive",
+  hasMageVoidPassive: "m_vr_passive",
+  hasSwordTribulationPassive: "s_tr_passive",
+  hasBodyTribulationPassive: "b_tr_passive",
+  hasMageTribulationPassive: "m_tr_passive",
+  hasBodyImmortalPassive: "b_im_passive",
+  hasBodyRebirthTruePassive: "b_ma_passive",
+  hasSwordMahayanaPassive: "s_ma_passive",
+  hasMageMahayanaPassive: "m_ma_passive",
+  hasMageImmortalPassive: "m_im_passive",
+  hasSwordImmortalPassive: "s_im_passive",
+  hasBodyEmperorPassive: "b_ie_passive",
+  hasSwordEmperorPassive: "s_ie_passive",
+  hasMageEmperorPassive: "m_ie_passive",
+};
+
+const getPlayerPassiveFlags = (learnedSkills: Skill[]): PlayerPassiveFlags =>
+  Object.fromEntries(
+    Object.entries(PLAYER_PASSIVE_FLAG_SKILL_IDS).map(([flagName, skillId]) => [
+      flagName,
+      hasPassiveSkillId(learnedSkills, skillId),
+    ])
+  ) as PlayerPassiveFlags;
 
 const getCanonicalSkillId = (skill?: Skill) =>
   skill ? getFormalSkillId(skill.id) : undefined;
@@ -461,6 +469,12 @@ const getCopperSkinReductionMultiplier = () => 0.97;
 
 const getMageQiCycleRecovery = (maxMp: number) =>
   Math.max(1, Math.floor(maxMp * 0.12));
+
+const hasSwordTribulationWindow = (
+  currentHp: number,
+  maxHp: number,
+  passiveFlags: Pick<PlayerPassiveFlags, "hasSwordTribulationPassive">
+) => passiveFlags.hasSwordTribulationPassive && currentHp <= maxHp * 0.2;
 
 const getPlayerAttackContext = (
   player: PlayerCombatStats,
@@ -1312,6 +1326,11 @@ export const resolvePlayerWorldStrike = (
   const { hasSwordVoidPassive, hasSwordQiPassive, hasMageQiPassive, hasBodyFoundationPassive, hasSwordEmperorPassive } =
     passiveFlags;
   const hasSwordQiChain = hasLearnedSkillId(player.learnedSkills, "s_f_active");
+  const swordTribulationActive = hasSwordTribulationWindow(
+    player.hp,
+    player.maxHp,
+    passiveFlags
+  );
 
   const timelineProfile = getSkillTimelineProfile(skill);
   let effectivePower = attackContext.power;
@@ -1330,6 +1349,9 @@ export const resolvePlayerWorldStrike = (
   if (!skill && hasMageQiPassive && player.profession === ProfessionType.Mage) {
     effectivePower += player.magic * 0.18;
   }
+  if (swordTribulationActive) {
+    effectivePower *= 1.5;
+  }
   if (canonicalSkillId === "s_tr_active" && hasSwordQiChain) {
     effectivePower *= 1.18;
   }
@@ -1346,7 +1368,8 @@ export const resolvePlayerWorldStrike = (
       (hasSwordQiPassive ? getSwordQiPassiveCritBonus() : 0)
   );
   const isCrit =
-    attackContext.canCrit && Math.random() * 100 < Math.max(0, critRate);
+    swordTribulationActive ||
+    (attackContext.canCrit && Math.random() * 100 < Math.max(0, critRate));
 
   let damage = 0;
   const ignoreEnemyReduction =
@@ -1415,6 +1438,7 @@ export const resolvePlayerWorldStrike = (
     executionTimeMs: timelineProfile.executionTimeMs,
     playerStatusNames: [
       ...playerSideStatuses.map((status) => status.name),
+      ...(swordTribulationActive ? ["向死而生"] : []),
       ...(canonicalSkillId === "s_tr_active" && hasSwordQiChain
         ? ["萬劍歸一"]
         : []),

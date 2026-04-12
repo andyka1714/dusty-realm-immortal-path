@@ -16,6 +16,7 @@ import { LogPanel } from '../components/LogPanel';
 import { StatsPanel } from '../components/StatsPanel';
 import { Modal } from '../components/Modal';
 import { IntroSequence } from '../components/IntroSequence';
+import { GameHintBubble } from '../components/game/GameHintBubble';
 import { Play, ChevronsUp, Moon, Info, Skull, AlertTriangle, Zap, Lock } from 'lucide-react';
 import { MajorRealm, SpiritRootType } from '../types';
 import { calculateSeclusionCost, getBaseCultivationRate, getGatheringMultiplier, getManualCultivateCooldown, getPassiveCultivationRate } from '../utils/cultivation';
@@ -404,9 +405,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                      
                      {/* Tooltip - Shows when disabled */}
                      {(isBreakthroughAvailable || isInSeclusion) && (
-                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-stone-950 border border-stone-700 text-xs text-stone-300 rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
+                         <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
                              {isBreakthroughAvailable ? "修為已滿，請先突破" : "閉關中無法運功"}
-                         </div>
+                         </GameHintBubble>
                      )}
                  </div>
 
@@ -436,9 +437,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
 
                      {/* Tooltip - Shows when disabled */}
                      {(isBreakthroughAvailable || isInSeclusion || !canAffordSeclusion) && (
-                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-stone-950 border border-stone-700 text-xs text-stone-300 rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
+                         <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
                              {isBreakthroughAvailable ? "修為已滿，請先突破" : isInSeclusion ? "閉關修煉進行中" : "靈石不足"}
-                         </div>
+                         </GameHintBubble>
                      )}
                  </div>
               <button

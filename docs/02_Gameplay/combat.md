@@ -59,6 +59,7 @@
 - 地圖內世界戰鬥已開始使用同一批欄位做第一版多目標命中：`circle / line / cone` 技能會依玩家與主目標的相對位置，波及附近其他怪物，而不再只是播放地面提示
 - 即時戰鬥表現層的投射物、施法圈、AOE 與命中特效參數，已抽成可測的 presentation helper，後續調整不必只靠人工目測
 - 世界戰鬥、時間軸戰鬥與右下角技能 CD HUD，現在已開始共用同一套技能冷卻解析，不再各自直接讀 `cooldownSeconds`
+- 被動技能開關判定也已抽成共用 skill-id 對照表，world strike 與 timeline combat 對齊時不必再重複鋪一大串 `hasPassiveSkillId(...)`
 - 第一批與第二批法術型怪物、遠程怪與 Boss 已補上 `specialAttack` 資料，戰鬥中不再只剩普通攻擊模板
 - `createEnemy()` 已加入預設怪物特招規則：
   - 沒有手工特招的精英 / Boss 也會依 `元素 / 階級 / 境界` 自動得到一套基礎殺招
@@ -133,6 +134,7 @@
   - `s_ie_active`：一劍開天會無視一般防禦減免
   - `b_ie_active`：掌中神國會附加神國抽離與最大生命吸收
   - `m_ie_active`：一念花開會把敵方優勢逆轉為多重 debuff
+- `s_tr_passive` 在地圖 world strike 也已正式對齊時間軸戰鬥：低血量時會直接進入 `向死而生` 狀態，強制暴擊並同步抬升輸出
 - 戰鬥 overlay 已補上：
   - 玩家血條
   - 目標血條

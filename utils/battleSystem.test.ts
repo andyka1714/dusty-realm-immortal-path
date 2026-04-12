@@ -2880,6 +2880,46 @@ describe("battle system balance", () => {
     expect(formalStrike.damage).toBeGreaterThan(baseStrike.damage);
   });
 
+  it("lets sword tribulation passive force crits in world strikes at low hp", () => {
+    fixedRandom.mockReturnValue(0.99);
+
+    const enemy = {
+      ...COMMON_ENEMIES.m130_c1,
+      defense: 880,
+    };
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 150,
+        rootBone: 168,
+        insight: 122,
+        comprehension: 76,
+        fortune: 34,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_FIRE_METAL,
+      buildEquipmentStats(SPIRIT_SEVERING_SWORD_SET),
+      "向死而生",
+      ProfessionType.Sword,
+      ["s_tr_passive"]
+    );
+
+    const healthyStrike = resolvePlayerWorldStrike(
+      sword,
+      enemy
+    );
+    const lowHpStrike = resolvePlayerWorldStrike(
+      { ...sword, hp: Math.floor(sword.maxHp * 0.18) },
+      enemy
+    );
+
+    expect(healthyStrike.isCrit).toBe(false);
+    expect(lowHpStrike.isCrit).toBe(true);
+    expect(lowHpStrike.playerStatusNames).toContain("向死而生");
+    expect(lowHpStrike.damage).toBeGreaterThan(healthyStrike.damage);
+  });
+
   it("lets body emperor active deal direct siphon damage and apply god kingdom", () => {
     fixedRandom.mockReturnValue(0.5);
 

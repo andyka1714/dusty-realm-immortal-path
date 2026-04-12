@@ -225,6 +225,7 @@
 - [x] 世界戰鬥與 `runAutoBattle()` 已開始共用技能 / 怪物特招的 status resolver、時間正規化與 player/enemy 分側規則
 - [x] 世界戰鬥、時間軸戰鬥與戰鬥 HUD 的主動技能冷卻顯示，已開始共用同一套 cooldown resolver
 - [x] 玩家被動技能判定已開始抽成共用 passive flags helper，降低 world / timeline / HUD 分散重寫風險
+- [x] 玩家被動技能判定已補成共用 skill-id 對照表，world strike 與 timeline combat 的 passive flag 來源不再各自手寫維護
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---
@@ -316,6 +317,7 @@
 - [x] 圖鑑改走同一套面板殼層
 - [x] 角色屬性與商店道具 tooltip 已開始共用同一套遊戲化 `GameTooltip` 外觀
 - [x] 圖鑑內部的掉落來源 tooltip 也已切到同一套 `GameTooltip` 外觀
+- [x] 側欄、道途與洞府百業的操作提示，已開始共用同一套 `GameHintBubble` 外觀
 - [ ] 進一步把所有面板內部視覺做成更明確的遊戲化框體語言
 - [ ] 讓技能書、裝備、角色詳情 tooltip 都完全對齊互動目標
 - [x] 補上更完整的戰鬥 HUD 第一版，例如目標血條與最近戰況

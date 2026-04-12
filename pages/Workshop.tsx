@@ -6,6 +6,7 @@ import { addLog } from '../store/slices/logSlice';
 import { calculateGatheringUpgradeCost } from '../constants';
 import { Hammer, CircleDashed, ArrowUpCircle, Flame } from 'lucide-react';
 import clsx from 'clsx';
+import { GameHintBubble } from '../components/game/GameHintBubble';
 
 interface WorkshopProps {
   embedded?: boolean;
@@ -74,13 +75,13 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
                 </button>
                 
                 {/* Tooltip */}
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-stone-950 border border-stone-800 text-xs text-stone-300 rounded-lg shadow-xl opacity-0 group-hover/btn:opacity-100 pointer-events-none transition-opacity z-[100] whitespace-nowrap">
+                <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2 group-hover/btn:opacity-100">
                    <div className={canAfford ? "text-emerald-400" : "text-red-400"}>
                        {canAfford ? "點擊升級" : "靈石不足"}
                    </div>
                    <div className="text-stone-500">消耗: {upgradeCost.toLocaleString()} 靈石</div>
                    {!canAfford && <div className="text-stone-600">擁有: {spiritStones.toLocaleString()}</div>}
-                </div>
+                </GameHintBubble>
             </div>
          </div>
 

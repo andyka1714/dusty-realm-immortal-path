@@ -13,6 +13,7 @@ import {
   Book,
 } from "lucide-react";
 import clsx from "clsx";
+import { GameHintBubble } from "./game/GameHintBubble";
 
 interface SidebarProps {
   activeTab: string;
@@ -105,7 +106,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 key={item.id}
                 onClick={() => !isDisabled && setActiveTab(item.id)}
                 disabled={isDisabled}
-                title={isCollapsed ? item.label : undefined}
                 className={clsx(
                   "w-full flex items-center rounded-lg transition-all duration-200 border group relative",
                   isCollapsed
@@ -133,21 +133,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                 {/* Tooltip for Disabled Adventure */}
                 {isDisabled && (
-                  <div
+                  <GameHintBubble
                     className={clsx(
-                      "absolute top-1/2 -translate-y-1/2 px-2 py-1 bg-red-900/90 text-red-200 text-xs rounded border border-red-700 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-[100] transition-opacity",
+                      "top-1/2 -translate-y-1/2",
                       isCollapsed ? "left-full ml-4" : "left-full ml-2"
                     )}
                   >
                     閉關中
-                  </div>
+                  </GameHintBubble>
                 )}
 
                 {/* Tooltip for Collapsed State Hover */}
                 {isCollapsed && !isDisabled && (
-                  <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-2 py-1 bg-stone-800 text-stone-200 text-xs rounded border border-stone-700 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-[100] transition-opacity">
+                  <GameHintBubble className="left-full top-1/2 ml-4 -translate-y-1/2">
                     {item.label}
-                  </div>
+                  </GameHintBubble>
                 )}
               </button>
             );
@@ -163,7 +163,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               isCollapsed ? "justify-center px-2 py-3" : "px-4 py-3 space-x-3",
               "border-stone-800 text-stone-400 hover:bg-stone-800 hover:text-amber-500 hover:border-amber-900/30"
             )}
-            title={isCollapsed ? "萬界圖鑑" : undefined}
           >
             <div className="relative">
               <Book size={20} />
@@ -175,9 +174,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
 
             {isCollapsed && (
-              <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-2 py-1 bg-stone-800 text-stone-200 text-xs rounded border border-stone-700 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-[100] transition-opacity">
+              <GameHintBubble className="left-full top-1/2 ml-4 -translate-y-1/2">
                 萬界圖鑑
-              </div>
+              </GameHintBubble>
             )}
           </button>
         </div>
@@ -188,8 +187,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="hidden md:flex w-full items-center justify-center p-2 rounded hover:bg-stone-800 text-stone-500 transition-colors"
-            title={isCollapsed ? "展開選單" : "收合選單"}
           >
+            <span className="sr-only">{isCollapsed ? "展開選單" : "收合選單"}</span>
             {isCollapsed ? (
               <ChevronRight size={20} />
             ) : (
