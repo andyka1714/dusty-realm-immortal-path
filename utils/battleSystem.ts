@@ -313,6 +313,9 @@ const getPassiveSkillBonuses = (
   learnedSkills
     .filter((skill) => skill.type === "Passive" && skill.profession)
     .forEach((skill) => {
+      if (getFormalSkillId(skill.id) === "b_q_passive") {
+        return;
+      }
       const tier = skill.minRealm + 1;
 
       switch (skill.profession) {
@@ -372,6 +375,22 @@ const getBodyFoundationBloodlineStacks = (
   const missingRatio = Math.max(0, 1 - currentHp / maxHp);
   return Math.max(0, Math.min(9, Math.floor(missingRatio / 0.1)));
 };
+
+const getSwordQiPassiveCritBonus = () => 3;
+
+const createSwordQiArmorBreakStatus = (currentTimeMs: number): CombatStatus => ({
+  id: "sword_meridian_break",
+  name: "劍脈破甲",
+  kind: "armorBreak",
+  value: 0.08,
+  expiresAtMs: currentTimeMs + 2000,
+  nextTickAtMs: undefined,
+});
+
+const getCopperSkinReductionMultiplier = () => 0.97;
+
+const getMageQiCycleRecovery = (maxMp: number) =>
+  Math.max(1, Math.floor(maxMp * 0.12));
 
 const getPlayerAttackContext = (
   player: PlayerCombatStats,
@@ -662,9 +681,10 @@ export const getResolvedSkillCooldownSeconds = (
     typeof learnedSkillIdsOrSkills[0] !== "string"
       ? (learnedSkillIdsOrSkills as Skill[])
       : getLearnedSkills(learnedSkillIdsOrSkills as string[]);
-  const hasExplicitCooldownReductionPassive =
-    hasPassiveSkillId(learnedSkills, "m_f_passive") ||
-    hasPassiveSkillId(learnedSkills, "m_sf_passive");
+  const hasExplicitCooldownReductionPassive = hasPassiveSkillId(
+    learnedSkills,
+    "m_sf_passive"
+  );
 
   return hasExplicitCooldownReductionPassive
     ? Math.max(1, baseCooldownSeconds - 1)
@@ -1222,6 +1242,8 @@ export const resolvePlayerWorldStrike = (
     player.learnedSkills,
     "s_vr_passive"
   );
+  const hasSwordQiPassive = hasPassiveSkillId(player.learnedSkills, "s_q_passive");
+  const hasMageQiPassive = hasPassiveSkillId(player.learnedSkills, "m_q_passive");
   const hasBodyFoundationPassive = hasPassiveSkillId(
     player.learnedSkills,
     "b_f_passive"
@@ -1242,6 +1264,9 @@ export const resolvePlayerWorldStrike = (
       effectivePower *= 1 + bloodlineStacks * 0.02;
     }
   }
+  if (!skill && hasMageQiPassive && player.profession === ProfessionType.Mage) {
+    effectivePower += player.magic * 0.18;
+  }
   if (canonicalSkillId === "s_tr_active" && hasSwordQiChain) {
     effectivePower *= 1.18;
   }
@@ -1251,7 +1276,12 @@ export const resolvePlayerWorldStrike = (
       ? Math.max(1, attackContext.defense * 0.5)
       : attackContext.defense;
 
-  const critRate = Math.min(95, player.crit + attackContext.critBonus);
+  const critRate = Math.min(
+    95,
+    player.crit +
+      attackContext.critBonus +
+      (hasSwordQiPassive ? getSwordQiPassiveCritBonus() : 0)
+  );
   const isCrit =
     attackContext.canCrit && Math.random() * 100 < Math.max(0, critRate);
 
@@ -1306,6 +1336,10 @@ export const resolvePlayerWorldStrike = (
     return true;
   });
 
+  if (hasSwordQiPassive && isCrit && dealsDirectDamage && skill?.profession === ProfessionType.Sword) {
+    filteredEnemyStatuses.push(createSwordQiArmorBreakStatus(0));
+  }
+
   return {
     damage,
     isCrit,
@@ -1356,8 +1390,12 @@ export const resolveEnemyWorldStrike = (
     attackContext.defense *
     (special ? timelineProfile.areaDamageModifier : 1);
   let damage = resolveDamage(effectivePower, effectiveDefense);
+  const hasBodyQiPassive = hasPassiveSkillId(player.learnedSkills, "b_q_passive");
   if (attackContext.damageBonus) {
     damage = Math.floor(damage * (1 + attackContext.damageBonus / 100));
+  }
+  if (hasBodyQiPassive && !useSpecial) {
+    damage = Math.max(0, Math.floor(damage * getCopperSkinReductionMultiplier()));
   }
 
   const statusNames = resolveNormalizedEnemySpecialStatuses(
@@ -1588,6 +1626,18 @@ export const runAutoBattle = (
   const hasReflectPassive = hasPassiveSkillId(
     player.learnedSkills,
     "b_g_passive"
+  );
+  const hasSwordQiPassive = hasPassiveSkillId(
+    player.learnedSkills,
+    "s_q_passive"
+  );
+  const hasBodyQiPassive = hasPassiveSkillId(
+    player.learnedSkills,
+    "b_q_passive"
+  );
+  const hasMageQiPassive = hasPassiveSkillId(
+    player.learnedSkills,
+    "m_q_passive"
   );
   const hasInitialShieldPassive = hasPassiveSkillId(
     player.learnedSkills,
@@ -2143,6 +2193,13 @@ export const runAutoBattle = (
       effectivePower *= enemyElementalAffinity.multiplier;
       if (bossBroken) effectivePower *= 1.25;
       if (playerDebuffed) effectivePower *= 0.9;
+      if (
+        hasMageQiPassive &&
+        !skillReady &&
+        player.profession === ProfessionType.Mage
+      ) {
+        effectivePower += player.magic * 0.28;
+      }
       if (hasSwordTribulationPassive && playerHp <= player.maxHp * 0.2) {
         effectivePower *= 1.5;
       }
@@ -2200,6 +2257,7 @@ export const runAutoBattle = (
         95,
         player.crit +
           (hasSwordMahayanaPassive ? 5 : 0) +
+          (hasSwordQiPassive ? getSwordQiPassiveCritBonus() : 0) +
           attackContext.critBonus +
           getCritBoostValue(playerStatuses, currentTimeMs)
       );
@@ -2292,12 +2350,50 @@ export const runAutoBattle = (
         enemyHp,
         enemyMaxHp: enemy.maxHp,
       });
+      if (
+        hasMageQiPassive &&
+        !skillReady &&
+        player.profession === ProfessionType.Mage
+      ) {
+        pushCombatLog(logs, {
+          turn,
+          timeMs: currentTimeMs,
+          isPlayer: true,
+          message: `【靈潮循環】法力餘波裹住普攻，讓空窗期不致斷勢。`,
+          damage: 0,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+        });
+      }
       if (bodyFoundationStacks > 0) {
         pushCombatLog(logs, {
           turn,
           timeMs: currentTimeMs,
           isPlayer: true,
           message: `【蠻荒血脈】氣血越低，凶性越盛，當前 ${bodyFoundationStacks} 層血脈沸騰同步拔高攻勢。`,
+          damage: 0,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+        });
+      }
+
+      if (
+        hasSwordQiPassive &&
+        skillReady &&
+        activeSkill?.profession === ProfessionType.Sword &&
+        isCrit &&
+        enemyHp > 0
+      ) {
+        enemyStatuses.push(createSwordQiArmorBreakStatus(currentTimeMs));
+        pushCombatLog(logs, {
+          turn,
+          timeMs: currentTimeMs,
+          isPlayer: true,
+          message: `【劍脈初成】劍勢貫通護體，為 <enemy rank="${enemy.rank}">${enemy.name}</enemy> 施加【劍脈破甲】。`,
           damage: 0,
           playerHp,
           playerMaxHp: player.maxHp,
@@ -2464,6 +2560,22 @@ export const runAutoBattle = (
             timeMs: currentTimeMs,
             isPlayer: true,
             message: `【道法自然】術式流轉提前歸位，冷卻縮短至 ${effectiveCooldownSeconds.toFixed(1)} 秒。`,
+            damage: 0,
+            playerHp,
+            playerMaxHp: player.maxHp,
+            enemyHp,
+            enemyMaxHp: enemy.maxHp,
+          });
+        }
+
+        if (hasMageQiPassive && activeSkill!.profession === ProfessionType.Mage) {
+          const recoveredMana = getMageQiCycleRecovery(player.maxMp);
+          playerMp = Math.min(player.maxMp, playerMp + recoveredMana);
+          pushCombatLog(logs, {
+            turn,
+            timeMs: currentTimeMs,
+            isPlayer: true,
+            message: `【靈潮循環】術式回潮歸海，你回復了 ${recoveredMana} 點靈力。`,
             damage: 0,
             playerHp,
             playerMaxHp: player.maxHp,
@@ -2854,6 +2966,28 @@ export const runAutoBattle = (
             timeMs: currentTimeMs,
             isPlayer: true,
             message: `【蠻荒血脈】傷勢越深，肉身越堅，當前 ${bodyFoundationStacks} 層血脈沸騰抬升了護體。`,
+            damage: 0,
+            playerHp,
+            playerMaxHp: player.maxHp,
+            enemyHp,
+            enemyMaxHp: enemy.maxHp,
+          });
+        }
+
+        if (hasBodyQiPassive && enemyDamage > 0 && !enemySpecialReady) {
+          const reduced = enemyDamage - Math.max(
+            1,
+            Math.floor(enemyDamage * getCopperSkinReductionMultiplier())
+          );
+          enemyDamage = Math.max(
+            1,
+            Math.floor(enemyDamage * getCopperSkinReductionMultiplier())
+          );
+          pushCombatLog(logs, {
+            turn,
+            timeMs: currentTimeMs,
+            isPlayer: true,
+            message: `【銅皮鐵骨】硬生生化去 <dmg>${reduced}</dmg> 點傷害。`,
             damage: 0,
             playerHp,
             playerMaxHp: player.maxHp,

@@ -288,6 +288,10 @@
 - [x] `m_g_passive` 元素護盾：完整抵擋一次敵方術式傷害
 - [x] `b_g_passive` 荊棘皮層：僅在近戰命中時反震，不再對遠程 / 術式一律生效
 - [x] `m_sf_passive` 道法自然：冷卻縮減已補上明確戰鬥事件與共用 cooldown resolver
+- [x] `s_q_passive` 劍脈初成：暴擊時追加 `劍脈破甲`
+- [x] `b_q_passive` 銅皮鐵骨：已補上明確減傷分支與戰鬥事件
+- [x] `m_q_passive` 靈潮循環：施法後回復靈力，已補上專屬戰鬥事件
+- [x] `m_f_passive` 靈力湧動：維持專屬術式蓄勢效果，不再誤接進共用冷卻縮減
 - [x] `b_n_passive` / `m_n_passive` 的回復事件已補回技能專屬戰鬥訊息，不再只走 generic regen log
 - [x] battle 開場被動狀態初始化已抽成共用 helper，`b_g_passive` 開場護體也補上明確戰鬥事件
 - [x] 護盾吸收與反震傷害事件，已開始抽成 battleSystem 共用 logger helper

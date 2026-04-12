@@ -684,6 +684,133 @@ describe("battle system balance", () => {
     ).toBe(true);
   });
 
+  it("keeps foundation mage passive out of the shared cooldown reduction helper", () => {
+    const skill = getSkill("m_f_active");
+
+    expect(getResolvedSkillCooldownSeconds(skill, ["m_f_passive"])).toBe(
+      skill?.cooldownSeconds ?? skill?.cooldown ?? 0
+    );
+    expect(getResolvedSkillCooldownSeconds(skill, ["m_sf_passive"])).toBe(
+      Math.max(1, (skill?.cooldownSeconds ?? skill?.cooldown ?? 0) - 1)
+    );
+  });
+
+  it("lets qi sword passive apply an explicit armor-break follow-up on critical strikes", () => {
+    fixedRandom.mockReturnValue(0);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 43,
+        rootBone: 48,
+        insight: 45,
+        comprehension: 16,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.QiRefining,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 150,
+        crit: 45,
+      },
+      "劍脈弟子",
+      ProfessionType.Sword,
+      ["s_q_active", "s_q_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(
+      sword,
+      COMMON_ENEMIES.m7_c2,
+      getSkill("s_q_active")
+    );
+
+    expect(strike.isCrit).toBe(true);
+    expect(strike.enemyStatusNames).toContain("劍脈破甲");
+  });
+
+  it("lets qi body passive explicitly reduce incoming strike damage", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const baseBody = calculatePlayerStats(
+      {
+        physique: 43,
+        rootBone: 43,
+        insight: 43,
+        comprehension: 16,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.QiRefining,
+      SpiritRootId.MIXED_FIVE,
+      {
+        defense: 140,
+        hp: 1200,
+      },
+      "鐵骨基準",
+      ProfessionType.Body,
+      []
+    );
+
+    const copperBody = calculatePlayerStats(
+      {
+        physique: 43,
+        rootBone: 43,
+        insight: 43,
+        comprehension: 16,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.QiRefining,
+      SpiritRootId.MIXED_FIVE,
+      {
+        defense: 140,
+        hp: 1200,
+      },
+      "銅皮修士",
+      ProfessionType.Body,
+      ["b_q_passive"]
+    );
+
+    const baseStrike = resolveEnemyWorldStrike(COMMON_ENEMIES.m16_c2, baseBody);
+    const copperStrike = resolveEnemyWorldStrike(
+      COMMON_ENEMIES.m16_c2,
+      copperBody
+    );
+
+    expect(copperStrike.damage).toBeLessThan(baseStrike.damage);
+  });
+
+  it("lets qi mage passive restore mana through explicit battle events", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 43,
+        rootBone: 43,
+        insight: 52,
+        comprehension: 18,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.QiRefining,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 220,
+        mp: 1200,
+        defense: 90,
+      },
+      "靈潮術士",
+      ProfessionType.Mage,
+      ["m_q_active", "m_q_passive"]
+    );
+
+    const result = runAutoBattle(mage, COMMON_ENEMIES.m26_c2);
+
+    expect(
+      result.logs.some((log) => log.message.includes("【靈潮循環】"))
+    ).toBe(true);
+  });
+
   it("lets foundation body passive scale offense with missing hp in world strikes", () => {
     fixedRandom.mockReturnValue(0.5);
 
