@@ -18,4 +18,5 @@
 - `GamePanel`：主遊戲大面板，已正式具備 `eyebrow + title + icon` 結構。
 - `Modal`：任務、商店、突破、地圖總覽、背包確認等視窗，已開始對齊同一套 `eyebrow + title + icon` 語言。
 - `GameTooltip`：角色屬性、商店、圖鑑、地圖情報等資訊浮層，已開始對齊同一套 `eyebrow + title + body + footer` 結構。
+- `Inventory` 的裝備、技能書與消耗品 hover，也已切到同一套 `GameTooltip` 結構，不再只靠右側詳情面板承接全部資訊。
 - `GameHintBubble`：操作提示、dock 切換、背包按鈕等短提示，作為輕量級懸停語言。

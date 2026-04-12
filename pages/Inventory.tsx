@@ -6,7 +6,7 @@ import { equipItem, unequipItem, sortItems, removeItems, removeItem } from '../s
 import { consumeItem } from '../store/slices/characterSlice';
 import { addLog } from '../store/slices/logSlice';
 import { Package, Shield, Sword, FlaskConical, CircleDashed, Footprints, Crown, MinusCircle, Shirt, Medal, ArrowUpDown, Trash2, LayoutGrid, CheckSquare, Plus, Minus, AlertTriangle } from 'lucide-react';
-import { ItemCategory, ItemQuality, EquipmentSlot, ConsumableItem, InventorySlot, ItemInstance } from '../types';
+import { ItemCategory, ItemQuality, EquipmentSlot, ConsumableItem, InventorySlot, ItemInstance, Skill } from '../types';
 import { REALM_NAMES } from '../constants';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
@@ -14,6 +14,7 @@ import { getFormalSkill, getSkill } from '../data/skills';
 import { getMissingPrerequisiteSkillIds, resolveReplacementSkillId } from '../data/skills/pool';
 import { getSkillManualCategoryLabel, getSkillManualSourceLabels, getSkillManualTierLabel } from '../data/items/manuals';
 import { GameHintBubble } from '../components/game/GameHintBubble';
+import { GameTooltip } from '../components/game/GameTooltip';
 
 interface InventoryProps {
   embedded?: boolean;
@@ -47,6 +48,11 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
       message: React.ReactNode;
       onConfirm: () => void;
   }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
+  const [hoveredItem, setHoveredItem] = useState<{
+    slot: InventorySlot;
+    x: number;
+    y: number;
+  } | null>(null);
 
   const filteredItems = items.filter(slot => {
     const item = ITEMS[slot.itemId];
@@ -104,6 +110,17 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
 
   const selectedConsumableBlockedReason = selectedConsumable
     ? getConsumableBlockedReason(selectedConsumable)
+    : null;
+
+  const hoveredItemDef = hoveredItem ? ITEMS[hoveredItem.slot.itemId] : null;
+  const hoveredSkillEffect =
+    hoveredItemDef?.category === ItemCategory.Consumable
+      ? (hoveredItemDef as ConsumableItem).effects.find(
+          (effect) => effect.type === 'learn_skill' && effect.skillId
+        )
+      : null;
+  const hoveredSkill = hoveredSkillEffect?.skillId
+    ? getFormalSkill(hoveredSkillEffect.skillId)
     : null;
 
   // Helper to check if an instance is equipped
@@ -368,6 +385,19 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                         } else {
                             setSelectedSlot(slot);
                         }
+                    }}
+                    onMouseEnter={(event) => {
+                        const rect = event.currentTarget.getBoundingClientRect();
+                        setHoveredItem({
+                          slot,
+                          x: Math.min(rect.right + 16, window.innerWidth - 304),
+                          y: Math.max(16, rect.top),
+                        });
+                    }}
+                    onMouseLeave={() => {
+                        setHoveredItem((current) =>
+                          current?.slot === slot ? null : current
+                        );
                     }}
                     className={clsx(
                         "aspect-square border-2 rounded-lg p-2 md:p-3 flex flex-col items-center justify-center relative group transition-all",
@@ -813,6 +843,82 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
             {embedded && equipmentSection}
         </div>
       </div>
+
+      {hoveredItem && hoveredItemDef && (
+        <GameTooltip
+          eyebrow={getInventoryTooltipEyebrow(hoveredItemDef, hoveredSkill)}
+          title={hoveredItemDef.name}
+          titleClassName={getQualityTextColor(
+            hoveredItem.slot.instance?.quality ?? hoveredItemDef.quality
+          )}
+          footer={getInventoryTooltipFooter(hoveredItemDef, hoveredItem.slot)}
+          widthClassName="w-72"
+          className="animate-in fade-in duration-150 zoom-in-95"
+          style={{ left: hoveredItem.x, top: hoveredItem.y }}
+        >
+          <p className="text-sm text-stone-400 italic">{hoveredItemDef.description}</p>
+
+          {hoveredSkill && (
+            <div className="space-y-2 rounded-xl border border-indigo-900/50 bg-indigo-950/15 p-3">
+              <div className="flex flex-wrap gap-2 text-[11px] font-bold">
+                <span className="rounded-full border border-indigo-700/60 bg-indigo-950/40 px-2 py-1 text-indigo-200">
+                  {hoveredSkill.type === 'Active' ? '主動術式' : '被動心法'}
+                </span>
+                <span className="rounded-full border border-amber-700/50 bg-amber-950/30 px-2 py-1 text-amber-300">
+                  {getSkillManualTierLabel(hoveredSkill)}
+                </span>
+              </div>
+              <div className="text-xs text-stone-300">
+                分類：<span className="text-stone-100">{getSkillManualCategoryLabel(hoveredSkill)}</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {getSkillManualSourceLabels(hoveredSkill).map((source) => (
+                  <span
+                    key={source}
+                    className="rounded-md border border-emerald-900/60 bg-emerald-950/20 px-2 py-1 text-[11px] text-emerald-300"
+                  >
+                    {source}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {hoveredItem.slot.instance && Object.keys(hoveredItem.slot.instance.stats).length > 0 && (
+            <div className="space-y-1 rounded-xl border border-stone-800/90 bg-black/20 p-3">
+              <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-stone-500">基礎屬性</div>
+              {Object.entries(hoveredItem.slot.instance.stats).map(([key, value]) => (
+                <div key={key} className="flex items-center justify-between text-xs text-stone-300">
+                  <span>{getAttributeName(key)}</span>
+                  <span className="font-mono text-amber-400">+{value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {hoveredItem.slot.instance?.affixes && hoveredItem.slot.instance.affixes.length > 0 && (
+            <div className="space-y-1 rounded-xl border border-amber-900/30 bg-amber-950/10 p-3">
+              <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-stone-500">附加詞條</div>
+              {hoveredItem.slot.instance.affixes.map((affix, index) => (
+                <div key={`${affix.description}-${index}`} className="text-xs text-amber-300">
+                  • {affix.description}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {hoveredSkill && hoveredSkill.prerequisiteSkillIds.length > 0 && (
+            <div className="text-xs text-stone-400">
+              前置：
+              <span className="text-stone-200">
+                {hoveredSkill.prerequisiteSkillIds
+                  .map((prerequisiteSkillId) => getSkill(prerequisiteSkillId)?.name ?? prerequisiteSkillId)
+                  .join('、')}
+              </span>
+            </div>
+          )}
+        </GameTooltip>
+      )}
       
       {/* Confirm Modal (Standard) */}
       <Modal
@@ -1012,6 +1118,44 @@ const getCategoryName = (category: ItemCategory) => {
     case ItemCategory.Breakthrough: return '突破';
     default: return '物品';
   }
+};
+
+const getInventoryTooltipEyebrow = (
+  item: { category: ItemCategory },
+  skill: Skill | null
+) => {
+  if (skill) return 'SKILL MANUAL';
+
+  switch (item.category) {
+    case ItemCategory.Equipment:
+      return 'EQUIPMENT';
+    case ItemCategory.Consumable:
+      return 'CONSUMABLE';
+    case ItemCategory.Material:
+      return 'CRAFT MATERIAL';
+    case ItemCategory.Breakthrough:
+      return 'BREAKTHROUGH ITEM';
+    default:
+      return 'ITEM DATA';
+  }
+};
+
+const getInventoryTooltipFooter = (
+  item: { quality: ItemQuality; minRealm?: number },
+  slot: InventorySlot
+) => {
+  const quality = slot.instance?.quality ?? item.quality;
+  const parts = [getQualityName(quality)];
+
+  if (item.minRealm !== undefined) {
+    parts.push(`${REALM_NAMES[item.minRealm]}期`);
+  }
+
+  if (!slot.instanceId) {
+    parts.push(`持有 ${slot.count}`);
+  }
+
+  return parts.filter(Boolean).join(' · ');
 };
 
 const getAttributeName = (key: string) => {
