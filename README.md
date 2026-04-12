@@ -15,13 +15,16 @@
 - 世界戰鬥、時間軸戰鬥與 HUD 已開始共用 cooldown / status / passive flags resolver
 - 戰鬥開場敘事也已開始共用 opener helper，元素克制、弱點洞察、護體展開與高境界開場壓制不再散寫
 - 主動術式後的一批被動觸發訊息，也已開始收斂成共用 passive-proc helper，減少 `runAutoBattle()` 戰鬥事件散寫
+- 來襲傷害的防禦型被動事件，也已開始收斂成共用 defensive-passive helper，讓 `蠻荒血脈`、`銅皮鐵骨`、`金剛法相`、`肉身成聖`、`元素護盾` 不再分散處理
 - 技能改為透過技能書學習，不再隨職業 / 突破自動送
 - 技能池已切成 `formal core / retired` 視角，retired 進一步收斂為 `battle-absorbed / retirement-ready`
 - 高境界精英 / Boss、裝備 audit、技能效果與世界戰鬥 AOE 都已接入第一版正式實作
 - 角色屬性、商店、圖鑑與多個操作提示，已開始共用 `GameTooltip / GameHintBubble` 遊戲化外觀元件
+- 底部浮動 dock 的面板切換提示，也已收進同一套 `GameHintBubble` 視覺語言
 - 共用 `Modal` 也已開始向 `GamePanel` 的遊戲化框體語言收斂，任務、商店、背包確認與地圖總覽視窗不再維持舊樣式殼層
 - `言出法隨`、`劍道獨尊`、`向死而生` 等高境界被動，已開始同步對齊 world strike 與時間軸戰鬥結果
 - `法力源泉`、`靈力湧動`、`五氣朝元` 這批法修被動，也已開始補齊 world strike 狀態回報
+- `蠻荒血脈`、`銅皮鐵骨`、`金剛法相`、`元素護盾` 這批防禦型被動，也已開始補齊 enemy world strike 狀態回報
 
 ## 文件入口
 

@@ -27,7 +27,7 @@
 使用者體驗與介面規範。
 - [flow.md](04_UI/flow.md): 遊戲初始化流程 (序幕->抽卡->主頁) 與導航結構。
 - [components.md](04_UI/components.md): UI 組件庫規範 (Tailwind 配色、按鈕樣式)。
-  - 補充：角色屬性、商店、圖鑑與部分操作提示，已開始共用 `GameTooltip / GameHintBubble` 遊戲化外觀。
+  - 補充：角色屬性、商店、圖鑑、底部 dock 與多個操作提示，已開始共用 `GameTooltip / GameHintBubble` 遊戲化外觀。
 
 ### [05_Data] 數據表 (Data Tables)
 純數據參考表，供查閱使用。
@@ -46,7 +46,7 @@
 - [06_實作修正落點.md](06_Balance_Audit/06_實作修正落點.md): 這一輪已改哪些檔案、後續要從哪裡繼續改。
 - [07_路線分流與主題掉落設計.md](06_Balance_Audit/07_路線分流與主題掉落設計.md): 三路分流、聚合期與職業主題掉落設計整理。
 - [08_技能系統與技能書規劃.md](06_Balance_Audit/08_技能系統與技能書規劃.md): 技能改成技能書取得的整理與落地方案。
-- [09_即時戰鬥改造分析.md](06_Balance_Audit/09_即時戰鬥改造分析.md): 從戰報回放轉成即時碰撞戰鬥的架構分析，以及 battle shared resolver 的收斂進度。
+- [09_即時戰鬥改造分析.md](06_Balance_Audit/09_即時戰鬥改造分析.md): 從戰報回放轉成即時碰撞戰鬥的架構分析，以及 cooldown / opener / passive-proc / defensive-passive 等 shared resolver 的收斂進度。
 - [10_技能數量與功能分類收斂.md](06_Balance_Audit/10_技能數量與功能分類收斂.md): 技能數量控制、功能分類與主流遊戲對照分析。
 - [11_三職業核心技能池草案.md](06_Balance_Audit/11_三職業核心技能池草案.md): 劍修、體修、法修的核心技能池草案，以及 retired 技能收斂到 `battle-absorbed / retirement-ready` 的正式規則，並持續對齊 world strike / timeline combat。
 - [12_技能書實作收斂.md](06_Balance_Audit/12_技能書實作收斂.md): 技能書正式實作、來源規則、前置條件與與程式對齊結果。

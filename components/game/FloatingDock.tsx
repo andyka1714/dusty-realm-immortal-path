@@ -6,6 +6,7 @@ import {
   Home,
 } from "lucide-react";
 import clsx from "clsx";
+import { GameHintBubble } from "./GameHintBubble";
 
 export type GamePanelId =
   | "character"
@@ -41,28 +42,32 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
           const isActive = activePanel === item.id;
 
           return (
-            <button
-              key={item.id}
-              onClick={() => onTogglePanel(item.id)}
-              className={clsx(
-                "group flex min-w-[60px] flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs tracking-widest transition-all",
-                isActive
-                  ? "bg-amber-500/15 text-amber-300 shadow-[inset_0_0_0_1px_rgba(245,158,11,0.3)]"
-                  : "text-stone-400 hover:bg-stone-800/80 hover:text-stone-100"
-              )}
-            >
-              <div
+            <div key={item.id} className="group relative">
+              <button
+                onClick={() => onTogglePanel(item.id)}
                 className={clsx(
-                  "flex h-9 w-9 items-center justify-center rounded-full border transition-colors",
+                  "flex min-w-[60px] flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs tracking-widest transition-all",
                   isActive
-                    ? "border-amber-500/60 bg-amber-500/10"
-                    : "border-stone-700 bg-stone-900/80 group-hover:border-stone-500"
+                    ? "bg-amber-500/15 text-amber-300 shadow-[inset_0_0_0_1px_rgba(245,158,11,0.3)]"
+                    : "text-stone-400 hover:bg-stone-800/80 hover:text-stone-100"
                 )}
               >
-                <Icon size={18} />
-              </div>
-              <span>{item.label}</span>
-            </button>
+                <div
+                  className={clsx(
+                    "flex h-9 w-9 items-center justify-center rounded-full border transition-colors",
+                    isActive
+                      ? "border-amber-500/60 bg-amber-500/10"
+                      : "border-stone-700 bg-stone-900/80 group-hover:border-stone-500"
+                  )}
+                >
+                  <Icon size={18} />
+                </div>
+                <span>{item.label}</span>
+              </button>
+              <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+                {isActive ? `收起${item.label}` : `打開${item.label}`}
+              </GameHintBubble>
+            </div>
           );
         })}
       </div>
