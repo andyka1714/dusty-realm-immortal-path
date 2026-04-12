@@ -1442,6 +1442,75 @@ describe("battle system balance", () => {
     expect(strike.statusNames).toContain("反震");
   });
 
+  it("surfaces tribulation body passive on enemy world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const body = calculatePlayerStats(
+      {
+        physique: 100,
+        rootBone: 88,
+        insight: 66,
+        comprehension: 24,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.MIXED_FIVE,
+      {
+        defense: 420,
+        hp: 14000,
+      },
+      "萬劫戰軀",
+      ProfessionType.Body,
+      ["b_tr_passive"]
+    );
+
+    const enemy = {
+      ...BOSS_ENEMIES.m181_b1,
+      attack: 920,
+    };
+
+    const strike = resolveEnemyWorldStrike(enemy, body);
+
+    expect(strike.statusNames).toContain("萬劫不滅");
+  });
+
+  it("surfaces tribulation mage passive on metal enemy world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 94,
+        rootBone: 82,
+        insight: 102,
+        comprehension: 30,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1800,
+        hp: 7600,
+        mp: 4200,
+        defense: 260,
+      },
+      "劫雷法尊",
+      ProfessionType.Mage,
+      ["m_tr_passive"]
+    );
+
+    const enemy = {
+      ...BOSS_ENEMIES.m180_b1,
+      element: ElementType.Metal,
+      attack: 860,
+    };
+
+    const strike = resolveEnemyWorldStrike(enemy, mage);
+
+    expect(strike.statusNames).toContain("雷劫煉心");
+  });
+
   it("lets fusion mage passive cast without mana cost and regenerate hp/mp", () => {
     fixedRandom.mockReturnValue(0.5);
 

@@ -487,6 +487,10 @@ const getEnemyWorldPassiveStatusNames = (
     bodyFusionTriggered: boolean;
     elementalBarrierTriggered: boolean;
     reflectTriggered: boolean;
+    enemyElement: ElementType;
+    bodyTribulationTriggered: boolean;
+    mageTribulationTriggered: boolean;
+    bodyRebirthTrueTriggered: boolean;
   }
 ) => {
   const statusNames: string[] = [];
@@ -500,6 +504,10 @@ const getEnemyWorldPassiveStatusNames = (
     bodyFusionTriggered,
     elementalBarrierTriggered,
     reflectTriggered,
+    enemyElement,
+    bodyTribulationTriggered,
+    mageTribulationTriggered,
+    bodyRebirthTrueTriggered,
   } = options;
 
   if (reflectTriggered) {
@@ -524,6 +532,18 @@ const getEnemyWorldPassiveStatusNames = (
 
   if (elementalBarrierTriggered) {
     statusNames.push("元素護盾");
+  }
+
+  if (bodyTribulationTriggered) {
+    statusNames.push("萬劫不滅");
+  }
+
+  if (mageTribulationTriggered && enemyElement === ElementType.Metal) {
+    statusNames.push("雷劫煉心");
+  }
+
+  if (bodyRebirthTrueTriggered) {
+    statusNames.push("滴血重生");
   }
 
   if (voidEvasion) {
@@ -1889,6 +1909,16 @@ export const resolveEnemyWorldStrike = (
   if (elementalBarrierTriggered) {
     damage = 0;
   }
+  const bodyTribulationTriggered =
+    passiveFlags.hasBodyTribulationPassive && damage > 0;
+  const mageTribulationTriggered =
+    passiveFlags.hasMageTribulationPassive &&
+    damage > 0 &&
+    enemy.element === ElementType.Metal;
+  const postTribulationDamage = damage;
+  const bodyRebirthTrueTriggered =
+    passiveFlags.hasBodyRebirthTruePassive &&
+    postTribulationDamage >= player.hp;
   const voidEvasion =
     passiveFlags.hasMageVoidPassive && Math.random() < 0.3;
   if (voidEvasion) {
@@ -1909,6 +1939,10 @@ export const resolveEnemyWorldStrike = (
       bodyFusionTriggered,
       elementalBarrierTriggered,
       reflectTriggered,
+      enemyElement: enemy.element,
+      bodyTribulationTriggered,
+      mageTribulationTriggered,
+      bodyRebirthTrueTriggered,
     }),
   ];
 
