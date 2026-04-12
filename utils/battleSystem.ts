@@ -3056,14 +3056,20 @@ export const runAutoBattle = (
         }
 
         const reflectValue = getReflectValue(playerStatuses, currentTimeMs);
-        if (reflectValue > 0 && enemyDamage > 0 && enemyHp > 0) {
+        const isMeleeEnemyHit = (enemy.attackRange ?? 1) <= 1;
+        if (
+          reflectValue > 0 &&
+          enemyDamage > 0 &&
+          enemyHp > 0 &&
+          isMeleeEnemyHit
+        ) {
           const reflected = Math.max(1, Math.floor(enemyDamage * reflectValue));
           enemyHp = Math.max(0, enemyHp - reflected);
           pushCombatLog(logs, {
             turn,
             timeMs: currentTimeMs,
             isPlayer: true,
-            message: `你以護體反震回敬 <enemy rank="${enemy.rank}">${enemy.name}</enemy>，造成 <dmg>${reflected}</dmg> 點傷害！`,
+            message: `【荊棘皮層】於近身交鋒間反震回敬 <enemy rank="${enemy.rank}">${enemy.name}</enemy>，造成 <dmg>${reflected}</dmg> 點傷害！`,
             damage: reflected,
             playerHp,
             playerMaxHp: player.maxHp,

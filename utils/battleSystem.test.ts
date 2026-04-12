@@ -579,6 +579,42 @@ describe("battle system balance", () => {
     ).toBe(true);
   });
 
+  it("lets golden-core body passive only reflect melee hits", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const body = calculatePlayerStats(
+      {
+        physique: 58,
+        rootBone: 58,
+        insight: 52,
+        comprehension: 18,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.GoldenCore,
+      SpiritRootId.HEAVENLY_EARTH,
+      {
+        attack: 320,
+        defense: 260,
+        hp: 2600,
+        speed: 7,
+      },
+      "戰體真人",
+      ProfessionType.Body,
+      ["b_g_passive"]
+    );
+
+    const meleeResult = runAutoBattle(body, COMMON_ENEMIES.m16_c2);
+    const rangedResult = runAutoBattle(body, BOSS_ENEMIES.m180_b1);
+
+    expect(
+      meleeResult.logs.some((log) => log.message.includes("荊棘皮層"))
+    ).toBe(true);
+    expect(
+      rangedResult.logs.some((log) => log.message.includes("荊棘皮層"))
+    ).toBe(false);
+  });
+
   it("lets golden-core mage passive block one incoming special attack completely", () => {
     fixedRandom.mockReturnValue(0.5);
 
