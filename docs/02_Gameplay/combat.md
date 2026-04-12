@@ -123,7 +123,7 @@
   - `s_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `劍道獨尊` 的暴擊強化
   - `m_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `言出法隨` 的術式增幅
   - `b_sf_passive` / `m_vr_passive`：在 enemy world strike 也會正式回報 `肉身成聖` / `空間法則`，不再只在時間軸戰鬥內有感
-  - `b_f_passive` / `b_q_passive` / `b_bi_passive` / `m_g_passive`：在 enemy world strike 也已開始正式回報 `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `元素護盾`
+  - `b_g_passive` / `b_f_passive` / `b_q_passive` / `b_bi_passive` / `m_g_passive`：在 enemy world strike 也已開始正式回報 `反震` / `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `元素護盾`
   - `b_f_passive` / `m_q_passive` / `s_q_passive` / `s_vr_passive`：在 player world strike 也開始明確回報 `蠻荒血脈`、`靈潮循環`、`劍脈初成`、`法則之劍`
   - `s_tr_passive`：低血量必暴與額外增傷
   - `b_ma_passive`：死亡逆轉並短暫無敵

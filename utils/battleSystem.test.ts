@@ -1408,6 +1408,40 @@ describe("battle system balance", () => {
     expect(strike.statusNames).toContain("元素護盾");
   });
 
+  it("surfaces reflect stance on enemy melee world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const body = calculatePlayerStats(
+      {
+        physique: 82,
+        rootBone: 74,
+        insight: 58,
+        comprehension: 20,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.GoldenCore,
+      SpiritRootId.MIXED_FIVE,
+      {
+        defense: 280,
+        hp: 7600,
+      },
+      "荊棘戰軀",
+      ProfessionType.Body,
+      ["b_g_passive"]
+    );
+
+    const enemy = {
+      ...COMMON_ENEMIES.m120_c1,
+      attackRange: 1,
+      attack: 540,
+    };
+
+    const strike = resolveEnemyWorldStrike(enemy, body);
+
+    expect(strike.statusNames).toContain("反震");
+  });
+
   it("lets fusion mage passive cast without mana cost and regenerate hp/mp", () => {
     fixedRandom.mockReturnValue(0.5);
 

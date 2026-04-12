@@ -486,6 +486,7 @@ const getEnemyWorldPassiveStatusNames = (
     copperSkinTriggered: boolean;
     bodyFusionTriggered: boolean;
     elementalBarrierTriggered: boolean;
+    reflectTriggered: boolean;
   }
 ) => {
   const statusNames: string[] = [];
@@ -498,7 +499,12 @@ const getEnemyWorldPassiveStatusNames = (
     copperSkinTriggered,
     bodyFusionTriggered,
     elementalBarrierTriggered,
+    reflectTriggered,
   } = options;
+
+  if (reflectTriggered) {
+    statusNames.push("反震");
+  }
 
   if (bodyFoundationStacks > 0) {
     statusNames.push("蠻荒血脈");
@@ -1853,6 +1859,10 @@ export const resolveEnemyWorldStrike = (
     (special ? timelineProfile.areaDamageModifier : 1);
   let damage = resolveDamage(effectivePower, effectiveDefense);
   const { hasBodyQiPassive } = passiveFlags;
+  const reflectTriggered =
+    passiveFlags.hasReflectPassive &&
+    damage > 0 &&
+    (enemy.attackRange ?? 1) <= 1;
   const bodyFoundationStacks = getBodyFoundationBloodlineStacks(player.hp, player.maxHp);
   if (attackContext.damageBonus) {
     damage = Math.floor(damage * (1 + attackContext.damageBonus / 100));
@@ -1898,6 +1908,7 @@ export const resolveEnemyWorldStrike = (
       copperSkinTriggered,
       bodyFusionTriggered,
       elementalBarrierTriggered,
+      reflectTriggered,
     }),
   ];
 
