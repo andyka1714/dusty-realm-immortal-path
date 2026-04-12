@@ -840,6 +840,35 @@ describe("battle system balance", () => {
     expect(strike.playerStatusNames).toContain("靈潮循環");
   });
 
+  it("surfaces nascent mage passive on high-mana world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 72,
+        rootBone: 68,
+        insight: 84,
+        comprehension: 26,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.NascentSoul,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1200,
+        mp: 2800,
+        defense: 180,
+      },
+      "法力源泉",
+      ProfessionType.Mage,
+      ["m_n_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(mage, COMMON_ENEMIES.m90_c1);
+
+    expect(strike.playerStatusNames).toContain("法力源泉");
+  });
+
   it("lets foundation body passive scale offense with missing hp in world strikes", () => {
     fixedRandom.mockReturnValue(0.5);
 

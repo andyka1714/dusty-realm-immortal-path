@@ -62,6 +62,7 @@
 - 被動技能開關判定也已抽成共用 skill-id 對照表，world strike 與 timeline combat 對齊時不必再重複鋪一大串 `hasPassiveSkillId(...)`
 - 戰鬥開場的被動狀態與對應戰鬥訊息，已開始走共用初始化 helper，不再由 `runAutoBattle()` 散寫 `荊棘皮層` / `元素護盾` 等開場事件
 - 屬性克制、弱點洞察、元素抗性、開場被動與高境界開場壓制提示，也已開始收斂到共用 opener helper，降低 `runAutoBattle()` 前置事件散落風險
+- 主動術式後的被動觸發訊息，已開始抽成共用 passive-proc helper，逐步收斂 `法力源泉` / `言出法隨` / `法則之劍` / `劍道獨尊` / `靈潮循環` / `蠻荒血脈` 等事件的散寫
 - 第一批與第二批法術型怪物、遠程怪與 Boss 已補上 `specialAttack` 資料，戰鬥中不再只剩普通攻擊模板
 - `createEnemy()` 已加入預設怪物特招規則：
   - 沒有手工特招的精英 / Boss 也會依 `元素 / 階級 / 境界` 自動得到一套基礎殺招
@@ -105,6 +106,7 @@
   - `s_n_passive`：致命一擊抵擋 + 反震（每戰 1 次）
   - `b_n_passive`：按最大生命與已損生命持續回血，已補上專屬戰鬥事件
   - `m_n_passive`：法力回復與高靈力增傷，已補上專屬戰鬥事件
+  - `m_n_passive`：world strike 已會正式回報 `法力源泉`
   - `m_n_passive`：持續回靈，且靈力高於 80% 時增傷
   - `s_sf_passive`：普攻雙段追擊
   - `s_bi_passive`：控制型狀態持續時間縮短

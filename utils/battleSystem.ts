@@ -549,6 +549,10 @@ const getPlayerWorldPassiveStatusNames = (options: {
     statusNames.push("靈潮循環");
   }
 
+  if (passiveFlags.hasManaSpringPassive && player.mp >= player.maxMp * 0.8) {
+    statusNames.push("法力源泉");
+  }
+
   if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageFoundationPassive) {
     statusNames.push("靈力湧動");
   }
@@ -1194,6 +1198,78 @@ const getPassiveRegenMessages = (options: {
             : `法力源泉湧動，你回復了 ${manaAmount} 點靈力。`
         : "",
   };
+};
+
+const getPlayerActivePassiveProcMessages = (options: {
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  currentTimeMs: number;
+  playerHp: number;
+  enemyHp: number;
+  skillReady: boolean;
+  activeSkill?: Skill;
+  isCrit: boolean;
+  manaSpringEmpowered: boolean;
+  hasMageMahayanaPassive: boolean;
+  hasSwordMahayanaPassive: boolean;
+  hasMageQiPassive: boolean;
+  bodyFoundationStacks: number;
+  voidSwordProc: boolean;
+}) => {
+  const {
+    player,
+    enemy,
+    currentTimeMs,
+    playerHp,
+    enemyHp,
+    skillReady,
+    activeSkill,
+    isCrit,
+    manaSpringEmpowered,
+    hasMageMahayanaPassive,
+    hasSwordMahayanaPassive,
+    hasMageQiPassive,
+    bodyFoundationStacks,
+    voidSwordProc,
+  } = options;
+
+  const messages: string[] = [];
+
+  if (manaSpringEmpowered) {
+    messages.push("【法力源泉】靈海盈滿，你的術式威能暴漲。");
+  }
+
+  if (hasMageMahayanaPassive && skillReady && activeSkill?.profession === ProfessionType.Mage) {
+    messages.push("【言出法隨】一言牽動萬法，主動術式威能被再度拔升。");
+  }
+
+  if (voidSwordProc) {
+    messages.push("【法則之劍】劍勢洞穿護體，這一擊額外撕開敵方防禦並抬升暴傷上限。");
+  }
+
+  if (hasSwordMahayanaPassive && isCrit) {
+    messages.push("【劍道獨尊】單體劍勢攀至極處，暴擊威能再被推上一層。");
+  }
+
+  if (hasMageQiPassive && !skillReady && player.profession === ProfessionType.Mage) {
+    messages.push("【靈潮循環】法力餘波裹住普攻，讓空窗期不致斷勢。");
+  }
+
+  if (bodyFoundationStacks > 0) {
+    messages.push(`【蠻荒血脈】氣血越低，凶性越盛，當前 ${bodyFoundationStacks} 層血脈沸騰同步拔高攻勢。`);
+  }
+
+  return messages.map((message) => ({
+    turn: 0,
+    timeMs: currentTimeMs,
+    isPlayer: true as const,
+    message,
+    damage: 0,
+    playerHp,
+    playerMaxHp: player.maxHp,
+    enemyHp,
+    enemyMaxHp: enemy.maxHp,
+  }));
 };
 
 const logShieldAbsorption = ({
@@ -2458,49 +2534,27 @@ export const runAutoBattle = (
       }
 
       enemyHp = Math.max(0, enemyHp - playerDamage);
-      if (manaSpringEmpowered) {
+      getPlayerActivePassiveProcMessages({
+        player,
+        enemy,
+        currentTimeMs,
+        playerHp,
+        enemyHp,
+        skillReady,
+        activeSkill: activeSkill ?? undefined,
+        isCrit,
+        manaSpringEmpowered,
+        hasMageMahayanaPassive,
+        hasSwordMahayanaPassive,
+        hasMageQiPassive,
+        bodyFoundationStacks,
+        voidSwordProc,
+      }).forEach((log) => {
         pushCombatLog(logs, {
+          ...log,
           turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【法力源泉】靈海盈滿，你的術式威能暴漲。`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
         });
-      }
-      if (
-        hasMageMahayanaPassive &&
-        skillReady &&
-        activeSkill!.profession === ProfessionType.Mage
-      ) {
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【言出法隨】一言牽動萬法，主動術式威能被再度拔升。`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-      }
-      if (voidSwordProc) {
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【法則之劍】劍勢洞穿護體，這一擊額外撕開敵方防禦並抬升暴傷上限。`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-      }
+      });
       pushCombatLog(logs, {
         turn,
         timeMs: currentTimeMs,
@@ -2516,50 +2570,6 @@ export const runAutoBattle = (
         enemyHp,
         enemyMaxHp: enemy.maxHp,
       });
-      if (hasSwordMahayanaPassive && isCrit) {
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【劍道獨尊】單體劍勢攀至極處，暴擊威能再被推上一層。`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-      }
-      if (
-        hasMageQiPassive &&
-        !skillReady &&
-        player.profession === ProfessionType.Mage
-      ) {
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【靈潮循環】法力餘波裹住普攻，讓空窗期不致斷勢。`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-      }
-      if (bodyFoundationStacks > 0) {
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【蠻荒血脈】氣血越低，凶性越盛，當前 ${bodyFoundationStacks} 層血脈沸騰同步拔高攻勢。`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-      }
-
       if (
         hasSwordQiPassive &&
         skillReady &&

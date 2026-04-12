@@ -147,6 +147,7 @@
 - 玩家被動技能判定已開始抽成共用 passive flags helper，降低 world / timeline 分散重寫風險
 - 玩家被動技能判定已補成共用 skill-id 對照表，world strike 與 timeline combat 的 passive flag 來源不再各自手寫
 - 戰鬥開場的元素克制、弱點洞察、護體展開與高境界開場壓制，也已開始整併成共用 opener helper
+- 主動術式後的多種被動觸發訊息，也已開始整併到共用 passive-proc helper
 - `言出法隨`、`劍道獨尊`、`向死而生` 等高境界被動，已開始同步對齊 world strike 與時間軸戰鬥結果
 - retired 技能已分成：
   - `battle-absorbed`
@@ -155,6 +156,7 @@
 - 其中 `m_bi_active`、`b_tr_active` 已在先前批次從 `pending-retirement` 推進到 `battle-absorbed`
 - 角色屬性、商店、圖鑑、側欄、背包與區域地圖節點提示，已開始共用 `GameTooltip / GameHintBubble` 遊戲化外觀，面板框體語言也進一步向同一套殼層收斂
 - `五氣朝元` 的回春 / 回藍事件也已改成專屬戰鬥訊息，不再落回 generic regen 文案
+- `法力源泉`、`靈力湧動`、`五氣朝元` 這批法修被動，也已開始補齊 world strike 狀態回報
 
 ---
 
