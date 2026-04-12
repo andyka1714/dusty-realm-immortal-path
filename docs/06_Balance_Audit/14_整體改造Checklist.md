@@ -302,6 +302,7 @@
 - [x] `b_sf_passive` / `m_vr_passive` 已補上 enemy world strike 對齊，正式回報 `肉身成聖` / `空間法則`
 - [x] `b_g_passive` / `b_f_passive` / `b_q_passive` / `b_bi_passive` / `m_g_passive` 已補上 enemy world strike 對齊，正式回報 `反震` / `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `元素護盾`
 - [x] `b_tr_passive` / `m_tr_passive` 已補上 enemy world strike 對齊，正式回報 `萬劫不滅` / `雷劫煉心`
+- [x] `s_n_passive` / `b_ma_passive` 已補上 enemy world strike 對齊，正式回報 `護體劍罡` / `滴血重生`
 - [x] 道途內的突破按鈕提示也已切到 `GameHintBubble`，再少一個原生 `title` 提示
 - [x] player world strike 的被動狀態回報已開始抽成共用 helper，並補上 `蠻荒血脈` / `靈潮循環` / `劍脈初成` / `法則之劍`
 - [x] `m_n_passive` / `m_f_passive` / `m_bi_passive` 已開始補齊 world strike 狀態回報，正式標出 `法力源泉` / `靈力湧動` / `五氣朝元`

@@ -1511,6 +1511,77 @@ describe("battle system balance", () => {
     expect(strike.statusNames).toContain("雷劫煉心");
   });
 
+  it("surfaces sword death-ward passive on lethal enemy world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 78,
+        rootBone: 80,
+        insight: 74,
+        comprehension: 24,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.NascentSoul,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 760,
+        defense: 200,
+        hp: 2600,
+        mp: 1200,
+      },
+      "劍罡真君",
+      ProfessionType.Sword,
+      ["s_n_passive"]
+    );
+
+    const woundedSword = { ...sword, hp: 300 };
+    const enemy = {
+      ...BOSS_ENEMIES.m151_b1,
+      attack: 50000,
+    };
+
+    const strike = resolveEnemyWorldStrike(enemy, woundedSword);
+
+    expect(strike.statusNames).toContain("護體劍罡");
+  });
+
+  it("surfaces true rebirth passive on lethal enemy world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const body = calculatePlayerStats(
+      {
+        physique: 92,
+        rootBone: 80,
+        insight: 66,
+        comprehension: 24,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.Mahayana,
+      SpiritRootId.MIXED_FIVE,
+      {
+        attack: 880,
+        defense: 280,
+        hp: 1500,
+      },
+      "真武聖者",
+      ProfessionType.Body,
+      ["b_ma_passive"]
+    );
+
+    const woundedBody = { ...body, hp: 200 };
+    const enemy = {
+      ...BOSS_ENEMIES.m161_b1,
+      attack: 50000,
+    };
+
+    const strike = resolveEnemyWorldStrike(enemy, woundedBody);
+
+    expect(strike.statusNames).toContain("滴血重生");
+  });
+
   it("lets fusion mage passive cast without mana cost and regenerate hp/mp", () => {
     fixedRandom.mockReturnValue(0.5);
 

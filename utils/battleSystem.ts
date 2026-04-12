@@ -491,6 +491,7 @@ const getEnemyWorldPassiveStatusNames = (
     bodyTribulationTriggered: boolean;
     mageTribulationTriggered: boolean;
     bodyRebirthTrueTriggered: boolean;
+    swordDeathWardTriggered: boolean;
   }
 ) => {
   const statusNames: string[] = [];
@@ -508,7 +509,12 @@ const getEnemyWorldPassiveStatusNames = (
     bodyTribulationTriggered,
     mageTribulationTriggered,
     bodyRebirthTrueTriggered,
+    swordDeathWardTriggered,
   } = options;
+
+  if (swordDeathWardTriggered) {
+    statusNames.push("護體劍罡");
+  }
 
   if (reflectTriggered) {
     statusNames.push("反震");
@@ -1919,6 +1925,10 @@ export const resolveEnemyWorldStrike = (
   const bodyRebirthTrueTriggered =
     passiveFlags.hasBodyRebirthTruePassive &&
     postTribulationDamage >= player.hp;
+  const swordDeathWardTriggered =
+    passiveFlags.hasSwordDeathWardPassive &&
+    postTribulationDamage >= player.hp &&
+    player.mp > 0;
   const voidEvasion =
     passiveFlags.hasMageVoidPassive && Math.random() < 0.3;
   if (voidEvasion) {
@@ -1943,6 +1953,7 @@ export const resolveEnemyWorldStrike = (
       bodyTribulationTriggered,
       mageTribulationTriggered,
       bodyRebirthTrueTriggered,
+      swordDeathWardTriggered,
     }),
   ];
 
