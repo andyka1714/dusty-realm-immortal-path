@@ -579,6 +579,39 @@ describe("battle system balance", () => {
     ).toBe(true);
   });
 
+  it("lets golden-core mage passive block one incoming special attack completely", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 58,
+        rootBone: 58,
+        insight: 70,
+        comprehension: 22,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.GoldenCore,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 520,
+        mp: 2200,
+        hp: 1800,
+        defense: 120,
+        speed: 8,
+      },
+      "玄水真人",
+      ProfessionType.Mage,
+      ["m_g_passive"]
+    );
+
+    const result = runAutoBattle(mage, BOSS_ENEMIES.m180_b1);
+
+    expect(
+      result.logs.some((log) => log.message.includes("完整化去了一次術式傷害"))
+    ).toBe(true);
+  });
+
   it("lets foundation body passive scale offense with missing hp in world strikes", () => {
     fixedRandom.mockReturnValue(0.5);
 

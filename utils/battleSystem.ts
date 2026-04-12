@@ -1819,7 +1819,7 @@ export const runAutoBattle = (
       id: "elemental_barrier",
       name: "元素護盾",
       kind: "shield",
-      value: Math.floor(player.maxHp * 0.18),
+      value: 1,
       expiresAtMs: Number.MAX_SAFE_INTEGER,
     });
     pushCombatLog(logs, {
@@ -2753,6 +2753,34 @@ export const runAutoBattle = (
           });
         }
 
+        let elementalBarrierBlocked = false;
+        if (enemySpecialReady && enemyDamage > 0) {
+          const elementalBarrier = playerStatuses.find(
+            (status) =>
+              status.id === "elemental_barrier" &&
+              status.kind === "shield" &&
+              status.expiresAtMs > currentTimeMs &&
+              status.value > 0
+          );
+          if (elementalBarrier) {
+            elementalBarrier.value = 0;
+            elementalBarrier.expiresAtMs = currentTimeMs;
+            elementalBarrierBlocked = true;
+            enemyDamage = 0;
+            pushCombatLog(logs, {
+              turn,
+              timeMs: currentTimeMs,
+              isPlayer: true,
+              message: `【元素護盾】完整化去了一次術式傷害。`,
+              damage: 0,
+              playerHp,
+              playerMaxHp: player.maxHp,
+              enemyHp,
+              enemyMaxHp: enemy.maxHp,
+            });
+          }
+        }
+
         const shieldResult = absorbDamageWithShield(
           playerStatuses,
           enemyDamage,
@@ -2772,6 +2800,16 @@ export const runAutoBattle = (
             enemyHp,
             enemyMaxHp: enemy.maxHp,
           });
+        }
+
+        if (elementalBarrierBlocked) {
+          playerStatuses = playerStatuses.filter(
+            (status) =>
+              !(
+                status.id === "elemental_barrier" &&
+                status.expiresAtMs <= currentTimeMs
+              )
+          );
         }
 
         if (
