@@ -17,6 +17,7 @@ import { StatsPanel } from '../components/StatsPanel';
 import { Modal } from '../components/Modal';
 import { IntroSequence } from '../components/IntroSequence';
 import { GameHintBubble } from '../components/game/GameHintBubble';
+import { GameTooltip } from '../components/game/GameTooltip';
 import { Play, ChevronsUp, Moon, Info, Skull, AlertTriangle, Zap, Lock } from 'lucide-react';
 import { MajorRealm, SpiritRootType } from '../types';
 import { calculateSeclusionCost, getBaseCultivationRate, getGatheringMultiplier, getManualCultivateCooldown, getPassiveCultivationRate } from '../utils/cultivation';
@@ -48,7 +49,39 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
   const spiritRoot = spiritRootId;
 
   const [isBreakthroughModalOpen, setIsBreakthroughModalOpen] = useState(false);
+  const [tooltip, setTooltip] = useState<{
+    x: number;
+    y: number;
+    title?: React.ReactNode;
+    content: React.ReactNode;
+    widthClassName?: string;
+  } | null>(null);
   const processedBreakthroughRef = useRef<number>(lastBreakthroughResult?.timestamp || 0);
+
+  const showTooltip = useCallback(
+    (
+      event: React.MouseEvent,
+      config: {
+        title?: React.ReactNode;
+        content: React.ReactNode;
+        widthClassName?: string;
+      }
+    ) => {
+      const rect = event.currentTarget.getBoundingClientRect();
+      setTooltip({
+        x: Math.min(rect.left, window.innerWidth - 320),
+        y: rect.bottom + 8,
+        title: config.title,
+        content: config.content,
+        widthClassName: config.widthClassName ?? "w-72",
+      });
+    },
+    []
+  );
+
+  const hideTooltip = useCallback(() => {
+    setTooltip(null);
+  }, []);
 
   // Monitor Age for Year Events
   useEffect(() => {
@@ -284,7 +317,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
         <div className={clsx("space-y-6", embedded ? "flex h-full min-h-0 flex-col" : "")}>
             <div className={clsx(embedded ? "rounded-[20px] border border-stone-800/80 bg-stone-900/82 p-5 md:p-6" : "")}>
             <div className="flex justify-between items-start">
-              <div className="group relative cursor-help">
+              <div
+                className="cursor-help"
+                onMouseEnter={(event) =>
+                  showTooltip(event, {
+                    title: `${name} (道號)`,
+                    content: (
+                      <>
+                        <div className="mb-2 leading-relaxed">
+                          當前骨齡：<span className="text-amber-500 font-mono">{currentAgeYearStr}</span> 歲<br/>
+                          壽元上限：<span className="text-stone-400 font-mono">{maxAgeYearStr}</span> 歲
+                        </div>
+                        <div className="text-xs text-stone-500 italic border-t border-stone-800 pt-2">
+                          歲月不居，時節如流，若不破境增加壽元，終將身死道消。
+                        </div>
+                      </>
+                    ),
+                  })
+                }
+                onMouseLeave={hideTooltip}
+              >
                 <div className="flex items-center gap-2">
                   <h2 className="text-3xl font-bold text-stone-100">{name}</h2>
                   <span className={`text-xl ${gender === 'Male' ? 'text-blue-400' : 'text-pink-400'}`}>
@@ -295,16 +347,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                    <span className="text-stone-500 text-sm border border-stone-700 px-2 py-0.5 rounded-full bg-stone-950">
                     {character.title}
                   </span>
-                </div>
-                <div className="absolute top-full left-0 mt-2 px-4 py-3 bg-stone-950 border border-stone-700 text-sm text-stone-300 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-[100] w-72">
-                   <div className="font-bold text-stone-200 mb-2">{name} (道號)</div>
-                   <div className="mb-2 leading-relaxed">
-                      當前骨齡：<span className="text-amber-500 font-mono">{currentAgeYearStr}</span> 歲<br/>
-                      壽元上限：<span className="text-stone-400 font-mono">{maxAgeYearStr}</span> 歲
-                   </div>
-                   <div className="text-xs text-stone-500 italic border-t border-stone-800 pt-2">
-                      歲月不居，時節如流，若不破境增加壽元，終將身死道消。
-                   </div>
                 </div>
               </div>
 
@@ -328,7 +370,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                         {expPercentage.toFixed(1)}%
                     </span>
                 </div>
-                <div className="group relative cursor-help flex items-center gap-3">
+                <div
+                  className="cursor-help flex items-center gap-3"
+                  onMouseEnter={(event) =>
+                    showTooltip(event, {
+                      title: "修煉效率",
+                      widthClassName: "w-72",
+                      content: (
+                        <div className="font-mono text-xs space-y-1">
+                          <div>根骨({attributes.rootBone}) × 境界({realmMultiplier.toFixed(2)}) × 靈根({spiritMultiplier.toFixed(1)}) × 聚靈({gatherMultiplier.toFixed(2)})</div>
+                          <div className="text-stone-400">基礎速率：{baseRate.toFixed(1)}</div>
+                          <div className="text-stone-400">狀態倍率：{stateMultiplier.toFixed(1)} ({isInSeclusion ? '閉關' : '自然運轉'})</div>
+                          <div className="border-t border-stone-700 mt-1 pt-1 text-right text-emerald-400 font-bold">
+                            = {finalDisplayRate}
+                          </div>
+                        </div>
+                      ),
+                    })
+                  }
+                  onMouseLeave={hideTooltip}
+                >
                     <span className="text-stone-400 text-xs">修練速度</span>
                     {isBreakthroughAvailable ? (
                         <span className="text-lg font-bold text-amber-500 animate-pulse tracking-widest">
@@ -342,17 +403,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                            {isInSeclusion && <span className="text-[10px] ml-1 text-amber-500 border border-amber-900 px-1 rounded">閉關 x2.0</span>}
                         </>
                     )}
-                   <div className="absolute top-full right-0 mt-2 px-4 py-3 bg-stone-950 border border-stone-700 text-xs text-stone-300 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-[100] w-72">
-                      <div className="mb-2 font-bold text-stone-200">修煉效率</div>
-                      <div className="font-mono text-xs space-y-1">
-                        <div>根骨({attributes.rootBone}) × 境界({realmMultiplier.toFixed(2)}) × 靈根({spiritMultiplier.toFixed(1)}) × 聚靈({gatherMultiplier.toFixed(2)})</div>
-                        <div className="text-stone-400">基礎速率：{baseRate.toFixed(1)}</div>
-                        <div className="text-stone-400">狀態倍率：{stateMultiplier.toFixed(1)} ({isInSeclusion ? '閉關' : '自然運轉'})</div>
-                        <div className="border-t border-stone-700 mt-1 pt-1 text-right text-emerald-400 font-bold">
-                          = {finalDisplayRate}
-                        </div>
-                      </div>
-                   </div>
                 </div>
               </div>
               <div className="relative">
@@ -370,7 +420,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                    >
                      +{Number(gainedAmount.toFixed(1))}
                    </div>
-                )}
+      )}
+
+      {tooltip && (
+        <GameTooltip
+          title={tooltip.title}
+          widthClassName={tooltip.widthClassName}
+          className="animate-in fade-in duration-150 zoom-in-95"
+          style={{ left: tooltip.x, top: tooltip.y }}
+        >
+          {tooltip.content}
+        </GameTooltip>
+      )}
               </div>
               <div className="flex justify-end mt-1 px-1">
                  <span className="text-[10px] text-stone-500 font-mono tracking-wide">

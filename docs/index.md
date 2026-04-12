@@ -27,7 +27,7 @@
 使用者體驗與介面規範。
 - [flow.md](04_UI/flow.md): 遊戲初始化流程 (序幕->抽卡->主頁) 與導航結構。
 - [components.md](04_UI/components.md): UI 組件庫規範 (Tailwind 配色、按鈕樣式)。
-  - 補充：角色屬性、商店、圖鑑、底部 dock 與多個操作提示，已開始共用 `GameTooltip / GameHintBubble` 遊戲化外觀。
+  - 補充：角色屬性、商店、圖鑑、底部 dock、道途頁資訊與多個操作提示，已開始共用 `GameTooltip / GameHintBubble` 遊戲化外觀。
 
 ### [05_Data] 數據表 (Data Tables)
 純數據參考表，供查閱使用。
