@@ -12,9 +12,11 @@
 
 - 地圖內直接移動、鎖定目標與即時出手
 - `runAutoBattle()` 保留作為時間軸數值驗證內核
+- 世界戰鬥、時間軸戰鬥與 HUD 已開始共用 cooldown / status / passive flags resolver
 - 技能改為透過技能書學習，不再隨職業 / 突破自動送
-- 技能池已切成 `formal core / retired` 視角，正式取得來源只投放 `core`
+- 技能池已切成 `formal core / retired` 視角，retired 進一步收斂為 `battle-absorbed / retirement-ready`
 - 高境界精英 / Boss、裝備 audit、技能效果與世界戰鬥 AOE 都已接入第一版正式實作
+- 角色屬性與商店道具 tooltip 已開始共用同一套遊戲化外觀元件
 
 ## 文件入口
 
