@@ -61,6 +61,7 @@
 - 世界戰鬥、時間軸戰鬥與右下角技能 CD HUD，現在已開始共用同一套技能冷卻解析，不再各自直接讀 `cooldownSeconds`
 - 被動技能開關判定也已抽成共用 skill-id 對照表，world strike 與 timeline combat 對齊時不必再重複鋪一大串 `hasPassiveSkillId(...)`
 - 戰鬥開場的被動狀態與對應戰鬥訊息，已開始走共用初始化 helper，不再由 `runAutoBattle()` 散寫 `荊棘皮層` / `元素護盾` 等開場事件
+- 屬性克制、弱點洞察、元素抗性、開場被動與高境界開場壓制提示，也已開始收斂到共用 opener helper，降低 `runAutoBattle()` 前置事件散落風險
 - 第一批與第二批法術型怪物、遠程怪與 Boss 已補上 `specialAttack` 資料，戰鬥中不再只剩普通攻擊模板
 - `createEnemy()` 已加入預設怪物特招規則：
   - 沒有手工特招的精英 / Boss 也會依 `元素 / 階級 / 境界` 自動得到一套基礎殺招

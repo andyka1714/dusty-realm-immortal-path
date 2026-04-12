@@ -1091,6 +1091,68 @@ const getInitialPassiveBattleLogMessages = ({
   return messages;
 };
 
+const getCombatOpeningMessages = (options: {
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  restriction: { isEffective: boolean; isResisted: boolean };
+  elementalAffinity: { multiplier: number; reason?: "resistance" | "weakness" };
+  hasReflectPassive: boolean;
+  hasInitialShieldPassive: boolean;
+  hasMageImmortalPassive: boolean;
+  hasMageEmperorPassive: boolean;
+}) => {
+  const {
+    player,
+    enemy,
+    restriction,
+    elementalAffinity,
+    hasReflectPassive,
+    hasInitialShieldPassive,
+    hasMageImmortalPassive,
+    hasMageEmperorPassive,
+  } = options;
+  const messages: string[] = [];
+
+  if (player.element !== ElementType.None && enemy.element !== ElementType.None) {
+    if (restriction.isEffective) {
+      messages.push(
+        `屬性克制：你的【${ELEMENT_NAMES[player.element]}】克制了敵方的【${ELEMENT_NAMES[enemy.element]}】！攻擊更易穿透對方護體。`
+      );
+    }
+    if (restriction.isResisted) {
+      messages.push(
+        `屬性受制：你的【${ELEMENT_NAMES[player.element]}】受到敵方【${ELEMENT_NAMES[enemy.element]}】壓制，輸出略有削弱。`
+      );
+    }
+    if (elementalAffinity.reason === "weakness") {
+      messages.push(
+        `弱點洞察：敵方對【${ELEMENT_NAMES[player.element]}】存在明顯弱點，造成的直接傷害將額外提升。`
+      );
+    } else if (elementalAffinity.reason === "resistance") {
+      messages.push(
+        `元素抗性：敵方對【${ELEMENT_NAMES[player.element]}】具備抗性，造成的直接傷害會被部分削減。`
+      );
+    }
+  }
+
+  messages.push(
+    ...getInitialPassiveBattleLogMessages({
+      hasReflectPassive,
+      hasInitialShieldPassive,
+    })
+  );
+
+  if (hasMageImmortalPassive) {
+    messages.push("【仙法通神】法則共鳴已展開，術式有機會再次應現。");
+  }
+
+  if (hasMageEmperorPassive) {
+    messages.push("【萬法歸宗】先天法則壓制降下，敵方術式運轉被延後。");
+  }
+
+  return messages;
+};
+
 const logShieldAbsorption = ({
   logs,
   turn,
@@ -2034,60 +2096,6 @@ export const runAutoBattle = (
     cleanupExpiredStatuses(currentMs);
   };
 
-  if (player.element !== ElementType.None && enemy.element !== ElementType.None) {
-    if (pVsE.isEffective) {
-      pushCombatLog(logs, {
-        turn: 0,
-        timeMs: 0,
-        isPlayer: true,
-        message: `屬性克制：你的【${ELEMENT_NAMES[player.element]}】克制了敵方的【${ELEMENT_NAMES[enemy.element]}】！攻擊更易穿透對方護體。`,
-        damage: 0,
-        playerHp,
-        playerMaxHp: player.maxHp,
-        enemyHp,
-        enemyMaxHp: enemy.maxHp,
-      });
-    }
-    if (pVsE.isResisted) {
-      pushCombatLog(logs, {
-        turn: 0,
-        timeMs: 0,
-        isPlayer: true,
-        message: `屬性受制：你的【${ELEMENT_NAMES[player.element]}】受到敵方【${ELEMENT_NAMES[enemy.element]}】壓制，輸出略有削弱。`,
-        damage: 0,
-        playerHp,
-        playerMaxHp: player.maxHp,
-        enemyHp,
-        enemyMaxHp: enemy.maxHp,
-      });
-    }
-    if (enemyElementalAffinity.reason === "weakness") {
-      pushCombatLog(logs, {
-        turn: 0,
-        timeMs: 0,
-        isPlayer: true,
-        message: `弱點洞察：敵方對【${ELEMENT_NAMES[player.element]}】存在明顯弱點，造成的直接傷害將額外提升。`,
-        damage: 0,
-        playerHp,
-        playerMaxHp: player.maxHp,
-        enemyHp,
-        enemyMaxHp: enemy.maxHp,
-      });
-    } else if (enemyElementalAffinity.reason === "resistance") {
-      pushCombatLog(logs, {
-        turn: 0,
-        timeMs: 0,
-        isPlayer: true,
-        message: `元素抗性：敵方對【${ELEMENT_NAMES[player.element]}】具備抗性，造成的直接傷害會被部分削減。`,
-        damage: 0,
-        playerHp,
-        playerMaxHp: player.maxHp,
-        enemyHp,
-        enemyMaxHp: enemy.maxHp,
-      });
-    }
-  }
-
   const initialPassiveStatuses = getInitialPassiveStatuses({
     hasReflectPassive,
     hasInitialShieldPassive,
@@ -2095,9 +2103,15 @@ export const runAutoBattle = (
   if (initialPassiveStatuses.length > 0) {
     playerStatuses.push(...initialPassiveStatuses);
   }
-  getInitialPassiveBattleLogMessages({
+  getCombatOpeningMessages({
+    player,
+    enemy,
+    restriction: pVsE,
+    elementalAffinity: enemyElementalAffinity,
     hasReflectPassive,
     hasInitialShieldPassive,
+    hasMageImmortalPassive,
+    hasMageEmperorPassive,
   }).forEach((message) => {
     pushCombatLog(logs, {
       turn: 0,
@@ -2111,35 +2125,7 @@ export const runAutoBattle = (
       enemyMaxHp: enemy.maxHp,
     });
   });
-
-  if (hasMageImmortalPassive) {
-    pushCombatLog(logs, {
-      turn: 0,
-      timeMs: 0,
-      isPlayer: true,
-      message: `【仙法通神】法則共鳴已展開，術式有機會再次應現。`,
-      damage: 0,
-      playerHp,
-      playerMaxHp: player.maxHp,
-      enemyHp,
-      enemyMaxHp: enemy.maxHp,
-    });
-  }
-
-  if (hasMageEmperorPassive) {
-    enemySpecialReadyAtMs = 2000;
-    pushCombatLog(logs, {
-      turn: 0,
-      timeMs: 0,
-      isPlayer: true,
-      message: `【萬法歸宗】先天法則壓制降下，敵方術式運轉被延後。`,
-      damage: 0,
-      playerHp,
-      playerMaxHp: player.maxHp,
-      enemyHp,
-      enemyMaxHp: enemy.maxHp,
-    });
-  }
+  if (hasMageEmperorPassive) enemySpecialReadyAtMs = 2000;
 
   while (playerHp > 0 && enemyHp > 0) {
     const playerActsFirst = playerNextActionMs <= enemyNextActionMs;

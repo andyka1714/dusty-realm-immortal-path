@@ -227,6 +227,7 @@
 - [x] 玩家被動技能判定已開始抽成共用 passive flags helper，降低 world / timeline / HUD 分散重寫風險
 - [x] 玩家被動技能判定已補成共用 skill-id 對照表，world strike 與 timeline combat 的 passive flag 來源不再各自手寫維護
 - [x] 開場被動狀態與對應戰鬥事件已開始走共用初始化 helper，降低 `runAutoBattle()` 散寫 `荊棘皮層` / `元素護盾` 等訊息的重複度
+- [x] 屬性克制、弱點洞察、元素抗性、開場被動與高境界開場壓制提示，已開始整併成共用 opener helper，縮減 `runAutoBattle()` 的前置事件散寫範圍
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---
