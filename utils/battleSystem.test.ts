@@ -1331,7 +1331,11 @@ describe("battle system balance", () => {
     const result = runAutoBattle(mage, enemy);
     expect(result.logs.some((log) => log.message.includes("元神出竅"))).toBe(true);
     expect(result.logs.some((log) => log.message.includes("五氣朝元"))).toBe(true);
-    expect(result.logs.some((log) => log.message.includes("回復了"))).toBe(true);
+    expect(
+      result.logs.some((log) =>
+        log.message.includes("【五氣朝元】五氣回流護住周身")
+      )
+    ).toBe(true);
   });
 
   it("lets fusion body active provide a giant-form sustain swing", () => {

@@ -1153,6 +1153,41 @@ const getCombatOpeningMessages = (options: {
   return messages;
 };
 
+const getPassiveRegenMessages = (options: {
+  healAmount: number;
+  manaAmount: number;
+  hasBodyRebirthPassive: boolean;
+  hasManaSpringPassive: boolean;
+  hasMageFusionPassive: boolean;
+}) => {
+  const {
+    healAmount,
+    manaAmount,
+    hasBodyRebirthPassive,
+    hasManaSpringPassive,
+    hasMageFusionPassive,
+  } = options;
+
+  return {
+    healMessage:
+      healAmount > 0
+        ? hasBodyRebirthPassive
+          ? `【滴血重生】血肉自衍，你回復了 ${healAmount} 點氣血。`
+          : hasMageFusionPassive
+            ? `【五氣朝元】五氣回流護住周身，你回復了 ${healAmount} 點氣血。`
+            : `氣血流轉，你回復了 ${healAmount} 點氣血。`
+        : "",
+    manaMessage:
+      manaAmount > 0
+        ? hasManaSpringPassive
+          ? `【法力源泉】靈海回湧，你回復了 ${manaAmount} 點靈力。`
+          : hasMageFusionPassive
+            ? `【五氣朝元】五氣朝元不息，你回復了 ${manaAmount} 點靈力。`
+            : `法力源泉湧動，你回復了 ${manaAmount} 點靈力。`
+        : "",
+  };
+};
+
 const logShieldAbsorption = ({
   logs,
   turn,
@@ -2151,9 +2186,13 @@ export const runAutoBattle = (
         );
         if (healAmount > 0) {
           playerHp = Math.min(player.maxHp, playerHp + healAmount);
-          const healMessage = hasBodyRebirthPassive
-            ? `【滴血重生】血肉自衍，你回復了 ${healAmount} 點氣血。`
-            : `氣血流轉，你回復了 ${healAmount} 點氣血。`;
+          const { healMessage } = getPassiveRegenMessages({
+            healAmount,
+            manaAmount: 0,
+            hasBodyRebirthPassive,
+            hasManaSpringPassive,
+            hasMageFusionPassive,
+          });
           pushCombatLog(logs, {
             turn,
             timeMs: currentTimeMs,
@@ -2174,9 +2213,13 @@ export const runAutoBattle = (
           const manaAmount = manaPerSecond * regenIntervals;
           if (manaAmount > 0) {
             playerMp = Math.min(player.maxMp, playerMp + manaAmount);
-            const manaMessage = hasManaSpringPassive
-              ? `【法力源泉】靈海回湧，你回復了 ${manaAmount} 點靈力。`
-              : `法力源泉湧動，你回復了 ${manaAmount} 點靈力。`;
+            const { manaMessage } = getPassiveRegenMessages({
+              healAmount: 0,
+              manaAmount,
+              hasBodyRebirthPassive,
+              hasManaSpringPassive,
+              hasMageFusionPassive,
+            });
             pushCombatLog(logs, {
               turn,
               timeMs: currentTimeMs,
