@@ -301,20 +301,25 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
             {/* Hover Tooltip */}
             {hoveredItem && ITEMS[hoveredItem.itemId] && (
                 <GameTooltip
+                    title={ITEMS[hoveredItem.itemId].name}
+                    titleClassName={getQualityTextColor(ITEMS[hoveredItem.itemId].quality)}
+                    footer={
+                        (() => {
+                            const hovered = ITEMS[hoveredItem.itemId];
+                            const realmName = hovered.minRealm !== undefined
+                              ? REALM_NAMES[hovered.minRealm]
+                              : ('requiredRealm' in hovered && hovered.requiredRealm !== undefined ? REALM_NAMES[hovered.requiredRealm] : '');
+                            return `${getQualityName(hovered.quality)}${realmName ? ` · ${realmName}期` : ''}`;
+                        })()
+                    }
                     widthClassName="w-64"
                     style={hoveredItem.style}
                 >
                     {(() => {
                         const item = ITEMS[hoveredItem.itemId];
-                        const qualityColor = getQualityTextColor(item.quality);
                         
                         return (
                             <div className="flex flex-col gap-2">
-                                {/* Header */}
-                                <div>
-                                    <h4 className={`text-lg font-bold ${qualityColor}`}>{item.name}</h4>
-                                    <span className="text-xs text-stone-500">{getQualityName(item.quality)}</span>
-                                </div>
                                 <p className="text-sm text-stone-400 italic">{item.description}</p>
                                 
                                 {/* Stats */}

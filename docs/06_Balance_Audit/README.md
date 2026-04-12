@@ -162,8 +162,9 @@
 - `萬法皆空` 也已開始在 player world strike 的普攻中正式回報，不再只在時間軸戰鬥裡隱性生效
 - `荊棘皮層`、`蠻荒血脈`、`銅皮鐵骨`、`金剛法相`、`元素護盾` 這批防禦型被動，也已開始補齊 enemy world strike 狀態回報
 - `萬劫不滅`、`雷劫煉心` 這批高境界承傷 / 生存被動，也已開始補齊 enemy world strike 狀態回報
-- `護體劍罡`、`滴血重生` 這批致命生存型被動，也已開始補齊 enemy world strike 狀態回報
+- `護體劍罡`、`滴血重生`、`不死不滅` 這批致命生存型被動，也已開始補齊 enemy world strike 狀態回報
 - `enemy world strike` 這條線的減傷 / 保命被動判定，也已開始抽成共用 trigger helper，往單一 battle resolver 再收一層
+- `StatsPanel / ShopPanel` 的主要資訊浮層已進一步收進 `GameTooltip` 的統一標題 / 註腳結構，UI 殼層更接近單一語言
 
 ---
 

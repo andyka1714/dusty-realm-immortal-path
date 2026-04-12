@@ -1582,6 +1582,41 @@ describe("battle system balance", () => {
     expect(strike.statusNames).toContain("滴血重生");
   });
 
+  it("surfaces emperor body passive on lethal enemy world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const body = calculatePlayerStats(
+      {
+        physique: 98,
+        rootBone: 82,
+        insight: 68,
+        comprehension: 24,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.ImmortalEmperor,
+      SpiritRootId.MIXED_FIVE,
+      {
+        attack: 940,
+        defense: 320,
+        hp: 1800,
+      },
+      "不滅武祖",
+      ProfessionType.Body,
+      ["b_ie_passive"]
+    );
+
+    const woundedBody = { ...body, hp: 180 };
+    const enemy = {
+      ...BOSS_ENEMIES.m181_b1,
+      attack: 50000,
+    };
+
+    const strike = resolveEnemyWorldStrike(enemy, woundedBody);
+
+    expect(strike.statusNames).toContain("不死不滅");
+  });
+
   it("lets fusion mage passive cast without mana cost and regenerate hp/mp", () => {
     fixedRandom.mockReturnValue(0.5);
 

@@ -302,12 +302,13 @@
 - [x] `b_sf_passive` / `m_vr_passive` 已補上 enemy world strike 對齊，正式回報 `肉身成聖` / `空間法則`
 - [x] `b_g_passive` / `b_f_passive` / `b_q_passive` / `b_bi_passive` / `m_g_passive` 已補上 enemy world strike 對齊，正式回報 `反震` / `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `元素護盾`
 - [x] `b_tr_passive` / `m_tr_passive` 已補上 enemy world strike 對齊，正式回報 `萬劫不滅` / `雷劫煉心`
-- [x] `s_n_passive` / `b_ma_passive` 已補上 enemy world strike 對齊，正式回報 `護體劍罡` / `滴血重生`
+- [x] `s_n_passive` / `b_ma_passive` / `b_ie_passive` 已補上 enemy world strike 對齊，正式回報 `護體劍罡` / `滴血重生` / `不死不滅`
 - [x] 道途內的突破按鈕提示也已切到 `GameHintBubble`，再少一個原生 `title` 提示
 - [x] player world strike 的被動狀態回報已開始抽成共用 helper，並補上 `蠻荒血脈` / `靈潮循環` / `劍脈初成` / `法則之劍`
 - [x] `m_n_passive` / `m_f_passive` / `m_bi_passive` 已開始補齊 world strike 狀態回報，正式標出 `法力源泉` / `靈力湧動` / `五氣朝元`
 - [x] `s_ie_passive` 已開始補齊 player world strike 對齊，正式標出 `萬法皆空`
 - [x] enemy world strike 的減傷 / 保命被動判定已開始抽成共用 trigger helper，減少 `resolveEnemyWorldStrike()` 內的重複流程
+- [x] `StatsPanel / ShopPanel` 的主要資訊浮層已進一步對齊 `GameTooltip` 的標題 / 註腳結構
 - [x] `m_im_passive` / `m_ie_passive` 已開始補齊 world strike 狀態回報，正式標出 `仙法通神` / `萬法歸宗`
 - [x] 多個已完成專屬接線的 passive，已開始移除手寫 generic `passiveEffectTags`，降低資料層誤導
 - [x] `b_n_passive` / `m_n_passive` 的回復事件已補回技能專屬戰鬥訊息，不再只走 generic regen log

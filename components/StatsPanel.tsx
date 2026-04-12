@@ -250,6 +250,9 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
       {/* FIXED TOOLTIP RENDERER */}
       {tooltip && (
         <GameTooltip
+          title={tooltip.label}
+          titleClassName={tooltip.highlightColor || "text-amber-500"}
+          footer={tooltip.subDesc}
           widthClassName="w-64 md:w-80"
           className="animate-in fade-in duration-200 zoom-in-95"
           style={{ 
@@ -257,9 +260,7 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
             left: Math.min(tooltip.x - 128, window.innerWidth - 300), // Adjusted collision for wider tooltip
           }}
         >
-          <div className={clsx("font-bold md:text-base", tooltip.highlightColor || "text-amber-500")}>{tooltip.label}</div>
           <div>{tooltip.desc}</div>
-          {tooltip.subDesc && <div className="text-[10px] md:text-xs text-stone-500">{tooltip.subDesc}</div>}
         </GameTooltip>
       )}
     </div>

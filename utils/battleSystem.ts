@@ -492,6 +492,7 @@ const getEnemyWorldPassiveStatusNames = (
     mageTribulationTriggered: boolean;
     bodyRebirthTrueTriggered: boolean;
     swordDeathWardTriggered: boolean;
+    bodyEmperorTriggered: boolean;
   }
 ) => {
   const statusNames: string[] = [];
@@ -510,6 +511,7 @@ const getEnemyWorldPassiveStatusNames = (
     mageTribulationTriggered,
     bodyRebirthTrueTriggered,
     swordDeathWardTriggered,
+    bodyEmperorTriggered,
   } = options;
 
   if (swordDeathWardTriggered) {
@@ -550,6 +552,10 @@ const getEnemyWorldPassiveStatusNames = (
 
   if (bodyRebirthTrueTriggered) {
     statusNames.push("滴血重生");
+  }
+
+  if (bodyEmperorTriggered) {
+    statusNames.push("不死不滅");
   }
 
   if (voidEvasion) {
@@ -615,6 +621,9 @@ const getEnemyWorldPassiveTriggerState = (options: {
   const bodyRebirthTrueTriggered =
     passiveFlags.hasBodyRebirthTruePassive &&
     postTribulationDamage >= player.hp;
+  const bodyEmperorTriggered =
+    passiveFlags.hasBodyEmperorPassive &&
+    postTribulationDamage >= player.hp;
   const swordDeathWardTriggered =
     passiveFlags.hasSwordDeathWardPassive &&
     postTribulationDamage >= player.hp &&
@@ -636,6 +645,7 @@ const getEnemyWorldPassiveTriggerState = (options: {
     bodyTribulationTriggered,
     mageTribulationTriggered,
     bodyRebirthTrueTriggered,
+    bodyEmperorTriggered,
     swordDeathWardTriggered,
     voidEvasion,
   };
@@ -1984,6 +1994,7 @@ export const resolveEnemyWorldStrike = (
     bodyTribulationTriggered,
     mageTribulationTriggered,
     bodyRebirthTrueTriggered,
+    bodyEmperorTriggered,
     swordDeathWardTriggered,
     voidEvasion,
   } = getEnemyWorldPassiveTriggerState({
@@ -2014,6 +2025,7 @@ export const resolveEnemyWorldStrike = (
       bodyTribulationTriggered,
       mageTribulationTriggered,
       bodyRebirthTrueTriggered,
+      bodyEmperorTriggered,
       swordDeathWardTriggered,
     }),
   ];
