@@ -611,7 +611,10 @@ describe("battle system balance", () => {
       meleeResult.logs.some((log) => log.message.includes("荊棘皮層"))
     ).toBe(true);
     expect(
-      rangedResult.logs.some((log) => log.message.includes("荊棘皮層"))
+      meleeResult.logs.some((log) => log.message.includes("覆上體表"))
+    ).toBe(true);
+    expect(
+      rangedResult.logs.some((log) => log.message.includes("反震回敬"))
     ).toBe(false);
   });
 

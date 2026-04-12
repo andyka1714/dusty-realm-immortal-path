@@ -289,6 +289,7 @@
 - [x] `b_g_passive` 荊棘皮層：僅在近戰命中時反震，不再對遠程 / 術式一律生效
 - [x] `m_sf_passive` 道法自然：冷卻縮減已補上明確戰鬥事件與共用 cooldown resolver
 - [x] `b_n_passive` / `m_n_passive` 的回復事件已補回技能專屬戰鬥訊息，不再只走 generic regen log
+- [x] battle 開場被動狀態初始化已抽成共用 helper，`b_g_passive` 開場護體也補上明確戰鬥事件
 - [ ] 被動技能改成逐招專屬效果，而不是通用屬性加成
 
 ---

@@ -846,6 +846,38 @@ const getReflectValue = (statuses: CombatStatus[], currentTimeMs: number) =>
     )
     .reduce((sum, status) => sum + status.value, 0);
 
+const getInitialPassiveStatuses = ({
+  hasReflectPassive,
+  hasInitialShieldPassive,
+}: {
+  hasReflectPassive: boolean;
+  hasInitialShieldPassive: boolean;
+}) => {
+  const statuses: CombatStatus[] = [];
+
+  if (hasReflectPassive) {
+    statuses.push({
+      id: "thorn_reflect",
+      name: "荊棘反震",
+      kind: "reflect",
+      value: 0.15,
+      expiresAtMs: Number.MAX_SAFE_INTEGER,
+    });
+  }
+
+  if (hasInitialShieldPassive) {
+    statuses.push({
+      id: "elemental_barrier",
+      name: "元素護盾",
+      kind: "shield",
+      value: 1,
+      expiresAtMs: Number.MAX_SAFE_INTEGER,
+    });
+  }
+
+  return statuses;
+};
+
 const isNegativeStatusKind = (kind: CombatStatus["kind"]) =>
   [
     "burn",
@@ -1804,24 +1836,29 @@ export const runAutoBattle = (
     }
   }
 
+  const initialPassiveStatuses = getInitialPassiveStatuses({
+    hasReflectPassive,
+    hasInitialShieldPassive,
+  });
+  if (initialPassiveStatuses.length > 0) {
+    playerStatuses.push(...initialPassiveStatuses);
+  }
+
   if (hasReflectPassive) {
-    playerStatuses.push({
-      id: "thorn_reflect",
-      name: "荊棘反震",
-      kind: "reflect",
-      value: 0.15,
-      expiresAtMs: Number.MAX_SAFE_INTEGER,
+    pushCombatLog(logs, {
+      turn: 0,
+      timeMs: 0,
+      isPlayer: true,
+      message: `【荊棘皮層】已覆上體表，只待近身來敵反震自傷。`,
+      damage: 0,
+      playerHp,
+      playerMaxHp: player.maxHp,
+      enemyHp,
+      enemyMaxHp: enemy.maxHp,
     });
   }
 
   if (hasInitialShieldPassive) {
-    playerStatuses.push({
-      id: "elemental_barrier",
-      name: "元素護盾",
-      kind: "shield",
-      value: 1,
-      expiresAtMs: Number.MAX_SAFE_INTEGER,
-    });
     pushCombatLog(logs, {
       turn: 0,
       timeMs: 0,
