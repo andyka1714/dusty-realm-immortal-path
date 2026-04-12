@@ -16,7 +16,8 @@
 - 技能改為透過技能書學習，不再隨職業 / 突破自動送
 - 技能池已切成 `formal core / retired` 視角，retired 進一步收斂為 `battle-absorbed / retirement-ready`
 - 高境界精英 / Boss、裝備 audit、技能效果與世界戰鬥 AOE 都已接入第一版正式實作
-- 角色屬性與商店道具 tooltip 已開始共用同一套遊戲化外觀元件
+- 角色屬性、商店、圖鑑與多個操作提示，已開始共用 `GameTooltip / GameHintBubble` 遊戲化外觀元件
+- `言出法隨`、`劍道獨尊`、`向死而生` 等高境界被動，已開始同步對齊 world strike 與時間軸戰鬥結果
 
 ## 文件入口
 
