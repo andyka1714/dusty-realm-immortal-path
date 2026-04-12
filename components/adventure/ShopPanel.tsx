@@ -12,6 +12,7 @@ import { addLog } from '../../store/slices/logSlice';
 import { X, ShoppingBag, Coins, Package, Shield, Sword, FlaskConical, CircleDashed, Footprints, Crown, Shirt, Medal, Check } from 'lucide-react';
 import clsx from 'clsx';
 import { Modal } from '../Modal';
+import { GameTooltip } from '../game/GameTooltip';
 
 
 // Helper for attribute names (Moved from Inventory to be shared concept ideally, but kept here for now)
@@ -299,8 +300,8 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
             
             {/* Hover Tooltip */}
             {hoveredItem && ITEMS[hoveredItem.itemId] && (
-                <div 
-                    className="fixed z-50 w-64 bg-stone-950 border border-stone-700 rounded-lg shadow-xl p-4 pointer-events-none"
+                <GameTooltip
+                    widthClassName="w-64"
                     style={hoveredItem.style}
                 >
                     {(() => {
@@ -383,7 +384,7 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                             </div>
                         );
                     })()}
-                </div>
+                </GameTooltip>
             )}
 
             <style>{`

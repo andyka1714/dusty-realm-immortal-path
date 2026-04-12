@@ -6,6 +6,7 @@ import { SPIRIT_ROOT_DETAILS, REALM_BASE_STATS } from '../constants';
 import { formatSpiritStone } from '../utils/currency';
 import { calculatePlayerStats } from '../utils/battleSystem';
 import clsx from 'clsx';
+import { GameTooltip } from './game/GameTooltip';
 
 interface StatsPanelProps {
   embedded?: boolean;
@@ -248,17 +249,18 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
 
       {/* FIXED TOOLTIP RENDERER */}
       {tooltip && (
-        <div 
-          className="fixed z-[9999] px-4 py-3 bg-stone-950 border border-stone-700 text-xs md:text-sm text-stone-300 rounded shadow-xl pointer-events-none w-64 md:w-80 animate-in fade-in duration-200 zoom-in-95"
+        <GameTooltip
+          widthClassName="w-64 md:w-80"
+          className="animate-in fade-in duration-200 zoom-in-95"
           style={{ 
             top: tooltip.y, 
             left: Math.min(tooltip.x - 128, window.innerWidth - 300), // Adjusted collision for wider tooltip
           }}
         >
-          <div className={clsx("font-bold mb-1 md:text-base", tooltip.highlightColor || "text-amber-500")}>{tooltip.label}</div>
-          <div className="mb-2 leading-relaxed">{tooltip.desc}</div>
-          {tooltip.subDesc && <div className="text-stone-500 text-[10px] md:text-xs border-t border-stone-800 pt-1 italic">{tooltip.subDesc}</div>}
-        </div>
+          <div className={clsx("font-bold md:text-base", tooltip.highlightColor || "text-amber-500")}>{tooltip.label}</div>
+          <div>{tooltip.desc}</div>
+          {tooltip.subDesc && <div className="text-[10px] md:text-xs text-stone-500">{tooltip.subDesc}</div>}
+        </GameTooltip>
       )}
     </div>
   );
