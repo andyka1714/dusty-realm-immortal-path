@@ -45,19 +45,6 @@ export const TRIBULATION_SKILLS: Record<string, Skill> = {
       value: 0.5,
     },
   },
-  b_tr_passive: {
-    id: "b_tr_passive",
-    name: "萬劫不滅",
-    description:
-      "每承受一次傷害，防禦力提升 2%，最多疊加 50 層，持續至戰鬥結束。",
-    type: "Passive",
-    cooldown: 0,
-    minRealm: MajorRealm.Tribulation,
-    profession: ProfessionType.Body,
-    effectType: "buff",
-    targetType: "self",
-  },
-
   // --- Mage Cultivator (Tribulation) ---
   m_tr_active: {
     id: "m_tr_active",
@@ -71,16 +58,5 @@ export const TRIBULATION_SKILLS: Record<string, Skill> = {
     damageMultiplier: 8.0,
     targetType: "all",
     effectType: "damage",
-  },
-  m_tr_passive: {
-    id: "m_tr_passive",
-    name: "雷劫煉心",
-    description: "免疫所有控制效果。受到雷屬性傷害時回復生命值。",
-    type: "Passive",
-    cooldown: 0,
-    minRealm: MajorRealm.Tribulation,
-    profession: ProfessionType.Mage,
-    effectType: "buff",
-    targetType: "self",
   },
 };

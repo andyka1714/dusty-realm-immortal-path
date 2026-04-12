@@ -30,13 +30,15 @@ ExpPerTick = RootBone * RealmMod * SpiritMod * GatheringMod * ModeMultiplier
   - 雜靈根: 1.0x (原 1.0x)
 - **GatheringMod (聚靈陣加成)**: `1 + (聚靈陣等級 * 0.05)`。
 - **ModeMultiplier (模式倍率)**:
-  - 自動 (Passive): 0.3x (大幅下修，鼓勵手動)
-  - 手動 (Manual): 1.0x (每 3秒 可點擊運功一次)
-  - 閉關 (Seculded): 2.0x (原 5.0x)
+  - 自動 (Passive): `0.02x`
+  - 手動 (Manual): 與自動同基準，但每 `3秒` 結算一次，單次收益為 `passiveRate * 3`
+  - 閉關 (Secluded): `0.2x`，也就是自動的 `10x`
 
-> **試算範例**: 
-> 根骨 10、練氣期 (3x)、天靈根 (2.5x)、無聚靈陣 (1x)、自動模式 (1x)
-> `Exp = 10 * 3 * 2.5 * 1 * 1 = 75 / sec`
+> **試算範例**:
+> 根骨 20、練氣期 (`2x`)、雜靈根 (`1.0x`)、無聚靈陣 (`1x`)
+> `BaseRate = 20 * 2 * 1 * 1 = 40 / sec`
+> `PassiveRate = 40 * 0.02 = 0.8 / sec`
+> `SeclusionRate = 40 * 0.2 = 8 / sec`
 
 ### 1.2 境界劃分 (Realm Stages)
 
@@ -54,8 +56,11 @@ ExpPerTick = RootBone * RealmMod * SpiritMod * GatheringMod * ModeMultiplier
 ```javascript
 MaxExp = Base * (Growth ^ MinorRealm)
 ```
-- **練氣期**: Base=1000, Growth=1.25
-- **築基期**: Base=15000, Growth=1.15
+- **凡人**: Base=100, 線性
+- **練氣期**: Base=2500, Growth=1.25
+- **築基期**: Base=75000, Growth=1.15
+- **金丹期**: Base=1250000, Growth=1.14
+- **元嬰期**: Base=20000000, Growth=1.13
 - (高境界數值詳見 `constants.ts`)
 
 ### 1.3 突破成功率 (Breakthrough Rate)
@@ -90,34 +95,34 @@ SuccessRate = (BaseRate * Decay) + (Comprehension * 0.002) + (Fortune * 0.001) +
 
 ### 2.2 傷害計算公式
 ```javascript
-Damage = (Attacker.Atk * Random(0.9, 1.1)) - (Defender.Def * 0.5)
+Damage = Power * (100 / (100 + Defense)) * Random(0.92, 1.08)
 ```
 - **最小傷害**: 1 點。
-- **暴擊 (Crit)**: 機率 `Comprehension * 0.1%`，造成 1.5x 傷害。
-- **閃避 (Dodge)**: 機率 `Fortune * 0.1%`，完全免疫該次傷害。
+- **暴擊**: 由 `crit` 與技能 / 職業加成共同決定，不再只看單一屬性。
+- **閃避 / 格擋 / 減傷**: 已由戰鬥層統一吃玩家衍生數值與技能被動。
 
 ## 3. 壽元與時間系統 (Time & Lifespan)
 
 ### 3.1 時間流逝 (Global Ticker)
-- **比例**: 現實 1 秒 = 遊戲 1 天 (約 6分鐘 = 1年)。
+- **比例**: 現實 `1 秒 = 遊戲 1 天`，約 `6 分鐘 = 1 年`。
 - **機制**: 無論玩家處於何種狀態 (Move, Combat, Idle)，時間皆恆定流逝。
 
 ### 3.2 壽元獲取 (Longevity)
-角色初始壽命為 `100 ± 5` 歲。延長壽命的途徑如下：
+角色初始壽命為 `100 ± 5` 歲。當前實作中的大境界壽元加成如下：
 
 #### A. 境界突破 (Breakthrough Bonus)
 突破大境界時獲得 **永久壽命上限** 加成：
-- **練氣 (Qi Refining)**: +50 歲
-- **築基 (Foundation)**: +150 歲
-- **金丹 (Golden Core)**: +300 歲
-- **元嬰 (Nascent Soul)**: +600 歲
-- **化神 (Spirit Severing)**: +1,200 歲
-- **煉虛 (Void Refining)**: +2,500 歲
-- **合體 (Fusion)**: +5,000 歲
-- **大乘 (Mahayana)**: +10,000 歲
-- **渡劫 (Tribulation)**: +200,000 歲 (生死劫難)
-- **仙人 (Immortal)**: +500,000 歲 (晉升人仙時獲得)
-- **仙帝 (Immortal Emperor)**: +1,000,000 歲 (長生久視)
+- **練氣**: +20 歲
+- **築基**: +50 歲
+- **金丹**: +100 歲
+- **元嬰**: +200 歲
+- **化神**: +500 歲
+- **煉虛**: +1000 歲
+- **合體**: +2000 歲
+- **大乘**: +5000 歲
+- **渡劫**: +10000 歲
+- **仙人**: +100000 歲
+- **仙帝**: +999999 歲
 
 #### B. 增壽丹藥 (Longevity Pills)
 - **來源**: 煉丹或 Boss 掉落。

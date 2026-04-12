@@ -27,6 +27,12 @@ import {
   getManualCultivationGain,
   getPassiveCultivationRate,
 } from "../../utils/cultivation";
+import { getFormalSkill } from "../../data/skills";
+import {
+  getMissingPrerequisiteSkillIds,
+  normalizeFormalSkillIds,
+  resolveReplacementSkillId,
+} from "../../data/skills/pool";
 
 // ... (Keep helpers generateSpiritRoot, generateInitialStats, calculateInitialLifespan) ...
 export const generateSpiritRoot = (): SpiritRootId => {
@@ -131,6 +137,21 @@ export const calculateInitialLifespan = (physique: number) => {
   return (baseLifespan + variation + physiqueBonus) * DAYS_PER_YEAR;
 };
 
+const getProfessionGrowthKey = (
+  profession: ProfessionType
+): "None" | "Sword" | "Body" | "Magic" => {
+  switch (profession) {
+    case ProfessionType.Sword:
+      return "Sword";
+    case ProfessionType.Body:
+      return "Body";
+    case ProfessionType.Mage:
+      return "Magic";
+    default:
+      return "None";
+  }
+};
+
 const initialState: CharacterState = {
   isInitialized: false,
   isDead: false,
@@ -194,6 +215,7 @@ const characterSlice = createSlice({
       state.itemConsumption = {};
       state.lastProcessedYear = 10;
       state.lastManualCultivateTime = 0;
+      state.skills = normalizeFormalSkillIds(state.skills);
 
       // Generate Spirit Root First to determine potential
       const generatedRootId =
@@ -263,6 +285,7 @@ const characterSlice = createSlice({
       }>
     ) => {
       const { itemId, effects, maxConsumption } = action.payload;
+      state.skills = normalizeFormalSkillIds(state.skills);
 
       // Check Limit
       const currentUses = state.itemConsumption[itemId] || 0;
@@ -270,11 +293,14 @@ const characterSlice = createSlice({
         return; // Silent fail or handled by UI check
       }
 
+      let appliedEffects = 0;
+
       // Apply Effects
       for (const effect of effects) {
         switch (effect.type) {
           case "lifespan":
             state.lifespan += effect.value;
+            appliedEffects += 1;
             break;
           case "gain_exp":
             state.currentExp += effect.value;
@@ -285,20 +311,50 @@ const characterSlice = createSlice({
               state.currentExp = state.maxExp;
               state.isBreakthroughAvailable = true;
             }
+            appliedEffects += 1;
             break;
           case "buff_stat":
             if (effect.stat && state.attributes[effect.stat] !== undefined) {
               state.attributes[effect.stat] += effect.value;
+              appliedEffects += 1;
             }
             break;
           case "learn_skill":
             if (effect.skillId && !state.skills.includes(effect.skillId)) {
-              state.skills.push(effect.skillId);
+              const normalizedSkillId = resolveReplacementSkillId(effect.skillId);
+              if (state.skills.includes(normalizedSkillId)) {
+                break;
+              }
+
+              const skill = getFormalSkill(normalizedSkillId);
+              if (!skill) {
+                break;
+              }
+
+              const professionAllowed =
+                !skill.profession ||
+                skill.profession === ProfessionType.None ||
+                state.profession === skill.profession;
+              const realmAllowed = state.majorRealm >= skill.minRealm;
+              const prerequisitesMet =
+                getMissingPrerequisiteSkillIds(state.skills, normalizedSkillId).length === 0;
+
+              if (professionAllowed && realmAllowed && prerequisitesMet) {
+                state.skills = normalizeFormalSkillIds([
+                  ...state.skills,
+                  normalizedSkillId,
+                ]);
+                appliedEffects += 1;
+              }
             }
             break;
           default:
             break;
         }
+      }
+
+      if (appliedEffects === 0) {
+        return;
       }
 
       // Increment Counter
@@ -470,8 +526,12 @@ const characterSlice = createSlice({
     },
 
     learnSkill: (state, action: PayloadAction<string>) => {
-      if (!state.skills.includes(action.payload)) {
-        state.skills.push(action.payload);
+      const normalizedSkillId = resolveReplacementSkillId(action.payload);
+      if (!state.skills.includes(normalizedSkillId)) {
+        state.skills = normalizeFormalSkillIds([
+          ...state.skills,
+          normalizedSkillId,
+        ]);
       }
     },
 
@@ -559,10 +619,11 @@ const characterSlice = createSlice({
         } else {
           state.minorRealm += 1;
 
-          // Apply Minor Realm Attribute Growth based on Realm & Profession (Default: None)
-          // TODO: Implement Profession/Class selection in State
+          // Apply Minor Realm Attribute Growth based on Realm & Profession
           const growthConfig =
-            REALM_ATTRIBUTE_GROWTH[state.majorRealm]?.["None"] ||
+            REALM_ATTRIBUTE_GROWTH[state.majorRealm]?.[
+              getProfessionGrowthKey(state.profession)
+            ] ||
             REALM_ATTRIBUTE_GROWTH[MajorRealm.Mortal]["None"];
 
           state.attributes.physique += growthConfig.physique;
@@ -669,5 +730,6 @@ export const {
   deductSpiritStones,
   upgradeGatheringLevel,
   setProfession,
+  learnSkill,
 } = characterSlice.actions;
 export default characterSlice.reducer;

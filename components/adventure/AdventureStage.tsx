@@ -3,10 +3,11 @@ import * as PIXI from 'pixi.js';
 import { useSelector, useDispatch } from 'react-redux'; // Added Redux hooks
 import { RootState } from '../../store/store'; // Fixed import path
 import { clearVisualEffect } from '../../store/slices/adventureSlice';
-import { MapData, Coordinate, Portal, EnemyRank, ActiveMonster, MajorRealm, Quest, QuestStatus } from '../../types';
+import { MapData, Coordinate, Portal, EnemyRank, ActiveMonster, MajorRealm, Quest, QuestStatus, VisualEffect } from '../../types';
 import { MOVEMENT_SPEEDS } from '../../constants';
 import { QUESTS } from '../../data/quests'; // Import QUESTS
 import { current } from '@reduxjs/toolkit';
+import { getVisualEffectPresentation } from '../../utils/visualEffectPresentation';
 
 interface AdventureStageProps {
   mapData: MapData;
@@ -59,7 +60,17 @@ export default function AdventureStage({
 }: AdventureStageProps) {
   const dispatch = useDispatch();
   const visualEffects = useSelector((state: RootState) => state.adventure.visualEffects);
-  const activeEffectsRef = useRef<Map<string, { text: PIXI.Text, startTime: number, startY: number, lifeTime: number }>>(new Map());
+  const activeEffectsRef = useRef<Map<string, {
+    type: VisualEffect["type"];
+    displayObject: PIXI.DisplayObject;
+    startTime: number;
+    lifeTime: number;
+    startX?: number;
+    startY?: number;
+    targetX?: number;
+    targetY?: number;
+    radiusPx?: number;
+  }>>(new Map());
   const lastSpawnTimeRef = useRef<number>(0);
 
   const moveTimerRef = useRef<number>(0);
@@ -75,50 +86,95 @@ export default function AdventureStage({
       
       (visualEffects || []).forEach(eff => {
           if (!activeEffectsRef.current.has(eff.id)) {
-               // Create Text
-               const text = new PIXI.Text(eff.text, {
-                   fontFamily: 'Arial',
-                   fontSize: 16,
-                   fontWeight: 'bold',
-                   fill: eff.colorInt || 0xffffff, // Use numeric color
-                   stroke: 0x000000,
-                   strokeThickness: 3,
-                   dropShadow: true,
-                   dropShadowColor: 0x000000,
-                   dropShadowBlur: 2,
-                   dropShadowDistance: 1
+               const presentation = getVisualEffectPresentation({
+                   effect: eff,
+                   playerPosition: visualRef.current.player,
+                   cellSize,
                });
-               text.anchor.set(0.5);
-               
-               // Position relative to player (default) or specific coord
-               const startX = (eff.x !== undefined ? eff.x : visualRef.current.player.x + 0.5) * cellSize;
-               const startY = (eff.y !== undefined ? eff.y : visualRef.current.player.y) * cellSize - 40; // Start above head
-               
-               text.x = startX;
-               text.y = startY;
-               
-               // Stagger overlapping effects? 
-               // Simple stagger based on active count? 
-               // For now, let's just stack them slightly if many spawn at once? 
-               // Actually, just spawning them is fine.
-               
-               displayRefs.current.effectsLayer!.addChild(text);
-               
+               const { effectType, startX, startY, targetX, targetY, radiusPx, lifeTime } = presentation;
+               const color = eff.colorInt || 0xffffff;
+               let displayObject: PIXI.DisplayObject;
+
+               if (effectType === 'projectile') {
+                   const projectile = new PIXI.Graphics();
+                   projectile.beginFill(color, 0.95);
+                   projectile.drawCircle(0, 0, Math.max(4, cellSize * 0.12));
+                   projectile.endFill();
+                   projectile.lineStyle(2, 0xffffff, 0.3);
+                   projectile.drawCircle(0, 0, Math.max(6, cellSize * 0.16));
+                   projectile.x = startX;
+                   projectile.y = startY + 20;
+                   displayObject = projectile;
+               } else if (effectType === 'area') {
+                   const area = new PIXI.Graphics();
+                   area.lineStyle(2, color, 0.9);
+                   area.beginFill(color, 0.16);
+                   area.drawCircle(0, 0, radiusPx ?? cellSize);
+                   area.endFill();
+                   area.x = targetX ?? startX;
+                   area.y = targetY ?? startY;
+                   displayObject = area;
+               } else if (effectType === 'impact') {
+                   const impact = new PIXI.Graphics();
+                   impact.lineStyle(3, color, 0.95);
+                   impact.drawCircle(0, 0, radiusPx ?? cellSize * 0.2);
+                   impact.lineStyle(1, 0xffffff, 0.35);
+                   impact.drawCircle(0, 0, (radiusPx ?? cellSize * 0.2) * 0.6);
+                   impact.x = targetX ?? startX;
+                   impact.y = targetY ?? startY;
+                   displayObject = impact;
+               } else if (effectType === 'cast') {
+                   const cast = new PIXI.Graphics();
+                   cast.lineStyle(2, color, 0.9);
+                   cast.drawCircle(0, 0, radiusPx ?? cellSize * 0.3);
+                   cast.lineStyle(1, 0xffffff, 0.28);
+                   cast.drawCircle(0, 0, (radiusPx ?? cellSize * 0.3) * 0.65);
+                   cast.x = targetX ?? startX;
+                   cast.y = targetY ?? startY;
+                   displayObject = cast;
+               } else {
+                   const text = new PIXI.Text(eff.text, {
+                       fontFamily: 'Arial',
+                       fontSize: 16,
+                       fontWeight: 'bold',
+                       fill: color,
+                       stroke: 0x000000,
+                       strokeThickness: 3,
+                       dropShadow: true,
+                       dropShadowColor: 0x000000,
+                       dropShadowBlur: 2,
+                       dropShadowDistance: 1
+                   });
+                   text.anchor.set(0.5);
+                   text.x = startX;
+                   text.y = startY;
+                   displayObject = text;
+               }
+
+               displayRefs.current.effectsLayer!.addChild(displayObject);
+
                // Schedule start time
                const now = Date.now();
-               const spawnTime = Math.max(now, lastSpawnTimeRef.current + 500);
+               const spawnTime =
+                 effectType === 'text'
+                   ? Math.max(now, lastSpawnTimeRef.current + 500)
+                   : now;
                lastSpawnTimeRef.current = spawnTime;
 
                activeEffectsRef.current.set(eff.id, {
-                   text,
+                   type: effectType,
+                   displayObject,
                    startTime: spawnTime,
-                   startY: startY,
-                   lifeTime: 1500 // 1.5s
+                   startX,
+                   startY,
+                   targetX,
+                   targetY,
+                   radiusPx,
+                   lifeTime
                });
-               
-               // Initially hide if future
+
                if (spawnTime > now) {
-                   text.visible = false;
+                   displayObject.visible = false;
                }
                
                // Clear from Redux so we don't re-process
@@ -684,18 +740,42 @@ export default function AdventureStage({
               activeEffectsRef.current.forEach((effect, id) => {
                   const elapsed = now - effect.startTime;
                   if (elapsed > effect.lifeTime) {
-                      effect.text.destroy();
+                      effect.displayObject.destroy();
                       activeEffectsRef.current.delete(id);
                   } else if (elapsed >= 0) {
-                      // Float Up
-                      effect.text.visible = true;
+                      effect.displayObject.visible = true;
                       const progress = elapsed / effect.lifeTime;
-                      const yOffset = progress * 60; // Float up 60px
-                      effect.text.y = effect.startY - yOffset;
-                      effect.text.alpha = 1 - Math.pow(progress, 3); // Fade out cubic
+
+                      if (effect.type === 'text') {
+                          const text = effect.displayObject as PIXI.Text;
+                          const yOffset = progress * 60;
+                          text.y = (effect.startY ?? text.y) - yOffset;
+                          text.alpha = 1 - Math.pow(progress, 3);
+                      } else if (effect.type === 'projectile') {
+                          const projectile = effect.displayObject as PIXI.Graphics;
+                          const sx = effect.startX ?? projectile.x;
+                          const sy = (effect.startY ?? projectile.y) + 20;
+                          const tx = effect.targetX ?? sx;
+                          const ty = effect.targetY ?? sy;
+                          projectile.x = sx + (tx - sx) * progress;
+                          projectile.y = sy + (ty - sy) * progress;
+                          projectile.alpha = 0.65 + (1 - progress) * 0.35;
+                          projectile.scale.set(1 - progress * 0.15);
+                      } else if (effect.type === 'area') {
+                          const area = effect.displayObject as PIXI.Graphics;
+                          area.alpha = 0.65 * (1 - progress);
+                          area.scale.set(1 + progress * 0.18);
+                      } else if (effect.type === 'impact') {
+                          const impact = effect.displayObject as PIXI.Graphics;
+                          impact.alpha = 0.9 * (1 - progress);
+                          impact.scale.set(1 + progress * 0.55);
+                      } else if (effect.type === 'cast') {
+                          const cast = effect.displayObject as PIXI.Graphics;
+                          cast.alpha = 0.8 * (1 - progress * 0.7);
+                          cast.scale.set(0.9 + progress * 0.45);
+                      }
                   } else {
-                      // Waiting to start
-                      effect.text.visible = false;
+                      effect.displayObject.visible = false;
                   }
               });
           }

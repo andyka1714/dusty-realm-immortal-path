@@ -1,3 +1,7 @@
+import { getSkillManualId } from "./items/manuals";
+import { MajorRealm, ProfessionType } from "../types";
+import { getFormalCoreSkills } from "./skills";
+
 export interface ShopItem {
     itemId: string;
     price?: number; // Override base price if set
@@ -10,6 +14,44 @@ export interface ShopData {
     description?: string;
     items: ShopItem[];
 }
+
+const getManualIds = (
+  skills: ReadonlyArray<{
+    id: string;
+    minRealm: MajorRealm;
+  }>
+) =>
+  skills.map((skill) => getSkillManualId(skill.id));
+
+const filterByRealm = <T extends { minRealm: MajorRealm }>(
+  skills: ReadonlyArray<T>,
+  predicate: (realm: MajorRealm) => boolean
+) => skills.filter((skill) => predicate(skill.minRealm));
+
+const SHOP_CORE_SKILLS = getFormalCoreSkills({ formalSourceTier: "shop" });
+
+const QI_SKILL_MANUALS = getManualIds(
+  filterByRealm(SHOP_CORE_SKILLS, (realm) => realm <= MajorRealm.QiRefining)
+);
+
+const SWORD_SECT_MANUALS = getManualIds(
+  filterByRealm(SHOP_CORE_SKILLS, (realm) => realm > MajorRealm.QiRefining)
+    .filter((skill) => skill.profession === ProfessionType.Sword)
+);
+
+const BODY_SECT_MANUALS = getManualIds(
+  filterByRealm(SHOP_CORE_SKILLS, (realm) => realm > MajorRealm.QiRefining)
+    .filter((skill) => skill.profession === ProfessionType.Body)
+);
+
+const MAGE_SECT_MANUALS = getManualIds(
+  filterByRealm(SHOP_CORE_SKILLS, (realm) => realm > MajorRealm.QiRefining)
+    .filter((skill) => skill.profession === ProfessionType.Mage)
+);
+
+const INHERITANCE_MANUALS = getManualIds(
+  getFormalCoreSkills({ formalSourceTier: "inheritance" })
+);
 
 export const SHOPS: Record<string, ShopData> = {
     // 1. General Store
@@ -82,40 +124,36 @@ export const SHOPS: Record<string, ShopData> = {
     'skill_shop_mortal': {
         id: 'skill_shop_mortal',
         name: '藏經閣',
-        description: '收藏著一些基礎的修煉法門。',
-        items: [
-            { itemId: 'manual_basic_breath' },
-            { itemId: 'manual_iron_skin' },
-            { itemId: 'manual_swift_step' },
-            { itemId: 'manual_spirit_strike' }
-        ]
+        description: '收藏著凡界能接觸到的入門功法，可先購得秘卷，待符合條件後再參悟。',
+        items: QI_SKILL_MANUALS.map((itemId) => ({ itemId }))
     },
 
-    // 5. Sect Skill Shops (Placeholders)
+    // 5. Sect Skill Shops
     'sect_skill_sword': {
         id: 'sect_skill_sword',
         name: '藏經閣 (劍)',
-        description: '凌霄劍宗的高深劍典，待有緣人習之。',
-        items: [
-            // TODO: Add Sword Sect specific skills
-        ]
+        description: '凌霄劍宗收藏的劍典。外門可先修基礎心法，高階殺招需歷練求取。',
+        items: SWORD_SECT_MANUALS.map((itemId) => ({ itemId }))
     },
 
     'sect_skill_beast': {
         id: 'sect_skill_beast',
         name: '藏經閣 (體)',
-        description: '萬獸山莊的煉體秘術，記載於獸骨之上。',
-        items: [
-            // TODO: Add Beast Sect specific skills
-        ]
+        description: '萬獸山莊的煉體秘術，外門可先修護體法門，強橫秘術仍需以戰養戰。',
+        items: BODY_SECT_MANUALS.map((itemId) => ({ itemId }))
     },
 
     'sect_skill_mystic': {
         id: 'sect_skill_mystic',
         name: '藏經閣 (法)',
-        description: '縹緲仙宮的五行法術，包羅萬象。',
-        items: [
-            // TODO: Add Mystic Sect specific skills
-        ]
+        description: '縹緲仙宮的五行法術，先授基礎心法，深奧術法須在歷練中尋得。',
+        items: MAGE_SECT_MANUALS.map((itemId) => ({ itemId }))
+    },
+
+    'inheritance_pavilion': {
+        id: 'inheritance_pavilion',
+        name: '古修傳承殿',
+        description: '收束本輪已正式保留的傳承秘卷，高境界殘篇不再混入一般掉落。',
+        items: INHERITANCE_MANUALS.map((itemId) => ({ itemId }))
     }
 };

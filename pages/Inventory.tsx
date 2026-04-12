@@ -3,11 +3,16 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/store';
 import { ITEMS } from '../data/items';
 import { equipItem, unequipItem, sortItems, removeItems, removeItem } from '../store/slices/inventorySlice';
+import { consumeItem } from '../store/slices/characterSlice';
+import { addLog } from '../store/slices/logSlice';
 import { Package, Shield, Sword, FlaskConical, CircleDashed, Footprints, Crown, MinusCircle, Shirt, Medal, ArrowUpDown, Trash2, LayoutGrid, CheckSquare, Plus, Minus } from 'lucide-react';
 import { ItemCategory, ItemQuality, EquipmentSlot, ConsumableItem, InventorySlot, ItemInstance } from '../types';
 import { REALM_NAMES } from '../constants';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
+import { getFormalSkill, getSkill } from '../data/skills';
+import { getMissingPrerequisiteSkillIds, resolveReplacementSkillId } from '../data/skills/pool';
+import { getSkillManualCategoryLabel, getSkillManualSourceLabels, getSkillManualTierLabel } from '../data/items/manuals';
 
 interface InventoryProps {
   embedded?: boolean;
@@ -15,6 +20,7 @@ interface InventoryProps {
 
 export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
   const { items, equipment } = useSelector((state: RootState) => state.inventory);
+  const character = useSelector((state: RootState) => state.character);
   const dispatch = useDispatch();
   
   const [filter, setFilter] = useState<'all' | ItemCategory>('all');
@@ -49,6 +55,55 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
   });
 
   const selectedItemDef = selectedSlot ? ITEMS[selectedSlot.itemId] : null;
+  const selectedConsumable =
+    selectedItemDef?.category === ItemCategory.Consumable
+      ? (selectedItemDef as ConsumableItem)
+      : null;
+  const selectedSkillEffect = selectedConsumable?.effects.find(
+    (effect) => effect.type === 'learn_skill' && effect.skillId
+  );
+  const selectedSkill = selectedSkillEffect?.skillId
+    ? getFormalSkill(selectedSkillEffect.skillId)
+    : null;
+
+  const getConsumableBlockedReason = (item: ConsumableItem) => {
+    const manualEffect = item.effects.find(
+      (effect) => effect.type === 'learn_skill' && effect.skillId
+    );
+
+    if (!manualEffect?.skillId) {
+      return null;
+    }
+
+    const normalizedSkillId = resolveReplacementSkillId(manualEffect.skillId);
+    const skill = getFormalSkill(normalizedSkillId);
+    if (!skill) {
+      return '技能資料缺失';
+    }
+    if (character.skills.includes(skill.id)) {
+      return '已習得此技能';
+    }
+    if (item.requiredProfession && character.profession !== item.requiredProfession) {
+      return '職業不符';
+    }
+    if (
+      item.requiredRealm !== undefined &&
+      character.majorRealm < item.requiredRealm
+    ) {
+      return `需達${REALM_NAMES[item.requiredRealm]}期`;
+    }
+    const missingPrerequisites = getMissingPrerequisiteSkillIds(character.skills, skill.id);
+    if (missingPrerequisites.length > 0) {
+      return `缺少前置：${missingPrerequisites
+        .map((prerequisiteSkillId) => getSkill(prerequisiteSkillId)?.name ?? prerequisiteSkillId)
+        .join('、')}`;
+    }
+    return null;
+  };
+
+  const selectedConsumableBlockedReason = selectedConsumable
+    ? getConsumableBlockedReason(selectedConsumable)
+    : null;
 
   // Helper to check if an instance is equipped
   const isEquipped = (instanceId?: string) => {
@@ -170,6 +225,57 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
       </div>
     </div>
   );
+
+  const handleUseSelectedItem = () => {
+    if (!selectedSlot || !selectedItemDef || selectedItemDef.category !== ItemCategory.Consumable) {
+      return;
+    }
+
+    const consumable = selectedItemDef as ConsumableItem;
+    const blockedReason = getConsumableBlockedReason(consumable);
+    if (blockedReason) {
+      dispatch(addLog({
+        message: `[${consumable.name}] 無法使用：${blockedReason}。`,
+        type: 'warning-low',
+      }));
+      return;
+    }
+
+    dispatch(
+      consumeItem({
+        itemId: consumable.id,
+        effects: consumable.effects,
+        maxConsumption: consumable.maxUsage,
+      })
+    );
+    dispatch(
+      removeItem({
+        itemId: selectedSlot.itemId,
+        count: 1,
+        instanceId: selectedSlot.instanceId,
+      })
+    );
+
+    if (selectedSkill) {
+      dispatch(
+        addLog({
+          message: `你參悟了【${selectedSkill.name}】。`,
+          type: 'success',
+        })
+      );
+    } else {
+      dispatch(
+        addLog({
+          message: `你使用了 [${consumable.name}]。`,
+          type: 'gain',
+        })
+      );
+    }
+
+    if (!selectedSlot.instanceId && selectedSlot.count <= 1) {
+      setSelectedSlot(null);
+    }
+  };
 
   return (
     <div
@@ -456,6 +562,35 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                     </div>
                     
                     <p className="text-sm text-stone-500 italic mb-4">{selectedItemDef.description}</p>
+
+                    {selectedSkill && (
+                      <div className="mb-4 space-y-2 rounded-lg border border-indigo-900/40 bg-indigo-950/10 p-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="rounded-full border border-indigo-700/60 bg-indigo-950/40 px-2 py-1 text-[11px] font-bold tracking-[0.18em] text-indigo-200">
+                            技能書
+                          </span>
+                          <span className="rounded-full border border-amber-700/50 bg-amber-950/30 px-2 py-1 text-[11px] font-bold text-amber-300">
+                            {getSkillManualTierLabel(selectedSkill)}
+                          </span>
+                          <span className="rounded-full border border-stone-700 bg-stone-950/40 px-2 py-1 text-[11px] font-bold text-stone-300">
+                            {selectedSkill.type === 'Active' ? '主動術式' : '被動心法'}
+                          </span>
+                        </div>
+                        <div className="text-xs text-stone-400">
+                          分類：<span className="text-stone-200">{getSkillManualCategoryLabel(selectedSkill)}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {getSkillManualSourceLabels(selectedSkill).map((source) => (
+                            <span
+                              key={source}
+                              className="rounded-md border border-emerald-900/60 bg-emerald-950/20 px-2 py-1 text-[11px] text-emerald-300"
+                            >
+                              {source}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Stats & Affixes */}
                     {selectedSlot.instance && (
@@ -540,8 +675,28 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                                    {effect.type === 'heal_hp' && `恢復氣血: ${effect.value}`}
                                    {effect.type === 'heal_mp' && `恢復真元: ${effect.value}`}
                                    {effect.type === 'buff_stat' && `提升${effect.stat}: +${effect.value}`}
+                                   {effect.type === 'gain_exp' && `直接獲得修為: ${effect.value}`}
+                                   {effect.type === 'lifespan' && `增加壽元: ${effect.value}`}
+                                   {effect.type === 'learn_skill' && selectedSkill && `參悟後習得：【${selectedSkill.name}】`}
                                </div>
                            ))}
+                           {selectedConsumable?.requiredProfession && (
+                             <div>職業限制：{selectedConsumable.requiredProfession === 'Sword' ? '劍修' : selectedConsumable.requiredProfession === 'Body' ? '體修' : '法修'}</div>
+                           )}
+                           {selectedConsumable?.requiredRealm !== undefined && (
+                             <div>境界限制：{REALM_NAMES[selectedConsumable.requiredRealm]}期以上</div>
+                           )}
+                           {selectedSkill && selectedSkill.prerequisiteSkillIds && selectedSkill.prerequisiteSkillIds.length > 0 && (
+                             <div>
+                               前置條件：
+                               {selectedSkill.prerequisiteSkillIds
+                                 .map((prerequisiteSkillId) => getSkill(prerequisiteSkillId)?.name ?? prerequisiteSkillId)
+                                 .join('、')}
+                             </div>
+                           )}
+                           {selectedConsumableBlockedReason && (
+                             <div className="text-red-400">目前無法使用：{selectedConsumableBlockedReason}</div>
+                           )}
                          </div>
                        )}
                        
@@ -567,10 +722,16 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                           
                           {selectedItemDef.category === ItemCategory.Consumable && (
                         <button 
-                          className="flex-1 bg-emerald-700 hover:bg-emerald-600 text-stone-100 py-2 rounded text-sm transition-colors"
-                          onClick={() => alert("使用功能即將開放!")}
+                          className={clsx(
+                            "flex-1 py-2 rounded text-sm transition-colors",
+                            selectedConsumableBlockedReason
+                              ? "bg-stone-800 text-stone-500 cursor-not-allowed"
+                              : "bg-emerald-700 hover:bg-emerald-600 text-stone-100"
+                          )}
+                          disabled={Boolean(selectedConsumableBlockedReason)}
+                          onClick={handleUseSelectedItem}
                         >
-                          服用
+                          {selectedSkill ? '參悟' : '服用'}
                         </button>
                       )}
 

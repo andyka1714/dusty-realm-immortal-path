@@ -166,6 +166,22 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                         if (item.category === ItemCategory.Equipment && item.minRealm !== undefined && item.minRealm !== character.majorRealm) {
                             return null;
                         }
+                        if (
+                            item.category === ItemCategory.Consumable &&
+                            'requiredProfession' in item &&
+                            item.requiredProfession &&
+                            character.profession !== item.requiredProfession
+                        ) {
+                            return null;
+                        }
+                        if (
+                            item.category === ItemCategory.Consumable &&
+                            'requiredRealm' in item &&
+                            item.requiredRealm !== undefined &&
+                            item.requiredRealm > character.majorRealm
+                        ) {
+                            return null;
+                        }
                         
                         const price = shopItem.price ?? item.price;
                         const canAfford = character.spiritStones >= price;
@@ -176,7 +192,9 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                         const qualityName = getQualityName(item.quality);
                         
                         // Determine Realm Name
-                        const realmName = item.minRealm !== undefined ? REALM_NAMES[item.minRealm] : '';
+                        const realmName = item.minRealm !== undefined
+                          ? REALM_NAMES[item.minRealm]
+                          : ('requiredRealm' in item && item.requiredRealm !== undefined ? REALM_NAMES[item.requiredRealm] : '');
 
                         return (
                             <div 

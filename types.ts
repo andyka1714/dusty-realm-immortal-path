@@ -168,8 +168,15 @@ export interface Skill {
   description: string;
   type: "Active" | "Passive";
   cooldown: number; // Turns
+  cooldownSeconds?: number;
   minRealm: MajorRealm;
   profession?: ProfessionType; // Specific to a profession or general (None)
+  castRange?: number;
+  castTimeMs?: number;
+  projectileSpeed?: number;
+  areaShape?: "single" | "line" | "cone" | "circle" | "self";
+  areaRadius?: number;
+  maxTargets?: number;
 
   // Battle Logic Descriptors
   damageMultiplier?: number; // e.g. 1.5 for 150%
@@ -183,6 +190,29 @@ export interface Skill {
     value?: number; // e.g. Poison damage %
   };
   cost?: number; // MP cost usually, or special resource
+  passiveEffectTags?: Array<
+    | "offense"
+    | "durability"
+    | "spellpower"
+    | "crit"
+    | "damage_reduction"
+    | "reflect"
+    | "shield"
+    | "cooldown_reduction"
+    | "regen"
+    | "mana_flow"
+    | "evasion"
+    | "armor_break"
+    | "execution"
+    | "cleanse"
+    | "death_prevention"
+    | "control_immunity"
+  >;
+  replacementSkillId?: string;
+  poolStatus?: "core" | "transition" | "legacy";
+  formalRole?: "guaranteed" | "utility" | "burst" | "passive";
+  formalSourceTier?: "shop" | "elite" | "boss" | "inheritance";
+  prerequisiteSkillIds?: string[];
 }
 
 // --- Combat & Map ---
@@ -215,14 +245,36 @@ export interface Enemy {
   minorRealm?: MinorRealmType; // e.g. '初期', '中期', '後期', '圓滿'
   symbol?: string; // Single character for map display
   rank: EnemyRank;
+  aiStyle?: "melee" | "ranged" | "caster";
+  attackRange?: number;
   hp: number;
   maxHp: number;
   attack: number;
   defense: number;
   element: ElementType;
+  resistances?: ElementType[];
+  weaknesses?: ElementType[];
+  affixes?: string[];
   drops: string[]; // itemIds
   exp: number;
   description?: string;
+  specialAttack?: {
+    name: string;
+    cooldownSeconds: number;
+    damageMultiplier?: number;
+    statusEffect?: {
+      id: string;
+      duration: number;
+      chance: number;
+      value?: number;
+    };
+    castRange?: number;
+    castTimeMs?: number;
+    projectileSpeed?: number;
+    areaShape?: "single" | "line" | "cone" | "circle" | "self";
+    areaRadius?: number;
+    maxTargets?: number;
+  };
 }
 
 export interface ActiveMonster extends Coordinate {
@@ -276,6 +328,7 @@ export interface MapData {
 
 export interface CombatLog {
   turn: number;
+  timeMs?: number;
   message: string;
   isPlayer: boolean;
   damage?: number;
@@ -283,6 +336,11 @@ export interface CombatLog {
   playerMaxHp: number;
   enemyHp: number;
   enemyMaxHp: number;
+  playerStatuses?: string[];
+  enemyStatuses?: string[];
+  playerActiveSkillName?: string;
+  playerActiveSkillCooldownRemainingMs?: number;
+  playerActiveSkillCooldownTotalMs?: number;
 }
 
 // --- Item & Inventory ---
@@ -346,6 +404,8 @@ export interface ConsumableItem extends BaseItem {
   effects: ConsumableEffect[];
   cooldown?: number;
   maxUsage?: number;
+  requiredProfession?: ProfessionType;
+  requiredRealm?: MajorRealm;
 }
 
 // -- Materials --
@@ -509,10 +569,14 @@ export interface Quest {
 
 export interface VisualEffect {
   id: string;
-  type: "text";
+  type: "text" | "projectile" | "area" | "impact" | "cast";
   text: string;
   color: string; // hex string: '#ff0000' or numeric 0xff0000? Let's use string for CSS or PIXI interop, probably numeric is better for PIXI but string is versatile. Let's use numeric.
   colorInt: number;
   x?: number; // fallback or override
   y?: number;
+  targetX?: number;
+  targetY?: number;
+  radius?: number;
+  durationMs?: number;
 }

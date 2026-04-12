@@ -3,6 +3,12 @@
 
 本文檔記錄遊戲中出現的所有敵人，包括普通怪物（Common）、精英怪物（Elite）與首領（Boss）。
 
+## 正式狀態
+
+- 化神以上地圖已不再是資料占位區，而是正式維持 `4` 普通怪 + `2` 精英怪 + `1` Boss
+- 高境界精英 / Boss 已補上主題描述、`specialAttack`、`affixes`、`resistances / weaknesses`
+- 正式戰鬥會讀取這些欄位，不再只剩通用普通攻擊模板
+
 ## 凡人期 (Mortal Realm)
 
 ### 北路 (北郊-劍門-山腳)

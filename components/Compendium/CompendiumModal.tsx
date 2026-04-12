@@ -28,7 +28,10 @@ import {
 } from "../../types";
 import { EQUIPMENT_ITEMS } from "../../data/items/equipment";
 import { CONSUMABLE_ITEMS } from "../../data/items/consumables"; // Added Consumables
-import { SKILLS } from "../../data/skills";
+import {
+  FORMAL_CORE_SKILLS_BY_PROFESSION,
+  FORMAL_CORE_SKILLS_SORTED,
+} from "../../data/skills";
 import { COMMON_ENEMIES } from "../../data/enemies/common";
 import { ELITE_ENEMIES } from "../../data/enemies/elite";
 import { BOSS_ENEMIES } from "../../data/enemies/boss";
@@ -136,10 +139,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
     []
   );
 
-  const allSkills: Record<string, Skill> = useMemo(
-    () => ({ ...SKILLS }) as unknown as Record<string, Skill>,
-    []
-  );
+  const allSkills: Skill[] = useMemo(() => [...FORMAL_CORE_SKILLS_SORTED], []);
 
   // Helper: Get Drops for Enemy
   const getEnemyDrops = (enemyId: string): Item[] => {
@@ -675,7 +675,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
             {/* --- Skill Tab --- */}
             {activeTab === "skill" && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.values(allSkills).map((skill) => (
+                {allSkills.map((skill) => (
                   <div
                     key={skill.id}
                     className="bg-stone-800 p-4 rounded border border-stone-700"
@@ -708,27 +708,21 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                     id: "sword",
                     name: "凌霄劍宗",
                     desc: "修煉劍道，以攻代守。追求極致的攻擊力與暴擊。",
-                    skills: Object.values(allSkills).filter(
-                      (s) => s.profession === ProfessionType.Sword
-                    ),
+                    skills: FORMAL_CORE_SKILLS_BY_PROFESSION[ProfessionType.Sword],
                     npcs: MAPS.find((m) => m.id === "4")?.npcs || [],
                   },
                   {
                     id: "body",
                     name: "萬壽山莊",
                     desc: "修煉肉身，力大無窮。擁有超高的防禦與生命回復能力。",
-                    skills: Object.values(allSkills).filter(
-                      (s) => s.profession === ProfessionType.Body
-                    ),
+                    skills: FORMAL_CORE_SKILLS_BY_PROFESSION[ProfessionType.Body],
                     npcs: MAPS.find((m) => m.id === "13")?.npcs || [],
                   },
                   {
                     id: "mage",
                     name: "縹緲星宮",
                     desc: "修煉法術，掌控天地。擅長群體傷害與控制法術。",
-                    skills: Object.values(allSkills).filter(
-                      (s) => s.profession === ProfessionType.Mage
-                    ),
+                    skills: FORMAL_CORE_SKILLS_BY_PROFESSION[ProfessionType.Mage],
                     npcs: MAPS.find((m) => m.id === "23")?.npcs || [],
                   },
                 ].map((sect) => (
@@ -785,9 +779,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                       <Scroll size={18} /> 傳承功法
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {sect.skills
-                        .sort((a, b) => a.minRealm - b.minRealm)
-                        .map((skill) => (
+                      {sect.skills.map((skill) => (
                           <div
                             key={skill.id}
                             className="bg-stone-900 p-3 rounded border border-stone-800"

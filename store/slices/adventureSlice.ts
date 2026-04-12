@@ -9,6 +9,13 @@ import {
   MONSTER_MOVE_MAX_DELAY_MS,
   MONSTER_MOVE_MIN_DELAY_MS,
 } from '../../constants';
+import {
+  getEnemyAggroRange,
+  getEnemyEngagementRange,
+  getGridDistance,
+  shouldEnemyHoldPreferredRange,
+  shouldEnemyStrafeNearRange,
+} from '../../utils/worldCombat';
 
 interface AdventureState {
   currentMapId: string | null;
@@ -18,6 +25,7 @@ interface AdventureState {
   mapHistory: Record<string, boolean>;
   isBattling: boolean;
   currentEnemy: Enemy | null;
+  currentEnemyInstanceId: string | null;
   battleLogs: CombatLog[];
   lastBattleResult: 'won' | 'lost' | null;
   tickCount: number;
@@ -35,6 +43,7 @@ const initialState: AdventureState = {
   mapHistory: {},
   isBattling: false,
   currentEnemy: null,
+  currentEnemyInstanceId: null,
   battleLogs: [],
   lastBattleResult: null,
   tickCount: 0,
@@ -61,6 +70,82 @@ const getRandomMoveDelay = () =>
   Math.random() * (MONSTER_MOVE_MAX_DELAY_MS - MONSTER_MOVE_MIN_DELAY_MS) +
   MONSTER_MOVE_MIN_DELAY_MS;
 
+const isOccupiedCell = (
+  monsters: ActiveMonster[],
+  x: number,
+  y: number,
+  playerPosition?: Coordinate,
+  ignoreInstanceId?: string
+) => {
+  if (playerPosition && playerPosition.x === x && playerPosition.y === y) {
+    return true;
+  }
+
+  return monsters.some(
+    (monster) =>
+      monster.instanceId !== ignoreInstanceId && monster.x === x && monster.y === y
+  );
+};
+
+const findOpenCoordinate = (
+  width: number,
+  height: number,
+  monsters: ActiveMonster[],
+  playerPosition: Coordinate,
+  preferred?: Coordinate
+) => {
+  const tryPositions: Coordinate[] = preferred ? [preferred] : [];
+
+  for (let attempt = 0; attempt < 24; attempt += 1) {
+    tryPositions.push({
+      x: Math.floor(Math.random() * width),
+      y: Math.floor(Math.random() * height),
+    });
+  }
+
+  for (const position of tryPositions) {
+    if (
+      position.x < 0 ||
+      position.x >= width ||
+      position.y < 0 ||
+      position.y >= height
+    ) {
+      continue;
+    }
+
+    if (!isOccupiedCell(monsters, position.x, position.y, playerPosition)) {
+      return position;
+    }
+  }
+
+  return null;
+};
+
+const beginBattleWithMonster = (
+  state: AdventureState,
+  mapId: string,
+  monsterInstanceId: string
+) => {
+  const mapData = MAPS.find(m => m.id === mapId);
+  if (!mapData) return false;
+
+  const monster = state.activeMonsters.find(m => m.instanceId === monsterInstanceId);
+  if (!monster) return false;
+
+  const template = mapData.enemies.find(e => e.id === monster.templateId);
+  if (!template) {
+    state.activeMonsters = state.activeMonsters.filter(m => m.instanceId !== monsterInstanceId);
+    return false;
+  }
+
+  state.currentEnemy = template;
+  state.currentEnemyInstanceId = monsterInstanceId;
+  state.isBattling = true;
+  state.battleLogs = [];
+  state.lastBattleResult = null;
+  return true;
+};
+
 const adventureSlice = createSlice({
   name: 'adventure',
   initialState,
@@ -86,14 +171,19 @@ const adventureSlice = createSlice({
       if (commonPool.length > 0) {
           for(let i=0; i<commonCap; i++) {
               const template = commonPool[Math.floor(Math.random() * commonPool.length)];
-              const rx = Math.floor(Math.random() * mapData.width);
-              const ry = Math.floor(Math.random() * mapData.height);
+              const openPosition = findOpenCoordinate(
+                mapData.width,
+                mapData.height,
+                state.activeMonsters,
+                state.playerPosition
+              );
+              if (!openPosition) break;
               state.activeMonsters.push({
                    instanceId: Math.random().toString(36),
                    templateId: template.id,
                    name: template.name,
                    symbol: template.symbol,
-                   x: rx, y: ry, spawnX: rx, spawnY: ry,
+                   x: openPosition.x, y: openPosition.y, spawnX: openPosition.x, spawnY: openPosition.y,
                    currentHp: template.maxHp,
                    rank: template.rank,
                    nextMoveTime: Date.now() + getRandomMoveDelay()
@@ -105,14 +195,19 @@ const adventureSlice = createSlice({
       if (elitePool.length > 0) {
           for(let i=0; i<eliteCap; i++) {
               const template = elitePool[Math.floor(Math.random() * elitePool.length)];
-              const rx = Math.floor(Math.random() * mapData.width);
-              const ry = Math.floor(Math.random() * mapData.height);
+              const openPosition = findOpenCoordinate(
+                mapData.width,
+                mapData.height,
+                state.activeMonsters,
+                state.playerPosition
+              );
+              if (!openPosition) break;
               state.activeMonsters.push({
                    instanceId: Math.random().toString(36),
                    templateId: template.id,
                    name: template.name,
                    symbol: template.symbol,
-                   x: rx, y: ry, spawnX: rx, spawnY: ry,
+                   x: openPosition.x, y: openPosition.y, spawnX: openPosition.x, spawnY: openPosition.y,
                    currentHp: template.maxHp,
                    rank: template.rank,
                    nextMoveTime: Date.now() + getRandomMoveDelay()
@@ -156,23 +251,29 @@ const adventureSlice = createSlice({
 
       state.playerPosition = { x: newX, y: newY };
       state.visitedCells[`${newX},${newY}`] = true;
+    },
 
-      // Collision Check
-      const collidedMonsterIndex = state.activeMonsters.findIndex(m => m.x === newX && m.y === newY);
-      if (collidedMonsterIndex !== -1) {
-          const monster = state.activeMonsters[collidedMonsterIndex];
-          const template = mapData.enemies.find(e => e.id === monster.templateId);
-          if (template) {
-              state.currentEnemy = template;
-              state.isBattling = true;
-              state.battleLogs = [];
-              state.lastBattleResult = null;
-              // Do NOT remove monster yet. Only remove if player wins.
-          } else {
-              // Template not found, safe to remove
-              state.activeMonsters.splice(collidedMonsterIndex, 1);
-          }
-      }
+    engageMonster: (state, action: PayloadAction<{ monsterInstanceId: string }>) => {
+      if (state.isBattling || !state.currentMapId) return;
+      beginBattleWithMonster(state, state.currentMapId, action.payload.monsterInstanceId);
+    },
+
+    applyWorldDamageToMonster: (
+      state,
+      action: PayloadAction<{ monsterInstanceId: string; damage: number }>
+    ) => {
+      const monster = state.activeMonsters.find(
+        (entry) => entry.instanceId === action.payload.monsterInstanceId
+      );
+      if (!monster) return;
+
+      monster.currentHp = Math.max(
+        0,
+        monster.currentHp - Math.max(0, action.payload.damage)
+      );
+      state.activeMonsters = state.activeMonsters.filter(
+        (entry) => entry.currentHp > 0
+      );
     },
 
     tickMonsters: (state) => {
@@ -194,29 +295,28 @@ const adventureSlice = createSlice({
        const { commonCap, eliteCap } = getMapPopulationCaps(mapData.width, mapData.height, elitePool.length > 0);
 
        const spawnMonster = (template: Enemy, isBoss: boolean = false) => {
-           let rx, ry;
-           if (isBoss && mapData.bossSpawn) {
-               rx = mapData.bossSpawn.x;
-               ry = mapData.bossSpawn.y;
-           } else {
-               rx = Math.floor(Math.random() * mapData.width);
-               ry = Math.floor(Math.random() * mapData.height);
-               if ((rx === state.playerPosition.x && ry === state.playerPosition.y) || 
-                   mapData.portals.some(p => p.x === rx && p.y === ry)) {
-                   rx = (rx + 2) % mapData.width;
-                   ry = (ry + 2) % mapData.height;
-               }
-           }
+           const preferredPosition =
+             isBoss && mapData.bossSpawn
+               ? { x: mapData.bossSpawn.x, y: mapData.bossSpawn.y }
+               : undefined;
+           const openPosition = findOpenCoordinate(
+             mapData.width,
+             mapData.height,
+             state.activeMonsters,
+             state.playerPosition,
+             preferredPosition
+           );
+           if (!openPosition) return;
 
            state.activeMonsters.push({
                instanceId: isBoss ? 'boss_instance' : Math.random().toString(36),
                templateId: template.id,
                name: template.name,
                symbol: template.symbol,
-               x: rx, 
-               y: ry,
-               spawnX: rx,
-               spawnY: ry,
+               x: openPosition.x, 
+               y: openPosition.y,
+               spawnX: openPosition.x,
+               spawnY: openPosition.y,
                currentHp: template.maxHp,
                rank: template.rank,
                nextMoveTime: now + getRandomMoveDelay()
@@ -269,20 +369,44 @@ const adventureSlice = createSlice({
            if (monster.nextMoveTime && now < monster.nextMoveTime) return;
 
            // Determine Aggro Range
-           let aggroRange = 0;
-           if (monster.rank === EnemyRank.Elite) aggroRange = 6;
-           if (monster.rank === EnemyRank.Boss) aggroRange = 10;
+           const template = mapData.enemies.find(e => e.id === monster.templateId);
+           if (!template) {
+             monster.currentHp = 0;
+             return;
+           }
 
-           const distToPlayer = Math.abs(monster.x - state.playerPosition.x) + Math.abs(monster.y - state.playerPosition.y);
+           const aggroRange = getEnemyAggroRange(template);
+           const engagementRange = getEnemyEngagementRange(template);
+           const distToPlayer = getGridDistance(monster, state.playerPosition);
            let dx = 0, dy = 0;
 
            if (aggroRange > 0 && distToPlayer <= aggroRange) {
-               // Chase Player
-               if (monster.x < state.playerPosition.x) dx = 1;
-               else if (monster.x > state.playerPosition.x) dx = -1;
-               
-               if (monster.y < state.playerPosition.y) dy = 1;
-               else if (monster.y > state.playerPosition.y) dy = -1;
+               if (shouldEnemyHoldPreferredRange(template, distToPlayer)) {
+                   if (shouldEnemyStrafeNearRange(template, distToPlayer)) {
+                       const deltaX = state.playerPosition.x - monster.x;
+                       const deltaY = state.playerPosition.y - monster.y;
+                       if (Math.abs(deltaX) >= Math.abs(deltaY)) {
+                           dy = Math.random() < 0.5 ? -1 : 1;
+                       } else {
+                           dx = Math.random() < 0.5 ? -1 : 1;
+                       }
+                   }
+               } else if (shouldEnemyStrafeNearRange(template, distToPlayer)) {
+                   const deltaX = state.playerPosition.x - monster.x;
+                   const deltaY = state.playerPosition.y - monster.y;
+                   if (Math.abs(deltaX) >= Math.abs(deltaY)) {
+                       dy = Math.random() < 0.5 ? -1 : 1;
+                   } else {
+                       dx = Math.random() < 0.5 ? -1 : 1;
+                   }
+               } else {
+                   // Chase Player
+                   if (monster.x < state.playerPosition.x) dx = 1;
+                   else if (monster.x > state.playerPosition.x) dx = -1;
+                   
+                   if (monster.y < state.playerPosition.y) dy = 1;
+                   else if (monster.y > state.playerPosition.y) dy = -1;
+               }
            } else {
                // Wander within Tether (Radius 3)
                // Pick random direction
@@ -319,7 +443,19 @@ const adventureSlice = createSlice({
                const ny = monster.y + dy;
 
                // Boundary Check
-               if (nx >= 0 && nx < mapData.width && ny >= 0 && ny < mapData.height) {
+               if (
+                 nx >= 0 &&
+                 nx < mapData.width &&
+                 ny >= 0 &&
+                 ny < mapData.height &&
+                 !isOccupiedCell(
+                   state.activeMonsters,
+                   nx,
+                   ny,
+                   state.playerPosition,
+                   monster.instanceId
+                 )
+               ) {
                    monster.x = nx;
                    monster.y = ny;
                }
@@ -328,17 +464,6 @@ const adventureSlice = createSlice({
            // Set next move time (2-4s)
            monster.nextMoveTime = now + getRandomMoveDelay();
 
-           // Check Collision (Monster hit Player)
-           if (monster.x === state.playerPosition.x && monster.y === state.playerPosition.y) {
-              const template = mapData.enemies.find(e => e.id === monster.templateId);
-              if (template) {
-                  state.currentEnemy = template;
-                  state.isBattling = true;
-                  state.battleLogs = [];
-                  state.lastBattleResult = null;
-                  // Do NOT mark for cleanup. Wait for resolveBattle result.
-              }
-           }
        });
 
        state.activeMonsters = state.activeMonsters.filter(m => m.currentHp > 0);
@@ -349,13 +474,11 @@ const adventureSlice = createSlice({
         state.lastBattleResult = action.payload.won ? 'won' : 'lost';
         
         if (action.payload.won) {
-            // Remove the monster on tile
-            if (state.currentEnemy) {
+            if (state.currentEnemyInstanceId) {
                  state.activeMonsters = state.activeMonsters.filter(m => 
-                    !(m.x === state.playerPosition.x && m.y === state.playerPosition.y && m.templateId === state.currentEnemy!.id)
+                    m.instanceId !== state.currentEnemyInstanceId
                 );
             }
-            // state.currentEnemy = null; // Keep currentEnemy for the report UI. Cleared in closeBattleReport.
         } else {
             // Player Lost: Teleport to Respawn Point (Sect or Start)
             const respawnId = action.payload.respawnMapId || '0';
@@ -381,6 +504,7 @@ const adventureSlice = createSlice({
     closeBattleReport: (state) => {
         state.isBattling = false;
         state.currentEnemy = null;
+        state.currentEnemyInstanceId = null;
         state.battleLogs = [];
         state.lastBattleResult = null;
     },
@@ -388,6 +512,7 @@ const adventureSlice = createSlice({
     cancelBattle: (state) => {
         state.isBattling = false;
         state.currentEnemy = null;
+        state.currentEnemyInstanceId = null;
         state.battleLogs = [];
         state.lastBattleResult = null;
         // Monster is preserved in activeMonsters array automatically
@@ -408,5 +533,17 @@ const adventureSlice = createSlice({
   },
 });
 
-export const { enterMap, movePlayer, tickMonsters, resolveBattle, closeBattleReport, cancelBattle, markMapVisited, addVisualEffect, clearVisualEffect } = adventureSlice.actions;
+export const {
+  enterMap,
+  movePlayer,
+  tickMonsters,
+  engageMonster,
+  applyWorldDamageToMonster,
+  resolveBattle,
+  closeBattleReport,
+  cancelBattle,
+  markMapVisited,
+  addVisualEffect,
+  clearVisualEffect,
+} = adventureSlice.actions;
 export default adventureSlice.reducer;

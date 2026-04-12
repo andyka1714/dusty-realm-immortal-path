@@ -105,6 +105,7 @@ export const BEAST_SECT_NPCS: NPC[] = [
         x: 20,
         y: 15,
         description: '身披獸皮，肌肉虯結，渾身散發著狂野的氣血之力。',
+        questIds: ['sect_beast_join', 'sect_beast_task_01'],
         dialogue: [
             "肉身是渡世寶筏，唯有千錘百煉，方能肉身成聖。",
             "汲取萬獸精血，鑄就無堅不摧之軀，方為我輩修士之本。"
@@ -152,6 +153,7 @@ export const MYSTIC_SECT_NPCS: NPC[] = [
         x: 20,
         y: 15,
         description: '仙風道骨，周身靈氣繚繞。',
+        questIds: ['sect_mystic_join', 'sect_mystic_task_01'],
         dialogue: [
             "道法自然，萬物皆有靈。感悟天地，方能御使五行。",
             "修仙修心，心若冰清，天塌不驚。"

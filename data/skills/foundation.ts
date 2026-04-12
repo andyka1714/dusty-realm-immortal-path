@@ -11,9 +11,14 @@ export const FOUNDATION_SKILLS: Record<string, Skill> = {
     cooldown: 3,
     minRealm: MajorRealm.Foundation,
     profession: ProfessionType.Sword,
-    damageMultiplier: 2.0,
+    damageMultiplier: 3.2,
     targetType: "single",
     effectType: "damage",
+    cooldownSeconds: 3.0,
+    castRange: 2,
+    castTimeMs: 220,
+    areaShape: "single",
+    maxTargets: 1,
     statusEffect: {
       id: "sword_qi",
       duration: 99, // Until used
@@ -21,18 +26,6 @@ export const FOUNDATION_SKILLS: Record<string, Skill> = {
       value: 1, // 1 stack
     },
   },
-  s_f_passive: {
-    id: "s_f_passive",
-    name: "養劍術",
-    description: "每回合結束時，若未受到傷害，攻擊力提升 3% (最多疊加 5 層)。",
-    type: "Passive",
-    cooldown: 0,
-    minRealm: MajorRealm.Foundation,
-    profession: ProfessionType.Sword,
-    effectType: "buff",
-    targetType: "self",
-  },
-
   // --- Body Cultivator (Foundation) ---
   b_f_active: {
     id: "b_f_active",
@@ -47,6 +40,12 @@ export const FOUNDATION_SKILLS: Record<string, Skill> = {
     // Note: Defense scaling logic needs special handling in battle engine
     targetType: "single",
     effectType: "damage",
+    cooldownSeconds: 3.8,
+    castRange: 1,
+    castTimeMs: 360,
+    areaShape: "cone",
+    areaRadius: 1,
+    maxTargets: 3,
     statusEffect: {
       id: "stun",
       duration: 1,
@@ -74,10 +73,17 @@ export const FOUNDATION_SKILLS: Record<string, Skill> = {
     cooldown: 3,
     minRealm: MajorRealm.Foundation,
     profession: ProfessionType.Mage,
-    damageMultiplier: 0.8, // Per hit
+    damageMultiplier: 3.0,
     targetType: "single", // Actually random x 3, but defined as single target logic repeatedly?
     // Simplified as single for now, need "multi-hit" logic
     effectType: "damage",
+    cooldownSeconds: 3.2,
+    castRange: 6,
+    castTimeMs: 480,
+    projectileSpeed: 12,
+    areaShape: "single",
+    areaRadius: 0,
+    maxTargets: 1,
   },
   m_f_passive: {
     id: "m_f_passive",
@@ -89,5 +95,6 @@ export const FOUNDATION_SKILLS: Record<string, Skill> = {
     profession: ProfessionType.Mage,
     effectType: "buff",
     targetType: "self",
+    passiveEffectTags: ["shield", "spellpower", "mana_flow"],
   },
 };

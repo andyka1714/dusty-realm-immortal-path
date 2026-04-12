@@ -6,11 +6,11 @@ import { RootState } from '../store/store';
 import { MAPS } from '../data/maps';
 import { ITEMS } from '../data/items';
 import { QUESTS } from '../data/quests';
-import { enterMap, movePlayer, tickMonsters, resolveBattle, closeBattleReport, cancelBattle, markMapVisited } from '../store/slices/adventureSlice';
-import { runAutoBattle, calculatePlayerStats } from '../utils/battleSystem';
+import { enterMap, movePlayer, tickMonsters, applyWorldDamageToMonster, resolveBattle, closeBattleReport, cancelBattle, markMapVisited, addVisualEffect } from '../store/slices/adventureSlice';
+import { runAutoBattle, calculatePlayerStats, resolvePlayerWorldStrike, resolveEnemyWorldStrike } from '../utils/battleSystem';
 import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
-import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move, Swords } from 'lucide-react';
+import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move, Swords, Flame, Droplets, Shield, ShieldOff, Zap, Snowflake, Sparkles } from 'lucide-react';
 import { parseBattleLog } from '../utils/logParser';
 import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory, NPC, NPCType, ProfessionType } from '../types';
 import { MOVEMENT_SPEEDS, REALM_NAMES, ELEMENT_COLORS, ELEMENT_NAMES } from '../constants';
@@ -23,6 +23,10 @@ import AdventureStage from '../components/adventure/AdventureStage';
 import ShopPanel from '../components/adventure/ShopPanel';
 import { QuestModal } from '../components/adventure/QuestModal';
 import { SHOPS } from '../data/shops';
+import { getEnemyEngagementRange, getGridDistance, getPlayerEngagementRange, getWorldSkillAreaTargets } from '../utils/worldCombat';
+import { getLearnedSkillEngagementRange } from '../utils/skillRealtime';
+import { getFormalSkillByName, normalizeLearnedSkills } from '../data/skills';
+import { generateDrops } from '../utils/dropSystem';
 
 
 // --- VISUAL CONFIG ---
@@ -32,6 +36,59 @@ const GRID_SCALE_X = 140;
 const GRID_SCALE_Y = 120; 
 const NODE_WIDTH = 100;
 const NODE_HEIGHT = 70;
+
+const STATUS_META: Record<
+  string,
+  {
+    label: string;
+    icon: React.ComponentType<{ className?: string; size?: number }>;
+    className: string;
+  }
+> = {
+  燃燒: { label: '燃燒', icon: Flame, className: 'border-orange-700 bg-orange-950/60 text-orange-300' },
+  中毒: { label: '中毒', icon: Droplets, className: 'border-emerald-700 bg-emerald-950/60 text-emerald-300' },
+  流血: { label: '流血', icon: Droplets, className: 'border-rose-700 bg-rose-950/60 text-rose-300' },
+  護盾: { label: '護盾', icon: Shield, className: 'border-cyan-700 bg-cyan-950/60 text-cyan-300' },
+  元素護盾: { label: '元素護盾', icon: Shield, className: 'border-sky-700 bg-sky-950/60 text-sky-300' },
+  破甲: { label: '破甲', icon: ShieldOff, className: 'border-amber-700 bg-amber-950/60 text-amber-300' },
+  暈眩: { label: '暈眩', icon: Zap, className: 'border-violet-700 bg-violet-950/60 text-violet-300' },
+  凍結: { label: '凍結', icon: Snowflake, className: 'border-blue-700 bg-blue-950/60 text-blue-300' },
+  麻痺: { label: '麻痺', icon: Zap, className: 'border-yellow-700 bg-yellow-950/60 text-yellow-300' },
+  反震: { label: '反震', icon: Sparkles, className: 'border-fuchsia-700 bg-fuchsia-950/60 text-fuchsia-300' },
+  放逐: { label: '放逐', icon: Sparkles, className: 'border-indigo-700 bg-indigo-950/60 text-indigo-300' },
+  神國侵蝕: { label: '神國侵蝕', icon: Sparkles, className: 'border-red-700 bg-red-950/60 text-red-300' },
+};
+
+const renderStatusBadges = (statuses: string[] = []) => {
+  if (statuses.length === 0) {
+    return <div className="text-[11px] text-stone-600">無特殊狀態</div>;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {statuses.map((status) => {
+        const meta = STATUS_META[status] ?? {
+          label: status,
+          icon: Info,
+          className: 'border-stone-700 bg-stone-900 text-stone-300',
+        };
+        const Icon = meta.icon;
+        return (
+          <span
+            key={status}
+            className={clsx(
+              'inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[11px] font-semibold',
+              meta.className
+            )}
+          >
+            <Icon size={12} />
+            {meta.label}
+          </span>
+        );
+      })}
+    </div>
+  );
+};
 
 // Simple BFS for Pathfinding
 const findPath = (start: Coordinate, end: Coordinate, width: number, height: number): Coordinate[] => {
@@ -409,7 +466,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   const { equipmentStats } = useSelector((state: RootState) => state.inventory);
   const { 
     currentMapId, playerPosition, activeMonsters, visitedCells, 
-    mapHistory, isBattling, currentEnemy, battleLogs, lastBattleResult 
+    mapHistory, isBattling, currentEnemy, currentEnemyInstanceId, battleLogs, lastBattleResult 
   } = useSelector((state: RootState) => state.adventure);
   const { activeQuests, completedQuests } = useSelector((state: RootState) => state.quest);
   
@@ -435,6 +492,8 @@ export const Adventure: React.FC<AdventureProps> = ({
   // Cancel Battle on Unmount (Tab Switch)
   useEffect(() => {
     return () => {
+        worldActionTimersRef.current.forEach((timer) => clearTimeout(timer));
+        worldActionTimersRef.current.clear();
         dispatch(cancelBattle());
     };
   }, [dispatch]);
@@ -457,6 +516,17 @@ export const Adventure: React.FC<AdventureProps> = ({
   const moveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [targetMonsterId, setTargetMonsterId] = useState<string | null>(null);
   const [isAutoBattling, setIsAutoBattling] = useState(false);
+  const [worldPlayerHp, setWorldPlayerHp] = useState(0);
+  const [worldPlayerShield, setWorldPlayerShield] = useState(0);
+  const [worldCombatTargetId, setWorldCombatTargetId] = useState<string | null>(null);
+  const [worldCombatTargetStatuses, setWorldCombatTargetStatuses] = useState<string[]>([]);
+  const [worldCombatPlayerStatuses, setWorldCombatPlayerStatuses] = useState<string[]>([]);
+  const [worldLastCombatMessage, setWorldLastCombatMessage] = useState<string | null>(null);
+  const [playerActionReadyAt, setPlayerActionReadyAt] = useState(0);
+  const [playerSkillReadyAt, setPlayerSkillReadyAt] = useState(0);
+  const [enemyActionReadyAtById, setEnemyActionReadyAtById] = useState<Record<string, number>>({});
+  const [enemySpecialReadyAtById, setEnemySpecialReadyAtById] = useState<Record<string, number>>({});
+  const worldActionTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
   
   // NPC Interaction State
   const [interactingNPC, setInteractingNPC] = useState<NPC | null>(null);
@@ -563,11 +633,449 @@ export const Adventure: React.FC<AdventureProps> = ({
   }, [currentMapId, dispatch]);
 
   const mapData = MAPS.find(m => m.id === currentMapId);
+  const currentTimestamp = Date.now();
+  const playerStats = calculatePlayerStats(
+    attributes,
+    majorRealm,
+    spiritRootId,
+    equipmentStats,
+    character.name,
+    profession,
+    character.skills
+  );
+  const playerEngagementRange = Math.max(
+    getPlayerEngagementRange(profession),
+    getLearnedSkillEngagementRange(profession, character.skills)
+  );
+  const latestBattleLog = displayedLogs.length > 0 ? displayedLogs[displayedLogs.length - 1] : null;
+  const targetedMonster = targetMonsterId
+    ? activeMonsters.find((monster) => monster.instanceId === targetMonsterId) ?? null
+    : null;
+  const targetedMonsterTemplate = targetedMonster
+    ? mapData?.enemies.find((enemy) => enemy.id === targetedMonster.templateId) ?? null
+    : null;
+  const targetDistance = targetedMonster
+    ? getGridDistance(playerPosition, targetedMonster)
+    : null;
+  const primaryActiveSkill = profession !== ProfessionType.None
+    ? normalizeLearnedSkills(character.skills)
+        .find((skill) => skill.type === 'Active' && skill.profession === profession)
+    : undefined;
+  const canEngageTarget =
+    Boolean(targetedMonster) &&
+    targetDistance !== null &&
+    targetDistance <= playerEngagementRange &&
+    !isBattling &&
+    !showIntro;
+
+  useEffect(() => {
+    setWorldPlayerHp(playerStats.maxHp);
+    setWorldPlayerShield(0);
+    setWorldCombatTargetId(null);
+    setWorldCombatTargetStatuses([]);
+    setWorldCombatPlayerStatuses([]);
+    setWorldLastCombatMessage(null);
+    setPlayerActionReadyAt(0);
+    setPlayerSkillReadyAt(0);
+    setEnemyActionReadyAtById({});
+    setEnemySpecialReadyAtById({});
+  }, [currentMapId, playerStats.maxHp]);
+
+  useEffect(() => {
+    if (worldPlayerHp > playerStats.maxHp) {
+      setWorldPlayerHp(playerStats.maxHp);
+    }
+  }, [worldPlayerHp, playerStats.maxHp]);
+
+  useEffect(() => {
+    if (worldCombatTargetId && !activeMonsters.some((monster) => monster.instanceId === worldCombatTargetId)) {
+      worldActionTimersRef.current.forEach((timer) => clearTimeout(timer));
+      worldActionTimersRef.current.clear();
+      setWorldCombatTargetId(null);
+      setWorldCombatTargetStatuses([]);
+      setWorldCombatPlayerStatuses([]);
+      setWorldLastCombatMessage(null);
+      setEnemyActionReadyAtById({});
+      setEnemySpecialReadyAtById({});
+    }
+  }, [activeMonsters, worldCombatTargetId]);
+
+  const resetWorldCombatState = () => {
+    worldActionTimersRef.current.forEach((timer) => clearTimeout(timer));
+    worldActionTimersRef.current.clear();
+    setWorldCombatTargetId(null);
+    setWorldCombatTargetStatuses([]);
+    setWorldCombatPlayerStatuses([]);
+    setWorldLastCombatMessage(null);
+    setWorldPlayerShield(0);
+    setPlayerActionReadyAt(0);
+    setPlayerSkillReadyAt(0);
+    setEnemyActionReadyAtById({});
+    setEnemySpecialReadyAtById({});
+  };
+
+  const clearWorldEncounterState = () => {
+    worldActionTimersRef.current.forEach((timer) => clearTimeout(timer));
+    worldActionTimersRef.current.clear();
+    setWorldCombatTargetId(null);
+    setWorldCombatTargetStatuses([]);
+    setWorldCombatPlayerStatuses([]);
+    setWorldLastCombatMessage(null);
+    setEnemyActionReadyAtById({});
+    setEnemySpecialReadyAtById({});
+  };
+
+  const recoverAfterWorldKill = () => {
+    const healAmount = Math.max(8, Math.floor(playerStats.maxHp * 0.08));
+    setWorldPlayerHp((prev) => Math.min(playerStats.maxHp, prev + healAmount));
+    dispatch(addLog({
+      message: `脫戰調息，恢復 <heal>${healAmount} 氣血</heal>。`,
+      type: 'gain',
+    }));
+  };
+
+  const grantMonsterRewards = (enemy: NonNullable<typeof targetedMonsterTemplate>) => {
+    const expAmount = enemy.exp;
+    if (expAmount > 0) {
+      dispatch(gainExperience(expAmount));
+      dispatch(addLog({
+        message: `擊敗 <enemy rank="${enemy.rank}">${enemy.name}</enemy>，獲得 <exp>${expAmount} 修為</exp>`,
+        type: 'gain',
+      }));
+    }
+
+    const { spiritStones } = getDropRewards(enemy);
+    const drops = generateDrops(enemy);
+    const lootParts: string[] = [];
+
+    if (spiritStones > 0) {
+      dispatch(addSpiritStones({ amount: spiritStones, source: 'battle' }));
+      lootParts.push(formatSpiritStone(spiritStones));
+    }
+
+    drops.forEach((drop) => {
+      if (drop.itemId === 'spirit_stone') {
+        dispatch(addSpiritStones({ amount: drop.count, source: 'battle' }));
+        lootParts.push(formatSpiritStone(drop.count));
+        return;
+      }
+
+      dispatch(addItem({ itemId: drop.itemId, count: drop.count, instance: drop.instance }));
+      const item = ITEMS[drop.itemId];
+      if (!item) return;
+
+      const qualityValue = drop.instance?.quality ?? item.quality ?? 0;
+      let itemStr = item.name;
+      if (qualityValue === 0) itemStr += '(下品)';
+      if (qualityValue === 1) itemStr += '(中品)';
+      if (qualityValue === 2) itemStr += '(上品)';
+      if (qualityValue === 3) itemStr += '(仙品)';
+
+      lootParts.push(
+        `${drop.count > 1 ? `<item q="${qualityValue}">${itemStr}</item> x${drop.count}` : `<item q="${qualityValue}">${itemStr}</item>`}`
+      );
+    });
+
+    if (lootParts.length > 0) {
+      dispatch(addLog({
+        message: `獲得戰利品：${lootParts.join('，')}`,
+        type: 'gold',
+      }));
+    }
+  };
+
+  const handleWorldPlayerDefeat = () => {
+    const respawnMapId = completedQuests.includes('sect_sword_join')
+      ? '4'
+      : completedQuests.includes('sect_beast_join')
+        ? '14'
+        : completedQuests.includes('sect_mystic_join')
+          ? '23'
+          : '0';
+    dispatch(addLog({
+      message: '你在野外遭受重創，被傳送回安全地帶調息。',
+      type: 'danger',
+    }));
+    dispatch(enterMap({ mapId: respawnMapId, startX: 20, startY: 20 }));
+    setTargetMonsterId(null);
+    setAutoMovePath([]);
+    setIsAutoBattling(false);
+    setWorldPlayerHp(playerStats.maxHp);
+    resetWorldCombatState();
+  };
+
+  const performWorldPlayerAction = (useSkill: boolean) => {
+    if (!targetedMonster || !targetedMonsterTemplate || !canEngageTarget) return false;
+
+    const now = Date.now();
+    if (now < playerActionReadyAt) return false;
+
+    const chosenSkill = useSkill && primaryActiveSkill && now >= playerSkillReadyAt
+      ? primaryActiveSkill
+      : undefined;
+    const strike = resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill);
+
+    if ((strike.executionTimeMs > 0 || chosenSkill?.castTimeMs) && chosenSkill) {
+      dispatch(addVisualEffect({
+        type: 'cast',
+        text: '',
+        color: chosenSkill.profession === ProfessionType.Mage ? '#60a5fa' : '#f59e0b',
+        colorInt: chosenSkill.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
+        targetX: playerPosition.x,
+        targetY: playerPosition.y,
+        radius: 0.7,
+        durationMs: Math.max(180, chosenSkill.castTimeMs ?? 220),
+      }));
+    }
+
+    setWorldCombatTargetId(targetedMonster.instanceId);
+    setWorldCombatTargetStatuses(strike.enemyStatusNames);
+    setWorldCombatPlayerStatuses(strike.playerStatusNames);
+    setWorldPlayerShield((prev) => prev + strike.playerShieldGain);
+    setWorldLastCombatMessage(
+      chosenSkill
+        ? `你開始施展【${chosenSkill.name}】。`
+        : `你朝 ${targetedMonster.name} 發動攻擊。`
+    );
+    setPlayerActionReadyAt(now + strike.nextActionDelayMs);
+    if (chosenSkill) {
+      setPlayerSkillReadyAt(now + strike.skillCooldownMs);
+    }
+
+    const executeStrike = () => {
+      const impactedMonsters = getWorldSkillAreaTargets({
+        origin: playerPosition,
+        primaryTarget: { x: targetedMonster.x, y: targetedMonster.y },
+        monsters: activeMonsters,
+        primaryTargetId: targetedMonster.instanceId,
+        areaShape: strike.areaShape,
+        areaRadius: strike.areaRadius,
+        maxTargets: strike.maxTargets,
+      });
+
+      impactedMonsters.forEach((monster, index) => {
+        if (strike.damage <= 0) return;
+
+        dispatch(applyWorldDamageToMonster({
+          monsterInstanceId: monster.instanceId,
+          damage: strike.damage,
+        }));
+
+        dispatch(addVisualEffect({
+          type: 'impact',
+          text: '',
+          color: '#f59e0b',
+          targetX: monster.x,
+          targetY: monster.y,
+          radius: strike.areaShape && strike.areaShape !== 'single' ? 0.8 : 0.45,
+          colorInt: chosenSkill?.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
+          durationMs: 220,
+        }));
+        dispatch(addVisualEffect({
+          type: 'text',
+          text: `${index === 0 && strike.isCrit ? '暴擊 ' : ''}${strike.damage}`,
+          color: index === 0 && strike.isCrit ? '#facc15' : '#ffffff',
+          x: monster.x,
+          y: monster.y,
+          colorInt: index === 0 && strike.isCrit ? 0xfacc15 : 0xffffff,
+          durationMs: 1200,
+        }));
+      });
+
+      if (strike.isProjectile) {
+        dispatch(addVisualEffect({
+          type: 'projectile',
+          text: '',
+          color: '#f59e0b',
+          x: playerPosition.x,
+          y: playerPosition.y,
+          targetX: targetedMonster.x,
+          targetY: targetedMonster.y,
+          colorInt: chosenSkill?.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
+          durationMs: Math.max(240, strike.executionTimeMs || 360),
+        }));
+      }
+
+      if (strike.areaShape && strike.areaShape !== 'single' && strike.areaShape !== 'self') {
+        dispatch(addVisualEffect({
+          type: 'area',
+          text: '',
+          color: '#f59e0b',
+          targetX: targetedMonster.x,
+          targetY: targetedMonster.y,
+          radius: Math.max(0.8, strike.areaRadius ?? 1),
+          colorInt: chosenSkill?.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
+          durationMs: 420,
+        }));
+      }
+
+      setWorldLastCombatMessage(
+        chosenSkill
+          ? `你施展【${chosenSkill.name}】造成 ${strike.damage} 點傷害${impactedMonsters.length > 1 ? `，波及 ${impactedMonsters.length} 個目標` : ''}。`
+          : `你對 ${targetedMonster.name} 造成 ${strike.damage} 點傷害。`
+      );
+
+      let primaryDefeated = false;
+      impactedMonsters.forEach((monster) => {
+        const remainingHp = Math.max(0, monster.currentHp - strike.damage);
+        if (remainingHp > 0) return;
+
+        const monsterTemplate = mapData?.enemies.find((enemy) => enemy.id === monster.templateId);
+        if (!monsterTemplate) return;
+
+        grantMonsterRewards(monsterTemplate);
+        recoverAfterWorldKill();
+        dispatch(addLog({
+          message: `你擊敗了 ${monster.name}。`,
+          type: 'success',
+        }));
+        if (monster.instanceId === targetedMonster.instanceId) {
+          primaryDefeated = true;
+        }
+      });
+
+      if (primaryDefeated) {
+        setTargetMonsterId(null);
+        clearWorldEncounterState();
+      }
+    };
+
+    if ((strike.executionTimeMs ?? 0) > 0) {
+      const timer = setTimeout(() => {
+        worldActionTimersRef.current.delete(timer);
+        executeStrike();
+      }, strike.executionTimeMs);
+      worldActionTimersRef.current.add(timer);
+    } else {
+      executeStrike();
+    }
+
+    return true;
+  };
+
+  const performWorldEnemyAction = (
+    enemyInstanceId: string,
+    enemyTemplate: NonNullable<typeof targetedMonsterTemplate>
+  ) => {
+    const now = Date.now();
+    const canUseSpecial = now >= (enemySpecialReadyAtById[enemyInstanceId] ?? 0);
+    const strike = resolveEnemyWorldStrike(enemyTemplate, playerStats, canUseSpecial);
+
+    if (strike.skillName) {
+      dispatch(addVisualEffect({
+        type: 'cast',
+        text: '',
+        color: '#f87171',
+        colorInt: 0xf87171,
+        targetX: targetedMonster?.x ?? playerPosition.x,
+        targetY: targetedMonster?.y ?? playerPosition.y,
+        radius: 0.7,
+        durationMs: 220,
+      }));
+    }
+
+    setEnemyActionReadyAtById((prev) => ({
+      ...prev,
+      [enemyInstanceId]: now + strike.nextActionDelayMs,
+    }));
+    if (canUseSpecial && strike.specialCooldownMs > 0) {
+      setEnemySpecialReadyAtById((prev) => ({
+        ...prev,
+        [enemyInstanceId]: now + strike.specialCooldownMs,
+      }));
+    }
+
+    setWorldLastCombatMessage(
+      strike.skillName
+        ? `${enemyTemplate.name} 正在施展【${strike.skillName}】。`
+        : `${enemyTemplate.name} 朝你撲殺而來。`
+    );
+
+    const executeStrike = () => {
+      let incomingDamage = strike.damage;
+      let absorbed = 0;
+      if (worldPlayerShield > 0) {
+        absorbed = Math.min(worldPlayerShield, incomingDamage);
+        incomingDamage -= absorbed;
+        setWorldPlayerShield((prev) => Math.max(0, prev - absorbed));
+      }
+
+      const nextHp = Math.max(0, worldPlayerHp - incomingDamage);
+      setWorldPlayerHp(nextHp);
+      setWorldCombatPlayerStatuses((prev) =>
+        Array.from(new Set([...prev, ...strike.statusNames]))
+      );
+      setWorldLastCombatMessage(
+        strike.skillName
+          ? `${enemyTemplate.name} 施展【${strike.skillName}】對你造成 ${incomingDamage} 點傷害。`
+          : `${enemyTemplate.name} 對你造成 ${incomingDamage} 點傷害。`
+      );
+
+      if (strike.isProjectile) {
+        dispatch(addVisualEffect({
+          type: 'projectile',
+          text: '',
+          color: '#f87171',
+          x: targetedMonster?.x ?? enemyTemplate.attackRange ?? 0,
+          y: targetedMonster?.y ?? playerPosition.y,
+          targetX: playerPosition.x,
+          targetY: playerPosition.y,
+          colorInt: 0xf87171,
+          durationMs: Math.max(240, strike.executionTimeMs || 320),
+        }));
+      }
+      if (strike.areaShape && strike.areaShape !== 'single' && strike.areaShape !== 'self') {
+        dispatch(addVisualEffect({
+          type: 'area',
+          text: '',
+          color: '#f87171',
+          targetX: playerPosition.x,
+          targetY: playerPosition.y,
+          radius: Math.max(0.8, strike.areaRadius ?? 1),
+          colorInt: 0xf87171,
+          durationMs: 360,
+        }));
+      }
+      dispatch(addVisualEffect({
+        type: 'impact',
+        text: '',
+        color: '#f87171',
+        targetX: playerPosition.x,
+        targetY: playerPosition.y,
+        radius: 0.45,
+        colorInt: 0xf87171,
+        durationMs: 220,
+      }));
+      dispatch(addVisualEffect({
+        type: 'text',
+        text: absorbed > 0 ? `-${incomingDamage} / 格擋 ${absorbed}` : `-${incomingDamage}`,
+        color: absorbed > 0 ? '#67e8f9' : '#fca5a5',
+        x: playerPosition.x,
+        y: playerPosition.y,
+        colorInt: absorbed > 0 ? 0x67e8f9 : 0xfca5a5,
+        durationMs: 1200,
+      }));
+
+      if (nextHp <= 0) {
+        handleWorldPlayerDefeat();
+      }
+    };
+
+    if ((strike.executionTimeMs ?? 0) > 0) {
+      const timer = setTimeout(() => {
+        worldActionTimersRef.current.delete(timer);
+        executeStrike();
+      }, strike.executionTimeMs);
+      worldActionTimersRef.current.add(timer);
+    } else {
+      executeStrike();
+    }
+  };
 
   // Stop auto-move if battle starts or map changes
   useEffect(() => {
       if (isBattling || showIntro) {
-          setAutoMovePath([]);
+          setAutoMovePath((prev) => (prev.length > 0 ? [] : prev));
           if (moveTimerRef.current) clearTimeout(moveTimerRef.current);
       }
   }, [isBattling, showIntro, currentMapId]);
@@ -578,6 +1086,11 @@ export const Adventure: React.FC<AdventureProps> = ({
 
       const targetMonster = activeMonsters.find(m => m.instanceId === targetMonsterId);
       if (targetMonster) {
+          if (getGridDistance(playerPosition, targetMonster) <= playerEngagementRange) {
+              setAutoMovePath((prev) => (prev.length > 0 ? [] : prev));
+              return;
+          }
+
           const currentDest = autoMovePath.length > 0 ? autoMovePath[autoMovePath.length - 1] : null;
           
           if (!currentDest || currentDest.x !== targetMonster.x || currentDest.y !== targetMonster.y) {
@@ -591,7 +1104,7 @@ export const Adventure: React.FC<AdventureProps> = ({
           // Monster dead or gone? Stop targeting.
           setTargetMonsterId(null);
       }
-  }, [targetMonsterId, activeMonsters, mapData, isBattling, showIntro, playerPosition, autoMovePath]);
+  }, [targetMonsterId, activeMonsters, mapData, isBattling, showIntro, playerPosition, autoMovePath, playerEngagementRange, dispatch]);
 
   // 2. Movement Execution Logic (Effect: Runs Timer)
   useEffect(() => {
@@ -641,6 +1154,46 @@ export const Adventure: React.FC<AdventureProps> = ({
     return () => clearInterval(interval);
   }, [dispatch, isBattling, showIntro]);
 
+  useEffect(() => {
+      if (showIntro || isBattling || !targetedMonster || !targetedMonsterTemplate) return;
+
+      const interval = setInterval(() => {
+          const now = Date.now();
+          const distance = getGridDistance(playerPosition, targetedMonster);
+
+          if (isAutoBattling && distance <= playerEngagementRange && now >= playerActionReadyAt) {
+              performWorldPlayerAction(Boolean(primaryActiveSkill && now >= playerSkillReadyAt));
+          }
+
+          const enemyRange = getEnemyEngagementRange(targetedMonsterTemplate);
+          const engagedTargetId = worldCombatTargetId ?? (isAutoBattling ? targetedMonster.instanceId : null);
+          if (
+            engagedTargetId === targetedMonster.instanceId &&
+            distance <= enemyRange &&
+            now >= (enemyActionReadyAtById[targetedMonster.instanceId] ?? 0)
+          ) {
+              performWorldEnemyAction(targetedMonster.instanceId, targetedMonsterTemplate);
+          }
+      }, 120);
+
+      return () => clearInterval(interval);
+  }, [
+    showIntro,
+    isBattling,
+    targetedMonster,
+    targetedMonsterTemplate,
+    playerPosition,
+    isAutoBattling,
+    playerEngagementRange,
+    playerActionReadyAt,
+    playerSkillReadyAt,
+    enemyActionReadyAtById,
+    worldCombatTargetId,
+    primaryActiveSkill,
+    worldPlayerHp,
+    worldPlayerShield,
+  ]);
+
   // --- Auto-Battle Logic ---
   
   // 1. Auto-Target: Find nearest monster when idle
@@ -653,7 +1206,7 @@ export const Adventure: React.FC<AdventureProps> = ({
 
       activeMonsters.forEach(m => {
           // Verify path exists? For now just euclidean distance is enough approximation
-          const dist = Math.abs(m.x - playerPosition.x) + Math.abs(m.y - playerPosition.y);
+          const dist = getGridDistance(playerPosition, m);
           if (dist < minDist) {
               minDist = dist;
               nearestId = m.instanceId;
@@ -675,6 +1228,16 @@ export const Adventure: React.FC<AdventureProps> = ({
       }
   }, [isAutoBattling, lastBattleResult, dispatch]);
 
+  useEffect(() => {
+      if (!lastBattleResult || isReplayingBattle) return;
+
+      const timer = setTimeout(() => {
+          dispatch(closeBattleReport());
+      }, isAutoBattling ? 1500 : 2200);
+
+      return () => clearTimeout(timer);
+  }, [lastBattleResult, isReplayingBattle, isAutoBattling, dispatch]);
+
   // 3. Handle Battle Result (Clear State on Loss)
   useEffect(() => {
       if (lastBattleResult === 'lost') {
@@ -694,6 +1257,28 @@ export const Adventure: React.FC<AdventureProps> = ({
         const isMoveKey = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(e.key);
         if (isMoveKey) setAutoMovePath([]); 
 
+        if (e.key.toLowerCase() === 'm') {
+            e.preventDefault();
+            setIsMapModalOpen(true);
+            setMapTab('area');
+            return;
+        }
+
+        if (e.key.toLowerCase() === 'r') {
+            e.preventDefault();
+            setIsAutoBattling(prev => !prev);
+            return;
+        }
+
+        if ((e.key.toLowerCase() === 'f' || e.key.toLowerCase() === 'q') && targetedMonster) {
+            e.preventDefault();
+            if (canEngageTarget) {
+                performWorldPlayerAction(e.key.toLowerCase() === 'q');
+                setAutoMovePath([]);
+            }
+            return;
+        }
+
         if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
         
         if (e.key === 'ArrowUp' || e.key === 'w') dispatch(movePlayer({ dx: 0, dy: -1 }));
@@ -703,7 +1288,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [dispatch, isBattling, showIntro, isMapModalOpen, isInputBlocked]);
+  }, [dispatch, isBattling, showIntro, isMapModalOpen, isInputBlocked, targetedMonster, canEngageTarget]);
 
   // Map Intro
   useEffect(() => {
@@ -771,6 +1356,32 @@ export const Adventure: React.FC<AdventureProps> = ({
         if (isReplayingBattle && replayQueue.length === 0 && battleSnapshot) {
              // Replay Finished -> Apply Final Results
              setIsReplayingBattle(false);
+             const defeatedMonster = currentEnemyInstanceId
+               ? activeMonsters.find((monster) => monster.instanceId === currentEnemyInstanceId)
+               : null;
+
+             if (battleSnapshot.won && defeatedMonster) {
+                 dispatch(addVisualEffect({
+                     type: 'area',
+                     text: '',
+                     color: '#fca5a5',
+                     colorInt: 0xfca5a5,
+                     targetX: defeatedMonster.x,
+                     targetY: defeatedMonster.y,
+                     radius: 0.9,
+                     durationMs: 420,
+                 }));
+                 dispatch(addVisualEffect({
+                     type: 'impact',
+                     text: '',
+                     color: '#ffffff',
+                     colorInt: 0xffffff,
+                     targetX: defeatedMonster.x,
+                     targetY: defeatedMonster.y,
+                     radius: 0.85,
+                     durationMs: 320,
+                 }));
+             }
 
              // Calculate Respawn ID based on Profession if lost
              let respawnMapId: string | undefined;
@@ -872,8 +1483,12 @@ export const Adventure: React.FC<AdventureProps> = ({
         return;
     }
 
+    const nextLog = replayQueue[0];
+    const previousTime = displayedLogs[displayedLogs.length - 1]?.timeMs ?? 0;
+    const nextTime = nextLog?.timeMs ?? previousTime + 500;
+    const replayDelay = Math.max(180, Math.min(900, nextTime - previousTime || 250));
+
     const timer = setTimeout(() => {
-        const nextLog = replayQueue[0];
         setDisplayedLogs(prev => [...prev, nextLog]);
         setReplayQueue(prev => prev.slice(1));
         
@@ -886,10 +1501,89 @@ export const Adventure: React.FC<AdventureProps> = ({
         const logContainer = document.getElementById('battle-log-container');
         if (logContainer) logContainer.scrollTop = logContainer.scrollHeight;
 
-    }, 500); // 0.5 Second Delay per turn
+        const targetMonster = currentEnemyInstanceId
+          ? activeMonsters.find((monster) => monster.instanceId === currentEnemyInstanceId)
+          : null;
+        const skillMatch = nextLog.message.match(/施展【([^】]+)】/);
+        const normalizedUsedSkill = skillMatch
+          ? getFormalSkillByName(skillMatch[1])
+          : undefined;
+
+        if (normalizedUsedSkill && nextLog.isPlayer && targetMonster) {
+            if ((normalizedUsedSkill.castRange ?? 1) > 1) {
+                dispatch(addVisualEffect({
+                    type: 'projectile',
+                    text: '',
+                    color: '#60a5fa',
+                    colorInt: 0x60a5fa,
+                    x: playerPosition.x,
+                    y: playerPosition.y,
+                    targetX: targetMonster.x,
+                    targetY: targetMonster.y,
+                    durationMs: Math.max(220, normalizedUsedSkill.castTimeMs ?? 280),
+                }));
+            }
+
+            if (
+              normalizedUsedSkill.areaShape &&
+              normalizedUsedSkill.areaShape !== 'single' &&
+              normalizedUsedSkill.areaShape !== 'self' &&
+              (normalizedUsedSkill.areaRadius ?? 0) > 0
+            ) {
+                dispatch(addVisualEffect({
+                    type: 'area',
+                    text: '',
+                    color: '#a78bfa',
+                    colorInt: 0xa78bfa,
+                    targetX: targetMonster.x,
+                    targetY: targetMonster.y,
+                    radius: normalizedUsedSkill.areaRadius,
+                    durationMs: 520,
+                }));
+            }
+        } else if (!nextLog.isPlayer && (currentEnemy?.attackRange ?? 1) > 1 && targetMonster) {
+            dispatch(addVisualEffect({
+                type: 'projectile',
+                text: '',
+                color: '#fb7185',
+                colorInt: 0xfb7185,
+                x: targetMonster.x,
+                y: targetMonster.y,
+                targetX: playerPosition.x,
+                targetY: playerPosition.y,
+                durationMs: 260,
+            }));
+        }
+
+        if (nextLog.damage && nextLog.damage > 0) {
+            const impactX = nextLog.isPlayer ? targetMonster?.x : playerPosition.x;
+            const impactY = nextLog.isPlayer ? targetMonster?.y : playerPosition.y;
+
+            dispatch(addVisualEffect({
+                type: 'impact',
+                text: '',
+                color: nextLog.isPlayer ? '#fde68a' : '#fca5a5',
+                colorInt: nextLog.isPlayer ? 0xfde68a : 0xfca5a5,
+                targetX: impactX,
+                targetY: impactY,
+                radius: 0.55,
+                durationMs: 240,
+            }));
+
+            dispatch(addVisualEffect({
+                type: 'text',
+                text: `${nextLog.damage}`,
+                color: nextLog.isPlayer ? '#fbbf24' : '#fb7185',
+                colorInt: nextLog.isPlayer ? 0xfbbf24 : 0xfb7185,
+                x: impactX,
+                y: impactY,
+            }));
+        }
+
+    }, replayDelay);
 
     return () => clearTimeout(timer);
-  }, [isReplayingBattle, replayQueue, battleSnapshot]);
+  }, [isReplayingBattle, replayQueue, battleSnapshot, displayedLogs, currentEnemyInstanceId, activeMonsters, playerPosition, dispatch]);
 
   // Auto-Scroll Battle Logs
   useEffect(() => {
@@ -912,7 +1606,15 @@ export const Adventure: React.FC<AdventureProps> = ({
       if (isBattling && currentEnemy && !lastBattleResult && !battleProcessedRef.current) {
           battleProcessedRef.current = true;
           // Calculate Stats
-          const playerStats = calculatePlayerStats(attributes, majorRealm, spiritRootId, equipmentStats, character.name);
+          const playerStats = calculatePlayerStats(
+            attributes,
+            majorRealm,
+            spiritRootId,
+            equipmentStats,
+            character.name,
+            profession,
+            character.skills
+          );
           const { won, logs, rewards } = runAutoBattle(playerStats, currentEnemy);
           
           // Start Replay
@@ -961,6 +1663,10 @@ export const Adventure: React.FC<AdventureProps> = ({
 
       if (targetMonster) {
           setTargetMonsterId(targetMonster.instanceId);
+          if (getGridDistance(playerPosition, targetMonster) <= playerEngagementRange) {
+              setAutoMovePath([]);
+              return;
+          }
       } else {
           setTargetMonsterId(null);
       }
@@ -1088,6 +1794,140 @@ export const Adventure: React.FC<AdventureProps> = ({
             ref={containerRef}
             className="flex-1 flex items-center justify-center bg-stone-950/80 relative overflow-hidden"
         >
+            {targetedMonster && targetedMonsterTemplate && !isBattling && (
+                <div className="absolute left-1/2 top-4 z-30 w-[min(420px,calc(100%-9rem))] -translate-x-1/2 rounded-xl border border-stone-700/90 bg-black/80 px-4 py-3 shadow-[0_0_30px_rgba(0,0,0,0.55)] backdrop-blur">
+                    <div className="mb-2 flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                                <span className={clsx(
+                                    "rounded border px-1.5 py-0.5 text-[10px] font-bold tracking-wider",
+                                    targetedMonster.rank === EnemyRank.Boss
+                                      ? "border-red-700 bg-red-950/50 text-red-300"
+                                      : targetedMonster.rank === EnemyRank.Elite
+                                        ? "border-blue-700 bg-blue-950/50 text-blue-300"
+                                        : "border-stone-700 bg-stone-900 text-stone-300"
+                                )}>
+                                    {targetedMonster.rank === EnemyRank.Boss ? "Boss" : targetedMonster.rank === EnemyRank.Elite ? "Elite" : "Common"}
+                                </span>
+                                <span className="truncate text-sm font-bold text-stone-200">
+                                    {targetedMonster.name}
+                                </span>
+                            </div>
+                            <div className="mt-1 text-xs text-stone-500">
+                                {REALM_NAMES[targetedMonsterTemplate.realm]} {targetedMonsterTemplate.minorRealm}
+                            </div>
+                        </div>
+                        <div className="text-right text-xs text-stone-400">
+                            <div>距離 {targetDistance}</div>
+                            <div className={clsx(
+                                "mt-1 font-bold",
+                                targetDistance !== null && targetDistance <= playerEngagementRange
+                                  ? "text-emerald-400"
+                                  : "text-amber-400"
+                            )}>
+                                {targetDistance !== null && targetDistance <= playerEngagementRange ? "已進入攻擊距離" : `攻擊距離 ${playerEngagementRange}`}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="h-2 rounded-full border border-stone-800 bg-stone-950 overflow-hidden">
+                        <div
+                            className={clsx(
+                                "h-full transition-all duration-300",
+                                targetedMonster.rank === EnemyRank.Boss
+                                  ? "bg-red-500"
+                                  : targetedMonster.rank === EnemyRank.Elite
+                                    ? "bg-blue-500"
+                                    : "bg-stone-400"
+                            )}
+                            style={{
+                                width: `${Math.max(0, (targetedMonster.currentHp / targetedMonsterTemplate.maxHp) * 100)}%`,
+                            }}
+                        />
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-[11px] text-stone-500">
+                        <span>氣血 {targetedMonster.currentHp} / {targetedMonsterTemplate.maxHp}</span>
+                        <span>{targetedMonsterTemplate.element !== ElementType.None ? ELEMENT_NAMES[targetedMonsterTemplate.element] : '無屬性'}</span>
+                    </div>
+                </div>
+            )}
+
+            {targetedMonster && targetedMonsterTemplate && !isBattling && (
+                <div className="absolute right-4 bottom-24 z-30 w-[min(420px,calc(100%-2rem))] rounded-xl border border-stone-700/90 bg-black/80 px-4 py-3 shadow-[0_0_30px_rgba(0,0,0,0.55)] backdrop-blur">
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-lg border border-emerald-900/50 bg-stone-950/70 p-3">
+                            <div className="mb-2 flex items-center justify-between">
+                                <div className="text-sm font-bold text-emerald-300">{character.name}</div>
+                                <div className="text-[11px] text-stone-500">你</div>
+                            </div>
+                            <div className="h-2 overflow-hidden rounded-full border border-stone-800 bg-stone-950">
+                                <div
+                                    className="h-full bg-emerald-500 transition-all duration-200"
+                                    style={{ width: `${Math.max(0, (worldPlayerHp / playerStats.maxHp) * 100)}%` }}
+                                />
+                            </div>
+                            <div className="mt-2 flex items-center justify-between text-[11px] text-stone-400">
+                                <span>氣血 {Math.floor(worldPlayerHp)} / {playerStats.maxHp}</span>
+                                <span>{worldPlayerShield > 0 ? `護盾 ${Math.floor(worldPlayerShield)}` : '無護盾'}</span>
+                            </div>
+                            <div className="mt-2">{renderStatusBadges(worldCombatPlayerStatuses)}</div>
+                        </div>
+                        <div className="rounded-lg border border-rose-900/50 bg-stone-950/70 p-3">
+                            <div className="mb-2 flex items-center justify-between">
+                                <div className="text-sm font-bold text-rose-300">{targetedMonster.name}</div>
+                                <div className="text-[11px] text-stone-500">{targetedMonster.rank === EnemyRank.Boss ? 'Boss' : targetedMonster.rank === EnemyRank.Elite ? 'Elite' : 'Common'}</div>
+                            </div>
+                            <div className="h-2 overflow-hidden rounded-full border border-stone-800 bg-stone-950">
+                                <div
+                                    className="h-full bg-rose-500 transition-all duration-200"
+                                    style={{ width: `${Math.max(0, (targetedMonster.currentHp / targetedMonsterTemplate.maxHp) * 100)}%` }}
+                                />
+                            </div>
+                            <div className="mt-2 flex items-center justify-between text-[11px] text-stone-400">
+                                <span>氣血 {targetedMonster.currentHp} / {targetedMonsterTemplate.maxHp}</span>
+                                <span>射程 {getEnemyEngagementRange(targetedMonsterTemplate)}</span>
+                            </div>
+                            <div className="mt-2">{renderStatusBadges(worldCombatTargetStatuses)}</div>
+                        </div>
+                    </div>
+                    <div className="mt-3 rounded-lg border border-stone-800 bg-stone-950/70 px-3 py-2">
+                        <div className="mb-1 flex items-center justify-between text-[11px] text-stone-500">
+                            <span>最近戰況</span>
+                        </div>
+                        <div className="text-sm text-stone-300">
+                            {worldLastCombatMessage ?? '尚未開始交手'}
+                        </div>
+                        {primaryActiveSkill && (
+                            <div className="mt-3">
+                                <div className="mb-1 flex items-center justify-between text-[11px] text-stone-500">
+                                    <span>{primaryActiveSkill.name}</span>
+                                    <span className={(currentTimestamp < playerSkillReadyAt) ? 'text-amber-300' : 'text-emerald-300'}>
+                                        {currentTimestamp < playerSkillReadyAt ? `${((playerSkillReadyAt - currentTimestamp) / 1000).toFixed(1)}s` : '可施放'}
+                                    </span>
+                                </div>
+                                <div className="h-2 overflow-hidden rounded-full border border-stone-800 bg-stone-950">
+                                    <div
+                                        className={clsx(
+                                            "h-full transition-all duration-200",
+                                            currentTimestamp < playerSkillReadyAt ? "bg-amber-500" : "bg-emerald-500"
+                                        )}
+                                        style={{
+                                          width: `${
+                                            primaryActiveSkill.cooldownSeconds
+                                              ? Math.max(
+                                                  0,
+                                                  100 - ((Math.max(0, playerSkillReadyAt - currentTimestamp) / (primaryActiveSkill.cooldownSeconds * 1000)) * 100)
+                                                )
+                                              : 100
+                                          }%`,
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* Transition Overlay */}
             <div className={clsx(
                 "absolute inset-0 z-50 bg-black pointer-events-none transition-opacity duration-500",
@@ -1123,16 +1963,14 @@ export const Adventure: React.FC<AdventureProps> = ({
 
         {/* Battle Layout Overlay - UNIFIED */}
         {(isBattling || lastBattleResult) && currentEnemy && ReactDOM.createPortal(
-            <div className="fixed inset-0 z-[5002] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-6 animate-fade-in">
-               <div className="absolute inset-0 bg-red-900/10 animate-pulse z-0 pointer-events-none"></div>
-               
-               <div className="relative z-10 w-full max-w-2xl bg-stone-950 border border-red-900/50 rounded-xl p-6 shadow-2xl flex flex-col h-[70vh] max-h-[600px] animate-scale-in">
-                   <div className="flex justify-between items-center mb-4 border-b border-stone-800 pb-4">
+            <div className="fixed bottom-4 right-4 z-[5002] w-[min(520px,calc(100vw-1rem))] md:bottom-6 md:right-6 animate-fade-in">
+               <div className="relative w-full bg-stone-950/95 border border-red-900/45 rounded-xl p-4 shadow-2xl flex flex-col h-[min(70vh,600px)] animate-scale-in backdrop-blur-md">
+                   <div className="flex justify-between items-center mb-3 border-b border-stone-800/80 pb-3">
                        <>
-                           <h2 className={`text-2xl font-bold flex items-center gap-2 ${currentEnemy.rank === EnemyRank.Boss ? 'text-red-500 uppercase tracking-widest' : 'text-stone-300'}`}>
-                               <Skull /> {currentEnemy.rank === EnemyRank.Boss ? '守關妖王' : '遭遇強敵'}：{currentEnemy.name}
+                           <h2 className={`text-lg font-bold flex items-center gap-2 ${currentEnemy.rank === EnemyRank.Boss ? 'text-red-500 uppercase tracking-[0.2em]' : 'text-stone-300'}`}>
+                               <Skull size={18} /> {currentEnemy.rank === EnemyRank.Boss ? '守關妖王' : '遭遇強敵'}：{currentEnemy.name}
                            </h2>
-                           <div className="text-stone-500 font-mono text-lg font-semibold tracking-wider">
+                           <div className="text-stone-500 font-mono text-sm font-semibold tracking-wider">
                                 {REALM_NAMES[currentEnemy.realm]} <span className="text-stone-400">{currentEnemy.minorRealm}</span>
                             </div>
                        </>
@@ -1140,32 +1978,141 @@ export const Adventure: React.FC<AdventureProps> = ({
                    
                    {/* Battle Status / HP Bars - Always show snapshot if available, or current logs imply it */}
                    {battleSnapshot && (
-                        <div className="mb-4 grid grid-cols-2 gap-4">
+                        <div className="mb-4 space-y-3">
+                             <div className="grid grid-cols-2 gap-3">
                              {/* Player HP */}
-                             <div className="bg-stone-900/80 p-3 rounded border border-stone-700">
-                                 <div className="flex justify-between text-xs mb-1 text-emerald-400 font-bold">
-                                     <span>{character.name}</span>
-                                     <span>{Math.floor(battleSnapshot.playerHp)} / {Math.floor(battleSnapshot.playerMaxHp)}</span>
+                             <div className="bg-stone-900/90 p-3 rounded-lg border border-emerald-900/60 shadow-[0_0_18px_rgba(16,185,129,0.08)]">
+                                 <div className="mb-2 flex items-center justify-between">
+                                     <div>
+                                         <div className="text-[11px] tracking-[0.25em] uppercase text-stone-500">玩家</div>
+                                         <div className="text-sm font-bold text-emerald-300">{character.name}</div>
+                                     </div>
+                                     <div className="text-right">
+                                         <div className="text-[11px] text-stone-500">氣血</div>
+                                         <div className="text-xs font-mono text-emerald-300">
+                                             {Math.floor(battleSnapshot.playerHp)} / {Math.floor(battleSnapshot.playerMaxHp)}
+                                         </div>
+                                     </div>
                                  </div>
-                                 <div className="h-2 bg-stone-950 rounded-full overflow-hidden">
+                                 <div className="h-2.5 bg-stone-950 rounded-full overflow-hidden border border-stone-800">
                                      <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${Math.max(0, (battleSnapshot.playerHp / battleSnapshot.playerMaxHp) * 100)}%` }}></div>
+                                 </div>
+                                 <div className="mt-2 text-[11px] text-stone-500">
+                                     剩餘生命 {Math.max(0, Math.round((battleSnapshot.playerHp / battleSnapshot.playerMaxHp) * 100))}%
+                                 </div>
+                                 {latestBattleLog?.playerActiveSkillName && (
+                                    <div className="mt-3 rounded-lg border border-stone-800 bg-black/35 px-3 py-2">
+                                        <div className="mb-1 flex items-center justify-between gap-3">
+                                            <span className="text-[10px] tracking-[0.22em] uppercase text-stone-500">主動術式</span>
+                                            <span className={clsx(
+                                              "text-xs font-semibold",
+                                              (latestBattleLog.playerActiveSkillCooldownRemainingMs ?? 0) > 0
+                                                ? "text-amber-300"
+                                                : "text-emerald-300"
+                                            )}>
+                                              {(latestBattleLog.playerActiveSkillCooldownRemainingMs ?? 0) > 0
+                                                ? `${((latestBattleLog.playerActiveSkillCooldownRemainingMs ?? 0) / 1000).toFixed(1)}s`
+                                                : "可施放"}
+                                            </span>
+                                        </div>
+                                        <div className="truncate text-sm font-bold text-stone-200">
+                                            {latestBattleLog.playerActiveSkillName}
+                                        </div>
+                                        <div className="mt-2 h-2 overflow-hidden rounded-full border border-stone-800 bg-stone-950">
+                                            <div
+                                              className={clsx(
+                                                "h-full transition-all duration-300",
+                                                (latestBattleLog.playerActiveSkillCooldownRemainingMs ?? 0) > 0
+                                                  ? "bg-amber-500"
+                                                  : "bg-emerald-500"
+                                              )}
+                                              style={{
+                                                width: `${
+                                                  latestBattleLog.playerActiveSkillCooldownTotalMs
+                                                    ? Math.max(
+                                                        0,
+                                                        100 -
+                                                          ((latestBattleLog.playerActiveSkillCooldownRemainingMs ?? 0) /
+                                                            latestBattleLog.playerActiveSkillCooldownTotalMs) *
+                                                            100
+                                                      )
+                                                    : 100
+                                                }%`,
+                                              }}
+                                            />
+                                        </div>
+                                    </div>
+                                 )}
+                                 <div className="mt-3 border-t border-stone-800/70 pt-2">
+                                    <div className="mb-1 text-[10px] tracking-[0.22em] uppercase text-stone-500">狀態</div>
+                                    {renderStatusBadges(latestBattleLog?.playerStatuses)}
                                  </div>
                              </div>
 
                              {/* Enemy HP */}
-                             <div className="bg-stone-900/80 p-3 rounded border border-stone-700">
-                                 <div className="flex justify-between text-xs mb-1 text-rose-400 font-bold">
-                                     <span>{currentEnemy.name}</span>
-                                     <span>{Math.floor(battleSnapshot.enemyHp)} / {Math.floor(battleSnapshot.enemyMaxHp)}</span>
+                             <div className="bg-stone-900/90 p-3 rounded-lg border border-rose-900/60 shadow-[0_0_18px_rgba(244,63,94,0.08)]">
+                                 <div className="mb-2 flex items-center justify-between">
+                                     <div>
+                                         <div className="text-[11px] tracking-[0.25em] uppercase text-stone-500">目標</div>
+                                         <div className="flex items-center gap-2">
+                                            <span className="text-sm font-bold text-rose-300">{currentEnemy.name}</span>
+                                            <span className={clsx(
+                                                "rounded border px-1.5 py-0.5 text-[10px] font-bold tracking-wider",
+                                                currentEnemy.rank === EnemyRank.Boss
+                                                  ? "border-red-700 bg-red-950/50 text-red-300"
+                                                  : currentEnemy.rank === EnemyRank.Elite
+                                                    ? "border-blue-700 bg-blue-950/50 text-blue-300"
+                                                    : "border-stone-700 bg-stone-950 text-stone-300"
+                                            )}>
+                                                {currentEnemy.rank === EnemyRank.Boss ? "Boss" : currentEnemy.rank === EnemyRank.Elite ? "Elite" : "Common"}
+                                            </span>
+                                         </div>
+                                     </div>
+                                     <div className="text-right">
+                                         <div className="text-[11px] text-stone-500">氣血</div>
+                                         <div className="text-xs font-mono text-rose-300">
+                                             {Math.floor(battleSnapshot.enemyHp)} / {Math.floor(battleSnapshot.enemyMaxHp)}
+                                         </div>
+                                     </div>
                                  </div>
-                                 <div className="h-2 bg-stone-950 rounded-full overflow-hidden">
+                                 <div className="h-2.5 bg-stone-950 rounded-full overflow-hidden border border-stone-800">
                                      <div className="h-full bg-rose-500 transition-all duration-300" style={{ width: `${Math.max(0, (battleSnapshot.enemyHp / battleSnapshot.enemyMaxHp) * 100)}%` }}></div>
+                                 </div>
+                                 <div className="mt-2 flex items-center justify-between text-[11px] text-stone-500">
+                                    <span>{REALM_NAMES[currentEnemy.realm]} {currentEnemy.minorRealm}</span>
+                                    <span>剩餘生命 {Math.max(0, Math.round((battleSnapshot.enemyHp / battleSnapshot.enemyMaxHp) * 100))}%</span>
+                                 </div>
+                                 <div className="mt-3 border-t border-stone-800/70 pt-2">
+                                    <div className="mb-1 text-[10px] tracking-[0.22em] uppercase text-stone-500">狀態</div>
+                                    {renderStatusBadges(latestBattleLog?.enemyStatuses)}
                                  </div>
                              </div>
                         </div>
+
+                        {latestBattleLog && (
+                            <div className="rounded-lg border border-stone-800 bg-black/55 px-4 py-3">
+                                <div className="mb-1 text-[11px] tracking-[0.25em] uppercase text-stone-500">最近戰況</div>
+                                <div className="flex items-center justify-between gap-4">
+                                    <div className="min-w-0 flex-1 text-sm text-stone-300">
+                                        {parseBattleLog(latestBattleLog.message)}
+                                    </div>
+                                    <div className={clsx(
+                                        "shrink-0 rounded-full border px-3 py-1 text-xs font-bold",
+                                        latestBattleLog.damage > 0
+                                          ? latestBattleLog.isPlayer
+                                            ? "border-amber-700 bg-amber-950/50 text-amber-300"
+                                            : "border-red-700 bg-red-950/50 text-red-300"
+                                          : "border-stone-700 bg-stone-900 text-stone-400"
+                                    )}>
+                                        {latestBattleLog.damage > 0 ? `${latestBattleLog.damage} 傷害` : '狀態變化'}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        </div>
                    )}
 
-                   <div id="battle-log-container" ref={battleLogRef} className="flex-1 overflow-y-auto space-y-2 font-mono text-sm p-4 bg-black/30 rounded inner-shadow custom-scrollbar">
+                   <div id="battle-log-container" ref={battleLogRef} className="flex-1 overflow-y-auto space-y-2 font-mono text-sm p-3 bg-black/35 rounded inner-shadow custom-scrollbar">
                        {displayedLogs.length > 0 ? displayedLogs.map((log, i) => (
                            <div key={i} className={log.isPlayer ? "text-stone-300" : "text-stone-400"}>
                                {parseBattleLog(log.message)}
@@ -1176,17 +2123,111 @@ export const Adventure: React.FC<AdventureProps> = ({
 
                    </div>
                    
-                   {/* Action Footer - Only shows when result is ready */}
                    {lastBattleResult && !isReplayingBattle && (
-                       <div className="mt-4 flex justify-center animate-fade-in">
-                           <button onClick={() => dispatch(closeBattleReport())} className="px-8 py-3 bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-600 rounded-lg shadow-lg hover:border-amber-500 transition-colors">
+                       <div className="mt-3 flex justify-center animate-fade-in">
+                           <div className={clsx(
+                               "rounded-full border px-4 py-2 text-sm font-bold tracking-[0.2em]",
+                               lastBattleResult === 'won'
+                                 ? "border-emerald-700 bg-emerald-950/45 text-emerald-300"
+                                 : "border-red-700 bg-red-950/45 text-red-300"
+                           )}>
                                {lastBattleResult === 'won' ? '戰鬥勝利' : '戰鬥失敗'}
-                           </button>
+                           </div>
                        </div>
                    )}
                </div>
             </div>,
             document.body
+        )}
+
+        {!showIntro && !isBattling && !isMapModalOpen && (
+            <div className="pointer-events-none fixed bottom-4 left-1/2 z-[5001] -translate-x-1/2">
+                <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-stone-700/80 bg-black/75 px-3 py-2 shadow-[0_0_30px_rgba(0,0,0,0.55)] backdrop-blur">
+                    <button
+                        onClick={() => {
+                            if (targetedMonster && canEngageTarget) {
+                                performWorldPlayerAction(false);
+                                setAutoMovePath([]);
+                            }
+                        }}
+                        disabled={!targetedMonster || !canEngageTarget}
+                        className={clsx(
+                            "min-w-24 rounded-xl border px-3 py-2 text-left transition-colors",
+                            targetedMonster && canEngageTarget
+                              ? "border-red-700 bg-red-950/50 text-red-200 hover:bg-red-900/60"
+                              : "cursor-not-allowed border-stone-800 bg-stone-950/60 text-stone-500"
+                        )}
+                    >
+                        <div className="flex items-center justify-between gap-3">
+                            <span className="text-sm font-bold">普攻</span>
+                            <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">F</span>
+                        </div>
+                        <div className="mt-1 text-[11px] text-stone-400">
+                            {targetedMonster
+                              ? canEngageTarget
+                                ? '直接在場景內出手'
+                                : '目標尚未進入距離'
+                              : '未鎖定目標'}
+                        </div>
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            if (targetedMonster && canEngageTarget) {
+                                performWorldPlayerAction(true);
+                                setAutoMovePath([]);
+                            }
+                        }}
+                        disabled={!primaryActiveSkill || !targetedMonster || !canEngageTarget}
+                        className={clsx(
+                            "min-w-36 rounded-xl border px-3 py-2 text-left transition-colors",
+                            primaryActiveSkill && targetedMonster && canEngageTarget
+                              ? "border-amber-700 bg-amber-950/45 text-amber-200 hover:bg-amber-900/60"
+                              : "cursor-not-allowed border-stone-800 bg-stone-950/60 text-stone-500"
+                        )}
+                    >
+                        <div className="flex items-center justify-between gap-3">
+                            <span className="truncate text-sm font-bold">
+                                {primaryActiveSkill?.name ?? '主動術式'}
+                            </span>
+                            <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">Q</span>
+                        </div>
+                        <div className="mt-1 text-[11px] text-stone-400">
+                            {primaryActiveSkill ? '直接施放主修術式' : '尚未習得主動術式'}
+                        </div>
+                    </button>
+
+                    <button
+                        onClick={() => setIsAutoBattling((prev) => !prev)}
+                        className={clsx(
+                            "min-w-24 rounded-xl border px-3 py-2 text-left transition-colors",
+                            isAutoBattling
+                              ? "border-emerald-700 bg-emerald-950/45 text-emerald-200 hover:bg-emerald-900/60"
+                              : "border-stone-700 bg-stone-950/60 text-stone-300 hover:bg-stone-900/70"
+                        )}
+                    >
+                        <div className="flex items-center justify-between gap-3">
+                            <span className="text-sm font-bold">{isAutoBattling ? '掛機中' : '掛機'}</span>
+                            <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">R</span>
+                        </div>
+                        <div className="mt-1 text-[11px] text-stone-400">自動尋敵與追擊</div>
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            setIsMapModalOpen(true);
+                            setMapTab('area');
+                        }}
+                        className="min-w-24 rounded-xl border border-stone-700 bg-stone-950/60 px-3 py-2 text-left text-stone-300 transition-colors hover:bg-stone-900/70"
+                    >
+                        <div className="flex items-center justify-between gap-3">
+                            <span className="text-sm font-bold">地圖</span>
+                            <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">M</span>
+                        </div>
+                        <div className="mt-1 text-[11px] text-stone-400">展開地區 / 世界地圖</div>
+                    </button>
+                </div>
+            </div>
         )}
 
 

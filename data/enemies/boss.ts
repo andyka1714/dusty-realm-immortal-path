@@ -1,6 +1,8 @@
 import { MajorRealm, ElementType, Enemy, EnemyRank } from "../../types";
 import { createEnemy } from "./utils";
 import { MINOR_REALM } from "../../constants";
+import { getSkillManualId } from "../items/manuals";
+import { getFormalCoreSkillsByRealm } from "../skills";
 
 // Boss Stats Logic
 // Target: requires High-Grade gear of current realm (Full Set upgraded ideally).
@@ -60,6 +62,9 @@ const FOUNDATION_SET = [
   "spirit_step_shoes",
   "focus_pendant",
 ];
+const FOUNDATION_SWORD_SET = FOUNDATION_SET.slice(0, 6);
+const FOUNDATION_BODY_SET = FOUNDATION_SET.slice(6, 12);
+const FOUNDATION_MAGIC_SET = FOUNDATION_SET.slice(12, 18);
 const GOLDEN_CORE_SET = [
   "azure_frost_sword",
   "sword_spirit_stone",
@@ -80,6 +85,9 @@ const GOLDEN_CORE_SET = [
   "gliding_boots",
   "wisdom_pearl",
 ];
+const GOLDEN_CORE_SWORD_SET = GOLDEN_CORE_SET.slice(0, 6);
+const GOLDEN_CORE_BODY_SET = GOLDEN_CORE_SET.slice(6, 12);
+const GOLDEN_CORE_MAGIC_SET = GOLDEN_CORE_SET.slice(12, 18);
 const NASCENT_SOUL_SET = [
   "seven_star_sword",
   "void_sword_box",
@@ -100,6 +108,9 @@ const NASCENT_SOUL_SET = [
   "void_step_shoes",
   "bodhi_seed",
 ];
+const NASCENT_SOUL_SWORD_SET = NASCENT_SOUL_SET.slice(0, 6);
+const NASCENT_SOUL_BODY_SET = NASCENT_SOUL_SET.slice(6, 12);
+const NASCENT_SOUL_MAGIC_SET = NASCENT_SOUL_SET.slice(12, 18);
 const SPIRIT_SEVERING_SET = [
   "celestial_slayer_sword",
   "heavenly_mirror_shield",
@@ -120,6 +131,9 @@ const SPIRIT_SEVERING_SET = [
   "cloud_crossing_boots",
   "mystic_method_ring",
 ];
+const SPIRIT_SEVERING_SWORD_SET = SPIRIT_SEVERING_SET.slice(0, 6);
+const SPIRIT_SEVERING_BODY_SET = SPIRIT_SEVERING_SET.slice(6, 12);
+const SPIRIT_SEVERING_MAGIC_SET = SPIRIT_SEVERING_SET.slice(12, 18);
 const VOID_REFINING_SET = [
   "void_render_sword",
   "sword_domain_plate",
@@ -140,6 +154,9 @@ const VOID_REFINING_SET = [
   "void_shuttle_boots",
   "elemental_origin_ring",
 ];
+const VOID_REFINING_SWORD_SET = VOID_REFINING_SET.slice(0, 6);
+const VOID_REFINING_BODY_SET = VOID_REFINING_SET.slice(6, 12);
+const VOID_REFINING_MAGIC_SET = VOID_REFINING_SET.slice(12, 18);
 const FUSION_SET = [
   "unity_sword",
   "sword_soul_scabbard",
@@ -160,6 +177,9 @@ const FUSION_SET = [
   "star_river_boots",
   "law_bead",
 ];
+const FUSION_SWORD_SET = FUSION_SET.slice(0, 6);
+const FUSION_BODY_SET = FUSION_SET.slice(6, 12);
+const FUSION_MAGIC_SET = FUSION_SET.slice(12, 18);
 const MAHAYANA_SET = [
   "world_breaker_sword",
   "ascension_token",
@@ -180,6 +200,9 @@ const MAHAYANA_SET = [
   "dimension_boots",
   "truth_eye",
 ];
+const MAHAYANA_SWORD_SET = MAHAYANA_SET.slice(0, 6);
+const MAHAYANA_BODY_SET = MAHAYANA_SET.slice(6, 12);
+const MAHAYANA_MAGIC_SET = MAHAYANA_SET.slice(12, 18);
 const TRIBULATION_SET = [
   "thunder_calamity_sword",
   "tribulation_ward",
@@ -200,6 +223,9 @@ const TRIBULATION_SET = [
   "light_speed_boots",
   "infinite_wisdom_pearl",
 ];
+const TRIBULATION_SWORD_SET = TRIBULATION_SET.slice(0, 6);
+const TRIBULATION_BODY_SET = TRIBULATION_SET.slice(6, 12);
+const TRIBULATION_MAGIC_SET = TRIBULATION_SET.slice(12, 18);
 const IMMORTAL_SET = [
   "immortal_execution_sword",
   "slaughter_immortal_plate",
@@ -220,6 +246,9 @@ const IMMORTAL_SET = [
   "time_boots",
   "destiny_wheel",
 ];
+const IMMORTAL_SWORD_SET = IMMORTAL_SET.slice(0, 6);
+const IMMORTAL_BODY_SET = IMMORTAL_SET.slice(6, 12);
+const IMMORTAL_MAGIC_SET = IMMORTAL_SET.slice(12, 18);
 const IMMORTAL_EMPEROR_SET = [
   "origin_sword",
   "end_shield",
@@ -240,6 +269,9 @@ const IMMORTAL_EMPEROR_SET = [
   "dimension_lord_boots",
   "truth_ring",
 ];
+const IMMORTAL_EMPEROR_SWORD_SET = IMMORTAL_EMPEROR_SET.slice(0, 6);
+const IMMORTAL_EMPEROR_BODY_SET = IMMORTAL_EMPEROR_SET.slice(6, 12);
+const IMMORTAL_EMPEROR_MAGIC_SET = IMMORTAL_EMPEROR_SET.slice(12, 18);
 
 export const BOSS_ENEMIES: Record<string, Enemy> = {
   // === [0] Mortal (凡人) ===
@@ -303,9 +335,9 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     "萬劍劍意",
     MajorRealm.QiRefining,
     EnemyRank.Boss,
-    5800,
+    6000,
     300,
-    130,
+    132,
     ElementType.Metal,
     [...QI_SWORD_SET, "bt_qi_foundation"],
     1000,
@@ -318,9 +350,9 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     "萬獸獸王",
     MajorRealm.QiRefining,
     EnemyRank.Boss,
-    6200,
-    290,
-    140,
+    11200,
+    455,
+    218,
     ElementType.Earth,
     [...QI_BODY_SET, "bt_qi_foundation"],
     1000,
@@ -328,20 +360,42 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     "王"
   ),
   // East
-  m26_b1: createEnemy(
-    "m26_b1",
-    "靈湖水蛟",
-    MajorRealm.QiRefining,
-    EnemyRank.Boss,
-    4200,
-    350,
-    130,
-    ElementType.Water,
-    [...QI_MAGIC_SET, "bt_qi_foundation"],
-    1000,
-    MINOR_REALM.PEAK,
-    "蛟"
-  ),
+  m26_b1: {
+    ...createEnemy(
+      "m26_b1",
+      "靈湖水蛟",
+      MajorRealm.QiRefining,
+      EnemyRank.Boss,
+      4650,
+      355,
+      142,
+      ElementType.Water,
+      [...QI_MAGIC_SET, "bt_qi_foundation"],
+      1000,
+      MINOR_REALM.PEAK,
+      "蛟",
+      {
+        aiStyle: "caster",
+        attackRange: 4,
+        specialAttack: {
+          name: "靈潮龍息",
+          cooldownSeconds: 4.8,
+          damageMultiplier: 1.45,
+          castRange: 5,
+          castTimeMs: 560,
+          projectileSpeed: 11,
+          areaShape: "cone",
+          areaRadius: 2,
+          maxTargets: 4,
+          statusEffect: {
+            id: "freeze",
+            duration: 1,
+            chance: 0.4,
+          },
+        },
+      }
+    ),
+  },
 
   // === [2] Foundation (築基) ===
   // Elite: HP 12k, Atk 850
@@ -352,11 +406,11 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     "極地劍靈",
     MajorRealm.Foundation,
     EnemyRank.Boss,
-    72000,
-    1870,
-    900,
+    22000,
+    760,
+    360,
     ElementType.Metal,
-    [...FOUNDATION_SET, "bt_foundation_gold"],
+    [...FOUNDATION_SWORD_SET, "bt_foundation_gold"],
     5000,
     MINOR_REALM.PEAK,
     "靈"
@@ -366,11 +420,11 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     "烈焰妖王",
     MajorRealm.Foundation,
     EnemyRank.Boss,
-    84000,
-    2125,
-    1080,
+    21800,
+    860,
+    650,
     ElementType.Fire,
-    [...FOUNDATION_SET, "bt_foundation_gold"],
+    [...FOUNDATION_BODY_SET, "bt_foundation_gold"],
     5000,
     MINOR_REALM.PEAK,
     "妖"
@@ -380,14 +434,34 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     "雷澤領主",
     MajorRealm.Foundation,
     EnemyRank.Boss,
-    78000,
-    2000,
-    990,
+    7500,
+    680,
+    300,
     ElementType.Metal,
-    [...FOUNDATION_SET, "bt_foundation_gold"],
+    [...FOUNDATION_MAGIC_SET, "bt_foundation_gold"],
     5000,
     MINOR_REALM.PEAK,
-    "雷"
+    "雷",
+    {
+      aiStyle: "caster",
+      attackRange: 4,
+      specialAttack: {
+        name: "雷澤天罰",
+        cooldownSeconds: 4.5,
+        damageMultiplier: 1.42,
+        castRange: 5,
+        castTimeMs: 480,
+        projectileSpeed: 13,
+        areaShape: "circle",
+        areaRadius: 2,
+        maxTargets: 4,
+        statusEffect: {
+          id: "paralyze",
+          duration: 1,
+          chance: 0.35,
+        },
+      },
+    }
   ),
 
   // === [3] Golden Core (金丹) ===
@@ -403,10 +477,31 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     8075,
     4050,
     ElementType.Metal,
-    [...GOLDEN_CORE_SET, "bt_gold_nascent"],
+    [...GOLDEN_CORE_SWORD_SET, "bt_gold_nascent"],
     20000,
     MINOR_REALM.PEAK,
-    "鵬"
+    "鵬",
+    {
+      aiStyle: "ranged",
+      attackRange: 3,
+      specialAttack: {
+        name: "裂空金羽",
+        cooldownSeconds: 3.9,
+        damageMultiplier: 1.35,
+        castRange: 4,
+        castTimeMs: 240,
+        projectileSpeed: 18,
+        areaShape: "line",
+        areaRadius: 3,
+        maxTargets: 4,
+        statusEffect: {
+          id: "bleed",
+          duration: 2,
+          chance: 0.42,
+          value: 0.018,
+        },
+      },
+    }
   ),
   m72_b1: createEnemy(
     "m72_b1",
@@ -417,10 +512,31 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     7480,
     4500,
     ElementType.Wood,
-    [...GOLDEN_CORE_SET, "bt_gold_nascent"],
+    [...GOLDEN_CORE_BODY_SET, "bt_gold_nascent"],
     20000,
     MINOR_REALM.PEAK,
-    "厄"
+    "厄",
+    {
+      aiStyle: "caster",
+      attackRange: 3,
+      specialAttack: {
+        name: "萬厄毒域",
+        cooldownSeconds: 4.6,
+        damageMultiplier: 1.38,
+        castRange: 4,
+        castTimeMs: 460,
+        projectileSpeed: 10,
+        areaShape: "circle",
+        areaRadius: 2,
+        maxTargets: 4,
+        statusEffect: {
+          id: "poison",
+          duration: 4,
+          chance: 0.55,
+          value: 0.018,
+        },
+      },
+    }
   ),
   m82_b1: createEnemy(
     "m82_b1",
@@ -431,17 +547,38 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     8925,
     4500,
     ElementType.Water,
-    [...GOLDEN_CORE_SET, "bt_gold_nascent"],
+    [...GOLDEN_CORE_MAGIC_SET, "bt_gold_nascent"],
     20000,
     MINOR_REALM.PEAK,
-    "蛟"
+    "蛟",
+    {
+      aiStyle: "caster",
+      attackRange: 5,
+      specialAttack: {
+        name: "覆海龍潮",
+        cooldownSeconds: 5.2,
+        damageMultiplier: 1.46,
+        castRange: 6,
+        castTimeMs: 560,
+        projectileSpeed: 12,
+        areaShape: "cone",
+        areaRadius: 3,
+        maxTargets: 5,
+        statusEffect: {
+          id: "freeze",
+          duration: 1,
+          chance: 0.4,
+        },
+      },
+    }
   ),
 
   // === [4] Nascent Soul (元嬰) ===
   // Elite: HP 360k, Atk 20k
   // Boss: HP 1.5M, Atk 38k, Def 18k
   // Boss: HP 1.5M, Atk 38k, Def 18k
-  m92_b1: createEnemy(
+  m92_b1: {
+    ...createEnemy(
     "m92_b1",
     "北寒劍尊",
     MajorRealm.NascentSoul,
@@ -450,12 +587,23 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     38250,
     18000,
     ElementType.Metal,
-    [...NASCENT_SOUL_SET, "bt_nascent_spirit"],
+    [...NASCENT_SOUL_SWORD_SET, "bt_nascent_spirit"],
     100000,
     MINOR_REALM.PEAK,
     "寒"
-  ),
-  m102_b1: createEnemy(
+    ),
+    specialAttack: {
+      name: "寒河劍潮",
+      cooldownSeconds: 7,
+      damageMultiplier: 1.8,
+      areaShape: "line",
+      areaRadius: 2,
+      maxTargets: 3,
+      statusEffect: { id: "freeze", duration: 1, chance: 0.35 },
+    },
+  },
+  m102_b1: {
+    ...createEnemy(
     "m102_b1",
     "刑天殘軀",
     MajorRealm.NascentSoul,
@@ -464,12 +612,23 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     34000,
     22500,
     ElementType.Earth,
-    [...NASCENT_SOUL_SET, "bt_nascent_spirit"],
+    [...NASCENT_SOUL_BODY_SET, "bt_nascent_spirit"],
     100000,
     MINOR_REALM.PEAK,
     "刑"
-  ),
-  m112_b1: createEnemy(
+    ),
+    specialAttack: {
+      name: "裂地戰吼",
+      cooldownSeconds: 8,
+      damageMultiplier: 1.75,
+      areaShape: "cone",
+      areaRadius: 2,
+      maxTargets: 3,
+      statusEffect: { id: "armorBreak", duration: 2, chance: 0.45, value: 0.18 },
+    },
+  },
+  m112_b1: {
+    ...createEnemy(
     "m112_b1",
     "九幽鬼帝",
     MajorRealm.NascentSoul,
@@ -478,17 +637,30 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     42500,
     16200,
     ElementType.Fire,
-    [...NASCENT_SOUL_SET, "bt_nascent_spirit"],
+    [...NASCENT_SOUL_MAGIC_SET, "bt_nascent_spirit"],
     100000,
     MINOR_REALM.PEAK,
     "帝"
-  ),
+    ),
+    aiStyle: "caster",
+    attackRange: 5,
+    specialAttack: {
+      name: "九幽冥焰",
+      cooldownSeconds: 7,
+      damageMultiplier: 1.9,
+      areaShape: "circle",
+      areaRadius: 3,
+      maxTargets: 4,
+      statusEffect: { id: "burn", duration: 3, chance: 0.55, value: 0.024 },
+    },
+  },
 
   // === [5] Spirit Severing (化神) ===
   // Elite: HP 1.4M, Atk 68k
   // Boss: HP 5.4M, Atk 127k, Def 72k
   // Boss: HP 5.4M, Atk 127k, Def 72k
-  m121_b1: createEnemy(
+  m121_b1: {
+    ...createEnemy(
     "m121_b1",
     "修羅魔尊",
     MajorRealm.SpiritSevering,
@@ -501,13 +673,26 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     500000,
     MINOR_REALM.PEAK,
     "尊"
-  ),
+    ),
+    specialAttack: {
+      name: "修羅煞界",
+      cooldownSeconds: 8,
+      damageMultiplier: 1.95,
+      areaShape: "circle",
+      areaRadius: 3,
+      maxTargets: 4,
+      statusEffect: { id: "bleed", duration: 3, chance: 0.5, value: 0.018 },
+    },
+    description: "隕仙深淵深處孕生的修羅魔尊，以血煞劍界撕裂飛昇殘魂。",
+    affixes: ["霸體", "統御", "噬生"],
+  },
 
   // === [6] Void Refining (煉虛) ===
   // Elite: HP 7.2M, Atk 340k
   // Boss: HP 21.6M, Atk 637k, Def 360k
   // Boss: HP 21.6M, Atk 637k, Def 360k
-  m131_b1: createEnemy(
+  m131_b1: {
+    ...createEnemy(
     "m131_b1",
     "時空之主",
     MajorRealm.VoidRefining,
@@ -520,7 +705,21 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     1500000,
     MINOR_REALM.PEAK,
     "主"
-  ),
+    ),
+    aiStyle: "caster",
+    attackRange: 6,
+    specialAttack: {
+      name: "時滯斷界",
+      cooldownSeconds: 7,
+      damageMultiplier: 2.0,
+      areaShape: "line",
+      areaRadius: 3,
+      maxTargets: 4,
+      statusEffect: { id: "paralyze", duration: 1, chance: 0.4 },
+    },
+    description: "時空之主盤踞破碎虛空，能以時滯切斷修士行動與術式流轉。",
+    affixes: ["霸體", "統御", "迅影"],
+  },
 
   // === [7] Fusion (合體) ===
   // Elite: HP 36M, Atk 1.35M
@@ -538,14 +737,28 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     [...FUSION_SET, "bt_fusion_maha"],
     5000000,
     MINOR_REALM.PEAK,
-    "皇"
+    "皇",
+    {
+      description: "靈界中樞誕生的靈皇統御萬法聖城，以靈脈王權壓制一切外來者。",
+      affixes: ["霸體", "統御", "堅甲"],
+      specialAttack: {
+        name: "萬法敕令",
+        cooldownSeconds: 8,
+        damageMultiplier: 2.02,
+        areaShape: "circle",
+        areaRadius: 3,
+        maxTargets: 5,
+        statusEffect: { id: "poison", duration: 2, chance: 0.42, value: 0.022 },
+      },
+    }
   ),
 
   // === [8] Mahayana (大乘) ===
   // Elite: HP 180M, Atk 6.8M
   // Boss: HP 600M, Atk 12.75M, Def 7.2M
   // Boss: HP 600M, Atk 12.75M, Def 7.2M
-  m151_b1: createEnemy(
+  m151_b1: {
+    ...createEnemy(
     "m151_b1",
     "守界者",
     MajorRealm.Mahayana,
@@ -558,7 +771,19 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     15000000,
     MINOR_REALM.PEAK,
     "守"
-  ),
+    ),
+    specialAttack: {
+      name: "界壁崩塌",
+      cooldownSeconds: 9,
+      damageMultiplier: 2.05,
+      areaShape: "cone",
+      areaRadius: 4,
+      maxTargets: 5,
+      statusEffect: { id: "armorBreak", duration: 2, chance: 0.5, value: 0.22 },
+    },
+    description: "守界者鎮守登仙天梯盡頭，以界壁重壓篩去偽仙。",
+    affixes: ["霸體", "統御", "堅甲"],
+  },
 
   // === [9] Tribulation (渡劫) ===
   // Elite: HP 900M, Atk 34M
@@ -576,7 +801,20 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     [...TRIBULATION_SET, "bt_trib_immortal"],
     50000000,
     MINOR_REALM.PEAK,
-    "天"
+    "天",
+    {
+      description: "天道化身自九天雷池中顯現，以天規審判一切逆命渡劫者。",
+      affixes: ["霸體", "統御", "迅影"],
+      specialAttack: {
+        name: "天誅雷律",
+        cooldownSeconds: 8,
+        damageMultiplier: 2.08,
+        areaShape: "circle",
+        areaRadius: 4,
+        maxTargets: 5,
+        statusEffect: { id: "paralyze", duration: 1, chance: 0.45 },
+      },
+    }
   ),
 
   // === [10] Immortal (仙人) ===
@@ -595,7 +833,20 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     [...IMMORTAL_SET, "bt_immortal_emperor"],
     200000000,
     MINOR_REALM.PEAK,
-    "尊"
+    "尊",
+    {
+      description: "九天仙尊駐守九重天闕，以仙庭殺伐鎮壓一切無詔飛昇者。",
+      affixes: ["霸體", "統御", "堅甲"],
+      specialAttack: {
+        name: "九天敕斬",
+        cooldownSeconds: 8,
+        damageMultiplier: 2.12,
+        areaShape: "line",
+        areaRadius: 4,
+        maxTargets: 5,
+        statusEffect: { id: "bleed", duration: 3, chance: 0.44, value: 0.02 },
+      },
+    }
   ),
 
   // === [11] Immortal Emperor (仙帝) ===
@@ -613,6 +864,60 @@ export const BOSS_ENEMIES: Record<string, Enemy> = {
     IMMORTAL_EMPEROR_SET,
     2000000000,
     MINOR_REALM.PEAK,
-    "祖"
+    "祖",
+    {
+      description: "鴻蒙道祖盤坐道宮核心，以本源道律封絕一切未證終極者。",
+      affixes: ["霸體", "統御", "堅甲", "迅影"],
+      specialAttack: {
+        name: "鴻蒙歸墟",
+        cooldownSeconds: 9,
+        damageMultiplier: 2.2,
+        areaShape: "circle",
+        areaRadius: 4,
+        maxTargets: 5,
+        statusEffect: { id: "armorBreak", duration: 3, chance: 0.5, value: 0.24 },
+      },
+    }
   ),
 };
+
+const BOSS_SKILL_DROPS: Record<string, string[]> = {
+  m7_b1: [getSkillManualId("s_q_active")],
+  m16_b1: [getSkillManualId("b_q_active")],
+  m26_b1: [getSkillManualId("m_q_active")],
+
+  m32_b1: [getSkillManualId("s_f_active")],
+  m42_b1: [getSkillManualId("b_f_active")],
+  m52_b1: [getSkillManualId("m_f_active")],
+
+  m62_b1: [getSkillManualId("s_g_active")],
+  m72_b1: [getSkillManualId("b_g_active")],
+  m82_b1: [getSkillManualId("m_g_active")],
+
+  m92_b1: [getSkillManualId("s_n_active")],
+  m102_b1: [getSkillManualId("b_n_active")],
+  m112_b1: [getSkillManualId("m_n_active")],
+};
+
+const getBossManualDropsForRealm = (realm: MajorRealm) =>
+  getFormalCoreSkillsByRealm(realm)
+    .filter((skill) => skill.formalSourceTier === "boss")
+    .map((skill) => getSkillManualId(skill.id));
+
+[
+  ["m121_b1", MajorRealm.SpiritSevering],
+  ["m131_b1", MajorRealm.VoidRefining],
+  ["m141_b1", MajorRealm.Fusion],
+  ["m151_b1", MajorRealm.Mahayana],
+  ["m161_b1", MajorRealm.Tribulation],
+  ["m171_b1", MajorRealm.Immortal],
+  ["m180_b1", MajorRealm.ImmortalEmperor],
+].forEach(([enemyId, realm]) => {
+  BOSS_SKILL_DROPS[enemyId] = getBossManualDropsForRealm(realm as MajorRealm);
+});
+
+Object.entries(BOSS_SKILL_DROPS).forEach(([enemyId, manuals]) => {
+  const enemy = BOSS_ENEMIES[enemyId];
+  if (!enemy) return;
+  enemy.drops = [...enemy.drops, ...manuals];
+});

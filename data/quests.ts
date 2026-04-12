@@ -1,4 +1,5 @@
 import { Quest, QuestType, MajorRealm, ItemQuality } from '../types';
+import { getSkillManualId } from './items/manuals';
 
 export const QUESTS: Record<string, Quest> = {
     // --- Tutorial Quests ---
@@ -108,7 +109,7 @@ export const QUESTS: Record<string, Quest> = {
         ],
         rewards: [
             { exp: 800, spiritStones: 500 },
-            { items: [{ itemId: 'manual_spirit_strike', count: 1, quality: ItemQuality.Medium }] }
+            { items: [{ itemId: getSkillManualId('s_q_active'), count: 1, quality: ItemQuality.Medium }] }
         ],
         dialogue: {
             start: [
@@ -121,7 +122,7 @@ export const QUESTS: Record<string, Quest> = {
             ],
             complete: [
                 "不錯，劍氣凌厲，已有幾分火候。",
-                "這本《靈力一擊》乃是當年我在築基期時所創，今日便傳授於你。",
+                "這卷《流光初斬》秘卷乃是我宗入門殺招，今日便傳授於你。",
                 "勤加修煉，莫要墮了劍宗威名。"
             ]
         }
@@ -156,6 +157,36 @@ export const QUESTS: Record<string, Quest> = {
         }
     },
 
+    'sect_beast_task_01': {
+        id: 'sect_beast_task_01',
+        type: QuestType.Side,
+        title: '獸莊試煉：裂猿',
+        description: '獸王谷口的赤火猿王近來不斷襲擊入門弟子。長老命你前去鎮壓，以驗肉身與膽魄。',
+        giverId: 'sect_beast_elder',
+        prerequisiteQuestId: 'sect_beast_join',
+        submitNpcId: 'sect_beast_elder',
+        requirements: [
+            { type: 'kill', targetId: 'm12_b1', count: 1 }
+        ],
+        rewards: [
+            { exp: 800, spiritStones: 500 },
+            { items: [{ itemId: getSkillManualId('b_q_active'), count: 1, quality: ItemQuality.Medium }] }
+        ],
+        dialogue: {
+            start: [
+                "蠻力不是亂拳，真正的體修要敢衝、敢扛、敢一拳打碎敵膽。",
+                "谷口那頭赤火猿王暴躁難馴，你去把它壓下來，讓我看看你的筋骨。"
+            ],
+            progress: [
+                "赤火猿王氣血旺盛，莫要只知硬拼，要學會在出拳時壓住它的節奏。"
+            ],
+            complete: [
+                "不錯，拳勢厚重，已能震懾兇獸。",
+                "這卷《震岳拳》秘卷便賜予你，往後出拳當如山崩。"
+            ]
+        }
+    },
+
     // Mystic Sect
     'sect_mystic_join': {
         id: 'sect_mystic_join',
@@ -181,6 +212,36 @@ export const QUESTS: Record<string, Quest> = {
             complete: [
                 "善，你已感悟到了天地靈氣的流動。",
                 "今日起，你便是我縹緲仙宮的門徒。這根靈木杖，可助你更好地操控五行。"
+            ]
+        }
+    },
+
+    'sect_mystic_task_01': {
+        id: 'sect_mystic_task_01',
+        type: QuestType.Side,
+        title: '仙宮試煉：鎮蟹',
+        description: '靈湖草甸的靈湖巨蟹吞納水靈過盛，已干擾周遭靈脈。長老命你前去鎮壓，藉此磨鍊術法。',
+        giverId: 'sect_mystic_elder',
+        prerequisiteQuestId: 'sect_mystic_join',
+        submitNpcId: 'sect_mystic_elder',
+        requirements: [
+            { type: 'kill', targetId: 'm22_b1', count: 1 }
+        ],
+        rewards: [
+            { exp: 800, spiritStones: 500 },
+            { items: [{ itemId: getSkillManualId('m_q_active'), count: 1, quality: ItemQuality.Medium }] }
+        ],
+        dialogue: {
+            start: [
+                "術法之道，不在單純堆疊靈力，而在於精準與節制。",
+                "靈湖巨蟹盤踞草甸，水靈翻湧失衡。你去平息此亂，也順勢磨礪自己的術法。"
+            ],
+            progress: [
+                "靈湖巨蟹甲殼堅厚，但水火流轉之間自有破綻，記得以術破勢。"
+            ],
+            complete: [
+                "很好，靈力收放已有章法。",
+                "這卷《火羽術》秘卷你拿去參悟，往後施法當更有鋒芒。"
             ]
         }
     }

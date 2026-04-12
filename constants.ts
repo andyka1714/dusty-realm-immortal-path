@@ -31,20 +31,20 @@ export type MinorRealmType = typeof MINOR_REALM[keyof typeof MINOR_REALM];
 
 // --- MOVEMENT SPEEDS (ms per cell) ---
 export const MOVEMENT_SPEEDS: Record<MajorRealm, number> = {
-  [MajorRealm.Mortal]: 500,
-  [MajorRealm.QiRefining]: 500,
-  [MajorRealm.Foundation]: 500,
+  [MajorRealm.Mortal]: 320,
+  [MajorRealm.QiRefining]: 300,
+  [MajorRealm.Foundation]: 280,
   
-  [MajorRealm.GoldenCore]: 300,
-  [MajorRealm.NascentSoul]: 300,
-  [MajorRealm.SpiritSevering]: 300,
-  [MajorRealm.VoidRefining]: 250,
+  [MajorRealm.GoldenCore]: 220,
+  [MajorRealm.NascentSoul]: 220,
+  [MajorRealm.SpiritSevering]: 200,
+  [MajorRealm.VoidRefining]: 180,
 
-  [MajorRealm.Fusion]: 200,
-  [MajorRealm.Mahayana]: 200,
-  [MajorRealm.Tribulation]: 200,
-  [MajorRealm.Immortal]: 150,
-  [MajorRealm.ImmortalEmperor]: 100,
+  [MajorRealm.Fusion]: 160,
+  [MajorRealm.Mahayana]: 160,
+  [MajorRealm.Tribulation]: 150,
+  [MajorRealm.Immortal]: 130,
+  [MajorRealm.ImmortalEmperor]: 110,
 };
 
 // --- FIVE ELEMENTS CONFIG ---
@@ -355,15 +355,16 @@ export const SPIRIT_ROOT_MULTIPLIERS: Record<SpiritRootType, number> = {
 };
 
 export const MANUAL_CULTIVATE_COOLDOWN = 3000; // 3 seconds
-export const PASSIVE_CULTIVATION_PENALTY = 0.1; // 10% Efficiency for passive
+export const PASSIVE_CULTIVATION_PENALTY = 0.02; // 2% Efficiency for passive
+export const SECLUSION_CULTIVATION_MULTIPLIER = 0.2; // 10x passive
 
 export const SECLUSION_DURATION_MS = 30000; // 30 seconds
 export const GATHERING_UPGRADE_BASE_COST = 100;
 export const GATHERING_UPGRADE_GROWTH = 1.5;
 export const COMMON_MONSTER_RESPAWN_MS = 60000;
 export const ELITE_MONSTER_RESPAWN_MS = 180000;
-export const MONSTER_MOVE_MIN_DELAY_MS = 2000;
-export const MONSTER_MOVE_MAX_DELAY_MS = 4000;
+export const MONSTER_MOVE_MIN_DELAY_MS = 900;
+export const MONSTER_MOVE_MAX_DELAY_MS = 1600;
 export const BOSS_RESPAWN_MINUTES = [0, 15, 30, 45] as const;
 
 export const SECLUSION_BASE_COST: Record<MajorRealm, number> = {
@@ -644,4 +645,3 @@ export const BREAKTHROUGH_CONFIG: Record<MajorRealm, BreakthroughRequirement> = 
     bossHint: '天道意志 · 因果法身 (彼岸)'
   },
 };
-

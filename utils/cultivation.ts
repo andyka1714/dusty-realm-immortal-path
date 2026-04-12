@@ -2,6 +2,7 @@ import {
   MANUAL_CULTIVATE_COOLDOWN,
   PASSIVE_CULTIVATION_PENALTY,
   REALM_MODIFIERS,
+  SECLUSION_CULTIVATION_MULTIPLIER,
   SECLUSION_BASE_COST,
   SPIRIT_ROOT_DETAILS,
 } from "../constants";
@@ -35,16 +36,18 @@ export const getPassiveCultivationRate = (
   isInSeclusion: boolean
 ): number => {
   const baseRate = getBaseCultivationRate(input);
-  return baseRate * (isInSeclusion ? 2 : PASSIVE_CULTIVATION_PENALTY);
+  return baseRate *
+    (isInSeclusion
+      ? SECLUSION_CULTIVATION_MULTIPLIER
+      : PASSIVE_CULTIVATION_PENALTY);
 };
 
 export const getManualCultivationGain = (
   input: CultivationRateInput,
   isInSeclusion: boolean
 ): number => {
-  const baseRate = getBaseCultivationRate(input);
-  const stateMultiplier = isInSeclusion ? 2 : 1;
-  return baseRate * stateMultiplier * 0.33;
+  const passiveRate = getPassiveCultivationRate(input, isInSeclusion);
+  return passiveRate * (MANUAL_CULTIVATE_COOLDOWN / 1000);
 };
 
 export const calculateSeclusionCost = (

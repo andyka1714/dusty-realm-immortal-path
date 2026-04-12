@@ -6,7 +6,7 @@ export const NASCENT_SOUL_SKILLS: Record<string, Skill> = {
     id: "s_n_active",
     name: "天外飛仙",
     description:
-      "對單體造成 400% 真實傷害(無視防禦)，若目標生命低於 30% 則傷害翻倍。",
+      "對單體造成 400% 真實傷害(無視防禦)，若目標生命低於 30% 則傷害翻倍；若未斬殺則附加【流血】3 回合。",
     type: "Active",
     cooldown: 6,
     minRealm: MajorRealm.NascentSoul,
@@ -14,7 +14,12 @@ export const NASCENT_SOUL_SKILLS: Record<string, Skill> = {
     damageMultiplier: 4.0,
     targetType: "single",
     effectType: "damage",
-    // True damage and execute logic needs engine support
+    statusEffect: {
+      id: "bleed",
+      duration: 3,
+      chance: 1.0,
+      value: 0.02,
+    },
   },
   s_n_passive: {
     id: "s_n_passive",

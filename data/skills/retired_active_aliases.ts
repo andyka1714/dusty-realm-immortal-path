@@ -1,0 +1,166 @@
+import { MajorRealm, ProfessionType, Skill } from "../../types";
+import { MAHAYANA_SKILLS } from "./mahayana";
+import { TRIBULATION_SKILLS } from "./tribulation";
+
+const buildRetiredActiveAlias = (
+  replacementSkill: Skill,
+  overrides: Pick<
+    Skill,
+    "id" | "name" | "description" | "minRealm" | "profession" | "targetType" | "effectType"
+  > &
+    Partial<Pick<Skill, "cooldown" | "damageMultiplier" | "statusEffect">>
+): Skill => ({
+  ...replacementSkill,
+  ...overrides,
+  cooldown: overrides.cooldown ?? replacementSkill.cooldown,
+  damageMultiplier: overrides.damageMultiplier ?? replacementSkill.damageMultiplier,
+  statusEffect: overrides.statusEffect ?? replacementSkill.statusEffect,
+});
+
+export const VOID_REFINING_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
+  s_vr_active: buildRetiredActiveAlias(MAHAYANA_SKILLS.s_ma_active, {
+    id: "s_vr_active",
+    name: "虛空劍陣",
+    description: "召喚劍陣，持續 3 回合。每回合對隨機敵人造成 3 次 100% 傷害。",
+    minRealm: MajorRealm.VoidRefining,
+    profession: ProfessionType.Sword,
+    targetType: "all",
+    effectType: "summon",
+    cooldown: 7,
+    damageMultiplier: undefined,
+    statusEffect: undefined,
+  }),
+};
+
+export const FUSION_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
+  b_bi_active: buildRetiredActiveAlias(MAHAYANA_SKILLS.b_ma_active, {
+    id: "b_bi_active",
+    name: "法天象地",
+    description:
+      "變身巨人，生命值上限翻倍，當前生命值等比提升，持續 5 回合。結束後扣除溢出生命。",
+    minRealm: MajorRealm.Fusion,
+    profession: ProfessionType.Body,
+    targetType: "self",
+    effectType: "buff",
+    cooldown: 12,
+    damageMultiplier: undefined,
+    statusEffect: {
+      id: "giant_form",
+      duration: 5,
+      chance: 1.0,
+    },
+  }),
+};
+
+export const MAHAYANA_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
+  m_ma_active: buildRetiredActiveAlias(TRIBULATION_SKILLS.m_tr_active, {
+    id: "m_ma_active",
+    name: "掌心雷",
+    description:
+      "瞬發，對單體造成 600% 雷系傷害，並有 80% 機率麻痺目標 (無法行動) 1 回合。",
+    minRealm: MajorRealm.Mahayana,
+    profession: ProfessionType.Mage,
+    targetType: "single",
+    effectType: "damage",
+    cooldown: 4,
+    damageMultiplier: 6.0,
+    statusEffect: {
+      id: "paralyze",
+      duration: 1,
+      chance: 0.8,
+    },
+  }),
+};
+
+export const IMMORTAL_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
+  s_im_active: buildRetiredActiveAlias(TRIBULATION_SKILLS.s_tr_active, {
+    id: "s_im_active",
+    name: "誅仙劍陣",
+    description:
+      "展開誅仙劍陣領域，持續 5 回合。領域內敵方全體每回合受到 300% 攻擊傷害且防禦降低 30%。",
+    minRealm: MajorRealm.Immortal,
+    profession: ProfessionType.Sword,
+    targetType: "all",
+    effectType: "special",
+    cooldown: 15,
+    damageMultiplier: undefined,
+    statusEffect: {
+      id: "zhuxian_domain",
+      duration: 5,
+      chance: 1.0,
+      value: 0.3,
+    },
+  }),
+  b_im_active: buildRetiredActiveAlias(MAHAYANA_SKILLS.b_ma_active, {
+    id: "b_im_active",
+    name: "祖巫降臨",
+    description:
+      "召喚祖巫虛影，對全體造成 800% 傷害，並將傷害量的 50% 轉化為自身與隊友的生命治療。",
+    minRealm: MajorRealm.Immortal,
+    profession: ProfessionType.Body,
+    targetType: "all",
+    effectType: "damage",
+    cooldown: 10,
+    damageMultiplier: 8.0,
+    statusEffect: undefined,
+  }),
+  m_im_active: buildRetiredActiveAlias(TRIBULATION_SKILLS.m_tr_active, {
+    id: "m_im_active",
+    name: "撒豆成兵",
+    description: "召喚 3 個金甲天兵助戰，繼承自身 100% 屬性，持續 5 回合。",
+    minRealm: MajorRealm.Immortal,
+    profession: ProfessionType.Mage,
+    targetType: "self",
+    effectType: "summon",
+    cooldown: 12,
+    damageMultiplier: undefined,
+    statusEffect: undefined,
+  }),
+};
+
+export const IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
+  s_ie_active: buildRetiredActiveAlias(TRIBULATION_SKILLS.s_tr_active, {
+    id: "s_ie_active",
+    name: "一劍開天",
+    description:
+      "對敵方全體造成 2000% 毀滅傷害。此傷害無視護盾、無敵與減傷效果。",
+    minRealm: MajorRealm.ImmortalEmperor,
+    profession: ProfessionType.Sword,
+    targetType: "all",
+    effectType: "damage",
+    cooldown: 20,
+    damageMultiplier: 20.0,
+    statusEffect: undefined,
+  }),
+  b_ie_active: buildRetiredActiveAlias(MAHAYANA_SKILLS.b_ma_active, {
+    id: "b_ie_active",
+    name: "掌中神國",
+    description:
+      "將敵方全體困入掌中神國，每回合造成 500% 傷害並吸取其 10% 最大生命值，持續 3 回合。",
+    minRealm: MajorRealm.ImmortalEmperor,
+    profession: ProfessionType.Body,
+    targetType: "all",
+    effectType: "special",
+    cooldown: 15,
+    damageMultiplier: 5.0,
+    statusEffect: {
+      id: "god_kingdom",
+      duration: 3,
+      chance: 1.0,
+      value: 0.1,
+    },
+  }),
+  m_ie_active: buildRetiredActiveAlias(TRIBULATION_SKILLS.m_tr_active, {
+    id: "m_ie_active",
+    name: "一念花開",
+    description:
+      "一念之間，萬物生滅。對敵方全體造成 1500% 傷害，並將其增益狀態轉化為等量的負面狀態。",
+    minRealm: MajorRealm.ImmortalEmperor,
+    profession: ProfessionType.Mage,
+    targetType: "all",
+    effectType: "special",
+    cooldown: 15,
+    damageMultiplier: 15.0,
+    statusEffect: undefined,
+  }),
+};

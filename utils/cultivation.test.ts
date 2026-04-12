@@ -17,13 +17,13 @@ const baseInput = {
 describe("cultivation helpers", () => {
   it("uses a consistent passive rate formula", () => {
     expect(getBaseCultivationRate(baseInput)).toBe(10.5);
-    expect(getPassiveCultivationRate(baseInput, false)).toBe(1.05);
-    expect(getPassiveCultivationRate(baseInput, true)).toBe(21);
+    expect(getPassiveCultivationRate(baseInput, false)).toBe(0.21);
+    expect(getPassiveCultivationRate(baseInput, true)).toBe(2.1);
   });
 
   it("uses the same base formula for manual cultivation", () => {
-    expect(getManualCultivationGain(baseInput, false)).toBeCloseTo(3.465);
-    expect(getManualCultivationGain(baseInput, true)).toBeCloseTo(6.93);
+    expect(getManualCultivationGain(baseInput, false)).toBeCloseTo(0.63);
+    expect(getManualCultivationGain(baseInput, true)).toBeCloseTo(6.3);
   });
 
   it("calculates seclusion cost by realm and minor realm", () => {

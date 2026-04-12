@@ -1,5 +1,7 @@
 # 09. 渡劫期 (Tribulation)
 
+正式狀態：本階段精英 / Boss 已要求雷劫主題化特招、詞綴與元素交互；每張圖維持 `4` 普通怪 + `2` 精英怪 + `1` Boss。
+
 ## 160. 劫雲荒原 (Tribulation Wasteland)
 - **Realm**: 渡劫
 - **Position**: [0, 25]

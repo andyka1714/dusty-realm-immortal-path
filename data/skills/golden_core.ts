@@ -24,6 +24,7 @@ export const GOLDEN_CORE_SKILLS: Record<string, Skill> = {
     cooldown: 0,
     minRealm: MajorRealm.GoldenCore,
     profession: ProfessionType.Sword,
+    passiveEffectTags: ["crit", "cooldown_reduction", "offense"],
     // Special cooldown reset logic
   },
 
@@ -55,6 +56,7 @@ export const GOLDEN_CORE_SKILLS: Record<string, Skill> = {
     minRealm: MajorRealm.GoldenCore,
     profession: ProfessionType.Body,
     effectType: "special",
+    passiveEffectTags: ["reflect", "durability"],
   },
 
   // --- Mage Cultivator (Golden Core) ---
@@ -86,5 +88,6 @@ export const GOLDEN_CORE_SKILLS: Record<string, Skill> = {
     profession: ProfessionType.Mage,
     effectType: "buff", // Initial buff
     targetType: "self",
+    passiveEffectTags: ["shield", "spellpower"],
   },
 };
