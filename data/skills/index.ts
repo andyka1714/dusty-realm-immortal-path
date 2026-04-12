@@ -211,45 +211,78 @@ const stripRetirementReadyActiveAliases = (skills: Record<string, Skill>) =>
     )
   ) as Record<string, Skill>;
 
+const BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_IDS = new Set<string>([
+  "s_f_passive",
+  "s_vr_passive",
+  "b_vr_passive",
+  "m_vr_passive",
+  "s_bi_passive",
+  "b_bi_passive",
+  "m_bi_passive",
+  "s_ma_passive",
+  "b_ma_passive",
+  "m_ma_passive",
+  "b_tr_passive",
+  "m_tr_passive",
+  "s_im_passive",
+  "s_ie_passive",
+  "b_im_passive",
+  "b_ie_passive",
+  "m_im_passive",
+  "m_ie_passive",
+]);
+
+const stripBattleAbsorbedPassiveAliases = (skills: Record<string, Skill>) =>
+  Object.fromEntries(
+    Object.entries(skills).filter(
+      ([skillId]) => !BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_IDS.has(skillId)
+    )
+  ) as Record<string, Skill>;
+
 const RAW_SKILL_SETS_BY_REALM: Record<MajorRealm, Record<string, Skill>> = {
   [MajorRealm.Mortal]: {},
   [MajorRealm.QiRefining]: QI_REFINING_SKILLS,
-  [MajorRealm.Foundation]: {
+  [MajorRealm.Foundation]: stripBattleAbsorbedPassiveAliases({
     ...FOUNDATION_SKILLS,
     ...FOUNDATION_RETIRED_PASSIVE_ALIASES,
-  },
+  }),
   [MajorRealm.GoldenCore]: GOLDEN_CORE_SKILLS,
   [MajorRealm.NascentSoul]: NASCENT_SOUL_SKILLS,
   [MajorRealm.SpiritSevering]: SPIRIT_SEVERING_SKILLS,
-  [MajorRealm.VoidRefining]: stripRetirementReadyActiveAliases({
+  [MajorRealm.VoidRefining]: stripBattleAbsorbedPassiveAliases(
+    stripRetirementReadyActiveAliases({
     ...VOID_REFINING_SKILLS,
     ...VOID_REFINING_RETIRED_ACTIVE_ALIASES,
     ...VOID_REFINING_RETIRED_PASSIVE_ALIASES,
-  }),
-  [MajorRealm.Fusion]: stripRetirementReadyActiveAliases({
+  })),
+  [MajorRealm.Fusion]: stripBattleAbsorbedPassiveAliases(
+    stripRetirementReadyActiveAliases({
     ...FUSION_SKILLS,
     ...FUSION_RETIRED_ACTIVE_ALIASES,
     ...FUSION_RETIRED_PASSIVE_ALIASES,
-  }),
-  [MajorRealm.Mahayana]: stripRetirementReadyActiveAliases({
+  })),
+  [MajorRealm.Mahayana]: stripBattleAbsorbedPassiveAliases(
+    stripRetirementReadyActiveAliases({
     ...MAHAYANA_SKILLS,
     ...MAHAYANA_RETIRED_ACTIVE_ALIASES,
     ...MAHAYANA_RETIRED_PASSIVE_ALIASES,
-  }),
-  [MajorRealm.Tribulation]: {
+  })),
+  [MajorRealm.Tribulation]: stripBattleAbsorbedPassiveAliases({
     ...TRIBULATION_SKILLS,
     ...TRIBULATION_RETIRED_PASSIVE_ALIASES,
-  },
-  [MajorRealm.Immortal]: stripRetirementReadyActiveAliases({
+  }),
+  [MajorRealm.Immortal]: stripBattleAbsorbedPassiveAliases(
+    stripRetirementReadyActiveAliases({
     ...IMMORTAL_SKILLS,
     ...IMMORTAL_RETIRED_ACTIVE_ALIASES,
     ...IMMORTAL_RETIRED_PASSIVE_ALIASES,
-  }),
-  [MajorRealm.ImmortalEmperor]: stripRetirementReadyActiveAliases({
+  })),
+  [MajorRealm.ImmortalEmperor]: stripBattleAbsorbedPassiveAliases(
+    stripRetirementReadyActiveAliases({
     ...IMMORTAL_EMPEROR_SKILLS,
     ...IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES,
     ...IMMORTAL_EMPEROR_RETIRED_PASSIVE_ALIASES,
-  }),
+  })),
 };
 
 export const SKILLS: Record<string, Skill> = Object.fromEntries(

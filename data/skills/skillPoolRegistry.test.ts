@@ -267,9 +267,9 @@ describe("skill pool registry", () => {
     expect(isBattleAbsorbedRetiredPassiveSkill("m_tr_passive")).toBe(true);
     expect(isBattleAbsorbedRetiredPassiveSkill("b_vr_passive")).toBe(true);
     expect(isBattleAbsorbedRetiredPassiveSkill("m_ma_passive")).toBe(true);
-    expect(getSkillsByRealm(MajorRealm.Immortal).some((skill) => skill.id === "b_im_passive")).toBe(
-      true
-    );
+    expect(
+      getSkillsByRealm(MajorRealm.Immortal).some((skill) => skill.id === "b_im_passive")
+    ).toBe(false);
     expect(
       getBattleAbsorbedRetiredPassiveSkills().map((skill) => skill.id)
     ).toEqual(BATTLE_ABSORBED_RETIRED_PASSIVE_SKILLS.map((skill) => skill.id).sort((left, right) => {
@@ -298,9 +298,9 @@ describe("skill pool registry", () => {
           !isBattleAbsorbedRetiredPassiveSkill(skill.id)
       )
     ).toBe(true);
-    expect(getSkillsByRealm(MajorRealm.Foundation).some((skill) => skill.id === "s_f_passive")).toBe(
-      true
-    );
+    expect(
+      getSkillsByRealm(MajorRealm.Foundation).some((skill) => skill.id === "s_f_passive")
+    ).toBe(false);
   });
 
   it("keeps retirement-ready retired actives out of realm datasets while preserving central lookup compatibility", () => {
