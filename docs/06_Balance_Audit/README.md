@@ -135,7 +135,7 @@
 這一輪還沒有全部做完，剩下的真缺口是：
 
 1. 被動技能雖已補出多招專屬效果，但仍未完全脫離通用增益模型
-2. 三職業正式技能池雖已收斂出 `battle-absorbed / retirement-ready / pending-retirement`，但還沒把重複技能真正刪整乾淨
+2. 三職業正式技能池雖已收斂出 `battle-absorbed / retirement-ready` 正式查詢層，且舊的 `pending-retirement` 過渡名單已清空，但還沒把重複技能真正刪整乾淨
 3. 地圖世界戰鬥已是主路徑，投射物、範圍、狀態與技能特效都已上線，但世界戰鬥與 `runAutoBattle()` 還沒完全統一成單一引擎
 4. 後期丹藥、洞府、奇遇對修為的乘區還沒完整進場
 
@@ -145,8 +145,8 @@
 - retired 技能已分成：
   - `battle-absorbed`
   - `retirement-ready`
-  - `pending-retirement`
-- 其中 `m_bi_active`、`b_tr_active` 已在本輪從 `pending-retirement` 推進到 `battle-absorbed`
+- 舊的 `pending-retirement` 僅作為過渡階段使用，現在已清空並移除
+- 其中 `m_bi_active`、`b_tr_active` 已在先前批次從 `pending-retirement` 推進到 `battle-absorbed`
 
 ---
 

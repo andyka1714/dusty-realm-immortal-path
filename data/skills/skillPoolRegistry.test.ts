@@ -21,18 +21,15 @@ import {
   getFormalSkillByNameExact,
   getFormalSkillId,
   getFormalSkillByName,
-  getPendingRetirementRetiredSkills,
   getRetirementReadyRetiredSkills,
   getRetiredSkillsByRealm,
   getSkillsByRealm,
   isBattleAbsorbedRetiredSkill,
   isBattleAbsorbedRetiredPassiveSkill,
-  isPendingRetirementRetiredSkill,
   isRetirementReadyRetiredSkill,
   normalizeLearnedSkills,
   RETIRED_SKILL_MAP,
   RETIRED_SKILL_NAME_INDEX,
-  PENDING_RETIREMENT_RETIRED_SKILL_MAP,
   RETIREMENT_READY_RETIRED_SKILL_MAP,
   RETIRED_SKILLS_BY_REALM,
   SKILLS,
@@ -283,24 +280,23 @@ describe("skill pool registry", () => {
     }));
   });
 
-  it("tracks which retired skills are still pending retirement cleanup", () => {
-    expect(PENDING_RETIREMENT_RETIRED_SKILL_MAP.s_f_passive).toBeUndefined();
-    expect(isPendingRetirementRetiredSkill("s_bi_active")).toBe(false);
-    expect(isPendingRetirementRetiredSkill("s_bi_passive")).toBe(false);
-    expect(isPendingRetirementRetiredSkill("b_tr_passive")).toBe(false);
-    expect(isPendingRetirementRetiredSkill("m_tr_passive")).toBe(false);
-    expect(isPendingRetirementRetiredSkill("m_bi_active")).toBe(false);
-    expect(isPendingRetirementRetiredSkill("s_ie_active")).toBe(false);
-    expect(isPendingRetirementRetiredSkill("s_vr_passive")).toBe(false);
-    expect(isPendingRetirementRetiredSkill("s_f_passive")).toBe(false);
+  it("keeps retirement-ready retired skills scoped to absorbed active aliases after pending cleanup", () => {
+    expect(RETIREMENT_READY_RETIRED_SKILL_MAP.s_bi_active?.replacementSkillId).toBe(
+      "s_tr_active"
+    );
+    expect(RETIREMENT_READY_RETIRED_SKILL_MAP.b_ie_active?.replacementSkillId).toBe(
+      "b_ma_active"
+    );
+    expect(RETIREMENT_READY_RETIRED_SKILL_MAP.m_ie_active?.replacementSkillId).toBe(
+      "m_tr_active"
+    );
     expect(
-      getPendingRetirementRetiredSkills().every(
+      getRetirementReadyRetiredSkills().every(
         (skill) =>
-          !isBattleAbsorbedRetiredSkill(skill.id) &&
+          isBattleAbsorbedRetiredSkill(skill.id) &&
           !isBattleAbsorbedRetiredPassiveSkill(skill.id)
       )
     ).toBe(true);
-    expect(getPendingRetirementRetiredSkills()).toHaveLength(0);
     expect(getSkillsByRealm(MajorRealm.Foundation).some((skill) => skill.id === "s_f_passive")).toBe(
       true
     );

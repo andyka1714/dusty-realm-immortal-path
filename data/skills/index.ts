@@ -392,20 +392,6 @@ export const RETIREMENT_READY_RETIRED_SKILL_MAP: Record<string, Skill> =
     RETIREMENT_READY_RETIRED_SKILLS.map((skill) => [skill.id, skill])
   ) as Record<string, Skill>;
 
-const ABSORBED_RETIRED_SKILL_IDS = new Set([
-  ...BATTLE_ABSORBED_RETIRED_SKILLS.map((skill) => skill.id),
-  ...BATTLE_ABSORBED_RETIRED_PASSIVE_SKILLS.map((skill) => skill.id),
-]);
-
-export const PENDING_RETIREMENT_RETIRED_SKILLS = RETIRED_SKILLS.filter(
-  (skill) => !ABSORBED_RETIRED_SKILL_IDS.has(skill.id)
-);
-
-export const PENDING_RETIREMENT_RETIRED_SKILL_MAP: Record<string, Skill> =
-  Object.fromEntries(
-    PENDING_RETIREMENT_RETIRED_SKILLS.map((skill) => [skill.id, skill])
-  ) as Record<string, Skill>;
-
 export const isFormalCoreSkill = (skillId: string) =>
   FORMAL_CORE_SKILL_IDS.has(skillId);
 export const isBattleAbsorbedRetiredSkill = (skillId: string) =>
@@ -420,10 +406,6 @@ export const isRetirementReadyRetiredSkill = (skillId: string) =>
   Boolean(RETIREMENT_READY_RETIRED_SKILL_MAP[skillId]);
 export const getRetirementReadyRetiredSkills = () =>
   [...RETIREMENT_READY_RETIRED_SKILLS].sort(compareSkills);
-export const isPendingRetirementRetiredSkill = (skillId: string) =>
-  Boolean(PENDING_RETIREMENT_RETIRED_SKILL_MAP[skillId]);
-export const getPendingRetirementRetiredSkills = () =>
-  [...PENDING_RETIREMENT_RETIRED_SKILLS].sort(compareSkills);
 
 export const getSkill = (id: string): Skill | undefined => SKILLS[id];
 export const getFormalSkillId = (skillId: string) => resolveReplacementSkillId(skillId);
