@@ -3367,6 +3367,128 @@ describe("battle system balance", () => {
 
     expect(empoweredStrike.isCrit).toBe(true);
     expect(empoweredStrike.damage).toBeGreaterThan(baseStrike.damage);
+    expect(empoweredStrike.playerStatusNames).toContain("劍道獨尊");
+  });
+
+  it("lets mahayana mage passive affect world strikes and surface explicit status names", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const baseMage = calculatePlayerStats(
+      {
+        physique: 88,
+        rootBone: 80,
+        insight: 94,
+        comprehension: 28,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Mahayana,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1800,
+        mp: 4200,
+        hp: 7600,
+        defense: 260,
+      },
+      "法修基準",
+      ProfessionType.Mage,
+      ["m_ma_active"]
+    );
+
+    const empoweredMage = calculatePlayerStats(
+      {
+        physique: 88,
+        rootBone: 80,
+        insight: 94,
+        comprehension: 28,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Mahayana,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1800,
+        mp: 4200,
+        hp: 7600,
+        defense: 260,
+      },
+      "言出法隨",
+      ProfessionType.Mage,
+      ["m_ma_active", "m_ma_passive"]
+    );
+
+    const enemy = {
+      ...COMMON_ENEMIES.m170_c1,
+      defense: 260,
+    };
+
+    const baseStrike = resolvePlayerWorldStrike(
+      baseMage,
+      enemy,
+      getSkill("m_ma_active")
+    );
+    const empoweredStrike = resolvePlayerWorldStrike(
+      empoweredMage,
+      enemy,
+      getSkill("m_ma_active")
+    );
+
+    expect(empoweredStrike.damage).toBeGreaterThan(baseStrike.damage);
+    expect(empoweredStrike.playerStatusNames).toContain("言出法隨");
+  });
+
+  it("writes explicit mahayana passive logs in timeline combat", () => {
+    fixedRandom.mockReturnValue(0);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 92,
+        rootBone: 104,
+        insight: 78,
+        comprehension: 26,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Mahayana,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 2200,
+        defense: 340,
+        hp: 8800,
+        crit: 0,
+      },
+      "劍道獨尊",
+      ProfessionType.Sword,
+      ["s_ma_passive"]
+    );
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 88,
+        rootBone: 80,
+        insight: 94,
+        comprehension: 28,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Mahayana,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1800,
+        mp: 4200,
+        hp: 7600,
+        defense: 260,
+      },
+      "言出法隨",
+      ProfessionType.Mage,
+      ["m_ma_active", "m_ma_passive"]
+    );
+
+    const swordResult = runAutoBattle(sword, COMMON_ENEMIES.m170_c1);
+    const mageResult = runAutoBattle(mage, COMMON_ENEMIES.m170_c1);
+
+    expect(swordResult.logs.some((log) => log.message.includes("劍道獨尊"))).toBe(true);
+    expect(mageResult.logs.some((log) => log.message.includes("言出法隨"))).toBe(true);
   });
 
   it("lets body tribulation passive stack defensive layers after taking hits", () => {

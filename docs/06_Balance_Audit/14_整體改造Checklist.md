@@ -294,6 +294,7 @@
 - [x] `b_q_passive` 銅皮鐵骨：已補上明確減傷分支與戰鬥事件
 - [x] `m_q_passive` 靈潮循環：施法後回復靈力，已補上專屬戰鬥事件
 - [x] `m_f_passive` 靈力湧動：維持專屬術式蓄勢效果，不再誤接進共用冷卻縮減
+- [x] `s_ma_passive` / `m_ma_passive` 已補上 world strike 對齊與明確戰鬥事件，不再只有時間軸內核默默生效
 - [x] 多個已完成專屬接線的 passive，已開始移除手寫 generic `passiveEffectTags`，降低資料層誤導
 - [x] `b_n_passive` / `m_n_passive` 的回復事件已補回技能專屬戰鬥訊息，不再只走 generic regen log
 - [x] battle 開場被動狀態初始化已抽成共用 helper，`b_g_passive` 開場護體也補上明確戰鬥事件

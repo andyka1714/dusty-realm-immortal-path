@@ -113,6 +113,8 @@
   - `b_vr_passive`：定時震散 1 個負面狀態
   - `m_vr_passive`：部分來襲傷害轉入虛空
   - `m_ma_passive`：法修主動術式額外增傷
+  - `s_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `劍道獨尊` 的暴擊強化
+  - `m_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `言出法隨` 的術式增幅
   - `s_tr_passive`：低血量必暴與額外增傷
   - `b_ma_passive`：死亡逆轉並短暫無敵
   - `m_tr_passive`：控制免疫外，雷屬反擊會轉為回復

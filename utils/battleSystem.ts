@@ -1323,7 +1323,7 @@ export const resolvePlayerWorldStrike = (
     !skill ||
     skill.effectType === "damage" ||
     skill.damageMultiplier !== undefined;
-  const { hasSwordVoidPassive, hasSwordQiPassive, hasMageQiPassive, hasBodyFoundationPassive, hasSwordEmperorPassive } =
+  const { hasSwordVoidPassive, hasSwordQiPassive, hasMageQiPassive, hasBodyFoundationPassive, hasSwordEmperorPassive, hasSwordMahayanaPassive, hasMageMahayanaPassive } =
     passiveFlags;
   const hasSwordQiChain = hasLearnedSkillId(player.learnedSkills, "s_f_active");
   const swordTribulationActive = hasSwordTribulationWindow(
@@ -1349,6 +1349,9 @@ export const resolvePlayerWorldStrike = (
   if (!skill && hasMageQiPassive && player.profession === ProfessionType.Mage) {
     effectivePower += player.magic * 0.18;
   }
+  if (hasMageMahayanaPassive && skill?.profession === ProfessionType.Mage) {
+    effectivePower *= 1.4;
+  }
   if (swordTribulationActive) {
     effectivePower *= 1.5;
   }
@@ -1365,6 +1368,7 @@ export const resolvePlayerWorldStrike = (
     95,
     player.crit +
       attackContext.critBonus +
+      (hasSwordMahayanaPassive ? 5 : 0) +
       (hasSwordQiPassive ? getSwordQiPassiveCritBonus() : 0)
   );
   const isCrit =
@@ -1393,6 +1397,7 @@ export const resolvePlayerWorldStrike = (
         damage *
           ((player.critDamage +
             attackContext.critDamageBonus +
+            (hasSwordMahayanaPassive ? 10 : 0) +
             (voidSwordProc ? 50 : 0)) /
             100)
       );
@@ -1438,6 +1443,10 @@ export const resolvePlayerWorldStrike = (
     executionTimeMs: timelineProfile.executionTimeMs,
     playerStatusNames: [
       ...playerSideStatuses.map((status) => status.name),
+      ...(hasMageMahayanaPassive && skill?.profession === ProfessionType.Mage
+        ? ["言出法隨"]
+        : []),
+      ...(hasSwordMahayanaPassive && isCrit ? ["劍道獨尊"] : []),
       ...(swordTribulationActive ? ["向死而生"] : []),
       ...(canonicalSkillId === "s_tr_active" && hasSwordQiChain
         ? ["萬劍歸一"]
@@ -2312,6 +2321,23 @@ export const runAutoBattle = (
           enemyMaxHp: enemy.maxHp,
         });
       }
+      if (
+        hasMageMahayanaPassive &&
+        skillReady &&
+        activeSkill!.profession === ProfessionType.Mage
+      ) {
+        pushCombatLog(logs, {
+          turn,
+          timeMs: currentTimeMs,
+          isPlayer: true,
+          message: `【言出法隨】一言牽動萬法，主動術式威能被再度拔升。`,
+          damage: 0,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+        });
+      }
       if (voidSwordProc) {
         pushCombatLog(logs, {
           turn,
@@ -2340,6 +2366,19 @@ export const runAutoBattle = (
         enemyHp,
         enemyMaxHp: enemy.maxHp,
       });
+      if (hasSwordMahayanaPassive && isCrit) {
+        pushCombatLog(logs, {
+          turn,
+          timeMs: currentTimeMs,
+          isPlayer: true,
+          message: `【劍道獨尊】單體劍勢攀至極處，暴擊威能再被推上一層。`,
+          damage: 0,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+        });
+      }
       if (
         hasMageQiPassive &&
         !skillReady &&
