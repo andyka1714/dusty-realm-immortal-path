@@ -648,6 +648,39 @@ describe("battle system balance", () => {
     ).toBe(true);
   });
 
+  it("lets spirit-severing mage passive emit an explicit cooldown-reduction battle log", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 70,
+        rootBone: 70,
+        insight: 82,
+        comprehension: 24,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.SpiritSevering,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 900,
+        mp: 2600,
+        hp: 2400,
+        defense: 140,
+        speed: 8,
+      },
+      "道法法修",
+      ProfessionType.Mage,
+      ["m_sf_active", "m_sf_passive"]
+    );
+
+    const result = runAutoBattle(mage, COMMON_ENEMIES.m30_c1);
+
+    expect(
+      result.logs.some((log) => log.message.includes("【道法自然】"))
+    ).toBe(true);
+  });
+
   it("lets foundation body passive scale offense with missing hp in world strikes", () => {
     fixedRandom.mockReturnValue(0.5);
 

@@ -2306,6 +2306,10 @@ export const runAutoBattle = (
       }
 
       if (skillReady) {
+        const baseCooldownSeconds =
+          activeSkillTimelineProfile?.cooldownSeconds ??
+          activeSkill!.cooldownSeconds ??
+          activeSkill!.cooldown;
         if (
           hasMageFusionPassive &&
           activeSkill!.profession === ProfessionType.Mage
@@ -2330,6 +2334,22 @@ export const runAutoBattle = (
         );
         activeSkillReadyAtMs =
           currentTimeMs + Math.floor(effectiveCooldownSeconds * 1000);
+        if (
+          effectiveCooldownSeconds < baseCooldownSeconds &&
+          activeSkill!.profession === ProfessionType.Mage
+        ) {
+          pushCombatLog(logs, {
+            turn,
+            timeMs: currentTimeMs,
+            isPlayer: true,
+            message: `【道法自然】術式流轉提前歸位，冷卻縮短至 ${effectiveCooldownSeconds.toFixed(1)} 秒。`,
+            damage: 0,
+            playerHp,
+            playerMaxHp: player.maxHp,
+            enemyHp,
+            enemyMaxHp: enemy.maxHp,
+          });
+        }
 
         if (
           hasSwordGoldenPassive &&
