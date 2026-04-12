@@ -590,6 +590,14 @@ const getPlayerWorldPassiveStatusNames = (options: {
     statusNames.push("五氣朝元");
   }
 
+  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageImmortalPassive) {
+    statusNames.push("仙法通神");
+  }
+
+  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageEmperorPassive) {
+    statusNames.push("萬法歸宗");
+  }
+
   if (
     passiveFlags.hasSwordQiPassive &&
     isCrit &&

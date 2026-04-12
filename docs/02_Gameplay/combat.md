@@ -119,6 +119,7 @@
   - `m_vr_passive`：部分來襲傷害轉入虛空
   - `m_ma_passive`：法修主動術式額外增傷
   - `m_bi_passive`：world strike 已會正式回報 `五氣朝元`
+  - `m_im_passive` / `m_ie_passive`：在 player world strike 也會正式回報 `仙法通神` / `萬法歸宗`
   - `s_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `劍道獨尊` 的暴擊強化
   - `m_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `言出法隨` 的術式增幅
   - `b_sf_passive` / `m_vr_passive`：在 enemy world strike 也會正式回報 `肉身成聖` / `空間法則`，不再只在時間軸戰鬥內有感

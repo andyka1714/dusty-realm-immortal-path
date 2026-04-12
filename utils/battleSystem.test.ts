@@ -3778,6 +3778,74 @@ describe("battle system balance", () => {
     expect(strike.playerStatusNames).toContain("五氣朝元");
   });
 
+  it("surfaces immortal mage passive on world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 92,
+        rootBone: 80,
+        insight: 104,
+        comprehension: 30,
+        fortune: 18,
+        charm: 10,
+      },
+      MajorRealm.Immortal,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1900,
+        mp: 4800,
+        defense: 260,
+        res: 220,
+      },
+      "仙法通神",
+      ProfessionType.Mage,
+      ["m_im_active", "m_im_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(
+      mage,
+      COMMON_ENEMIES.m170_c1,
+      getSkill("m_im_active")
+    );
+
+    expect(strike.playerStatusNames).toContain("仙法通神");
+  });
+
+  it("surfaces emperor mage passive on world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 96,
+        rootBone: 84,
+        insight: 110,
+        comprehension: 32,
+        fortune: 18,
+        charm: 10,
+      },
+      MajorRealm.ImmortalEmperor,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 2200,
+        mp: 5200,
+        defense: 280,
+        res: 240,
+      },
+      "萬法歸宗",
+      ProfessionType.Mage,
+      ["m_ie_active", "m_ie_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(
+      mage,
+      COMMON_ENEMIES.m170_c1,
+      getSkill("m_ie_active")
+    );
+
+    expect(strike.playerStatusNames).toContain("萬法歸宗");
+  });
+
   it("writes explicit mahayana passive logs in timeline combat", () => {
     fixedRandom.mockReturnValue(0);
 
