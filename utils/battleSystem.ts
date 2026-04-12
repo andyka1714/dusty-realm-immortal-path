@@ -482,13 +482,42 @@ const getEnemyWorldPassiveStatusNames = (
     prePassiveDamage: number;
     playerMaxHp: number;
     voidEvasion: boolean;
+    bodyFoundationStacks: number;
+    copperSkinTriggered: boolean;
+    bodyFusionTriggered: boolean;
+    elementalBarrierTriggered: boolean;
   }
 ) => {
   const statusNames: string[] = [];
-  const { passiveFlags, prePassiveDamage, playerMaxHp, voidEvasion } = options;
+  const {
+    passiveFlags,
+    prePassiveDamage,
+    playerMaxHp,
+    voidEvasion,
+    bodyFoundationStacks,
+    copperSkinTriggered,
+    bodyFusionTriggered,
+    elementalBarrierTriggered,
+  } = options;
+
+  if (bodyFoundationStacks > 0) {
+    statusNames.push("蠻荒血脈");
+  }
+
+  if (copperSkinTriggered) {
+    statusNames.push("銅皮鐵骨");
+  }
+
+  if (bodyFusionTriggered) {
+    statusNames.push("金剛法相");
+  }
 
   if (passiveFlags.hasBodySaintPassive && prePassiveDamage > 0) {
     statusNames.push("肉身成聖");
+  }
+
+  if (elementalBarrierTriggered) {
+    statusNames.push("元素護盾");
   }
 
   if (voidEvasion) {
@@ -1350,6 +1379,47 @@ const logReflectRetaliation = ({
   });
 };
 
+const getIncomingDefensivePassiveMessages = (options: {
+  bodyFoundationStacks: number;
+  copperSkinReduced: number;
+  bodyFusionReduced: number;
+  bodySaintReduced: number;
+  elementalBarrierBlocked: boolean;
+}) => {
+  const messages: string[] = [];
+  const {
+    bodyFoundationStacks,
+    copperSkinReduced,
+    bodyFusionReduced,
+    bodySaintReduced,
+    elementalBarrierBlocked,
+  } = options;
+
+  if (bodyFoundationStacks > 0) {
+    messages.push(
+      `【蠻荒血脈】傷勢越深，肉身越堅，當前 ${bodyFoundationStacks} 層血脈沸騰抬升了護體。`
+    );
+  }
+
+  if (copperSkinReduced > 0) {
+    messages.push(`【銅皮鐵骨】硬生生化去 <dmg>${copperSkinReduced}</dmg> 點傷害。`);
+  }
+
+  if (bodyFusionReduced > 0) {
+    messages.push(`【金剛法相】卸去 <dmg>${bodyFusionReduced}</dmg> 點最終傷害。`);
+  }
+
+  if (bodySaintReduced > 0) {
+    messages.push(`【肉身成聖】化去重擊，減少了 <dmg>${bodySaintReduced}</dmg> 點傷害。`);
+  }
+
+  if (elementalBarrierBlocked) {
+    messages.push("【元素護盾】完整化去了一次術式傷害。");
+  }
+
+  return messages;
+};
+
 const isNegativeStatusKind = (kind: CombatStatus["kind"]) =>
   [
     "burn",
@@ -1775,15 +1845,31 @@ export const resolveEnemyWorldStrike = (
     (special ? timelineProfile.areaDamageModifier : 1);
   let damage = resolveDamage(effectivePower, effectiveDefense);
   const { hasBodyQiPassive } = passiveFlags;
+  const bodyFoundationStacks = getBodyFoundationBloodlineStacks(player.hp, player.maxHp);
   if (attackContext.damageBonus) {
     damage = Math.floor(damage * (1 + attackContext.damageBonus / 100));
   }
+  const copperSkinTriggered =
+    hasBodyQiPassive && !useSpecial && damage > 0;
   if (hasBodyQiPassive && !useSpecial) {
     damage = Math.max(0, Math.floor(damage * getCopperSkinReductionMultiplier()));
+  }
+  const preBodyFusionDamage = damage;
+  const bodyFusionTriggered =
+    passiveFlags.hasBodyFusionPassive && preBodyFusionDamage > 0;
+  if (passiveFlags.hasBodyFusionPassive && preBodyFusionDamage > 0) {
+    damage = Math.max(1, Math.floor(damage * 0.7));
   }
   const preBodySaintDamage = damage;
   if (passiveFlags.hasBodySaintPassive && preBodySaintDamage > player.maxHp * 0.2) {
     damage = Math.max(1, Math.floor(damage * 0.5));
+  }
+  const elementalBarrierTriggered =
+    Boolean(special) &&
+    passiveFlags.hasInitialShieldPassive &&
+    damage > 0;
+  if (elementalBarrierTriggered) {
+    damage = 0;
   }
   const voidEvasion =
     passiveFlags.hasMageVoidPassive && Math.random() < 0.3;
@@ -1800,6 +1886,10 @@ export const resolveEnemyWorldStrike = (
       prePassiveDamage: preBodySaintDamage,
       playerMaxHp: player.maxHp,
       voidEvasion,
+      bodyFoundationStacks,
+      copperSkinTriggered,
+      bodyFusionTriggered,
+      elementalBarrierTriggered,
     }),
   ];
 
@@ -3149,22 +3239,9 @@ export const runAutoBattle = (
           enemyDamage = Math.max(1, Math.floor(enemyDamage * 0.6));
         }
 
-        if (bodyFoundationStacks > 0) {
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【蠻荒血脈】傷勢越深，肉身越堅，當前 ${bodyFoundationStacks} 層血脈沸騰抬升了護體。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
-
+        let copperSkinReduced = 0;
         if (hasBodyQiPassive && enemyDamage > 0 && !enemySpecialReady) {
-          const reduced = enemyDamage - Math.max(
+          copperSkinReduced = enemyDamage - Math.max(
             1,
             Math.floor(enemyDamage * getCopperSkinReductionMultiplier())
           );
@@ -3172,49 +3249,18 @@ export const runAutoBattle = (
             1,
             Math.floor(enemyDamage * getCopperSkinReductionMultiplier())
           );
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【銅皮鐵骨】硬生生化去 <dmg>${reduced}</dmg> 點傷害。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
         }
 
+        let bodyFusionReduced = 0;
         if (hasBodyFusionPassive && enemyDamage > 0) {
-          const reduced = enemyDamage - Math.max(1, Math.floor(enemyDamage * 0.7));
+          bodyFusionReduced = enemyDamage - Math.max(1, Math.floor(enemyDamage * 0.7));
           enemyDamage = Math.max(1, Math.floor(enemyDamage * 0.7));
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【金剛法相】卸去 <dmg>${reduced}</dmg> 點最終傷害。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
         }
 
+        let bodySaintReduced = 0;
         if (hasBodySaintPassive && enemyDamage > player.maxHp * 0.2) {
-          const reduced = enemyDamage - Math.max(1, Math.floor(enemyDamage * 0.5));
+          bodySaintReduced = enemyDamage - Math.max(1, Math.floor(enemyDamage * 0.5));
           enemyDamage = Math.max(1, Math.floor(enemyDamage * 0.5));
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【肉身成聖】化去重擊，減少了 <dmg>${reduced}</dmg> 點傷害。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
         }
 
         let elementalBarrierBlocked = false;
@@ -3231,19 +3277,28 @@ export const runAutoBattle = (
             elementalBarrier.expiresAtMs = currentTimeMs;
             elementalBarrierBlocked = true;
             enemyDamage = 0;
-            pushCombatLog(logs, {
-              turn,
-              timeMs: currentTimeMs,
-              isPlayer: true,
-              message: `【元素護盾】完整化去了一次術式傷害。`,
-              damage: 0,
-              playerHp,
-              playerMaxHp: player.maxHp,
-              enemyHp,
-              enemyMaxHp: enemy.maxHp,
-            });
           }
         }
+
+        getIncomingDefensivePassiveMessages({
+          bodyFoundationStacks,
+          copperSkinReduced,
+          bodyFusionReduced,
+          bodySaintReduced,
+          elementalBarrierBlocked,
+        }).forEach((message) => {
+          pushCombatLog(logs, {
+            turn,
+            timeMs: currentTimeMs,
+            isPlayer: true,
+            message,
+            damage: 0,
+            playerHp,
+            playerMaxHp: player.maxHp,
+            enemyHp,
+            enemyMaxHp: enemy.maxHp,
+          });
+        });
 
         const shieldResult = absorbDamageWithShield(
           playerStatuses,

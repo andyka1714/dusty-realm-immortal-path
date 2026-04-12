@@ -228,6 +228,7 @@
 - [x] 玩家被動技能判定已補成共用 skill-id 對照表，world strike 與 timeline combat 的 passive flag 來源不再各自手寫維護
 - [x] 開場被動狀態與對應戰鬥事件已開始走共用初始化 helper，降低 `runAutoBattle()` 散寫 `荊棘皮層` / `元素護盾` 等訊息的重複度
 - [x] 屬性克制、弱點洞察、元素抗性、開場被動與高境界開場壓制提示，已開始整併成共用 opener helper，縮減 `runAutoBattle()` 的前置事件散寫範圍
+- [x] 來襲傷害的防禦型被動事件已開始抽成共用 defensive-passive helper，集中處理 `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `肉身成聖` / `元素護盾`
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---
@@ -299,6 +300,7 @@
 - [x] `m_f_passive` / `m_bi_passive` 已補上 world strike 狀態回報，正式標出 `靈力湧動` / `五氣朝元`
 - [x] `s_ma_passive` / `m_ma_passive` 已補上 world strike 對齊與明確戰鬥事件，不再只有時間軸內核默默生效
 - [x] `b_sf_passive` / `m_vr_passive` 已補上 enemy world strike 對齊，正式回報 `肉身成聖` / `空間法則`
+- [x] `b_f_passive` / `b_q_passive` / `b_bi_passive` / `m_g_passive` 已補上 enemy world strike 對齊，正式回報 `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `元素護盾`
 - [x] 道途內的突破按鈕提示也已切到 `GameHintBubble`，再少一個原生 `title` 提示
 - [x] player world strike 的被動狀態回報已開始抽成共用 helper，並補上 `蠻荒血脈` / `靈潮循環` / `劍脈初成` / `法則之劍`
 - [x] `m_n_passive` / `m_f_passive` / `m_bi_passive` 已開始補齊 world strike 狀態回報，正式標出 `法力源泉` / `靈力湧動` / `五氣朝元`

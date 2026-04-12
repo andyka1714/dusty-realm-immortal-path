@@ -1324,6 +1324,90 @@ describe("battle system balance", () => {
     expect(passiveFinalHp).toBeGreaterThan(baseFinalHp);
   });
 
+  it("surfaces incoming body defensive passives on enemy world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const body = calculatePlayerStats(
+      {
+        physique: 90,
+        rootBone: 82,
+        insight: 60,
+        comprehension: 22,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.Fusion,
+      SpiritRootId.MIXED_FIVE,
+      {
+        attack: 1200,
+        defense: 340,
+        hp: 11000,
+      },
+      "法相戰軀",
+      ProfessionType.Body,
+      ["b_f_passive", "b_q_passive", "b_bi_passive"]
+    );
+
+    const woundedBody = { ...body, hp: Math.floor(body.maxHp * 0.52) };
+    const enemy = {
+      ...BOSS_ENEMIES.m170_b1,
+      attack: 760,
+      specialAttack: undefined,
+    };
+
+    const strike = resolveEnemyWorldStrike(enemy, woundedBody);
+
+    expect(strike.statusNames).toContain("蠻荒血脈");
+    expect(strike.statusNames).toContain("銅皮鐵骨");
+    expect(strike.statusNames).toContain("金剛法相");
+  });
+
+  it("surfaces elemental barrier on enemy special world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 72,
+        rootBone: 62,
+        insight: 88,
+        comprehension: 24,
+        fortune: 15,
+        charm: 10,
+      },
+      MajorRealm.GoldenCore,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 860,
+        mp: 2600,
+        hp: 2600,
+        defense: 150,
+        speed: 12,
+      },
+      "青木真修",
+      ProfessionType.Mage,
+      ["m_g_passive"]
+    );
+
+    const enemy = {
+      ...BOSS_ENEMIES.m102_b1,
+      attack: 900,
+      specialAttack: {
+        name: "玄雷貫體",
+        cooldownSeconds: 4,
+        damageMultiplier: 1.2,
+        statusEffect: { id: "paralyze", duration: 2, chance: 1 },
+        areaShape: "single" as const,
+        areaRadius: 0,
+        maxTargets: 1,
+      },
+    };
+
+    const strike = resolveEnemyWorldStrike(enemy, mage, true);
+
+    expect(strike.damage).toBe(0);
+    expect(strike.statusNames).toContain("元素護盾");
+  });
+
   it("lets fusion mage passive cast without mana cost and regenerate hp/mp", () => {
     fixedRandom.mockReturnValue(0.5);
 
