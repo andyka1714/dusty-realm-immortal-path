@@ -1071,6 +1071,26 @@ const getInitialPassiveStatuses = ({
   return statuses;
 };
 
+const getInitialPassiveBattleLogMessages = ({
+  hasReflectPassive,
+  hasInitialShieldPassive,
+}: {
+  hasReflectPassive: boolean;
+  hasInitialShieldPassive: boolean;
+}) => {
+  const messages: string[] = [];
+
+  if (hasReflectPassive) {
+    messages.push("【荊棘皮層】已覆上體表，只待近身來敵反震自傷。");
+  }
+
+  if (hasInitialShieldPassive) {
+    messages.push("戰鬥開始時，你獲得了【元素護盾】。");
+  }
+
+  return messages;
+};
+
 const logShieldAbsorption = ({
   logs,
   turn,
@@ -2075,34 +2095,22 @@ export const runAutoBattle = (
   if (initialPassiveStatuses.length > 0) {
     playerStatuses.push(...initialPassiveStatuses);
   }
-
-  if (hasReflectPassive) {
+  getInitialPassiveBattleLogMessages({
+    hasReflectPassive,
+    hasInitialShieldPassive,
+  }).forEach((message) => {
     pushCombatLog(logs, {
       turn: 0,
       timeMs: 0,
       isPlayer: true,
-      message: `【荊棘皮層】已覆上體表，只待近身來敵反震自傷。`,
+      message,
       damage: 0,
       playerHp,
       playerMaxHp: player.maxHp,
       enemyHp,
       enemyMaxHp: enemy.maxHp,
     });
-  }
-
-  if (hasInitialShieldPassive) {
-    pushCombatLog(logs, {
-      turn: 0,
-      timeMs: 0,
-      isPlayer: true,
-      message: `戰鬥開始時，你獲得了【元素護盾】。`,
-      damage: 0,
-      playerHp,
-      playerMaxHp: player.maxHp,
-      enemyHp,
-      enemyMaxHp: enemy.maxHp,
-    });
-  }
+  });
 
   if (hasMageImmortalPassive) {
     pushCombatLog(logs, {

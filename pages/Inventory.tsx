@@ -5,7 +5,7 @@ import { ITEMS } from '../data/items';
 import { equipItem, unequipItem, sortItems, removeItems, removeItem } from '../store/slices/inventorySlice';
 import { consumeItem } from '../store/slices/characterSlice';
 import { addLog } from '../store/slices/logSlice';
-import { Package, Shield, Sword, FlaskConical, CircleDashed, Footprints, Crown, MinusCircle, Shirt, Medal, ArrowUpDown, Trash2, LayoutGrid, CheckSquare, Plus, Minus } from 'lucide-react';
+import { Package, Shield, Sword, FlaskConical, CircleDashed, Footprints, Crown, MinusCircle, Shirt, Medal, ArrowUpDown, Trash2, LayoutGrid, CheckSquare, Plus, Minus, AlertTriangle } from 'lucide-react';
 import { ItemCategory, ItemQuality, EquipmentSlot, ConsumableItem, InventorySlot, ItemInstance } from '../types';
 import { REALM_NAMES } from '../constants';
 import { Modal } from '../components/Modal';
@@ -819,6 +819,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
         title={confirmModal.title}
+        icon={<AlertTriangle size={18} className="text-red-400" />}
         actions={
             <>
                 <button 
@@ -849,6 +850,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
         isOpen={!!itemToDelete}
         onClose={() => setItemToDelete(null)}
         title="丟棄物品"
+        icon={<Trash2 size={18} className="text-red-400" />}
         actions={
             <>
                 <button 

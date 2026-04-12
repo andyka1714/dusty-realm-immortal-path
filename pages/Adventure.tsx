@@ -2310,6 +2310,7 @@ export const Adventure: React.FC<AdventureProps> = ({
           isOpen={isMapModalOpen} 
           onClose={() => setIsMapModalOpen(false)}
           title="玄天寶鑑"
+          icon={<MapIcon size={18} className="text-amber-500" />}
           size="large"
           actions={
              <button onClick={() => setIsMapModalOpen(false)} className="px-4 py-2 bg-stone-800 text-stone-300 rounded hover:bg-stone-700 border border-stone-700">關閉</button>

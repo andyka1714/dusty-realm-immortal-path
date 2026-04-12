@@ -10,7 +10,7 @@ import { addItem } from '../../store/slices/inventorySlice';
 import { addLog } from '../../store/slices/logSlice';
 import { addVisualEffect } from '../../store/slices/adventureSlice'; // Import addVisualEffect
 import { Modal } from '../Modal';
-import { MessageCircle, Gift, CheckCircle, Circle } from 'lucide-react';
+import { MessageCircle, Gift, CheckCircle, Circle, ScrollText } from 'lucide-react';
 
 interface QuestModalProps {
     npc: NPC;
@@ -284,6 +284,7 @@ export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
             isOpen={true}
             onClose={onClose}
             title={npc.name}
+            icon={<ScrollText size={18} />}
             size="small"
             actions={
                 <button 
