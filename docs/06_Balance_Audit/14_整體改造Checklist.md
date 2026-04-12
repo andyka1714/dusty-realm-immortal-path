@@ -160,6 +160,7 @@
 - [x] 第一批 battle-absorbed retired 被動技能也已自各境界正式技能資料集移除，realm 視圖只保留正式技能池
 - [x] 原先 pending-retirement retired 被動技能已全部併回正式 retired passive alias 層，不再獨立維護資料檔
 - [x] 更多已落地的 pending-retirement retired 被動技能已正式推進到 battle-absorbed 分類，降低後續本體刪整阻力
+- [x] retirement-ready / battle-absorbed 的 retired alias ID 清單已回收至 alias 檔本體，skill index 不再重複維護同一份清單
 - [x] `s_vr_passive` 已正式承接進 formal core 劍修被動分支，從 pending-retirement 推進到 battle-absorbed
 - [x] `s_bi_active` 已正式承接進 formal core 劍修 burst 分支，從 pending-retirement 推進到 battle-absorbed
 - [x] `s_f_passive` 已正式承接進 formal core 劍修被動分支，從 pending-retirement 推進到 battle-absorbed
@@ -229,6 +230,7 @@
 - [x] 開場被動狀態與對應戰鬥事件已開始走共用初始化 helper，降低 `runAutoBattle()` 散寫 `荊棘皮層` / `元素護盾` 等訊息的重複度
 - [x] 屬性克制、弱點洞察、元素抗性、開場被動與高境界開場壓制提示，已開始整併成共用 opener helper，縮減 `runAutoBattle()` 的前置事件散寫範圍
 - [x] 來襲傷害的防禦型被動事件已開始抽成共用 defensive-passive helper，集中處理 `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `肉身成聖` / `元素護盾`
+- [x] enemy special 的 incoming status 過濾與控制縮短，現在也開始走 world / timeline 共用 resolver，不再在 `runAutoBattle()` 內手寫一套獨立分支
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---

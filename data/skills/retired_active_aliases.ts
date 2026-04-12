@@ -164,3 +164,21 @@ export const IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
     statusEffect: undefined,
   }),
 };
+
+export const BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS = [
+  "s_vr_active",
+  "s_bi_active",
+  "b_bi_active",
+  "b_tr_active",
+  "b_im_active",
+  "b_ie_active",
+  "m_bi_active",
+  "m_ma_active",
+  "m_im_active",
+  "m_ie_active",
+  "s_im_active",
+  "s_ie_active",
+] as const;
+
+export const RETIREMENT_READY_RETIRED_ACTIVE_SKILL_IDS =
+  BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS;

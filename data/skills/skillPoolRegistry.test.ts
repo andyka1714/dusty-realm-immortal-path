@@ -23,6 +23,7 @@ import {
   getFormalSkillId,
   getFormalSkillByName,
   getRetirementReadyRetiredSkills,
+  getRetirementReadyRetiredPassiveSkills,
   getRetiredSkillsByRealm,
   getSkillsByRealm,
   isBattleAbsorbedRetiredSkill,
@@ -301,6 +302,21 @@ describe("skill pool registry", () => {
     expect(
       getSkillsByRealm(MajorRealm.Foundation).some((skill) => skill.id === "s_f_passive")
     ).toBe(false);
+  });
+
+  it("keeps retirement-ready retired passive lookups centralized in the alias layer", () => {
+    const passiveIds = getRetirementReadyRetiredPassiveSkills().map((skill) => skill.id);
+
+    expect(passiveIds).toContain("s_f_passive");
+    expect(passiveIds).toContain("b_ie_passive");
+    expect(passiveIds).toContain("m_tr_passive");
+    expect(
+      getRetirementReadyRetiredPassiveSkills().every(
+        (skill) =>
+          isBattleAbsorbedRetiredPassiveSkill(skill.id) &&
+          getSkillsByRealm(skill.minRealm).every((realmSkill) => realmSkill.id !== skill.id)
+      )
+    ).toBe(true);
   });
 
   it("keeps retirement-ready retired actives out of realm datasets while preserving central lookup compatibility", () => {

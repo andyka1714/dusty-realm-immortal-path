@@ -610,6 +610,46 @@ const getResolvedEnemyWorldIncomingStatuses = ({
   };
 };
 
+const resolveIncomingEnemySpecialStatuses = ({
+  special,
+  player,
+  passiveFlags,
+  currentTimeMs,
+  shortenControlDuration,
+}: {
+  special?: Enemy["specialAttack"];
+  player: PlayerCombatStats;
+  passiveFlags: PlayerPassiveFlags;
+  currentTimeMs: number;
+  shortenControlDuration: boolean;
+}) => {
+  const incomingStatuses = getResolvedEnemyWorldIncomingStatuses({
+    special,
+    player,
+    passiveFlags,
+  });
+
+  const normalizedIncomingStatuses = incomingStatuses.filteredStatuses
+    .map((status) => {
+      if (shortenControlDuration && status.kind === "incapacitate") {
+        return {
+          ...status,
+          expiresAtMs: Math.max(currentTimeMs, status.expiresAtMs - 1000),
+        };
+      }
+      return status;
+    })
+    .filter(
+      (status) =>
+        status.kind !== "incapacitate" || status.expiresAtMs > currentTimeMs
+    );
+
+  return {
+    ...incomingStatuses,
+    normalizedIncomingStatuses,
+  };
+};
+
 const getEnemyWorldPassiveTriggerState = (options: {
   enemy: Enemy;
   player: PlayerCombatStats;
@@ -2441,6 +2481,7 @@ export const runAutoBattle = (
   const pVsE = getRestriction(player.element, enemy.element);
   const eVsP = getRestriction(enemy.element, player.element);
   const enemyElementalAffinity = getEnemyElementalModifier(player.element, enemy);
+  const passiveFlags = getPlayerPassiveFlags(player.learnedSkills);
   const {
     hasReflectPassive,
     hasSwordQiPassive,
@@ -2474,7 +2515,7 @@ export const runAutoBattle = (
     hasBodyEmperorPassive,
     hasSwordEmperorPassive,
     hasMageEmperorPassive,
-  } = getPlayerPassiveFlags(player.learnedSkills);
+  } = passiveFlags;
   let swordDeathWardUsed = false;
   let bodyRebirthTrueUsed = false;
   let bodyTribulationStacks = 0;
@@ -3773,44 +3814,19 @@ export const runAutoBattle = (
         });
 
         if (enemySpecialReady && enemy.specialAttack) {
-          const enemyStatusesCreated = resolveNormalizedEnemySpecialStatuses(
-            enemy.specialAttack,
-            player.maxHp,
-            currentTimeMs
-          );
-
-          const filteredEnemyStatuses = enemyStatusesCreated.filter((status) => {
-            if (hasMageTribulationPassive && status.kind === "incapacitate") {
-              return false;
-            }
-            if (hasSwordEmperorPassive && isNegativeStatusKind(status.kind)) {
-              return false;
-            }
-            if (hasBodyImmortalPassive && isDotStatusKind(status.kind)) {
-              return false;
-            }
-            return true;
+          const enemyIncomingStatusResult = resolveIncomingEnemySpecialStatuses({
+            special: enemy.specialAttack,
+            player,
+            passiveFlags,
+            currentTimeMs,
+            shortenControlDuration: hasSwordFusionPassive,
           });
+          const filteredEnemyStatuses =
+            enemyIncomingStatusResult.filteredStatuses;
+          const normalizedIncomingStatuses =
+            enemyIncomingStatusResult.normalizedIncomingStatuses;
 
           if (filteredEnemyStatuses.length > 0) {
-            const normalizedIncomingStatuses = filteredEnemyStatuses
-              .map((status) => {
-                if (
-                  hasSwordFusionPassive &&
-                  status.kind === "incapacitate"
-                ) {
-                  return {
-                    ...status,
-                    expiresAtMs: Math.max(currentTimeMs, status.expiresAtMs - 1000),
-                  };
-                }
-                return status;
-              })
-              .filter(
-                (status) =>
-                  status.kind !== "incapacitate" ||
-                  status.expiresAtMs > currentTimeMs
-              );
             playerStatuses.push(...normalizedIncomingStatuses);
             normalizedIncomingStatuses.forEach((status) => {
               pushCombatLog(logs, {
@@ -3845,9 +3861,7 @@ export const runAutoBattle = (
           }
 
           if (
-            hasBodyImmortalPassive &&
-            enemyStatusesCreated.some((status) => isDotStatusKind(status.kind)) &&
-            filteredEnemyStatuses.every((status) => !isDotStatusKind(status.kind))
+            enemyIncomingStatusResult.bodyImmortalTriggered
           ) {
             pushCombatLog(logs, {
               turn,
@@ -3863,9 +3877,7 @@ export const runAutoBattle = (
           }
 
           if (
-            hasSwordEmperorPassive &&
-            enemyStatusesCreated.some((status) => isNegativeStatusKind(status.kind)) &&
-            filteredEnemyStatuses.every((status) => !isNegativeStatusKind(status.kind))
+            enemyIncomingStatusResult.swordEmperorTriggered
           ) {
             pushCombatLog(logs, {
               turn,

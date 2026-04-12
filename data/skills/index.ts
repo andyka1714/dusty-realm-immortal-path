@@ -11,18 +11,22 @@ import { TRIBULATION_SKILLS } from "./tribulation";
 import { IMMORTAL_SKILLS } from "./immortal";
 import { IMMORTAL_EMPEROR_SKILLS } from "./immortal_emperor";
 import {
+  BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS,
   FUSION_RETIRED_ACTIVE_ALIASES,
   IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES,
   IMMORTAL_RETIRED_ACTIVE_ALIASES,
   MAHAYANA_RETIRED_ACTIVE_ALIASES,
+  RETIREMENT_READY_RETIRED_ACTIVE_SKILL_IDS,
   VOID_REFINING_RETIRED_ACTIVE_ALIASES,
 } from "./retired_active_aliases";
 import {
+  BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS,
   FOUNDATION_RETIRED_PASSIVE_ALIASES,
   FUSION_RETIRED_PASSIVE_ALIASES,
   IMMORTAL_EMPEROR_RETIRED_PASSIVE_ALIASES,
   IMMORTAL_RETIRED_PASSIVE_ALIASES,
   MAHAYANA_RETIRED_PASSIVE_ALIASES,
+  RETIREMENT_READY_RETIRED_PASSIVE_SKILL_IDS,
   TRIBULATION_RETIRED_PASSIVE_ALIASES,
   VOID_REFINING_RETIRED_PASSIVE_ALIASES,
 } from "./retired_passive_aliases";
@@ -189,20 +193,9 @@ const RAW_SKILLS: Record<string, Skill> = {
   ...IMMORTAL_EMPEROR_RETIRED_PASSIVE_ALIASES,
 };
 
-const RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_IDS = new Set<string>([
-  "s_vr_active",
-  "s_bi_active",
-  "b_bi_active",
-  "b_tr_active",
-  "b_im_active",
-  "b_ie_active",
-  "m_bi_active",
-  "m_ma_active",
-  "m_im_active",
-  "m_ie_active",
-  "s_im_active",
-  "s_ie_active",
-] as const);
+const RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_IDS = new Set<string>(
+  RETIREMENT_READY_RETIRED_ACTIVE_SKILL_IDS
+);
 
 const stripRetirementReadyActiveAliases = (skills: Record<string, Skill>) =>
   Object.fromEntries(
@@ -211,26 +204,9 @@ const stripRetirementReadyActiveAliases = (skills: Record<string, Skill>) =>
     )
   ) as Record<string, Skill>;
 
-const BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_IDS = new Set<string>([
-  "s_f_passive",
-  "s_vr_passive",
-  "b_vr_passive",
-  "m_vr_passive",
-  "s_bi_passive",
-  "b_bi_passive",
-  "m_bi_passive",
-  "s_ma_passive",
-  "b_ma_passive",
-  "m_ma_passive",
-  "b_tr_passive",
-  "m_tr_passive",
-  "s_im_passive",
-  "s_ie_passive",
-  "b_im_passive",
-  "b_ie_passive",
-  "m_im_passive",
-  "m_ie_passive",
-]);
+const BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_IDS = new Set<string>(
+  BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS
+);
 
 const stripBattleAbsorbedPassiveAliases = (skills: Record<string, Skill>) =>
   Object.fromEntries(
@@ -383,21 +359,6 @@ export const RETIRED_SKILL_NAME_INDEX: Record<string, Skill> = Object.fromEntrie
   RETIRED_SKILLS.map((skill) => [skill.name, skill])
 ) as Record<string, Skill>;
 
-const BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS = [
-  "s_vr_active",
-  "s_bi_active",
-  "s_im_active",
-  "s_ie_active",
-  "b_bi_active",
-  "b_tr_active",
-  "b_im_active",
-  "b_ie_active",
-  "m_bi_active",
-  "m_ma_active",
-  "m_im_active",
-  "m_ie_active",
-] as const;
-
 export const BATTLE_ABSORBED_RETIRED_SKILLS = BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS.map(
   (skillId) => SKILLS[skillId]
 ).filter((skill): skill is Skill => Boolean(skill));
@@ -406,27 +367,6 @@ export const BATTLE_ABSORBED_RETIRED_SKILL_MAP: Record<string, Skill> =
   Object.fromEntries(
     BATTLE_ABSORBED_RETIRED_SKILLS.map((skill) => [skill.id, skill])
   ) as Record<string, Skill>;
-
-const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS = [
-  "s_f_passive",
-  "s_vr_passive",
-  "b_vr_passive",
-  "m_vr_passive",
-  "s_bi_passive",
-  "b_bi_passive",
-  "m_bi_passive",
-  "s_ma_passive",
-  "b_ma_passive",
-  "m_ma_passive",
-  "b_tr_passive",
-  "m_tr_passive",
-  "s_im_passive",
-  "s_ie_passive",
-  "b_im_passive",
-  "b_ie_passive",
-  "m_im_passive",
-  "m_ie_passive",
-] as const;
 
 export const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILLS =
   BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS.map((skillId) => SKILLS[skillId]).filter(
@@ -461,6 +401,10 @@ export const isRetirementReadyRetiredSkill = (skillId: string) =>
   Boolean(RETIREMENT_READY_RETIRED_SKILL_MAP[skillId]);
 export const getRetirementReadyRetiredSkills = () =>
   [...RETIREMENT_READY_RETIRED_SKILLS].sort(compareSkills);
+export const getRetirementReadyRetiredPassiveSkills = () =>
+  RETIREMENT_READY_RETIRED_PASSIVE_SKILL_IDS.map((skillId) => SKILLS[skillId])
+    .filter((skill): skill is Skill => Boolean(skill))
+    .sort(compareSkills);
 
 export const getSkill = (id: string): Skill | undefined => SKILLS[id];
 export const getFormalSkillId = (skillId: string) => resolveReplacementSkillId(skillId);
