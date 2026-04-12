@@ -1729,8 +1729,8 @@ export const Adventure: React.FC<AdventureProps> = ({
                           return null;
                       })}
                  </div>
-                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/40 transition-opacity">
-                     <span className="text-xs text-amber-200 font-bold tracking-widest flex items-center gap-1"><MapIcon size={12}/> 展開</span>
+                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                     <span className="flex items-center gap-1 text-xs font-bold tracking-widest text-amber-200"><MapIcon size={12}/> 展開</span>
                  </div>
                  <div className="absolute bottom-0 right-0 bg-stone-900/80 text-[9px] px-1 text-stone-400 border-tl rounded font-mono">
                      {playerPosition.x},{playerPosition.y}
@@ -1749,10 +1749,9 @@ export const Adventure: React.FC<AdventureProps> = ({
                      >
                          <Swords size={16} />
                          
-                         {/* Tooltip */}
-                         <span className="absolute top-full mt-1 left-1/2 -translate-x-1/2 bg-black/90 border border-stone-800 text-[10px] text-stone-300 px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                         <GameHintBubble className="left-1/2 top-full mt-1 -translate-x-1/2">
                             {isAutoBattling ? "停止掛機" : "自動戰鬥"}
-                         </span>
+                         </GameHintBubble>
                      </button>
                      <div className="h-8 flex items-center text-stone-400 text-xs bg-black/50 px-3 rounded backdrop-blur border border-stone-800 font-bold tracking-wider">
                         {mapData?.name}

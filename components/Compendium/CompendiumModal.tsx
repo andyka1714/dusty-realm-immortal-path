@@ -38,6 +38,7 @@ import { BOSS_ENEMIES } from "../../data/enemies/boss";
 import { MAPS } from "../../data/maps";
 import clsx from "clsx";
 import { GameTooltip } from "../game/GameTooltip";
+import { GameHintBubble } from "../game/GameHintBubble";
 
 interface CompendiumModalProps {
   isOpen: boolean;
@@ -534,15 +535,18 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                                           c: "text-amber-500 border-amber-900/30 bg-amber-950/20",
                                         },
                                       ].map((badge) => (
-                                        <span
-                                          key={badge.q}
-                                          className={clsx(
-                                            "text-[10px] px-1 rounded border",
-                                            badge.c
-                                          )}
-                                          title={`可掉落${badge.l}品`}
-                                        >
-                                          {badge.l}
+                                        <span key={badge.q} className="relative group inline-flex">
+                                          <span
+                                            className={clsx(
+                                              "text-[10px] px-1 rounded border",
+                                              badge.c
+                                            )}
+                                          >
+                                            {badge.l}
+                                          </span>
+                                          <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+                                            可掉落{badge.l}品
+                                          </GameHintBubble>
                                         </span>
                                       ))}
                                     </div>
