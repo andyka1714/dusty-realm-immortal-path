@@ -878,6 +878,84 @@ const getInitialPassiveStatuses = ({
   return statuses;
 };
 
+const logShieldAbsorption = ({
+  logs,
+  turn,
+  timeMs,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+  absorbed,
+  sourceName,
+}: {
+  logs: CombatLog[];
+  turn: number;
+  timeMs: number;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  absorbed: number;
+  sourceName?: string;
+}) => {
+  if (absorbed <= 0) return;
+
+  pushCombatLog(logs, {
+    turn,
+    timeMs,
+    isPlayer: true,
+    message: sourceName
+      ? `【${sourceName}】替你抵擋了 <dmg>${absorbed}</dmg> 點傷害。`
+      : `護盾替你抵擋了 <dmg>${absorbed}</dmg> 點傷害。`,
+    damage: 0,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp,
+  });
+};
+
+const logReflectRetaliation = ({
+  logs,
+  turn,
+  timeMs,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+  reflected,
+  enemy,
+  sourceName,
+}: {
+  logs: CombatLog[];
+  turn: number;
+  timeMs: number;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  reflected: number;
+  enemy: Enemy;
+  sourceName?: string;
+}) => {
+  if (reflected <= 0) return;
+
+  pushCombatLog(logs, {
+    turn,
+    timeMs,
+    isPlayer: true,
+    message: sourceName
+      ? `【${sourceName}】於近身交鋒間反震回敬 <enemy rank="${enemy.rank}">${enemy.name}</enemy>，造成 <dmg>${reflected}</dmg> 點傷害！`
+      : `你以護體反震回敬 <enemy rank="${enemy.rank}">${enemy.name}</enemy>，造成 <dmg>${reflected}</dmg> 點傷害！`,
+    damage: reflected,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp,
+  });
+};
+
 const isNegativeStatusKind = (kind: CombatStatus["kind"]) =>
   [
     "burn",
@@ -2851,19 +2929,16 @@ export const runAutoBattle = (
         );
         enemyDamage = shieldResult.remainingDamage;
 
-        if (shieldResult.absorbed > 0) {
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `護盾替你抵擋了 <dmg>${shieldResult.absorbed}</dmg> 點傷害。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
+        logShieldAbsorption({
+          logs,
+          turn,
+          timeMs: currentTimeMs,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+          absorbed: shieldResult.absorbed,
+        });
 
         if (elementalBarrierBlocked) {
           playerStatuses = playerStatuses.filter(
@@ -3128,16 +3203,17 @@ export const runAutoBattle = (
         ) {
           const reflected = Math.max(1, Math.floor(enemyDamage * reflectValue));
           enemyHp = Math.max(0, enemyHp - reflected);
-          pushCombatLog(logs, {
+          logReflectRetaliation({
+            logs,
             turn,
             timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【荊棘皮層】於近身交鋒間反震回敬 <enemy rank="${enemy.rank}">${enemy.name}</enemy>，造成 <dmg>${reflected}</dmg> 點傷害！`,
-            damage: reflected,
             playerHp,
             playerMaxHp: player.maxHp,
             enemyHp,
             enemyMaxHp: enemy.maxHp,
+            reflected,
+            enemy,
+            sourceName: "荊棘皮層",
           });
         }
       }
