@@ -559,6 +559,88 @@ const getEnemyWorldPassiveStatusNames = (
   return statusNames;
 };
 
+const getEnemyWorldPassiveTriggerState = (options: {
+  enemy: Enemy;
+  player: PlayerCombatStats;
+  passiveFlags: PlayerPassiveFlags;
+  damage: number;
+  useSpecial: boolean;
+  special?: Enemy["specialAttack"];
+}) => {
+  const { enemy, player, passiveFlags, useSpecial, special } = options;
+  let damage = options.damage;
+  const reflectTriggered =
+    passiveFlags.hasReflectPassive &&
+    damage > 0 &&
+    (enemy.attackRange ?? 1) <= 1;
+  const bodyFoundationStacks = getBodyFoundationBloodlineStacks(player.hp, player.maxHp);
+
+  if (options.special?.damageMultiplier) {
+    // damage bonus has already been folded into the incoming value before this helper runs.
+  }
+
+  const copperSkinTriggered =
+    passiveFlags.hasBodyQiPassive && !useSpecial && damage > 0;
+  if (passiveFlags.hasBodyQiPassive && !useSpecial) {
+    damage = Math.max(0, Math.floor(damage * getCopperSkinReductionMultiplier()));
+  }
+
+  const preBodyFusionDamage = damage;
+  const bodyFusionTriggered =
+    passiveFlags.hasBodyFusionPassive && preBodyFusionDamage > 0;
+  if (passiveFlags.hasBodyFusionPassive && preBodyFusionDamage > 0) {
+    damage = Math.max(1, Math.floor(damage * 0.7));
+  }
+
+  const preBodySaintDamage = damage;
+  if (passiveFlags.hasBodySaintPassive && preBodySaintDamage > player.maxHp * 0.2) {
+    damage = Math.max(1, Math.floor(damage * 0.5));
+  }
+
+  const elementalBarrierTriggered =
+    Boolean(special) &&
+    passiveFlags.hasInitialShieldPassive &&
+    damage > 0;
+  if (elementalBarrierTriggered) {
+    damage = 0;
+  }
+
+  const bodyTribulationTriggered =
+    passiveFlags.hasBodyTribulationPassive && damage > 0;
+  const mageTribulationTriggered =
+    passiveFlags.hasMageTribulationPassive &&
+    damage > 0 &&
+    enemy.element === ElementType.Metal;
+  const postTribulationDamage = damage;
+  const bodyRebirthTrueTriggered =
+    passiveFlags.hasBodyRebirthTruePassive &&
+    postTribulationDamage >= player.hp;
+  const swordDeathWardTriggered =
+    passiveFlags.hasSwordDeathWardPassive &&
+    postTribulationDamage >= player.hp &&
+    player.mp > 0;
+  const voidEvasion =
+    passiveFlags.hasMageVoidPassive && Math.random() < 0.3;
+  if (voidEvasion) {
+    damage = 0;
+  }
+
+  return {
+    damage,
+    reflectTriggered,
+    bodyFoundationStacks,
+    copperSkinTriggered,
+    bodyFusionTriggered,
+    preBodySaintDamage,
+    elementalBarrierTriggered,
+    bodyTribulationTriggered,
+    mageTribulationTriggered,
+    bodyRebirthTrueTriggered,
+    swordDeathWardTriggered,
+    voidEvasion,
+  };
+};
+
 const getPlayerWorldPassiveStatusNames = (options: {
   passiveFlags: PlayerPassiveFlags;
   player: PlayerCombatStats;
@@ -628,6 +710,10 @@ const getPlayerWorldPassiveStatusNames = (options: {
 
   if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageEmperorPassive) {
     statusNames.push("萬法歸宗");
+  }
+
+  if (!skill && passiveFlags.hasSwordEmperorPassive && dealsDirectDamage) {
+    statusNames.push("萬法皆空");
   }
 
   if (
@@ -1884,56 +1970,31 @@ export const resolveEnemyWorldStrike = (
     attackContext.defense *
     (special ? timelineProfile.areaDamageModifier : 1);
   let damage = resolveDamage(effectivePower, effectiveDefense);
-  const { hasBodyQiPassive } = passiveFlags;
-  const reflectTriggered =
-    passiveFlags.hasReflectPassive &&
-    damage > 0 &&
-    (enemy.attackRange ?? 1) <= 1;
-  const bodyFoundationStacks = getBodyFoundationBloodlineStacks(player.hp, player.maxHp);
   if (attackContext.damageBonus) {
     damage = Math.floor(damage * (1 + attackContext.damageBonus / 100));
   }
-  const copperSkinTriggered =
-    hasBodyQiPassive && !useSpecial && damage > 0;
-  if (hasBodyQiPassive && !useSpecial) {
-    damage = Math.max(0, Math.floor(damage * getCopperSkinReductionMultiplier()));
-  }
-  const preBodyFusionDamage = damage;
-  const bodyFusionTriggered =
-    passiveFlags.hasBodyFusionPassive && preBodyFusionDamage > 0;
-  if (passiveFlags.hasBodyFusionPassive && preBodyFusionDamage > 0) {
-    damage = Math.max(1, Math.floor(damage * 0.7));
-  }
-  const preBodySaintDamage = damage;
-  if (passiveFlags.hasBodySaintPassive && preBodySaintDamage > player.maxHp * 0.2) {
-    damage = Math.max(1, Math.floor(damage * 0.5));
-  }
-  const elementalBarrierTriggered =
-    Boolean(special) &&
-    passiveFlags.hasInitialShieldPassive &&
-    damage > 0;
-  if (elementalBarrierTriggered) {
-    damage = 0;
-  }
-  const bodyTribulationTriggered =
-    passiveFlags.hasBodyTribulationPassive && damage > 0;
-  const mageTribulationTriggered =
-    passiveFlags.hasMageTribulationPassive &&
-    damage > 0 &&
-    enemy.element === ElementType.Metal;
-  const postTribulationDamage = damage;
-  const bodyRebirthTrueTriggered =
-    passiveFlags.hasBodyRebirthTruePassive &&
-    postTribulationDamage >= player.hp;
-  const swordDeathWardTriggered =
-    passiveFlags.hasSwordDeathWardPassive &&
-    postTribulationDamage >= player.hp &&
-    player.mp > 0;
-  const voidEvasion =
-    passiveFlags.hasMageVoidPassive && Math.random() < 0.3;
-  if (voidEvasion) {
-    damage = 0;
-  }
+  const {
+    damage: resolvedDamage,
+    reflectTriggered,
+    bodyFoundationStacks,
+    copperSkinTriggered,
+    bodyFusionTriggered,
+    preBodySaintDamage,
+    elementalBarrierTriggered,
+    bodyTribulationTriggered,
+    mageTribulationTriggered,
+    bodyRebirthTrueTriggered,
+    swordDeathWardTriggered,
+    voidEvasion,
+  } = getEnemyWorldPassiveTriggerState({
+    enemy,
+    player,
+    passiveFlags,
+    damage,
+    useSpecial,
+    special,
+  });
+  damage = resolvedDamage;
 
   const statusNames = [
     ...resolveNormalizedEnemySpecialStatuses(special, player.maxHp, 0).map(

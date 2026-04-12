@@ -120,6 +120,7 @@
   - `m_ma_passive`：法修主動術式額外增傷
   - `m_bi_passive`：world strike 已會正式回報 `五氣朝元`
   - `m_im_passive` / `m_ie_passive`：在 player world strike 也會正式回報 `仙法通神` / `萬法歸宗`
+  - `s_ie_passive`：在 player world strike 的普攻也會正式回報 `萬法皆空`
   - `s_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `劍道獨尊` 的暴擊強化
   - `m_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `言出法隨` 的術式增幅
   - `b_sf_passive` / `m_vr_passive`：在 enemy world strike 也會正式回報 `肉身成聖` / `空間法則`，不再只在時間軸戰鬥內有感
@@ -148,6 +149,7 @@
   - `s_ie_active`：一劍開天會無視一般防禦減免
   - `b_ie_active`：掌中神國會附加神國抽離與最大生命吸收
   - `m_ie_active`：一念花開會把敵方優勢逆轉為多重 debuff
+- `enemy world strike` 的承傷 / 生存型被動觸發計算，已開始抽成共用 helper，避免 `resolveEnemyWorldStrike()` 內重複堆疊同一批減傷與保命判定
 - `s_tr_passive` 在地圖 world strike 也已正式對齊時間軸戰鬥：低血量時會直接進入 `向死而生` 狀態，強制暴擊並同步抬升輸出
 - 戰鬥 overlay 已補上：
   - 玩家血條

@@ -4020,6 +4020,37 @@ describe("battle system balance", () => {
     expect(strike.playerStatusNames).toContain("萬法歸宗");
   });
 
+  it("surfaces sword emperor passive on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 98,
+        rootBone: 112,
+        insight: 86,
+        comprehension: 32,
+        fortune: 18,
+        charm: 10,
+      },
+      MajorRealm.ImmortalEmperor,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 2400,
+        defense: 320,
+        hp: 9200,
+        crit: 18,
+      },
+      "萬法皆空",
+      ProfessionType.Sword,
+      ["s_ie_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(sword, COMMON_ENEMIES.m170_c1);
+
+    expect(strike.playerStatusNames).toContain("萬法皆空");
+    expect(strike.damage).toBeGreaterThan(0);
+  });
+
   it("writes explicit mahayana passive logs in timeline combat", () => {
     fixedRandom.mockReturnValue(0);
 

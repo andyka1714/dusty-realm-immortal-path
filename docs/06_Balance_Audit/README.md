@@ -159,9 +159,11 @@
 - `五氣朝元` 的回春 / 回藍事件也已改成專屬戰鬥訊息，不再落回 generic regen 文案
 - `法力源泉`、`靈力湧動`、`五氣朝元` 這批法修被動，也已開始補齊 world strike 狀態回報
 - `仙法通神`、`萬法歸宗` 這批高境界法修被動，也已開始補齊 world strike 狀態回報
+- `萬法皆空` 也已開始在 player world strike 的普攻中正式回報，不再只在時間軸戰鬥裡隱性生效
 - `荊棘皮層`、`蠻荒血脈`、`銅皮鐵骨`、`金剛法相`、`元素護盾` 這批防禦型被動，也已開始補齊 enemy world strike 狀態回報
 - `萬劫不滅`、`雷劫煉心` 這批高境界承傷 / 生存被動，也已開始補齊 enemy world strike 狀態回報
 - `護體劍罡`、`滴血重生` 這批致命生存型被動，也已開始補齊 enemy world strike 狀態回報
+- `enemy world strike` 這條線的減傷 / 保命被動判定，也已開始抽成共用 trigger helper，往單一 battle resolver 再收一層
 
 ---
 
