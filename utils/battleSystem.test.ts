@@ -961,7 +961,7 @@ describe("battle system balance", () => {
         attack: 720,
         defense: 240,
         speed: 9,
-        hp: 3600,
+        hp: 1200,
       },
       "武聖",
       ProfessionType.Body,
@@ -1031,6 +1031,102 @@ describe("battle system balance", () => {
 
     const result = runAutoBattle(player, BOSS_ENEMIES.m102_b1);
     expect(result.logs.some((log) => log.message.includes("空間法則"))).toBe(true);
+  });
+
+  it("lets spirit severing body passive reduce enemy world strikes and surface status name", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const body = calculatePlayerStats(
+      {
+        physique: 82,
+        rootBone: 76,
+        insight: 60,
+        comprehension: 22,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.SpiritSevering,
+      SpiritRootId.MIXED_FIVE,
+      {
+        attack: 720,
+        defense: 240,
+        speed: 9,
+        hp: 1200,
+      },
+      "武聖",
+      ProfessionType.Body,
+      ["b_sf_passive"]
+    );
+
+    const baseBody = calculatePlayerStats(
+      {
+        physique: 82,
+        rootBone: 76,
+        insight: 60,
+        comprehension: 22,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.SpiritSevering,
+      SpiritRootId.MIXED_FIVE,
+      {
+        attack: 720,
+        defense: 240,
+        speed: 9,
+        hp: 3600,
+      },
+      "基準武聖",
+      ProfessionType.Body,
+      []
+    );
+
+    const enemy = {
+      ...BOSS_ENEMIES.m151_b1,
+      attack: 50000,
+    };
+
+    const baseStrike = resolveEnemyWorldStrike(enemy, baseBody);
+    const passiveStrike = resolveEnemyWorldStrike(enemy, body);
+
+    expect(passiveStrike.damage).toBeLessThan(baseStrike.damage);
+    expect(passiveStrike.statusNames).toContain("肉身成聖");
+  });
+
+  it("lets void-refining mage passive affect enemy world strikes and surface status name", () => {
+    fixedRandom.mockReturnValue(0.2);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 76,
+        rootBone: 70,
+        insight: 84,
+        comprehension: 26,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.VoidRefining,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 860,
+        mp: 2800,
+        hp: 2600,
+        defense: 160,
+        speed: 12,
+      },
+      "虛空法君",
+      ProfessionType.Mage,
+      ["m_vr_passive"]
+    );
+
+    const enemy = {
+      ...BOSS_ENEMIES.m102_b1,
+      attack: 900,
+    };
+
+    const strike = resolveEnemyWorldStrike(enemy, mage);
+
+    expect(strike.damage).toBe(0);
+    expect(strike.statusNames).toContain("空間法則");
   });
 
   it("lets fusion sword passive shorten incoming control effects", () => {

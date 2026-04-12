@@ -115,6 +115,7 @@
   - `m_ma_passive`：法修主動術式額外增傷
   - `s_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `劍道獨尊` 的暴擊強化
   - `m_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `言出法隨` 的術式增幅
+  - `b_sf_passive` / `m_vr_passive`：在 enemy world strike 也會正式回報 `肉身成聖` / `空間法則`，不再只在時間軸戰鬥內有感
   - `s_tr_passive`：低血量必暴與額外增傷
   - `b_ma_passive`：死亡逆轉並短暫無敵
   - `m_tr_passive`：控制免疫外，雷屬反擊會轉為回復

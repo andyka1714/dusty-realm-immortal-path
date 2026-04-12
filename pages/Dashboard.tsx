@@ -462,6 +462,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                       {isBreakthroughAvailable ? "瓶頸已至，點擊破境" : "積累修為中..."}
                     </span>
                 </div>
+                <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+                  {isMajorBreakthrough ? "衝擊大境界" : "突破小境界"}
+                </GameHintBubble>
               </button>
            </div>
             </div>

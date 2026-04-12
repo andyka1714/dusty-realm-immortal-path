@@ -476,6 +476,28 @@ const hasSwordTribulationWindow = (
   passiveFlags: Pick<PlayerPassiveFlags, "hasSwordTribulationPassive">
 ) => passiveFlags.hasSwordTribulationPassive && currentHp <= maxHp * 0.2;
 
+const getEnemyWorldPassiveStatusNames = (
+  options: {
+    passiveFlags: PlayerPassiveFlags;
+    prePassiveDamage: number;
+    playerMaxHp: number;
+    voidEvasion: boolean;
+  }
+) => {
+  const statusNames: string[] = [];
+  const { passiveFlags, prePassiveDamage, playerMaxHp, voidEvasion } = options;
+
+  if (passiveFlags.hasBodySaintPassive && prePassiveDamage > 0) {
+    statusNames.push("肉身成聖");
+  }
+
+  if (voidEvasion) {
+    statusNames.push("空間法則");
+  }
+
+  return statusNames;
+};
+
 const getPlayerAttackContext = (
   player: PlayerCombatStats,
   enemy: Enemy,
@@ -1490,12 +1512,27 @@ export const resolveEnemyWorldStrike = (
   if (hasBodyQiPassive && !useSpecial) {
     damage = Math.max(0, Math.floor(damage * getCopperSkinReductionMultiplier()));
   }
+  const preBodySaintDamage = damage;
+  if (passiveFlags.hasBodySaintPassive && preBodySaintDamage > player.maxHp * 0.2) {
+    damage = Math.max(1, Math.floor(damage * 0.5));
+  }
+  const voidEvasion =
+    passiveFlags.hasMageVoidPassive && Math.random() < 0.3;
+  if (voidEvasion) {
+    damage = 0;
+  }
 
-  const statusNames = resolveNormalizedEnemySpecialStatuses(
-    special,
-    player.maxHp,
-    0
-  ).map((status) => status.name);
+  const statusNames = [
+    ...resolveNormalizedEnemySpecialStatuses(special, player.maxHp, 0).map(
+      (status) => status.name
+    ),
+    ...getEnemyWorldPassiveStatusNames({
+      passiveFlags,
+      prePassiveDamage: preBodySaintDamage,
+      playerMaxHp: player.maxHp,
+      voidEvasion,
+    }),
+  ];
 
   return {
     damage,
