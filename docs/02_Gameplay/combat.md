@@ -96,7 +96,8 @@
   - `s_n_active`：可附加流血
   - `b_vr_active`：可附加中毒
   - `s_n_passive`：致命一擊抵擋 + 反震（每戰 1 次）
-  - `b_n_passive`：按最大生命與已損生命持續回血
+  - `b_n_passive`：按最大生命與已損生命持續回血，已補上專屬戰鬥事件
+  - `m_n_passive`：法力回復與高靈力增傷，已補上專屬戰鬥事件
   - `m_n_passive`：持續回靈，且靈力高於 80% 時增傷
   - `s_sf_passive`：普攻雙段追擊
   - `s_bi_passive`：控制型狀態持續時間縮短

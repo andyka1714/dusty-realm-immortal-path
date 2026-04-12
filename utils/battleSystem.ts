@@ -1888,11 +1888,14 @@ export const runAutoBattle = (
         );
         if (healAmount > 0) {
           playerHp = Math.min(player.maxHp, playerHp + healAmount);
+          const healMessage = hasBodyRebirthPassive
+            ? `【滴血重生】血肉自衍，你回復了 ${healAmount} 點氣血。`
+            : `氣血流轉，你回復了 ${healAmount} 點氣血。`;
           pushCombatLog(logs, {
             turn,
             timeMs: currentTimeMs,
             isPlayer: true,
-            message: `氣血流轉，你回復了 ${healAmount} 點氣血。`,
+            message: healMessage,
             damage: -healAmount,
             playerHp,
             playerMaxHp: player.maxHp,
@@ -1908,11 +1911,14 @@ export const runAutoBattle = (
           const manaAmount = manaPerSecond * regenIntervals;
           if (manaAmount > 0) {
             playerMp = Math.min(player.maxMp, playerMp + manaAmount);
+            const manaMessage = hasManaSpringPassive
+              ? `【法力源泉】靈海回湧，你回復了 ${manaAmount} 點靈力。`
+              : `法力源泉湧動，你回復了 ${manaAmount} 點靈力。`;
             pushCombatLog(logs, {
               turn,
               timeMs: currentTimeMs,
               isPlayer: true,
-              message: `法力源泉湧動，你回復了 ${manaAmount} 點靈力。`,
+              message: manaMessage,
               damage: 0,
               playerHp,
               playerMaxHp: player.maxHp,

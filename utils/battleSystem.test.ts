@@ -810,7 +810,7 @@ describe("battle system balance", () => {
     );
 
     const result = runAutoBattle(player, BOSS_ENEMIES.m7_b1);
-    expect(result.logs.some((log) => log.message.includes("回復了"))).toBe(true);
+    expect(result.logs.some((log) => log.message.includes("【滴血重生】"))).toBe(true);
   });
 
   it("lets spirit severing body passive halve oversized hits", () => {
@@ -869,7 +869,7 @@ describe("battle system balance", () => {
     );
 
     const result = runAutoBattle(player, BOSS_ENEMIES.m26_b1);
-    expect(result.logs.some((log) => log.message.includes("法力源泉"))).toBe(true);
+    expect(result.logs.some((log) => log.message.includes("【法力源泉】"))).toBe(true);
     expect(result.logs.some((log) => log.message.includes("九天雷劫"))).toBe(true);
   });
 
