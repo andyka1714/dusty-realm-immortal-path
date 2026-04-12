@@ -61,3 +61,4 @@
 - 精英與 Boss 的技能書掉落池也已改走同一套 formal core 查詢 helper
 - 技能資料本身也已切出按境界的 `formal core / retired` 索引，後續刪整舊技能不必再從全域技能表反推
 - 這樣 UI 不會再把 `transition / legacy` 當成正式可取得技能對外呈現
+- 背包內的丟棄確認與批量丟棄視窗，也已開始對齊 `Modal` 的正式 eyebrow 殼層語言

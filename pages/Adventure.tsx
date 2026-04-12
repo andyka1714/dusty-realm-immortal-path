@@ -2311,6 +2311,7 @@ export const Adventure: React.FC<AdventureProps> = ({
           isOpen={isMapModalOpen} 
           onClose={() => setIsMapModalOpen(false)}
           title="玄天寶鑑"
+          eyebrow="WORLD SURVEY"
           icon={<MapIcon size={18} className="text-amber-500" />}
           size="large"
           actions={

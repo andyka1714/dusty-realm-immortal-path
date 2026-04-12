@@ -578,6 +578,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
         isOpen={isBreakthroughModalOpen}
         onClose={() => setIsBreakthroughModalOpen(false)}
         title={isMajorBreakthrough ? "衝擊大境界" : "突破小境界"}
+        eyebrow="BREAKTHROUGH RITE"
         icon={config.tribulationName ? <Zap size={18} className="text-red-500" /> : <ChevronsUp size={18} className="text-amber-500" />}
       >
          <div className="space-y-6 text-center py-2">

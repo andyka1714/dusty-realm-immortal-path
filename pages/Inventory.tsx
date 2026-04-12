@@ -819,6 +819,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
         title={confirmModal.title}
+        eyebrow="ITEM DISPOSAL"
         icon={<AlertTriangle size={18} className="text-red-400" />}
         actions={
             <>
@@ -850,6 +851,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
         isOpen={!!itemToDelete}
         onClose={() => setItemToDelete(null)}
         title="丟棄物品"
+        eyebrow="BATCH DISPOSAL"
         icon={<Trash2 size={18} className="text-red-400" />}
         actions={
             <>

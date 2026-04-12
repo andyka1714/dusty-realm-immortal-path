@@ -136,6 +136,7 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
             isOpen={true} 
             onClose={onClose}
             title={shop.name}
+            eyebrow="SPIRIT MARKET"
             icon={<ShoppingBag size={20} className="text-amber-500" />}
             size="medium"
         >

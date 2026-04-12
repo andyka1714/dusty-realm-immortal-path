@@ -284,6 +284,7 @@ export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
             isOpen={true}
             onClose={onClose}
             title={npc.name}
+            eyebrow="NPC DISCOURSE"
             icon={<ScrollText size={18} />}
             size="small"
             actions={

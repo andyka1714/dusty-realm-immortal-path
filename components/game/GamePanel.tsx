@@ -9,6 +9,7 @@ interface GamePanelProps {
   children: React.ReactNode;
   widthClassName?: string;
   title?: string;
+  eyebrow?: string;
   titleIcon?: React.ReactNode;
 }
 
@@ -18,6 +19,7 @@ export const GamePanel: React.FC<GamePanelProps> = ({
   children,
   widthClassName = "max-w-6xl",
   title,
+  eyebrow = "IMMORTAL ARCHIVE",
   titleIcon,
 }) => {
   useEffect(() => {
@@ -69,9 +71,14 @@ export const GamePanel: React.FC<GamePanelProps> = ({
               {titleIcon && (
                 <span className="text-amber-500/95">{titleIcon}</span>
               )}
-              <span className="text-[1.05rem] font-bold tracking-[0.18em] text-stone-100">
-                {title}
-              </span>
+              <div className="flex min-w-0 flex-col">
+                <span className="text-[10px] uppercase tracking-[0.28em] text-amber-200/60">
+                  {eyebrow}
+                </span>
+                <span className="text-[1.05rem] font-bold tracking-[0.18em] text-stone-100">
+                  {title}
+                </span>
+              </div>
             </div>
           </div>
         )}

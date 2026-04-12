@@ -7,16 +7,18 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
+  eyebrow?: string;
   icon?: React.ReactNode;
   children: React.ReactNode;
   actions?: React.ReactNode;
-  size?: 'default' | 'large';
+  size?: 'small' | 'default' | 'medium' | 'large';
 }
 
 export const Modal: React.FC<ModalProps> = ({ 
   isOpen, 
   onClose, 
   title, 
+  eyebrow = 'IMMORTAL RECORD',
   icon,
   children, 
   actions, 
@@ -34,7 +36,9 @@ export const Modal: React.FC<ModalProps> = ({
   // Determine container classes based on size
   const containerClasses = size === 'large'
     ? "relative w-full h-full md:w-[90vw] md:h-[90vh] md:max-w-[1400px] border-0 md:border md:border-amber-700/20 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.08),transparent_22%),linear-gradient(180deg,rgba(42,31,10,0.9)_0%,rgba(12,12,12,0.94)_18%,rgba(8,8,8,0.98)_100%)] shadow-[0_30px_100px_rgba(0,0,0,0.72)] flex flex-col md:rounded-[28px]"
-    : "relative max-w-lg w-full max-h-[calc(100vh-105px)] md:max-h-[90vh] border border-amber-700/20 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.08),transparent_22%),linear-gradient(180deg,rgba(42,31,10,0.9)_0%,rgba(12,12,12,0.94)_20%,rgba(8,8,8,0.98)_100%)] shadow-[0_30px_100px_rgba(0,0,0,0.72)] flex flex-col rounded-[24px]";
+    : size === 'medium'
+      ? "relative w-full max-w-4xl max-h-[calc(100vh-105px)] md:max-h-[90vh] border border-amber-700/20 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.08),transparent_22%),linear-gradient(180deg,rgba(42,31,10,0.9)_0%,rgba(12,12,12,0.94)_20%,rgba(8,8,8,0.98)_100%)] shadow-[0_30px_100px_rgba(0,0,0,0.72)] flex flex-col rounded-[24px]"
+      : "relative max-w-lg w-full max-h-[calc(100vh-105px)] md:max-h-[90vh] border border-amber-700/20 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.08),transparent_22%),linear-gradient(180deg,rgba(42,31,10,0.9)_0%,rgba(12,12,12,0.94)_20%,rgba(8,8,8,0.98)_100%)] shadow-[0_30px_100px_rgba(0,0,0,0.72)] flex flex-col rounded-[24px]";
 
   // Wrapper padding: Remove padding on mobile for large modals to ensure full screen
   const wrapperClasses = size === 'large'
@@ -71,7 +75,7 @@ export const Modal: React.FC<ModalProps> = ({
             )}
             <div className="min-w-0">
               <div className="text-[10px] uppercase tracking-[0.28em] text-amber-200/60">
-                IMMORTAL RECORD
+                {eyebrow}
               </div>
               <h3 className="truncate text-xl font-bold tracking-[0.16em] text-amber-400">{title}</h3>
             </div>

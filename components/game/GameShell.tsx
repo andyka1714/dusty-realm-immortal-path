@@ -35,6 +35,7 @@ const PANEL_CONFIG: Record<
   {
     widthClassName: string;
     title: string;
+    eyebrow: string;
     icon: React.ReactNode;
     render: () => React.ReactNode;
   }
@@ -42,18 +43,21 @@ const PANEL_CONFIG: Record<
   character: {
     widthClassName: "md:w-[min(96vw,1480px)]",
     title: "道途",
+    eyebrow: "CULTIVATION PATH",
     icon: <Home size={18} />,
     render: () => <Dashboard embedded />,
   },
   inventory: {
     widthClassName: "md:w-[min(96vw,1500px)]",
     title: "行囊空間",
+    eyebrow: "TRAVEL PACK",
     icon: <Package size={18} />,
     render: () => <Inventory embedded />,
   },
   workshop: {
     widthClassName: "md:w-[min(94vw,1320px)]",
     title: "洞府百業",
+    eyebrow: "ESTATE ARTS",
     icon: <Hammer size={18} />,
     render: () => <Workshop embedded />,
   },
@@ -95,6 +99,7 @@ export const GameShell: React.FC = () => {
             onClose={() => setActivePanel(null)}
             widthClassName={activePanelConfig.widthClassName}
             title={activePanelConfig.title}
+            eyebrow={activePanelConfig.eyebrow}
             titleIcon={activePanelConfig.icon}
           >
             {activePanelConfig.render()}
@@ -106,6 +111,7 @@ export const GameShell: React.FC = () => {
           onClose={() => setActivePanel(null)}
           widthClassName="md:w-[min(96vw,1500px)]"
           title="萬界圖鑑"
+          eyebrow="WORLD COMPENDIUM"
           titleIcon={<BookOpen size={18} />}
         >
           <CompendiumModal
