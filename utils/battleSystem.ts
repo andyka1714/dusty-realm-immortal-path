@@ -498,6 +498,73 @@ const getEnemyWorldPassiveStatusNames = (
   return statusNames;
 };
 
+const getPlayerWorldPassiveStatusNames = (options: {
+  passiveFlags: PlayerPassiveFlags;
+  player: PlayerCombatStats;
+  skill?: Skill;
+  isCrit: boolean;
+  dealsDirectDamage: boolean;
+  canonicalSkillId?: string;
+  hasSwordQiChain: boolean;
+  swordTribulationActive: boolean;
+  bodyFoundationStacks: number;
+  voidSwordProc: boolean;
+}) => {
+  const {
+    passiveFlags,
+    player,
+    skill,
+    isCrit,
+    dealsDirectDamage,
+    canonicalSkillId,
+    hasSwordQiChain,
+    swordTribulationActive,
+    bodyFoundationStacks,
+    voidSwordProc,
+  } = options;
+
+  const statusNames: string[] = [];
+
+  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageMahayanaPassive) {
+    statusNames.push("言出法隨");
+  }
+
+  if (passiveFlags.hasSwordMahayanaPassive && isCrit) {
+    statusNames.push("劍道獨尊");
+  }
+
+  if (swordTribulationActive) {
+    statusNames.push("向死而生");
+  }
+
+  if (canonicalSkillId === "s_tr_active" && hasSwordQiChain) {
+    statusNames.push("萬劍歸一");
+  }
+
+  if (bodyFoundationStacks > 0) {
+    statusNames.push("蠻荒血脈");
+  }
+
+  if (!skill && passiveFlags.hasMageQiPassive && player.profession === ProfessionType.Mage) {
+    statusNames.push("靈潮循環");
+  }
+
+  if (
+    passiveFlags.hasSwordQiPassive &&
+    isCrit &&
+    dealsDirectDamage &&
+    skill?.profession === ProfessionType.Sword
+  ) {
+    statusNames.push("劍脈初成");
+  }
+
+  if (voidSwordProc) {
+    statusNames.push("法則之劍");
+  }
+
+  return statusNames;
+};
+
 const getPlayerAttackContext = (
   player: PlayerCombatStats,
   enemy: Enemy,
@@ -1353,20 +1420,17 @@ export const resolvePlayerWorldStrike = (
     player.maxHp,
     passiveFlags
   );
+  const bodyFoundationStacks = hasBodyFoundationPassive
+    ? getBodyFoundationBloodlineStacks(player.hp, player.maxHp)
+    : 0;
 
   const timelineProfile = getSkillTimelineProfile(skill);
   let effectivePower = attackContext.power;
   if (restriction.isEffective) effectivePower *= 1.12;
   if (restriction.isResisted) effectivePower *= 0.88;
   effectivePower *= elementalAffinity.multiplier;
-  if (hasBodyFoundationPassive) {
-    const bloodlineStacks = getBodyFoundationBloodlineStacks(
-      player.hp,
-      player.maxHp
-    );
-    if (bloodlineStacks > 0) {
-      effectivePower *= 1 + bloodlineStacks * 0.02;
-    }
+  if (bodyFoundationStacks > 0) {
+    effectivePower *= 1 + bodyFoundationStacks * 0.02;
   }
   if (!skill && hasMageQiPassive && player.profession === ProfessionType.Mage) {
     effectivePower += player.magic * 0.18;
@@ -1465,14 +1529,18 @@ export const resolvePlayerWorldStrike = (
     executionTimeMs: timelineProfile.executionTimeMs,
     playerStatusNames: [
       ...playerSideStatuses.map((status) => status.name),
-      ...(hasMageMahayanaPassive && skill?.profession === ProfessionType.Mage
-        ? ["言出法隨"]
-        : []),
-      ...(hasSwordMahayanaPassive && isCrit ? ["劍道獨尊"] : []),
-      ...(swordTribulationActive ? ["向死而生"] : []),
-      ...(canonicalSkillId === "s_tr_active" && hasSwordQiChain
-        ? ["萬劍歸一"]
-        : []),
+      ...getPlayerWorldPassiveStatusNames({
+        passiveFlags,
+        player,
+        skill,
+        isCrit,
+        dealsDirectDamage,
+        canonicalSkillId,
+        hasSwordQiChain,
+        swordTribulationActive,
+        bodyFoundationStacks,
+        voidSwordProc,
+      }),
     ],
     enemyStatusNames: filteredEnemyStatuses.map((status) => status.name),
     playerShieldGain: playerSideStatuses

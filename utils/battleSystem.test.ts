@@ -811,6 +811,35 @@ describe("battle system balance", () => {
     ).toBe(true);
   });
 
+  it("surfaces qi mage passive on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 43,
+        rootBone: 43,
+        insight: 52,
+        comprehension: 18,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.QiRefining,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 220,
+        mp: 1200,
+        defense: 90,
+      },
+      "靈潮術士",
+      ProfessionType.Mage,
+      ["m_q_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(mage, COMMON_ENEMIES.m26_c2);
+
+    expect(strike.playerStatusNames).toContain("靈潮循環");
+  });
+
   it("lets foundation body passive scale offense with missing hp in world strikes", () => {
     fixedRandom.mockReturnValue(0.5);
 
@@ -853,6 +882,38 @@ describe("battle system balance", () => {
     );
 
     expect(woundedStrike.damage).toBeGreaterThan(healthyStrike.damage);
+    expect(woundedStrike.playerStatusNames).toContain("蠻荒血脈");
+  });
+
+  it("surfaces sword passive procs on world strikes", () => {
+    fixedRandom.mockReset();
+    fixedRandom.mockReturnValueOnce(0.05).mockReturnValueOnce(0);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 150,
+        rootBone: 170,
+        insight: 120,
+        comprehension: 80,
+        fortune: 40,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_FIRE_METAL,
+      buildEquipmentStats(SPIRIT_SEVERING_SWORD_SET),
+      "劍勢共鳴",
+      ProfessionType.Sword,
+      ["s_q_active", "s_q_passive", "s_vr_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(
+      sword,
+      BOSS_ENEMIES.m180_b1,
+      getSkill("s_q_active")
+    );
+
+    expect(strike.playerStatusNames).toContain("法則之劍");
+    expect(strike.playerStatusNames).toContain("劍脈初成");
   });
 
   it("lets nascent soul sword passive prevent a fatal hit once and reflect it", () => {
