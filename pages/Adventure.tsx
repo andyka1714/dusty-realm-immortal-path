@@ -7,7 +7,7 @@ import { MAPS } from '../data/maps';
 import { ITEMS } from '../data/items';
 import { QUESTS } from '../data/quests';
 import { enterMap, movePlayer, tickMonsters, applyWorldDamageToMonster, resolveBattle, closeBattleReport, cancelBattle, markMapVisited, addVisualEffect } from '../store/slices/adventureSlice';
-import { runAutoBattle, calculatePlayerStats, resolvePlayerWorldStrike, resolveEnemyWorldStrike } from '../utils/battleSystem';
+import { runAutoBattle, calculatePlayerStats, resolvePlayerWorldStrike, resolveEnemyWorldStrike, getResolvedSkillCooldownSeconds } from '../utils/battleSystem';
 import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move, Swords, Flame, Droplets, Shield, ShieldOff, Zap, Snowflake, Sparkles } from 'lucide-react';
@@ -1912,10 +1912,23 @@ export const Adventure: React.FC<AdventureProps> = ({
                                         )}
                                         style={{
                                           width: `${
-                                            primaryActiveSkill.cooldownSeconds
+                                            getResolvedSkillCooldownSeconds(
+                                              primaryActiveSkill,
+                                              character.skills
+                                            )
                                               ? Math.max(
                                                   0,
-                                                  100 - ((Math.max(0, playerSkillReadyAt - currentTimestamp) / (primaryActiveSkill.cooldownSeconds * 1000)) * 100)
+                                                  100 -
+                                                    ((Math.max(
+                                                      0,
+                                                      playerSkillReadyAt - currentTimestamp
+                                                    ) /
+                                                      (getResolvedSkillCooldownSeconds(
+                                                        primaryActiveSkill,
+                                                        character.skills
+                                                      ) *
+                                                        1000)) *
+                                                      100)
                                                 )
                                               : 100
                                           }%`,

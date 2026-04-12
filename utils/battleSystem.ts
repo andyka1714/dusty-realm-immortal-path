@@ -641,6 +641,27 @@ export const getSkillTimelineProfile = (
   };
 };
 
+export const getResolvedSkillCooldownSeconds = (
+  skill: Skill | undefined,
+  learnedSkillIdsOrSkills: string[] | Skill[] = []
+) => {
+  if (!skill) return 0;
+
+  const baseCooldownSeconds = getSkillTimelineProfile(skill).cooldownSeconds;
+  const learnedSkills =
+    learnedSkillIdsOrSkills.length > 0 &&
+    typeof learnedSkillIdsOrSkills[0] !== "string"
+      ? (learnedSkillIdsOrSkills as Skill[])
+      : getLearnedSkills(learnedSkillIdsOrSkills as string[]);
+  const hasExplicitCooldownReductionPassive =
+    hasPassiveSkillId(learnedSkills, "m_f_passive") ||
+    hasPassiveSkillId(learnedSkills, "m_sf_passive");
+
+  return hasExplicitCooldownReductionPassive
+    ? Math.max(1, baseCooldownSeconds - 1)
+    : baseCooldownSeconds;
+};
+
 const getAreaShapeDamageModifier = (skill?: Skill) => {
   if (!skill || skill.targetType === "self") return 1;
 
@@ -712,6 +733,9 @@ export const getEnemySpecialTimelineProfile = (
     areaDamageModifier: getEnemyAreaDamageModifier(special),
   };
 };
+
+export const getResolvedEnemySpecialCooldownSeconds = (enemy: Enemy) =>
+  getEnemySpecialTimelineProfile(enemy).cooldownSeconds;
 
 const buildStatusesFromEnemySpecial = (
   specialAttack?: Enemy["specialAttack"],
@@ -1158,7 +1182,11 @@ export const resolvePlayerWorldStrike = (
       getPlayerAttackIntervalMs(player),
       timelineProfile.executionTimeMs
     ),
-    skillCooldownMs: skill ? timelineProfile.cooldownMs : 0,
+    skillCooldownMs: skill
+      ? Math.floor(
+          getResolvedSkillCooldownSeconds(skill, player.learnedSkills) * 1000
+        )
+      : 0,
     executionTimeMs: timelineProfile.executionTimeMs,
     playerStatusNames: [
       ...playerSideStatuses.map((status) => status.name),
@@ -1211,7 +1239,9 @@ export const resolveEnemyWorldStrike = (
     skillName: special?.name,
     statusNames,
     nextActionDelayMs: getEnemyAttackIntervalMs(enemy),
-    specialCooldownMs: special ? timelineProfile.cooldownMs : 0,
+    specialCooldownMs: special
+      ? Math.floor(getResolvedEnemySpecialCooldownSeconds(enemy) * 1000)
+      : 0,
     executionTimeMs: timelineProfile.executionTimeMs,
     areaShape: timelineProfile.areaShape,
     areaRadius: timelineProfile.areaRadius,
@@ -1411,12 +1441,8 @@ export const runAutoBattle = (
       : 0,
     playerActiveSkillCooldownTotalMs: activeSkill
       ? Math.floor(
-          (hasCooldownReductionPassive
-            ? Math.max(
-                1,
-                (activeSkill.cooldownSeconds ?? activeSkill.cooldown) - 1
-              )
-            : activeSkill.cooldownSeconds ?? activeSkill.cooldown) * 1000
+          getResolvedSkillCooldownSeconds(activeSkill, player.learnedSkills) *
+            1000
         )
       : 0,
   });
@@ -1435,9 +1461,6 @@ export const runAutoBattle = (
     player.learnedSkills,
     "m_g_passive"
   );
-  const hasCooldownReductionPassive =
-    hasPassiveSkillId(player.learnedSkills, "m_f_passive") ||
-    hasPassiveSkillId(player.learnedSkills, "m_sf_passive");
   const hasSwordDeathWardPassive = hasPassiveSkillId(
     player.learnedSkills,
     "s_n_passive"
@@ -2256,12 +2279,10 @@ export const runAutoBattle = (
         } else {
           playerMp = Math.max(0, playerMp - (activeSkill!.cost || 0));
         }
-        const cooldownSeconds =
-          activeSkillTimelineProfile?.cooldownSeconds ??
-          activeSkill!.cooldownSeconds ??
-          activeSkill!.cooldown;
-        const effectiveCooldownSeconds =
-          hasCooldownReductionPassive && skillReady ? Math.max(1, cooldownSeconds - 1) : cooldownSeconds;
+        const effectiveCooldownSeconds = getResolvedSkillCooldownSeconds(
+          activeSkill!,
+          player.learnedSkills
+        );
         activeSkillReadyAtMs =
           currentTimeMs + Math.floor(effectiveCooldownSeconds * 1000);
 
@@ -2966,10 +2987,7 @@ export const runAutoBattle = (
       playerDamagedSinceSwordHeartWindow = false;
 
       if (enemySpecialReady && enemy.specialAttack) {
-        const specialCooldown =
-          enemySpecialTimelineProfile?.cooldownSeconds ??
-          enemy.specialAttack.cooldownSeconds ??
-          4;
+        const specialCooldown = getResolvedEnemySpecialCooldownSeconds(enemy);
         enemySpecialReadyAtMs =
           currentTimeMs +
           Math.floor(specialCooldown * 1000) +

@@ -10,6 +10,8 @@ import {
 } from "../types";
 import {
   calculatePlayerStats,
+  getResolvedEnemySpecialCooldownSeconds,
+  getResolvedSkillCooldownSeconds,
   getEnemySpecialTimelineProfile,
   getSkillTimelineProfile,
   resolveEnemyWorldStrike,
@@ -189,6 +191,26 @@ describe("battle system balance", () => {
     expect(profile.executionTimeMs).toBeGreaterThan(0);
     expect(profile.areaShape).toBeDefined();
     expect(profile.areaDamageModifier).toBeGreaterThan(0);
+  });
+
+  it("resolves mage cooldown reduction through the shared skill cooldown helper", () => {
+    const skill = getSkill("m_sf_active");
+
+    expect(getResolvedSkillCooldownSeconds(skill, [])).toBe(
+      skill?.cooldownSeconds ?? skill?.cooldown ?? 0
+    );
+    expect(getResolvedSkillCooldownSeconds(skill, ["m_sf_passive"])).toBe(
+      Math.max(1, (skill?.cooldownSeconds ?? skill?.cooldown ?? 0) - 1)
+    );
+  });
+
+  it("resolves enemy special cooldown through the shared special cooldown helper", () => {
+    const enemy = BOSS_ENEMIES.m180_b1;
+    const profile = getEnemySpecialTimelineProfile(enemy);
+
+    expect(getResolvedEnemySpecialCooldownSeconds(enemy)).toBe(
+      profile.cooldownSeconds
+    );
   });
 
   it("keeps formal skill world-strike statuses on the same shared split logic as timeline combat", () => {

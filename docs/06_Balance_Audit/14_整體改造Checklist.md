@@ -221,6 +221,7 @@
 - [x] 玩家地圖內出手已開始吃 `executionTimeMs`，命中與結算不再發生在按鍵瞬間
 - [x] 世界戰鬥與 `runAutoBattle()` 已開始共用技能 / 怪物特招的 timeline metadata（execution / AOE / projectile / cooldown 基準）
 - [x] 世界戰鬥與 `runAutoBattle()` 已開始共用技能 / 怪物特招的 status resolver、時間正規化與 player/enemy 分側規則
+- [x] 世界戰鬥、時間軸戰鬥與戰鬥 HUD 的主動技能冷卻顯示，已開始共用同一套 cooldown resolver
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---
