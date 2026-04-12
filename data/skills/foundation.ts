@@ -95,6 +95,5 @@ export const FOUNDATION_SKILLS: Record<string, Skill> = {
     profession: ProfessionType.Mage,
     effectType: "buff",
     targetType: "self",
-    passiveEffectTags: ["shield", "spellpower", "mana_flow"],
   },
 };

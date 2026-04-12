@@ -293,6 +293,7 @@
 - [x] `b_q_passive` 銅皮鐵骨：已補上明確減傷分支與戰鬥事件
 - [x] `m_q_passive` 靈潮循環：施法後回復靈力，已補上專屬戰鬥事件
 - [x] `m_f_passive` 靈力湧動：維持專屬術式蓄勢效果，不再誤接進共用冷卻縮減
+- [x] 多個已完成專屬接線的 passive，已開始移除手寫 generic `passiveEffectTags`，降低資料層誤導
 - [x] `b_n_passive` / `m_n_passive` 的回復事件已補回技能專屬戰鬥訊息，不再只走 generic regen log
 - [x] battle 開場被動狀態初始化已抽成共用 helper，`b_g_passive` 開場護體也補上明確戰鬥事件
 - [x] 護盾吸收與反震傷害事件，已開始抽成 battleSystem 共用 logger helper
@@ -314,6 +315,7 @@
 - [x] 背包改成左主區 + 右裝備 / 詳情的雙艙結構
 - [x] 圖鑑改走同一套面板殼層
 - [x] 角色屬性與商店道具 tooltip 已開始共用同一套遊戲化 `GameTooltip` 外觀
+- [x] 圖鑑內部的掉落來源 tooltip 也已切到同一套 `GameTooltip` 外觀
 - [ ] 進一步把所有面板內部視覺做成更明確的遊戲化框體語言
 - [ ] 讓技能書、裝備、角色詳情 tooltip 都完全對齊互動目標
 - [x] 補上更完整的戰鬥 HUD 第一版，例如目標血條與最近戰況

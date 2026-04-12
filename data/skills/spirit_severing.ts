@@ -89,6 +89,5 @@ export const SPIRIT_SEVERING_SKILLS: Record<string, Skill> = {
     profession: ProfessionType.Mage,
     effectType: "buff",
     targetType: "self",
-    passiveEffectTags: ["cooldown_reduction", "spellpower", "mana_flow"],
   },
 };

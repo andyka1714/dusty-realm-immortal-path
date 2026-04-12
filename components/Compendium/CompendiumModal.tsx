@@ -37,6 +37,7 @@ import { ELITE_ENEMIES } from "../../data/enemies/elite";
 import { BOSS_ENEMIES } from "../../data/enemies/boss";
 import { MAPS } from "../../data/maps";
 import clsx from "clsx";
+import { GameTooltip } from "../game/GameTooltip";
 
 interface CompendiumModalProps {
   isOpen: boolean;
@@ -168,12 +169,13 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
       >
         {/* Tooltip Portal (Quick implementation inside) */}
         {tooltip && tooltip.visible && (
-          <div
-            className="fixed z-[70] bg-black/90 border border-stone-600 text-stone-200 text-xs p-2 rounded pointer-events-none whitespace-pre-wrap max-w-xs shadow-xl"
+          <GameTooltip
+            widthClassName="max-w-xs"
+            className="z-[70] whitespace-pre-wrap text-xs"
             style={{ left: tooltip.x, top: tooltip.y }}
           >
             {tooltip.content}
-          </div>
+          </GameTooltip>
         )}
 
         {/* Sidebar Tabs */}
