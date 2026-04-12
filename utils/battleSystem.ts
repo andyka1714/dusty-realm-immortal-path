@@ -364,6 +364,15 @@ const hasLearnedSkillId = (learnedSkills: Skill[], skillId: string) =>
 const getCanonicalSkillId = (skill?: Skill) =>
   skill ? getFormalSkillId(skill.id) : undefined;
 
+const getBodyFoundationBloodlineStacks = (
+  currentHp: number,
+  maxHp: number
+) => {
+  if (maxHp <= 0) return 0;
+  const missingRatio = Math.max(0, 1 - currentHp / maxHp);
+  return Math.max(0, Math.min(9, Math.floor(missingRatio / 0.1)));
+};
+
 const getPlayerAttackContext = (
   player: PlayerCombatStats,
   enemy: Enemy,
@@ -1103,6 +1112,10 @@ export const resolvePlayerWorldStrike = (
     player.learnedSkills,
     "s_vr_passive"
   );
+  const hasBodyFoundationPassive = hasPassiveSkillId(
+    player.learnedSkills,
+    "b_f_passive"
+  );
   const hasSwordQiChain = hasLearnedSkillId(player.learnedSkills, "s_f_active");
 
   const timelineProfile = getSkillTimelineProfile(skill);
@@ -1110,6 +1123,15 @@ export const resolvePlayerWorldStrike = (
   if (restriction.isEffective) effectivePower *= 1.12;
   if (restriction.isResisted) effectivePower *= 0.88;
   effectivePower *= elementalAffinity.multiplier;
+  if (hasBodyFoundationPassive) {
+    const bloodlineStacks = getBodyFoundationBloodlineStacks(
+      player.hp,
+      player.maxHp
+    );
+    if (bloodlineStacks > 0) {
+      effectivePower *= 1 + bloodlineStacks * 0.02;
+    }
+  }
   if (canonicalSkillId === "s_tr_active" && hasSwordQiChain) {
     effectivePower *= 1.18;
   }
@@ -1472,6 +1494,10 @@ export const runAutoBattle = (
   const hasManaSpringPassive = hasPassiveSkillId(
     player.learnedSkills,
     "m_n_passive"
+  );
+  const hasBodyFoundationPassive = hasPassiveSkillId(
+    player.learnedSkills,
+    "b_f_passive"
   );
   const hasMageFoundationPassive = hasPassiveSkillId(
     player.learnedSkills,
@@ -1983,6 +2009,9 @@ export const runAutoBattle = (
       let effectivePower = attackContext.power;
       let effectiveDefense =
         attackContext.defense * getArmorBreakMultiplier(enemyStatuses, currentTimeMs);
+      const bodyFoundationStacks = hasBodyFoundationPassive
+        ? getBodyFoundationBloodlineStacks(playerHp, player.maxHp)
+        : 0;
       const voidSwordProc = hasSwordVoidPassive && Math.random() < 0.1;
       if (voidSwordProc) {
         effectiveDefense = Math.max(1, effectiveDefense * 0.5);
@@ -2028,6 +2057,9 @@ export const runAutoBattle = (
       }
       if (hasSwordHeartPassive && swordHeartStacks > 0) {
         effectivePower *= 1 + swordHeartStacks * 0.03;
+      }
+      if (bodyFoundationStacks > 0) {
+        effectivePower *= 1 + bodyFoundationStacks * 0.02;
       }
       const hasSwordQiChain = hasLearnedSkillId(player.learnedSkills, "s_f_active");
       const activeSwordQiStatuses =
@@ -2139,6 +2171,19 @@ export const runAutoBattle = (
         enemyHp,
         enemyMaxHp: enemy.maxHp,
       });
+      if (bodyFoundationStacks > 0) {
+        pushCombatLog(logs, {
+          turn,
+          timeMs: currentTimeMs,
+          isPlayer: true,
+          message: `【蠻荒血脈】氣血越低，凶性越盛，當前 ${bodyFoundationStacks} 層血脈沸騰同步拔高攻勢。`,
+          damage: 0,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+        });
+      }
 
       if (
         skillReady &&
@@ -2597,8 +2642,14 @@ export const runAutoBattle = (
       let enemyPower = enemyContext.power;
       let playerDefense =
         enemyContext.defense * getArmorBreakMultiplier(playerStatuses, currentTimeMs);
+      const bodyFoundationStacks = hasBodyFoundationPassive
+        ? getBodyFoundationBloodlineStacks(playerHp, player.maxHp)
+        : 0;
       if (hasBodyTribulationPassive && bodyTribulationStacks > 0) {
         playerDefense *= 1 + Math.min(0.02 * bodyTribulationStacks, 1);
+      }
+      if (bodyFoundationStacks > 0) {
+        playerDefense *= 1 + bodyFoundationStacks * 0.05;
       }
       if (eVsP.isEffective) enemyPower *= 1.12;
       if (eVsP.isResisted) enemyPower *= 0.88;
@@ -2654,6 +2705,20 @@ export const runAutoBattle = (
       } else {
         if (isBlock) {
           enemyDamage = Math.max(1, Math.floor(enemyDamage * 0.6));
+        }
+
+        if (bodyFoundationStacks > 0) {
+          pushCombatLog(logs, {
+            turn,
+            timeMs: currentTimeMs,
+            isPlayer: true,
+            message: `【蠻荒血脈】傷勢越深，肉身越堅，當前 ${bodyFoundationStacks} 層血脈沸騰抬升了護體。`,
+            damage: 0,
+            playerHp,
+            playerMaxHp: player.maxHp,
+            enemyHp,
+            enemyMaxHp: enemy.maxHp,
+          });
         }
 
         if (hasBodyFusionPassive && enemyDamage > 0) {

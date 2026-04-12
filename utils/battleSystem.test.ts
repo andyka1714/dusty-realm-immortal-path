@@ -579,6 +579,50 @@ describe("battle system balance", () => {
     ).toBe(true);
   });
 
+  it("lets foundation body passive scale offense with missing hp in world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const healthyBody = calculatePlayerStats(
+      {
+        physique: 58,
+        rootBone: 58,
+        insight: 48,
+        comprehension: 18,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.Foundation,
+      SpiritRootId.HEAVENLY_EARTH,
+      {
+        attack: 180,
+        defense: 180,
+        hp: 2200,
+        speed: 6,
+      },
+      "蠻體修士",
+      ProfessionType.Body,
+      ["b_f_active", "b_f_passive"]
+    );
+
+    const woundedBody = {
+      ...healthyBody,
+      hp: Math.floor(healthyBody.maxHp * 0.35),
+    };
+
+    const healthyStrike = resolvePlayerWorldStrike(
+      healthyBody,
+      COMMON_ENEMIES.m21_c1,
+      getSkill("b_f_active")
+    );
+    const woundedStrike = resolvePlayerWorldStrike(
+      woundedBody,
+      COMMON_ENEMIES.m21_c1,
+      getSkill("b_f_active")
+    );
+
+    expect(woundedStrike.damage).toBeGreaterThan(healthyStrike.damage);
+  });
+
   it("lets nascent soul sword passive prevent a fatal hit once and reflect it", () => {
     fixedRandom.mockReturnValue(0.5);
 
