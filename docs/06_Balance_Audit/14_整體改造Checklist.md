@@ -309,6 +309,7 @@
 - [x] `s_ie_passive` 已開始補齊 player world strike 對齊，正式標出 `萬法皆空`
 - [x] enemy world strike 的減傷 / 保命被動判定已開始抽成共用 trigger helper，減少 `resolveEnemyWorldStrike()` 內的重複流程
 - [x] `StatsPanel / ShopPanel` 的主要資訊浮層已進一步對齊 `GameTooltip` 的標題 / 註腳結構
+- [x] `Adventure` 區域地圖情報與 `Compendium` 額外掉落來源浮層，已開始對齊同一套 `GameTooltip` 標題 / 註腳結構
 - [x] `m_im_passive` / `m_ie_passive` 已開始補齊 world strike 狀態回報，正式標出 `仙法通神` / `萬法歸宗`
 - [x] 多個已完成專屬接線的 passive，已開始移除手寫 generic `passiveEffectTags`，降低資料層誤導
 - [x] `b_n_passive` / `m_n_passive` 的回復事件已補回技能專屬戰鬥訊息，不再只走 generic regen log

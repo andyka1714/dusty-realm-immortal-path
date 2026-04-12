@@ -122,6 +122,8 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
     visible: boolean;
     x: number;
     y: number;
+    title?: React.ReactNode;
+    footer?: React.ReactNode;
     content: React.ReactNode;
   } | null>(null);
 
@@ -171,6 +173,8 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
         {/* Tooltip Portal (Quick implementation inside) */}
         {tooltip && tooltip.visible && (
           <GameTooltip
+            title={tooltip.title}
+            footer={tooltip.footer}
             widthClassName="max-w-xs"
             className="z-[70] whitespace-pre-wrap text-xs"
             style={{ left: tooltip.x, top: tooltip.y }}
@@ -652,6 +656,8 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                                               visible: true,
                                               x: event.clientX,
                                               y: event.clientY,
+                                              title: "額外掉落來源",
+                                              footer: `${getDroppedBy(item.id).length} 個來源`,
                                               content: content,
                                             });
                                           }}

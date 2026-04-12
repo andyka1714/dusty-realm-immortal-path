@@ -23,6 +23,7 @@ import AdventureStage from '../components/adventure/AdventureStage';
 import ShopPanel from '../components/adventure/ShopPanel';
 import { QuestModal } from '../components/adventure/QuestModal';
 import { GameHintBubble } from '../components/game/GameHintBubble';
+import { GameTooltip } from '../components/game/GameTooltip';
 import { SHOPS } from '../data/shops';
 import { getEnemyEngagementRange, getGridDistance, getPlayerEngagementRange, getWorldSkillAreaTargets } from '../utils/worldCombat';
 import { getLearnedSkillEngagementRange } from '../utils/skillRealtime';
@@ -368,14 +369,14 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 );
 
                 return (
-                    <div className="absolute top-4 left-4 z-50 p-4 bg-stone-900/95 border border-amber-500/50 rounded-lg shadow-2xl backdrop-blur max-w-xs animate-fade-in pointer-events-none">
-                        <div className="flex items-center justify-between mb-2 pb-2 border-b border-stone-800">
-                            <h3 className="text-lg font-bold text-amber-500">{map.name}</h3>
-                            <span className="text-xs px-2 py-0.5 rounded bg-stone-800 text-stone-400 border border-stone-700">
-                                {REALM_NAMES[map.minRealm]}
-                            </span>
-                        </div>
-                        <p className="text-sm text-stone-400 mb-4 font-serif leading-relaxed line-clamp-3">
+                    <GameTooltip
+                        title={map.name}
+                        footer={`${REALM_NAMES[map.minRealm]} · 區域地圖情報`}
+                        widthClassName="w-80 max-w-[calc(100vw-2rem)]"
+                        className="animate-fade-in"
+                        style={{ left: 16, top: 16 }}
+                    >
+                        <p className="text-sm text-stone-400 font-serif leading-relaxed line-clamp-3">
                             {map.introText.replace(/踏入.*?，/, '')}
                         </p>
                         
@@ -447,7 +448,7 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                 </div>
                             </div>
                         )}
-                    </div>
+                    </GameTooltip>
                 );
             })()}
         </div>

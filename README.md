@@ -20,6 +20,7 @@
 - 技能池已切成 `formal core / retired` 視角，retired 進一步收斂為 `battle-absorbed / retirement-ready`
 - 高境界精英 / Boss、裝備 audit、技能效果與世界戰鬥 AOE 都已接入第一版正式實作
 - 角色屬性、商店、圖鑑與多個操作提示，已開始共用 `GameTooltip / GameHintBubble` 遊戲化外觀元件
+- 區域地圖情報與圖鑑掉落來源浮層，也已開始收進同一套 `GameTooltip` 標題 / 註腳語言
 - 底部浮動 dock 的面板切換提示，也已收進同一套 `GameHintBubble` 視覺語言
 - 道途頁的人物道號與修煉效率說明，也已收進同一套 `GameTooltip` 外觀，不再維持舊的手寫 hover 面板
 - 共用 `Modal` 也已開始向 `GamePanel` 的遊戲化框體語言收斂，任務、商店、背包確認與地圖總覽視窗不再維持舊樣式殼層
