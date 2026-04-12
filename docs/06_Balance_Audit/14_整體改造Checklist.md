@@ -156,6 +156,7 @@
 - [x] 第一批 retirement-ready retired 主動技能已從原境界技能檔抽離，改為集中 alias 定義
 - [x] 第一批 battle-absorbed retired 被動技能已從原境界技能檔抽離，改為集中 alias 定義
 - [x] retired 技能曾切出 pending-retirement 查詢層作為過渡名單；目前該層已清空並自程式查詢層移除
+- [x] 第一批 retirement-ready retired 主動技能已自各境界正式技能資料集移除，只保留中央 alias / 相容查詢層
 - [x] 原先 pending-retirement retired 被動技能已全部併回正式 retired passive alias 層，不再獨立維護資料檔
 - [x] 更多已落地的 pending-retirement retired 被動技能已正式推進到 battle-absorbed 分類，降低後續本體刪整阻力
 - [x] `s_vr_passive` 已正式承接進 formal core 劍修被動分支，從 pending-retirement 推進到 battle-absorbed

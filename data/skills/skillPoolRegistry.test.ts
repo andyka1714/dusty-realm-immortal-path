@@ -17,6 +17,7 @@ import {
   getBattleAbsorbedRetiredPassiveSkills,
   getFormalCoreSkillsByRealm,
   getFormalCoreSkills,
+  getSkill,
   getFormalSkill,
   getFormalSkillByNameExact,
   getFormalSkillId,
@@ -227,12 +228,12 @@ describe("skill pool registry", () => {
     ).toBe(true);
   });
 
-  it("keeps retirement-ready retired actives addressable through realm datasets after alias centralization", () => {
-    expect(getSkillsByRealm(MajorRealm.VoidRefining).some((skill) => skill.id === "s_vr_active")).toBe(true);
-    expect(getSkillsByRealm(MajorRealm.Fusion).some((skill) => skill.id === "b_bi_active")).toBe(true);
-    expect(getSkillsByRealm(MajorRealm.Mahayana).some((skill) => skill.id === "m_ma_active")).toBe(true);
-    expect(getSkillsByRealm(MajorRealm.Immortal).some((skill) => skill.id === "s_im_active")).toBe(true);
-    expect(getSkillsByRealm(MajorRealm.ImmortalEmperor).some((skill) => skill.id === "m_ie_active")).toBe(true);
+  it("keeps retirement-ready retired actives out of realm datasets after centralizing aliases", () => {
+    expect(getSkillsByRealm(MajorRealm.VoidRefining).some((skill) => skill.id === "s_vr_active")).toBe(false);
+    expect(getSkillsByRealm(MajorRealm.Fusion).some((skill) => skill.id === "b_bi_active")).toBe(false);
+    expect(getSkillsByRealm(MajorRealm.Mahayana).some((skill) => skill.id === "m_ma_active")).toBe(false);
+    expect(getSkillsByRealm(MajorRealm.Immortal).some((skill) => skill.id === "s_im_active")).toBe(false);
+    expect(getSkillsByRealm(MajorRealm.ImmortalEmperor).some((skill) => skill.id === "m_ie_active")).toBe(false);
   });
 
   it("keeps battle-absorbed retired passives addressable after alias centralization", () => {
@@ -300,5 +301,27 @@ describe("skill pool registry", () => {
     expect(getSkillsByRealm(MajorRealm.Foundation).some((skill) => skill.id === "s_f_passive")).toBe(
       true
     );
+  });
+
+  it("keeps retirement-ready retired actives out of realm datasets while preserving central lookup compatibility", () => {
+    expect(getSkill("s_vr_active")?.replacementSkillId).toBe("s_ma_active");
+    expect(getSkill("b_ie_active")?.replacementSkillId).toBe("b_ma_active");
+    expect(getSkill("m_ie_active")?.replacementSkillId).toBe("m_tr_active");
+
+    expect(
+      getSkillsByRealm(MajorRealm.VoidRefining).some(
+        (skill) => skill.id === "s_vr_active"
+      )
+    ).toBe(false);
+    expect(
+      getSkillsByRealm(MajorRealm.Fusion).some(
+        (skill) => skill.id === "b_bi_active"
+      )
+    ).toBe(false);
+    expect(
+      getSkillsByRealm(MajorRealm.ImmortalEmperor).some(
+        (skill) => skill.id === "m_ie_active"
+      )
+    ).toBe(false);
   });
 });
