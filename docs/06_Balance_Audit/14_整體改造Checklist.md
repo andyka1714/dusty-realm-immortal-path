@@ -224,6 +224,7 @@
 - [x] 世界戰鬥與 `runAutoBattle()` 已開始共用技能 / 怪物特招的 timeline metadata（execution / AOE / projectile / cooldown 基準）
 - [x] 世界戰鬥與 `runAutoBattle()` 已開始共用技能 / 怪物特招的 status resolver、時間正規化與 player/enemy 分側規則
 - [x] 世界戰鬥、時間軸戰鬥與戰鬥 HUD 的主動技能冷卻顯示，已開始共用同一套 cooldown resolver
+- [x] 玩家被動技能判定已開始抽成共用 passive flags helper，降低 world / timeline / HUD 分散重寫風險
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---
