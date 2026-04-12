@@ -22,6 +22,7 @@ import { formatSpiritStone } from '@/utils/currency';
 import AdventureStage from '../components/adventure/AdventureStage';
 import ShopPanel from '../components/adventure/ShopPanel';
 import { QuestModal } from '../components/adventure/QuestModal';
+import { GameHintBubble } from '../components/game/GameHintBubble';
 import { SHOPS } from '../data/shops';
 import { getEnemyEngagementRange, getGridDistance, getPlayerEngagementRange, getWorldSkillAreaTargets } from '../utils/worldCombat';
 import { getLearnedSkillEngagementRange } from '../utils/skillRealtime';
@@ -2365,10 +2366,16 @@ export const Adventure: React.FC<AdventureProps> = ({
 
                               {/* Portals */}
                               {mapData.portals.map((p, i) => (
-                                  <div key={i} className="absolute w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-500/50 rounded-full border border-blue-400 shadow-[0_0_10px_blue]"
+                                  <div
+                                    key={i}
+                                    className="group absolute"
                                     style={{ left: `${(p.x / mapData.width) * 100}%`, top: `${(p.y / mapData.height) * 100}%`, transform: 'translate(-50%, -50%)' }}
-                                    title={p.label}
-                                  ></div>
+                                  >
+                                    <div className="w-1.5 h-1.5 rounded-full border border-blue-400 bg-blue-500/50 shadow-[0_0_10px_blue] md:h-2 md:w-2"></div>
+                                    <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+                                      {p.label}
+                                    </GameHintBubble>
+                                  </div>
                               ))}
 
                               {/* Player */}
@@ -2391,21 +2398,29 @@ export const Adventure: React.FC<AdventureProps> = ({
 
                               {/* NPCs (Brown w/ Text) */}
                               {mapData.npcs && mapData.npcs.map(npc => (
-                                  <div key={npc.id} 
-                                    className="absolute z-15 flex items-center justify-center bg-[#a0522d] border border-orange-900/50 shadow-sm rounded-sm"
+                                  <div key={npc.id}
+                                    className="group absolute z-15"
                                     style={{ 
                                         left: `${(npc.x / mapData.width) * 100}%`, 
                                         top: `${(npc.y / mapData.height) * 100}%`, 
                                         transform: 'translate(-50%, -50%)',
-                                        width: '18px',
-                                        height: '18px',
-                                        fontSize: '10px',
-                                        color: '#ffd700', // Gold text
-                                        fontWeight: 'bold'
                                     }}
-                                    title={npc.name}
                                   >
+                                      <div
+                                        className="flex items-center justify-center rounded-sm border border-orange-900/50 bg-[#a0522d] shadow-sm"
+                                        style={{
+                                          width: '18px',
+                                          height: '18px',
+                                          fontSize: '10px',
+                                          color: '#ffd700',
+                                          fontWeight: 'bold',
+                                        }}
+                                      >
                                       {npc.symbol}
+                                      </div>
+                                      <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+                                        {npc.name}
+                                      </GameHintBubble>
                                   </div>
                               ))}
                            </div>

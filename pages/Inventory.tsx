@@ -13,6 +13,7 @@ import clsx from 'clsx';
 import { getFormalSkill, getSkill } from '../data/skills';
 import { getMissingPrerequisiteSkillIds, resolveReplacementSkillId } from '../data/skills/pool';
 import { getSkillManualCategoryLabel, getSkillManualSourceLabels, getSkillManualTierLabel } from '../data/items/manuals';
+import { GameHintBubble } from '../components/game/GameHintBubble';
 
 interface InventoryProps {
   embedded?: boolean;
@@ -120,30 +121,38 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
 
   const managementActions = (
     <div className="flex gap-2">
-      <button 
-          onClick={() => dispatch(sortItems())}
-          className="p-2 rounded bg-stone-900 border border-stone-800 text-stone-400 hover:text-amber-500 hover:border-amber-900 transition-colors"
-          title="整理"
-      >
-          <ArrowUpDown size={18} />
-      </button>
-      <button 
-          onClick={() => {
-              setIsDeleteMode(!isDeleteMode);
-              setSelectedForDelete(new Set());
-              setSelectedSlot(null);
-          }}
-          className={clsx(
-              "p-2 rounded border transition-all flex items-center gap-2 text-sm font-bold",
-              isDeleteMode 
-                  ? "bg-red-900/50 border-red-500 text-red-200 animate-pulse" 
-                  : "bg-stone-900 border-stone-800 text-stone-400 hover:text-stone-200"
-          )}
-          title="批量管理"
-      >
-          {isDeleteMode ? <CheckSquare size={18} /> : <Trash2 size={18} />}
-          {isDeleteMode && <span className="hidden md:inline">選擇模式</span>}
-      </button>
+      <div className="relative group">
+        <button 
+            onClick={() => dispatch(sortItems())}
+            className="p-2 rounded bg-stone-900 border border-stone-800 text-stone-400 hover:text-amber-500 hover:border-amber-900 transition-colors"
+        >
+            <ArrowUpDown size={18} />
+        </button>
+        <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+          整理
+        </GameHintBubble>
+      </div>
+      <div className="relative group">
+        <button 
+            onClick={() => {
+                setIsDeleteMode(!isDeleteMode);
+                setSelectedForDelete(new Set());
+                setSelectedSlot(null);
+            }}
+            className={clsx(
+                "p-2 rounded border transition-all flex items-center gap-2 text-sm font-bold",
+                isDeleteMode 
+                    ? "bg-red-900/50 border-red-500 text-red-200 animate-pulse" 
+                    : "bg-stone-900 border-stone-800 text-stone-400 hover:text-stone-200"
+            )}
+        >
+            {isDeleteMode ? <CheckSquare size={18} /> : <Trash2 size={18} />}
+            {isDeleteMode && <span className="hidden md:inline">選擇模式</span>}
+        </button>
+        <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+          批量管理
+        </GameHintBubble>
+      </div>
     </div>
   );
 
@@ -737,47 +746,53 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
 
                       {/* Single Item Delete Button */}
                       {(selectedSlot.instanceId || selectedSlot.itemId) && (
-                          <button 
-                             disabled={selectedSlot.instanceId ? isEquipped(selectedSlot.instanceId) : false}
-                             onClick={() => {
-                                 // Stackable Item (No instanceId)
-                                 if (!selectedSlot.instanceId && selectedSlot.itemId) {
-                                     setItemToDelete({
-                                         itemId: selectedSlot.itemId,
-                                         name: selectedItemDef.name,
-                                         count: selectedSlot.count, // Default to Max
-                                         max: selectedSlot.count,
-                                         quality: ITEMS[selectedSlot.itemId].quality
-                                     });
-                                     return;
-                                 }
+                          <div className="relative group">
+                            <button 
+                               disabled={selectedSlot.instanceId ? isEquipped(selectedSlot.instanceId) : false}
+                               onClick={() => {
+                                   // Stackable Item (No instanceId)
+                                   if (!selectedSlot.instanceId && selectedSlot.itemId) {
+                                       setItemToDelete({
+                                           itemId: selectedSlot.itemId,
+                                           name: selectedItemDef.name,
+                                           count: selectedSlot.count, // Default to Max
+                                           max: selectedSlot.count,
+                                           quality: ITEMS[selectedSlot.itemId].quality
+                                       });
+                                       return;
+                                   }
 
-                                 // Instance Item (Existing Logic)
-                                 const idToDelete = selectedSlot.instanceId;
-                                 if (idToDelete && !isEquipped(idToDelete)) {
-                                     setConfirmModal({
-                                         isOpen: true,
-                                         title: '丟棄確認',
-                                         message: (
-                                             <span>確定要丟棄 <span className={getQualityTextColor(selectedSlot.instance?.quality ?? selectedItemDef.quality)}>{selectedItemDef.name}</span> 嗎？此操作無法復原！</span>
-                                         ),
-                                         onConfirm: () => {
-                                             dispatch(removeItems([idToDelete]));
-                                             setSelectedSlot(null);
-                                         }
-                                     });
-                                 }
-                             }}
-                             className={clsx(
-                                 "p-2 rounded border transition-all flex-none",
-                                 (selectedSlot.instanceId && isEquipped(selectedSlot.instanceId))
-                                     ? "bg-stone-900 border-stone-800 text-stone-600 cursor-not-allowed"
-                                     : "bg-red-950/30 border-red-900/50 text-red-500 hover:bg-red-900/80 hover:text-red-200"
-                             )}
-                             title="丟棄"
-                          >
-                             <Trash2 size={18} />
-                          </button>
+                                   // Instance Item (Existing Logic)
+                                   const idToDelete = selectedSlot.instanceId;
+                                   if (idToDelete && !isEquipped(idToDelete)) {
+                                       setConfirmModal({
+                                           isOpen: true,
+                                           title: '丟棄確認',
+                                           message: (
+                                               <span>確定要丟棄 <span className={getQualityTextColor(selectedSlot.instance?.quality ?? selectedItemDef.quality)}>{selectedItemDef.name}</span> 嗎？此操作無法復原！</span>
+                                           ),
+                                           onConfirm: () => {
+                                               dispatch(removeItems([idToDelete]));
+                                               setSelectedSlot(null);
+                                           }
+                                       });
+                                   }
+                               }}
+                               className={clsx(
+                                   "p-2 rounded border transition-all flex-none",
+                                   (selectedSlot.instanceId && isEquipped(selectedSlot.instanceId))
+                                       ? "bg-stone-900 border-stone-800 text-stone-600 cursor-not-allowed"
+                                       : "bg-red-950/30 border-red-900/50 text-red-500 hover:bg-red-900/80 hover:text-red-200"
+                               )}
+                            >
+                               <Trash2 size={18} />
+                            </button>
+                            <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+                              {selectedSlot.instanceId && isEquipped(selectedSlot.instanceId)
+                                ? '裝備中不可丟棄'
+                                : '丟棄'}
+                            </GameHintBubble>
+                          </div>
                       )}
                    </div>
                 </div>
