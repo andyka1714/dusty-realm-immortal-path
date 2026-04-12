@@ -87,6 +87,8 @@
 - 部分技能與被動已開始接入專屬效果，而不再只是通用加成：
   - `b_g_active`：護盾會真正吸收傷害
   - `b_g_passive`：常駐反震
+  - `s_g_passive`：暴擊可重置 `s_f_active` 冷卻
+  - `m_f_passive`：施法後疊加後續術式增傷
   - `m_g_passive`：開場元素護盾
   - `m_sf_passive`：技能冷卻縮減
   - `s_n_active`：可附加流血

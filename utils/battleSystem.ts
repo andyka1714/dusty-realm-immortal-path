@@ -105,6 +105,28 @@ export interface WorldStrikeResult {
   isProjectile: boolean;
 }
 
+export interface SkillTimelineProfile {
+  cooldownSeconds: number;
+  cooldownMs: number;
+  executionTimeMs: number;
+  areaShape: NonNullable<Skill["areaShape"]>;
+  areaRadius: number;
+  maxTargets: number;
+  isProjectile: boolean;
+  areaDamageModifier: number;
+}
+
+export interface EnemySpecialTimelineProfile {
+  cooldownSeconds: number;
+  cooldownMs: number;
+  executionTimeMs: number;
+  areaShape: NonNullable<Skill["areaShape"]>;
+  areaRadius: number;
+  maxTargets: number;
+  isProjectile: boolean;
+  areaDamageModifier: number;
+}
+
 type CombatStatusKind =
   | "incapacitate"
   | "burn"
@@ -327,20 +349,16 @@ const getHighestActiveSkill = (
     (skill) => skill.profession === profession && skill.type === "Active"
   );
 
-const hasPassiveEffectTag = (
-  learnedSkills: Skill[],
-  tag: NonNullable<Skill["passiveEffectTags"]>[number]
-) =>
-  learnedSkills.some(
-    (skill) =>
-      skill.type === "Passive" && skill.passiveEffectTags?.includes(tag)
-  );
-
 const hasPassiveSkillId = (learnedSkills: Skill[], skillId: string) =>
   learnedSkills.some(
     (skill) =>
       skill.type === "Passive" &&
       getFormalSkillId(skill.id) === getFormalSkillId(skillId)
+  );
+
+const hasLearnedSkillId = (learnedSkills: Skill[], skillId: string) =>
+  learnedSkills.some(
+    (skill) => getFormalSkillId(skill.id) === getFormalSkillId(skillId)
   );
 
 const getCanonicalSkillId = (skill?: Skill) =>
@@ -595,6 +613,34 @@ const getSkillExecutionTimeMs = (skill?: Skill) => {
   return castTimeMs + travelTimeMs;
 };
 
+export const getSkillTimelineProfile = (
+  skill?: Skill
+): SkillTimelineProfile => {
+  const cooldownSeconds = skill?.cooldownSeconds ?? skill?.cooldown ?? 0;
+  const areaShape =
+    skill?.areaShape ??
+    (skill?.targetType === "self"
+      ? "self"
+      : skill?.targetType === "all"
+        ? "circle"
+        : "single");
+  const areaRadius = skill?.areaRadius ?? 0;
+  const maxTargets =
+    skill?.maxTargets ?? (skill?.targetType === "all" ? 3 : 1);
+  const executionTimeMs = getSkillExecutionTimeMs(skill);
+
+  return {
+    cooldownSeconds,
+    cooldownMs: Math.floor(cooldownSeconds * 1000),
+    executionTimeMs,
+    areaShape,
+    areaRadius,
+    maxTargets,
+    isProjectile: Boolean(skill?.projectileSpeed && (skill.castRange ?? 0) > 1),
+    areaDamageModifier: getAreaShapeDamageModifier(skill),
+  };
+};
+
 const getAreaShapeDamageModifier = (skill?: Skill) => {
   if (!skill || skill.targetType === "self") return 1;
 
@@ -643,6 +689,28 @@ const getEnemyAreaDamageModifier = (
   );
 
   return Math.max(0.7, Math.min(1.02, base + radiusBonus - targetPenalty));
+};
+
+export const getEnemySpecialTimelineProfile = (
+  enemy: Enemy
+): EnemySpecialTimelineProfile => {
+  const special = enemy.specialAttack;
+  const cooldownSeconds = special?.cooldownSeconds ?? 0;
+  const areaShape = special?.areaShape ?? "single";
+  const areaRadius = special?.areaRadius ?? 0;
+  const maxTargets = special?.maxTargets ?? 1;
+
+  return {
+    cooldownSeconds,
+    cooldownMs: Math.floor(cooldownSeconds * 1000),
+    executionTimeMs:
+      special?.castTimeMs ?? ((enemy.attackRange ?? 1) > 1 ? 260 : 120),
+    areaShape,
+    areaRadius,
+    maxTargets,
+    isProjectile: Boolean((enemy.attackRange ?? 1) > 1),
+    areaDamageModifier: getEnemyAreaDamageModifier(special),
+  };
 };
 
 const buildStatusesFromEnemySpecial = (
@@ -928,6 +996,72 @@ const buildStatusesFromSkill = (
   return statuses;
 };
 
+const normalizeCombatStatuses = (
+  statuses: CombatStatus[],
+  currentTimeMs: number
+) =>
+  statuses.map((status) => ({
+    ...status,
+    expiresAtMs: currentTimeMs + status.expiresAtMs,
+    nextTickAtMs: status.nextTickAtMs
+      ? currentTimeMs + status.nextTickAtMs
+      : undefined,
+  }));
+
+const splitSkillStatusesBySide = (
+  skill: Skill,
+  statuses: CombatStatus[]
+) => {
+  const playerSideStatuses = statuses.filter(
+    (status) =>
+      skill.targetType === "self" ||
+      status.kind === "shield" ||
+      status.kind === "reflect" ||
+      status.kind === "critBoost"
+  );
+  const enemySideStatuses = statuses.filter(
+    (status) => !playerSideStatuses.includes(status)
+  );
+
+  return {
+    playerSideStatuses,
+    enemySideStatuses,
+  };
+};
+
+const resolveNormalizedSkillStatuses = (
+  skill: Skill,
+  targetMaxHp: number,
+  currentTimeMs: number
+) => {
+  const createdStatuses = buildStatusesFromSkill(skill, targetMaxHp);
+  const normalizedStatuses = normalizeCombatStatuses(
+    createdStatuses,
+    currentTimeMs
+  );
+  const { playerSideStatuses, enemySideStatuses } = splitSkillStatusesBySide(
+    skill,
+    normalizedStatuses
+  );
+
+  return {
+    createdStatuses,
+    normalizedStatuses,
+    playerSideStatuses,
+    enemySideStatuses,
+  };
+};
+
+const resolveNormalizedEnemySpecialStatuses = (
+  specialAttack: Enemy["specialAttack"] | undefined,
+  targetMaxHp: number,
+  currentTimeMs: number
+) =>
+  normalizeCombatStatuses(
+    buildStatusesFromEnemySpecial(specialAttack, targetMaxHp),
+    currentTimeMs
+  );
+
 export const resolvePlayerWorldStrike = (
   player: PlayerCombatStats,
   enemy: Enemy,
@@ -941,11 +1075,25 @@ export const resolvePlayerWorldStrike = (
     !skill ||
     skill.effectType === "damage" ||
     skill.damageMultiplier !== undefined;
+  const hasSwordVoidPassive = hasPassiveSkillId(
+    player.learnedSkills,
+    "s_vr_passive"
+  );
+  const hasSwordQiChain = hasLearnedSkillId(player.learnedSkills, "s_f_active");
 
+  const timelineProfile = getSkillTimelineProfile(skill);
   let effectivePower = attackContext.power;
   if (restriction.isEffective) effectivePower *= 1.12;
   if (restriction.isResisted) effectivePower *= 0.88;
   effectivePower *= elementalAffinity.multiplier;
+  if (canonicalSkillId === "s_tr_active" && hasSwordQiChain) {
+    effectivePower *= 1.18;
+  }
+  const voidSwordProc = hasSwordVoidPassive && Math.random() < 0.1;
+  const resolvedDefense =
+    voidSwordProc && attackContext.defense > 0
+      ? Math.max(1, attackContext.defense * 0.5)
+      : attackContext.defense;
 
   const critRate = Math.min(95, player.crit + attackContext.critBonus);
   const isCrit =
@@ -961,7 +1109,7 @@ export const resolvePlayerWorldStrike = (
   if (dealsDirectDamage) {
     damage = resolveDamage(
       effectivePower,
-      ignoreEnemyReduction ? 0 : attackContext.defense
+      ignoreEnemyReduction ? 0 : resolvedDefense
     );
     if (attackContext.damageBonus) {
       damage = Math.floor(damage * (1 + attackContext.damageBonus / 100));
@@ -970,29 +1118,27 @@ export const resolvePlayerWorldStrike = (
       damage = Math.floor(damage * getEnemyDamageReductionMultiplier(enemy));
     }
     if (skill) {
-      damage = Math.floor(damage * getAreaShapeDamageModifier(skill));
+      damage = Math.floor(damage * timelineProfile.areaDamageModifier);
     }
     if (isCrit) {
       damage = Math.floor(
-        damage * ((player.critDamage + attackContext.critDamageBonus) / 100)
+        damage *
+          ((player.critDamage +
+            attackContext.critDamageBonus +
+            (voidSwordProc ? 50 : 0)) /
+            100)
       );
     }
   }
 
-  const createdStatuses = skill
-    ? buildStatusesFromSkill(
+  const { playerSideStatuses, enemySideStatuses } = skill
+    ? resolveNormalizedSkillStatuses(
         skill,
-        skill.targetType === "self" ? player.maxHp : enemy.maxHp
+        skill.targetType === "self" ? player.maxHp : enemy.maxHp,
+        0
       )
-    : [];
-  const playerSideStatuses = createdStatuses.filter(
-    (status) =>
-      skill?.targetType === "self" ||
-      status.kind === "shield" ||
-      status.kind === "reflect" ||
-      status.kind === "critBoost"
-  );
-  const enemySideStatuses = createdStatuses.filter((status) => {
+    : { playerSideStatuses: [], enemySideStatuses: [] };
+  const filteredEnemyStatuses = enemySideStatuses.filter((status) => {
     if (playerSideStatuses.includes(status)) return false;
     if (
       hasEnemyAffix(enemy, "霸體") &&
@@ -1004,28 +1150,30 @@ export const resolvePlayerWorldStrike = (
     return true;
   });
 
-  const cooldownSeconds = skill?.cooldownSeconds ?? skill?.cooldown ?? 0;
-  const executionTimeMs = getSkillExecutionTimeMs(skill);
-
   return {
     damage,
     isCrit,
     skillName: skill?.name,
     nextActionDelayMs: Math.max(
       getPlayerAttackIntervalMs(player),
-      executionTimeMs
+      timelineProfile.executionTimeMs
     ),
-    skillCooldownMs: skill ? Math.floor(cooldownSeconds * 1000) : 0,
-    executionTimeMs,
-    playerStatusNames: playerSideStatuses.map((status) => status.name),
-    enemyStatusNames: enemySideStatuses.map((status) => status.name),
+    skillCooldownMs: skill ? timelineProfile.cooldownMs : 0,
+    executionTimeMs: timelineProfile.executionTimeMs,
+    playerStatusNames: [
+      ...playerSideStatuses.map((status) => status.name),
+      ...(canonicalSkillId === "s_tr_active" && hasSwordQiChain
+        ? ["萬劍歸一"]
+        : []),
+    ],
+    enemyStatusNames: filteredEnemyStatuses.map((status) => status.name),
     playerShieldGain: playerSideStatuses
       .filter((status) => status.kind === "shield")
       .reduce((sum, status) => sum + Math.floor(status.value), 0),
-    areaShape: skill?.areaShape,
-    areaRadius: skill?.areaRadius,
-    maxTargets: skill?.maxTargets,
-    isProjectile: Boolean(skill?.projectileSpeed && (skill.castRange ?? 0) > 1),
+    areaShape: timelineProfile.areaShape,
+    areaRadius: timelineProfile.areaRadius,
+    maxTargets: timelineProfile.maxTargets,
+    isProjectile: timelineProfile.isProjectile,
   };
 };
 
@@ -1035,6 +1183,7 @@ export const resolveEnemyWorldStrike = (
   useSpecial = false
 ) => {
   const special = useSpecial ? enemy.specialAttack : undefined;
+  const timelineProfile = getEnemySpecialTimelineProfile(enemy);
   const attackContext = getEnemyAttackContext(enemy, player);
   const restriction = getRestriction(enemy.element, player.element);
   let effectivePower =
@@ -1045,27 +1194,28 @@ export const resolveEnemyWorldStrike = (
 
   const effectiveDefense =
     attackContext.defense *
-    (special ? getEnemyAreaDamageModifier(special) : 1);
+    (special ? timelineProfile.areaDamageModifier : 1);
   let damage = resolveDamage(effectivePower, effectiveDefense);
   if (attackContext.damageBonus) {
     damage = Math.floor(damage * (1 + attackContext.damageBonus / 100));
   }
 
-  const statusNames = buildStatusesFromEnemySpecial(special, player.maxHp).map(
-    (status) => status.name
-  );
+  const statusNames = resolveNormalizedEnemySpecialStatuses(
+    special,
+    player.maxHp,
+    0
+  ).map((status) => status.name);
 
   return {
     damage,
     skillName: special?.name,
     statusNames,
     nextActionDelayMs: getEnemyAttackIntervalMs(enemy),
-    specialCooldownMs: special ? Math.floor(special.cooldownSeconds * 1000) : 0,
-    executionTimeMs:
-      special?.castTimeMs ?? ((enemy.attackRange ?? 1) > 1 ? 260 : 120),
-    areaShape: special?.areaShape,
-    areaRadius: special?.areaRadius,
-    isProjectile: Boolean((enemy.attackRange ?? 1) > 1),
+    specialCooldownMs: special ? timelineProfile.cooldownMs : 0,
+    executionTimeMs: timelineProfile.executionTimeMs,
+    areaShape: timelineProfile.areaShape,
+    areaRadius: timelineProfile.areaRadius,
+    isProjectile: timelineProfile.isProjectile,
   };
 };
 
@@ -1277,18 +1427,17 @@ export const runAutoBattle = (
   const pVsE = getRestriction(player.element, enemy.element);
   const eVsP = getRestriction(enemy.element, player.element);
   const enemyElementalAffinity = getEnemyElementalModifier(player.element, enemy);
-  const hasReflectPassive = hasPassiveEffectTag(
+  const hasReflectPassive = hasPassiveSkillId(
     player.learnedSkills,
-    "reflect"
+    "b_g_passive"
   );
-  const hasInitialShieldPassive = hasPassiveEffectTag(
+  const hasInitialShieldPassive = hasPassiveSkillId(
     player.learnedSkills,
-    "shield"
+    "m_g_passive"
   );
-  const hasCooldownReductionPassive = hasPassiveEffectTag(
-    player.learnedSkills,
-    "cooldown_reduction"
-  );
+  const hasCooldownReductionPassive =
+    hasPassiveSkillId(player.learnedSkills, "m_f_passive") ||
+    hasPassiveSkillId(player.learnedSkills, "m_sf_passive");
   const hasSwordDeathWardPassive = hasPassiveSkillId(
     player.learnedSkills,
     "s_n_passive"
@@ -1301,9 +1450,21 @@ export const runAutoBattle = (
     player.learnedSkills,
     "m_n_passive"
   );
+  const hasMageFoundationPassive = hasPassiveSkillId(
+    player.learnedSkills,
+    "m_f_passive"
+  );
+  const hasSwordGoldenPassive = hasPassiveSkillId(
+    player.learnedSkills,
+    "s_g_passive"
+  );
   const hasSwordEchoPassive = hasPassiveSkillId(
     player.learnedSkills,
     "s_sf_passive"
+  );
+  const hasSwordHeartPassive = hasPassiveSkillId(
+    player.learnedSkills,
+    "s_f_passive"
   );
   const hasBodySaintPassive = hasPassiveSkillId(
     player.learnedSkills,
@@ -1312,6 +1473,10 @@ export const runAutoBattle = (
   const hasSwordFusionPassive = hasPassiveSkillId(
     player.learnedSkills,
     "s_bi_passive"
+  );
+  const hasSwordVoidPassive = hasPassiveSkillId(
+    player.learnedSkills,
+    "s_vr_passive"
   );
   const hasBodyFusionPassive = hasPassiveSkillId(
     player.learnedSkills,
@@ -1380,6 +1545,9 @@ export const runAutoBattle = (
   let swordDeathWardUsed = false;
   let bodyRebirthTrueUsed = false;
   let bodyTribulationStacks = 0;
+  let mageFoundationStacks = 0;
+  let swordHeartStacks = 0;
+  let playerDamagedSinceSwordHeartWindow = false;
   let nextSwordImmortalGuardAtMs = 5000;
 
   const cleanupExpiredStatuses = (currentMs: number) => {
@@ -1512,6 +1680,7 @@ export const runAutoBattle = (
 
         if (tickDamage > 0) {
           playerHp = Math.max(0, playerHp - tickDamage);
+          playerDamagedSinceSwordHeartWindow = true;
           pushCombatLog(logs, {
             turn,
             timeMs: tickMs,
@@ -1772,6 +1941,9 @@ export const runAutoBattle = (
         (playerMp >= (activeSkill.cost || 0) ||
           (hasMageFusionPassive &&
             activeSkill.profession === ProfessionType.Mage));
+      const activeSkillTimelineProfile = skillReady
+        ? getSkillTimelineProfile(activeSkill!)
+        : undefined;
       const dealsDirectDamage =
         !skillReady ||
         activeSkill!.effectType === "damage" ||
@@ -1788,6 +1960,10 @@ export const runAutoBattle = (
       let effectivePower = attackContext.power;
       let effectiveDefense =
         attackContext.defense * getArmorBreakMultiplier(enemyStatuses, currentTimeMs);
+      const voidSwordProc = hasSwordVoidPassive && Math.random() < 0.1;
+      if (voidSwordProc) {
+        effectiveDefense = Math.max(1, effectiveDefense * 0.5);
+      }
 
       if (pVsE.isEffective) effectivePower *= 1.12;
       if (pVsE.isResisted) effectivePower *= 0.88;
@@ -1805,6 +1981,14 @@ export const runAutoBattle = (
         effectivePower *= 1.4;
       }
       if (
+        hasMageFoundationPassive &&
+        skillReady &&
+        activeSkill!.profession === ProfessionType.Mage &&
+        mageFoundationStacks > 0
+      ) {
+        effectivePower *= 1 + mageFoundationStacks * 0.1;
+      }
+      if (
         skillReady &&
         activeSkillCanonicalId === "m_tr_active" &&
         enemyStatuses.some(
@@ -1818,6 +2002,22 @@ export const runAutoBattle = (
         hasManaSpringPassive && playerMp >= player.maxMp * 0.8;
       if (manaSpringEmpowered) {
         effectivePower *= 1.2;
+      }
+      if (hasSwordHeartPassive && swordHeartStacks > 0) {
+        effectivePower *= 1 + swordHeartStacks * 0.03;
+      }
+      const hasSwordQiChain = hasLearnedSkillId(player.learnedSkills, "s_f_active");
+      const activeSwordQiStatuses =
+        skillReady && activeSkillCanonicalId === "s_tr_active"
+          ? playerStatuses.filter(
+              (status) =>
+                status.kind === "critBoost" && status.expiresAtMs > currentTimeMs
+            )
+          : [];
+      if (activeSwordQiStatuses.length > 0) {
+        effectivePower *= 1 + activeSwordQiStatuses.length * 0.35;
+      } else if (skillReady && activeSkillCanonicalId === "s_tr_active" && hasSwordQiChain) {
+        effectivePower *= 1.18;
       }
 
       const critRate = Math.min(
@@ -1852,7 +2052,7 @@ export const runAutoBattle = (
         }
         if (skillReady) {
           playerDamage = Math.floor(
-            playerDamage * getAreaShapeDamageModifier(activeSkill!)
+            playerDamage * (activeSkillTimelineProfile?.areaDamageModifier ?? 1)
           );
         }
         if (isCrit) {
@@ -1860,6 +2060,7 @@ export const runAutoBattle = (
             playerDamage *
               ((player.critDamage +
                 attackContext.critDamageBonus +
+                (voidSwordProc ? 50 : 0) +
                 (hasSwordMahayanaPassive ? 10 : 0)) /
                 100)
           );
@@ -1887,6 +2088,19 @@ export const runAutoBattle = (
           enemyMaxHp: enemy.maxHp,
         });
       }
+      if (voidSwordProc) {
+        pushCombatLog(logs, {
+          turn,
+          timeMs: currentTimeMs,
+          isPlayer: true,
+          message: `【法則之劍】劍勢洞穿護體，這一擊額外撕開敵方防禦並抬升暴傷上限。`,
+          damage: 0,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+        });
+      }
       pushCombatLog(logs, {
         turn,
         timeMs: currentTimeMs,
@@ -1902,6 +2116,47 @@ export const runAutoBattle = (
         enemyHp,
         enemyMaxHp: enemy.maxHp,
       });
+
+      if (
+        skillReady &&
+        activeSkillCanonicalId === "s_tr_active" &&
+        activeSwordQiStatuses.length > 0
+      ) {
+        playerStatuses = playerStatuses.filter(
+          (status) =>
+            !(
+              status.kind === "critBoost" &&
+              status.expiresAtMs > currentTimeMs
+            )
+        );
+        pushCombatLog(logs, {
+          turn,
+          timeMs: currentTimeMs,
+          isPlayer: true,
+          message: `【萬劍歸一】引爆 ${activeSwordQiStatuses.length} 層劍氣共鳴，劍勢瞬間攀升。`,
+          damage: 0,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+        });
+      } else if (
+        skillReady &&
+        activeSkillCanonicalId === "s_tr_active" &&
+        hasSwordQiChain
+      ) {
+        pushCombatLog(logs, {
+          turn,
+          timeMs: currentTimeMs,
+          isPlayer: true,
+          message: `【萬劍歸一】殘存劍勢與破劫一擊共鳴，爆發再度攀升。`,
+          damage: 0,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+        });
+      }
 
       if (
         hasSwordEchoPassive &&
@@ -2001,35 +2256,56 @@ export const runAutoBattle = (
         } else {
           playerMp = Math.max(0, playerMp - (activeSkill!.cost || 0));
         }
-        const cooldownSeconds = activeSkill!.cooldownSeconds ?? activeSkill!.cooldown;
+        const cooldownSeconds =
+          activeSkillTimelineProfile?.cooldownSeconds ??
+          activeSkill!.cooldownSeconds ??
+          activeSkill!.cooldown;
         const effectiveCooldownSeconds =
           hasCooldownReductionPassive && skillReady ? Math.max(1, cooldownSeconds - 1) : cooldownSeconds;
         activeSkillReadyAtMs =
           currentTimeMs + Math.floor(effectiveCooldownSeconds * 1000);
 
-        const createdStatuses =
-          activeSkill!.targetType === "self"
-            ? buildStatusesFromSkill(activeSkill!, player.maxHp)
-            : buildStatusesFromSkill(activeSkill!, enemy.maxHp);
+        if (
+          hasSwordGoldenPassive &&
+          activeSkillCanonicalId === "s_f_active" &&
+          isCrit &&
+          Math.random() < 0.3
+        ) {
+          activeSkillReadyAtMs = currentTimeMs;
+          pushCombatLog(logs, {
+            turn,
+            timeMs: currentTimeMs,
+            isPlayer: true,
+            message: `【劍心通明】你在暴擊中瞬息回氣，流光劍影冷卻即刻重置。`,
+            damage: 0,
+            playerHp,
+            playerMaxHp: player.maxHp,
+            enemyHp,
+            enemyMaxHp: enemy.maxHp,
+          });
+        }
 
-        const normalizedStatuses = createdStatuses.map((status) => ({
-          ...status,
-          expiresAtMs: currentTimeMs + status.expiresAtMs,
-          nextTickAtMs: status.nextTickAtMs
-            ? currentTimeMs + status.nextTickAtMs
-            : undefined,
-        }));
+        if (hasMageFoundationPassive && activeSkill!.profession === ProfessionType.Mage) {
+          mageFoundationStacks = Math.min(3, mageFoundationStacks + 1);
+          pushCombatLog(logs, {
+            turn,
+            timeMs: currentTimeMs,
+            isPlayer: true,
+            message: `【靈力湧動】術式餘波回流，下一輪法術威能提升，當前 ${mageFoundationStacks} 層。`,
+            damage: 0,
+            playerHp,
+            playerMaxHp: player.maxHp,
+            enemyHp,
+            enemyMaxHp: enemy.maxHp,
+          });
+        }
 
-        const playerSideStatuses = normalizedStatuses.filter(
-          (status) =>
-            activeSkill!.targetType === "self" ||
-            status.kind === "shield" ||
-            status.kind === "reflect" ||
-            status.kind === "critBoost"
-        );
-        const enemySideStatuses = normalizedStatuses.filter(
-          (status) => !playerSideStatuses.includes(status)
-        );
+        const { createdStatuses, playerSideStatuses, enemySideStatuses } =
+          resolveNormalizedSkillStatuses(
+            activeSkill!,
+            activeSkill!.targetType === "self" ? player.maxHp : enemy.maxHp,
+            currentTimeMs
+          );
 
         if (playerSideStatuses.length > 0) {
           playerStatuses.push(...playerSideStatuses);
@@ -2252,9 +2528,9 @@ export const runAutoBattle = (
         }
       }
 
-      const skillExecutionTimeMs = getSkillExecutionTimeMs(
-        skillReady ? activeSkill! : undefined
-      );
+      const skillExecutionTimeMs =
+        activeSkillTimelineProfile?.executionTimeMs ??
+        getSkillExecutionTimeMs(skillReady ? activeSkill! : undefined);
       playerNextActionMs =
         currentTimeMs + Math.max(playerAttackIntervalMs, skillExecutionTimeMs);
       if (enemyHp <= 0) break;
@@ -2272,6 +2548,21 @@ export const runAutoBattle = (
           enemyMaxHp: enemy.maxHp,
         });
         enemyNextActionMs = currentTimeMs + enemyAttackIntervalMs;
+        if (hasSwordHeartPassive && !playerDamagedSinceSwordHeartWindow && swordHeartStacks < 5) {
+          swordHeartStacks += 1;
+          pushCombatLog(logs, {
+            turn,
+            timeMs: currentTimeMs,
+            isPlayer: true,
+            message: `【養劍術】敵勢受阻，劍勢提升至第 ${swordHeartStacks} 層。`,
+            damage: 0,
+            playerHp,
+            playerMaxHp: player.maxHp,
+            enemyHp,
+            enemyMaxHp: enemy.maxHp,
+          });
+        }
+        playerDamagedSinceSwordHeartWindow = false;
         turn++;
         continue;
       }
@@ -2279,6 +2570,9 @@ export const runAutoBattle = (
       const enemyContext = getEnemyAttackContext(enemy, player);
       const enemySpecialReady =
         enemy.specialAttack && currentTimeMs >= enemySpecialReadyAtMs;
+      const enemySpecialTimelineProfile = enemySpecialReady
+        ? getEnemySpecialTimelineProfile(enemy)
+        : undefined;
       let enemyPower = enemyContext.power;
       let playerDefense =
         enemyContext.defense * getArmorBreakMultiplier(playerStatuses, currentTimeMs);
@@ -2293,7 +2587,7 @@ export const runAutoBattle = (
 
       if (enemySpecialReady && enemy.specialAttack?.damageMultiplier) {
         enemyPower *= enemy.specialAttack.damageMultiplier;
-        enemyPower *= getEnemyAreaDamageModifier(enemy.specialAttack);
+        enemyPower *= enemySpecialTimelineProfile?.areaDamageModifier ?? 1;
       }
 
       const enemyCrit =
@@ -2420,6 +2714,9 @@ export const runAutoBattle = (
         }
 
       playerHp = Math.max(0, playerHp - enemyDamage);
+      if (enemyDamage > 0) {
+        playerDamagedSinceSwordHeartWindow = true;
+      }
       if (
         hasBodyTribulationPassive &&
         enemyDamage > 0 &&
@@ -2516,7 +2813,7 @@ export const runAutoBattle = (
           timeMs: currentTimeMs,
           isPlayer: false,
           message: enemySpecialReady && enemy.specialAttack
-            ? `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 施展【${enemy.specialAttack.name}】${enemy.specialAttack.areaShape && enemy.specialAttack.areaShape !== "single" && enemy.specialAttack.areaShape !== "self" ? "，術式波及周遭，" : "，"}${isBlock ? "被你格擋後，" : ""}造成 <dmg>${enemyDamage}</dmg> 點傷害！`
+            ? `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 施展【${enemy.specialAttack.name}】${enemySpecialTimelineProfile && enemySpecialTimelineProfile.areaShape !== "single" && enemySpecialTimelineProfile.areaShape !== "self" ? "，術式波及周遭，" : "，"}${isBlock ? "被你格擋後，" : ""}造成 <dmg>${enemyDamage}</dmg> 點傷害！`
             : `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 反擊，${isBlock ? "被你格擋後，" : ""}造成 <dmg>${enemyDamage}</dmg> 點傷害！`,
           damage: enemyDamage,
           playerHp,
@@ -2526,16 +2823,11 @@ export const runAutoBattle = (
         });
 
         if (enemySpecialReady && enemy.specialAttack) {
-          const enemyStatusesCreated = buildStatusesFromEnemySpecial(
+          const enemyStatusesCreated = resolveNormalizedEnemySpecialStatuses(
             enemy.specialAttack,
-            player.maxHp
-          ).map((status) => ({
-            ...status,
-            expiresAtMs: currentTimeMs + status.expiresAtMs,
-            nextTickAtMs: status.nextTickAtMs
-              ? currentTimeMs + status.nextTickAtMs
-              : undefined,
-          }));
+            player.maxHp,
+            currentTimeMs
+          );
 
           const filteredEnemyStatuses = enemyStatusesCreated.filter((status) => {
             if (hasMageTribulationPassive && status.kind === "incapacitate") {
@@ -2657,12 +2949,31 @@ export const runAutoBattle = (
         }
       }
 
+      if (hasSwordHeartPassive && !playerDamagedSinceSwordHeartWindow && swordHeartStacks < 5) {
+        swordHeartStacks += 1;
+        pushCombatLog(logs, {
+          turn,
+          timeMs: currentTimeMs,
+          isPlayer: true,
+          message: `【養劍術】劍勢沉澱更深，攻勢提升至第 ${swordHeartStacks} 層。`,
+          damage: 0,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+        });
+      }
+      playerDamagedSinceSwordHeartWindow = false;
+
       if (enemySpecialReady && enemy.specialAttack) {
-        const specialCooldown = enemy.specialAttack.cooldownSeconds ?? 4;
+        const specialCooldown =
+          enemySpecialTimelineProfile?.cooldownSeconds ??
+          enemy.specialAttack.cooldownSeconds ??
+          4;
         enemySpecialReadyAtMs =
           currentTimeMs +
           Math.floor(specialCooldown * 1000) +
-          (enemy.specialAttack.castTimeMs ?? 0);
+          (enemySpecialTimelineProfile?.executionTimeMs ?? 0);
       }
       enemyNextActionMs = currentTimeMs + enemyAttackIntervalMs;
     }

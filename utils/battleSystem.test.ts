@@ -8,7 +8,14 @@ import {
   SpiritRootId,
   ElementType,
 } from "../types";
-import { calculatePlayerStats, resolvePlayerWorldStrike, runAutoBattle } from "./battleSystem";
+import {
+  calculatePlayerStats,
+  getEnemySpecialTimelineProfile,
+  getSkillTimelineProfile,
+  resolveEnemyWorldStrike,
+  resolvePlayerWorldStrike,
+  runAutoBattle,
+} from "./battleSystem";
 import { COMMON_ENEMIES } from "../data/enemies/common";
 import { BOSS_ENEMIES } from "../data/enemies/boss";
 import { ITEMS } from "../data/items";
@@ -163,6 +170,86 @@ afterEach(() => {
 });
 
 describe("battle system balance", () => {
+  it("shares the same timeline profile metadata for formal skills used by world and auto battle", () => {
+    const profile = getSkillTimelineProfile(getSkill("m_tr_active"));
+
+    expect(profile.cooldownSeconds).toBeGreaterThan(0);
+    expect(profile.cooldownMs).toBe(profile.cooldownSeconds * 1000);
+    expect(profile.executionTimeMs).toBeGreaterThan(0);
+    expect(profile.areaShape).toBe("circle");
+    expect(profile.maxTargets).toBeGreaterThan(1);
+    expect(profile.areaDamageModifier).toBeGreaterThan(0);
+  });
+
+  it("shares enemy special timeline metadata between world strikes and timeline combat", () => {
+    const profile = getEnemySpecialTimelineProfile(BOSS_ENEMIES.m180_b1);
+
+    expect(profile.cooldownSeconds).toBeGreaterThan(0);
+    expect(profile.cooldownMs).toBe(profile.cooldownSeconds * 1000);
+    expect(profile.executionTimeMs).toBeGreaterThan(0);
+    expect(profile.areaShape).toBeDefined();
+    expect(profile.areaDamageModifier).toBeGreaterThan(0);
+  });
+
+  it("keeps formal skill world-strike statuses on the same shared split logic as timeline combat", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 120,
+        rootBone: 140,
+        insight: 120,
+        comprehension: 80,
+        fortune: 40,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_METAL_EARTH,
+      buildEquipmentStats(SPIRIT_SEVERING_SWORD_SET),
+      "劍修",
+      ProfessionType.Sword,
+      ["s_tr_active"]
+    );
+
+    const strike = resolvePlayerWorldStrike(
+      sword,
+      BOSS_ENEMIES.m180_b1,
+      getSkill("s_tr_active")
+    );
+
+    expect(strike.enemyStatusNames).toContain("誅仙劍陣");
+    expect(strike.enemyStatusNames).toContain("燃燒");
+    expect(strike.playerStatusNames).not.toContain("誅仙劍陣");
+  });
+
+  it("keeps enemy world-strike statuses and cooldown on the same shared special resolver", () => {
+    fixedRandom.mockReturnValue(0.1);
+
+    const player = calculatePlayerStats(
+      {
+        physique: 120,
+        rootBone: 120,
+        insight: 120,
+        comprehension: 70,
+        fortune: 40,
+        charm: 10,
+      },
+      MajorRealm.SpiritSevering,
+      SpiritRootId.HEAVENLY_WATER,
+      buildEquipmentStats(SPIRIT_SEVERING_BODY_SET),
+      "體修",
+      ProfessionType.Body,
+      ["b_sf_passive"]
+    );
+
+    const strike = resolveEnemyWorldStrike(BOSS_ENEMIES.m180_b1, player, true);
+    const profile = getEnemySpecialTimelineProfile(BOSS_ENEMIES.m180_b1);
+
+    expect(strike.specialCooldownMs).toBe(profile.cooldownMs);
+    expect(strike.executionTimeMs).toBe(profile.executionTimeMs);
+    expect(strike.statusNames.length).toBeGreaterThan(0);
+  });
+
   it("lets a geared mortal player defeat entry common mobs", () => {
     fixedRandom.mockReturnValue(0.5);
 
@@ -1419,6 +1506,97 @@ describe("battle system balance", () => {
     expect(runAutoBattle(mage, BOSS_ENEMIES.m52_b1).won).toBe(true);
   });
 
+  it("lets formal core sword passive inherit the nurturing sword-stack effect", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const baseSword = calculatePlayerStats(
+      {
+        physique: 43,
+        rootBone: 43,
+        insight: 43,
+        comprehension: 16,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.Foundation,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        ...buildEquipmentStats(FOUNDATION_SWORD_SET),
+        dodge: 100,
+      },
+      "築基劍修",
+      ProfessionType.Sword,
+      ["s_q_active", "s_q_passive", "s_f_active"]
+    );
+
+    const nurturedSword = calculatePlayerStats(
+      {
+        physique: 43,
+        rootBone: 43,
+        insight: 43,
+        comprehension: 16,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.Foundation,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        ...buildEquipmentStats(FOUNDATION_SWORD_SET),
+        dodge: 100,
+      },
+      "築基劍修",
+      ProfessionType.Sword,
+      ["s_q_active", "s_q_passive", "s_f_active", "s_g_passive"]
+    );
+
+    const trainingDummy = {
+      ...COMMON_ENEMIES.m1_c1,
+      hp: 40000,
+      attack: 1,
+      defense: 260,
+    };
+
+    const baseResult = runAutoBattle(baseSword, trainingDummy);
+    const nurturedResult = runAutoBattle(nurturedSword, trainingDummy);
+
+    expect(nurturedResult.logs.some((log) => log.message.includes("養劍術"))).toBe(true);
+    expect(baseResult.logs.some((log) => log.message.includes("養劍術"))).toBe(false);
+  });
+
+  it("lets golden-core sword passive reset flowing-sword cooldown on crit", () => {
+    fixedRandom.mockReturnValue(0);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 48,
+        rootBone: 52,
+        insight: 52,
+        comprehension: 20,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.GoldenCore,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        ...buildEquipmentStats(FOUNDATION_SWORD_SET),
+        crit: 100,
+      },
+      "金丹劍修",
+      ProfessionType.Sword,
+      ["s_f_active", "s_g_passive"]
+    );
+
+    const result = runAutoBattle(sword, {
+      ...COMMON_ENEMIES.m1_c1,
+      hp: 8000,
+      defense: 120,
+    });
+
+    expect(
+      result.logs.some((log) => log.message.includes("劍心通明"))
+    ).toBe(true);
+  });
+
   it("applies enemy elemental weaknesses and resistances to player strikes", () => {
     fixedRandom.mockReturnValue(0.5);
 
@@ -1899,6 +2077,94 @@ describe("battle system balance", () => {
     expect(strike.enemyStatusNames).toContain("燃燒");
   });
 
+  it("lets formal core sword active inherit the sword-qi resonance burst in world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const baseSword = calculatePlayerStats(
+      {
+        physique: 98,
+        rootBone: 118,
+        insight: 80,
+        comprehension: 28,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 1700,
+        defense: 360,
+        hp: 5600,
+      },
+      "大道劍君",
+      ProfessionType.Sword,
+      ["s_tr_active"]
+    );
+
+    const resonantSword = calculatePlayerStats(
+      {
+        physique: 98,
+        rootBone: 118,
+        insight: 80,
+        comprehension: 28,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 1700,
+        defense: 360,
+        hp: 5600,
+      },
+      "大道劍君",
+      ProfessionType.Sword,
+      ["s_f_active", "s_tr_active"]
+    );
+
+    const enemy = COMMON_ENEMIES.m150_c1;
+    const baseStrike = resolvePlayerWorldStrike(baseSword, enemy, getSkill("s_tr_active"));
+    const resonantStrike = resolvePlayerWorldStrike(
+      resonantSword,
+      enemy,
+      getSkill("s_tr_active")
+    );
+
+    expect(resonantStrike.damage).toBeGreaterThan(baseStrike.damage);
+    expect(resonantStrike.playerStatusNames).toContain("萬劍歸一");
+  });
+
+  it("lets formal core sword active inherit the sword-qi resonance burst", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const resonantSword = calculatePlayerStats(
+      {
+        physique: 98,
+        rootBone: 118,
+        insight: 80,
+        comprehension: 28,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 1700,
+        defense: 360,
+        hp: 5600,
+      },
+      "大道劍君",
+      ProfessionType.Sword,
+      ["s_f_active", "s_tr_active"]
+    );
+
+    const result = runAutoBattle(resonantSword, COMMON_ENEMIES.m150_c1);
+
+    expect(
+      result.logs.some((log) => log.message.includes("萬劍歸一"))
+    ).toBe(true);
+  });
+
   it("lets formal core mage active inherit the palm-thunder paralyze in world strikes", () => {
     fixedRandom.mockReturnValue(0.5);
 
@@ -2261,6 +2527,57 @@ describe("battle system balance", () => {
 
     const baseStrike = resolvePlayerWorldStrike(baseSword, wallEnemy);
     const formalStrike = resolvePlayerWorldStrike(formalSword, wallEnemy);
+
+    expect(formalStrike.damage).toBeGreaterThan(baseStrike.damage);
+  });
+
+  it("lets formal core sword passive inherit the void-refining armor-pierce proc", () => {
+    const enemy = {
+      ...BOSS_ENEMIES.m180_b1,
+      defense: 900,
+    };
+
+    const baseSword = calculatePlayerStats(
+      {
+        physique: 150,
+        rootBone: 170,
+        insight: 120,
+        comprehension: 80,
+        fortune: 40,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_FIRE_METAL,
+      buildEquipmentStats(SPIRIT_SEVERING_SWORD_SET),
+      "基礎劍修",
+      ProfessionType.Sword,
+      []
+    );
+
+    const formalSword = calculatePlayerStats(
+      {
+        physique: 150,
+        rootBone: 170,
+        insight: 120,
+        comprehension: 80,
+        fortune: 40,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_FIRE_METAL,
+      buildEquipmentStats(SPIRIT_SEVERING_SWORD_SET),
+      "正式劍修",
+      ProfessionType.Sword,
+      ["s_tr_passive"]
+    );
+
+    fixedRandom.mockReset();
+    fixedRandom.mockReturnValueOnce(0.99);
+    const baseStrike = resolvePlayerWorldStrike(baseSword, enemy);
+
+    fixedRandom.mockReset();
+    fixedRandom.mockReturnValueOnce(0.05).mockReturnValueOnce(0.99);
+    const formalStrike = resolvePlayerWorldStrike(formalSword, enemy);
 
     expect(formalStrike.damage).toBeGreaterThan(baseStrike.damage);
   });

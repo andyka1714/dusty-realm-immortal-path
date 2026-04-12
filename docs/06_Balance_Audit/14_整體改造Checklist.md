@@ -150,12 +150,17 @@
 - [x] 部分 retired emperor 主動 / 被動效果已開始直接合流到 formal core 戰鬥分支
 - [x] 更多 retired high-realm 主動效果已開始直接合流到 formal core 戰鬥分支
 - [x] `m_bi_active`、`b_tr_active` 已從 pending-retirement 進一步推進到 battle-absorbed 戰鬥分支
+- [x] `s_bi_active` 已開始把劍氣共鳴爆發承接進 `s_tr_active`，往 battle-absorbed 戰鬥分支推進
 - [x] 第一批「已被 formal core 戰鬥分支吸收、可優先刪整」的 retired 主動技能清單已正式程式化
 - [x] 第一批 retirement-ready retired 主動技能查詢層已建立，可直接支援後續資料本體刪整
 - [x] 第一批 retirement-ready retired 主動技能已從原境界技能檔抽離，改為集中 alias 定義
 - [x] 第一批 battle-absorbed retired 被動技能已從原境界技能檔抽離，改為集中 alias 定義
 - [x] retired 技能已正式切出 pending-retirement 查詢層，作為下一輪本體收束名單
-- [x] 第一批 pending-retirement retired 被動技能已從原境界技能檔抽離，改為集中 alias 定義
+- [x] 原先 pending-retirement retired 被動技能已全部併回正式 retired passive alias 層，不再獨立維護資料檔
+- [x] 更多已落地的 pending-retirement retired 被動技能已正式推進到 battle-absorbed 分類，降低後續本體刪整阻力
+- [x] `s_vr_passive` 已正式承接進 formal core 劍修被動分支，從 pending-retirement 推進到 battle-absorbed
+- [x] `s_bi_active` 已正式承接進 formal core 劍修 burst 分支，從 pending-retirement 推進到 battle-absorbed
+- [x] `s_f_passive` 已正式承接進 formal core 劍修被動分支，從 pending-retirement 推進到 battle-absorbed
 - [ ] 刪除或合併重複功能技能
 - [x] 補齊每職業保底技能、功能技能、爆發技能、被動技能的最終名單
 - [x] 補齊每個技能的最終來源層級
@@ -214,6 +219,8 @@
 - [x] AOE `areaShape / areaRadius / maxTargets` 正式進入戰鬥
 - [x] 狀態持續時間正式進入時間軸
 - [x] 玩家地圖內出手已開始吃 `executionTimeMs`，命中與結算不再發生在按鍵瞬間
+- [x] 世界戰鬥與 `runAutoBattle()` 已開始共用技能 / 怪物特招的 timeline metadata（execution / AOE / projectile / cooldown 基準）
+- [x] 世界戰鬥與 `runAutoBattle()` 已開始共用技能 / 怪物特招的 status resolver、時間正規化與 player/enemy 分側規則
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---
@@ -245,6 +252,7 @@
 - [x] `armorBreak` 正式進入防禦削弱
 - [x] 開始把部分技能與被動改成逐招專屬效果
 - [x] `s_n_passive` 護體劍罡：致命傷害抵擋 + 反震（每戰 1 次）
+- [x] `s_g_passive` 劍心通明：暴擊觸發 `s_f_active` 冷卻重置
 - [x] `b_n_passive` 滴血重生：依最大生命與已損生命持續回血
 - [x] `m_n_passive` 法力源泉：持續回靈 + 高靈力增傷
 - [x] `s_sf_passive` 劍意化形：普攻雙段追擊
