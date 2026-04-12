@@ -150,6 +150,7 @@
   - `b_ie_active`：掌中神國會附加神國抽離與最大生命吸收
   - `m_ie_active`：一念花開會把敵方優勢逆轉為多重 debuff
 - `enemy world strike` 的承傷 / 生存型被動觸發計算，已開始抽成共用 helper，避免 `resolveEnemyWorldStrike()` 內重複堆疊同一批減傷與保命判定
+- 時間軸戰鬥內的致命保命分支，也已開始抽成共用 helper，集中處理 `護體劍罡`、`滴血重生（真）`、`不死不滅` 這批生死線特例
 - `StatsPanel / ShopPanel` 的資訊浮層也已進一步對齊 `GameTooltip` 的標題、內文、註腳結構，往同一套遊戲化資訊殼層收斂
 - `s_tr_passive` 在地圖 world strike 也已正式對齊時間軸戰鬥：低血量時會直接進入 `向死而生` 狀態，強制暴擊並同步抬升輸出
 - 戰鬥 overlay 已補上：

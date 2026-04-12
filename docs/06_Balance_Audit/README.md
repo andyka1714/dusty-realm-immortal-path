@@ -164,6 +164,7 @@
 - `萬劫不滅`、`雷劫煉心` 這批高境界承傷 / 生存被動，也已開始補齊 enemy world strike 狀態回報
 - `護體劍罡`、`滴血重生`、`不死不滅` 這批致命生存型被動，也已開始補齊 enemy world strike 狀態回報
 - `enemy world strike` 這條線的減傷 / 保命被動判定，也已開始抽成共用 trigger helper，往單一 battle resolver 再收一層
+- `runAutoBattle()` 內的致命保命流程，也已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`
 - `StatsPanel / ShopPanel` 的主要資訊浮層已進一步收進 `GameTooltip` 的統一標題 / 註腳結構，UI 殼層更接近單一語言
 - `Adventure` 的區域地圖情報與 `Compendium` 的額外掉落來源浮層，也已開始對齊到同一套 `GameTooltip` 結構
 - `GamePanel / Modal` 這條 UI 殼層也已開始對齊 `eyebrow + title + icon` 結構，主頁面板與互動視窗不再分裂成兩套語言

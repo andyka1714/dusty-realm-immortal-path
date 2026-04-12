@@ -1515,6 +1515,142 @@ const logReflectRetaliation = ({
   });
 };
 
+const applySwordDeathWardTrigger = ({
+  shouldTrigger,
+  logs,
+  turn,
+  timeMs,
+  preventedDamage,
+  playerHp,
+  playerMaxHp,
+  playerMp,
+  enemyHp,
+  enemyMaxHp,
+  enemy,
+}: {
+  shouldTrigger: boolean;
+  logs: CombatLog[];
+  turn: number;
+  timeMs: number;
+  preventedDamage: number;
+  playerHp: number;
+  playerMaxHp: number;
+  playerMp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  enemy: Enemy;
+}) => {
+  if (!shouldTrigger) {
+    return {
+      playerMp,
+      enemyHp,
+      enemyDamage: undefined as number | undefined,
+      triggered: false,
+    };
+  }
+
+  const prevented = preventedDamage;
+  const reflected = Math.max(1, prevented);
+  const nextEnemyHp = Math.max(0, enemyHp - reflected);
+
+  pushCombatLog(logs, {
+    turn,
+    timeMs,
+    isPlayer: true,
+    message: `【護體劍罡】於生死一線間展開，你耗盡靈力擋下致命一擊，並反震 <enemy rank="${enemy.rank}">${enemy.name}</enemy> <dmg>${reflected}</dmg> 點傷害！`,
+    damage: reflected,
+    playerHp,
+    playerMaxHp,
+    enemyHp: nextEnemyHp,
+    enemyMaxHp,
+  });
+
+  return {
+    playerMp: 0,
+    enemyHp: nextEnemyHp,
+    enemyDamage: 0,
+    triggered: true,
+  };
+};
+
+const applyFatalSurvivalPassives = ({
+  logs,
+  turn,
+  timeMs,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+  playerStatuses,
+  bodyRebirthTrueAvailable,
+  bodyEmperorAvailable,
+}: {
+  logs: CombatLog[];
+  turn: number;
+  timeMs: number;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  playerStatuses: CombatStatus[];
+  bodyRebirthTrueAvailable: boolean;
+  bodyEmperorAvailable: boolean;
+}) => {
+  let nextPlayerHp = playerHp;
+  let nextPlayerStatuses = playerStatuses;
+  let bodyRebirthTrueTriggered = false;
+  let bodyEmperorTriggered = false;
+
+  if (bodyRebirthTrueAvailable && nextPlayerHp <= 0) {
+    bodyRebirthTrueTriggered = true;
+    nextPlayerHp = Math.floor(playerMaxHp * 0.5);
+    nextPlayerStatuses = [
+      ...nextPlayerStatuses,
+      {
+        id: "true_rebirth_guard",
+        name: "滴血重生",
+        kind: "shield",
+        value: 999999,
+        expiresAtMs: timeMs + 3000,
+      },
+    ];
+    pushCombatLog(logs, {
+      turn,
+      timeMs,
+      isPlayer: true,
+      message: `【滴血重生（真）】逆轉死劫，你恢復了大量氣血並短暫無敵。`,
+      damage: 0,
+      playerHp: nextPlayerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  if (bodyEmperorAvailable && nextPlayerHp <= 0) {
+    bodyEmperorTriggered = true;
+    nextPlayerHp = 1;
+    pushCombatLog(logs, {
+      turn,
+      timeMs,
+      isPlayer: true,
+      message: `【不死不滅】強行續住最後一線生機。`,
+      damage: 0,
+      playerHp: nextPlayerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  return {
+    playerHp: nextPlayerHp,
+    playerStatuses: nextPlayerStatuses,
+    bodyRebirthTrueTriggered,
+    bodyEmperorTriggered,
+  };
+};
+
 const getIncomingDefensivePassiveMessages = (options: {
   bodyFoundationStacks: number;
   copperSkinReduced: number;
@@ -3471,23 +3607,23 @@ export const runAutoBattle = (
           enemyDamage >= playerHp &&
           playerMp > 0
         ) {
-          swordDeathWardUsed = true;
-          const prevented = enemyDamage;
-          const reflected = Math.max(1, prevented);
-          playerMp = 0;
-          enemyDamage = 0;
-          enemyHp = Math.max(0, enemyHp - reflected);
-          pushCombatLog(logs, {
+          const swordDeathWardResult = applySwordDeathWardTrigger({
+            shouldTrigger: true,
+            logs,
             turn,
             timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【護體劍罡】於生死一線間展開，你耗盡靈力擋下致命一擊，並反震 <enemy rank="${enemy.rank}">${enemy.name}</enemy> <dmg>${reflected}</dmg> 點傷害！`,
-            damage: reflected,
+            preventedDamage: enemyDamage,
             playerHp,
             playerMaxHp: player.maxHp,
+            playerMp,
             enemyHp,
             enemyMaxHp: enemy.maxHp,
+            enemy,
           });
+          swordDeathWardUsed = swordDeathWardResult.triggered;
+          playerMp = swordDeathWardResult.playerMp;
+          enemyDamage = swordDeathWardResult.enemyDamage ?? enemyDamage;
+          enemyHp = swordDeathWardResult.enemyHp;
         }
 
       playerHp = Math.max(0, playerHp - enemyDamage);
@@ -3547,42 +3683,23 @@ export const runAutoBattle = (
         });
       }
 
-        if (hasBodyRebirthTruePassive && !bodyRebirthTrueUsed && playerHp <= 0) {
+        const fatalSurvivalResult = applyFatalSurvivalPassives({
+          logs,
+          turn,
+          timeMs: currentTimeMs,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+          playerStatuses,
+          bodyRebirthTrueAvailable:
+            hasBodyRebirthTruePassive && !bodyRebirthTrueUsed,
+          bodyEmperorAvailable: hasBodyEmperorPassive,
+        });
+        playerHp = fatalSurvivalResult.playerHp;
+        playerStatuses = fatalSurvivalResult.playerStatuses;
+        if (fatalSurvivalResult.bodyRebirthTrueTriggered) {
           bodyRebirthTrueUsed = true;
-          playerHp = Math.floor(player.maxHp * 0.5);
-          playerStatuses.push({
-            id: "true_rebirth_guard",
-            name: "滴血重生",
-            kind: "shield",
-            value: 999999,
-            expiresAtMs: currentTimeMs + 3000,
-          });
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【滴血重生（真）】逆轉死劫，你恢復了大量氣血並短暫無敵。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
-
-        if (hasBodyEmperorPassive && playerHp <= 0) {
-          playerHp = 1;
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【不死不滅】強行續住最後一線生機。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
         }
 
         pushCombatLog(logs, {

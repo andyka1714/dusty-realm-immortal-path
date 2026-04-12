@@ -1724,6 +1724,37 @@ describe("battle system balance", () => {
     expect(result.logs.some((log) => log.message.includes("滴血重生（真）"))).toBe(true);
   });
 
+  it("lets body emperor passive keep the player at one hp in timeline combat", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const player = calculatePlayerStats(
+      {
+        physique: 96,
+        rootBone: 82,
+        insight: 68,
+        comprehension: 24,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.ImmortalEmperor,
+      SpiritRootId.MIXED_FIVE,
+      {
+        attack: 920,
+        defense: 260,
+        speed: 10,
+        hp: 1400,
+      },
+      "不滅武皇",
+      ProfessionType.Body,
+      ["b_ie_passive"]
+    );
+
+    const result = runAutoBattle(player, BOSS_ENEMIES.m180_b1);
+    expect(result.logs.some((log) => log.message.includes("不死不滅"))).toBe(true);
+    const emperorLog = result.logs.find((log) => log.message.includes("不死不滅"));
+    expect(emperorLog?.playerHp).toBe(1);
+  });
+
   it("lets immortal mage passive occasionally echo a second cast", () => {
     fixedRandom.mockReturnValue(0.2);
 

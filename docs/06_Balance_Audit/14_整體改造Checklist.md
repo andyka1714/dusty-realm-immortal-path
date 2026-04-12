@@ -308,6 +308,7 @@
 - [x] `m_n_passive` / `m_f_passive` / `m_bi_passive` 已開始補齊 world strike 狀態回報，正式標出 `法力源泉` / `靈力湧動` / `五氣朝元`
 - [x] `s_ie_passive` 已開始補齊 player world strike 對齊，正式標出 `萬法皆空`
 - [x] enemy world strike 的減傷 / 保命被動判定已開始抽成共用 trigger helper，減少 `resolveEnemyWorldStrike()` 內的重複流程
+- [x] timeline combat 的致命保命流程已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`
 - [x] `StatsPanel / ShopPanel` 的主要資訊浮層已進一步對齊 `GameTooltip` 的標題 / 註腳結構
 - [x] `Adventure` 區域地圖情報與 `Compendium` 額外掉落來源浮層，已開始對齊同一套 `GameTooltip` 標題 / 註腳結構
 - [x] `GamePanel / Modal` 已開始對齊 `eyebrow + title + icon` 的正式殼層語言，主頁面板、商店、任務、突破、背包確認與地圖總覽不再各自為政
