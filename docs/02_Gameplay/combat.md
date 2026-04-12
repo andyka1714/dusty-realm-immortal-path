@@ -97,7 +97,7 @@
   - `b_f_passive`：依已損失氣血逐層抬升攻勢與護體
   - `b_g_passive`：僅在近戰攻擊命中時反震，並於戰鬥開始就顯示護體已展開
   - `s_g_passive`：暴擊可重置 `s_f_active` 冷卻
-  - `m_f_passive`：施法後疊加後續術式增傷，且不再誤接進共用冷卻縮減
+  - `m_f_passive`：施法後疊加後續術式增傷，且 world strike 已會正式回報 `靈力湧動`
   - `m_g_passive`：開場元素護盾，可完整抵擋一次敵方術式傷害
   - `m_sf_passive`：技能冷卻縮減，並會在戰鬥事件中明確回報冷卻縮短
   - `s_n_active`：可附加流血
@@ -115,6 +115,7 @@
   - `b_vr_passive`：定時震散 1 個負面狀態
   - `m_vr_passive`：部分來襲傷害轉入虛空
   - `m_ma_passive`：法修主動術式額外增傷
+  - `m_bi_passive`：world strike 已會正式回報 `五氣朝元`
   - `s_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `劍道獨尊` 的暴擊強化
   - `m_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `言出法隨` 的術式增幅
   - `b_sf_passive` / `m_vr_passive`：在 enemy world strike 也會正式回報 `肉身成聖` / `空間法則`，不再只在時間軸戰鬥內有感

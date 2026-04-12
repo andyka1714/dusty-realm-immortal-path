@@ -296,6 +296,7 @@
 - [x] `b_q_passive` 銅皮鐵骨：已補上明確減傷分支與戰鬥事件
 - [x] `m_q_passive` 靈潮循環：施法後回復靈力，已補上專屬戰鬥事件
 - [x] `m_f_passive` 靈力湧動：維持專屬術式蓄勢效果，不再誤接進共用冷卻縮減
+- [x] `m_f_passive` / `m_bi_passive` 已補上 world strike 狀態回報，正式標出 `靈力湧動` / `五氣朝元`
 - [x] `s_ma_passive` / `m_ma_passive` 已補上 world strike 對齊與明確戰鬥事件，不再只有時間軸內核默默生效
 - [x] `b_sf_passive` / `m_vr_passive` 已補上 enemy world strike 對齊，正式回報 `肉身成聖` / `空間法則`
 - [x] 道途內的突破按鈕提示也已切到 `GameHintBubble`，再少一個原生 `title` 提示

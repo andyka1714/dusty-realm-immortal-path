@@ -549,6 +549,14 @@ const getPlayerWorldPassiveStatusNames = (options: {
     statusNames.push("靈潮循環");
   }
 
+  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageFoundationPassive) {
+    statusNames.push("靈力湧動");
+  }
+
+  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageFusionPassive) {
+    statusNames.push("五氣朝元");
+  }
+
   if (
     passiveFlags.hasSwordQiPassive &&
     isCrit &&
