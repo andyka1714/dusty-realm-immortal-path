@@ -370,6 +370,7 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
                 return (
                     <GameTooltip
+                        eyebrow="REGION INTEL"
                         title={map.name}
                         footer={`${REALM_NAMES[map.minRealm]} · 區域地圖情報`}
                         widthClassName="w-80 max-w-[calc(100vw-2rem)]"

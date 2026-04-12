@@ -311,6 +311,7 @@
 - [x] timeline combat 的致命保命流程已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`
 - [x] `StatsPanel / ShopPanel` 的主要資訊浮層已進一步對齊 `GameTooltip` 的標題 / 註腳結構
 - [x] `Adventure` 區域地圖情報與 `Compendium` 額外掉落來源浮層，已開始對齊同一套 `GameTooltip` 標題 / 註腳結構
+- [x] `Stats / Dashboard / Shop / 地圖 / 圖鑑` 這批核心浮層，已開始補齊 `GameTooltip` 的 `eyebrow`，往完整 `eyebrow + title + body + footer` 語言收口
 - [x] `GamePanel / Modal` 已開始對齊 `eyebrow + title + icon` 的正式殼層語言，主頁面板、商店、任務、突破、背包確認與地圖總覽不再各自為政
 - [x] `m_im_passive` / `m_ie_passive` 已開始補齊 world strike 狀態回報，正式標出 `仙法通神` / `萬法歸宗`
 - [x] 多個已完成專屬接線的 passive，已開始移除手寫 generic `passiveEffectTags`，降低資料層誤導

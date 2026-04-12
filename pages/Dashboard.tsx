@@ -424,6 +424,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
 
       {tooltip && (
         <GameTooltip
+          eyebrow="CULTIVATION NOTES"
           title={tooltip.title}
           widthClassName={tooltip.widthClassName}
           className="animate-in fade-in duration-150 zoom-in-95"

@@ -250,6 +250,7 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
       {/* FIXED TOOLTIP RENDERER */}
       {tooltip && (
         <GameTooltip
+          eyebrow="STAT DETAIL"
           title={tooltip.label}
           titleClassName={tooltip.highlightColor || "text-amber-500"}
           footer={tooltip.subDesc}

@@ -302,6 +302,7 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
             {/* Hover Tooltip */}
             {hoveredItem && ITEMS[hoveredItem.itemId] && (
                 <GameTooltip
+                    eyebrow="MARKET GOODS"
                     title={ITEMS[hoveredItem.itemId].name}
                     titleClassName={getQualityTextColor(ITEMS[hoveredItem.itemId].quality)}
                     footer={

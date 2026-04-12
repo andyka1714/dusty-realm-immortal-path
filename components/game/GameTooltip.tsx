@@ -2,6 +2,7 @@ import React from "react";
 import clsx from "clsx";
 
 interface GameTooltipProps {
+  eyebrow?: React.ReactNode;
   title?: React.ReactNode;
   titleClassName?: string;
   footer?: React.ReactNode;
@@ -12,6 +13,7 @@ interface GameTooltipProps {
 }
 
 export const GameTooltip: React.FC<GameTooltipProps> = ({
+  eyebrow,
   title,
   titleClassName,
   footer,
@@ -38,6 +40,11 @@ export const GameTooltip: React.FC<GameTooltipProps> = ({
     </div>
 
     <div className="relative z-10">
+      {eyebrow && (
+        <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.28em] text-stone-500">
+          {eyebrow}
+        </div>
+      )}
       {title && (
         <div
           className={clsx(

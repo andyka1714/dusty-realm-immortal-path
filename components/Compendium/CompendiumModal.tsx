@@ -173,6 +173,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
         {/* Tooltip Portal (Quick implementation inside) */}
         {tooltip && tooltip.visible && (
           <GameTooltip
+            eyebrow="DROP INTEL"
             title={tooltip.title}
             footer={tooltip.footer}
             widthClassName="max-w-xs"
