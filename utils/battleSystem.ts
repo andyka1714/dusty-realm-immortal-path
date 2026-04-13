@@ -2736,6 +2736,131 @@ const getCombatOpeningMessages = (options: {
   return messages;
 };
 
+const initializeCombatEncounter = ({
+  player,
+  enemy,
+  logs,
+  passiveFlags,
+  restriction,
+  elementalAffinity,
+  playerHp,
+  enemyHp,
+}: {
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  logs: CombatLog[];
+  passiveFlags: PlayerPassiveFlags;
+  restriction: { isEffective: boolean; isResisted: boolean };
+  elementalAffinity: { multiplier: number; reason?: "resistance" | "weakness" };
+  playerHp: number;
+  enemyHp: number;
+}) => {
+  const initialPassiveStatuses = getInitialPassiveStatuses({
+    hasReflectPassive: passiveFlags.hasReflectPassive,
+    hasInitialShieldPassive: passiveFlags.hasInitialShieldPassive,
+  });
+
+  getCombatOpeningMessages({
+    player,
+    enemy,
+    restriction,
+    elementalAffinity,
+    hasReflectPassive: passiveFlags.hasReflectPassive,
+    hasInitialShieldPassive: passiveFlags.hasInitialShieldPassive,
+    hasSwordGoldenPassive: passiveFlags.hasSwordGoldenPassive,
+    hasSwordDeathWardPassive: passiveFlags.hasSwordDeathWardPassive,
+    hasSwordQiPassive: passiveFlags.hasSwordQiPassive,
+    hasBodyQiPassive: passiveFlags.hasBodyQiPassive,
+    hasBodyFoundationPassive: passiveFlags.hasBodyFoundationPassive,
+    hasBodyRebirthPassive: passiveFlags.hasBodyRebirthPassive,
+    hasSwordEchoPassive: passiveFlags.hasSwordEchoPassive,
+    hasBodySaintPassive: passiveFlags.hasBodySaintPassive,
+    hasMageQiPassive: passiveFlags.hasMageQiPassive,
+    hasManaSpringPassive: passiveFlags.hasManaSpringPassive,
+    hasMageFoundationPassive: passiveFlags.hasMageFoundationPassive,
+    hasMageSpiritSeveringPassive: passiveFlags.hasMageSpiritSeveringPassive,
+    hasBodyAncientPassive: passiveFlags.hasBodyAncientPassive,
+    hasSwordImmortalPassive: passiveFlags.hasSwordImmortalPassive,
+    hasBodyImmortalPassive: passiveFlags.hasBodyImmortalPassive,
+    hasMageVoidPassive: passiveFlags.hasMageVoidPassive,
+    hasSwordEmperorPassive: passiveFlags.hasSwordEmperorPassive,
+    hasBodyEmperorPassive: passiveFlags.hasBodyEmperorPassive,
+    hasSwordFusionPassive: passiveFlags.hasSwordFusionPassive,
+    hasBodyTribulationPassive: passiveFlags.hasBodyTribulationPassive,
+    hasMageTribulationPassive: passiveFlags.hasMageTribulationPassive,
+    hasSwordMahayanaPassive: passiveFlags.hasSwordMahayanaPassive,
+    hasMageMahayanaPassive: passiveFlags.hasMageMahayanaPassive,
+    hasMageImmortalPassive: passiveFlags.hasMageImmortalPassive,
+    hasMageEmperorPassive: passiveFlags.hasMageEmperorPassive,
+  }).forEach((message) => {
+    pushCombatLog(logs, {
+      turn: 0,
+      timeMs: 0,
+      isPlayer: true,
+      message,
+      damage: 0,
+      playerHp,
+      playerMaxHp: player.maxHp,
+      enemyHp,
+      enemyMaxHp: enemy.maxHp,
+    });
+  });
+
+  return {
+    initialPassiveStatuses,
+    initialEnemySpecialReadyAtMs: getInitialEnemySpecialReadyAtMs(
+      passiveFlags.hasMageEmperorPassive
+    ),
+  };
+};
+
+const rollBossBreakOpportunity = ({
+  enemy,
+  restriction,
+  bossBroken,
+  currentTimeMs,
+  turn,
+  logs,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+}: {
+  enemy: Enemy;
+  restriction: { isEffective: boolean; isResisted: boolean };
+  bossBroken: boolean;
+  currentTimeMs: number;
+  turn: number;
+  logs: CombatLog[];
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+}) => {
+  if (
+    enemy.rank !== EnemyRank.Boss ||
+    !restriction.isEffective ||
+    bossBroken ||
+    Math.random() >= 0.12
+  ) {
+    return bossBroken;
+  }
+
+  pushCombatLog(logs, {
+    turn,
+    timeMs: currentTimeMs,
+    isPlayer: true,
+    message: `【破綻】你抓住了 <enemy rank="${enemy.rank}">${enemy.name}</enemy> 的氣機破綻，下一擊傷害大幅提升！`,
+    damage: 0,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp,
+  });
+
+  return true;
+};
+
 const getPassiveRegenMessages = (options: {
   healAmount: number;
   manaAmount: number;
@@ -5450,61 +5575,21 @@ export const runAutoBattle = (
     cleanupExpiredStatuses(currentMs);
   };
 
-  const initialPassiveStatuses = getInitialPassiveStatuses({
-    hasReflectPassive,
-    hasInitialShieldPassive,
-  });
+  const { initialPassiveStatuses, initialEnemySpecialReadyAtMs } =
+    initializeCombatEncounter({
+      player,
+      enemy,
+      logs,
+      passiveFlags,
+      restriction: pVsE,
+      elementalAffinity: enemyElementalAffinity,
+      playerHp,
+      enemyHp,
+    });
   if (initialPassiveStatuses.length > 0) {
     playerStatuses.push(...initialPassiveStatuses);
   }
-  getCombatOpeningMessages({
-    player,
-    enemy,
-    restriction: pVsE,
-    elementalAffinity: enemyElementalAffinity,
-    hasReflectPassive,
-    hasInitialShieldPassive,
-    hasSwordGoldenPassive,
-    hasSwordDeathWardPassive,
-    hasSwordQiPassive,
-    hasBodyQiPassive,
-    hasBodyFoundationPassive,
-    hasBodyRebirthPassive,
-    hasSwordEchoPassive,
-    hasBodySaintPassive,
-    hasMageQiPassive,
-    hasManaSpringPassive,
-    hasMageFoundationPassive,
-    hasMageSpiritSeveringPassive,
-    hasBodyAncientPassive,
-    hasSwordImmortalPassive,
-    hasBodyImmortalPassive,
-    hasMageVoidPassive,
-    hasSwordEmperorPassive,
-    hasBodyEmperorPassive,
-    hasSwordFusionPassive,
-    hasBodyTribulationPassive,
-    hasMageTribulationPassive,
-    hasSwordMahayanaPassive,
-    hasMageMahayanaPassive,
-    hasMageImmortalPassive,
-    hasMageEmperorPassive,
-  }).forEach((message) => {
-    pushCombatLog(logs, {
-      turn: 0,
-      timeMs: 0,
-      isPlayer: true,
-      message,
-      damage: 0,
-      playerHp,
-      playerMaxHp: player.maxHp,
-      enemyHp,
-      enemyMaxHp: enemy.maxHp,
-    });
-  });
-  enemySpecialReadyAtMs = getInitialEnemySpecialReadyAtMs(
-    hasMageEmperorPassive
-  );
+  enemySpecialReadyAtMs = initialEnemySpecialReadyAtMs;
 
   while (playerHp > 0 && enemyHp > 0) {
     const playerActsFirst = playerNextActionMs <= enemyNextActionMs;
@@ -5553,20 +5638,18 @@ export const runAutoBattle = (
         nextSwordImmortalGuardAtMs,
       }));
 
-      if (enemy.rank === EnemyRank.Boss && pVsE.isEffective && !bossBroken && Math.random() < 0.12) {
-        bossBroken = true;
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【破綻】你抓住了 <enemy rank="${enemy.rank}">${enemy.name}</enemy> 的氣機破綻，下一擊傷害大幅提升！`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-      }
+      bossBroken = rollBossBreakOpportunity({
+        enemy,
+        restriction: pVsE,
+        bossBroken,
+        currentTimeMs,
+        turn,
+        logs,
+        playerHp,
+        playerMaxHp: player.maxHp,
+        enemyHp,
+        enemyMaxHp: enemy.maxHp,
+      });
 
       const skillReady =
         activeSkill &&

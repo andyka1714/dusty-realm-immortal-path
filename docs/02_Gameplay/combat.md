@@ -65,6 +65,7 @@
 - formal core 與 retired passive 的承接，現在改成顯式 alias 對照，而不是再靠 canonical skill id 模糊折疊
 - formal core 被動的基礎屬性收益，現在也已改成逐招明確對照表；absorbed retired passive 會透過同一份 formal 對照承接，不再用職業 + 境界通用公式補值
 - 戰鬥開場的被動狀態與對應戰鬥訊息，已開始走共用初始化 helper，不再由 `runAutoBattle()` 散寫 `荊棘皮層` / `元素護盾` 等開場事件
+- 開場初始護體、待命訊息與帝境初始特招延後，已開始整併到 `initializeCombatEncounter(...)`，降低主循環前置鋪排的重複度
 - 屬性克制、弱點洞察、元素抗性、開場被動與高境界開場壓制提示，也已開始收斂到共用 opener helper，降低 `runAutoBattle()` 前置事件散落風險
 - 主動術式後的被動觸發訊息，已開始抽成共用 passive-proc helper，逐步收斂 `法力源泉` / `言出法隨` / `法則之劍` / `劍道獨尊` / `靈潮循環` / `蠻荒血脈` 等事件的散寫
 - 主動術式後的資源、冷卻、疊層與重置類被動訊息，也已開始收斂到共用 logger helper，集中處理 `五氣朝元` / `道法自然` / `靈潮循環` / `劍心通明` / `靈力湧動`
@@ -171,6 +172,7 @@
 - `enemy world strike` 的承傷 / 生存型被動觸發計算，已開始抽成共用 helper，避免 `resolveEnemyWorldStrike()` 內重複堆疊同一批減傷與保命判定
 - `enemy world strike` 的 incoming status 過濾，也已開始和 timeline combat 對齊，正式處理 `DOT / 負面狀態免疫` 的共用規則
 - `enemy special` 的 incoming status 過濾與控制縮短，也已開始抽成 world / timeline 共用 resolver，不再只在 `runAutoBattle()` 內手寫 `filteredEnemyStatuses / normalizedIncomingStatuses`
+- Boss 破綻觸發與戰鬥事件，也已開始整併到 `rollBossBreakOpportunity(...)`，主循環不再直接散寫同一段爆發窗口判定
 - `enemy special` 的狀態套用、戰鬥日誌與免疫觸發，已開始進一步收斂到同一層 helper，減少 timeline 內核殘留的散寫分支
 - DOT / 吸血 tick 的傷害、回復與戰鬥訊息，也已開始共用同一個 status outcome resolver，玩家與敵方不再各寫一套 `燃燒 / 中毒 / 流血 / 吸生` 結算
 - `絕仙劍` 的 `絕仙封脈` 也已正式接進 timeline combat，會在敵方特招將要就緒時把術式節奏再壓後 `1` 秒，而不再只剩狀態標記

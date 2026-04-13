@@ -245,6 +245,8 @@
 - [x] 玩家主動技能命中後的資源流、狀態推入、回響追擊與高境界後續效果，已開始整併到 `resolvePlayerActiveAftermath(...)`
 - [x] 敵方出手後的格擋、承傷、反震、enemy special 狀態套用與命中後續事件，已開始整併到 `resolveEnemyTurnAftermath(...)`
 - [x] DOT / 吸生 tick 的雙側處理迴圈，已開始整併到 `applyStatusTickBatch(...)`
+- [x] 開場初始護體、待命訊息與帝境初始特招延後，已開始整併到 `initializeCombatEncounter(...)`
+- [x] Boss 破綻觸發與對應戰鬥事件，已開始整併到 `rollBossBreakOpportunity(...)`
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---
