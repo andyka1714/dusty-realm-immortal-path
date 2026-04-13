@@ -4568,6 +4568,82 @@ const getInitialPassiveBattleLogMessages = ({
   return messages;
 };
 
+const resolveInitialPassiveStateBundle = (
+  passiveFlags: Pick<
+    PlayerPassiveFlags,
+    | "hasReflectPassive"
+    | "hasInitialShieldPassive"
+    | "hasSwordGoldenPassive"
+    | "hasSwordDeathWardPassive"
+    | "hasSwordQiPassive"
+    | "hasBodyQiPassive"
+    | "hasBodyFoundationPassive"
+    | "hasBodyRebirthPassive"
+    | "hasSwordEchoPassive"
+    | "hasBodySaintPassive"
+    | "hasMageQiPassive"
+    | "hasManaSpringPassive"
+    | "hasMageFoundationPassive"
+    | "hasMageSpiritSeveringPassive"
+    | "hasBodyAncientPassive"
+    | "hasSwordImmortalPassive"
+    | "hasBodyImmortalPassive"
+    | "hasMageVoidPassive"
+    | "hasSwordEmperorPassive"
+    | "hasBodyEmperorPassive"
+    | "hasSwordHeartPassive"
+    | "hasBodyFusionPassive"
+    | "hasMageFusionPassive"
+    | "hasSwordFusionPassive"
+    | "hasBodyTribulationPassive"
+    | "hasMageTribulationPassive"
+    | "hasSwordMahayanaPassive"
+    | "hasMageMahayanaPassive"
+    | "hasMageImmortalPassive"
+    | "hasMageEmperorPassive"
+  >
+) => ({
+  initialPassiveStatuses: getInitialPassiveStatuses({
+    hasReflectPassive: passiveFlags.hasReflectPassive,
+    hasInitialShieldPassive: passiveFlags.hasInitialShieldPassive,
+  }),
+  openingMessages: getInitialPassiveBattleLogMessages({
+    hasReflectPassive: passiveFlags.hasReflectPassive,
+    hasInitialShieldPassive: passiveFlags.hasInitialShieldPassive,
+    hasSwordGoldenPassive: passiveFlags.hasSwordGoldenPassive,
+    hasSwordDeathWardPassive: passiveFlags.hasSwordDeathWardPassive,
+    hasSwordQiPassive: passiveFlags.hasSwordQiPassive,
+    hasBodyQiPassive: passiveFlags.hasBodyQiPassive,
+    hasBodyFoundationPassive: passiveFlags.hasBodyFoundationPassive,
+    hasBodyRebirthPassive: passiveFlags.hasBodyRebirthPassive,
+    hasSwordEchoPassive: passiveFlags.hasSwordEchoPassive,
+    hasBodySaintPassive: passiveFlags.hasBodySaintPassive,
+    hasMageQiPassive: passiveFlags.hasMageQiPassive,
+    hasManaSpringPassive: passiveFlags.hasManaSpringPassive,
+    hasMageFoundationPassive: passiveFlags.hasMageFoundationPassive,
+    hasMageSpiritSeveringPassive: passiveFlags.hasMageSpiritSeveringPassive,
+    hasBodyAncientPassive: passiveFlags.hasBodyAncientPassive,
+    hasSwordImmortalPassive: passiveFlags.hasSwordImmortalPassive,
+    hasBodyImmortalPassive: passiveFlags.hasBodyImmortalPassive,
+    hasMageVoidPassive: passiveFlags.hasMageVoidPassive,
+    hasSwordEmperorPassive: passiveFlags.hasSwordEmperorPassive,
+    hasBodyEmperorPassive: passiveFlags.hasBodyEmperorPassive,
+    hasSwordHeartPassive: passiveFlags.hasSwordHeartPassive,
+    hasBodyFusionPassive: passiveFlags.hasBodyFusionPassive,
+    hasMageFusionPassive: passiveFlags.hasMageFusionPassive,
+    hasSwordFusionPassive: passiveFlags.hasSwordFusionPassive,
+    hasBodyTribulationPassive: passiveFlags.hasBodyTribulationPassive,
+    hasMageTribulationPassive: passiveFlags.hasMageTribulationPassive,
+    hasSwordMahayanaPassive: passiveFlags.hasSwordMahayanaPassive,
+    hasMageMahayanaPassive: passiveFlags.hasMageMahayanaPassive,
+    hasMageImmortalPassive: passiveFlags.hasMageImmortalPassive,
+    hasMageEmperorPassive: passiveFlags.hasMageEmperorPassive,
+  }),
+  initialEnemySpecialReadyAtMs: getInitialEnemySpecialReadyAtMs(
+    passiveFlags.hasMageEmperorPassive
+  ),
+});
+
 const getCombatOpeningMessages = (options: {
   player: PlayerCombatStats;
   enemy: Enemy;
@@ -4721,10 +4797,11 @@ const initializeCombatEncounter = ({
   playerHp: number;
   enemyHp: number;
 }) => {
-  const initialPassiveStatuses = getInitialPassiveStatuses({
-    hasReflectPassive: passiveFlags.hasReflectPassive,
-    hasInitialShieldPassive: passiveFlags.hasInitialShieldPassive,
-  });
+  const {
+    initialPassiveStatuses,
+    openingMessages,
+    initialEnemySpecialReadyAtMs,
+  } = resolveInitialPassiveStateBundle(passiveFlags);
 
   getCombatOpeningMessages({
     player,
@@ -4761,7 +4838,9 @@ const initializeCombatEncounter = ({
     hasMageMahayanaPassive: passiveFlags.hasMageMahayanaPassive,
     hasMageImmortalPassive: passiveFlags.hasMageImmortalPassive,
     hasMageEmperorPassive: passiveFlags.hasMageEmperorPassive,
-  }).forEach((message) => {
+  })
+    .concat(openingMessages)
+    .forEach((message) => {
     pushCombatLog(logs, {
       turn: 0,
       timeMs: 0,
@@ -4777,9 +4856,7 @@ const initializeCombatEncounter = ({
 
   return {
     initialPassiveStatuses,
-    initialEnemySpecialReadyAtMs: getInitialEnemySpecialReadyAtMs(
-      passiveFlags.hasMageEmperorPassive
-    ),
+    initialEnemySpecialReadyAtMs,
   };
 };
 

@@ -2708,7 +2708,13 @@ describe("battle system balance", () => {
       ["m_sf_passive"]
     );
 
-    expect(runAutoBattle(sword, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("劍意化形"))).toBe(true);
+    const swordLogs = runAutoBattle(sword, BOSS_ENEMIES.m121_b1).logs;
+    expect(swordLogs.some((log) => log.message.includes("劍意化形"))).toBe(true);
+    expect(
+      swordLogs.filter((log) =>
+        log.message.includes("【劍意化形】劍意凝影待發，普攻將化作雙段追斬。")
+      ).length
+    ).toBeGreaterThanOrEqual(1);
     expect(runAutoBattle(body, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("肉身成聖"))).toBe(true);
     expect(runAutoBattle(mage, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("道法自然"))).toBe(true);
   });

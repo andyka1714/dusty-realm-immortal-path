@@ -173,6 +173,7 @@
 - `荊棘皮層 / 蠻荒血脈 / 銅皮鐵骨 / 金剛法相 / 元素護盾 / 萬劫不滅 / 雷劫煉心 / 護體劍罡 / 滴血重生 / 不死不滅 / 仙體無垢` 這批承傷、生存與免疫被動，也已開始補齊 enemy world strike 或 enemy special world strike 的可見狀態。
 - `養劍術` 的非受傷疊層流程，也已開始抽成共用 upkeep helper，停手與承傷後的劍勢累進不再各自維護重複分支。
 - 戰鬥開場的初始護體、待命訊息與帝境初始特招延後，也已開始整併到 `initializeCombatEncounter(...)`，不再由 `runAutoBattle()` 主流程手動鋪開。
+- 開場被動狀態、待命訊息與 enemy special 起始延後，也已開始透過 `resolveInitialPassiveStateBundle(...)` 聚合，battle 開場初始化不再維護一長串被動布林參數。
 - Boss 破綻的觸發與戰鬥訊息，也已開始整併到 `rollBossBreakOpportunity(...)`，減少主循環內對同一條爆發窗口的重複敘述。
 - 玩家出手主幹也已開始收斂到 `resolvePlayerTurn(...)`，把可施放窗口、攻勢判定、主傷害訊息、破甲追擊、共鳴消耗與命中後續處理集中在同一層流程。
 - world strike 結果組裝也已開始拆成 `buildPlayerWorldStrikeResult(...) / buildEnemyWorldStrikeResult(...)`；enemy 端 timing metadata 也已抽成 `buildEnemyWorldStrikeTiming(...)`。

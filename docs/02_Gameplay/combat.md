@@ -110,6 +110,7 @@
 - 敵方出手窗口也已開始整併到 `resolveEnemyActionWindow(...)`，控制跳過、特招延後、特招窗口與敵方攻勢判定不再在主循環平鋪散寫
 - 回合開場維護也已開始整併到 `resolveTurnStartMaintenance(...)`，狀態 tick、被動回復與淨化流程不再直接散在主循環開頭
 - 戰鬥開場 seed 流程也已開始整併到 `seedCombatEncounter(...)`，初始護體與 enemy special 起始冷卻不再直接在主循環鋪開
+- 開場被動狀態、待命訊息與 enemy special 起始延後，也已開始透過 `resolveInitialPassiveStateBundle(...)` 收斂，不再讓 `initializeCombatEncounter(...)` 長期維護一整串被動布林參數
 - 玩家出手階段也已開始整併到 `resolvePlayerActionPhase(...)`，週期護體、Boss 破綻與正式出手流程不再在主循環拆成兩段散寫
 - 玩家先手分支也已開始整併到 `resolvePlayerTurnPhase(...)`，玩家先手時的正式出手鏈不再直接鋪在主循環裡
 - 勝利掉落結算也已開始整併到 `resolveVictoryRewards(...)`，擊殺訊息與戰利品組裝不再直接堆在 `runAutoBattle()` 尾端

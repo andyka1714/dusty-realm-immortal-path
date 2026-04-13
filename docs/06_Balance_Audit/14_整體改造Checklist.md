@@ -235,6 +235,7 @@
 - [x] 所有正式核心被動現在都已至少會對一項正式戰鬥屬性產生明確變化，可直接透過測試驗證不再只靠 fallback 才看得出差異
 - [x] 開場被動狀態與對應戰鬥事件已開始走共用初始化 helper，降低 `runAutoBattle()` 散寫 `荊棘皮層` / `元素護盾` 等訊息的重複度
 - [x] 屬性克制、弱點洞察、元素抗性、開場被動與高境界開場壓制提示，已開始整併成共用 opener helper，縮減 `runAutoBattle()` 的前置事件散寫範圍
+- [x] 開場被動狀態、待命訊息與 enemy special 起始延後，也已開始透過 `resolveInitialPassiveStateBundle(...)` 聚合，縮減 `initializeCombatEncounter(...)` 的布林參數面
 - [x] 來襲傷害的防禦型被動事件已開始抽成共用 defensive-passive helper，集中處理 `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `肉身成聖` / `元素護盾`
 - [x] enemy special 的 incoming status 過濾與控制縮短，現在也開始走 world / timeline 共用 resolver，不再在 `runAutoBattle()` 內手寫一套獨立分支
 - [x] enemy special 的免疫觸發訊息，也已開始抽成共用 helper，避免 `仙體無垢 / 萬法皆空` 在時間軸戰鬥內重複散寫
