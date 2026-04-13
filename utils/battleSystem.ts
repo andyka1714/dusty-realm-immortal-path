@@ -2656,6 +2656,184 @@ const resolvePlayerActionPhase = ({
   };
 };
 
+const resolvePlayerTurnPhase = ({
+  currentTimeMs,
+  turn,
+  player,
+  enemy,
+  logs,
+  passiveFlags,
+  pVsE,
+  bossBroken,
+  playerDebuffed,
+  playerHp,
+  playerMp,
+  enemyHp,
+  playerStatuses,
+  enemyStatuses,
+  activeSkill,
+  activeSkillReadyAtMs,
+  mageFoundationStacks,
+  swordHeartStacks,
+  playerAttackIntervalMs,
+  nextSwordImmortalGuardAtMs,
+  hasMageFusionPassive,
+  hasSwordImmortalPassive,
+}: {
+  currentTimeMs: number;
+  turn: number;
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  logs: CombatLog[];
+  passiveFlags: PlayerPassiveFlags;
+  pVsE: { isEffective: boolean; isResisted: boolean };
+  bossBroken: boolean;
+  playerDebuffed: boolean;
+  playerHp: number;
+  playerMp: number;
+  enemyHp: number;
+  playerStatuses: CombatStatus[];
+  enemyStatuses: CombatStatus[];
+  activeSkill?: Skill;
+  activeSkillReadyAtMs: number;
+  mageFoundationStacks: number;
+  swordHeartStacks: number;
+  playerAttackIntervalMs: number;
+  nextSwordImmortalGuardAtMs: number;
+  hasMageFusionPassive: boolean;
+  hasSwordImmortalPassive: boolean;
+}) =>
+  resolvePlayerActionPhase({
+    currentTimeMs,
+    turn,
+    player,
+    enemy,
+    logs,
+    passiveFlags,
+    pVsE,
+    bossBroken,
+    playerDebuffed,
+    playerHp,
+    playerMp,
+    enemyHp,
+    playerStatuses,
+    enemyStatuses,
+    activeSkill,
+    activeSkillReadyAtMs,
+    mageFoundationStacks,
+    swordHeartStacks,
+    playerAttackIntervalMs,
+    nextSwordImmortalGuardAtMs,
+    hasMageFusionPassive,
+    hasSwordImmortalPassive,
+  });
+
+const resolveEnemyTurnPhase = ({
+  currentTimeMs,
+  turn,
+  player,
+  enemy,
+  logs,
+  passiveFlags,
+  playerHp,
+  playerMp,
+  enemyHp,
+  playerStatuses,
+  enemyStatuses,
+  swordDeathWardUsed,
+  bodyTribulationStacks,
+  bodyRebirthTrueUsed,
+  hasSwordHeartPassive,
+  playerDamagedSinceSwordHeartWindow,
+  swordHeartStacks,
+  enemyAttackIntervalMs,
+  enemySpecialReadyAtMs,
+}: {
+  currentTimeMs: number;
+  turn: number;
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  logs: CombatLog[];
+  passiveFlags: PlayerPassiveFlags;
+  playerHp: number;
+  playerMp: number;
+  enemyHp: number;
+  playerStatuses: CombatStatus[];
+  enemyStatuses: CombatStatus[];
+  swordDeathWardUsed: boolean;
+  bodyTribulationStacks: number;
+  bodyRebirthTrueUsed: boolean;
+  hasSwordHeartPassive: boolean;
+  playerDamagedSinceSwordHeartWindow: boolean;
+  swordHeartStacks: number;
+  enemyAttackIntervalMs: number;
+  enemySpecialReadyAtMs: number;
+}) => {
+  const enemyActionWindow = resolveEnemyActionWindow({
+    currentTimeMs,
+    turn,
+    player,
+    enemy,
+    logs,
+    passiveFlags,
+    playerStatuses,
+    enemyStatuses,
+    playerHp,
+    playerMp,
+    enemyHp,
+    enemyAttackIntervalMs,
+    enemySpecialReadyAtMs,
+    bodyTribulationStacks,
+    hasSwordHeartPassive,
+    playerDamagedSinceSwordHeartWindow,
+    swordHeartStacks,
+  });
+
+  if (enemyActionWindow.skipped) {
+    return {
+      skipped: true as const,
+      enemyNextActionMs: enemyActionWindow.enemyNextActionMs,
+      swordHeartStacks: enemyActionWindow.swordHeartStacks,
+      playerDamagedSinceSwordHeartWindow:
+        enemyActionWindow.playerDamagedSinceSwordHeartWindow,
+    };
+  }
+
+  const resolvedEnemyActionWindow = enemyActionWindow as Exclude<
+    ReturnType<typeof resolveEnemyActionWindow>,
+    { skipped: true }
+  >;
+
+  return {
+    skipped: false as const,
+    ...resolveEnemyActionPhase({
+      enemyActionWindow: resolvedEnemyActionWindow,
+      currentTimeMs,
+      turn,
+      player: {
+        ...player,
+        hp: playerHp,
+        mp: playerMp,
+      },
+      enemy,
+      logs,
+      passiveFlags,
+      playerHp,
+      playerMp,
+      enemyHp,
+      playerStatuses,
+      enemyStatuses,
+      swordDeathWardUsed,
+      bodyTribulationStacks,
+      bodyRebirthTrueUsed,
+      hasSwordHeartPassive,
+      playerDamagedSinceSwordHeartWindow,
+      swordHeartStacks,
+      enemyAttackIntervalMs,
+    }),
+  };
+};
+
 const resolveDamage = (
   power: number,
   defense: number,
@@ -6811,7 +6989,7 @@ export const runAutoBattle = (
         playerNextActionMs,
         nextSwordImmortalGuardAtMs,
         bossBroken,
-      } = resolvePlayerActionPhase({
+      } = resolvePlayerTurnPhase({
         currentTimeMs,
         turn,
         player,
@@ -6837,7 +7015,7 @@ export const runAutoBattle = (
       }));
       if (enemyHp <= 0) break;
     } else {
-      const enemyActionWindow = resolveEnemyActionWindow({
+      const enemyTurnResult = resolveEnemyTurnPhase({
         currentTimeMs,
         turn,
         player,
@@ -6851,49 +7029,28 @@ export const runAutoBattle = (
         enemyHp,
         enemyAttackIntervalMs,
         enemySpecialReadyAtMs,
+        swordDeathWardUsed,
         bodyTribulationStacks,
+        bodyRebirthTrueUsed,
         hasSwordHeartPassive,
         playerDamagedSinceSwordHeartWindow,
         swordHeartStacks,
       });
 
-      if (enemyActionWindow.skipped) {
+      if (enemyTurnResult.skipped) {
         ({
           enemyNextActionMs,
           swordHeartStacks,
           playerDamagedSinceSwordHeartWindow,
-        } = enemyActionWindow);
+        } = enemyTurnResult);
         turn++;
         continue;
       } else {
-        const resolvedEnemyActionWindow = enemyActionWindow as Exclude<
-          ReturnType<typeof resolveEnemyActionWindow>,
+        const resolvedEnemyTurnResult = enemyTurnResult as Exclude<
+          ReturnType<typeof resolveEnemyTurnPhase>,
           { skipped: true }
         >;
         ({
-          playerHp,
-          playerMp,
-          enemyHp,
-          playerStatuses,
-          swordDeathWardUsed,
-          bodyTribulationStacks,
-          bodyRebirthTrueUsed,
-          playerDamagedSinceSwordHeartWindow,
-          swordHeartStacks,
-          enemySpecialReadyAtMs,
-          enemyNextActionMs,
-        } = resolveEnemyActionPhase({
-          enemyActionWindow: resolvedEnemyActionWindow,
-          currentTimeMs,
-          turn,
-          player: {
-            ...player,
-            hp: playerHp,
-            mp: playerMp,
-          },
-          enemy,
-          logs,
-          passiveFlags,
           playerHp,
           playerMp,
           enemyHp,
@@ -6902,11 +7059,11 @@ export const runAutoBattle = (
           swordDeathWardUsed,
           bodyTribulationStacks,
           bodyRebirthTrueUsed,
-          hasSwordHeartPassive,
           playerDamagedSinceSwordHeartWindow,
           swordHeartStacks,
-          enemyAttackIntervalMs,
-        }));
+          enemySpecialReadyAtMs,
+          enemyNextActionMs,
+        } = resolvedEnemyTurnResult);
       }
     }
 
