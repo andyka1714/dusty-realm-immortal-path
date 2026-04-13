@@ -1659,6 +1659,35 @@ describe("battle system balance", () => {
     expect(strike.playerStatusNames).toContain("肉身成聖");
   });
 
+  it("surfaces qi body passive on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const body = calculatePlayerStats(
+      {
+        physique: 72,
+        rootBone: 68,
+        insight: 48,
+        comprehension: 18,
+        fortune: 12,
+        charm: 8,
+      },
+      MajorRealm.QiRefining,
+      SpiritRootId.MIXED_FIVE,
+      {
+        attack: 280,
+        defense: 90,
+        speed: 8,
+        hp: 980,
+      },
+      "鐵骨",
+      ProfessionType.Body,
+      ["b_q_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(body, COMMON_ENEMIES.m30_c1);
+    expect(strike.playerStatusNames).toContain("銅皮鐵骨");
+  });
+
   it("surfaces nascent soul body passive on basic world strikes", () => {
     fixedRandom.mockReturnValue(0.5);
 
@@ -1717,6 +1746,36 @@ describe("battle system balance", () => {
     const result = runAutoBattle(player, BOSS_ENEMIES.m26_b1);
     expect(result.logs.some((log) => log.message.includes("【法力源泉】"))).toBe(true);
     expect(result.logs.some((log) => log.message.includes("九天雷劫"))).toBe(true);
+  });
+
+  it("surfaces golden-core mage barrier on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 70,
+        rootBone: 66,
+        insight: 84,
+        comprehension: 26,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.GoldenCore,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 640,
+        mp: 2200,
+        hp: 1800,
+        defense: 130,
+        speed: 11,
+      },
+      "靈師",
+      ProfessionType.Mage,
+      ["m_g_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(mage, COMMON_ENEMIES.m30_c1);
+    expect(strike.playerStatusNames).toContain("元素護盾");
   });
 
   it("lets void-refining mage passive redirect some hits into the void", () => {

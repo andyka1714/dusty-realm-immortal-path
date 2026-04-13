@@ -864,6 +864,10 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
     statusNames.push("荒古戰體");
   }
 
+  if (!skill && passiveFlags.hasBodyQiPassive) {
+    statusNames.push("銅皮鐵骨");
+  }
+
   if (!skill && passiveFlags.hasBodyFusionPassive) {
     statusNames.push("金剛法相");
   }
@@ -878,6 +882,10 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
 
   if (!skill && passiveFlags.hasMageQiPassive && player.profession === ProfessionType.Mage) {
     statusNames.push("靈潮循環");
+  }
+
+  if (!skill && passiveFlags.hasInitialShieldPassive) {
+    statusNames.push("元素護盾");
   }
 
   if (passiveFlags.hasManaSpringPassive && player.mp >= player.maxMp * 0.8) {
