@@ -1625,9 +1625,13 @@ const getInitialPassiveStatuses = ({
 const getInitialPassiveBattleLogMessages = ({
   hasReflectPassive,
   hasInitialShieldPassive,
+  hasBodyAncientPassive,
+  hasSwordImmortalPassive,
 }: {
   hasReflectPassive: boolean;
   hasInitialShieldPassive: boolean;
+  hasBodyAncientPassive: boolean;
+  hasSwordImmortalPassive: boolean;
 }) => {
   const messages: string[] = [];
 
@@ -1637,6 +1641,14 @@ const getInitialPassiveBattleLogMessages = ({
 
   if (hasInitialShieldPassive) {
     messages.push("戰鬥開始時，你獲得了【元素護盾】。");
+  }
+
+  if (hasBodyAncientPassive) {
+    messages.push("【荒古戰體】荒古血肉盤踞周身，負面侵蝕將被持續震散。");
+  }
+
+  if (hasSwordImmortalPassive) {
+    messages.push("【仙元護體】劍元護體已待命，將定時凝成一次絕對護盾。");
   }
 
   return messages;
@@ -1649,6 +1661,8 @@ const getCombatOpeningMessages = (options: {
   elementalAffinity: { multiplier: number; reason?: "resistance" | "weakness" };
   hasReflectPassive: boolean;
   hasInitialShieldPassive: boolean;
+  hasBodyAncientPassive: boolean;
+  hasSwordImmortalPassive: boolean;
   hasMageImmortalPassive: boolean;
   hasMageEmperorPassive: boolean;
 }) => {
@@ -1659,6 +1673,8 @@ const getCombatOpeningMessages = (options: {
     elementalAffinity,
     hasReflectPassive,
     hasInitialShieldPassive,
+    hasBodyAncientPassive,
+    hasSwordImmortalPassive,
     hasMageImmortalPassive,
     hasMageEmperorPassive,
   } = options;
@@ -1690,6 +1706,8 @@ const getCombatOpeningMessages = (options: {
     ...getInitialPassiveBattleLogMessages({
       hasReflectPassive,
       hasInitialShieldPassive,
+      hasBodyAncientPassive,
+      hasSwordImmortalPassive,
     })
   );
 
@@ -3188,6 +3206,8 @@ export const runAutoBattle = (
     elementalAffinity: enemyElementalAffinity,
     hasReflectPassive,
     hasInitialShieldPassive,
+    hasBodyAncientPassive,
+    hasSwordImmortalPassive,
     hasMageImmortalPassive,
     hasMageEmperorPassive,
   }).forEach((message) => {

@@ -129,6 +129,7 @@
   - `s_ie_passive`：在 player world strike 的普攻也會正式回報 `萬法皆空`
   - `s_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `劍道獨尊` 的暴擊強化
   - `m_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `言出法隨` 的術式增幅
+  - `b_vr_passive` / `s_im_passive`：在 timeline combat 開場也會明確標出 `荒古戰體` / `仙元護體` 已進入待命狀態
   - `b_sf_passive` / `m_vr_passive`：在 enemy world strike 也會正式回報 `肉身成聖` / `空間法則`，不再只在時間軸戰鬥內有感
   - `b_g_passive` / `b_f_passive` / `b_q_passive` / `b_bi_passive` / `m_g_passive`：在 enemy world strike 也已開始正式回報 `反震` / `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `元素護盾`
   - `b_tr_passive` / `m_tr_passive`：在 enemy world strike 也已開始正式回報 `萬劫不滅` / `雷劫煉心`
