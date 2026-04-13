@@ -69,6 +69,7 @@
 - 主動術式後的被動觸發訊息，已開始抽成共用 passive-proc helper，逐步收斂 `法力源泉` / `言出法隨` / `法則之劍` / `劍道獨尊` / `靈潮循環` / `蠻荒血脈` 等事件的散寫
 - 主動術式後的資源、冷卻、疊層與重置類被動訊息，也已開始收斂到共用 logger helper，集中處理 `五氣朝元` / `道法自然` / `靈潮循環` / `劍心通明` / `靈力湧動`
 - 來襲傷害的防禦型被動事件，也已開始抽成共用 defensive-passive helper，集中處理 `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `肉身成聖` / `元素護盾`
+- `養劍術` 的非受傷疊層流程，也已開始抽成共用 upkeep helper，停手回合與承傷後回合不再各自維護一套劍勢累進邏輯
 - 第一批與第二批法術型怪物、遠程怪與 Boss 已補上 `specialAttack` 資料，戰鬥中不再只剩普通攻擊模板
 - `createEnemy()` 已加入預設怪物特招規則：
   - 沒有手工特招的精英 / Boss 也會依 `元素 / 階級 / 境界` 自動得到一套基礎殺招
@@ -133,6 +134,7 @@
 - `b_vr_passive` / `s_im_passive`：在 timeline combat 開場也會明確標出 `荒古戰體` / `仙元護體` 已進入待命狀態
 - `s_sf_passive` / `b_sf_passive` / `m_sf_passive`：在 timeline combat 開場也會明確標出 `劍意化形` / `肉身成聖` / `道法自然` 已進入待命狀態
 - `s_q_passive` / `b_q_passive` / `m_q_passive` / `m_n_passive`：在 timeline combat 開場也已開始標出 `劍脈初成` / `銅皮鐵骨` / `靈潮循環` / `法力源泉` 的待命狀態
+- `s_g_passive` / `s_n_passive` / `b_f_passive` / `b_n_passive` / `m_f_passive`：在 timeline combat 開場也已開始標出 `劍心通明` / `護體劍罡` / `蠻荒血脈` / `滴血重生` / `靈力湧動` 的待命狀態
 - `s_ie_passive` / `b_ie_passive`：在 timeline combat 開場也已開始明確標出 `萬法皆空` / `不死不滅` 的待命狀態
 - `s_bi_passive` / `b_tr_passive` / `m_tr_passive`：在 timeline combat 開場也已開始明確標出 `人劍合神` / `萬劫不滅` / `雷劫煉心` 的待命狀態
 - `m_vr_passive` / `b_im_passive` / `s_ma_passive` / `m_ma_passive`：在 timeline combat 開場也已開始明確標出 `空間法則` / `仙體無垢` / `劍道獨尊` / `言出法隨` 的待命狀態

@@ -2450,12 +2450,17 @@ const getInitialPassiveStatuses = ({
 const getInitialPassiveBattleLogMessages = ({
   hasReflectPassive,
   hasInitialShieldPassive,
+  hasSwordGoldenPassive,
+  hasSwordDeathWardPassive,
   hasSwordQiPassive,
   hasBodyQiPassive,
+  hasBodyFoundationPassive,
+  hasBodyRebirthPassive,
   hasSwordEchoPassive,
   hasBodySaintPassive,
   hasMageQiPassive,
   hasManaSpringPassive,
+  hasMageFoundationPassive,
   hasMageSpiritSeveringPassive,
   hasBodyAncientPassive,
   hasSwordImmortalPassive,
@@ -2471,12 +2476,17 @@ const getInitialPassiveBattleLogMessages = ({
 }: {
   hasReflectPassive: boolean;
   hasInitialShieldPassive: boolean;
+  hasSwordGoldenPassive: boolean;
+  hasSwordDeathWardPassive: boolean;
   hasSwordQiPassive: boolean;
   hasBodyQiPassive: boolean;
+  hasBodyFoundationPassive: boolean;
+  hasBodyRebirthPassive: boolean;
   hasSwordEchoPassive: boolean;
   hasBodySaintPassive: boolean;
   hasMageQiPassive: boolean;
   hasManaSpringPassive: boolean;
+  hasMageFoundationPassive: boolean;
   hasMageSpiritSeveringPassive: boolean;
   hasBodyAncientPassive: boolean;
   hasSwordImmortalPassive: boolean;
@@ -2500,6 +2510,14 @@ const getInitialPassiveBattleLogMessages = ({
     messages.push("戰鬥開始時，你獲得了【元素護盾】。");
   }
 
+  if (hasSwordGoldenPassive) {
+    messages.push("【劍心通明】劍心澄澈待發，暴擊時將牽動流光劍影再次出鞘。");
+  }
+
+  if (hasSwordDeathWardPassive) {
+    messages.push("【護體劍罡】劍罡已護住命門，一次致命來襲將被強行截斷。");
+  }
+
   if (hasSwordEchoPassive) {
     messages.push("【劍意化形】劍意凝影待發，普攻將化作雙段追斬。");
   }
@@ -2512,6 +2530,14 @@ const getInitialPassiveBattleLogMessages = ({
     messages.push("【銅皮鐵骨】筋骨已提前繃緊，凡俗重擊將被層層卸去。");
   }
 
+  if (hasBodyFoundationPassive) {
+    messages.push("【蠻荒血脈】荒血已在體內鼓盪，負傷越深，血勢越兇。");
+  }
+
+  if (hasBodyRebirthPassive) {
+    messages.push("【滴血重生】血氣已盤踞命宮，重傷時將自行回生續戰。");
+  }
+
   if (hasBodySaintPassive) {
     messages.push("【肉身成聖】聖軀已穩，重擊將被大幅化去。");
   }
@@ -2522,6 +2548,10 @@ const getInitialPassiveBattleLogMessages = ({
 
   if (hasManaSpringPassive) {
     messages.push("【法力源泉】靈海滿溢時，術式威能將再向上拔高。");
+  }
+
+  if (hasMageFoundationPassive) {
+    messages.push("【靈力湧動】靈元已在經脈間翻騰，施法時將順勢拔高術式威能。");
   }
 
   if (hasMageSpiritSeveringPassive) {
@@ -2582,12 +2612,17 @@ const getCombatOpeningMessages = (options: {
   elementalAffinity: { multiplier: number; reason?: "resistance" | "weakness" };
   hasReflectPassive: boolean;
   hasInitialShieldPassive: boolean;
+  hasSwordGoldenPassive: boolean;
+  hasSwordDeathWardPassive: boolean;
   hasSwordQiPassive: boolean;
   hasBodyQiPassive: boolean;
+  hasBodyFoundationPassive: boolean;
+  hasBodyRebirthPassive: boolean;
   hasSwordEchoPassive: boolean;
   hasBodySaintPassive: boolean;
   hasMageQiPassive: boolean;
   hasManaSpringPassive: boolean;
+  hasMageFoundationPassive: boolean;
   hasMageSpiritSeveringPassive: boolean;
   hasBodyAncientPassive: boolean;
   hasSwordImmortalPassive: boolean;
@@ -2610,12 +2645,17 @@ const getCombatOpeningMessages = (options: {
     elementalAffinity,
     hasReflectPassive,
     hasInitialShieldPassive,
+    hasSwordGoldenPassive,
+    hasSwordDeathWardPassive,
     hasSwordQiPassive,
     hasBodyQiPassive,
+    hasBodyFoundationPassive,
+    hasBodyRebirthPassive,
     hasSwordEchoPassive,
     hasBodySaintPassive,
     hasMageQiPassive,
     hasManaSpringPassive,
+    hasMageFoundationPassive,
     hasMageSpiritSeveringPassive,
     hasBodyAncientPassive,
     hasSwordImmortalPassive,
@@ -2659,12 +2699,17 @@ const getCombatOpeningMessages = (options: {
     ...getInitialPassiveBattleLogMessages({
       hasReflectPassive,
       hasInitialShieldPassive,
+      hasSwordGoldenPassive,
+      hasSwordDeathWardPassive,
       hasSwordQiPassive,
       hasBodyQiPassive,
+      hasBodyFoundationPassive,
+      hasBodyRebirthPassive,
       hasSwordEchoPassive,
       hasBodySaintPassive,
       hasMageQiPassive,
       hasManaSpringPassive,
+      hasMageFoundationPassive,
       hasMageSpiritSeveringPassive,
       hasBodyAncientPassive,
       hasSwordImmortalPassive,
@@ -4756,6 +4801,59 @@ const logPlayerSwordResonance = ({
   return false;
 };
 
+const applySwordHeartUpkeep = ({
+  swordHeartStacks,
+  logs,
+  turn,
+  timeMs,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+  blockedMessage,
+  stackingMessage,
+}: {
+  swordHeartStacks: number;
+  logs: CombatLog[];
+  turn: number;
+  timeMs: number;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  blockedMessage: string;
+  stackingMessage: (nextStacks: number) => string;
+}) => {
+  if (swordHeartStacks >= 5) {
+    pushCombatLog(logs, {
+      turn,
+      timeMs,
+      isPlayer: true,
+      message: blockedMessage,
+      damage: 0,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+    return swordHeartStacks;
+  }
+
+  const nextStacks = swordHeartStacks + 1;
+  pushCombatLog(logs, {
+    turn,
+    timeMs,
+    isPlayer: true,
+    message: stackingMessage(nextStacks),
+    damage: 0,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp,
+  });
+  return nextStacks;
+};
+
 const logEnemyAvoidance = ({
   logs,
   turn,
@@ -5366,12 +5464,17 @@ export const runAutoBattle = (
     elementalAffinity: enemyElementalAffinity,
     hasReflectPassive,
     hasInitialShieldPassive,
+    hasSwordGoldenPassive,
+    hasSwordDeathWardPassive,
     hasSwordQiPassive,
     hasBodyQiPassive,
+    hasBodyFoundationPassive,
+    hasBodyRebirthPassive,
     hasSwordEchoPassive,
     hasBodySaintPassive,
     hasMageQiPassive,
     hasManaSpringPassive,
+    hasMageFoundationPassive,
     hasMageSpiritSeveringPassive,
     hasBodyAncientPassive,
     hasSwordImmortalPassive,
@@ -5659,18 +5762,20 @@ export const runAutoBattle = (
           enemyMaxHp: enemy.maxHp,
         });
         enemyNextActionMs = currentTimeMs + enemyAttackIntervalMs;
-        if (hasSwordHeartPassive && !playerDamagedSinceSwordHeartWindow && swordHeartStacks < 5) {
-          swordHeartStacks += 1;
-          pushCombatLog(logs, {
+        if (hasSwordHeartPassive && !playerDamagedSinceSwordHeartWindow) {
+          swordHeartStacks = applySwordHeartUpkeep({
+            swordHeartStacks,
+            logs,
             turn,
             timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【養劍術】敵勢受阻，劍勢提升至第 ${swordHeartStacks} 層。`,
-            damage: 0,
             playerHp,
             playerMaxHp: player.maxHp,
             enemyHp,
             enemyMaxHp: enemy.maxHp,
+            blockedMessage:
+              "【養劍術】劍勢已滿，當前回合的停滯不再繼續積蓄殺機。",
+            stackingMessage: (nextStacks) =>
+              `【養劍術】敵勢受阻，劍勢提升至第 ${nextStacks} 層。`,
           });
         }
         playerDamagedSinceSwordHeartWindow = false;
@@ -5755,18 +5860,20 @@ export const runAutoBattle = (
         playerDamagedSinceSwordHeartWindow = true;
       }
 
-      if (hasSwordHeartPassive && !playerDamagedSinceSwordHeartWindow && swordHeartStacks < 5) {
-        swordHeartStacks += 1;
-        pushCombatLog(logs, {
+      if (hasSwordHeartPassive && !playerDamagedSinceSwordHeartWindow) {
+        swordHeartStacks = applySwordHeartUpkeep({
+          swordHeartStacks,
+          logs,
           turn,
           timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【養劍術】劍勢沉澱更深，攻勢提升至第 ${swordHeartStacks} 層。`,
-          damage: 0,
           playerHp,
           playerMaxHp: player.maxHp,
           enemyHp,
           enemyMaxHp: enemy.maxHp,
+          blockedMessage:
+            "【養劍術】劍勢已滿，敵招雖過，劍意已抵當前可凝的極限。",
+          stackingMessage: (nextStacks) =>
+            `【養劍術】劍勢沉澱更深，攻勢提升至第 ${nextStacks} 層。`,
         });
       }
       playerDamagedSinceSwordHeartWindow = false;

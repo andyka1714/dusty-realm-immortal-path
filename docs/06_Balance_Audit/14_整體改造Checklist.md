@@ -240,6 +240,7 @@
 - [x] enemy special 的狀態套用、戰鬥日誌與免疫提示，已開始進一步收斂到同一層 helper，減少 timeline 內核殘留散寫
 - [x] DOT / 吸血 tick 的傷害、回復與戰鬥訊息，已開始共用同一個 status outcome resolver，玩家與敵方不再各維護一套
 - [x] 主動術式後的資源回復、冷卻縮短、冷卻重置與疊層訊息，也已開始抽成共用 logger helper，收斂 `五氣朝元 / 道法自然 / 靈潮循環 / 劍心通明 / 靈力湧動`
+- [x] `養劍術` 的非受傷疊層流程，也已開始抽成共用 upkeep helper，停手與承傷後回合不再各自散寫一份劍勢累進邏輯
 - [x] 玩家出手前的攻勢計算與暴擊 / 破防判定，已開始抽成共用 `resolvePlayerOffenseRoll(...)`，縮小 `runAutoBattle()` 主循環內的 inline 分支
 - [x] 玩家主動技能命中後的資源流、狀態推入、回響追擊與高境界後續效果，已開始整併到 `resolvePlayerActiveAftermath(...)`
 - [x] 敵方出手後的格擋、承傷、反震、enemy special 狀態套用與命中後續事件，已開始整併到 `resolveEnemyTurnAftermath(...)`
@@ -360,6 +361,7 @@
 - [x] `m_im_passive` / `m_ie_passive` 已開始補齊 world strike 狀態回報，正式標出 `仙法通神` / `萬法歸宗`
 - [x] `b_vr_passive` / `s_im_passive` 已開始補齊 timeline combat 開場待命訊息，正式標出 `荒古戰體` / `仙元護體`
 - [x] `s_sf_passive` / `b_sf_passive` / `m_sf_passive` 已開始補齊 timeline combat 開場待命訊息，正式標出 `劍意化形` / `肉身成聖` / `道法自然`
+- [x] `s_g_passive` / `s_n_passive` / `b_f_passive` / `b_n_passive` / `m_f_passive` 已開始補齊 timeline combat 開場待命訊息，正式標出 `劍心通明` / `護體劍罡` / `蠻荒血脈` / `滴血重生` / `靈力湧動`
 - [x] `s_ie_passive` / `b_ie_passive` 已開始補齊 timeline combat 開場待命訊息，正式標出 `萬法皆空` / `不死不滅`
 - [x] `s_bi_passive` / `b_tr_passive` / `m_tr_passive` 已開始補齊 timeline combat 開場待命訊息，正式標出 `人劍合神` / `萬劫不滅` / `雷劫煉心`
 - [x] `m_vr_passive` / `b_im_passive` / `s_ma_passive` / `m_ma_passive` 已開始補齊 timeline combat 開場待命訊息，正式標出 `空間法則` / `仙體無垢` / `劍道獨尊` / `言出法隨`

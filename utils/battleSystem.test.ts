@@ -2539,6 +2539,77 @@ describe("battle system balance", () => {
     expect(runAutoBattle(mage, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("道法自然"))).toBe(true);
   });
 
+  it("surfaces early sword, body, and mage passive opening logs before spirit-severing", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 84,
+        rootBone: 92,
+        insight: 74,
+        comprehension: 22,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.GoldenCore,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 640,
+        defense: 180,
+        hp: 3800,
+      },
+      "劍心通明",
+      ProfessionType.Sword,
+      ["s_g_passive"]
+    );
+
+    const body = calculatePlayerStats(
+      {
+        physique: 96,
+        rootBone: 84,
+        insight: 54,
+        comprehension: 18,
+        fortune: 10,
+        charm: 10,
+      },
+      MajorRealm.Foundation,
+      SpiritRootId.TRUE_METAL_EARTH,
+      {
+        attack: 420,
+        defense: 220,
+        hp: 4300,
+      },
+      "蠻荒血脈",
+      ProfessionType.Body,
+      ["b_f_passive"]
+    );
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 70,
+        rootBone: 68,
+        insight: 86,
+        comprehension: 24,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.Foundation,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 760,
+        mp: 2400,
+        defense: 150,
+      },
+      "靈力湧動",
+      ProfessionType.Mage,
+      ["m_f_passive"]
+    );
+
+    expect(runAutoBattle(sword, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("劍心通明"))).toBe(true);
+    expect(runAutoBattle(body, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("蠻荒血脈"))).toBe(true);
+    expect(runAutoBattle(mage, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("靈力湧動"))).toBe(true);
+  });
+
   it("surfaces emperor passive opening logs for sword and body styles", () => {
     fixedRandom.mockReturnValue(0.5);
 
