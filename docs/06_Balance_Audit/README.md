@@ -182,6 +182,7 @@
 - 戰鬥 snapshot provider 與 DOT / 吸生 tick 迴圈，也已開始抽成 `createCombatSnapshotProvider(...) / createStatusTickProcessor(...)`，主循環不再直接背著整段閉包式基礎設施。
 - 戰鬥開場的 runtime 組裝，也已開始整併到 `createCombatRuntimeContext(...)`，主動術式、攻速、克制、元素修正與被動旗標不再在 `runAutoBattle()` 開頭散寫。
 - 戰鬥基礎設施的 snapshot / tick wiring，也已開始整併到 `createCombatInfrastructure(...)`，`runAutoBattle()` 不再同時手動拼裝 snapshot provider 與 status tick processor。
+- 初始 combat loop state 也已開始整併到 `createInitialCombatLoopState(...)`，hp/mp、冷卻、疊層、護體與回合旗標不再在 `runAutoBattle()` 開頭逐項手寫。
 - 玩家出手前置流程也已開始整併到 `resolvePlayerTurnPrelude(...)`，週期護體與 Boss 破綻窗口不再在主循環平鋪散寫。
 - 敵方出手窗口也已開始整併到 `resolveEnemyActionWindow(...)`，控制跳過、特招延後、特招窗口與敵方攻勢判定已收進同一層 helper。
 - 回合開場維護也已開始整併到 `resolveTurnStartMaintenance(...)`，狀態 tick、被動回復與淨化流程不再直接散在主循環開頭。

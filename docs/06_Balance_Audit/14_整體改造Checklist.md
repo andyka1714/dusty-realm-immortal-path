@@ -260,6 +260,7 @@
 - [x] 戰鬥開場 seed 流程也已開始整併到 `seedCombatEncounter(...)`，初始護體與 enemy special 起始冷卻不再直接在主循環鋪開
 - [x] 戰鬥開場的 runtime 組裝，也已開始整併到 `createCombatRuntimeContext(...)`，主動術式、攻速、克制、元素修正與被動旗標不再在 `runAutoBattle()` 開頭散寫
 - [x] 戰鬥基礎設施的 snapshot / tick wiring，也已開始整併到 `createCombatInfrastructure(...)`，snapshot provider 與 status tick processor 不再在 `runAutoBattle()` 內各自散寫
+- [x] 初始 combat loop state 也已開始整併到 `createInitialCombatLoopState(...)`，hp/mp、冷卻、疊層、護體與回合旗標不再在 `runAutoBattle()` 開頭逐項手寫
 - [x] 玩家出手階段也已開始整併到 `resolvePlayerActionPhase(...)`，週期護體、Boss 破綻與正式出手流程不再在主循環拆成兩段散寫
 - [x] 玩家先手分支也已開始整併到 `resolvePlayerTurnPhase(...)`，玩家先手時的正式出手鏈不再直接鋪在主循環裡
 - [x] 勝利掉落結算也已開始整併到 `resolveVictoryRewards(...)`，擊殺訊息與戰利品組裝不再直接堆在 `runAutoBattle()` 尾端

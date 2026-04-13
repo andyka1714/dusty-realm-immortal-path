@@ -112,6 +112,7 @@
 - 戰鬥開場 seed 流程也已開始整併到 `seedCombatEncounter(...)`，初始護體與 enemy special 起始冷卻不再直接在主循環鋪開
 - 戰鬥開場的 runtime 組裝，也已開始整併到 `createCombatRuntimeContext(...)`，主動術式、攻速、克制、元素修正與被動旗標不再在 `runAutoBattle()` 開頭散寫
 - 戰鬥基礎設施的 snapshot / tick wiring，也已開始整併到 `createCombatInfrastructure(...)`，snapshot provider 與 status tick processor 不再在 `runAutoBattle()` 內各自散寫
+- 初始 combat loop state 也已開始整併到 `createInitialCombatLoopState(...)`，hp/mp、冷卻、疊層、護體與回合旗標不再在 `runAutoBattle()` 開頭逐項手寫
 - 開場被動狀態、待命訊息與 enemy special 起始延後，也已開始透過 `resolveInitialPassiveStateBundle(...)` 收斂，不再讓 `initializeCombatEncounter(...)` 長期維護一整串被動布林參數
 - 玩家出手階段也已開始整併到 `resolvePlayerActionPhase(...)`，週期護體、Boss 破綻與正式出手流程不再在主循環拆成兩段散寫
 - 玩家先手分支也已開始整併到 `resolvePlayerTurnPhase(...)`，玩家先手時的正式出手鏈不再直接鋪在主循環裡
@@ -172,6 +173,7 @@
 - `b_im_passive` / `s_ie_passive`：在 enemy special world strike 也已開始正式回報 `仙體無垢` / `萬法皆空`，不再只在 timeline combat 內部靜默過濾 DOT 與負面狀態
 - `b_f_passive` / `m_q_passive` / `s_q_passive` / `s_vr_passive`：在 player world strike 也開始明確回報 `蠻荒血脈`、`靈潮循環`、`劍脈初成`、`法則之劍`
 - `s_g_passive`：在劍修 world strike 暴擊時也已開始明確回報 `劍心通明`
+- `b_sf_passive`：在 player world strike 也已開始明確回報 `肉身成聖`，體修前中期 build 的進攻視角不再缺少被動可見性
 - 第一批高境界 retired active alias，也已補上明確即時戰鬥欄位，不再只靠 default fallback 推估：
   - `m_bi_active`：固定 `circle / 2 / 6 / projectile`
   - `s_im_active`：固定 `line / 2 / 4`

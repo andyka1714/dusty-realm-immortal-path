@@ -1601,6 +1601,35 @@ describe("battle system balance", () => {
     expect(result.logs.some((log) => log.message.includes("肉身成聖"))).toBe(true);
   });
 
+  it("surfaces spirit severing body passive on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const body = calculatePlayerStats(
+      {
+        physique: 82,
+        rootBone: 76,
+        insight: 60,
+        comprehension: 22,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.SpiritSevering,
+      SpiritRootId.MIXED_FIVE,
+      {
+        attack: 720,
+        defense: 240,
+        speed: 9,
+        hp: 1200,
+      },
+      "武聖",
+      ProfessionType.Body,
+      ["b_sf_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(body, COMMON_ENEMIES.m30_c1);
+    expect(strike.playerStatusNames).toContain("肉身成聖");
+  });
+
   it("lets nascent soul mage passive regenerate mana and boost high-mp damage", () => {
     fixedRandom.mockReturnValue(0.5);
 

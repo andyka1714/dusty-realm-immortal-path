@@ -864,6 +864,10 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
     statusNames.push("金剛法相");
   }
 
+  if (!skill && passiveFlags.hasBodySaintPassive) {
+    statusNames.push("肉身成聖");
+  }
+
   if (!skill && passiveFlags.hasMageQiPassive && player.profession === ProfessionType.Mage) {
     statusNames.push("靈潮循環");
   }
@@ -2321,6 +2325,33 @@ type CombatLoopState = {
   playerDamagedSinceSwordHeartWindow: boolean;
   nextSwordImmortalGuardAtMs: number;
 };
+
+const createInitialCombatLoopState = (
+  player: PlayerCombatStats,
+  enemy: Enemy
+): CombatLoopState => ({
+  turn: 1,
+  currentTimeMs: 0,
+  playerNextActionMs: 0,
+  enemyNextActionMs: 0,
+  activeSkillReadyAtMs: 0,
+  enemySpecialReadyAtMs: 0,
+  bossBroken: false,
+  playerDebuffed: false,
+  lastRegenTimeMs: 0,
+  playerHp: player.hp,
+  enemyHp: enemy.hp,
+  playerMp: player.mp,
+  playerStatuses: [],
+  enemyStatuses: [],
+  swordDeathWardUsed: false,
+  bodyRebirthTrueUsed: false,
+  bodyTribulationStacks: 0,
+  mageFoundationStacks: 0,
+  swordHeartStacks: 0,
+  playerDamagedSinceSwordHeartWindow: false,
+  nextSwordImmortalGuardAtMs: 5000,
+});
 
 type CombatRuntimeContext = {
   activeSkill?: Skill;
@@ -7612,22 +7643,31 @@ export const runAutoBattle = (
     drops: { itemId: string; count: number; instance?: ItemInstance }[];
   };
 } => {
-  let playerHp = player.hp;
-  let enemyHp = enemy.hp;
-  let playerMp = player.mp;
+  let {
+    turn,
+    currentTimeMs,
+    playerNextActionMs,
+    enemyNextActionMs,
+    activeSkillReadyAtMs,
+    enemySpecialReadyAtMs,
+    bossBroken,
+    playerDebuffed,
+    lastRegenTimeMs,
+    playerHp,
+    enemyHp,
+    playerMp,
+    playerStatuses,
+    enemyStatuses,
+    swordDeathWardUsed,
+    bodyRebirthTrueUsed,
+    bodyTribulationStacks,
+    mageFoundationStacks,
+    swordHeartStacks,
+    playerDamagedSinceSwordHeartWindow,
+    nextSwordImmortalGuardAtMs,
+  } = createInitialCombatLoopState(player, enemy);
   const logs: CombatLog[] = [];
-  let turn = 1;
-  let currentTimeMs = 0;
-  let playerNextActionMs = 0;
-  let enemyNextActionMs = 0;
-  let activeSkillReadyAtMs = 0;
-  let enemySpecialReadyAtMs = 0;
-  let bossBroken = false;
-  let playerDebuffed = false;
-  let lastRegenTimeMs = 0;
   let lastStatusTickMs = 0;
-  let playerStatuses: CombatStatus[] = [];
-  let enemyStatuses: CombatStatus[] = [];
   const {
     activeSkill,
     playerAttackIntervalMs,
@@ -7671,13 +7711,6 @@ export const runAutoBattle = (
     hasSwordEmperorPassive,
     hasMageEmperorPassive,
   } = passiveFlags;
-  let swordDeathWardUsed = false;
-  let bodyRebirthTrueUsed = false;
-  let bodyTribulationStacks = 0;
-  let mageFoundationStacks = 0;
-  let swordHeartStacks = 0;
-  let playerDamagedSinceSwordHeartWindow = false;
-  let nextSwordImmortalGuardAtMs = 5000;
 
   const { previousSnapshotProvider, processStatusTicks } = createCombatInfrastructure({
     player,
