@@ -2205,6 +2205,7 @@ const resolveEnemyActionPhase = ({
   playerMp,
   enemyHp,
   playerStatuses,
+  enemyStatuses,
   swordDeathWardUsed,
   bodyTribulationStacks,
   bodyRebirthTrueUsed,
@@ -2227,6 +2228,7 @@ const resolveEnemyActionPhase = ({
   playerMp: number;
   enemyHp: number;
   playerStatuses: CombatStatus[];
+  enemyStatuses: CombatStatus[];
   swordDeathWardUsed: boolean;
   bodyTribulationStacks: number;
   bodyRebirthTrueUsed: boolean;
@@ -2313,6 +2315,7 @@ const resolveEnemyActionPhase = ({
     playerMp,
     enemyHp,
     playerStatuses,
+    enemyStatuses,
     swordDeathWardUsed,
     bodyTribulationStacks,
     bodyRebirthTrueUsed,
@@ -6895,6 +6898,7 @@ export const runAutoBattle = (
           playerMp,
           enemyHp,
           playerStatuses,
+          enemyStatuses,
           swordDeathWardUsed,
           bodyTribulationStacks,
           bodyRebirthTrueUsed,
