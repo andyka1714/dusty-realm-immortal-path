@@ -10,6 +10,7 @@ import { addItem } from '../../store/slices/inventorySlice';
 import { addLog } from '../../store/slices/logSlice';
 import { addVisualEffect } from '../../store/slices/adventureSlice'; // Import addVisualEffect
 import { Modal } from '../Modal';
+import { GameSection } from '../game/GameSection';
 import { GameTooltip } from '../game/GameTooltip';
 import { getFormalSkill } from '../../data/skills';
 import { getSkillManualCategoryLabel, getSkillManualSourceLabels, getSkillManualTierLabel } from '../../data/items/manuals';
@@ -343,18 +344,30 @@ export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
         >
             <div className="flex flex-col gap-4">
                 {/* Dialogue Area */}
-                <div className="bg-stone-900/50 p-4 rounded-lg border border-stone-800 min-h-[120px] relative">
+                <GameSection
+                    title="問答往來"
+                    eyebrow="DIALOGUE THREAD"
+                    titleIcon={<MessageCircle size={16} className="text-stone-300" />}
+                    className="min-h-[120px]"
+                    bodyClassName="relative min-h-[120px]"
+                >
                     <p className="text-stone-300 text-lg leading-relaxed italic relative z-10">
                         "{dialogueLines[currentLineIndex]}"
                     </p>
                     <div className="absolute bottom-2 right-2 text-xs text-stone-600 font-mono">
                         {currentLineIndex + 1} / {dialogueLines.length}
                     </div>
-                </div>
+                </GameSection>
 
                 {/* Quest Info Area (If Applicable) */}
                 {currentQuest && (
-                    <div className="border border-stone-800 bg-stone-950/80 p-3 rounded">
+                    <GameSection
+                        title={currentQuest.title}
+                        eyebrow={currentQuest.type === 'main' ? 'MAIN QUEST' : 'SIDE QUEST'}
+                        titleIcon={<Gift size={16} className="text-amber-300" />}
+                        className="bg-stone-950/80"
+                        bodyClassName="space-y-2"
+                    >
                         <div className="text-amber-500 font-bold text-sm mb-1 flex items-center gap-2">
                            <CheckCircle size={14} /> {currentQuest.type === 'main' ? '[主線]' : '[支線]'} {currentQuest.title}
                         </div>
@@ -464,7 +477,7 @@ export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
                                     </React.Fragment>
                                 ))}
                             </div>
-                    </div>
+                    </GameSection>
                 )}
             </div>
         </Modal>

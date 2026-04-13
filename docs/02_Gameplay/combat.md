@@ -224,6 +224,7 @@
 - `player world strike` 的前置 runtime 組裝也已開始抽成 `createPlayerWorldStrikeRuntime(...)`，攻勢上下文、被動旗標、克制、元素修正、劍氣鏈與高境界窗口不再散寫在結果函式內
 - `enemy world strike` 的前置 runtime 組裝也已開始抽成 `createEnemyWorldStrikeRuntime(...)`，敵方攻勢上下文、特招 timing、incoming status 與承傷前參數不再各自重算
 - world strike 的結果運算本體，也已開始拆成 `resolvePlayerWorldStrikeOutcome(...) / resolveEnemyWorldStrikeOutcome(...)`，world 視角的傷害、stance 與狀態套用不再全部擠在入口函式內
+- world strike 的狀態名組裝，也已開始拆成 `buildPlayerWorldStrikeStatusNames(...) / buildEnemyWorldStrikeStatusNames(...)`，player-side 與 enemy-side 的 stance / incoming status 不再在結果組裝裡直接攤平
 - world strike 的被動狀態整理也已拆層：enemy 端改成 `defensive / survival` 兩段 helper，player 端改成 `sword / body / mage` 三段 helper，降低單一函式持續膨脹的風險
 - `enemy special` 的 incoming status 過濾與控制縮短，也已開始抽成 world / timeline 共用 resolver，不再只在 `runAutoBattle()` 內手寫 `filteredEnemyStatuses / normalizedIncomingStatuses`
 - Boss 破綻觸發與戰鬥事件，也已開始整併到 `rollBossBreakOpportunity(...)`，主循環不再直接散寫同一段爆發窗口判定

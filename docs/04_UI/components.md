@@ -22,7 +22,7 @@
 - `GameTitleStack`：`GamePanel / Modal / GameTooltip` 共用的標題層組件，統一 `eyebrow + title (+ icon)` 的字階與間距。
 - `GameOrnamentFrame`：`GamePanel / Modal / GameTooltip` 共用的內框、角飾、頂部光帶與背景光暈裝飾層，不再各自維護一份近似 ornament markup。
 - `GamePanel / Modal` 內原本重複存在的 eyebrow 裝飾已移除，現在正式由 `GameTitleStack` 單點承接標題階層，不再重複堆兩層同名標識。
-- `StatsPanel / ShopPanel / Inventory` 內部的關鍵資訊區，也已開始改走 `GameSection`，面板內部不再只有單純的邊框盒與 `border-l` 小標。
+- `StatsPanel / ShopPanel / Inventory / Dashboard / QuestModal` 內部的關鍵資訊區，也已開始改走 `GameSection`，面板內層不再只有單純的邊框盒與 `border-l` 小標。
 - `Inventory` 的裝備、技能書與消耗品 hover，也已切到同一套 `GameTooltip` 結構，不再只靠右側詳情面板承接全部資訊。
 - `QuestModal` 的裝備 / 技能書任務獎勵，也已補上 hover `GameTooltip`，不再只剩純文字獎勵列。
 - `QuestModal` 的獎勵 tooltip 標題，也已開始對齊品質色階，和商店 / 背包裝備共用同一套辨識語言。

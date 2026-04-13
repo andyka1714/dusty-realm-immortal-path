@@ -1195,39 +1195,81 @@ const buildPlayerWorldStrikeResult = ({
   voidSwordProc: boolean;
   dealsDirectDamage: boolean;
   timelineProfile: ReturnType<typeof getSkillTimelineProfile>;
-}): WorldStrikeResult => ({
-  damage,
-  isCrit,
-  skillName: skill?.name,
-  ...buildPlayerWorldStrikeTiming({
+}): WorldStrikeResult => {
+  const playerStatusNames = buildPlayerWorldStrikeStatusNames({
+    playerSideStatuses,
+    passiveFlags,
     player,
     skill,
-    timelineProfile,
-  }),
-  playerStatusNames: [
-    ...playerSideStatuses.map((status) => status.name),
-    ...getPlayerWorldPassiveStatusNames({
-      passiveFlags,
+    isCrit,
+    dealsDirectDamage,
+    canonicalSkillId,
+    hasSwordQiChain,
+    swordTribulationActive,
+    bodyFoundationStacks,
+    voidSwordProc,
+  });
+
+  return {
+    damage,
+    isCrit,
+    skillName: skill?.name,
+    ...buildPlayerWorldStrikeTiming({
       player,
       skill,
-      isCrit,
-      dealsDirectDamage,
-      canonicalSkillId,
-      hasSwordQiChain,
-      swordTribulationActive,
-      bodyFoundationStacks,
-      voidSwordProc,
+      timelineProfile,
     }),
-  ],
-  enemyStatusNames: filteredEnemyStatuses.map((status) => status.name),
-  playerShieldGain: playerSideStatuses
-    .filter((status) => status.kind === "shield")
-    .reduce((sum, status) => sum + Math.floor(status.value), 0),
-  areaShape: timelineProfile.areaShape,
-  areaRadius: timelineProfile.areaRadius,
-  maxTargets: timelineProfile.maxTargets,
-  isProjectile: timelineProfile.isProjectile,
-});
+    playerStatusNames,
+    enemyStatusNames: filteredEnemyStatuses.map((status) => status.name),
+    playerShieldGain: playerSideStatuses
+      .filter((status) => status.kind === "shield")
+      .reduce((sum, status) => sum + Math.floor(status.value), 0),
+    areaShape: timelineProfile.areaShape,
+    areaRadius: timelineProfile.areaRadius,
+    maxTargets: timelineProfile.maxTargets,
+    isProjectile: timelineProfile.isProjectile,
+  };
+};
+
+const buildPlayerWorldStrikeStatusNames = ({
+  playerSideStatuses,
+  passiveFlags,
+  player,
+  skill,
+  isCrit,
+  dealsDirectDamage,
+  canonicalSkillId,
+  hasSwordQiChain,
+  swordTribulationActive,
+  bodyFoundationStacks,
+  voidSwordProc,
+}: {
+  playerSideStatuses: CombatStatus[];
+  passiveFlags: PlayerPassiveFlags;
+  player: PlayerCombatStats;
+  skill?: Skill;
+  isCrit: boolean;
+  dealsDirectDamage: boolean;
+  canonicalSkillId?: string;
+  hasSwordQiChain: boolean;
+  swordTribulationActive: boolean;
+  bodyFoundationStacks: number;
+  voidSwordProc: boolean;
+}) => [
+  ...playerSideStatuses.map((status) => status.name),
+  ...getPlayerWorldPassiveStatusNames({
+    passiveFlags,
+    player,
+    skill,
+    isCrit,
+    dealsDirectDamage,
+    canonicalSkillId,
+    hasSwordQiChain,
+    swordTribulationActive,
+    bodyFoundationStacks,
+    voidSwordProc,
+  }),
+];
 
 const buildPlayerWorldStrikeTiming = ({
   player,
@@ -1310,37 +1352,24 @@ const buildEnemyWorldStrikeResult = ({
   bodyEmperorTriggered: boolean;
   swordDeathWardTriggered: boolean;
 }) => {
-  const statusNames = [
-    ...incomingStatuses.normalizedIncomingStatuses.map((status) => status.name),
-    ...getEnemyWorldPassiveStatusNames({
-      passiveFlags,
-      prePassiveDamage: preBodySaintDamage,
-      playerMaxHp: player.maxHp,
-      voidEvasion,
-      bodyFoundationStacks,
-      copperSkinTriggered,
-      bodyFusionTriggered,
-      elementalBarrierTriggered,
-      reflectTriggered,
-      enemyElement: enemy.element,
-      bodyTribulationTriggered,
-      mageTribulationTriggered,
-      mageTribulationControlTriggered:
-        incomingStatuses.mageTribulationControlTriggered,
-      swordFusionControlTriggered:
-        incomingStatuses.swordFusionControlTriggered,
-      bodyRebirthTrueTriggered,
-      bodyEmperorTriggered,
-      swordDeathWardTriggered,
-    }),
-  ];
-
-  statusNames.push(
-    ...getEnemyWorldIncomingStatusNames({
-      bodyImmortalTriggered: incomingStatuses.bodyImmortalTriggered,
-      swordEmperorTriggered: incomingStatuses.swordEmperorTriggered,
-    })
-  );
+  const statusNames = buildEnemyWorldStrikeStatusNames({
+    incomingStatuses,
+    passiveFlags,
+    preBodySaintDamage,
+    playerMaxHp: player.maxHp,
+    enemyElement: enemy.element,
+    voidEvasion,
+    bodyFoundationStacks,
+    copperSkinTriggered,
+    bodyFusionTriggered,
+    elementalBarrierTriggered,
+    reflectTriggered,
+    bodyTribulationTriggered,
+    mageTribulationTriggered,
+    bodyRebirthTrueTriggered,
+    bodyEmperorTriggered,
+    swordDeathWardTriggered,
+  });
 
   return {
     damage,
@@ -1353,6 +1382,69 @@ const buildEnemyWorldStrikeResult = ({
     }),
   };
 };
+
+const buildEnemyWorldStrikeStatusNames = ({
+  incomingStatuses,
+  passiveFlags,
+  preBodySaintDamage,
+  playerMaxHp,
+  enemyElement,
+  voidEvasion,
+  bodyFoundationStacks,
+  copperSkinTriggered,
+  bodyFusionTriggered,
+  elementalBarrierTriggered,
+  reflectTriggered,
+  bodyTribulationTriggered,
+  mageTribulationTriggered,
+  bodyRebirthTrueTriggered,
+  bodyEmperorTriggered,
+  swordDeathWardTriggered,
+}: {
+  incomingStatuses: ReturnType<typeof resolveIncomingEnemySpecialStatuses>;
+  passiveFlags: PlayerPassiveFlags;
+  preBodySaintDamage: number;
+  playerMaxHp: number;
+  enemyElement: ElementType;
+  voidEvasion: boolean;
+  bodyFoundationStacks: number;
+  copperSkinTriggered: boolean;
+  bodyFusionTriggered: boolean;
+  elementalBarrierTriggered: boolean;
+  reflectTriggered: boolean;
+  bodyTribulationTriggered: boolean;
+  mageTribulationTriggered: boolean;
+  bodyRebirthTrueTriggered: boolean;
+  bodyEmperorTriggered: boolean;
+  swordDeathWardTriggered: boolean;
+}) => [
+  ...incomingStatuses.normalizedIncomingStatuses.map((status) => status.name),
+  ...getEnemyWorldPassiveStatusNames({
+    passiveFlags,
+    prePassiveDamage: preBodySaintDamage,
+    playerMaxHp,
+    voidEvasion,
+    bodyFoundationStacks,
+    copperSkinTriggered,
+    bodyFusionTriggered,
+    elementalBarrierTriggered,
+    reflectTriggered,
+    enemyElement,
+    bodyTribulationTriggered,
+    mageTribulationTriggered,
+    mageTribulationControlTriggered:
+      incomingStatuses.mageTribulationControlTriggered,
+    swordFusionControlTriggered:
+      incomingStatuses.swordFusionControlTriggered,
+    bodyRebirthTrueTriggered,
+    bodyEmperorTriggered,
+    swordDeathWardTriggered,
+  }),
+  ...getEnemyWorldIncomingStatusNames({
+    bodyImmortalTriggered: incomingStatuses.bodyImmortalTriggered,
+    swordEmperorTriggered: incomingStatuses.swordEmperorTriggered,
+  }),
+];
 
 const applyEnemySpecialStatusApplication = ({
   special,

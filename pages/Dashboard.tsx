@@ -17,6 +17,7 @@ import { StatsPanel } from '../components/StatsPanel';
 import { Modal } from '../components/Modal';
 import { IntroSequence } from '../components/IntroSequence';
 import { GameHintBubble } from '../components/game/GameHintBubble';
+import { GameSection } from '../components/game/GameSection';
 import { GameTooltip } from '../components/game/GameTooltip';
 import { Play, ChevronsUp, Moon, Info, Skull, AlertTriangle, Zap, Lock } from 'lucide-react';
 import { MajorRealm, SpiritRootType } from '../types';
@@ -442,8 +443,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
             </div>
             </div>
 
-            <div className={clsx(embedded ? "rounded-[20px] border border-stone-800/80 bg-stone-900/78 p-5 md:p-6" : "bg-stone-900 border border-stone-800 rounded-xl p-6 relative z-20 hover:z-50 transition-all duration-200")}>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <GameSection
+              title="修行抉擇"
+              eyebrow="CULTIVATION ACTIONS"
+              className={clsx(embedded ? "" : "relative z-20 hover:z-50 transition-all duration-200")}
+              bodyClassName="grid grid-cols-2 gap-4 md:grid-cols-3"
+            >
 
                  {/* 1. Manual Cultivate */}
                  <div className="flex-1 relative group">
@@ -528,21 +533,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                   {isMajorBreakthrough ? "衝擊大境界" : "突破小境界"}
                 </GameHintBubble>
               </button>
-           </div>
-            </div>
+            </GameSection>
 
-            <div className={clsx(
-              "flex items-start gap-3 rounded-xl border p-4",
-              embedded
-                ? "border-stone-800/80 bg-black/18"
-                : "border-stone-800/50 bg-stone-900/50"
-            )}>
-              <Info size={16} className="text-stone-500 mt-1 flex-shrink-0" />
-              <p className="text-stone-500 text-xs leading-relaxed">
-                 <span className="text-stone-400 font-bold">修煉指南：</span> 
-                 閉關雖能大幅提升修為，但無法進行歷練或戰鬥。壽元有限，道友需在天人五衰之前突破桎梏，方能證道長生。
+            <GameSection
+              title="修煉指南"
+              eyebrow="WAYFARING NOTES"
+              titleIcon={<Info size={16} className="text-stone-400" />}
+              className={clsx(
+                embedded ? "border-stone-800/80 bg-black/18" : "border-stone-800/50 bg-stone-900/50"
+              )}
+            >
+              <p className="text-xs leading-relaxed text-stone-500">
+                <span className="font-bold text-stone-300">修煉指南：</span>
+                {" "}閉關雖能大幅提升修為，但無法進行歷練或戰鬥。壽元有限，道友需在天人五衰之前突破桎梏，方能證道長生。
               </p>
-            </div>
+            </GameSection>
 
             {embedded && (
               <div className="min-h-0 flex-1 overflow-hidden rounded-[20px] border border-stone-800/80 bg-stone-900/70">
