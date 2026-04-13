@@ -271,6 +271,8 @@
 - [x] 敵方完整出手階段也已開始整併到 `resolveEnemyActionPhase(...)`，承傷、保命、劍勢回補與特招冷卻回推不再在主循環散寫
 - [x] battle while 迴圈本身也已開始整併到 `runCombatTimelineLoop(...)`，`runAutoBattle()` 不再自己持有整段 loop / 解構 / 回寫流程
 - [x] 法修高境界 stance 的 `player world strike` 可見性也已補齊到基本攻擊視角，`道法自然 / 五氣朝元 / 仙法通神 / 萬法歸宗` 不再只在施法 world strike 或 timeline combat 才看得到
+- [x] `空間法則` 也已補進法修基本攻擊的 `player world strike` stance，可直接從進攻視角看到虛空轉移待命
+- [x] `runAutoBattle()` 的 runtime / seed / tick wiring 也已開始收斂到 `prepareAutoBattleExecution(...)`，主函式不再自己鋪開整段 battle setup
 - [x] 敵方出手後的劍勢回補與特招冷卻回推，也已開始拆到 `resolveEnemySwordHeartAftermath(...) / resolveEnemySpecialReadyAfterAction(...)`，enemy action phase 的尾端流程更接近單一 resolver
 - [x] 敵方行動分支也已開始整併到 `resolveEnemyTurnPhase(...)`，敵方出手窗口、控制跳過與完整出手鏈不再直接在主循環維護雙段流程
 - [x] 戰鬥勝敗尾端也已開始整併到 `finalizeCombatResult(...)`，勝利掉落與敗北記錄不再直接堆在主流程尾端

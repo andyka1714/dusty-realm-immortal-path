@@ -1895,6 +1895,36 @@ describe("battle system balance", () => {
     expect(result.logs.some((log) => log.message.includes("空間法則"))).toBe(true);
   });
 
+  it("surfaces void-refining mage passive on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 76,
+        rootBone: 70,
+        insight: 84,
+        comprehension: 26,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.VoidRefining,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 860,
+        mp: 2800,
+        hp: 2600,
+        defense: 160,
+        speed: 12,
+      },
+      "虛空法君",
+      ProfessionType.Mage,
+      ["m_vr_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(mage, COMMON_ENEMIES.m170_c1);
+    expect(strike.playerStatusNames).toContain("空間法則");
+  });
+
   it("lets spirit severing body passive reduce enemy world strikes and surface status name", () => {
     fixedRandom.mockReturnValue(0.5);
 

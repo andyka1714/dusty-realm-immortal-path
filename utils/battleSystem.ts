@@ -963,6 +963,10 @@ const getPlayerWorldMagePassiveStatusNames = (options: PlayerWorldPassiveStatusO
     statusNames.push("元素護盾");
   }
 
+  if (!skill && passiveFlags.hasMageVoidPassive) {
+    statusNames.push("空間法則");
+  }
+
   if (isManaSpringEmpowered(player.mp, player.maxMp, passiveFlags)) {
     statusNames.push("法力源泉");
   }
@@ -2998,6 +3002,88 @@ const runCombatTimelineLoop = ({
   }
 
   return state;
+};
+
+const prepareAutoBattleExecution = (
+  player: PlayerCombatStats,
+  enemy: Enemy,
+  logs: CombatLog[]
+) => {
+  let state = createInitialCombatLoopState(player, enemy);
+  let lastStatusTickMs = 0;
+
+  const {
+    activeSkill,
+    playerAttackIntervalMs,
+    enemyAttackIntervalMs,
+    pVsE,
+    enemyElementalAffinity,
+    passiveFlags,
+  } = createCombatRuntimeContext(player, enemy);
+  const featureFlags = createCombatLoopFeatureFlags(passiveFlags);
+
+  const runtimeContext = {
+    activeSkill: activeSkill ?? undefined,
+    playerAttackIntervalMs,
+    enemyAttackIntervalMs,
+    pVsE,
+    enemyElementalAffinity,
+    passiveFlags,
+  } satisfies CombatRuntimeContext;
+
+  const {
+    previousSnapshotProvider,
+    processStatusTicks,
+    playerStatuses: seededPlayerStatuses,
+    enemySpecialReadyAtMs: seededEnemySpecialReadyAtMs,
+  } = prepareCombatLoopEnvironment({
+    player,
+    enemy,
+    logs,
+    runtimeContext,
+    getTurn: () => state.turn,
+    playerStatusesRef: () => state.playerStatuses,
+    enemyStatusesRef: () => state.enemyStatuses,
+    activeSkillReadyAtMsRef: () => state.activeSkillReadyAtMs,
+    getPlayerHp: () => state.playerHp,
+    getEnemyHp: () => state.enemyHp,
+    setPlayerHp: (value) => {
+      state.playerHp = value;
+    },
+    setEnemyHp: (value) => {
+      state.enemyHp = value;
+    },
+    setPlayerStatuses: (value) => {
+      state.playerStatuses = value;
+    },
+    setEnemyStatuses: (value) => {
+      state.enemyStatuses = value;
+    },
+    getLastStatusTickMs: () => lastStatusTickMs,
+    setLastStatusTickMs: (value) => {
+      lastStatusTickMs = value;
+    },
+    getPlayerDamagedSinceSwordHeartWindow: () => state.playerDamagedSinceSwordHeartWindow,
+    setPlayerDamagedSinceSwordHeartWindow: (value) => {
+      state.playerDamagedSinceSwordHeartWindow = value;
+    },
+    playerHp: state.playerHp,
+    enemyHp: state.enemyHp,
+    playerStatuses: state.playerStatuses,
+  });
+
+  state = applyPreparedCombatLoopState(state, {
+    playerStatuses: seededPlayerStatuses,
+    enemySpecialReadyAtMs: seededEnemySpecialReadyAtMs,
+  });
+
+  return {
+    state,
+    runtimeContext,
+    featureFlags,
+    previousSnapshotProvider,
+    processStatusTicks,
+  };
 };
 
 const resolvePlayerTurnPrelude = ({
@@ -7955,73 +8041,15 @@ export const runAutoBattle = (
   };
 } => {
   const logs: CombatLog[] = [];
-  let state = createInitialCombatLoopState(player, enemy);
-  let lastStatusTickMs = 0;
   const {
-    activeSkill,
-    playerAttackIntervalMs,
-    enemyAttackIntervalMs,
-    pVsE,
-    enemyElementalAffinity,
-    passiveFlags,
-  } = createCombatRuntimeContext(player, enemy);
-  const featureFlags = createCombatLoopFeatureFlags(passiveFlags);
-
-  const runtimeContext = {
-    activeSkill: activeSkill ?? undefined,
-    playerAttackIntervalMs,
-    enemyAttackIntervalMs,
-    pVsE,
-    enemyElementalAffinity,
-    passiveFlags,
-  } satisfies CombatRuntimeContext;
-
-  const {
+    state,
+    runtimeContext,
+    featureFlags,
     previousSnapshotProvider,
     processStatusTicks,
-    playerStatuses: seededPlayerStatuses,
-    enemySpecialReadyAtMs: seededEnemySpecialReadyAtMs,
-  } = prepareCombatLoopEnvironment({
-    player,
-    enemy,
-    logs,
-    runtimeContext,
-    getTurn: () => state.turn,
-    playerStatusesRef: () => state.playerStatuses,
-    enemyStatusesRef: () => state.enemyStatuses,
-    activeSkillReadyAtMsRef: () => state.activeSkillReadyAtMs,
-    getPlayerHp: () => state.playerHp,
-    getEnemyHp: () => state.enemyHp,
-    setPlayerHp: (value) => {
-      state.playerHp = value;
-    },
-    setEnemyHp: (value) => {
-      state.enemyHp = value;
-    },
-    setPlayerStatuses: (value) => {
-      state.playerStatuses = value;
-    },
-    setEnemyStatuses: (value) => {
-      state.enemyStatuses = value;
-    },
-    getLastStatusTickMs: () => lastStatusTickMs,
-    setLastStatusTickMs: (value) => {
-      lastStatusTickMs = value;
-    },
-    getPlayerDamagedSinceSwordHeartWindow: () => state.playerDamagedSinceSwordHeartWindow,
-    setPlayerDamagedSinceSwordHeartWindow: (value) => {
-      state.playerDamagedSinceSwordHeartWindow = value;
-    },
-    playerHp: state.playerHp,
-    enemyHp: state.enemyHp,
-    playerStatuses: state.playerStatuses,
-  });
-  state = applyPreparedCombatLoopState(state, {
-    playerStatuses: seededPlayerStatuses,
-    enemySpecialReadyAtMs: seededEnemySpecialReadyAtMs,
-  });
+  } = prepareAutoBattleExecution(player, enemy, logs);
 
-  state = runCombatTimelineLoop({
+  const finalState = runCombatTimelineLoop({
     initialState: state,
     processStatusTicks,
     player,
@@ -8031,16 +8059,16 @@ export const runAutoBattle = (
     featureFlags,
   });
 
-  const won = state.playerHp > 0 && state.enemyHp <= 0;
+  const won = finalState.playerHp > 0 && finalState.enemyHp <= 0;
   return finalizeCombatResult({
     won,
     logs,
-    turn: state.turn,
-    currentTimeMs: state.currentTimeMs,
+    turn: finalState.turn,
+    currentTimeMs: finalState.currentTimeMs,
     player,
     enemy,
-    playerHp: state.playerHp,
-    enemyHp: state.enemyHp,
+    playerHp: finalState.playerHp,
+    enemyHp: finalState.enemyHp,
     previousSnapshotProvider,
   });
 };
