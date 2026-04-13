@@ -2322,6 +2322,30 @@ type CombatLoopState = {
   nextSwordImmortalGuardAtMs: number;
 };
 
+type CombatRuntimeContext = {
+  activeSkill?: Skill;
+  playerAttackIntervalMs: number;
+  enemyAttackIntervalMs: number;
+  pVsE: { isEffective: boolean; isResisted: boolean };
+  enemyElementalAffinity: ReturnType<typeof getEnemyElementalModifier>;
+  passiveFlags: PlayerPassiveFlags;
+};
+
+const createCombatRuntimeContext = (
+  player: PlayerCombatStats,
+  enemy: Enemy
+): CombatRuntimeContext => {
+  const activeSkill = getHighestActiveSkill(player.profession, player.learnedSkills);
+  return {
+    activeSkill: activeSkill ?? undefined,
+    playerAttackIntervalMs: getPlayerAttackIntervalMs(player),
+    enemyAttackIntervalMs: getEnemyAttackIntervalMs(enemy),
+    pVsE: getRestriction(player.element, enemy.element),
+    enemyElementalAffinity: getEnemyElementalModifier(player.element, enemy),
+    passiveFlags: getPlayerPassiveFlags(player.learnedSkills),
+  };
+};
+
 const resolveCombatLoopStep = ({
   state,
   processStatusTicks,
@@ -7527,21 +7551,22 @@ export const runAutoBattle = (
   let playerStatuses: CombatStatus[] = [];
   let enemyStatuses: CombatStatus[] = [];
   const previousSnapshotProvider = combatLogSnapshotProvider;
-  const activeSkill = getHighestActiveSkill(player.profession, player.learnedSkills);
+  const {
+    activeSkill,
+    playerAttackIntervalMs,
+    enemyAttackIntervalMs,
+    pVsE,
+    enemyElementalAffinity,
+    passiveFlags,
+  } = createCombatRuntimeContext(player, enemy);
 
   combatLogSnapshotProvider = createCombatSnapshotProvider({
-    activeSkill: activeSkill ?? undefined,
+    activeSkill,
     playerStatusesRef: () => playerStatuses,
     enemyStatusesRef: () => enemyStatuses,
     activeSkillReadyAtMsRef: () => activeSkillReadyAtMs,
     learnedSkills: player.learnedSkills,
   });
-
-  const playerAttackIntervalMs = getPlayerAttackIntervalMs(player);
-  const enemyAttackIntervalMs = getEnemyAttackIntervalMs(enemy);
-  const pVsE = getRestriction(player.element, enemy.element);
-  const enemyElementalAffinity = getEnemyElementalModifier(player.element, enemy);
-  const passiveFlags = getPlayerPassiveFlags(player.learnedSkills);
   const {
     hasReflectPassive,
     hasSwordQiPassive,
