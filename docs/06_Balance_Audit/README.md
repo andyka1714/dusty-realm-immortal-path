@@ -150,19 +150,14 @@
 - 玩家主動術式施加後的 player-side / enemy-side 狀態推入與戰鬥日誌，也已開始走共用 append logger helper，時間軸戰鬥不再逐段手寫同一套流程。
 - 玩家主動術式的資源 / 冷卻流，也已開始抽成共用 `resolvePlayerActiveResourceFlow(...)`，把術式免耗、冷卻縮短、靈潮回補、劍心重置與法修築基層數累進集中處理。
 - `劍意化形 / 虛空劍陣 / 撒豆成兵` 這批多段追擊與召喚後續傷害，也已開始抽成共用 `applyPlayerEchoAndSummonFollowupEffects(...)`。
-- 敵方來襲後的承傷流程，也已開始抽成共用 `resolveIncomingEnemyDamage(...)`，把 `銅皮鐵骨 / 金剛法相 / 肉身成聖 / 元素護盾 / 護體劍罡` 這批減傷、護盾與保命流程集中到同一條處理鏈。
-- 敵方命中後的承傷反應鏈，也已開始抽成共用 `applyEnemyHitAftermath(...)`，把 `萬劫不滅 / 雷劫煉心 / 噬生 / 滴血重生（真） / 不死不滅` 這批後處理事件集中處理。
-- 敵方出手前的攻勢計算，也已開始抽成共用 `resolveEnemyOffenseRoll(...)`，把屬性克制、特招倍率、格擋 / 閃避 / 虛空轉移與承傷前數值準備收進同一條流程。
+- 敵方出手前的攻勢計算、承傷鏈與命中後反應鏈，也已開始收斂到 `resolveEnemyOffenseRoll(...) / resolveIncomingEnemyDamage(...) / applyEnemyHitAftermath(...)`，把克制、特招倍率、格擋 / 閃避 / 虛空轉移、減傷、護盾、保命與命中後續事件集中到同一條處理鏈。
 - `runAutoBattle()` 內的致命保命流程，也已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡 / 滴血重生（真） / 不死不滅`。
 - `祖巫降臨 / 法天象地 / 掌中神國 / 一念花開 / 破劫一擊` 這批高境界主動的後續效果，也已開始收斂到共用 follow-up helper，進一步縮小 `runAutoBattle()` 的 inline 分支。
 - 戰鬥中的 DOT / 吸血 tick 結算，也已開始共用同一個 status outcome resolver，`燃燒 / 中毒 / 流血 / 吸生` 不再由玩家與敵方各寫一套。
 - 玩家被動技能判定已改成明確 skill id / alias 對照，formal core 對 retired passive 的承接也不再依賴模糊 canonical 折疊。
 - formal core 被動的 stat bonus 也已改成逐招明確對照表，不再沿用職業 + 境界通用公式；absorbed retired passive 會透過同一份 formal 對照表承接屬性收益。
 - retired 技能目前正式收斂成 `battle-absorbed / retirement-ready`；舊的 `pending-retirement` 過渡層已清空並移除。
-- formal realm dataset 已開始透過單一 retired-alias 剝離 helper 統一移除 `retirement-ready active + battle-absorbed passive`，降低 realm view 重複維護風險。
-- retired active / passive 的 alias 剝離 helper，現在也已回收到 alias 檔本體，realm view 不再在 `data/skills/index.ts` 額外重複維護同一套過濾規則。
-- retired active / passive alias 也已補上 alias-layer 聚合表，正式 realm dataset 現在可直接由 alias-layer 組裝，不再在 `data/skills/index.ts` 手動攤開多份 alias 清單。
-- `battle-absorbed / retirement-ready` 的 active / passive alias record，現在也已開始直接由 alias-layer 聚合表和 skill ID 名單組裝，不再在各別 alias 檔裡手寫平鋪同一份 retired alias map。
+- formal realm dataset 現在已透過 alias-layer 聚合表與單一 retired-alias 剝離 helper 統一移除 `retirement-ready active + battle-absorbed passive`；`data/skills/index.ts` 不再重複維護 alias 清單、過濾規則與 `battle-absorbed / retirement-ready` record 組裝。
 - formal realm dataset 的組裝也已開始走單一 `buildRealmSkillSet(...)` helper，各境界不再重複拼接 retired alias。
 - `言出法隨 / 劍道獨尊 / 向死而生 / 法力源泉 / 靈力湧動 / 五氣朝元 / 仙法通神 / 萬法歸宗 / 萬法皆空 / 劍意化形` 等被動，已陸續補齊 world strike 與 timeline combat 的狀態回報。
 - `荒古戰體 / 仙元護體 / 劍意化形 / 肉身成聖 / 道法自然` 這批被動，也已開始補齊 timeline combat 開場待命訊息，不再只有內部效果在跑。

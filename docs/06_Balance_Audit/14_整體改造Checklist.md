@@ -28,6 +28,7 @@
 - [x] 把平衡審計文件掛到 [docs/index.md](/Users/andyka1714/Desktop/Ascend-Spark/dusty-realm-immortal-path/docs/index.md)
 - [x] 建立本 checklist 文件
 - [x] `README.md`、`docs/index.md` 與平衡審計總覽已持續做分批交叉同步，避免文件敘述與最新 battle / UI helper 狀態脫節
+- [x] 平衡審計總覽與即時戰鬥分析文件已開始實際去掉 alias-layer / battle helper 的重複條目，往最終完全去重推進
 - [ ] 讓所有平衡審計文件彼此完全去重，避免同一件事在多份文件重複描述
 - [ ] 把 `README.md`、`docs/02_Gameplay/*`、`docs/03_World/*` 與平衡審計全部再做一次全面交叉校對
 
@@ -239,6 +240,8 @@
 - [x] enemy special 的狀態套用、戰鬥日誌與免疫提示，已開始進一步收斂到同一層 helper，減少 timeline 內核殘留散寫
 - [x] DOT / 吸血 tick 的傷害、回復與戰鬥訊息，已開始共用同一個 status outcome resolver，玩家與敵方不再各維護一套
 - [x] 主動術式後的資源回復、冷卻縮短、冷卻重置與疊層訊息，也已開始抽成共用 logger helper，收斂 `五氣朝元 / 道法自然 / 靈潮循環 / 劍心通明 / 靈力湧動`
+- [x] 玩家出手前的攻勢計算與暴擊 / 破防判定，已開始抽成共用 `resolvePlayerOffenseRoll(...)`，縮小 `runAutoBattle()` 主循環內的 inline 分支
+- [x] 玩家主動技能命中後的資源流、狀態推入、回響追擊與高境界後續效果，已開始整併到 `resolvePlayerActiveAftermath(...)`
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---

@@ -1324,6 +1324,209 @@ const getPlayerAttackContext = (
   };
 };
 
+const resolvePlayerOffenseRoll = ({
+  player,
+  enemy,
+  activeSkill,
+  activeSkillCanonicalId,
+  activeSkillTimelineProfile,
+  skillReady,
+  passiveFlags,
+  playerHp,
+  playerMp,
+  playerStatuses,
+  enemyStatuses,
+  bossBroken,
+  playerDebuffed,
+  mageFoundationStacks,
+  swordHeartStacks,
+  currentTimeMs,
+}: {
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  activeSkill?: Skill;
+  activeSkillCanonicalId?: string;
+  activeSkillTimelineProfile?: SkillTimelineProfile;
+  skillReady: boolean;
+  passiveFlags: PlayerPassiveFlags;
+  playerHp: number;
+  playerMp: number;
+  playerStatuses: CombatStatus[];
+  enemyStatuses: CombatStatus[];
+  bossBroken: boolean;
+  playerDebuffed: boolean;
+  mageFoundationStacks: number;
+  swordHeartStacks: number;
+  currentTimeMs: number;
+}) => {
+  const attackContext = getPlayerAttackContext(
+    player,
+    enemy,
+    skillReady ? activeSkill : undefined
+  );
+  const pVsE = getRestriction(player.element, enemy.element);
+  const enemyElementalAffinity = getEnemyElementalModifier(player.element, enemy);
+  const dealsDirectDamage =
+    !skillReady ||
+    activeSkill!.effectType === "damage" ||
+    activeSkill!.damageMultiplier !== undefined;
+
+  let effectivePower = attackContext.power;
+  let effectiveDefense =
+    attackContext.defense * getArmorBreakMultiplier(enemyStatuses, currentTimeMs);
+  const bodyFoundationStacks = passiveFlags.hasBodyFoundationPassive
+    ? getBodyFoundationBloodlineStacks(playerHp, player.maxHp)
+    : 0;
+  const voidSwordProc = passiveFlags.hasSwordVoidPassive && Math.random() < 0.1;
+  if (voidSwordProc) {
+    effectiveDefense = Math.max(1, effectiveDefense * 0.5);
+  }
+
+  if (pVsE.isEffective) effectivePower *= 1.12;
+  if (pVsE.isResisted) effectivePower *= 0.88;
+  effectivePower *= enemyElementalAffinity.multiplier;
+  if (bossBroken) effectivePower *= 1.25;
+  if (playerDebuffed) effectivePower *= 0.9;
+  if (
+    passiveFlags.hasMageQiPassive &&
+    !skillReady &&
+    player.profession === ProfessionType.Mage
+  ) {
+    effectivePower += player.magic * 0.28;
+  }
+  const swordTribulationActive = hasSwordTribulationWindow(
+    playerHp,
+    player.maxHp,
+    passiveFlags
+  );
+  if (swordTribulationActive) {
+    effectivePower *= 1.5;
+  }
+  if (
+    passiveFlags.hasMageMahayanaPassive &&
+    skillReady &&
+    activeSkill!.profession === ProfessionType.Mage
+  ) {
+    effectivePower *= 1.4;
+  }
+  if (
+    passiveFlags.hasMageFoundationPassive &&
+    skillReady &&
+    activeSkill!.profession === ProfessionType.Mage &&
+    mageFoundationStacks > 0
+  ) {
+    effectivePower *= 1 + mageFoundationStacks * 0.1;
+  }
+  if (
+    skillReady &&
+    activeSkillCanonicalId === "m_tr_active" &&
+    enemyStatuses.some(
+      (status) =>
+        status.id === "paralyze" && status.expiresAtMs > currentTimeMs
+    )
+  ) {
+    effectivePower *= 1.5;
+  }
+  const manaSpringEmpowered = isManaSpringEmpowered(
+    playerMp,
+    player.maxMp,
+    passiveFlags
+  );
+  if (manaSpringEmpowered) {
+    effectivePower *= 1.2;
+  }
+  if (passiveFlags.hasSwordHeartPassive && swordHeartStacks > 0) {
+    effectivePower *= 1 + swordHeartStacks * 0.03;
+  }
+  if (bodyFoundationStacks > 0) {
+    effectivePower *= 1 + bodyFoundationStacks * 0.02;
+  }
+  const hasSwordQiChain = hasLearnedSkillId(player.learnedSkills, "s_f_active");
+  const activeSwordQiStatuses =
+    skillReady && activeSkillCanonicalId === "s_tr_active"
+      ? playerStatuses.filter(
+          (status) =>
+            status.kind === "critBoost" && status.expiresAtMs > currentTimeMs
+        )
+      : [];
+  if (activeSwordQiStatuses.length > 0) {
+    effectivePower *= 1 + activeSwordQiStatuses.length * 0.35;
+  } else if (skillReady && activeSkillCanonicalId === "s_tr_active" && hasSwordQiChain) {
+    effectivePower *= 1.18;
+  }
+
+  const critRate = Math.min(
+    95,
+    player.crit +
+      (passiveFlags.hasSwordMahayanaPassive ? 5 : 0) +
+      (passiveFlags.hasSwordQiPassive ? getSwordQiPassiveCritBonus() : 0) +
+      attackContext.critBonus +
+      getCritBoostValue(playerStatuses, currentTimeMs)
+  );
+  const isCrit =
+    swordTribulationActive ||
+    (attackContext.canCrit && Math.random() * 100 < Math.max(0, critRate));
+
+  let playerDamage = 0;
+  const ignoreEnemyReduction =
+    (skillReady && activeSkillCanonicalId === "s_tr_active") ||
+    (!skillReady && passiveFlags.hasSwordEmperorPassive);
+  if (dealsDirectDamage) {
+    playerDamage = resolveDamage(
+      effectivePower,
+      ignoreEnemyReduction ? 0 : effectiveDefense
+    );
+    if (attackContext.damageBonus) {
+      playerDamage = Math.floor(
+        playerDamage * (1 + attackContext.damageBonus / 100)
+      );
+    }
+    if (!ignoreEnemyReduction) {
+      playerDamage = Math.floor(
+        playerDamage * getEnemyDamageReductionMultiplier(enemy)
+      );
+    }
+    if (skillReady) {
+      playerDamage = Math.floor(
+        playerDamage * (activeSkillTimelineProfile?.areaDamageModifier ?? 1)
+      );
+    }
+    if (isCrit) {
+      playerDamage = Math.floor(
+        playerDamage *
+          ((player.critDamage +
+            attackContext.critDamageBonus +
+            (voidSwordProc ? 50 : 0) +
+            (passiveFlags.hasSwordMahayanaPassive ? 10 : 0)) /
+            100)
+      );
+    }
+    if (
+      skillReady &&
+      activeSkillCanonicalId === "b_vr_active" &&
+      enemy.rank !== EnemyRank.Boss
+    ) {
+      playerDamage = Math.max(playerDamage, enemy.hp);
+    }
+  }
+
+  return {
+    attackContext,
+    pVsE,
+    enemyElementalAffinity,
+    dealsDirectDamage,
+    effectiveDefense,
+    bodyFoundationStacks,
+    voidSwordProc,
+    swordTribulationActive,
+    manaSpringEmpowered,
+    hasSwordQiChain,
+    activeSwordQiStatuses,
+    isCrit,
+    playerDamage,
+  };
+};
+
 const getEnemyAttackContext = (
   enemy: Enemy,
   player: PlayerCombatStats
@@ -1423,6 +1626,207 @@ const resolveEnemyOffenseRoll = ({
     isBlock,
     bodyFoundationStacks,
     eVsP,
+  };
+};
+
+const resolvePlayerActiveAftermath = ({
+  player,
+  skillReady,
+  activeSkill,
+  activeSkillCanonicalId,
+  currentTimeMs,
+  turn,
+  logs,
+  enemy,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+  playerStatuses,
+  enemyStatuses,
+  playerMp,
+  playerDamage,
+  effectiveDefense,
+  pVsE,
+  enemyElementalAffinity,
+  activeSkillReadyAtMs,
+  mageFoundationStacks,
+  isCrit,
+  dealsDirectDamage,
+  passiveFlags,
+}: {
+  player: PlayerCombatStats;
+  skillReady: boolean;
+  activeSkill?: Skill;
+  activeSkillCanonicalId?: string;
+  currentTimeMs: number;
+  turn: number;
+  logs: CombatLog[];
+  enemy: Enemy;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  playerStatuses: CombatStatus[];
+  enemyStatuses: CombatStatus[];
+  playerMp: number;
+  playerDamage: number;
+  effectiveDefense: number;
+  pVsE: ReturnType<typeof getRestriction>;
+  enemyElementalAffinity: ReturnType<typeof getEnemyElementalModifier>;
+  activeSkillReadyAtMs: number;
+  mageFoundationStacks: number;
+  isCrit: boolean;
+  dealsDirectDamage: boolean;
+  passiveFlags: PlayerPassiveFlags;
+}) => {
+  if (!skillReady || !activeSkill) {
+    return {
+      enemyHp,
+      playerHp,
+      playerStatuses,
+      enemyStatuses,
+      playerMp,
+      activeSkillReadyAtMs,
+      mageFoundationStacks,
+    };
+  }
+
+  ({
+    playerMp,
+    activeSkillReadyAtMs,
+    mageFoundationStacks,
+  } = resolvePlayerActiveResourceFlow({
+    activeSkill,
+    activeSkillCanonicalId,
+    player,
+    playerMp,
+    currentTimeMs,
+    activeSkillReadyAtMs,
+    mageFoundationStacks,
+    isCrit,
+    logs,
+    turn,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp,
+    hasMageFusionPassive: passiveFlags.hasMageFusionPassive,
+    hasMageQiPassive: passiveFlags.hasMageQiPassive,
+    hasSwordGoldenPassive: passiveFlags.hasSwordGoldenPassive,
+    hasMageFoundationPassive: passiveFlags.hasMageFoundationPassive,
+  }));
+
+  const { playerSideStatuses, filteredEnemyStatuses } =
+    resolvePlayerSkillStatusApplication({
+      skill: activeSkill,
+      targetMaxHp:
+        activeSkill.targetType === "self" ? playerMaxHp : enemyMaxHp,
+      enemy,
+      passiveFlags,
+      dealsDirectDamage,
+      isCrit,
+      currentTimeMs,
+      enemyHp,
+    });
+
+  appendAndLogCombatStatuses({
+    container: playerStatuses,
+    statuses: playerSideStatuses,
+    logs,
+    turn,
+    timeMs: currentTimeMs,
+    isPlayer: true,
+    targetIsPlayer: true,
+    enemy,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp,
+  });
+
+  appendAndLogCombatStatuses({
+    container: enemyStatuses,
+    statuses: filteredEnemyStatuses,
+    logs,
+    turn,
+    timeMs: currentTimeMs,
+    isPlayer: true,
+    targetIsPlayer: false,
+    enemy,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp,
+  });
+
+  if (
+    passiveFlags.hasMageImmortalPassive &&
+    activeSkill.profession === ProfessionType.Mage &&
+    playerDamage > 0 &&
+    Math.random() < 0.3
+  ) {
+    const repeatedDamage = Math.max(1, Math.floor(playerDamage));
+    enemyHp = Math.max(0, enemyHp - repeatedDamage);
+    pushCombatLog(logs, {
+      turn,
+      timeMs: currentTimeMs + 1,
+      isPlayer: true,
+      message: `【仙法通神】術式回響，再度造成 <dmg>${repeatedDamage}</dmg> 點傷害！`,
+      damage: repeatedDamage,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  ({
+    enemyHp,
+    playerHp,
+    activeSkillReadyAtMs,
+  } = applyPlayerActiveFollowupEffects({
+    activeSkillCanonicalId,
+    playerDamage,
+    currentTimeMs,
+    enemy,
+    enemyHp,
+    playerHp,
+    playerMaxHp,
+    turn,
+    logs,
+    hasBodyImmortalPassive: passiveFlags.hasBodyImmortalPassive,
+    enemyStatuses,
+    activeSkillReadyAtMs,
+  }));
+
+  enemyHp = applyPlayerEchoAndSummonFollowupEffects({
+    skillReady,
+    activeSkillCanonicalId,
+    hasSwordEchoPassive: passiveFlags.hasSwordEchoPassive,
+    currentTimeMs,
+    turn,
+    logs,
+    player,
+    enemy,
+    enemyHp,
+    playerHp,
+    playerMaxHp,
+    playerDamage,
+    effectiveDefense,
+    enemyStatuses,
+    pVsE,
+    enemyElementalAffinity,
+  });
+
+  return {
+    enemyHp,
+    playerHp,
+    playerStatuses,
+    enemyStatuses,
+    playerMp,
+    activeSkillReadyAtMs,
+    mageFoundationStacks,
   };
 };
 
@@ -4482,7 +4886,6 @@ export const runAutoBattle = (
   const playerAttackIntervalMs = getPlayerAttackIntervalMs(player);
   const enemyAttackIntervalMs = getEnemyAttackIntervalMs(enemy);
   const pVsE = getRestriction(player.element, enemy.element);
-  const eVsP = getRestriction(enemy.element, player.element);
   const enemyElementalAffinity = getEnemyElementalModifier(player.element, enemy);
   const passiveFlags = getPlayerPassiveFlags(player.learnedSkills);
   const {
@@ -4780,152 +5183,46 @@ export const runAutoBattle = (
       const activeSkillTimelineProfile = skillReady
         ? getSkillTimelineProfile(activeSkill!)
         : undefined;
-      const dealsDirectDamage =
-        !skillReady ||
-        activeSkill!.effectType === "damage" ||
-        activeSkill!.damageMultiplier !== undefined;
       const activeSkillCanonicalId = skillReady
         ? getCanonicalSkillId(activeSkill!)
         : undefined;
-      const attackContext = getPlayerAttackContext(
-        player,
-        enemy,
-        skillReady ? activeSkill : undefined
-      );
-
-      let effectivePower = attackContext.power;
-      let effectiveDefense =
-        attackContext.defense * getArmorBreakMultiplier(enemyStatuses, currentTimeMs);
-      const bodyFoundationStacks = hasBodyFoundationPassive
-        ? getBodyFoundationBloodlineStacks(playerHp, player.maxHp)
-        : 0;
-      const voidSwordProc = hasSwordVoidPassive && Math.random() < 0.1;
-      if (voidSwordProc) {
-        effectiveDefense = Math.max(1, effectiveDefense * 0.5);
-      }
-
-      if (pVsE.isEffective) effectivePower *= 1.12;
-      if (pVsE.isResisted) effectivePower *= 0.88;
-      effectivePower *= enemyElementalAffinity.multiplier;
-      if (bossBroken) effectivePower *= 1.25;
-      if (playerDebuffed) effectivePower *= 0.9;
-      if (
-        hasMageQiPassive &&
-        !skillReady &&
-        player.profession === ProfessionType.Mage
-      ) {
-        effectivePower += player.magic * 0.28;
-      }
-      if (hasSwordTribulationPassive && playerHp <= player.maxHp * 0.2) {
-        effectivePower *= 1.5;
-      }
-      if (
-        hasMageMahayanaPassive &&
-        skillReady &&
-        activeSkill!.profession === ProfessionType.Mage
-      ) {
-        effectivePower *= 1.4;
-      }
-      if (
-        hasMageFoundationPassive &&
-        skillReady &&
-        activeSkill!.profession === ProfessionType.Mage &&
-        mageFoundationStacks > 0
-      ) {
-        effectivePower *= 1 + mageFoundationStacks * 0.1;
-      }
-      if (
-        skillReady &&
-        activeSkillCanonicalId === "m_tr_active" &&
-        enemyStatuses.some(
-          (status) =>
-            status.id === "paralyze" && status.expiresAtMs > currentTimeMs
-        )
-      ) {
-        effectivePower *= 1.5;
-      }
-      const manaSpringEmpowered = isManaSpringEmpowered(
+      let {
+        dealsDirectDamage,
+        effectiveDefense,
+        bodyFoundationStacks,
+        voidSwordProc,
+        manaSpringEmpowered,
+        hasSwordQiChain,
+        activeSwordQiStatuses,
+        isCrit,
+        playerDamage,
+        pVsE: playerRestriction,
+        enemyElementalAffinity: playerEnemyElementalAffinity,
+      } = resolvePlayerOffenseRoll({
+        player: {
+          ...player,
+          hp: playerHp,
+          mp: playerMp,
+        },
+        enemy: {
+          ...enemy,
+          hp: enemyHp,
+        },
+        activeSkill: activeSkill ?? undefined,
+        activeSkillCanonicalId,
+        activeSkillTimelineProfile,
+        skillReady,
+        passiveFlags,
+        playerHp,
         playerMp,
-        player.maxMp,
-        passiveFlags
-      );
-      if (manaSpringEmpowered) {
-        effectivePower *= 1.2;
-      }
-      if (hasSwordHeartPassive && swordHeartStacks > 0) {
-        effectivePower *= 1 + swordHeartStacks * 0.03;
-      }
-      if (bodyFoundationStacks > 0) {
-        effectivePower *= 1 + bodyFoundationStacks * 0.02;
-      }
-      const hasSwordQiChain = hasLearnedSkillId(player.learnedSkills, "s_f_active");
-      const activeSwordQiStatuses =
-        skillReady && activeSkillCanonicalId === "s_tr_active"
-          ? playerStatuses.filter(
-              (status) =>
-                status.kind === "critBoost" && status.expiresAtMs > currentTimeMs
-            )
-          : [];
-      if (activeSwordQiStatuses.length > 0) {
-        effectivePower *= 1 + activeSwordQiStatuses.length * 0.35;
-      } else if (skillReady && activeSkillCanonicalId === "s_tr_active" && hasSwordQiChain) {
-        effectivePower *= 1.18;
-      }
-
-      const critRate = Math.min(
-        95,
-        player.crit +
-          (hasSwordMahayanaPassive ? 5 : 0) +
-          (hasSwordQiPassive ? getSwordQiPassiveCritBonus() : 0) +
-          attackContext.critBonus +
-          getCritBoostValue(playerStatuses, currentTimeMs)
-      );
-      const isCrit =
-        (hasSwordTribulationPassive && playerHp <= player.maxHp * 0.2) ||
-        (attackContext.canCrit && Math.random() * 100 < Math.max(0, critRate));
-
-      let playerDamage = 0;
-      const ignoreEnemyReduction =
-        (skillReady && activeSkillCanonicalId === "s_tr_active") ||
-        (!skillReady && hasSwordEmperorPassive);
-      if (dealsDirectDamage) {
-        playerDamage = resolveDamage(
-          effectivePower,
-          ignoreEnemyReduction ? 0 : effectiveDefense
-        );
-        if (attackContext.damageBonus) {
-          playerDamage = Math.floor(
-            playerDamage * (1 + attackContext.damageBonus / 100)
-          );
-        }
-        if (!ignoreEnemyReduction) {
-          playerDamage = Math.floor(
-            playerDamage * getEnemyDamageReductionMultiplier(enemy)
-          );
-        }
-        if (skillReady) {
-          playerDamage = Math.floor(
-            playerDamage * (activeSkillTimelineProfile?.areaDamageModifier ?? 1)
-          );
-        }
-        if (isCrit) {
-          playerDamage = Math.floor(
-            playerDamage *
-              ((player.critDamage +
-                attackContext.critDamageBonus +
-                (voidSwordProc ? 50 : 0) +
-                (hasSwordMahayanaPassive ? 10 : 0)) /
-                100)
-          );
-        }
-        if (
-          skillReady &&
-          activeSkillCanonicalId === "b_vr_active" &&
-          enemy.rank !== EnemyRank.Boss
-        ) {
-          playerDamage = Math.max(playerDamage, enemyHp);
-        }
-      }
+        playerStatuses,
+        enemyStatuses,
+        bossBroken,
+        playerDebuffed,
+        mageFoundationStacks,
+        swordHeartStacks,
+        currentTimeMs,
+      });
 
       enemyHp = Math.max(0, enemyHp - playerDamage);
       getPlayerActivePassiveProcMessages({
@@ -5009,134 +5306,47 @@ export const runAutoBattle = (
         );
       }
 
-      enemyHp = applyPlayerEchoAndSummonFollowupEffects({
+      ({
+        enemyHp,
+        playerHp,
+        playerStatuses,
+        enemyStatuses,
+        playerMp,
+        activeSkillReadyAtMs,
+        mageFoundationStacks,
+      } = resolvePlayerActiveAftermath({
+        player: {
+          ...player,
+          hp: playerHp,
+          mp: playerMp,
+        },
         skillReady,
+        activeSkill: activeSkill ?? undefined,
         activeSkillCanonicalId,
-        hasSwordEchoPassive,
         currentTimeMs,
         turn,
         logs,
-        player,
-        enemy,
-        enemyHp,
+        enemy: {
+          ...enemy,
+          hp: enemyHp,
+        },
         playerHp,
         playerMaxHp: player.maxHp,
+        enemyHp,
+        enemyMaxHp: enemy.maxHp,
+        playerStatuses,
+        enemyStatuses,
+        playerMp,
         playerDamage,
         effectiveDefense,
-        enemyStatuses,
-        pVsE,
-        enemyElementalAffinity,
-      });
-
-      if (skillReady) {
-        ({
-          playerMp,
-          activeSkillReadyAtMs,
-          mageFoundationStacks,
-        } = resolvePlayerActiveResourceFlow({
-          activeSkill: activeSkill!,
-          activeSkillCanonicalId,
-          player,
-          playerMp,
-          currentTimeMs,
-          activeSkillReadyAtMs,
-          mageFoundationStacks,
-          isCrit,
-          logs,
-          turn,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-          hasMageFusionPassive,
-          hasMageQiPassive,
-          hasSwordGoldenPassive,
-          hasMageFoundationPassive,
-        }));
-
-        const { playerSideStatuses, filteredEnemyStatuses } =
-          resolvePlayerSkillStatusApplication({
-            skill: activeSkill ?? undefined,
-            targetMaxHp:
-              activeSkill!.targetType === "self" ? player.maxHp : enemy.maxHp,
-            enemy,
-            passiveFlags,
-            dealsDirectDamage,
-            isCrit,
-            currentTimeMs,
-            enemyHp,
-          });
-
-        appendAndLogCombatStatuses({
-          container: playerStatuses,
-          statuses: playerSideStatuses,
-          logs,
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          targetIsPlayer: true,
-          enemy,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-
-        appendAndLogCombatStatuses({
-          container: enemyStatuses,
-          statuses: filteredEnemyStatuses,
-          logs,
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          targetIsPlayer: false,
-          enemy,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-
-        if (
-          hasMageImmortalPassive &&
-          activeSkill!.profession === ProfessionType.Mage &&
-          playerDamage > 0 &&
-          Math.random() < 0.3
-        ) {
-          const repeatedDamage = Math.max(1, Math.floor(playerDamage));
-          enemyHp = Math.max(0, enemyHp - repeatedDamage);
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs + 1,
-            isPlayer: true,
-            message: `【仙法通神】術式回響，再度造成 <dmg>${repeatedDamage}</dmg> 點傷害！`,
-            damage: repeatedDamage,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
-
-        ({
-          enemyHp,
-          playerHp,
-          activeSkillReadyAtMs,
-        } = applyPlayerActiveFollowupEffects({
-          activeSkillCanonicalId,
-          playerDamage,
-          currentTimeMs,
-          enemy,
-          enemyHp,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          turn,
-          logs,
-          hasBodyImmortalPassive,
-          enemyStatuses,
-          activeSkillReadyAtMs,
-        }));
-      }
+        pVsE: playerRestriction,
+        enemyElementalAffinity: playerEnemyElementalAffinity,
+        activeSkillReadyAtMs,
+        mageFoundationStacks,
+        isCrit,
+        dealsDirectDamage,
+        passiveFlags,
+      }));
 
       const skillExecutionTimeMs =
         activeSkillTimelineProfile?.executionTimeMs ??
