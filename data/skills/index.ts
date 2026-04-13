@@ -17,11 +17,13 @@ import {
   IMMORTAL_RETIRED_ACTIVE_ALIASES,
   MAHAYANA_RETIRED_ACTIVE_ALIASES,
   RETIREMENT_READY_RETIRED_ACTIVE_SKILL_IDS,
+  stripRetirementReadyActiveAliases,
   TRIBULATION_RETIRED_ACTIVE_ALIASES,
   VOID_REFINING_RETIRED_ACTIVE_ALIASES,
 } from "./retired_active_aliases";
 import {
   BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS,
+  stripBattleAbsorbedPassiveAliases,
   FOUNDATION_RETIRED_PASSIVE_ALIASES,
   FUSION_RETIRED_PASSIVE_ALIASES,
   IMMORTAL_EMPEROR_RETIRED_PASSIVE_ALIASES,
@@ -194,28 +196,6 @@ const RAW_SKILLS: Record<string, Skill> = {
   ...IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES,
   ...IMMORTAL_EMPEROR_RETIRED_PASSIVE_ALIASES,
 };
-
-const RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_IDS = new Set<string>(
-  RETIREMENT_READY_RETIRED_ACTIVE_SKILL_IDS
-);
-
-const stripRetirementReadyActiveAliases = (skills: Record<string, Skill>) =>
-  Object.fromEntries(
-    Object.entries(skills).filter(
-      ([skillId]) => !RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_IDS.has(skillId)
-    )
-  ) as Record<string, Skill>;
-
-const BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_IDS = new Set<string>(
-  BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS
-);
-
-const stripBattleAbsorbedPassiveAliases = (skills: Record<string, Skill>) =>
-  Object.fromEntries(
-    Object.entries(skills).filter(
-      ([skillId]) => !BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_IDS.has(skillId)
-    )
-  ) as Record<string, Skill>;
 
 const stripRetiredAliasesForRealmView = (skills: Record<string, Skill>) =>
   stripBattleAbsorbedPassiveAliases(stripRetirementReadyActiveAliases(skills));

@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { MajorRealm, ProfessionType } from "../../types";
 import {
+  stripRetirementReadyActiveAliases as stripRetirementReadyActiveAliasesForTest,
+} from "./retired_active_aliases";
+import {
+  stripBattleAbsorbedPassiveAliases as stripBattleAbsorbedPassiveAliasesForTest,
+} from "./retired_passive_aliases";
+import {
   BATTLE_ABSORBED_RETIRED_PASSIVE_SKILLS,
   BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP,
   BATTLE_ABSORBED_RETIRED_SKILLS,
@@ -345,5 +351,30 @@ describe("skill pool registry", () => {
         (skill) => skill.id === "m_ie_active"
       )
     ).toBe(false);
+  });
+
+  it("reuses alias-layer strip helpers instead of duplicating realm-view filtering logic", () => {
+    const mixedSkills = {
+      s_q_active: SKILLS.s_q_active,
+      s_bi_active: SKILLS.s_bi_active,
+      b_ie_active: SKILLS.b_ie_active,
+      s_f_passive: SKILLS.s_f_passive,
+      m_ie_passive: SKILLS.m_ie_passive,
+      m_f_passive: SKILLS.m_f_passive,
+    };
+
+    const withoutRetirementReadyActives =
+      stripRetirementReadyActiveAliasesForTest(mixedSkills);
+    expect(Object.keys(withoutRetirementReadyActives)).toEqual([
+      "s_q_active",
+      "s_f_passive",
+      "m_ie_passive",
+      "m_f_passive",
+    ]);
+
+    const realmView = stripBattleAbsorbedPassiveAliasesForTest(
+      withoutRetirementReadyActives
+    );
+    expect(Object.keys(realmView)).toEqual(["s_q_active", "m_f_passive"]);
   });
 });

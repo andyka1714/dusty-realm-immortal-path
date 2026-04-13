@@ -230,3 +230,16 @@ export const BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS = [
 
 export const RETIREMENT_READY_RETIRED_ACTIVE_SKILL_IDS =
   BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS;
+
+export const RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_ID_SET = new Set<string>(
+  RETIREMENT_READY_RETIRED_ACTIVE_SKILL_IDS
+);
+
+export const stripRetirementReadyActiveAliases = (
+  skills: Record<string, Skill>
+) =>
+  Object.fromEntries(
+    Object.entries(skills).filter(
+      ([skillId]) => !RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_ID_SET.has(skillId)
+    )
+  ) as Record<string, Skill>;
