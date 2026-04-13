@@ -334,6 +334,7 @@
 - [x] `劍意化形 / 虛空劍陣 / 撒豆成兵` 這批多段追擊與召喚後續傷害，也已開始抽成 `applyPlayerEchoAndSummonFollowupEffects(...)`
 - [x] 敵方來襲後的承傷流程，也已開始抽成 `resolveIncomingEnemyDamage(...)`，把 `銅皮鐵骨 / 金剛法相 / 肉身成聖 / 元素護盾 / 護體劍罡` 這批減傷、護盾與保命流程集中到同一條處理鏈
 - [x] 敵方命中後的承傷反應鏈，也已開始抽成 `applyEnemyHitAftermath(...)`，把 `萬劫不滅 / 雷劫煉心 / 噬生 / 滴血重生（真） / 不死不滅` 這批後處理事件集中處理
+- [x] 敵方出手前的攻勢計算，也已開始抽成 `resolveEnemyOffenseRoll(...)`，把屬性克制、特招倍率、格擋 / 閃避 / 虛空轉移與承傷前數值準備集中處理
 - [x] timeline combat 的致命保命流程已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`
 - [x] formal core 被動的 stat bonus 已改成逐招明確對照表，不再依職業 + 境界通用公式自動推導
 - [x] absorbed retired passive 透過 formal id 承接時，也會吃到同一份逐招 stat bonus 對照，不再靠模糊 profession-tier fallback 撐場
@@ -363,6 +364,7 @@
 - [x] 護盾吸收與反震傷害事件，已開始抽成 battleSystem 共用 logger helper
 - [x] 主動術式後的多種被動觸發訊息，已開始抽成共用 passive-proc helper，降低時間軸內核散寫風險
 - [x] `GamePanel / Modal / GameTooltip` 的標題層已開始共用 `GameTitleStack`，面板與資訊浮層的遊戲化資訊階層更一致
+- [x] `GamePanel / Modal` 內原本重複存在的 eyebrow 裝飾也已移除，正式改由 `GameTitleStack` 單點承接標題階層，不再重複堆兩層同名標識
 - [ ] 被動技能改成逐招專屬效果，而不是通用屬性加成
 
 ---

@@ -61,9 +61,6 @@ export const GamePanel: React.FC<GamePanelProps> = ({
           <div className="absolute inset-x-8 top-[10px] h-px bg-gradient-to-r from-transparent via-amber-400/18 to-transparent"></div>
           <div className="absolute inset-x-12 top-[58px] h-px bg-gradient-to-r from-transparent via-stone-500/20 to-transparent"></div>
           <div className="absolute -right-12 top-8 h-40 w-40 rounded-full bg-amber-500/8 blur-3xl"></div>
-          <div className="absolute left-10 top-5 rounded-full border border-amber-500/15 bg-black/20 px-3 py-1 text-[10px] tracking-[0.28em] text-amber-200/65">
-            {eyebrow}
-          </div>
         </div>
 
         {title && (

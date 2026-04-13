@@ -1344,6 +1344,88 @@ const getEnemyAttackContext = (
   };
 };
 
+const resolveEnemyOffenseRoll = ({
+  enemy,
+  player,
+  enemyStatuses,
+  playerStatuses,
+  currentTimeMs,
+  enemySpecialReady,
+  enemySpecialTimelineProfile,
+  passiveFlags,
+  bodyTribulationStacks,
+}: {
+  enemy: Enemy;
+  player: PlayerCombatStats;
+  enemyStatuses: CombatStatus[];
+  playerStatuses: CombatStatus[];
+  currentTimeMs: number;
+  enemySpecialReady: boolean;
+  enemySpecialTimelineProfile?: EnemySpecialTimelineProfile;
+  passiveFlags: PlayerPassiveFlags;
+  bodyTribulationStacks: number;
+}) => {
+  const enemyContext = getEnemyAttackContext(enemy, player);
+  const eVsP = getRestriction(enemy.element, player.element);
+  const bodyFoundationStacks = passiveFlags.hasBodyFoundationPassive
+    ? getBodyFoundationBloodlineStacks(player.hp, player.maxHp)
+    : 0;
+
+  let enemyPower = enemyContext.power;
+  let playerDefense =
+    enemyContext.defense * getArmorBreakMultiplier(playerStatuses, currentTimeMs);
+
+  if (passiveFlags.hasBodyTribulationPassive && bodyTribulationStacks > 0) {
+    playerDefense *= 1 + Math.min(0.02 * bodyTribulationStacks, 1);
+  }
+  if (bodyFoundationStacks > 0) {
+    playerDefense *= 1 + bodyFoundationStacks * 0.05;
+  }
+  if (eVsP.isEffective) enemyPower *= 1.12;
+  if (eVsP.isResisted) enemyPower *= 0.88;
+  if (passiveFlags.hasMageEmperorPassive && enemy.element !== ElementType.None) {
+    enemyPower *= 0.8;
+  }
+  if (enemySpecialReady && enemy.specialAttack?.damageMultiplier) {
+    enemyPower *= enemy.specialAttack.damageMultiplier;
+    enemyPower *= enemySpecialTimelineProfile?.areaDamageModifier ?? 1;
+  }
+
+  const enemyCrit =
+    enemyContext.canCrit &&
+    Math.random() * 100 < Math.max(0, enemyContext.critBonus);
+  let enemyDamage = resolveDamage(enemyPower, playerDefense);
+  if (enemyContext.damageBonus) {
+    enemyDamage = Math.floor(
+      enemyDamage * (1 + enemyContext.damageBonus / 100)
+    );
+  }
+  if (enemyCrit) {
+    enemyDamage = Math.floor(
+      enemyDamage * ((150 + enemyContext.critDamageBonus) / 100)
+    );
+  }
+  if (player.damageReduction > 0) {
+    enemyDamage = Math.floor(
+      enemyDamage * (1 - player.damageReduction / 100)
+    );
+  }
+
+  const isDodge = Math.random() * 100 < player.dodge;
+  const voidEvasion =
+    passiveFlags.hasMageVoidPassive && !isDodge && Math.random() < 0.3;
+  const isBlock = Math.random() * 100 < player.blockRate;
+
+  return {
+    enemyDamage,
+    isDodge,
+    voidEvasion,
+    isBlock,
+    bodyFoundationStacks,
+    eVsP,
+  };
+};
+
 const resolveDamage = (
   power: number,
   defense: number,
@@ -5015,7 +5097,6 @@ export const runAutoBattle = (
         continue;
       }
 
-      const enemyContext = getEnemyAttackContext(enemy, player);
       enemySpecialReadyAtMs = applyEnemySpecialTimingDelay({
         logs,
         turn,
@@ -5033,54 +5114,27 @@ export const runAutoBattle = (
       const enemySpecialTimelineProfile = enemySpecialReady
         ? getEnemySpecialTimelineProfile(enemy)
         : undefined;
-      let enemyPower = enemyContext.power;
-      let playerDefense =
-        enemyContext.defense * getArmorBreakMultiplier(playerStatuses, currentTimeMs);
-      const bodyFoundationStacks = hasBodyFoundationPassive
-        ? getBodyFoundationBloodlineStacks(playerHp, player.maxHp)
-        : 0;
-      if (hasBodyTribulationPassive && bodyTribulationStacks > 0) {
-        playerDefense *= 1 + Math.min(0.02 * bodyTribulationStacks, 1);
-      }
-      if (bodyFoundationStacks > 0) {
-        playerDefense *= 1 + bodyFoundationStacks * 0.05;
-      }
-      if (eVsP.isEffective) enemyPower *= 1.12;
-      if (eVsP.isResisted) enemyPower *= 0.88;
-      if (hasMageEmperorPassive && enemy.element !== ElementType.None) {
-        enemyPower *= 0.8;
-      }
-
-      if (enemySpecialReady && enemy.specialAttack?.damageMultiplier) {
-        enemyPower *= enemy.specialAttack.damageMultiplier;
-        enemyPower *= enemySpecialTimelineProfile?.areaDamageModifier ?? 1;
-      }
-
-      const enemyCrit =
-        enemyContext.canCrit &&
-        Math.random() * 100 < Math.max(0, enemyContext.critBonus);
-      let enemyDamage = resolveDamage(enemyPower, playerDefense);
-      if (enemyContext.damageBonus) {
-        enemyDamage = Math.floor(
-          enemyDamage * (1 + enemyContext.damageBonus / 100)
-        );
-      }
-      if (enemyCrit) {
-        enemyDamage = Math.floor(
-          enemyDamage * ((150 + enemyContext.critDamageBonus) / 100)
-        );
-      }
-
-      if (player.damageReduction > 0) {
-        enemyDamage = Math.floor(
-          enemyDamage * (1 - player.damageReduction / 100)
-        );
-      }
-
-      const isDodge = Math.random() * 100 < player.dodge;
-      const voidEvasion =
-        hasMageVoidPassive && !isDodge && Math.random() < 0.3;
-      const isBlock = Math.random() * 100 < player.blockRate;
+      let {
+        enemyDamage,
+        isDodge,
+        voidEvasion,
+        isBlock,
+        bodyFoundationStacks,
+      } = resolveEnemyOffenseRoll({
+        enemy,
+        player: {
+          ...player,
+          hp: playerHp,
+          mp: playerMp,
+        },
+        enemyStatuses,
+        playerStatuses,
+        currentTimeMs,
+        enemySpecialReady: Boolean(enemySpecialReady),
+        enemySpecialTimelineProfile: enemySpecialTimelineProfile ?? undefined,
+        passiveFlags,
+        bodyTribulationStacks,
+      });
 
       if (isDodge || voidEvasion) {
         pushCombatLog(logs, {

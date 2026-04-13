@@ -64,9 +64,6 @@ export const Modal: React.FC<ModalProps> = ({
           <div className="absolute inset-x-6 top-[10px] h-px bg-gradient-to-r from-transparent via-amber-400/20 to-transparent"></div>
           <div className="absolute inset-x-10 top-[58px] h-px bg-gradient-to-r from-transparent via-stone-500/20 to-transparent"></div>
           <div className="absolute -right-10 top-3 h-28 w-28 rounded-full bg-amber-500/10 blur-3xl"></div>
-          <div className="absolute left-8 top-5 rounded-full border border-amber-500/15 bg-black/20 px-3 py-1 text-[10px] tracking-[0.28em] text-amber-200/65">
-            {eyebrow}
-          </div>
         </div>
 
         {/* Header */}
