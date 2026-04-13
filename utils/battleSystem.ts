@@ -2443,6 +2443,17 @@ type CombatRuntimeContext = {
   passiveFlags: PlayerPassiveFlags;
 };
 
+type CombatLoopFeatureFlags = Pick<
+  PlayerPassiveFlags,
+  | "hasBodyRebirthPassive"
+  | "hasManaSpringPassive"
+  | "hasMageFusionPassive"
+  | "hasBodyImmortalPassive"
+  | "hasBodyAncientPassive"
+  | "hasSwordImmortalPassive"
+  | "hasSwordHeartPassive"
+>;
+
 const createCombatInfrastructure = ({
   player,
   enemy,
@@ -2536,43 +2547,46 @@ const createCombatRuntimeContext = (
   };
 };
 
+const createCombatLoopFeatureFlags = (
+  passiveFlags: PlayerPassiveFlags
+): CombatLoopFeatureFlags => ({
+  hasBodyRebirthPassive: passiveFlags.hasBodyRebirthPassive,
+  hasManaSpringPassive: passiveFlags.hasManaSpringPassive,
+  hasMageFusionPassive: passiveFlags.hasMageFusionPassive,
+  hasBodyImmortalPassive: passiveFlags.hasBodyImmortalPassive,
+  hasBodyAncientPassive: passiveFlags.hasBodyAncientPassive,
+  hasSwordImmortalPassive: passiveFlags.hasSwordImmortalPassive,
+  hasSwordHeartPassive: passiveFlags.hasSwordHeartPassive,
+});
+
 const resolveCombatLoopStep = ({
   state,
   processStatusTicks,
   player,
   enemy,
   logs,
-  passiveFlags,
-  pVsE,
-  activeSkill,
-  playerAttackIntervalMs,
-  enemyAttackIntervalMs,
-  hasBodyRebirthPassive,
-  hasManaSpringPassive,
-  hasMageFusionPassive,
-  hasBodyImmortalPassive,
-  hasBodyAncientPassive,
-  hasSwordImmortalPassive,
-  hasSwordHeartPassive,
+  runtimeContext,
+  featureFlags,
 }: {
   state: CombatLoopState;
   processStatusTicks: (currentMs: number) => void;
   player: PlayerCombatStats;
   enemy: Enemy;
   logs: CombatLog[];
-  passiveFlags: PlayerPassiveFlags;
-  pVsE: { isEffective: boolean; isResisted: boolean };
-  activeSkill?: Skill;
-  playerAttackIntervalMs: number;
-  enemyAttackIntervalMs: number;
-  hasBodyRebirthPassive: boolean;
-  hasManaSpringPassive: boolean;
-  hasMageFusionPassive: boolean;
-  hasBodyImmortalPassive: boolean;
-  hasBodyAncientPassive: boolean;
-  hasSwordImmortalPassive: boolean;
-  hasSwordHeartPassive: boolean;
+  runtimeContext: CombatRuntimeContext;
+  featureFlags: CombatLoopFeatureFlags;
 }) => {
+  const { passiveFlags, pVsE, activeSkill, playerAttackIntervalMs, enemyAttackIntervalMs } =
+    runtimeContext;
+  const {
+    hasBodyRebirthPassive,
+    hasManaSpringPassive,
+    hasMageFusionPassive,
+    hasBodyImmortalPassive,
+    hasBodyAncientPassive,
+    hasSwordImmortalPassive,
+    hasSwordHeartPassive,
+  } = featureFlags;
   let {
     turn,
     currentTimeMs,
@@ -7757,41 +7771,7 @@ export const runAutoBattle = (
     enemyElementalAffinity,
     passiveFlags,
   } = createCombatRuntimeContext(player, enemy);
-  const {
-    hasReflectPassive,
-    hasSwordQiPassive,
-    hasBodyQiPassive,
-    hasMageQiPassive,
-    hasInitialShieldPassive,
-    hasSwordDeathWardPassive,
-    hasBodyRebirthPassive,
-    hasManaSpringPassive,
-    hasBodyFoundationPassive,
-    hasMageFoundationPassive,
-    hasSwordGoldenPassive,
-    hasSwordEchoPassive,
-    hasSwordHeartPassive,
-    hasBodySaintPassive,
-    hasMageSpiritSeveringPassive,
-    hasSwordFusionPassive,
-    hasSwordVoidPassive,
-    hasBodyFusionPassive,
-    hasMageFusionPassive,
-    hasBodyAncientPassive,
-    hasMageVoidPassive,
-    hasSwordTribulationPassive,
-    hasBodyTribulationPassive,
-    hasMageTribulationPassive,
-    hasBodyImmortalPassive,
-    hasBodyRebirthTruePassive,
-    hasSwordMahayanaPassive,
-    hasMageMahayanaPassive,
-    hasMageImmortalPassive,
-    hasSwordImmortalPassive,
-    hasBodyEmperorPassive,
-    hasSwordEmperorPassive,
-    hasMageEmperorPassive,
-  } = passiveFlags;
+  const featureFlags = createCombatLoopFeatureFlags(passiveFlags);
 
   const { previousSnapshotProvider, processStatusTicks } = createCombatInfrastructure({
     player,
@@ -7872,18 +7852,15 @@ export const runAutoBattle = (
       player,
       enemy,
       logs,
-      passiveFlags,
-      pVsE,
-      activeSkill: activeSkill ?? undefined,
-      playerAttackIntervalMs,
-      enemyAttackIntervalMs,
-      hasBodyRebirthPassive,
-      hasManaSpringPassive,
-      hasMageFusionPassive,
-      hasBodyImmortalPassive,
-      hasBodyAncientPassive,
-      hasSwordImmortalPassive,
-      hasSwordHeartPassive,
+      runtimeContext: {
+        activeSkill: activeSkill ?? undefined,
+        playerAttackIntervalMs,
+        enemyAttackIntervalMs,
+        pVsE,
+        enemyElementalAffinity,
+        passiveFlags,
+      },
+      featureFlags,
     });
 
     ({
