@@ -2689,6 +2689,43 @@ const getEnemyAttackIntervalMs = (enemy: Enemy) => {
   return Math.max(650, rankBase[enemy.rank] + rangePenalty - affixReduction);
 };
 
+const buildVictoryLootMessage = (
+  spiritStones: number,
+  drops: { itemId: string; count: number; instance?: ItemInstance }[]
+) => {
+  let lootMsg = "";
+
+  if (spiritStones > 0) {
+    lootMsg += formatSpiritStones(spiritStones);
+  }
+
+  if (drops.length > 0) {
+    if (lootMsg) lootMsg += "，";
+    const dropNames = drops.map((d) => {
+      const item = getItem(d.itemId);
+      const name = item ? item.name : d.itemId;
+      let qStr = "";
+      let qVal = 0;
+
+      if (d.instance) {
+        qVal = d.instance.quality;
+      } else if (item) {
+        qVal = item.quality || 0;
+      }
+
+      if (qVal === ItemQuality.Low) qStr = "(下品)";
+      if (qVal === ItemQuality.Medium) qStr = "(中品)";
+      if (qVal === ItemQuality.High) qStr = "(上品)";
+      if (qVal === ItemQuality.Immortal) qStr = "(仙品)";
+
+      return `<item q="${qVal}">${name}${qStr}</item>`;
+    });
+    lootMsg += dropNames.join("，");
+  }
+
+  return lootMsg;
+};
+
 const resolveVictoryRewards = ({
   enemy,
   logs,
@@ -2732,35 +2769,7 @@ const resolveVictoryRewards = ({
   });
 
   if (spiritStones > 0 || finalDrops.length > 0) {
-    let lootMsg = "";
-
-    if (spiritStones > 0) {
-      lootMsg += formatSpiritStones(spiritStones);
-    }
-
-    if (finalDrops.length > 0) {
-      if (lootMsg) lootMsg += "，";
-      const dropNames = finalDrops.map((d) => {
-        const item = getItem(d.itemId);
-        const name = item ? item.name : d.itemId;
-        let qStr = "";
-        let qVal = 0;
-
-        if (d.instance) {
-          qVal = d.instance.quality;
-        } else if (item) {
-          qVal = item.quality || 0;
-        }
-
-        if (qVal === ItemQuality.Low) qStr = "(下品)";
-        if (qVal === ItemQuality.Medium) qStr = "(中品)";
-        if (qVal === ItemQuality.High) qStr = "(上品)";
-        if (qVal === ItemQuality.Immortal) qStr = "(仙品)";
-
-        return `<item q="${qVal}">${name}${qStr}</item>`;
-      });
-      lootMsg += dropNames.join("，");
-    }
+    const lootMsg = buildVictoryLootMessage(spiritStones, finalDrops);
 
     pushCombatLog(logs, {
       turn,
