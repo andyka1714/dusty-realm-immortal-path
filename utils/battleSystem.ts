@@ -1105,16 +1105,11 @@ const buildPlayerWorldStrikeResult = ({
   damage,
   isCrit,
   skillName: skill?.name,
-  nextActionDelayMs: Math.max(
-    getPlayerAttackIntervalMs(player),
-    timelineProfile.executionTimeMs
-  ),
-  skillCooldownMs: skill
-    ? Math.floor(
-        getResolvedSkillCooldownSeconds(skill, player.learnedSkills) * 1000
-      )
-    : 0,
-  executionTimeMs: timelineProfile.executionTimeMs,
+  ...buildPlayerWorldStrikeTiming({
+    player,
+    skill,
+    timelineProfile,
+  }),
   playerStatusNames: [
     ...playerSideStatuses.map((status) => status.name),
     ...getPlayerWorldPassiveStatusNames({
@@ -1138,6 +1133,27 @@ const buildPlayerWorldStrikeResult = ({
   areaRadius: timelineProfile.areaRadius,
   maxTargets: timelineProfile.maxTargets,
   isProjectile: timelineProfile.isProjectile,
+});
+
+const buildPlayerWorldStrikeTiming = ({
+  player,
+  skill,
+  timelineProfile,
+}: {
+  player: PlayerCombatStats;
+  skill?: Skill;
+  timelineProfile: ReturnType<typeof getSkillTimelineProfile>;
+}) => ({
+  nextActionDelayMs: Math.max(
+    getPlayerAttackIntervalMs(player),
+    timelineProfile.executionTimeMs
+  ),
+  skillCooldownMs: skill
+    ? Math.floor(
+        getResolvedSkillCooldownSeconds(skill, player.learnedSkills) * 1000
+      )
+    : 0,
+  executionTimeMs: timelineProfile.executionTimeMs,
 });
 
 const buildEnemyWorldStrikeTiming = ({

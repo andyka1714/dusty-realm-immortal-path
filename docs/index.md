@@ -13,7 +13,7 @@
 ### [02_Gameplay] 遊玩系統
 具體的遊戲功能模組。
 - [cultivation.md](02_Gameplay/cultivation.md): 修煉、閉關、境界突破流程。
-- [combat.md](02_Gameplay/combat.md): 地圖內直接出手、世界戰鬥第一版多目標 AOE、時間軸驗證內核、怪物特招、技能專屬效果與共用 battle resolver。
+- [combat.md](02_Gameplay/combat.md): 地圖內直接出手、世界戰鬥第一版多目標 AOE、時間軸驗證內核、怪物特招、技能專屬效果、world strike result helper 與共用 battle resolver。
 - [inventory.md](02_Gameplay/inventory.md): 背包管理、裝備限制、技能書學習、formal core 技能池與退場技能映射規則。
 - [workshop.md](02_Gameplay/workshop.md): 洞府功能 (聚靈陣、煉丹、煉器)。
 
@@ -47,7 +47,7 @@
 - [06_實作修正落點.md](06_Balance_Audit/06_實作修正落點.md): 這一輪已改哪些檔案、後續要從哪裡繼續改。
 - [07_路線分流與主題掉落設計.md](06_Balance_Audit/07_路線分流與主題掉落設計.md): 三路分流、聚合期與職業主題掉落設計整理。
 - [08_技能系統與技能書規劃.md](06_Balance_Audit/08_技能系統與技能書規劃.md): 技能改成技能書取得的整理與落地方案。
-- [09_即時戰鬥改造分析.md](06_Balance_Audit/09_即時戰鬥改造分析.md): 從戰報回放轉成即時碰撞戰鬥的架構分析，以及 cooldown / opener / passive-proc / defensive-passive / status logger 等 shared resolver 的收斂進度。
+- [09_即時戰鬥改造分析.md](06_Balance_Audit/09_即時戰鬥改造分析.md): 從戰報回放轉成即時碰撞戰鬥的架構分析，以及 cooldown / opener / passive-proc / defensive-passive / world-strike result / status logger 等 shared resolver 的收斂進度。
 - [10_技能數量與功能分類收斂.md](06_Balance_Audit/10_技能數量與功能分類收斂.md): 技能數量控制、功能分類與主流遊戲對照分析。
 - [11_三職業核心技能池草案.md](06_Balance_Audit/11_三職業核心技能池草案.md): 劍修、體修、法修的核心技能池草案，以及 retired 技能收斂到 `battle-absorbed / retirement-ready` 的正式規則，並持續對齊 world strike / timeline combat。
 - 補充：formal realm view 現在已透過單一 retired-alias 剝離 helper 移除 `retirement-ready active + battle-absorbed passive`，realm dataset 更接近正式技能池視角；formal core 被動的 stat bonus、retirement-ready passive 視圖與 battle-absorbed active 視圖，也已改成直接由 alias-layer 聚合表對照，舊技能則仍保留中央 alias / 相容查詢層。

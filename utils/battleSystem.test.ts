@@ -556,6 +556,42 @@ describe("battle system balance", () => {
     expect(strike.statusNames.length).toBeGreaterThan(0);
   });
 
+  it("keeps player world-strike timing and area metadata on the shared helper path", () => {
+    fixedRandom.mockReturnValue(0.1);
+
+    const player = calculatePlayerStats(
+      {
+        physique: 150,
+        rootBone: 150,
+        insight: 180,
+        comprehension: 80,
+        fortune: 50,
+        charm: 10,
+      },
+      MajorRealm.ImmortalEmperor,
+      SpiritRootId.HEAVENLY_FIRE,
+      buildEquipmentStats(SPIRIT_SEVERING_MAGE_SET),
+      "帝法",
+      ProfessionType.Mage,
+      ["m_tr_active", "m_sf_passive"]
+    );
+
+    const skill = getSkill("m_ie_active");
+    expect(skill).toBeTruthy();
+    const profile = getSkillTimelineProfile(skill!);
+
+    const strike = resolvePlayerWorldStrike(player, BOSS_ENEMIES.m180_b1, skill);
+
+    expect(strike.skillCooldownMs).toBe(
+      Math.floor(getResolvedSkillCooldownSeconds(skill!, player.learnedSkills) * 1000)
+    );
+    expect(strike.executionTimeMs).toBe(profile.executionTimeMs);
+    expect(strike.areaShape).toBe(profile.areaShape);
+    expect(strike.areaRadius).toBe(profile.areaRadius);
+    expect(strike.maxTargets).toBe(profile.maxTargets);
+    expect(strike.isProjectile).toBe(profile.isProjectile);
+  });
+
   it("lets a geared mortal player defeat entry common mobs", () => {
     fixedRandom.mockReturnValue(0.5);
 
