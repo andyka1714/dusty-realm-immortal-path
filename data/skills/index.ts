@@ -20,7 +20,7 @@ import {
 import {
   ALL_RETIRED_PASSIVE_ALIASES,
   BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS,
-  RETIREMENT_READY_RETIRED_PASSIVE_SKILL_IDS,
+  RETIREMENT_READY_RETIRED_PASSIVE_ALIASES,
   RETIRED_PASSIVE_ALIASES_BY_REALM,
   stripBattleAbsorbedPassiveAliases,
 } from "./retired_passive_aliases";
@@ -363,7 +363,8 @@ export const isRetirementReadyRetiredSkill = (skillId: string) =>
 export const getRetirementReadyRetiredSkills = () =>
   [...RETIREMENT_READY_RETIRED_SKILLS].sort(compareSkills);
 export const getRetirementReadyRetiredPassiveSkills = () =>
-  RETIREMENT_READY_RETIRED_PASSIVE_SKILL_IDS.map((skillId) => SKILLS[skillId])
+  Object.values(RETIREMENT_READY_RETIRED_PASSIVE_ALIASES)
+    .map((skill) => SKILLS[skill.id])
     .filter((skill): skill is Skill => Boolean(skill))
     .sort(compareSkills);
 

@@ -50,7 +50,7 @@
 - [09_即時戰鬥改造分析.md](06_Balance_Audit/09_即時戰鬥改造分析.md): 從戰報回放轉成即時碰撞戰鬥的架構分析，以及 cooldown / opener / passive-proc / defensive-passive / status logger 等 shared resolver 的收斂進度。
 - [10_技能數量與功能分類收斂.md](06_Balance_Audit/10_技能數量與功能分類收斂.md): 技能數量控制、功能分類與主流遊戲對照分析。
 - [11_三職業核心技能池草案.md](06_Balance_Audit/11_三職業核心技能池草案.md): 劍修、體修、法修的核心技能池草案，以及 retired 技能收斂到 `battle-absorbed / retirement-ready` 的正式規則，並持續對齊 world strike / timeline combat。
-- 補充：formal realm view 現在已透過單一 retired-alias 剝離 helper 移除 `retirement-ready active + battle-absorbed passive`，realm dataset 更接近正式技能池視角；formal core 被動的 stat bonus 也已改成逐招明確對照表，舊技能則仍保留中央 alias / 相容查詢層。
+- 補充：formal realm view 現在已透過單一 retired-alias 剝離 helper 移除 `retirement-ready active + battle-absorbed passive`，realm dataset 更接近正式技能池視角；formal core 被動的 stat bonus 與 retirement-ready passive 視圖，也已改成直接由 alias-layer 聚合表對照，舊技能則仍保留中央 alias / 相容查詢層。
 - [12_技能書實作收斂.md](06_Balance_Audit/12_技能書實作收斂.md): 技能書正式實作、來源規則、前置條件與與程式對齊結果。
 - [13_3D渲染與戰鬥呈現評估.md](06_Balance_Audit/13_3D渲染與戰鬥呈現評估.md): 3D、Three.js 與目前 Pixi 戰鬥呈現層的可行性評估。
 - [14_整體改造Checklist.md](06_Balance_Audit/14_整體改造Checklist.md): 本輪所有已完成 / 未完成細項的逐條追蹤表。
