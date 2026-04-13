@@ -1775,6 +1775,35 @@ describe("battle system balance", () => {
     expect(strike.playerStatusNames).toContain("萬劫不滅");
   });
 
+  it("surfaces immortal body passive on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const body = calculatePlayerStats(
+      {
+        physique: 92,
+        rootBone: 72,
+        insight: 42,
+        comprehension: 24,
+        fortune: 18,
+        charm: 10,
+      },
+      MajorRealm.Immortal,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 1450,
+        defense: 320,
+        hp: 9800,
+        speed: 9,
+      },
+      "仙境體修",
+      ProfessionType.Body,
+      ["b_im_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(body, COMMON_ENEMIES.m170_c1);
+    expect(strike.playerStatusNames).toContain("仙體無垢");
+  });
+
   it("lets nascent soul mage passive regenerate mana and boost high-mp damage", () => {
     fixedRandom.mockReturnValue(0.5);
 
@@ -5738,6 +5767,35 @@ describe("battle system balance", () => {
     );
 
     expect(strike.playerStatusNames).toContain("萬法歸宗");
+  });
+
+  it("surfaces emperor body passive on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const body = calculatePlayerStats(
+      {
+        physique: 98,
+        rootBone: 82,
+        insight: 68,
+        comprehension: 24,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.ImmortalEmperor,
+      SpiritRootId.MIXED_FIVE,
+      {
+        attack: 940,
+        defense: 320,
+        hp: 4200,
+        speed: 9,
+      },
+      "不滅武祖",
+      ProfessionType.Body,
+      ["b_ie_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(body, COMMON_ENEMIES.m170_c1);
+    expect(strike.playerStatusNames).toContain("不死不滅");
   });
 
   it("surfaces tribulation mage passive on world strikes", () => {

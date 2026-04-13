@@ -888,6 +888,14 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
     statusNames.push("萬劫不滅");
   }
 
+  if (!skill && passiveFlags.hasBodyImmortalPassive) {
+    statusNames.push("仙體無垢");
+  }
+
+  if (!skill && passiveFlags.hasBodyEmperorPassive) {
+    statusNames.push("不死不滅");
+  }
+
   if (!skill && passiveFlags.hasMageQiPassive && player.profession === ProfessionType.Mage) {
     statusNames.push("靈潮循環");
   }

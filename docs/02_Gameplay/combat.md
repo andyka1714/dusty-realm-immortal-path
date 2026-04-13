@@ -174,6 +174,7 @@
 - `b_g_passive`：在 player world strike 的普攻也已開始正式回報 `荊棘皮層`
 - `s_f_passive` / `b_bi_passive`：在 player world strike 的普攻也已開始正式回報 `養劍術` / `金剛法相`
 - `b_tr_passive` / `m_tr_passive`：在 player world strike 也已開始正式回報 `萬劫不滅` / `雷劫煉心`
+- `b_im_passive` / `b_ie_passive`：在 player world strike 也已開始正式回報 `仙體無垢` / `不死不滅`
 - `m_sf_passive`：在 player world strike 的法修主動術式也已開始正式回報 `道法自然`
 - `b_im_passive` / `s_ie_passive`：在 enemy special world strike 也已開始正式回報 `仙體無垢` / `萬法皆空`，不再只在 timeline combat 內部靜默過濾 DOT 與負面狀態
 - `b_f_passive` / `m_q_passive` / `s_q_passive` / `s_vr_passive`：在 player world strike 也開始明確回報 `蠻荒血脈`、`靈潮循環`、`劍脈初成`、`法則之劍`

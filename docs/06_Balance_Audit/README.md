@@ -167,6 +167,7 @@
 - `荊棘皮層` 也已開始補齊 player world strike 的狀態回報，體修金丹期防反 build 的進攻視角不再只剩 timeline 開場提示。
 - `養劍術 / 金剛法相` 也已開始補齊 player world strike 的狀態回報，劍修築基與體修融合期的 build 可見性不再只靠 timeline 開場訊息。
 - `萬劫不滅 / 雷劫煉心` 也已開始補齊 player world strike 的狀態回報，渡劫期體修與法修在進攻視角下也能明確看見高境界 stance 已進入待命。
+- `仙體無垢 / 不死不滅` 也已開始補齊 player world strike 的狀態回報，體修仙境與帝境的高境界保命 stance 不再只在 enemy 來襲或 timeline 開場時可見。
 - `劍心通明` 也已開始補齊劍修 world strike 的狀態回報，不再只在 timeline combat 的冷卻重置事件裡可見。
 - `肉身成聖` 也已開始補齊 player world strike 的狀態回報，體修前中期 build 的進攻視角不再缺少被動可見性。
 - `荒古戰體 / 仙元護體 / 劍意化形 / 肉身成聖 / 道法自然` 這批被動，也已開始補齊 timeline combat 開場待命訊息，不再只有內部效果在跑。
