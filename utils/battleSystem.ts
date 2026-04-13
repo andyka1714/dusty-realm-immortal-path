@@ -3931,6 +3931,142 @@ const resolveEnemyTurnAftermath = ({
   };
 };
 
+const applyStatusTickBatch = ({
+  statuses,
+  tickMs,
+  targetIsPlayer,
+  targetMaxHp,
+  actorIsPlayer,
+  logs,
+  turn,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+  enemy,
+  passiveFlags,
+}: {
+  statuses: CombatStatus[];
+  tickMs: number;
+  targetIsPlayer: boolean;
+  targetMaxHp: number;
+  actorIsPlayer: boolean;
+  logs: CombatLog[];
+  turn: number;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  enemy?: Enemy;
+  passiveFlags: PlayerPassiveFlags;
+}) => {
+  let nextPlayerHp = playerHp;
+  let nextEnemyHp = enemyHp;
+  let playerTookDamage = false;
+
+  statuses.forEach((status) => {
+    if ((status.nextTickAtMs ?? 0) > tickMs || status.expiresAtMs <= tickMs) {
+      return;
+    }
+
+    if (
+      targetIsPlayer &&
+      passiveFlags.hasSwordEmperorPassive &&
+      isNegativeStatusKind(status.kind)
+    ) {
+      status.expiresAtMs = tickMs;
+      status.nextTickAtMs = undefined;
+      pushCombatLog(logs, {
+        turn,
+        timeMs: tickMs,
+        isPlayer: true,
+        message: `【萬法皆空】直接抹除了【${status.name}】。`,
+        damage: 0,
+        playerHp: nextPlayerHp,
+        playerMaxHp,
+        enemyHp: nextEnemyHp,
+        enemyMaxHp,
+      });
+      return;
+    }
+
+    if (
+      targetIsPlayer &&
+      passiveFlags.hasBodyImmortalPassive &&
+      isDotStatusKind(status.kind)
+    ) {
+      status.expiresAtMs = tickMs;
+      status.nextTickAtMs = undefined;
+      pushCombatLog(logs, {
+        turn,
+        timeMs: tickMs,
+        isPlayer: true,
+        message: `【仙體無垢】淨化了【${status.name}】的侵蝕。`,
+        damage: 0,
+        playerHp: nextPlayerHp,
+        playerMaxHp,
+        enemyHp: nextEnemyHp,
+        enemyMaxHp,
+      });
+      return;
+    }
+
+    const outcome = resolveStatusTickOutcome({
+      status,
+      targetMaxHp,
+      targetIsPlayer,
+      enemy,
+    });
+
+    if (targetIsPlayer) {
+      if (outcome.restoreToEnemy && outcome.damage > 0) {
+        nextEnemyHp = Math.min(enemyMaxHp, nextEnemyHp + outcome.damage);
+      }
+      if (outcome.damage > 0) {
+        nextPlayerHp = Math.max(0, nextPlayerHp - outcome.damage);
+        playerTookDamage = true;
+        pushCombatLog(logs, {
+          turn,
+          timeMs: tickMs,
+          isPlayer: actorIsPlayer,
+          message: outcome.message,
+          damage: outcome.damage,
+          playerHp: nextPlayerHp,
+          playerMaxHp,
+          enemyHp: nextEnemyHp,
+          enemyMaxHp,
+        });
+      }
+    } else {
+      if (outcome.restoreToPlayer && outcome.damage > 0) {
+        nextPlayerHp = Math.min(playerMaxHp, nextPlayerHp + outcome.damage);
+      }
+      if (outcome.damage > 0) {
+        nextEnemyHp = Math.max(0, nextEnemyHp - outcome.damage);
+        pushCombatLog(logs, {
+          turn,
+          timeMs: tickMs,
+          isPlayer: actorIsPlayer,
+          message: outcome.message,
+          damage: outcome.damage,
+          playerHp: nextPlayerHp,
+          playerMaxHp,
+          enemyHp: nextEnemyHp,
+          enemyMaxHp,
+        });
+      }
+    }
+
+    status.nextTickAtMs = tickMs + 1000;
+  });
+
+  return {
+    playerHp: nextPlayerHp,
+    enemyHp: nextEnemyHp,
+    playerTookDamage,
+  };
+};
+
 const isNegativeStatusKind = (kind: CombatStatus["kind"]) =>
   [
     "burn",
@@ -5176,115 +5312,41 @@ export const runAutoBattle = (
 
       cleanupExpiredStatuses(tickMs);
 
-      enemyStatuses.forEach((status) => {
-        if ((status.nextTickAtMs ?? 0) > tickMs || status.expiresAtMs <= tickMs) {
-          return;
-        }
+      ({ playerHp, enemyHp } = applyStatusTickBatch({
+        statuses: enemyStatuses,
+        tickMs,
+        targetIsPlayer: false,
+        targetMaxHp: enemy.maxHp,
+        actorIsPlayer: true,
+        logs,
+        turn,
+        playerHp,
+        playerMaxHp: player.maxHp,
+        enemyHp,
+        enemyMaxHp: enemy.maxHp,
+        enemy,
+        passiveFlags,
+      }));
 
-        const {
-          damage: tickDamage,
-          message: tickMessage,
-          restoreToPlayer,
-        } = resolveStatusTickOutcome({
-          status,
-          targetMaxHp: enemy.maxHp,
-          targetIsPlayer: false,
-          enemy,
-        });
-
-        if (restoreToPlayer && tickDamage > 0) {
-          playerHp = Math.min(player.maxHp, playerHp + tickDamage);
-        }
-
-        if (tickDamage > 0) {
-          enemyHp = Math.max(0, enemyHp - tickDamage);
-          pushCombatLog(logs, {
-            turn,
-            timeMs: tickMs,
-            isPlayer: true,
-            message: tickMessage,
-            damage: tickDamage,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
-
-        status.nextTickAtMs = tickMs + 1000;
+      const playerTickResult = applyStatusTickBatch({
+        statuses: playerStatuses,
+        tickMs,
+        targetIsPlayer: true,
+        targetMaxHp: player.maxHp,
+        actorIsPlayer: false,
+        logs,
+        turn,
+        playerHp,
+        playerMaxHp: player.maxHp,
+        enemyHp,
+        enemyMaxHp: enemy.maxHp,
+        passiveFlags,
       });
-
-      playerStatuses.forEach((status) => {
-        if ((status.nextTickAtMs ?? 0) > tickMs || status.expiresAtMs <= tickMs) {
-          return;
-        }
-
-        if (hasSwordEmperorPassive && isNegativeStatusKind(status.kind)) {
-          status.expiresAtMs = tickMs;
-          status.nextTickAtMs = undefined;
-          pushCombatLog(logs, {
-            turn,
-            timeMs: tickMs,
-            isPlayer: true,
-            message: `【萬法皆空】直接抹除了【${status.name}】。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-          return;
-        }
-
-        if (hasBodyImmortalPassive && isDotStatusKind(status.kind)) {
-          status.expiresAtMs = tickMs;
-          status.nextTickAtMs = undefined;
-          pushCombatLog(logs, {
-            turn,
-            timeMs: tickMs,
-            isPlayer: true,
-            message: `【仙體無垢】淨化了【${status.name}】的侵蝕。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-          return;
-        }
-
-        const {
-          damage: tickDamage,
-          message: tickMessage,
-          restoreToEnemy,
-        } = resolveStatusTickOutcome({
-          status,
-          targetMaxHp: player.maxHp,
-          targetIsPlayer: true,
-        });
-
-        if (restoreToEnemy && tickDamage > 0) {
-          enemyHp = Math.min(enemy.maxHp, enemyHp + tickDamage);
-        }
-
-        if (tickDamage > 0) {
-          playerHp = Math.max(0, playerHp - tickDamage);
-          playerDamagedSinceSwordHeartWindow = true;
-          pushCombatLog(logs, {
-            turn,
-            timeMs: tickMs,
-            isPlayer: false,
-            message: tickMessage,
-            damage: tickDamage,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
-
-        status.nextTickAtMs = tickMs + 1000;
-      });
+      playerHp = playerTickResult.playerHp;
+      enemyHp = playerTickResult.enemyHp;
+      if (playerTickResult.playerTookDamage) {
+        playerDamagedSinceSwordHeartWindow = true;
+      }
     }
 
     cleanupExpiredStatuses(currentMs);

@@ -243,6 +243,7 @@
 - [x] 玩家出手前的攻勢計算與暴擊 / 破防判定，已開始抽成共用 `resolvePlayerOffenseRoll(...)`，縮小 `runAutoBattle()` 主循環內的 inline 分支
 - [x] 玩家主動技能命中後的資源流、狀態推入、回響追擊與高境界後續效果，已開始整併到 `resolvePlayerActiveAftermath(...)`
 - [x] 敵方出手後的格擋、承傷、反震、enemy special 狀態套用與命中後續事件，已開始整併到 `resolveEnemyTurnAftermath(...)`
+- [x] DOT / 吸生 tick 的雙側處理迴圈，已開始整併到 `applyStatusTickBatch(...)`
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---
