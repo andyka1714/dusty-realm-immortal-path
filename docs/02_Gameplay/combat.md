@@ -104,6 +104,7 @@
 - 玩家主動術式的主傷害訊息與 `劍脈破甲` 提示，也已開始抽成共用 helper，主循環不再重複散寫攻擊文案與破甲追擊提示
 - 玩家出手主幹也已開始整併到 `resolvePlayerTurn(...)`，把可施放窗口、攻勢判定、主傷害訊息、破甲追擊、共鳴處理與命中後續集中到同一層流程
 - 敵方被控跳過回合的流程，也已開始整併到 `resolveEnemyIncapacitatedTurn(...)`，控制跳過與 `養劍術` 疊層不再在主循環散寫
+- battle snapshot provider 與 DOT / 吸生 tick 迴圈，也已開始抽成 `createCombatSnapshotProvider(...) / createStatusTickProcessor(...)`，主循環不再直接維護整段閉包式基礎設施
 - 部分技能與被動已開始接入專屬效果，而不再只是通用加成：
   - `b_g_active`：護盾會真正吸收傷害
   - `s_q_passive`：暴擊時會追加 `劍脈破甲`

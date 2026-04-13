@@ -2284,6 +2284,138 @@ const getCombatStatusSnapshot = (
   return Array.from(new Set(labels));
 };
 
+const createCombatSnapshotProvider = ({
+  activeSkill,
+  playerStatusesRef,
+  enemyStatusesRef,
+  activeSkillReadyAtMsRef,
+  learnedSkills,
+}: {
+  activeSkill?: Skill;
+  playerStatusesRef: () => CombatStatus[];
+  enemyStatusesRef: () => CombatStatus[];
+  activeSkillReadyAtMsRef: () => number;
+  learnedSkills: Skill[];
+}) => (snapshotTimeMs: number) => ({
+  playerStatuses: getCombatStatusSnapshot(playerStatusesRef(), snapshotTimeMs),
+  enemyStatuses: getCombatStatusSnapshot(enemyStatusesRef(), snapshotTimeMs),
+  playerActiveSkillName: activeSkill?.name,
+  playerActiveSkillCooldownRemainingMs: activeSkill
+    ? Math.max(0, activeSkillReadyAtMsRef() - snapshotTimeMs)
+    : 0,
+  playerActiveSkillCooldownTotalMs: activeSkill
+    ? Math.floor(getResolvedSkillCooldownSeconds(activeSkill, learnedSkills) * 1000)
+    : 0,
+});
+
+const createStatusTickProcessor = ({
+  getTurn,
+  logs,
+  player,
+  enemy,
+  passiveFlags,
+  getPlayerHp,
+  getEnemyHp,
+  setPlayerHp,
+  setEnemyHp,
+  getPlayerStatuses,
+  setPlayerStatuses,
+  getEnemyStatuses,
+  setEnemyStatuses,
+  getLastStatusTickMs,
+  setLastStatusTickMs,
+  getPlayerDamagedSinceSwordHeartWindow,
+  setPlayerDamagedSinceSwordHeartWindow,
+}: {
+  getTurn: () => number;
+  logs: CombatLog[];
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  passiveFlags: PlayerPassiveFlags;
+  getPlayerHp: () => number;
+  getEnemyHp: () => number;
+  setPlayerHp: (value: number) => void;
+  setEnemyHp: (value: number) => void;
+  getPlayerStatuses: () => CombatStatus[];
+  setPlayerStatuses: (value: CombatStatus[]) => void;
+  getEnemyStatuses: () => CombatStatus[];
+  setEnemyStatuses: (value: CombatStatus[]) => void;
+  getLastStatusTickMs: () => number;
+  setLastStatusTickMs: (value: number) => void;
+  getPlayerDamagedSinceSwordHeartWindow: () => boolean;
+  setPlayerDamagedSinceSwordHeartWindow: (value: boolean) => void;
+}) => {
+  const cleanupExpiredStatuses = (currentMs: number) => {
+    setPlayerStatuses(
+      getPlayerStatuses().filter(
+        (status) =>
+          status.expiresAtMs > currentMs &&
+          (status.kind !== "shield" || status.value > 0)
+      )
+    );
+    setEnemyStatuses(
+      getEnemyStatuses().filter(
+        (status) =>
+          status.expiresAtMs > currentMs &&
+          (status.kind !== "shield" || status.value > 0)
+      )
+    );
+  };
+
+  return (currentMs: number) => {
+    while (
+      getLastStatusTickMs() + 1000 <= currentMs &&
+      getPlayerHp() > 0 &&
+      getEnemyHp() > 0
+    ) {
+      const tickMs = getLastStatusTickMs() + 1000;
+      setLastStatusTickMs(tickMs);
+
+      cleanupExpiredStatuses(tickMs);
+
+      const enemyTickResult = applyStatusTickBatch({
+        statuses: getEnemyStatuses(),
+        tickMs,
+        targetIsPlayer: false,
+        targetMaxHp: enemy.maxHp,
+        actorIsPlayer: true,
+        logs,
+        turn: getTurn(),
+        playerHp: getPlayerHp(),
+        playerMaxHp: player.maxHp,
+        enemyHp: getEnemyHp(),
+        enemyMaxHp: enemy.maxHp,
+        enemy,
+        passiveFlags,
+      });
+      setPlayerHp(enemyTickResult.playerHp);
+      setEnemyHp(enemyTickResult.enemyHp);
+
+      const playerTickResult = applyStatusTickBatch({
+        statuses: getPlayerStatuses(),
+        tickMs,
+        targetIsPlayer: true,
+        targetMaxHp: player.maxHp,
+        actorIsPlayer: false,
+        logs,
+        turn: getTurn(),
+        playerHp: getPlayerHp(),
+        playerMaxHp: player.maxHp,
+        enemyHp: getEnemyHp(),
+        enemyMaxHp: enemy.maxHp,
+        passiveFlags,
+      });
+      setPlayerHp(playerTickResult.playerHp);
+      setEnemyHp(playerTickResult.enemyHp);
+      if (playerTickResult.playerTookDamage) {
+        setPlayerDamagedSinceSwordHeartWindow(true);
+      }
+    }
+
+    cleanupExpiredStatuses(currentMs);
+  };
+};
+
 const resolveStatusTickOutcome = ({
   status,
   targetMaxHp,
@@ -5849,23 +5981,16 @@ export const runAutoBattle = (
   let playerStatuses: CombatStatus[] = [];
   let enemyStatuses: CombatStatus[] = [];
   const previousSnapshotProvider = combatLogSnapshotProvider;
+  const activeSkill = getHighestActiveSkill(player.profession, player.learnedSkills);
 
-  combatLogSnapshotProvider = (snapshotTimeMs) => ({
-    playerStatuses: getCombatStatusSnapshot(playerStatuses, snapshotTimeMs),
-    enemyStatuses: getCombatStatusSnapshot(enemyStatuses, snapshotTimeMs),
-    playerActiveSkillName: activeSkill?.name,
-    playerActiveSkillCooldownRemainingMs: activeSkill
-      ? Math.max(0, activeSkillReadyAtMs - snapshotTimeMs)
-      : 0,
-    playerActiveSkillCooldownTotalMs: activeSkill
-      ? Math.floor(
-          getResolvedSkillCooldownSeconds(activeSkill, player.learnedSkills) *
-            1000
-        )
-      : 0,
+  combatLogSnapshotProvider = createCombatSnapshotProvider({
+    activeSkill: activeSkill ?? undefined,
+    playerStatusesRef: () => playerStatuses,
+    enemyStatusesRef: () => enemyStatuses,
+    activeSkillReadyAtMsRef: () => activeSkillReadyAtMs,
+    learnedSkills: player.learnedSkills,
   });
 
-  const activeSkill = getHighestActiveSkill(player.profession, player.learnedSkills);
   const playerAttackIntervalMs = getPlayerAttackIntervalMs(player);
   const enemyAttackIntervalMs = getEnemyAttackIntervalMs(enemy);
   const pVsE = getRestriction(player.element, enemy.element);
@@ -5914,65 +6039,37 @@ export const runAutoBattle = (
   let playerDamagedSinceSwordHeartWindow = false;
   let nextSwordImmortalGuardAtMs = 5000;
 
-  const cleanupExpiredStatuses = (currentMs: number) => {
-    playerStatuses = playerStatuses.filter(
-      (status) =>
-        status.expiresAtMs > currentMs &&
-        (status.kind !== "shield" || status.value > 0)
-    );
-    enemyStatuses = enemyStatuses.filter(
-      (status) =>
-        status.expiresAtMs > currentMs &&
-        (status.kind !== "shield" || status.value > 0)
-    );
-  };
-
-  const processStatusTicks = (currentMs: number) => {
-    while (lastStatusTickMs + 1000 <= currentMs && playerHp > 0 && enemyHp > 0) {
-      lastStatusTickMs += 1000;
-      const tickMs = lastStatusTickMs;
-
-      cleanupExpiredStatuses(tickMs);
-
-      ({ playerHp, enemyHp } = applyStatusTickBatch({
-        statuses: enemyStatuses,
-        tickMs,
-        targetIsPlayer: false,
-        targetMaxHp: enemy.maxHp,
-        actorIsPlayer: true,
-        logs,
-        turn,
-        playerHp,
-        playerMaxHp: player.maxHp,
-        enemyHp,
-        enemyMaxHp: enemy.maxHp,
-        enemy,
-        passiveFlags,
-      }));
-
-      const playerTickResult = applyStatusTickBatch({
-        statuses: playerStatuses,
-        tickMs,
-        targetIsPlayer: true,
-        targetMaxHp: player.maxHp,
-        actorIsPlayer: false,
-        logs,
-        turn,
-        playerHp,
-        playerMaxHp: player.maxHp,
-        enemyHp,
-        enemyMaxHp: enemy.maxHp,
-        passiveFlags,
-      });
-      playerHp = playerTickResult.playerHp;
-      enemyHp = playerTickResult.enemyHp;
-      if (playerTickResult.playerTookDamage) {
-        playerDamagedSinceSwordHeartWindow = true;
-      }
-    }
-
-    cleanupExpiredStatuses(currentMs);
-  };
+  const processStatusTicks = createStatusTickProcessor({
+    getTurn: () => turn,
+    logs,
+    player,
+    enemy,
+    passiveFlags,
+    getPlayerHp: () => playerHp,
+    getEnemyHp: () => enemyHp,
+    setPlayerHp: (value) => {
+      playerHp = value;
+    },
+    setEnemyHp: (value) => {
+      enemyHp = value;
+    },
+    getPlayerStatuses: () => playerStatuses,
+    setPlayerStatuses: (value) => {
+      playerStatuses = value;
+    },
+    getEnemyStatuses: () => enemyStatuses,
+    setEnemyStatuses: (value) => {
+      enemyStatuses = value;
+    },
+    getLastStatusTickMs: () => lastStatusTickMs,
+    setLastStatusTickMs: (value) => {
+      lastStatusTickMs = value;
+    },
+    getPlayerDamagedSinceSwordHeartWindow: () => playerDamagedSinceSwordHeartWindow,
+    setPlayerDamagedSinceSwordHeartWindow: (value) => {
+      playerDamagedSinceSwordHeartWindow = value;
+    },
+  });
 
   const { initialPassiveStatuses, initialEnemySpecialReadyAtMs } =
     initializeCombatEncounter({
