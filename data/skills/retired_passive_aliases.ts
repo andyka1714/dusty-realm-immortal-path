@@ -200,6 +200,23 @@ export const TRIBULATION_RETIRED_PASSIVE_ALIASES: Record<string, Skill> = {
   }),
 };
 
+export const RETIRED_PASSIVE_ALIASES_BY_REALM: Partial<
+  Record<MajorRealm, Record<string, Skill>>
+> = {
+  [MajorRealm.Foundation]: FOUNDATION_RETIRED_PASSIVE_ALIASES,
+  [MajorRealm.VoidRefining]: VOID_REFINING_RETIRED_PASSIVE_ALIASES,
+  [MajorRealm.Fusion]: FUSION_RETIRED_PASSIVE_ALIASES,
+  [MajorRealm.Mahayana]: MAHAYANA_RETIRED_PASSIVE_ALIASES,
+  [MajorRealm.Tribulation]: TRIBULATION_RETIRED_PASSIVE_ALIASES,
+  [MajorRealm.Immortal]: IMMORTAL_RETIRED_PASSIVE_ALIASES,
+  [MajorRealm.ImmortalEmperor]: IMMORTAL_EMPEROR_RETIRED_PASSIVE_ALIASES,
+};
+
+export const ALL_RETIRED_PASSIVE_ALIASES: Record<string, Skill> = Object.assign(
+  {},
+  ...Object.values(RETIRED_PASSIVE_ALIASES_BY_REALM)
+);
+
 export const BATTLE_ABSORBED_RETIRED_PASSIVE_ALIASES: Record<string, Skill> = {
   ...FOUNDATION_RETIRED_PASSIVE_ALIASES,
   ...VOID_REFINING_RETIRED_PASSIVE_ALIASES,

@@ -213,6 +213,22 @@ export const IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
   }),
 };
 
+export const RETIRED_ACTIVE_ALIASES_BY_REALM: Partial<
+  Record<MajorRealm, Record<string, Skill>>
+> = {
+  [MajorRealm.VoidRefining]: VOID_REFINING_RETIRED_ACTIVE_ALIASES,
+  [MajorRealm.Fusion]: FUSION_RETIRED_ACTIVE_ALIASES,
+  [MajorRealm.Mahayana]: MAHAYANA_RETIRED_ACTIVE_ALIASES,
+  [MajorRealm.Tribulation]: TRIBULATION_RETIRED_ACTIVE_ALIASES,
+  [MajorRealm.Immortal]: IMMORTAL_RETIRED_ACTIVE_ALIASES,
+  [MajorRealm.ImmortalEmperor]: IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES,
+};
+
+export const ALL_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = Object.assign(
+  {},
+  ...Object.values(RETIRED_ACTIVE_ALIASES_BY_REALM)
+);
+
 export const BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS = [
   "s_vr_active",
   "s_bi_active",

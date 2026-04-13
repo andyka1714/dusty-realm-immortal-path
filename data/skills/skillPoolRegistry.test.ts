@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { MajorRealm, ProfessionType } from "../../types";
 import {
+  ALL_RETIRED_ACTIVE_ALIASES,
+  RETIRED_ACTIVE_ALIASES_BY_REALM,
   stripRetirementReadyActiveAliases as stripRetirementReadyActiveAliasesForTest,
 } from "./retired_active_aliases";
 import {
+  ALL_RETIRED_PASSIVE_ALIASES,
+  RETIRED_PASSIVE_ALIASES_BY_REALM,
   stripBattleAbsorbedPassiveAliases as stripBattleAbsorbedPassiveAliasesForTest,
 } from "./retired_passive_aliases";
 import {
@@ -376,5 +380,20 @@ describe("skill pool registry", () => {
       withoutRetirementReadyActives
     );
     expect(Object.keys(realmView)).toEqual(["s_q_active", "m_f_passive"]);
+  });
+
+  it("centralizes retired alias aggregation in alias-layer maps before composing realm datasets", () => {
+    expect(Object.keys(ALL_RETIRED_ACTIVE_ALIASES)).toContain("s_bi_active");
+    expect(Object.keys(ALL_RETIRED_ACTIVE_ALIASES)).toContain("m_ie_active");
+    expect(Object.keys(ALL_RETIRED_PASSIVE_ALIASES)).toContain("s_f_passive");
+    expect(Object.keys(ALL_RETIRED_PASSIVE_ALIASES)).toContain("b_ie_passive");
+    expect(RETIRED_ACTIVE_ALIASES_BY_REALM[MajorRealm.Fusion]?.s_bi_active?.id).toBe(
+      "s_bi_active"
+    );
+    expect(RETIRED_PASSIVE_ALIASES_BY_REALM[MajorRealm.Immortal]?.s_im_passive?.id).toBe(
+      "s_im_passive"
+    );
+    expect(getSkill("s_bi_active")?.replacementSkillId).toBe("s_tr_active");
+    expect(getSkill("s_im_passive")?.replacementSkillId).toBe("s_tr_passive");
   });
 });

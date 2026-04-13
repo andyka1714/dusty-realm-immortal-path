@@ -11,27 +11,18 @@ import { TRIBULATION_SKILLS } from "./tribulation";
 import { IMMORTAL_SKILLS } from "./immortal";
 import { IMMORTAL_EMPEROR_SKILLS } from "./immortal_emperor";
 import {
+  ALL_RETIRED_ACTIVE_ALIASES,
   BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS,
-  FUSION_RETIRED_ACTIVE_ALIASES,
-  IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES,
-  IMMORTAL_RETIRED_ACTIVE_ALIASES,
-  MAHAYANA_RETIRED_ACTIVE_ALIASES,
   RETIREMENT_READY_RETIRED_ACTIVE_SKILL_IDS,
+  RETIRED_ACTIVE_ALIASES_BY_REALM,
   stripRetirementReadyActiveAliases,
-  TRIBULATION_RETIRED_ACTIVE_ALIASES,
-  VOID_REFINING_RETIRED_ACTIVE_ALIASES,
 } from "./retired_active_aliases";
 import {
+  ALL_RETIRED_PASSIVE_ALIASES,
   BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS,
-  stripBattleAbsorbedPassiveAliases,
-  FOUNDATION_RETIRED_PASSIVE_ALIASES,
-  FUSION_RETIRED_PASSIVE_ALIASES,
-  IMMORTAL_EMPEROR_RETIRED_PASSIVE_ALIASES,
-  IMMORTAL_RETIRED_PASSIVE_ALIASES,
-  MAHAYANA_RETIRED_PASSIVE_ALIASES,
   RETIREMENT_READY_RETIRED_PASSIVE_SKILL_IDS,
-  TRIBULATION_RETIRED_PASSIVE_ALIASES,
-  VOID_REFINING_RETIRED_PASSIVE_ALIASES,
+  RETIRED_PASSIVE_ALIASES_BY_REALM,
+  stripBattleAbsorbedPassiveAliases,
 } from "./retired_passive_aliases";
 import {
   getSkillPoolEntry,
@@ -173,7 +164,6 @@ const normalizeSkill = (skill: Skill): Skill => {
 const RAW_SKILLS: Record<string, Skill> = {
   ...QI_REFINING_SKILLS,
   ...FOUNDATION_SKILLS,
-  ...FOUNDATION_RETIRED_PASSIVE_ALIASES,
   ...GOLDEN_CORE_SKILLS,
   ...NASCENT_SOUL_SKILLS,
   ...SPIRIT_SEVERING_SKILLS,
@@ -183,18 +173,8 @@ const RAW_SKILLS: Record<string, Skill> = {
   ...TRIBULATION_SKILLS,
   ...IMMORTAL_SKILLS,
   ...IMMORTAL_EMPEROR_SKILLS,
-  ...VOID_REFINING_RETIRED_ACTIVE_ALIASES,
-  ...VOID_REFINING_RETIRED_PASSIVE_ALIASES,
-  ...FUSION_RETIRED_ACTIVE_ALIASES,
-  ...FUSION_RETIRED_PASSIVE_ALIASES,
-  ...MAHAYANA_RETIRED_ACTIVE_ALIASES,
-  ...MAHAYANA_RETIRED_PASSIVE_ALIASES,
-  ...TRIBULATION_RETIRED_ACTIVE_ALIASES,
-  ...TRIBULATION_RETIRED_PASSIVE_ALIASES,
-  ...IMMORTAL_RETIRED_ACTIVE_ALIASES,
-  ...IMMORTAL_RETIRED_PASSIVE_ALIASES,
-  ...IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES,
-  ...IMMORTAL_EMPEROR_RETIRED_PASSIVE_ALIASES,
+  ...ALL_RETIRED_ACTIVE_ALIASES,
+  ...ALL_RETIRED_PASSIVE_ALIASES,
 };
 
 const stripRetiredAliasesForRealmView = (skills: Record<string, Skill>) =>
@@ -205,40 +185,40 @@ const RAW_SKILL_SETS_BY_REALM: Record<MajorRealm, Record<string, Skill>> = {
   [MajorRealm.QiRefining]: QI_REFINING_SKILLS,
   [MajorRealm.Foundation]: stripRetiredAliasesForRealmView({
     ...FOUNDATION_SKILLS,
-    ...FOUNDATION_RETIRED_PASSIVE_ALIASES,
+    ...(RETIRED_PASSIVE_ALIASES_BY_REALM[MajorRealm.Foundation] ?? {}),
   }),
   [MajorRealm.GoldenCore]: GOLDEN_CORE_SKILLS,
   [MajorRealm.NascentSoul]: NASCENT_SOUL_SKILLS,
   [MajorRealm.SpiritSevering]: SPIRIT_SEVERING_SKILLS,
   [MajorRealm.VoidRefining]: stripRetiredAliasesForRealmView({
     ...VOID_REFINING_SKILLS,
-    ...VOID_REFINING_RETIRED_ACTIVE_ALIASES,
-    ...VOID_REFINING_RETIRED_PASSIVE_ALIASES,
+    ...(RETIRED_ACTIVE_ALIASES_BY_REALM[MajorRealm.VoidRefining] ?? {}),
+    ...(RETIRED_PASSIVE_ALIASES_BY_REALM[MajorRealm.VoidRefining] ?? {}),
   }),
   [MajorRealm.Fusion]: stripRetiredAliasesForRealmView({
       ...FUSION_SKILLS,
-      ...FUSION_RETIRED_ACTIVE_ALIASES,
-      ...FUSION_RETIRED_PASSIVE_ALIASES,
+      ...(RETIRED_ACTIVE_ALIASES_BY_REALM[MajorRealm.Fusion] ?? {}),
+      ...(RETIRED_PASSIVE_ALIASES_BY_REALM[MajorRealm.Fusion] ?? {}),
   }),
   [MajorRealm.Mahayana]: stripRetiredAliasesForRealmView({
       ...MAHAYANA_SKILLS,
-      ...MAHAYANA_RETIRED_ACTIVE_ALIASES,
-      ...MAHAYANA_RETIRED_PASSIVE_ALIASES,
+      ...(RETIRED_ACTIVE_ALIASES_BY_REALM[MajorRealm.Mahayana] ?? {}),
+      ...(RETIRED_PASSIVE_ALIASES_BY_REALM[MajorRealm.Mahayana] ?? {}),
   }),
   [MajorRealm.Tribulation]: stripRetiredAliasesForRealmView({
       ...TRIBULATION_SKILLS,
-      ...TRIBULATION_RETIRED_ACTIVE_ALIASES,
-      ...TRIBULATION_RETIRED_PASSIVE_ALIASES,
+      ...(RETIRED_ACTIVE_ALIASES_BY_REALM[MajorRealm.Tribulation] ?? {}),
+      ...(RETIRED_PASSIVE_ALIASES_BY_REALM[MajorRealm.Tribulation] ?? {}),
   }),
   [MajorRealm.Immortal]: stripRetiredAliasesForRealmView({
       ...IMMORTAL_SKILLS,
-      ...IMMORTAL_RETIRED_ACTIVE_ALIASES,
-      ...IMMORTAL_RETIRED_PASSIVE_ALIASES,
+      ...(RETIRED_ACTIVE_ALIASES_BY_REALM[MajorRealm.Immortal] ?? {}),
+      ...(RETIRED_PASSIVE_ALIASES_BY_REALM[MajorRealm.Immortal] ?? {}),
   }),
   [MajorRealm.ImmortalEmperor]: stripRetiredAliasesForRealmView({
       ...IMMORTAL_EMPEROR_SKILLS,
-      ...IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES,
-      ...IMMORTAL_EMPEROR_RETIRED_PASSIVE_ALIASES,
+      ...(RETIRED_ACTIVE_ALIASES_BY_REALM[MajorRealm.ImmortalEmperor] ?? {}),
+      ...(RETIRED_PASSIVE_ALIASES_BY_REALM[MajorRealm.ImmortalEmperor] ?? {}),
   }),
 };
 
