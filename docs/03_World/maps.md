@@ -69,7 +69,7 @@
 - 地圖戰鬥現在已是主要遊玩路徑，不再依賴舊的中央戰報 modal。
 - 玩家與怪物在場景內會依射程直接交戰；玩家出手、怪物回擊、投射物、AOE、浮字與掉落，都直接在地圖層完成。
 - `circle / line / cone` 範圍技能已不只存在於欄位或特效，現在會依玩家與主目標相對位置正式波及附近怪物。
-- 世界戰鬥與 `runAutoBattle()` 已開始共用技能 / 特招的 cooldown、execution、AOE 與部分 status resolver，但仍未完全統一成單一引擎。
+- 世界戰鬥與 `runAutoBattle()` 已開始共用技能 / 特招的 cooldown、execution、AOE、部分 status resolver，以及 enemy special 的 incoming status 過濾與控制縮短規則，但仍未完全統一成單一引擎。
 - 區域地圖的地點懸停情報，也已開始收進共用 `GameTooltip` 外觀，不再維持獨立樣式的浮窗。
 
 怪物根據地圖名稱自動生成 (Auto-populate) 以保持多樣性與合理性：
