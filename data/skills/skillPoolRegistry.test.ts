@@ -231,8 +231,11 @@ describe("skill pool registry", () => {
 
   it("keeps retirement-ready retired actives out of realm datasets after centralizing aliases", () => {
     expect(getSkillsByRealm(MajorRealm.VoidRefining).some((skill) => skill.id === "s_vr_active")).toBe(false);
+    expect(getSkillsByRealm(MajorRealm.Fusion).some((skill) => skill.id === "s_bi_active")).toBe(false);
     expect(getSkillsByRealm(MajorRealm.Fusion).some((skill) => skill.id === "b_bi_active")).toBe(false);
+    expect(getSkillsByRealm(MajorRealm.Fusion).some((skill) => skill.id === "m_bi_active")).toBe(false);
     expect(getSkillsByRealm(MajorRealm.Mahayana).some((skill) => skill.id === "m_ma_active")).toBe(false);
+    expect(getSkillsByRealm(MajorRealm.Tribulation).some((skill) => skill.id === "b_tr_active")).toBe(false);
     expect(getSkillsByRealm(MajorRealm.Immortal).some((skill) => skill.id === "s_im_active")).toBe(false);
     expect(getSkillsByRealm(MajorRealm.ImmortalEmperor).some((skill) => skill.id === "m_ie_active")).toBe(false);
   });
@@ -321,6 +324,9 @@ describe("skill pool registry", () => {
 
   it("keeps retirement-ready retired actives out of realm datasets while preserving central lookup compatibility", () => {
     expect(getSkill("s_vr_active")?.replacementSkillId).toBe("s_ma_active");
+    expect(getSkill("s_bi_active")?.replacementSkillId).toBe("s_tr_active");
+    expect(getSkill("b_tr_active")?.replacementSkillId).toBe("b_vr_active");
+    expect(getSkill("m_bi_active")?.replacementSkillId).toBe("m_tr_active");
     expect(getSkill("b_ie_active")?.replacementSkillId).toBe("b_ma_active");
     expect(getSkill("m_ie_active")?.replacementSkillId).toBe("m_tr_active");
 

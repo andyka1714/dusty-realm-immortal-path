@@ -650,6 +650,56 @@ const resolveIncomingEnemySpecialStatuses = ({
   };
 };
 
+const logEnemySpecialImmunityTriggers = ({
+  logs,
+  turn,
+  timeMs,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+  bodyImmortalTriggered,
+  swordEmperorTriggered,
+}: {
+  logs: CombatLog[];
+  turn: number;
+  timeMs: number;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  bodyImmortalTriggered: boolean;
+  swordEmperorTriggered: boolean;
+}) => {
+  if (bodyImmortalTriggered) {
+    pushCombatLog(logs, {
+      turn,
+      timeMs,
+      isPlayer: true,
+      message: `【仙體無垢】你直接免疫了持續傷害侵蝕。`,
+      damage: 0,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  if (swordEmperorTriggered) {
+    pushCombatLog(logs, {
+      turn,
+      timeMs,
+      isPlayer: true,
+      message: `【萬法皆空】你不受任何負面狀態束縛。`,
+      damage: 0,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
+};
+
 const getEnemyWorldPassiveTriggerState = (options: {
   enemy: Enemy;
   player: PlayerCombatStats;
@@ -3860,37 +3910,17 @@ export const runAutoBattle = (
             }
           }
 
-          if (
-            enemyIncomingStatusResult.bodyImmortalTriggered
-          ) {
-            pushCombatLog(logs, {
-              turn,
-              timeMs: currentTimeMs,
-              isPlayer: true,
-              message: `【仙體無垢】你直接免疫了持續傷害侵蝕。`,
-              damage: 0,
-              playerHp,
-              playerMaxHp: player.maxHp,
-              enemyHp,
-              enemyMaxHp: enemy.maxHp,
-            });
-          }
-
-          if (
-            enemyIncomingStatusResult.swordEmperorTriggered
-          ) {
-            pushCombatLog(logs, {
-              turn,
-              timeMs: currentTimeMs,
-              isPlayer: true,
-              message: `【萬法皆空】你不受任何負面狀態束縛。`,
-              damage: 0,
-              playerHp,
-              playerMaxHp: player.maxHp,
-              enemyHp,
-              enemyMaxHp: enemy.maxHp,
-            });
-          }
+          logEnemySpecialImmunityTriggers({
+            logs,
+            turn,
+            timeMs: currentTimeMs,
+            playerHp,
+            playerMaxHp: player.maxHp,
+            enemyHp,
+            enemyMaxHp: enemy.maxHp,
+            bodyImmortalTriggered: enemyIncomingStatusResult.bodyImmortalTriggered,
+            swordEmperorTriggered: enemyIncomingStatusResult.swordEmperorTriggered,
+          });
         }
 
         const reflectValue = getReflectValue(playerStatuses, currentTimeMs);

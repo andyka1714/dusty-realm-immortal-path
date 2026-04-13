@@ -25,26 +25,6 @@ export const TRIBULATION_SKILLS: Record<string, Skill> = {
     effectType: "buff",
     targetType: "self",
   },
-
-  // --- Body Cultivator (Tribulation) ---
-  b_tr_active: {
-    id: "b_tr_active",
-    name: "硬抗天劫",
-    description:
-      "嘲諷全體敵人，並將自身受到的 50% 傷害反彈給來源，持續 3 回合。",
-    type: "Active",
-    cooldown: 6,
-    minRealm: MajorRealm.Tribulation,
-    profession: ProfessionType.Body,
-    targetType: "all",
-    effectType: "special",
-    statusEffect: {
-      id: "reflect_taunt",
-      duration: 3,
-      chance: 1.0,
-      value: 0.5,
-    },
-  },
   // --- Mage Cultivator (Tribulation) ---
   m_tr_active: {
     id: "m_tr_active",

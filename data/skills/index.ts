@@ -17,6 +17,7 @@ import {
   IMMORTAL_RETIRED_ACTIVE_ALIASES,
   MAHAYANA_RETIRED_ACTIVE_ALIASES,
   RETIREMENT_READY_RETIRED_ACTIVE_SKILL_IDS,
+  TRIBULATION_RETIRED_ACTIVE_ALIASES,
   VOID_REFINING_RETIRED_ACTIVE_ALIASES,
 } from "./retired_active_aliases";
 import {
@@ -186,6 +187,7 @@ const RAW_SKILLS: Record<string, Skill> = {
   ...FUSION_RETIRED_PASSIVE_ALIASES,
   ...MAHAYANA_RETIRED_ACTIVE_ALIASES,
   ...MAHAYANA_RETIRED_PASSIVE_ALIASES,
+  ...TRIBULATION_RETIRED_ACTIVE_ALIASES,
   ...TRIBULATION_RETIRED_PASSIVE_ALIASES,
   ...IMMORTAL_RETIRED_ACTIVE_ALIASES,
   ...IMMORTAL_RETIRED_PASSIVE_ALIASES,
@@ -233,32 +235,39 @@ const RAW_SKILL_SETS_BY_REALM: Record<MajorRealm, Record<string, Skill>> = {
   })),
   [MajorRealm.Fusion]: stripBattleAbsorbedPassiveAliases(
     stripRetirementReadyActiveAliases({
-    ...FUSION_SKILLS,
-    ...FUSION_RETIRED_ACTIVE_ALIASES,
-    ...FUSION_RETIRED_PASSIVE_ALIASES,
-  })),
+      ...FUSION_SKILLS,
+      ...FUSION_RETIRED_ACTIVE_ALIASES,
+      ...FUSION_RETIRED_PASSIVE_ALIASES,
+    })
+  ),
   [MajorRealm.Mahayana]: stripBattleAbsorbedPassiveAliases(
     stripRetirementReadyActiveAliases({
-    ...MAHAYANA_SKILLS,
-    ...MAHAYANA_RETIRED_ACTIVE_ALIASES,
-    ...MAHAYANA_RETIRED_PASSIVE_ALIASES,
-  })),
-  [MajorRealm.Tribulation]: stripBattleAbsorbedPassiveAliases({
-    ...TRIBULATION_SKILLS,
-    ...TRIBULATION_RETIRED_PASSIVE_ALIASES,
-  }),
+      ...MAHAYANA_SKILLS,
+      ...MAHAYANA_RETIRED_ACTIVE_ALIASES,
+      ...MAHAYANA_RETIRED_PASSIVE_ALIASES,
+    })
+  ),
+  [MajorRealm.Tribulation]: stripBattleAbsorbedPassiveAliases(
+    stripRetirementReadyActiveAliases({
+      ...TRIBULATION_SKILLS,
+      ...TRIBULATION_RETIRED_ACTIVE_ALIASES,
+      ...TRIBULATION_RETIRED_PASSIVE_ALIASES,
+    })
+  ),
   [MajorRealm.Immortal]: stripBattleAbsorbedPassiveAliases(
     stripRetirementReadyActiveAliases({
-    ...IMMORTAL_SKILLS,
-    ...IMMORTAL_RETIRED_ACTIVE_ALIASES,
-    ...IMMORTAL_RETIRED_PASSIVE_ALIASES,
-  })),
+      ...IMMORTAL_SKILLS,
+      ...IMMORTAL_RETIRED_ACTIVE_ALIASES,
+      ...IMMORTAL_RETIRED_PASSIVE_ALIASES,
+    })
+  ),
   [MajorRealm.ImmortalEmperor]: stripBattleAbsorbedPassiveAliases(
     stripRetirementReadyActiveAliases({
-    ...IMMORTAL_EMPEROR_SKILLS,
-    ...IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES,
-    ...IMMORTAL_EMPEROR_RETIRED_PASSIVE_ALIASES,
-  })),
+      ...IMMORTAL_EMPEROR_SKILLS,
+      ...IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES,
+      ...IMMORTAL_EMPEROR_RETIRED_PASSIVE_ALIASES,
+    })
+  ),
 };
 
 export const SKILLS: Record<string, Skill> = Object.fromEntries(

@@ -157,6 +157,7 @@
 - [x] 第一批 battle-absorbed retired 被動技能已從原境界技能檔抽離，改為集中 alias 定義
 - [x] retired 技能曾切出 pending-retirement 查詢層作為過渡名單；目前該層已清空並自程式查詢層移除
 - [x] 第一批 retirement-ready retired 主動技能已自各境界正式技能資料集移除，只保留中央 alias / 相容查詢層
+- [x] 原先仍留在 `fusion / tribulation` 原境界技能檔的 `s_bi_active`、`m_bi_active`、`b_tr_active`，也已回收進正式 retired active alias 層
 - [x] 第一批 battle-absorbed retired 被動技能也已自各境界正式技能資料集移除，realm 視圖只保留正式技能池
 - [x] 原先 pending-retirement retired 被動技能已全部併回正式 retired passive alias 層，不再獨立維護資料檔
 - [x] 更多已落地的 pending-retirement retired 被動技能已正式推進到 battle-absorbed 分類，降低後續本體刪整阻力
@@ -231,6 +232,7 @@
 - [x] 屬性克制、弱點洞察、元素抗性、開場被動與高境界開場壓制提示，已開始整併成共用 opener helper，縮減 `runAutoBattle()` 的前置事件散寫範圍
 - [x] 來襲傷害的防禦型被動事件已開始抽成共用 defensive-passive helper，集中處理 `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `肉身成聖` / `元素護盾`
 - [x] enemy special 的 incoming status 過濾與控制縮短，現在也開始走 world / timeline 共用 resolver，不再在 `runAutoBattle()` 內手寫一套獨立分支
+- [x] enemy special 的免疫觸發訊息，也已開始抽成共用 helper，避免 `仙體無垢 / 萬法皆空` 在時間軸戰鬥內重複散寫
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---

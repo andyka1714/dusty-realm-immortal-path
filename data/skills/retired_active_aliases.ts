@@ -1,6 +1,7 @@
 import { MajorRealm, ProfessionType, Skill } from "../../types";
 import { MAHAYANA_SKILLS } from "./mahayana";
 import { TRIBULATION_SKILLS } from "./tribulation";
+import { VOID_REFINING_SKILLS } from "./void_refining";
 
 const buildRetiredActiveAlias = (
   replacementSkill: Skill,
@@ -33,6 +34,19 @@ export const VOID_REFINING_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
 };
 
 export const FUSION_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
+  s_bi_active: buildRetiredActiveAlias(TRIBULATION_SKILLS.s_tr_active, {
+    id: "s_bi_active",
+    name: "萬劍歸一",
+    description:
+      "對單體造成 800% 傷害。若目標處於【劍氣】狀態，消耗所有層數，每層提升 50% 傷害。",
+    minRealm: MajorRealm.Fusion,
+    profession: ProfessionType.Sword,
+    targetType: "single",
+    effectType: "damage",
+    cooldown: 6,
+    damageMultiplier: 8.0,
+    statusEffect: undefined,
+  }),
   b_bi_active: buildRetiredActiveAlias(MAHAYANA_SKILLS.b_ma_active, {
     id: "b_bi_active",
     name: "法天象地",
@@ -49,6 +63,19 @@ export const FUSION_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
       duration: 5,
       chance: 1.0,
     },
+  }),
+  m_bi_active: buildRetiredActiveAlias(TRIBULATION_SKILLS.m_tr_active, {
+    id: "m_bi_active",
+    name: "元神出竅",
+    description:
+      "元神離體進行攻擊，對全體造成 400% 傷害，並無視敵人 50% 法術防禦。",
+    minRealm: MajorRealm.Fusion,
+    profession: ProfessionType.Mage,
+    targetType: "all",
+    effectType: "damage",
+    cooldown: 6,
+    damageMultiplier: 4.0,
+    statusEffect: undefined,
   }),
 };
 
@@ -68,6 +95,27 @@ export const MAHAYANA_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
       id: "paralyze",
       duration: 1,
       chance: 0.8,
+    },
+  }),
+};
+
+export const TRIBULATION_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
+  b_tr_active: buildRetiredActiveAlias(VOID_REFINING_SKILLS.b_vr_active, {
+    id: "b_tr_active",
+    name: "硬抗天劫",
+    description:
+      "嘲諷全體敵人，並將自身受到的 50% 傷害反彈給來源，持續 3 回合。",
+    minRealm: MajorRealm.Tribulation,
+    profession: ProfessionType.Body,
+    targetType: "all",
+    effectType: "special",
+    cooldown: 6,
+    damageMultiplier: undefined,
+    statusEffect: {
+      id: "reflect_taunt",
+      duration: 3,
+      chance: 1.0,
+      value: 0.5,
     },
   }),
 };
