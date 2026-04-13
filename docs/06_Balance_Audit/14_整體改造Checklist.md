@@ -293,6 +293,7 @@
 - [x] `m_ie_passive` 萬法歸宗：敵方術式延後 + 元素反擊削弱
 - [x] `m_tr_active` 九霄神雷：對麻痺目標額外增傷
 - [x] `s_ma_active` / `m_tr_active` / `b_ma_active` 已開始直接承接 retired 高境界主動額外分支
+- [x] `s_ma_active` 已補上 `絕仙封脈` 的 timeline combat 接線，會實際延後敵方特招節奏
 - [x] `s_tr_active` 已開始直接承接 `誅仙劍陣` 的持續壓制與破甲分支
 - [x] `m_tr_active` 已開始直接承接 `掌心雷` 的麻痺分支
 - [x] `b_ie_active` 掌中神國：額外神國抽離 + 最大生命吸收

@@ -366,6 +366,45 @@ describe("battle system balance", () => {
     expect(strike.playerStatusNames).not.toContain("誅仙劍陣");
   });
 
+  it("surfaces spirit sever on world strikes and delays enemy specials in timeline combat", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 92,
+        rootBone: 108,
+        insight: 80,
+        comprehension: 28,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Mahayana,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 1320,
+        defense: 260,
+        hp: 7600,
+        speed: 20,
+      },
+      "絕仙劍",
+      ProfessionType.Sword,
+      ["s_ma_active", "s_tr_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(
+      sword,
+      BOSS_ENEMIES.m121_b1,
+      getSkill("s_ma_active")
+    );
+
+    expect(strike.enemyStatusNames).toContain("絕仙封脈");
+
+    const result = runAutoBattle(sword, BOSS_ENEMIES.m121_b1);
+    expect(
+      result.logs.some((log) => log.message.includes("【絕仙劍】斬斷敵方靈機流轉"))
+    ).toBe(true);
+  });
+
   it("keeps enemy world-strike statuses and cooldown on the same shared special resolver", () => {
     fixedRandom.mockReturnValue(0.1);
 

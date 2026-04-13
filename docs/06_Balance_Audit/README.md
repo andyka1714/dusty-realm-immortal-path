@@ -160,6 +160,7 @@
 - `荒古戰體 / 仙元護體 / 劍意化形 / 肉身成聖 / 道法自然` 這批被動，也已開始補齊 timeline combat 開場待命訊息，不再只有內部效果在跑。
 - `荊棘皮層 / 蠻荒血脈 / 銅皮鐵骨 / 金剛法相 / 元素護盾 / 萬劫不滅 / 雷劫煉心 / 護體劍罡 / 滴血重生 / 不死不滅 / 仙體無垢` 這批承傷、生存與免疫被動，也已開始補齊 enemy world strike 或 enemy special world strike 的可見狀態。
 - `enemy special` 的 incoming status 過濾、狀態推入、戰鬥日誌與免疫提示，也已開始收斂到更完整的共用 helper，world / timeline 的差異進一步縮小。
+- `絕仙劍` 的 `絕仙封脈` 也已正式接進 timeline combat，會在敵方特招將要出手時把節奏再壓後 `1` 秒，高境界劍修的節奏壓制已不再只是狀態名義存在。
 - `GamePanel / Modal / GameTooltip / GameHintBubble` 這條 UI 殼層語言已進一步收斂；角色屬性、商店、圖鑑、背包、任務獎勵、區域地圖情報與多個短提示已開始共用同一套遊戲化外觀。
 - `World / UI / Audit` 文件對於地圖情報 tooltip、短提示 eyebrow 與 battle shared resolver 的描述，也已開始按目前實作重新對齊。
 

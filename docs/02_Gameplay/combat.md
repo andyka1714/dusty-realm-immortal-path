@@ -155,6 +155,7 @@
   - `b_im_active`：祖巫降臨會把部分傷害轉為治療
   - `s_tr_active`：擊殺後會重置冷卻
   - `m_tr_active`：對麻痺目標會額外放大雷劫傷害
+  - `s_ma_active`：附加 `絕仙封脈`，在時間軸戰鬥會實際延後敵方特招節奏
   - `s_im_active`：誅仙劍陣會附加持續壓制與護體削弱
   - `b_bi_active`：法天象地會回復大量氣血並撐起巨靈護體
   - `s_ie_active`：一劍開天會無視一般防禦減免
@@ -164,6 +165,7 @@
 - `enemy world strike` 的 incoming status 過濾，也已開始和 timeline combat 對齊，正式處理 `DOT / 負面狀態免疫` 的共用規則
 - `enemy special` 的 incoming status 過濾與控制縮短，也已開始抽成 world / timeline 共用 resolver，不再只在 `runAutoBattle()` 內手寫 `filteredEnemyStatuses / normalizedIncomingStatuses`
 - `enemy special` 的狀態套用、戰鬥日誌與免疫觸發，已開始進一步收斂到同一層 helper，減少 timeline 內核殘留的散寫分支
+- `絕仙劍` 的 `絕仙封脈` 也已正式接進 timeline combat，會在敵方特招將要就緒時把術式節奏再壓後 `1` 秒，而不再只剩狀態標記
 - 玩家主動術式施加給敵方的控制型狀態與後續破甲追擊，現在也已開始和 timeline combat 共用同一層 enemy-status resolver；`霸體` 過濾與 `劍脈破甲` 不再 world / timeline 各寫一份
 - 玩家主動術式施加的 `盾、破甲、DOT、反震、劍氣` 等狀態，也已開始走共用 status logger，不再在時間軸戰鬥內逐段手寫訊息
 - `m_tr_passive`：enemy special 造成控制時，也已開始在 enemy world strike 正式回報 `雷劫煉心`

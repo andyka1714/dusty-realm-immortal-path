@@ -1287,6 +1287,8 @@ const getStatusLabel = (statusId: string) => {
       return "嘲諷";
     case "god_kingdom":
       return "神國侵蝕";
+    case "spirit_sever":
+      return "絕仙封脈";
     case "sword_qi":
       return "劍氣";
     default:
@@ -1668,6 +1670,16 @@ const getReflectValue = (statuses: CombatStatus[], currentTimeMs: number) =>
       (status) => status.kind === "reflect" && status.expiresAtMs > currentTimeMs
     )
     .reduce((sum, status) => sum + status.value, 0);
+
+const getEnemySpecialDelayFromStatuses = (
+  statuses: CombatStatus[],
+  currentTimeMs: number
+) =>
+  statuses.some(
+    (status) => status.id === "spirit_sever" && status.expiresAtMs > currentTimeMs
+  )
+    ? 1000
+    : 0;
 
 const getInitialPassiveStatuses = ({
   hasReflectPassive,
@@ -4079,6 +4091,28 @@ export const runAutoBattle = (
       }
 
       const enemyContext = getEnemyAttackContext(enemy, player);
+      const enemySpecialDelayMs = getEnemySpecialDelayFromStatuses(
+        enemyStatuses,
+        currentTimeMs
+      );
+      if (
+        enemy.specialAttack &&
+        currentTimeMs >= enemySpecialReadyAtMs &&
+        enemySpecialDelayMs > 0
+      ) {
+        enemySpecialReadyAtMs = currentTimeMs + enemySpecialDelayMs;
+        pushCombatLog(logs, {
+          turn,
+          timeMs: currentTimeMs,
+          isPlayer: true,
+          message: `【絕仙劍】斬斷敵方靈機流轉，將其術式節奏再壓後 ${(enemySpecialDelayMs / 1000).toFixed(0)} 秒。`,
+          damage: 0,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+        });
+      }
       const enemySpecialReady =
         enemy.specialAttack && currentTimeMs >= enemySpecialReadyAtMs;
       const enemySpecialTimelineProfile = enemySpecialReady
