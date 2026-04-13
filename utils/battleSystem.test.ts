@@ -2765,6 +2765,60 @@ describe("battle system balance", () => {
     expect(swordStrike.playerStatusNames).toContain("仙元護體");
   });
 
+  it("surfaces sword-heart and body-fusion passives on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const swordHeart = calculatePlayerStats(
+      {
+        physique: 74,
+        rootBone: 88,
+        insight: 54,
+        comprehension: 22,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.Foundation,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 420,
+        defense: 120,
+        hp: 1800,
+        speed: 10,
+      },
+      "養劍者",
+      ProfessionType.Sword,
+      ["s_f_passive"]
+    );
+
+    const bodyFusion = calculatePlayerStats(
+      {
+        physique: 90,
+        rootBone: 80,
+        insight: 52,
+        comprehension: 18,
+        fortune: 12,
+        charm: 8,
+      },
+      MajorRealm.Fusion,
+      SpiritRootId.MIXED_FIVE,
+      {
+        attack: 760,
+        defense: 240,
+        hp: 5200,
+        speed: 8,
+      },
+      "法相身",
+      ProfessionType.Body,
+      ["b_bi_passive"]
+    );
+
+    const swordStrike = resolvePlayerWorldStrike(swordHeart, COMMON_ENEMIES.m30_c1);
+    const bodyStrike = resolvePlayerWorldStrike(bodyFusion, COMMON_ENEMIES.m121_c1);
+
+    expect(swordStrike.playerStatusNames).toContain("養劍術");
+    expect(bodyStrike.playerStatusNames).toContain("金剛法相");
+  });
+
   it("surfaces high-realm passive opening logs for ancient body and immortal sword styles", () => {
     fixedRandom.mockReturnValue(0.5);
 
