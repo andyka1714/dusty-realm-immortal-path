@@ -107,6 +107,7 @@
 - battle snapshot provider 與 DOT / 吸生 tick 迴圈，也已開始抽成 `createCombatSnapshotProvider(...) / createStatusTickProcessor(...)`，主循環不再直接維護整段閉包式基礎設施
 - 玩家出手前置流程也已開始整併到 `resolvePlayerTurnPrelude(...)`，把週期護體與 Boss 破綻窗口集中在同一層處理
 - 敵方出手窗口也已開始整併到 `resolveEnemyActionWindow(...)`，控制跳過、特招延後、特招窗口與敵方攻勢判定不再在主循環平鋪散寫
+- 回合開場維護也已開始整併到 `resolveTurnStartMaintenance(...)`，狀態 tick、被動回復與淨化流程不再直接散在主循環開頭
 - 部分技能與被動已開始接入專屬效果，而不再只是通用加成：
   - `b_g_active`：護盾會真正吸收傷害
   - `s_q_passive`：暴擊時會追加 `劍脈破甲`

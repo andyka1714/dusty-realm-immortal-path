@@ -1962,6 +1962,80 @@ const resolveEnemyIncapacitatedTurn = ({
   };
 };
 
+const resolveTurnStartMaintenance = ({
+  currentTimeMs,
+  turn,
+  processStatusTicks,
+  player,
+  enemy,
+  logs,
+  getPlayerHp,
+  getPlayerMp,
+  setPlayerHp,
+  setPlayerMp,
+  getEnemyHp,
+  getPlayerStatuses,
+  setPlayerStatuses,
+  getLastRegenTimeMs,
+  setLastRegenTimeMs,
+  hasBodyRebirthPassive,
+  hasManaSpringPassive,
+  hasMageFusionPassive,
+  hasBodyImmortalPassive,
+  hasBodyAncientPassive,
+}: {
+  currentTimeMs: number;
+  turn: number;
+  processStatusTicks: (currentMs: number) => void;
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  logs: CombatLog[];
+  getPlayerHp: () => number;
+  getPlayerMp: () => number;
+  setPlayerHp: (value: number) => void;
+  setPlayerMp: (value: number) => void;
+  getEnemyHp: () => number;
+  getPlayerStatuses: () => CombatStatus[];
+  setPlayerStatuses: (value: CombatStatus[]) => void;
+  getLastRegenTimeMs: () => number;
+  setLastRegenTimeMs: (value: number) => void;
+  hasBodyRebirthPassive: boolean;
+  hasManaSpringPassive: boolean;
+  hasMageFusionPassive: boolean;
+  hasBodyImmortalPassive: boolean;
+  hasBodyAncientPassive: boolean;
+}) => {
+  processStatusTicks(currentTimeMs);
+  if (getPlayerHp() <= 0 || getEnemyHp() <= 0) {
+    return { combatEnded: true };
+  }
+
+  const upkeepResult = applyPassiveRegenAndCleanse({
+    player,
+    logs,
+    turn,
+    timeMs: currentTimeMs,
+    playerHp: getPlayerHp(),
+    playerMp: getPlayerMp(),
+    enemyHp: getEnemyHp(),
+    enemyMaxHp: enemy.maxHp,
+    playerStatuses: getPlayerStatuses(),
+    lastRegenTimeMs: getLastRegenTimeMs(),
+    hasBodyRebirthPassive,
+    hasManaSpringPassive,
+    hasMageFusionPassive,
+    hasBodyImmortalPassive,
+    hasBodyAncientPassive,
+  });
+
+  setPlayerHp(upkeepResult.playerHp);
+  setPlayerMp(upkeepResult.playerMp);
+  setPlayerStatuses(upkeepResult.playerStatuses);
+  setLastRegenTimeMs(upkeepResult.lastRegenTimeMs);
+
+  return { combatEnded: false };
+};
+
 const resolvePlayerTurnPrelude = ({
   currentTimeMs,
   turn,
@@ -6248,31 +6322,37 @@ export const runAutoBattle = (
     const playerActsFirst = playerNextActionMs <= enemyNextActionMs;
     currentTimeMs = playerActsFirst ? playerNextActionMs : enemyNextActionMs;
 
-    processStatusTicks(currentTimeMs);
-    if (playerHp <= 0 || enemyHp <= 0) break;
-
-    ({
-      playerHp,
-      playerMp,
-      playerStatuses,
-      lastRegenTimeMs,
-    } = applyPassiveRegenAndCleanse({
-      player,
-      logs,
+    const { combatEnded } = resolveTurnStartMaintenance({
+      currentTimeMs,
       turn,
-      timeMs: currentTimeMs,
-      playerHp,
-      playerMp,
-      enemyHp,
-      enemyMaxHp: enemy.maxHp,
-      playerStatuses,
-      lastRegenTimeMs,
+      processStatusTicks,
+      player,
+      enemy,
+      logs,
+      getPlayerHp: () => playerHp,
+      getPlayerMp: () => playerMp,
+      setPlayerHp: (value) => {
+        playerHp = value;
+      },
+      setPlayerMp: (value) => {
+        playerMp = value;
+      },
+      getEnemyHp: () => enemyHp,
+      getPlayerStatuses: () => playerStatuses,
+      setPlayerStatuses: (value) => {
+        playerStatuses = value;
+      },
+      getLastRegenTimeMs: () => lastRegenTimeMs,
+      setLastRegenTimeMs: (value) => {
+        lastRegenTimeMs = value;
+      },
       hasBodyRebirthPassive,
       hasManaSpringPassive,
       hasMageFusionPassive,
       hasBodyImmortalPassive,
       hasBodyAncientPassive,
-    }));
+    });
+    if (combatEnded) break;
 
     if (playerActsFirst) {
       ({
