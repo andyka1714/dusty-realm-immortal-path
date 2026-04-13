@@ -321,6 +321,7 @@
 - [x] enemy world strike 的減傷 / 保命被動判定已開始抽成共用 trigger helper，減少 `resolveEnemyWorldStrike()` 內的重複流程
 - [x] enemy world strike 的 incoming status 過濾已開始和 timeline combat 對齊，正式共用 DOT / 負面狀態免疫規則
 - [x] enemy special 的免疫 / 控制縮短訊息，也已開始抽成共用 resistance helper，減少 `仙體無垢` / `萬法皆空` / `雷劫煉心` / `人劍合神` 的散寫風險
+- [x] 玩家主動術式施加的 `盾、破甲、DOT、反震、劍氣` 訊息，也已開始抽成共用 status logger，降低時間軸戰鬥內逐段手寫的重複度
 - [x] timeline combat 的致命保命流程已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`
 - [x] `StatsPanel / ShopPanel` 的主要資訊浮層已進一步對齊 `GameTooltip` 的標題 / 註腳結構
 - [x] `Adventure` 區域地圖情報與 `Compendium` 額外掉落來源浮層，已開始對齊同一套 `GameTooltip` 標題 / 註腳結構
@@ -359,6 +360,7 @@
 - [x] 底部浮動 dock 的面板切換提示，也已切到共用 `GameHintBubble`，面板切換不再只靠圖示猜測
 - [x] 道途頁的人物道號與修煉效率說明，也已切到共用 `GameTooltip`，再少兩塊手寫 hover 面板
 - [x] 任務對話視窗中的裝備 / 技能書獎勵，也已補上 hover `GameTooltip`，不再只剩純文字獎勵列
+- [x] 任務獎勵 tooltip 的標題也已開始對齊品質色階，和商店 / 背包裝備顯示共用同一套辨識語言
 - [ ] 進一步把所有面板內部視覺做成更明確的遊戲化框體語言
 - [x] 讓技能書、裝備、角色詳情 tooltip 都完全對齊互動目標
 - [x] 補上更完整的戰鬥 HUD 第一版，例如目標血條與最近戰況

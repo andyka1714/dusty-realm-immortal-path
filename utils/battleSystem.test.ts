@@ -1659,6 +1659,33 @@ describe("battle system balance", () => {
     expect(strike.statusNames).not.toContain("萬法皆空");
   });
 
+  it("logs reflect stance gain when body tribulation active applies battle reflect", () => {
+    const body = calculatePlayerStats(
+      {
+        physique: 88,
+        rootBone: 80,
+        insight: 62,
+        comprehension: 24,
+        fortune: 12,
+        charm: 8,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 1480,
+        defense: 420,
+        hp: 8800,
+      },
+      "硬抗天劫",
+      ProfessionType.Body,
+      ["b_tr_active"]
+    );
+
+    const result = runAutoBattle(body, COMMON_ENEMIES.m16_c2);
+
+    expect(result.logs.some((log) => log.message.includes("你獲得了【反震】"))).toBe(true);
+  });
+
   it("surfaces sword death-ward passive on lethal enemy world strikes", () => {
     fixedRandom.mockReturnValue(0.5);
 

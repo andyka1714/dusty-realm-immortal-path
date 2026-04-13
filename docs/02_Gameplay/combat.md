@@ -157,6 +157,7 @@
 - `enemy world strike` 的承傷 / 生存型被動觸發計算，已開始抽成共用 helper，避免 `resolveEnemyWorldStrike()` 內重複堆疊同一批減傷與保命判定
 - `enemy world strike` 的 incoming status 過濾，也已開始和 timeline combat 對齊，正式處理 `DOT / 負面狀態免疫` 的共用規則
 - `enemy special` 的 incoming status 過濾與控制縮短，也已開始抽成 world / timeline 共用 resolver，不再只在 `runAutoBattle()` 內手寫 `filteredEnemyStatuses / normalizedIncomingStatuses`
+- 玩家主動術式施加的 `盾、破甲、DOT、反震、劍氣` 等狀態，也已開始走共用 status logger，不再在時間軸戰鬥內逐段手寫訊息
 - `m_tr_passive`：enemy special 造成控制時，也已開始在 enemy world strike 正式回報 `雷劫煉心`
 - `enemy special` 的免疫 / 控制縮短訊息，已開始抽成共用 resistance helper，避免 timeline combat 再散寫 `仙體無垢 / 萬法皆空 / 雷劫煉心 / 人劍合神`
 - 時間軸戰鬥內的致命保命分支，也已開始抽成共用 helper，集中處理 `護體劍罡`、`滴血重生（真）`、`不死不滅` 這批生死線特例

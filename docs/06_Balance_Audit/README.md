@@ -172,6 +172,7 @@
 - `enemy world strike` 這條線的減傷 / 保命被動判定，也已開始抽成共用 trigger helper，往單一 battle resolver 再收一層
 - `enemy world strike` 的 incoming status 過濾，也已開始和 timeline combat 對齊，不再讓 DOT / 負面狀態免疫只存在於時間軸戰鬥
 - `enemy special` 的 incoming status 過濾與控制縮短，現在也已開始走 world / timeline 共用 resolver，降低 `runAutoBattle()` 與 world strike 各自手寫分支的風險
+- 玩家主動術式施加的 `盾、破甲、DOT、反震、劍氣` 訊息，也已開始走共用 status logger，減少 `runAutoBattle()` 內逐段手寫套用訊息的重複度
 - `雷劫煉心` 這條控制對抗型被動，也已開始補齊 enemy special world strike 狀態回報
 - `GameHintBubble` 也已開始補齊 `eyebrow + body` 的短提示層級，讓 dock、側欄、背包與道途操作提示和主 tooltip 語言更一致
 - `enemy special` 的免疫 / 控制縮短訊息，已開始抽成共用 resistance helper，減少 `仙體無垢 / 萬法皆空 / 雷劫煉心 / 人劍合神` 在 timeline 戰鬥散寫
@@ -179,6 +180,7 @@
 - `StatsPanel / ShopPanel` 的主要資訊浮層已進一步收進 `GameTooltip` 的統一標題 / 註腳結構，UI 殼層更接近單一語言
 - `Adventure` 的區域地圖情報與 `Compendium` 的額外掉落來源浮層，也已開始對齊到同一套 `GameTooltip` 結構
 - `QuestModal` 的裝備 / 技能書任務獎勵，也已補上 hover `GameTooltip`，不再只剩純文字獎勵列
+- `QuestModal` 的獎勵 tooltip 標題也已開始吃品質色階，和商店 / 背包裝備顯示更一致
 - `Stats / Dashboard / Shop / 地圖 / 圖鑑` 這批核心浮層，已開始補齊 `eyebrow`，往 `GameTooltip` 的完整 `eyebrow + title + body + footer` 語言收口
 - `GamePanel / Modal` 這條 UI 殼層也已開始對齊 `eyebrow + title + icon` 結構，主頁面板與互動視窗不再分裂成兩套語言
 - retirement-ready / battle-absorbed 的 retired alias ID 清單，也已回收至 alias 檔本體，skill index 不再重複維護同一份清單

@@ -20,4 +20,5 @@
 - `GameTooltip`：角色屬性、商店、圖鑑、地圖情報等資訊浮層，已開始對齊同一套 `eyebrow + title + body + footer` 結構。
 - `Inventory` 的裝備、技能書與消耗品 hover，也已切到同一套 `GameTooltip` 結構，不再只靠右側詳情面板承接全部資訊。
 - `QuestModal` 的裝備 / 技能書任務獎勵，也已補上 hover `GameTooltip`，不再只剩純文字獎勵列。
+- `QuestModal` 的獎勵 tooltip 標題，也已開始對齊品質色階，和商店 / 背包裝備共用同一套辨識語言。
 - `GameHintBubble`：操作提示、dock 切換、背包按鈕等短提示，作為輕量級懸停語言；現在也開始補齊 `eyebrow + body` 層級，讓短提示不再只是裸文字浮泡。

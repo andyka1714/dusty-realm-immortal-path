@@ -30,6 +30,16 @@ const rankName = (quality: ItemQuality) => {
     }
 };
 
+const getQualityTextColor = (quality: ItemQuality) => {
+    switch (quality) {
+        case ItemQuality.Low: return 'text-stone-200';
+        case ItemQuality.Medium: return 'text-emerald-300';
+        case ItemQuality.High: return 'text-sky-300';
+        case ItemQuality.Immortal: return 'text-amber-300';
+        default: return 'text-amber-400';
+    }
+};
+
 export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
     const dispatch = useDispatch();
     const { activeQuests, completedQuests } = useSelector((state: RootState) => state.quest);
@@ -407,6 +417,7 @@ export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
                                                         <GameTooltip
                                                             eyebrow={getQuestRewardTooltipEyebrow(rewardItem.itemId)}
                                                             title={itemDef.name}
+                                                            titleClassName={getQualityTextColor(quality)}
                                                             footer={getQuestRewardTooltipFooter(
                                                                 rewardItem.itemId,
                                                                 rewardItem.count,

@@ -1157,6 +1157,12 @@ const kindToStatusMessage = (
       : `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 凝聚了【${status.name}】。`;
   }
 
+  if (status.kind === "reflect") {
+    return targetIsPlayer
+      ? `你獲得了【${status.name}】，近身來敵將被反噬。`
+      : `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 佈下【${status.name}】。`;
+  }
+
   if (
     status.kind === "burn" ||
     status.kind === "poison" ||
@@ -1177,6 +1183,46 @@ const kindToStatusMessage = (
   return targetIsPlayer
     ? `你受到【${status.name}】影響。`
     : `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 受到【${status.name}】影響。`;
+};
+
+const logAppliedCombatStatuses = ({
+  logs,
+  turn,
+  timeMs,
+  isPlayer,
+  statuses,
+  targetIsPlayer,
+  enemy,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+}: {
+  logs: CombatLog[];
+  turn: number;
+  timeMs: number;
+  isPlayer: boolean;
+  statuses: CombatStatus[];
+  targetIsPlayer: boolean;
+  enemy: Enemy;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+}) => {
+  statuses.forEach((status) => {
+    pushCombatLog(logs, {
+      turn,
+      timeMs,
+      isPlayer,
+      message: kindToStatusMessage(status, targetIsPlayer, enemy),
+      damage: 0,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  });
 };
 
 const getSkillExecutionTimeMs = (skill?: Skill) => {
@@ -3470,87 +3516,37 @@ export const runAutoBattle = (
           enemyStatuses.push(...enemySideStatuses);
         }
 
-        createdStatuses.forEach((status) => {
-          if (status.kind === "incapacitate") {
-            pushCombatLog(logs, {
-              turn,
-              timeMs: currentTimeMs,
-              isPlayer: true,
-              message:
-                activeSkill!.targetType === "self"
-                  ? `你獲得了【${status.name}】相關加持。`
-                  : `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 陷入【${status.name}】！`,
-              damage: 0,
-              playerHp,
-              playerMaxHp: player.maxHp,
-              enemyHp,
-              enemyMaxHp: enemy.maxHp,
-            });
-          }
+        if (playerSideStatuses.length > 0) {
+          logAppliedCombatStatuses({
+            logs,
+            turn,
+            timeMs: currentTimeMs,
+            isPlayer: true,
+            statuses: playerSideStatuses,
+            targetIsPlayer: true,
+            enemy,
+            playerHp,
+            playerMaxHp: player.maxHp,
+            enemyHp,
+            enemyMaxHp: enemy.maxHp,
+          });
+        }
 
-          if (status.kind === "armorBreak") {
-            pushCombatLog(logs, {
-              turn,
-              timeMs: currentTimeMs,
-              isPlayer: true,
-              message: `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 被施加【${status.name}】，護體被削弱！`,
-              damage: 0,
-              playerHp,
-              playerMaxHp: player.maxHp,
-              enemyHp,
-              enemyMaxHp: enemy.maxHp,
-            });
-          }
-
-          if (
-            status.kind === "burn" ||
-            status.kind === "poison" ||
-            status.kind === "bleed" ||
-            status.kind === "drain"
-          ) {
-            pushCombatLog(logs, {
-              turn,
-              timeMs: currentTimeMs,
-              isPlayer: true,
-              message: `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 被施加【${status.name}】！`,
-              damage: 0,
-              playerHp,
-              playerMaxHp: player.maxHp,
-              enemyHp,
-              enemyMaxHp: enemy.maxHp,
-            });
-          }
-
-          if (status.kind === "shield") {
-            pushCombatLog(logs, {
-              turn,
-              timeMs: currentTimeMs,
-              isPlayer: true,
-              message: `你獲得了【${status.name}】，可抵擋 ${Math.floor(
-                status.value
-              )} 點傷害。`,
-              damage: 0,
-              playerHp,
-              playerMaxHp: player.maxHp,
-              enemyHp,
-              enemyMaxHp: enemy.maxHp,
-            });
-          }
-
-          if (status.kind === "critBoost") {
-            pushCombatLog(logs, {
-              turn,
-              timeMs: currentTimeMs,
-              isPlayer: true,
-              message: `你凝聚了【${status.name}】，暴擊機會暫時提升。`,
-              damage: 0,
-              playerHp,
-              playerMaxHp: player.maxHp,
-              enemyHp,
-              enemyMaxHp: enemy.maxHp,
-            });
-          }
-        });
+        if (enemySideStatuses.length > 0) {
+          logAppliedCombatStatuses({
+            logs,
+            turn,
+            timeMs: currentTimeMs,
+            isPlayer: true,
+            statuses: enemySideStatuses,
+            targetIsPlayer: false,
+            enemy,
+            playerHp,
+            playerMaxHp: player.maxHp,
+            enemyHp,
+            enemyMaxHp: enemy.maxHp,
+          });
+        }
 
         if (
           hasMageImmortalPassive &&
@@ -4016,19 +4012,18 @@ export const runAutoBattle = (
 
           if (filteredEnemyStatuses.length > 0) {
             playerStatuses.push(...normalizedIncomingStatuses);
-            normalizedIncomingStatuses.forEach((status) => {
-              pushCombatLog(logs, {
-                turn,
-                timeMs: currentTimeMs,
-                isPlayer: false,
-                message:
-                  kindToStatusMessage(status, true, enemy),
-                damage: 0,
-                playerHp,
-                playerMaxHp: player.maxHp,
-                enemyHp,
-                enemyMaxHp: enemy.maxHp,
-              });
+            logAppliedCombatStatuses({
+              logs,
+              turn,
+              timeMs: currentTimeMs,
+              isPlayer: false,
+              statuses: normalizedIncomingStatuses,
+              targetIsPlayer: true,
+              enemy,
+              playerHp,
+              playerMaxHp: player.maxHp,
+              enemyHp,
+              enemyMaxHp: enemy.maxHp,
             });
           }
 
