@@ -50,3 +50,23 @@
 ### 5.2 系統邏輯
 - 狀態追蹤: `character.lastProcessedYear` 記錄最後處理的年份。
 - 離線計算: 上線時若經過多年，會依序觸發多次事件（上限 50 次以防洗屏）。
+
+## 6. 後期修為乘區與追趕規格
+
+高境界進度不再只靠 `utils/cultivation.ts` 的基礎修煉速率。`化神 -> 仙帝` 的：
+
+- 丹藥乘區
+- 洞府乘區
+- 奇遇乘區
+- 事件乘區
+- 首殺修為加成
+- 精英掉落補貼
+- 閉關成本減免
+- 落後境界補正
+
+現在已正式收進：
+
+- `data/progression/balanceAudit.ts`
+- `data/progression/balanceAudit.test.ts`
+
+也就是說，後期修為節奏現在已有正式 registry，不再只是 audit 文件中的口頭建議。

@@ -12,7 +12,7 @@
 
 ### [02_Gameplay] 遊玩系統
 具體的遊戲功能模組。
-- [cultivation.md](02_Gameplay/cultivation.md): 修煉、閉關、境界突破流程。
+- [cultivation.md](02_Gameplay/cultivation.md): 修煉、閉關、境界突破流程，以及高境界修為乘區 / 追趕規格入口。
 - [combat.md](02_Gameplay/combat.md): 地圖內直接出手、世界戰鬥第一版多目標 AOE、時間軸驗證內核、怪物特招、技能專屬效果、world strike result helper 與共用 battle resolver。
 - [inventory.md](02_Gameplay/inventory.md): 背包管理、裝備限制、技能書學習、formal core 技能池與退場技能映射規則。
 - [workshop.md](02_Gameplay/workshop.md): 洞府功能 (聚靈陣、煉丹、煉器)。
@@ -39,8 +39,8 @@
 ### [06_Balance_Audit] 數值平衡審計
 本輪針對實作數值做的審計文件，重點在於比對文件與程式、驗算修為曲線、戰鬥曲線、裝備與技能落地狀態。
 - [README.md](06_Balance_Audit/README.md): 審計總覽、尚未補完的核心缺口，以及 battle / UI shared helper 的最新收斂狀態與文件去重進度。
-- [01_修為與境界曲線審計.md](06_Balance_Audit/01_修為與境界曲線審計.md): 修為需求、通道效率與時長試算。
-- [02_戰鬥與裝備曲線審計.md](06_Balance_Audit/02_戰鬥與裝備曲線審計.md): 怪物、裝備、掉落與戰鬥實作審計。
+- [01_修為與境界曲線審計.md](06_Balance_Audit/01_修為與境界曲線審計.md): 修為需求、通道效率、時長試算，以及後期乘區 / 追趕機制正式表。
+- [02_戰鬥與裝備曲線審計.md](06_Balance_Audit/02_戰鬥與裝備曲線審計.md): 怪物、裝備、掉落、戰鬥實作審計與每境界 TTK 目標表。
 - [03_職業與技能審計.md](06_Balance_Audit/03_職業與技能審計.md): 三職業、技能資料與實戰接線現況。
 - [04_平衡目標與改版建議.md](06_Balance_Audit/04_平衡目標與改版建議.md): 建議的目標挑戰帶與改版優先順序。
 - [05_經驗明細表.md](06_Balance_Audit/05_經驗明細表.md): 各大境界小境界需求表。

@@ -130,6 +130,8 @@
 - 法修高境界 stance 的 `player world strike` 可見性也已補齊到基本攻擊視角，`道法自然 / 五氣朝元 / 仙法通神 / 萬法歸宗` 不再只在施法 world strike 或 timeline combat 才看得到
 - `空間法則` 也已補進法修基本攻擊的 `player world strike` stance，可直接從進攻視角看到虛空轉移待命
 - `runAutoBattle()` 的 runtime / seed / tick wiring 也已開始收斂到 `prepareAutoBattleExecution(...)`，主函式不再自己鋪開整段 battle setup
+- `runAutoBattle()` 的 timeline 執行與結果 finalize，也已開始進一步收斂到 `executeAutoBattleTimeline(...)`，主函式不再自己串接 loop 與結果收束
+- 法修基本攻擊的 `player world strike` stance 也已補齊到 `靈力湧動 / 言出法隨`，不再只有高境界被動在基本攻擊視角可見
 - 法修高境界被動的開場待命訊息已補齊到 `仙法通神 / 萬法歸宗`
 - `養劍術 / 金剛法相 / 五氣朝元` 的開場待命訊息也已補齊，前中後期核心被動的可見性更一致
 - 部分技能與被動已開始接入專屬效果，而不再只是通用加成：

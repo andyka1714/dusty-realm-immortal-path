@@ -137,7 +137,7 @@
 1. 被動技能雖已改成 explicit passive bonus 對照，並補出多招專屬效果與開場 / world strike 可見性，但仍有少數高境界被動尚未完全脫離共用模板
 2. 三職業正式技能池雖已收斂出 `battle-absorbed / retirement-ready` 正式查詢層，且舊的 `pending-retirement` 過渡名單已清空，但還沒把重複技能真正刪整乾淨
 3. 地圖世界戰鬥已是主路徑，投射物、範圍、狀態與技能特效都已上線，但世界戰鬥與 `runAutoBattle()` 還沒完全統一成單一引擎
-4. 後期丹藥、洞府、奇遇對修為的乘區還沒完整進場
+4. 後期丹藥、洞府、奇遇、事件對修為的正式乘區規格已落地，但尚未全部接進角色主線成長來源
 
 ### 最新收斂狀態
 
@@ -209,6 +209,7 @@
 - 法修高境界 stance 的 `player world strike` 可見性也已補齊到基本攻擊視角，`道法自然 / 五氣朝元 / 仙法通神 / 萬法歸宗` 不再只在施法 world strike 或 timeline combat 才看得到。
 - `空間法則` 也已補進法修基本攻擊的 `player world strike` stance，可直接從進攻視角看到虛空轉移待命。
 - `runAutoBattle()` 的 runtime / seed / tick wiring 也已開始收斂到 `prepareAutoBattleExecution(...)`，主函式不再自己鋪開整段 battle setup。
+- `化神 -> 仙帝` 的後期乘區、高境界追趕機制，以及 `凡人 -> 仙帝` 的三職業 TTK 目標表，現在也已正式收進 `data/progression/balanceAudit.ts` 並由測試驗證。
 - 法修高境界被動的開場待命訊息也已補齊到 `仙法通神 / 萬法歸宗`。
 - `養劍術 / 金剛法相 / 五氣朝元` 也已補齊 timeline combat 開場待命訊息，前中期與高境界被動的可見性更一致。
 - 戰利品文字組裝也已開始整併到 `buildVictoryLootMessage(...)`，掉落字串不再直接堆在勝利結算函式內。
