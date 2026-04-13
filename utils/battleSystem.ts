@@ -663,6 +663,12 @@ const getCopperSkinReductionMultiplier = () => 0.97;
 const getMageQiCycleRecovery = (maxMp: number) =>
   Math.max(1, Math.floor(maxMp * 0.12));
 
+const isManaSpringEmpowered = (
+  currentMp: number,
+  maxMp: number,
+  passiveFlags: Pick<PlayerPassiveFlags, "hasManaSpringPassive">
+) => passiveFlags.hasManaSpringPassive && currentMp >= maxMp * 0.8;
+
 const hasSwordTribulationWindow = (
   currentHp: number,
   maxHp: number,
@@ -3362,6 +3368,14 @@ export const resolvePlayerWorldStrike = (
   if (bodyFoundationStacks > 0) {
     effectivePower *= 1 + bodyFoundationStacks * 0.02;
   }
+  const manaSpringEmpowered = isManaSpringEmpowered(
+    player.mp,
+    player.maxMp,
+    passiveFlags
+  );
+  if (manaSpringEmpowered) {
+    effectivePower *= 1.2;
+  }
   if (!skill && hasMageQiPassive && player.profession === ProfessionType.Mage) {
     effectivePower += player.magic * 0.18;
   }
@@ -4137,8 +4151,11 @@ export const runAutoBattle = (
       ) {
         effectivePower *= 1.5;
       }
-      const manaSpringEmpowered =
-        hasManaSpringPassive && playerMp >= player.maxMp * 0.8;
+      const manaSpringEmpowered = isManaSpringEmpowered(
+        playerMp,
+        player.maxMp,
+        passiveFlags
+      );
       if (manaSpringEmpowered) {
         effectivePower *= 1.2;
       }

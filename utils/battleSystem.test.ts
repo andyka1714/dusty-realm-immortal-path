@@ -1219,6 +1219,43 @@ describe("battle system balance", () => {
     expect(strike.playerStatusNames).toContain("法力源泉");
   });
 
+  it("lets nascent mage passive share its high-mana damage bonus across world strikes and timeline combat", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 40,
+        rootBone: 34,
+        insight: 96,
+        comprehension: 44,
+        fortune: 18,
+        charm: 12,
+      },
+      MajorRealm.NascentSoul,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        attack: 120,
+        defense: 70,
+        speed: 8,
+        hp: 600,
+        mp: 1600,
+        magic: 900,
+      },
+      "靈海真君",
+      ProfessionType.Mage,
+      ["m_n_passive"]
+    );
+
+    const lowMpMage = { ...mage, mp: Math.floor(mage.maxMp * 0.6) };
+    const highMpStrike = resolvePlayerWorldStrike(mage, COMMON_ENEMIES.m26_c2);
+    const lowMpStrike = resolvePlayerWorldStrike(lowMpMage, COMMON_ENEMIES.m26_c2);
+    const highMpTimeline = runAutoBattle(mage, COMMON_ENEMIES.m26_c2);
+
+    expect(highMpStrike.damage).toBeGreaterThan(lowMpStrike.damage);
+    expect(highMpStrike.playerStatusNames).toContain("法力源泉");
+    expect(highMpTimeline.logs.some((log) => log.message.includes("【法力源泉】靈海盈滿"))).toBe(true);
+  });
+
   it("lets foundation body passive scale offense with missing hp in world strikes", () => {
     fixedRandom.mockReturnValue(0.5);
 
