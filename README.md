@@ -21,6 +21,7 @@
 - 多個高境界被動已補齊 world strike / enemy world strike / enemy special world strike 對齊，避免只有時間軸戰鬥才看得到實際效果。
 - 第一批高境界 retired active alias 也已補上明確 realtime metadata，避免範圍、目標數與施法節奏持續依賴 default fallback。
 - UI 殼層已開始統一：`GamePanel / Modal / GameTooltip / GameHintBubble` 正在收斂成同一套遊戲化語言，`GamePanel / Modal / GameTooltip` 的標題層也已開始共用 `GameTitleStack`。
+- `GamePanel / Modal / GameTooltip` 的角飾、內框、頂部光帶與背景光暈，也已開始收斂到共用 `GameOrnamentFrame`，不再各自維護一份近似裝飾層。
 - 區域地圖情報、圖鑑掉落來源、任務獎勵、背包 hover、dock 提示、道途資訊與工坊操作等浮層，已開始共用同一套 tooltip / hint 元件。
 - `Gameplay / World / UI / Audit` 文件已持續按 battle shared resolver、地圖情報 tooltip 與短提示語言做交叉校對，剩餘缺口集中在最後一輪全面去重。
 

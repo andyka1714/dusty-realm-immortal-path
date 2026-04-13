@@ -193,6 +193,7 @@
 - `絕仙劍` 的 `絕仙封脈` 也已正式接進 timeline combat，會在敵方特招將要出手時把節奏再壓後 `1` 秒，高境界劍修的節奏壓制已不再只是狀態名義存在。
 - 敵方特招的初始延後與後續節奏壓制，也已開始抽成共用 helper，`萬法歸宗 / 絕仙封脈` 不再在時間軸主循環內分散處理。
 - `GamePanel / Modal / GameTooltip / GameHintBubble` 這條 UI 殼層語言已進一步收斂；角色屬性、商店、圖鑑、背包、任務獎勵、區域地圖情報與多個短提示已開始共用同一套遊戲化外觀，標題層也已開始透過 `GameTitleStack` 共用同一套 `eyebrow + title (+ icon)` 結構。
+- `GamePanel / Modal / GameTooltip` 的角飾、內框、頂部光帶與背景光暈，也已開始透過 `GameOrnamentFrame` 共用，面板內部視覺語言更接近單一來源。
 - `GamePanel / Modal` 內原本重複存在的 eyebrow 裝飾也已移除，正式改由 `GameTitleStack` 單點承接標題階層，不再重複堆兩層同名標識。
 - `World / UI / Audit` 文件對於地圖情報 tooltip、短提示 eyebrow 與 battle shared resolver 的描述，也已開始按目前實作重新對齊。
 

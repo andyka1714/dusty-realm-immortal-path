@@ -232,6 +232,7 @@
 - [x] 玩家被動技能判定已開始抽成共用 passive flags helper，降低 world / timeline / HUD 分散重寫風險
 - [x] 玩家被動技能判定已補成共用 skill-id 對照表，world strike 與 timeline combat 的 passive flag 來源不再各自手寫維護
 - [x] 高境界 passive 的基礎屬性收益已開始補成逐招 explicit 對照表，不再只靠職業 / 境界 fallback 推估
+- [x] 所有正式核心被動現在都已至少會對一項正式戰鬥屬性產生明確變化，可直接透過測試驗證不再只靠 fallback 才看得出差異
 - [x] 開場被動狀態與對應戰鬥事件已開始走共用初始化 helper，降低 `runAutoBattle()` 散寫 `荊棘皮層` / `元素護盾` 等訊息的重複度
 - [x] 屬性克制、弱點洞察、元素抗性、開場被動與高境界開場壓制提示，已開始整併成共用 opener helper，縮減 `runAutoBattle()` 的前置事件散寫範圍
 - [x] 來襲傷害的防禦型被動事件已開始抽成共用 defensive-passive helper，集中處理 `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `肉身成聖` / `元素護盾`
@@ -396,6 +397,7 @@
 - [x] 主動術式後的多種被動觸發訊息，已開始抽成共用 passive-proc helper，降低時間軸內核散寫風險
 - [x] `GamePanel / Modal / GameTooltip` 的標題層已開始共用 `GameTitleStack`，面板與資訊浮層的遊戲化資訊階層更一致
 - [x] `GamePanel / Modal` 內原本重複存在的 eyebrow 裝飾也已移除，正式改由 `GameTitleStack` 單點承接標題階層，不再重複堆兩層同名標識
+- [x] `GamePanel / Modal / GameTooltip` 的角飾、內框、頂部光帶與背景光暈，也已開始收斂到共用 `GameOrnamentFrame`
 - [ ] 被動技能改成逐招專屬效果，而不是通用屬性加成
 
 ---

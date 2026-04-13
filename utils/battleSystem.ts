@@ -2298,6 +2298,328 @@ const advanceCombatLoop = ({
   exceededTurnLimit: turn + 1 > 500,
 });
 
+type CombatLoopState = {
+  turn: number;
+  currentTimeMs: number;
+  playerNextActionMs: number;
+  enemyNextActionMs: number;
+  activeSkillReadyAtMs: number;
+  enemySpecialReadyAtMs: number;
+  bossBroken: boolean;
+  playerDebuffed: boolean;
+  lastRegenTimeMs: number;
+  playerHp: number;
+  enemyHp: number;
+  playerMp: number;
+  playerStatuses: CombatStatus[];
+  enemyStatuses: CombatStatus[];
+  swordDeathWardUsed: boolean;
+  bodyRebirthTrueUsed: boolean;
+  bodyTribulationStacks: number;
+  mageFoundationStacks: number;
+  swordHeartStacks: number;
+  playerDamagedSinceSwordHeartWindow: boolean;
+  nextSwordImmortalGuardAtMs: number;
+};
+
+const resolveCombatLoopStep = ({
+  state,
+  processStatusTicks,
+  player,
+  enemy,
+  logs,
+  passiveFlags,
+  pVsE,
+  activeSkill,
+  playerAttackIntervalMs,
+  enemyAttackIntervalMs,
+  hasBodyRebirthPassive,
+  hasManaSpringPassive,
+  hasMageFusionPassive,
+  hasBodyImmortalPassive,
+  hasBodyAncientPassive,
+  hasSwordImmortalPassive,
+  hasSwordHeartPassive,
+}: {
+  state: CombatLoopState;
+  processStatusTicks: (currentMs: number) => void;
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  logs: CombatLog[];
+  passiveFlags: PlayerPassiveFlags;
+  pVsE: { isEffective: boolean; isResisted: boolean };
+  activeSkill?: Skill;
+  playerAttackIntervalMs: number;
+  enemyAttackIntervalMs: number;
+  hasBodyRebirthPassive: boolean;
+  hasManaSpringPassive: boolean;
+  hasMageFusionPassive: boolean;
+  hasBodyImmortalPassive: boolean;
+  hasBodyAncientPassive: boolean;
+  hasSwordImmortalPassive: boolean;
+  hasSwordHeartPassive: boolean;
+}) => {
+  let {
+    turn,
+    currentTimeMs,
+    playerNextActionMs,
+    enemyNextActionMs,
+    activeSkillReadyAtMs,
+    enemySpecialReadyAtMs,
+    bossBroken,
+    playerDebuffed,
+    lastRegenTimeMs,
+    playerHp,
+    enemyHp,
+    playerMp,
+    playerStatuses,
+    enemyStatuses,
+    swordDeathWardUsed,
+    bodyRebirthTrueUsed,
+    bodyTribulationStacks,
+    mageFoundationStacks,
+    swordHeartStacks,
+    playerDamagedSinceSwordHeartWindow,
+    nextSwordImmortalGuardAtMs,
+  } = state;
+
+  const playerActsFirst = playerNextActionMs <= enemyNextActionMs;
+  currentTimeMs = playerActsFirst ? playerNextActionMs : enemyNextActionMs;
+
+  const { combatEnded } = resolveTurnStartMaintenance({
+    currentTimeMs,
+    turn,
+    processStatusTicks,
+    player,
+    enemy,
+    logs,
+    getPlayerHp: () => playerHp,
+    getPlayerMp: () => playerMp,
+    setPlayerHp: (value) => {
+      playerHp = value;
+    },
+    setPlayerMp: (value) => {
+      playerMp = value;
+    },
+    getEnemyHp: () => enemyHp,
+    getPlayerStatuses: () => playerStatuses,
+    setPlayerStatuses: (value) => {
+      playerStatuses = value;
+    },
+    getLastRegenTimeMs: () => lastRegenTimeMs,
+    setLastRegenTimeMs: (value) => {
+      lastRegenTimeMs = value;
+    },
+    hasBodyRebirthPassive,
+    hasManaSpringPassive,
+    hasMageFusionPassive,
+    hasBodyImmortalPassive,
+    hasBodyAncientPassive,
+  });
+
+  if (combatEnded) {
+    return {
+      combatEnded: true,
+      state: {
+        turn,
+        currentTimeMs,
+        playerNextActionMs,
+        enemyNextActionMs,
+        activeSkillReadyAtMs,
+        enemySpecialReadyAtMs,
+        bossBroken,
+        playerDebuffed,
+        lastRegenTimeMs,
+        playerHp,
+        enemyHp,
+        playerMp,
+        playerStatuses,
+        enemyStatuses,
+        swordDeathWardUsed,
+        bodyRebirthTrueUsed,
+        bodyTribulationStacks,
+        mageFoundationStacks,
+        swordHeartStacks,
+        playerDamagedSinceSwordHeartWindow,
+        nextSwordImmortalGuardAtMs,
+      },
+    };
+  }
+
+  if (playerActsFirst) {
+    ({
+      enemyHp,
+      playerHp,
+      playerMp,
+      playerStatuses,
+      enemyStatuses,
+      activeSkillReadyAtMs,
+      mageFoundationStacks,
+      playerNextActionMs,
+      nextSwordImmortalGuardAtMs,
+      bossBroken,
+    } = resolvePlayerTurnPhase({
+      currentTimeMs,
+      turn,
+      player,
+      enemy,
+      logs,
+      passiveFlags,
+      pVsE,
+      bossBroken,
+      playerDebuffed,
+      playerHp,
+      playerMp,
+      enemyHp,
+      playerStatuses,
+      enemyStatuses,
+      activeSkill,
+      activeSkillReadyAtMs,
+      mageFoundationStacks,
+      swordHeartStacks,
+      playerAttackIntervalMs,
+      nextSwordImmortalGuardAtMs,
+      hasMageFusionPassive,
+      hasSwordImmortalPassive,
+    }));
+
+    if (enemyHp <= 0) {
+      return {
+        combatEnded: true,
+        state: {
+          turn,
+          currentTimeMs,
+          playerNextActionMs,
+          enemyNextActionMs,
+          activeSkillReadyAtMs,
+          enemySpecialReadyAtMs,
+          bossBroken,
+          playerDebuffed,
+          lastRegenTimeMs,
+          playerHp,
+          enemyHp,
+          playerMp,
+          playerStatuses,
+          enemyStatuses,
+          swordDeathWardUsed,
+          bodyRebirthTrueUsed,
+          bodyTribulationStacks,
+          mageFoundationStacks,
+          swordHeartStacks,
+          playerDamagedSinceSwordHeartWindow,
+          nextSwordImmortalGuardAtMs,
+        },
+      };
+    }
+  } else {
+    const enemyTurnResult = resolveEnemyTurnPhase({
+      currentTimeMs,
+      turn,
+      player,
+      enemy,
+      logs,
+      passiveFlags,
+      playerStatuses,
+      enemyStatuses,
+      playerHp,
+      playerMp,
+      enemyHp,
+      enemyAttackIntervalMs,
+      enemySpecialReadyAtMs,
+      swordDeathWardUsed,
+      bodyTribulationStacks,
+      bodyRebirthTrueUsed,
+      hasSwordHeartPassive,
+      playerDamagedSinceSwordHeartWindow,
+      swordHeartStacks,
+    });
+
+    if (enemyTurnResult.skipped) {
+      return {
+        combatEnded: false,
+        state: {
+          turn: turn + 1,
+          currentTimeMs,
+          playerNextActionMs,
+          enemyNextActionMs: enemyTurnResult.enemyNextActionMs,
+          activeSkillReadyAtMs,
+          enemySpecialReadyAtMs,
+          bossBroken,
+          playerDebuffed,
+          lastRegenTimeMs,
+          playerHp,
+          enemyHp,
+          playerMp,
+          playerStatuses,
+          enemyStatuses,
+          swordDeathWardUsed,
+          bodyRebirthTrueUsed,
+          bodyTribulationStacks,
+          mageFoundationStacks,
+          swordHeartStacks: enemyTurnResult.swordHeartStacks,
+          playerDamagedSinceSwordHeartWindow:
+            enemyTurnResult.playerDamagedSinceSwordHeartWindow,
+          nextSwordImmortalGuardAtMs,
+        },
+      };
+    }
+
+    const resolvedEnemyTurnResult = enemyTurnResult as Exclude<
+      ReturnType<typeof resolveEnemyTurnPhase>,
+      { skipped: true }
+    >;
+
+    ({
+      playerHp,
+      playerMp,
+      enemyHp,
+      playerStatuses,
+      enemyStatuses,
+      swordDeathWardUsed,
+      bodyTribulationStacks,
+      bodyRebirthTrueUsed,
+      playerDamagedSinceSwordHeartWindow,
+      swordHeartStacks,
+      enemySpecialReadyAtMs,
+      enemyNextActionMs,
+    } = resolvedEnemyTurnResult);
+  }
+
+  const turnAdvance = advanceCombatLoop({
+    bossBroken,
+    playerDebuffed,
+    turn,
+  });
+  ({ bossBroken, playerDebuffed, turn } = turnAdvance);
+
+  return {
+    combatEnded: turnAdvance.exceededTurnLimit,
+    state: {
+      turn,
+      currentTimeMs,
+      playerNextActionMs,
+      enemyNextActionMs,
+      activeSkillReadyAtMs,
+      enemySpecialReadyAtMs,
+      bossBroken,
+      playerDebuffed,
+      lastRegenTimeMs,
+      playerHp,
+      enemyHp,
+      playerMp,
+      playerStatuses,
+      enemyStatuses,
+      swordDeathWardUsed,
+      bodyRebirthTrueUsed,
+      bodyTribulationStacks,
+      mageFoundationStacks,
+      swordHeartStacks,
+      playerDamagedSinceSwordHeartWindow,
+      nextSwordImmortalGuardAtMs,
+    },
+  };
+};
+
 const resolvePlayerTurnPrelude = ({
   currentTimeMs,
   turn,
@@ -7157,139 +7479,73 @@ export const runAutoBattle = (
   }));
 
   while (playerHp > 0 && enemyHp > 0) {
-    const playerActsFirst = playerNextActionMs <= enemyNextActionMs;
-    currentTimeMs = playerActsFirst ? playerNextActionMs : enemyNextActionMs;
-
-    const { combatEnded } = resolveTurnStartMaintenance({
-      currentTimeMs,
-      turn,
+    const loopStep = resolveCombatLoopStep({
+      state: {
+        turn,
+        currentTimeMs,
+        playerNextActionMs,
+        enemyNextActionMs,
+        activeSkillReadyAtMs,
+        enemySpecialReadyAtMs,
+        bossBroken,
+        playerDebuffed,
+        lastRegenTimeMs,
+        playerHp,
+        enemyHp,
+        playerMp,
+        playerStatuses,
+        enemyStatuses,
+        swordDeathWardUsed,
+        bodyRebirthTrueUsed,
+        bodyTribulationStacks,
+        mageFoundationStacks,
+        swordHeartStacks,
+        playerDamagedSinceSwordHeartWindow,
+        nextSwordImmortalGuardAtMs,
+      },
       processStatusTicks,
       player,
       enemy,
       logs,
-      getPlayerHp: () => playerHp,
-      getPlayerMp: () => playerMp,
-      setPlayerHp: (value) => {
-        playerHp = value;
-      },
-      setPlayerMp: (value) => {
-        playerMp = value;
-      },
-      getEnemyHp: () => enemyHp,
-      getPlayerStatuses: () => playerStatuses,
-      setPlayerStatuses: (value) => {
-        playerStatuses = value;
-      },
-      getLastRegenTimeMs: () => lastRegenTimeMs,
-      setLastRegenTimeMs: (value) => {
-        lastRegenTimeMs = value;
-      },
+      passiveFlags,
+      pVsE,
+      activeSkill: activeSkill ?? undefined,
+      playerAttackIntervalMs,
+      enemyAttackIntervalMs,
       hasBodyRebirthPassive,
       hasManaSpringPassive,
       hasMageFusionPassive,
       hasBodyImmortalPassive,
       hasBodyAncientPassive,
+      hasSwordImmortalPassive,
+      hasSwordHeartPassive,
     });
-    if (combatEnded) break;
 
-    if (playerActsFirst) {
-      ({
-        enemyHp,
-        playerHp,
-        playerMp,
-        playerStatuses,
-        enemyStatuses,
-        activeSkillReadyAtMs,
-        mageFoundationStacks,
-        playerNextActionMs,
-        nextSwordImmortalGuardAtMs,
-        bossBroken,
-      } = resolvePlayerTurnPhase({
-        currentTimeMs,
-        turn,
-        player,
-        enemy,
-        logs,
-        passiveFlags,
-        pVsE,
-        bossBroken,
-        playerDebuffed,
-        playerHp,
-        playerMp,
-        enemyHp,
-        playerStatuses,
-        enemyStatuses,
-        activeSkill: activeSkill ?? undefined,
-        activeSkillReadyAtMs,
-        mageFoundationStacks,
-        swordHeartStacks,
-        playerAttackIntervalMs,
-        nextSwordImmortalGuardAtMs,
-        hasMageFusionPassive,
-        hasSwordImmortalPassive,
-      }));
-      if (enemyHp <= 0) break;
-    } else {
-      const enemyTurnResult = resolveEnemyTurnPhase({
-        currentTimeMs,
-        turn,
-        player,
-        enemy,
-        logs,
-        passiveFlags,
-        playerStatuses,
-        enemyStatuses,
-        playerHp,
-        playerMp,
-        enemyHp,
-        enemyAttackIntervalMs,
-        enemySpecialReadyAtMs,
-        swordDeathWardUsed,
-        bodyTribulationStacks,
-        bodyRebirthTrueUsed,
-        hasSwordHeartPassive,
-        playerDamagedSinceSwordHeartWindow,
-        swordHeartStacks,
-      });
-
-      if (enemyTurnResult.skipped) {
-        ({
-          enemyNextActionMs,
-          swordHeartStacks,
-          playerDamagedSinceSwordHeartWindow,
-        } = enemyTurnResult);
-        turn++;
-        continue;
-      } else {
-        const resolvedEnemyTurnResult = enemyTurnResult as Exclude<
-          ReturnType<typeof resolveEnemyTurnPhase>,
-          { skipped: true }
-        >;
-        ({
-          playerHp,
-          playerMp,
-          enemyHp,
-          playerStatuses,
-          enemyStatuses,
-          swordDeathWardUsed,
-          bodyTribulationStacks,
-          bodyRebirthTrueUsed,
-          playerDamagedSinceSwordHeartWindow,
-          swordHeartStacks,
-          enemySpecialReadyAtMs,
-          enemyNextActionMs,
-        } = resolvedEnemyTurnResult);
-      }
-    }
-
-    const turnAdvance = advanceCombatLoop({
+    ({
+      turn,
+      currentTimeMs,
+      playerNextActionMs,
+      enemyNextActionMs,
+      activeSkillReadyAtMs,
+      enemySpecialReadyAtMs,
       bossBroken,
       playerDebuffed,
-      turn,
-    });
-    ({ bossBroken, playerDebuffed, turn } = turnAdvance);
+      lastRegenTimeMs,
+      playerHp,
+      enemyHp,
+      playerMp,
+      playerStatuses,
+      enemyStatuses,
+      swordDeathWardUsed,
+      bodyRebirthTrueUsed,
+      bodyTribulationStacks,
+      mageFoundationStacks,
+      swordHeartStacks,
+      playerDamagedSinceSwordHeartWindow,
+      nextSwordImmortalGuardAtMs,
+    } = loopStep.state);
 
-    if (turnAdvance.exceededTurnLimit) break;
+    if (loopStep.combatEnded) break;
   }
 
   const won = playerHp > 0 && enemyHp <= 0;

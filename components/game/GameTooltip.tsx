@@ -1,6 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 import { GameTitleStack } from "./GameTitleStack";
+import { GameOrnamentFrame } from "./GameOrnamentFrame";
 
 interface GameTooltipProps {
   eyebrow?: React.ReactNode;
@@ -31,14 +32,11 @@ export const GameTooltip: React.FC<GameTooltipProps> = ({
     )}
     style={style}
   >
-    <div className="pointer-events-none absolute inset-0">
-      <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/35 to-transparent" />
-      <div className="absolute left-3 top-3 h-4 w-4 rounded-tl-[8px] border-l border-t border-amber-400/30" />
-      <div className="absolute right-3 top-3 h-4 w-4 rounded-tr-[8px] border-r border-t border-amber-400/30" />
-      <div className="absolute bottom-3 left-3 h-4 w-4 rounded-bl-[8px] border-b border-l border-stone-500/25" />
-      <div className="absolute bottom-3 right-3 h-4 w-4 rounded-br-[8px] border-b border-r border-stone-500/25" />
-      <div className="absolute -right-8 top-2 h-20 w-20 rounded-full bg-amber-500/8 blur-2xl" />
-    </div>
+    <GameOrnamentFrame
+      size="compact"
+      insetClassName="inset-[10px] rounded-[12px] border-amber-950/30"
+      glowClassName="-right-8 top-2 h-20 w-20 bg-amber-500/8 blur-2xl"
+    />
 
     <div className="relative z-10">
       {(eyebrow || title) && (

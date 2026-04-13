@@ -99,6 +99,7 @@
 - 所有被動技能現在都具備 `passiveEffectTags`，後續逐招專屬效果與 HUD / 文件可共用同一套標記資料
 - 已完成專屬接線的被動，開始移除手寫 generic `passiveEffectTags`，避免資料層繼續誤導成仍主要依賴通用加成
 - formal core 被動的基礎屬性收益，已改成逐招明確對照表；absorbed retired passive 透過 formal id 承接時，也會吃到同一份 explicit 對照
+- 所有正式核心被動現在都至少會對一項正式戰鬥屬性產生明確變化，可直接透過測試驗證不再只靠職業 / 境界 fallback 才看得出差異
 - timeline combat 內主動術式施加的 player-side / enemy-side 狀態，已開始走共用的「狀態推入 + 戰鬥日誌」helper，降低 world / timeline 分叉風險
 - 玩家主動術式的可施放窗口，也已開始抽成共用 `resolvePlayerActiveSkillWindow(...)`，可施放判定、profile 組裝與主循環不再重複耦合
 - 玩家主動術式的主傷害訊息與 `劍脈破甲` 提示，也已開始抽成共用 helper，主循環不再重複散寫攻擊文案與破甲追擊提示
@@ -115,6 +116,7 @@
 - 敵方完整出手階段也已開始整併到 `resolveEnemyActionPhase(...)`，承傷、保命、劍勢回補與特招冷卻回推不再在主循環散寫
 - 敵方行動分支也已開始整併到 `resolveEnemyTurnPhase(...)`，敵方出手窗口、控制跳過與完整出手鏈不再直接在主循環維護雙段流程
 - 戰鬥勝敗尾端也已開始整併到 `finalizeCombatResult(...)`，勝利掉落與敗北記錄不再直接堆在主流程尾端
+- 單回合 orchestration 也已開始收斂到 `resolveCombatLoopStep(...)`，回合維護、玩家 / 敵方行動與 turn advance 不再全部直接平鋪在 `runAutoBattle()` while 迴圈內
 - 法修高境界被動的開場待命訊息已補齊到 `仙法通神 / 萬法歸宗`
 - `養劍術 / 金剛法相 / 五氣朝元` 的開場待命訊息也已補齊，前中後期核心被動的可見性更一致
 - 部分技能與被動已開始接入專屬效果，而不再只是通用加成：

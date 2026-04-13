@@ -21,7 +21,7 @@ import {
 import { COMMON_ENEMIES } from "../data/enemies/common";
 import { BOSS_ENEMIES } from "../data/enemies/boss";
 import { ITEMS } from "../data/items";
-import { getSkill } from "../data/skills";
+import { FORMAL_CORE_PASSIVE_SKILLS, getSkill } from "../data/skills";
 
 let fixedRandom: ReturnType<typeof vi.spyOn>;
 
@@ -333,6 +333,58 @@ describe("battle system balance", () => {
     expect(withMagePassive.maxMp).toBeGreaterThan(baseline.maxMp);
     expect(withMagePassive.res).toBeGreaterThan(baseline.res);
     expect(withMagePassive.critDamage).toBeGreaterThan(baseline.critDamage);
+  });
+
+  it("gives every formal passive a direct stat delta without relying on profession-tier fallback", () => {
+    const baseAttributes = {
+      physique: 32,
+      rootBone: 32,
+      insight: 32,
+      comprehension: 20,
+      fortune: 12,
+      charm: 8,
+    };
+
+    FORMAL_CORE_PASSIVE_SKILLS.forEach((skill) => {
+      const baseline = calculatePlayerStats(
+        baseAttributes,
+        skill.minRealm,
+        SpiritRootId.TRUE_METAL_EARTH,
+        {},
+        skill.name,
+        skill.profession,
+        []
+      );
+
+      const withPassive = calculatePlayerStats(
+        baseAttributes,
+        skill.minRealm,
+        SpiritRootId.TRUE_METAL_EARTH,
+        {},
+        skill.name,
+        skill.profession,
+        [skill.id]
+      );
+
+      const changedStats = [
+        withPassive.maxHp !== baseline.maxHp,
+        withPassive.maxMp !== baseline.maxMp,
+        withPassive.attack !== baseline.attack,
+        withPassive.magic !== baseline.magic,
+        withPassive.defense !== baseline.defense,
+        withPassive.res !== baseline.res,
+        withPassive.crit !== baseline.crit,
+        withPassive.critDamage !== baseline.critDamage,
+        withPassive.dodge !== baseline.dodge,
+        withPassive.damageReduction !== baseline.damageReduction,
+        withPassive.regenHp !== baseline.regenHp,
+      ];
+
+      expect(
+        changedStats.some(Boolean),
+        `${skill.id} 應至少明確改變一項正式戰鬥屬性`
+      ).toBe(true);
+    });
   });
 
   it("uses explicit high-realm sword passive bonuses instead of leaving them on generic fallback", () => {

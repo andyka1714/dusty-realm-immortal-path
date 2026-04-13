@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { X } from 'lucide-react';
 import clsx from 'clsx';
 import { GameTitleStack } from './game/GameTitleStack';
+import { GameOrnamentFrame } from './game/GameOrnamentFrame';
 
 interface ModalProps {
   isOpen: boolean;
@@ -49,22 +50,10 @@ export const Modal: React.FC<ModalProps> = ({
   const modalContent = (
     <div className={wrapperClasses}>
       <div className={containerClasses}>
-        <div className={clsx(
-          "pointer-events-none absolute inset-0 overflow-hidden",
-          size === 'large' ? "md:rounded-[inherit]" : "rounded-[inherit]"
-        )}>
-          <div className={clsx(
-            "absolute inset-[12px] border border-stone-800/70 shadow-[inset_0_0_0_1px_rgba(245,158,11,0.04)]",
-            size === 'large' ? "md:rounded-[22px]" : "rounded-[18px]"
-          )}></div>
-          <div className="absolute left-4 top-4 h-6 w-6 rounded-tl-[10px] border-l border-t border-amber-400/25"></div>
-          <div className="absolute right-4 top-4 h-6 w-6 rounded-tr-[10px] border-r border-t border-amber-400/25"></div>
-          <div className="absolute bottom-4 left-4 h-6 w-6 rounded-bl-[10px] border-b border-l border-stone-500/25"></div>
-          <div className="absolute bottom-4 right-4 h-6 w-6 rounded-br-[10px] border-b border-r border-stone-500/25"></div>
-          <div className="absolute inset-x-6 top-[10px] h-px bg-gradient-to-r from-transparent via-amber-400/20 to-transparent"></div>
-          <div className="absolute inset-x-10 top-[58px] h-px bg-gradient-to-r from-transparent via-stone-500/20 to-transparent"></div>
-          <div className="absolute -right-10 top-3 h-28 w-28 rounded-full bg-amber-500/10 blur-3xl"></div>
-        </div>
+        <GameOrnamentFrame
+          className={size === 'large' ? "md:rounded-[inherit]" : "rounded-[inherit]"}
+          insetClassName={size === 'large' ? "md:rounded-[22px]" : "rounded-[18px]"}
+        />
 
         {/* Header */}
         <div className="relative z-10 flex items-center justify-between border-b border-stone-800/90 p-4 flex-none">
