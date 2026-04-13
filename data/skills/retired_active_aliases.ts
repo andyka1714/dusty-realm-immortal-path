@@ -229,23 +229,31 @@ export const ALL_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = Object.assign(
   ...Object.values(RETIRED_ACTIVE_ALIASES_BY_REALM)
 );
 
-export const BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS = [
-  "s_vr_active",
-  "s_bi_active",
-  "b_bi_active",
-  "b_tr_active",
-  "b_im_active",
-  "b_ie_active",
-  "m_bi_active",
-  "m_ma_active",
-  "m_im_active",
-  "m_ie_active",
-  "s_im_active",
-  "s_ie_active",
-] as const;
+export const BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
+  s_vr_active: VOID_REFINING_RETIRED_ACTIVE_ALIASES.s_vr_active,
+  s_bi_active: FUSION_RETIRED_ACTIVE_ALIASES.s_bi_active,
+  b_bi_active: FUSION_RETIRED_ACTIVE_ALIASES.b_bi_active,
+  m_bi_active: FUSION_RETIRED_ACTIVE_ALIASES.m_bi_active,
+  m_ma_active: MAHAYANA_RETIRED_ACTIVE_ALIASES.m_ma_active,
+  b_tr_active: TRIBULATION_RETIRED_ACTIVE_ALIASES.b_tr_active,
+  s_im_active: IMMORTAL_RETIRED_ACTIVE_ALIASES.s_im_active,
+  b_im_active: IMMORTAL_RETIRED_ACTIVE_ALIASES.b_im_active,
+  m_im_active: IMMORTAL_RETIRED_ACTIVE_ALIASES.m_im_active,
+  s_ie_active: IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES.s_ie_active,
+  b_ie_active: IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES.b_ie_active,
+  m_ie_active: IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES.m_ie_active,
+};
 
-export const RETIREMENT_READY_RETIRED_ACTIVE_SKILL_IDS =
-  BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS;
+export const BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS = Object.keys(
+  BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES
+);
+
+export const RETIREMENT_READY_RETIRED_ACTIVE_ALIASES =
+  BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES;
+
+export const RETIREMENT_READY_RETIRED_ACTIVE_SKILL_IDS = Object.keys(
+  RETIREMENT_READY_RETIRED_ACTIVE_ALIASES
+);
 
 export const RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_ID_SET = new Set<string>(
   RETIREMENT_READY_RETIRED_ACTIVE_SKILL_IDS

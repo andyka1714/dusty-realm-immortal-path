@@ -11,9 +11,9 @@ import { TRIBULATION_SKILLS } from "./tribulation";
 import { IMMORTAL_SKILLS } from "./immortal";
 import { IMMORTAL_EMPEROR_SKILLS } from "./immortal_emperor";
 import {
+  BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES,
   ALL_RETIRED_ACTIVE_ALIASES,
-  BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS,
-  RETIREMENT_READY_RETIRED_ACTIVE_SKILL_IDS,
+  RETIREMENT_READY_RETIRED_ACTIVE_ALIASES,
   RETIRED_ACTIVE_ALIASES_BY_REALM,
   stripRetirementReadyActiveAliases,
 } from "./retired_active_aliases";
@@ -320,9 +320,11 @@ export const RETIRED_SKILL_NAME_INDEX: Record<string, Skill> = Object.fromEntrie
   RETIRED_SKILLS.map((skill) => [skill.name, skill])
 ) as Record<string, Skill>;
 
-export const BATTLE_ABSORBED_RETIRED_SKILLS = BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS.map(
-  (skillId) => SKILLS[skillId]
-).filter((skill): skill is Skill => Boolean(skill));
+export const BATTLE_ABSORBED_RETIRED_SKILLS = Object.values(
+  BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES
+)
+  .map((skill) => SKILLS[skill.id])
+  .filter((skill): skill is Skill => Boolean(skill));
 
 export const BATTLE_ABSORBED_RETIRED_SKILL_MAP: Record<string, Skill> =
   Object.fromEntries(
@@ -339,9 +341,11 @@ export const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP: Record<string, Skill> =
     BATTLE_ABSORBED_RETIRED_PASSIVE_SKILLS.map((skill) => [skill.id, skill])
   ) as Record<string, Skill>;
 
-export const RETIREMENT_READY_RETIRED_SKILLS = BATTLE_ABSORBED_RETIRED_SKILLS.filter(
-  (skill) => skill.type === "Active"
-);
+export const RETIREMENT_READY_RETIRED_SKILLS = Object.values(
+  RETIREMENT_READY_RETIRED_ACTIVE_ALIASES
+)
+  .map((skill) => SKILLS[skill.id])
+  .filter((skill): skill is Skill => Boolean(skill));
 
 export const RETIREMENT_READY_RETIRED_SKILL_MAP: Record<string, Skill> =
   Object.fromEntries(

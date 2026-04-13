@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { MajorRealm, ProfessionType } from "../../types";
 import {
   ALL_RETIRED_ACTIVE_ALIASES,
+  BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES,
+  RETIREMENT_READY_RETIRED_ACTIVE_ALIASES,
   RETIRED_ACTIVE_ALIASES_BY_REALM,
   stripRetirementReadyActiveAliases as stripRetirementReadyActiveAliasesForTest,
 } from "./retired_active_aliases";
@@ -207,6 +209,8 @@ describe("skill pool registry", () => {
   });
 
   it("tracks which retired actives are already battle-absorbed by formal core skills", () => {
+    expect(BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES.s_vr_active?.id).toBe("s_vr_active");
+    expect(BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES.m_ie_active?.id).toBe("m_ie_active");
     expect(BATTLE_ABSORBED_RETIRED_SKILL_MAP.s_vr_active?.replacementSkillId).toBe("s_ma_active");
     expect(BATTLE_ABSORBED_RETIRED_SKILL_MAP.s_bi_active?.replacementSkillId).toBe("s_tr_active");
     expect(BATTLE_ABSORBED_RETIRED_SKILL_MAP.b_ie_active?.replacementSkillId).toBe("b_ma_active");
@@ -229,6 +233,8 @@ describe("skill pool registry", () => {
   });
 
   it("surfaces retirement-ready retired actives for the next data cleanup step", () => {
+    expect(RETIREMENT_READY_RETIRED_ACTIVE_ALIASES.s_bi_active?.id).toBe("s_bi_active");
+    expect(RETIREMENT_READY_RETIRED_ACTIVE_ALIASES.b_ie_active?.id).toBe("b_ie_active");
     expect(RETIREMENT_READY_RETIRED_SKILL_MAP.s_vr_active?.type).toBe("Active");
     expect(RETIREMENT_READY_RETIRED_SKILL_MAP.b_ie_active?.replacementSkillId).toBe("b_ma_active");
     expect(RETIREMENT_READY_RETIRED_SKILL_MAP.m_ie_active?.replacementSkillId).toBe("m_tr_active");
