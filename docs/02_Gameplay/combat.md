@@ -182,6 +182,12 @@
   - 劍心重置
   - 法修築基層數累進
 - `劍意化形 / 虛空劍陣 / 撒豆成兵` 的多段追擊與召喚後續傷害，也已開始抽成 `applyPlayerEchoAndSummonFollowupEffects(...)`
+- 敵方來襲後的承傷流程，也已開始抽成 `resolveIncomingEnemyDamage(...)`：
+  - `銅皮鐵骨`
+  - `金剛法相`
+  - `肉身成聖`
+  - `元素護盾`
+  - `護體劍罡`
 - `m_tr_passive`：enemy special 造成控制時，也已開始在 enemy world strike 正式回報 `雷劫煉心`
 - `enemy special` 的免疫 / 控制縮短訊息，已開始抽成共用 resistance helper，避免 timeline combat 再散寫 `仙體無垢 / 萬法皆空 / 雷劫煉心 / 人劍合神`
 - 時間軸戰鬥內的致命保命分支，也已開始抽成共用 helper，集中處理 `護體劍罡`、`滴血重生（真）`、`不死不滅` 這批生死線特例

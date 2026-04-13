@@ -2926,6 +2926,175 @@ const getIncomingDefensivePassiveMessages = (options: {
   return messages;
 };
 
+const resolveIncomingEnemyDamage = ({
+  enemyDamage,
+  enemySpecialReady,
+  currentTimeMs,
+  playerStatuses,
+  logs,
+  turn,
+  enemy,
+  playerHp,
+  playerMaxHp,
+  playerMp,
+  enemyHp,
+  enemyMaxHp,
+  bodyFoundationStacks,
+  hasBodyQiPassive,
+  hasBodyFusionPassive,
+  hasBodySaintPassive,
+  hasSwordDeathWardPassive,
+  swordDeathWardUsed,
+}: {
+  enemyDamage: number;
+  enemySpecialReady: boolean;
+  currentTimeMs: number;
+  playerStatuses: CombatStatus[];
+  logs: CombatLog[];
+  turn: number;
+  enemy: Enemy;
+  playerHp: number;
+  playerMaxHp: number;
+  playerMp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  bodyFoundationStacks: number;
+  hasBodyQiPassive: boolean;
+  hasBodyFusionPassive: boolean;
+  hasBodySaintPassive: boolean;
+  hasSwordDeathWardPassive: boolean;
+  swordDeathWardUsed: boolean;
+}) => {
+  let nextEnemyDamage = enemyDamage;
+  let nextPlayerStatuses = playerStatuses;
+  let nextPlayerMp = playerMp;
+  let nextEnemyHp = enemyHp;
+  let nextSwordDeathWardUsed = swordDeathWardUsed;
+
+  let copperSkinReduced = 0;
+  if (hasBodyQiPassive && nextEnemyDamage > 0 && !enemySpecialReady) {
+    copperSkinReduced = nextEnemyDamage - Math.max(
+      1,
+      Math.floor(nextEnemyDamage * getCopperSkinReductionMultiplier())
+    );
+    nextEnemyDamage = Math.max(
+      1,
+      Math.floor(nextEnemyDamage * getCopperSkinReductionMultiplier())
+    );
+  }
+
+  let bodyFusionReduced = 0;
+  if (hasBodyFusionPassive && nextEnemyDamage > 0) {
+    bodyFusionReduced =
+      nextEnemyDamage - Math.max(1, Math.floor(nextEnemyDamage * 0.7));
+    nextEnemyDamage = Math.max(1, Math.floor(nextEnemyDamage * 0.7));
+  }
+
+  let bodySaintReduced = 0;
+  if (hasBodySaintPassive && nextEnemyDamage > playerMaxHp * 0.2) {
+    bodySaintReduced =
+      nextEnemyDamage - Math.max(1, Math.floor(nextEnemyDamage * 0.5));
+    nextEnemyDamage = Math.max(1, Math.floor(nextEnemyDamage * 0.5));
+  }
+
+  let elementalBarrierBlocked = false;
+  if (enemySpecialReady && nextEnemyDamage > 0) {
+    const elementalBarrier = nextPlayerStatuses.find(
+      (status) =>
+        status.id === "elemental_barrier" &&
+        status.kind === "shield" &&
+        status.expiresAtMs > currentTimeMs &&
+        status.value > 0
+    );
+    if (elementalBarrier) {
+      elementalBarrier.value = 0;
+      elementalBarrier.expiresAtMs = currentTimeMs;
+      elementalBarrierBlocked = true;
+      nextEnemyDamage = 0;
+    }
+  }
+
+  getIncomingDefensivePassiveMessages({
+    bodyFoundationStacks,
+    copperSkinReduced,
+    bodyFusionReduced,
+    bodySaintReduced,
+    elementalBarrierBlocked,
+  }).forEach((message) => {
+    pushCombatLog(logs, {
+      turn,
+      timeMs: currentTimeMs,
+      isPlayer: true,
+      message,
+      damage: 0,
+      playerHp,
+      playerMaxHp,
+      enemyHp: nextEnemyHp,
+      enemyMaxHp,
+    });
+  });
+
+  const shieldResult = absorbDamageWithShield(
+    nextPlayerStatuses,
+    nextEnemyDamage,
+    currentTimeMs
+  );
+  nextEnemyDamage = shieldResult.remainingDamage;
+
+  logShieldAbsorption({
+    logs,
+    turn,
+    timeMs: currentTimeMs,
+    playerHp,
+    playerMaxHp,
+    enemyHp: nextEnemyHp,
+    enemyMaxHp,
+    absorbed: shieldResult.absorbed,
+  });
+
+  if (elementalBarrierBlocked) {
+    nextPlayerStatuses = nextPlayerStatuses.filter(
+      (status) =>
+        !(
+          status.id === "elemental_barrier" && status.expiresAtMs <= currentTimeMs
+        )
+    );
+  }
+
+  if (
+    hasSwordDeathWardPassive &&
+    !nextSwordDeathWardUsed &&
+    nextEnemyDamage >= playerHp &&
+    nextPlayerMp > 0
+  ) {
+    const swordDeathWardResult = applySwordDeathWardTrigger({
+      shouldTrigger: true,
+      logs,
+      turn,
+      timeMs: currentTimeMs,
+      preventedDamage: nextEnemyDamage,
+      playerHp,
+      playerMaxHp,
+      playerMp: nextPlayerMp,
+      enemyHp: nextEnemyHp,
+      enemyMaxHp,
+      enemy,
+    });
+    nextSwordDeathWardUsed = swordDeathWardResult.triggered;
+    nextPlayerMp = swordDeathWardResult.playerMp;
+    nextEnemyDamage = swordDeathWardResult.enemyDamage ?? nextEnemyDamage;
+    nextEnemyHp = swordDeathWardResult.enemyHp;
+  }
+
+  return {
+    enemyDamage: nextEnemyDamage,
+    playerStatuses: nextPlayerStatuses,
+    playerMp: nextPlayerMp,
+    enemyHp: nextEnemyHp,
+    swordDeathWardUsed: nextSwordDeathWardUsed,
+  };
+};
+
 const isNegativeStatusKind = (kind: CombatStatus["kind"]) =>
   [
     "burn",
@@ -4806,120 +4975,32 @@ export const runAutoBattle = (
         if (isBlock) {
           enemyDamage = Math.max(1, Math.floor(enemyDamage * 0.6));
         }
-
-        let copperSkinReduced = 0;
-        if (hasBodyQiPassive && enemyDamage > 0 && !enemySpecialReady) {
-          copperSkinReduced = enemyDamage - Math.max(
-            1,
-            Math.floor(enemyDamage * getCopperSkinReductionMultiplier())
-          );
-          enemyDamage = Math.max(
-            1,
-            Math.floor(enemyDamage * getCopperSkinReductionMultiplier())
-          );
-        }
-
-        let bodyFusionReduced = 0;
-        if (hasBodyFusionPassive && enemyDamage > 0) {
-          bodyFusionReduced = enemyDamage - Math.max(1, Math.floor(enemyDamage * 0.7));
-          enemyDamage = Math.max(1, Math.floor(enemyDamage * 0.7));
-        }
-
-        let bodySaintReduced = 0;
-        if (hasBodySaintPassive && enemyDamage > player.maxHp * 0.2) {
-          bodySaintReduced = enemyDamage - Math.max(1, Math.floor(enemyDamage * 0.5));
-          enemyDamage = Math.max(1, Math.floor(enemyDamage * 0.5));
-        }
-
-        let elementalBarrierBlocked = false;
-        if (enemySpecialReady && enemyDamage > 0) {
-          const elementalBarrier = playerStatuses.find(
-            (status) =>
-              status.id === "elemental_barrier" &&
-              status.kind === "shield" &&
-              status.expiresAtMs > currentTimeMs &&
-              status.value > 0
-          );
-          if (elementalBarrier) {
-            elementalBarrier.value = 0;
-            elementalBarrier.expiresAtMs = currentTimeMs;
-            elementalBarrierBlocked = true;
-            enemyDamage = 0;
-          }
-        }
-
-        getIncomingDefensivePassiveMessages({
-          bodyFoundationStacks,
-          copperSkinReduced,
-          bodyFusionReduced,
-          bodySaintReduced,
-          elementalBarrierBlocked,
-        }).forEach((message) => {
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        });
-
-        const shieldResult = absorbDamageWithShield(
-          playerStatuses,
+        ({
           enemyDamage,
-          currentTimeMs
-        );
-        enemyDamage = shieldResult.remainingDamage;
-
-        logShieldAbsorption({
+          playerStatuses,
+          playerMp,
+          enemyHp,
+          swordDeathWardUsed,
+        } = resolveIncomingEnemyDamage({
+          enemyDamage,
+          enemySpecialReady,
+          currentTimeMs,
+          playerStatuses,
           logs,
           turn,
-          timeMs: currentTimeMs,
+          enemy,
           playerHp,
           playerMaxHp: player.maxHp,
+          playerMp,
           enemyHp,
           enemyMaxHp: enemy.maxHp,
-          absorbed: shieldResult.absorbed,
-        });
-
-        if (elementalBarrierBlocked) {
-          playerStatuses = playerStatuses.filter(
-            (status) =>
-              !(
-                status.id === "elemental_barrier" &&
-                status.expiresAtMs <= currentTimeMs
-              )
-          );
-        }
-
-        if (
-          hasSwordDeathWardPassive &&
-          !swordDeathWardUsed &&
-          enemyDamage >= playerHp &&
-          playerMp > 0
-        ) {
-          const swordDeathWardResult = applySwordDeathWardTrigger({
-            shouldTrigger: true,
-            logs,
-            turn,
-            timeMs: currentTimeMs,
-            preventedDamage: enemyDamage,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            playerMp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-            enemy,
-          });
-          swordDeathWardUsed = swordDeathWardResult.triggered;
-          playerMp = swordDeathWardResult.playerMp;
-          enemyDamage = swordDeathWardResult.enemyDamage ?? enemyDamage;
-          enemyHp = swordDeathWardResult.enemyHp;
-        }
+          bodyFoundationStacks,
+          hasBodyQiPassive,
+          hasBodyFusionPassive,
+          hasBodySaintPassive,
+          hasSwordDeathWardPassive,
+          swordDeathWardUsed,
+        }));
 
       playerHp = Math.max(0, playerHp - enemyDamage);
       if (enemyDamage > 0) {
