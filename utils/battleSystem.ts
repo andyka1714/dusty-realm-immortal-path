@@ -2331,6 +2331,84 @@ type CombatRuntimeContext = {
   passiveFlags: PlayerPassiveFlags;
 };
 
+const createCombatInfrastructure = ({
+  player,
+  enemy,
+  logs,
+  passiveFlags,
+  activeSkill,
+  learnedSkills,
+  getTurn,
+  playerStatusesRef,
+  enemyStatusesRef,
+  activeSkillReadyAtMsRef,
+  getPlayerHp,
+  getEnemyHp,
+  setPlayerHp,
+  setEnemyHp,
+  setPlayerStatuses,
+  setEnemyStatuses,
+  getLastStatusTickMs,
+  setLastStatusTickMs,
+  getPlayerDamagedSinceSwordHeartWindow,
+  setPlayerDamagedSinceSwordHeartWindow,
+}: {
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  logs: CombatLog[];
+  passiveFlags: PlayerPassiveFlags;
+  activeSkill?: Skill;
+  learnedSkills: Skill[];
+  getTurn: () => number;
+  playerStatusesRef: () => CombatStatus[];
+  enemyStatusesRef: () => CombatStatus[];
+  activeSkillReadyAtMsRef: () => number;
+  getPlayerHp: () => number;
+  getEnemyHp: () => number;
+  setPlayerHp: (value: number) => void;
+  setEnemyHp: (value: number) => void;
+  setPlayerStatuses: (value: CombatStatus[]) => void;
+  setEnemyStatuses: (value: CombatStatus[]) => void;
+  getLastStatusTickMs: () => number;
+  setLastStatusTickMs: (value: number) => void;
+  getPlayerDamagedSinceSwordHeartWindow: () => boolean;
+  setPlayerDamagedSinceSwordHeartWindow: (value: boolean) => void;
+}) => {
+  const previousSnapshotProvider = combatLogSnapshotProvider;
+  combatLogSnapshotProvider = createCombatSnapshotProvider({
+    activeSkill,
+    playerStatusesRef,
+    enemyStatusesRef,
+    activeSkillReadyAtMsRef,
+    learnedSkills,
+  });
+
+  const processStatusTicks = createStatusTickProcessor({
+    getTurn,
+    logs,
+    player,
+    enemy,
+    passiveFlags,
+    getPlayerHp,
+    getEnemyHp,
+    setPlayerHp,
+    setEnemyHp,
+    getPlayerStatuses: playerStatusesRef,
+    setPlayerStatuses,
+    getEnemyStatuses: enemyStatusesRef,
+    setEnemyStatuses,
+    getLastStatusTickMs,
+    setLastStatusTickMs,
+    getPlayerDamagedSinceSwordHeartWindow,
+    setPlayerDamagedSinceSwordHeartWindow,
+  });
+
+  return {
+    previousSnapshotProvider,
+    processStatusTicks,
+  };
+};
+
 const createCombatRuntimeContext = (
   player: PlayerCombatStats,
   enemy: Enemy
@@ -7550,7 +7628,6 @@ export const runAutoBattle = (
   let lastStatusTickMs = 0;
   let playerStatuses: CombatStatus[] = [];
   let enemyStatuses: CombatStatus[] = [];
-  const previousSnapshotProvider = combatLogSnapshotProvider;
   const {
     activeSkill,
     playerAttackIntervalMs,
@@ -7559,14 +7636,6 @@ export const runAutoBattle = (
     enemyElementalAffinity,
     passiveFlags,
   } = createCombatRuntimeContext(player, enemy);
-
-  combatLogSnapshotProvider = createCombatSnapshotProvider({
-    activeSkill,
-    playerStatusesRef: () => playerStatuses,
-    enemyStatusesRef: () => enemyStatuses,
-    activeSkillReadyAtMsRef: () => activeSkillReadyAtMs,
-    learnedSkills: player.learnedSkills,
-  });
   const {
     hasReflectPassive,
     hasSwordQiPassive,
@@ -7610,12 +7679,17 @@ export const runAutoBattle = (
   let playerDamagedSinceSwordHeartWindow = false;
   let nextSwordImmortalGuardAtMs = 5000;
 
-  const processStatusTicks = createStatusTickProcessor({
-    getTurn: () => turn,
-    logs,
+  const { previousSnapshotProvider, processStatusTicks } = createCombatInfrastructure({
     player,
     enemy,
+    logs,
     passiveFlags,
+    activeSkill,
+    learnedSkills: player.learnedSkills,
+    getTurn: () => turn,
+    playerStatusesRef: () => playerStatuses,
+    enemyStatusesRef: () => enemyStatuses,
+    activeSkillReadyAtMsRef: () => activeSkillReadyAtMs,
     getPlayerHp: () => playerHp,
     getEnemyHp: () => enemyHp,
     setPlayerHp: (value) => {
@@ -7624,11 +7698,9 @@ export const runAutoBattle = (
     setEnemyHp: (value) => {
       enemyHp = value;
     },
-    getPlayerStatuses: () => playerStatuses,
     setPlayerStatuses: (value) => {
       playerStatuses = value;
     },
-    getEnemyStatuses: () => enemyStatuses,
     setEnemyStatuses: (value) => {
       enemyStatuses = value;
     },

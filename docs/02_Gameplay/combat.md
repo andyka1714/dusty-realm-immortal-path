@@ -111,6 +111,7 @@
 - 回合開場維護也已開始整併到 `resolveTurnStartMaintenance(...)`，狀態 tick、被動回復與淨化流程不再直接散在主循環開頭
 - 戰鬥開場 seed 流程也已開始整併到 `seedCombatEncounter(...)`，初始護體與 enemy special 起始冷卻不再直接在主循環鋪開
 - 戰鬥開場的 runtime 組裝，也已開始整併到 `createCombatRuntimeContext(...)`，主動術式、攻速、克制、元素修正與被動旗標不再在 `runAutoBattle()` 開頭散寫
+- 戰鬥基礎設施的 snapshot / tick wiring，也已開始整併到 `createCombatInfrastructure(...)`，snapshot provider 與 status tick processor 不再在 `runAutoBattle()` 內各自散寫
 - 開場被動狀態、待命訊息與 enemy special 起始延後，也已開始透過 `resolveInitialPassiveStateBundle(...)` 收斂，不再讓 `initializeCombatEncounter(...)` 長期維護一整串被動布林參數
 - 玩家出手階段也已開始整併到 `resolvePlayerActionPhase(...)`，週期護體、Boss 破綻與正式出手流程不再在主循環拆成兩段散寫
 - 玩家先手分支也已開始整併到 `resolvePlayerTurnPhase(...)`，玩家先手時的正式出手鏈不再直接鋪在主循環裡
