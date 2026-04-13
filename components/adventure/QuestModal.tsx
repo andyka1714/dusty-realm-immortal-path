@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/store';
-import { NPC, Quest, QuestStatus, ItemQuality, Item, ProfessionType } from '../../types';
+import { NPC, Quest, QuestStatus, ItemQuality, ItemCategory, ConsumableItem, ProfessionType } from '../../types';
 import { QUESTS } from '../../data/quests';
 import { ITEMS } from '../../data/items';
 import { acceptQuest, updateQuestProgress, completeQuest } from '../../store/slices/questSlice';
@@ -10,6 +10,9 @@ import { addItem } from '../../store/slices/inventorySlice';
 import { addLog } from '../../store/slices/logSlice';
 import { addVisualEffect } from '../../store/slices/adventureSlice'; // Import addVisualEffect
 import { Modal } from '../Modal';
+import { GameTooltip } from '../game/GameTooltip';
+import { getFormalSkill } from '../../data/skills';
+import { getSkillManualCategoryLabel, getSkillManualSourceLabels, getSkillManualTierLabel } from '../../data/items/manuals';
 import { MessageCircle, Gift, CheckCircle, Circle, ScrollText } from 'lucide-react';
 
 interface QuestModalProps {
@@ -37,6 +40,38 @@ export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
     const [questStatus, setQuestStatus] = useState<QuestStatus | null>(null);
     const [dialogueLines, setDialogueLines] = useState<string[]>([]);
     const [currentLineIndex, setCurrentLineIndex] = useState(0);
+    const [hoveredRewardItem, setHoveredRewardItem] = useState<{
+        itemId: string;
+        count: number;
+        quality: ItemQuality;
+        x: number;
+        y: number;
+    } | null>(null);
+
+    const getQuestRewardTooltipEyebrow = (itemId: string) => {
+        const item = ITEMS[itemId];
+        if (!item) return 'QUEST REWARD';
+
+        switch (item.category) {
+            case ItemCategory.Equipment:
+                return 'REWARD EQUIPMENT';
+            case ItemCategory.Consumable:
+                return 'REWARD MANUAL';
+            default:
+                return 'QUEST REWARD';
+        }
+    };
+
+    const getQuestRewardTooltipFooter = (itemId: string, count: number, quality: ItemQuality) => {
+        const item = ITEMS[itemId];
+        const categoryLabel = item?.category === ItemCategory.Equipment
+            ? '裝備'
+            : item?.category === ItemCategory.Consumable
+              ? '技能書'
+              : '獎勵';
+
+        return `${rankName(quality)}｜${categoryLabel}｜數量 x${count}`;
+    };
 
     // Initialization Logic
     useEffect(() => {
@@ -332,9 +367,86 @@ export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
                                             const quality = rewardItem.quality ?? itemDef?.quality ?? ItemQuality.Low;
                                             const colorClass = itemDef ? (rankColors[quality] || 'text-stone-300') : 'text-stone-300';
                                             const itemName = itemDef ? `[${rankName(quality)}] ${itemDef.name}` : rewardItem.itemId;
+                                            const rewardSkillEffect =
+                                                itemDef?.category === ItemCategory.Consumable
+                                                    ? (itemDef as ConsumableItem).effects.find(
+                                                          (effect) => effect.type === 'learn_skill' && effect.skillId
+                                                      )
+                                                    : null;
+                                            const rewardSkill = rewardSkillEffect?.skillId
+                                                ? getFormalSkill(rewardSkillEffect.skillId)
+                                                : null;
                                             return (
-                                                <span key={`${i}-${idx}`} className={colorClass}>
+                                                <span
+                                                    key={`${i}-${idx}`}
+                                                    className={`${colorClass} cursor-help decoration-dotted underline-offset-2 hover:underline`}
+                                                    onMouseEnter={(event) =>
+                                                        setHoveredRewardItem({
+                                                            itemId: rewardItem.itemId,
+                                                            count: rewardItem.count,
+                                                            quality,
+                                                            x: event.clientX + 16,
+                                                            y: event.clientY + 16,
+                                                        })
+                                                    }
+                                                    onMouseMove={(event) =>
+                                                        setHoveredRewardItem((current) =>
+                                                            current?.itemId === rewardItem.itemId
+                                                                ? {
+                                                                      ...current,
+                                                                      x: event.clientX + 16,
+                                                                      y: event.clientY + 16,
+                                                                  }
+                                                                : current
+                                                        )
+                                                    }
+                                                    onMouseLeave={() => setHoveredRewardItem(null)}
+                                                >
                                                     {itemName} x{rewardItem.count}
+                                                    {hoveredRewardItem?.itemId === rewardItem.itemId && itemDef && (
+                                                        <GameTooltip
+                                                            eyebrow={getQuestRewardTooltipEyebrow(rewardItem.itemId)}
+                                                            title={itemDef.name}
+                                                            footer={getQuestRewardTooltipFooter(
+                                                                rewardItem.itemId,
+                                                                rewardItem.count,
+                                                                quality
+                                                            )}
+                                                            style={{
+                                                                left: `${hoveredRewardItem.x}px`,
+                                                                top: `${hoveredRewardItem.y}px`,
+                                                            }}
+                                                            widthClassName="w-80"
+                                                        >
+                                                            <div className="text-xs text-stone-400">
+                                                                {itemDef.description}
+                                                            </div>
+                                                            {itemDef.category === ItemCategory.Equipment && 'stats' in itemDef && (
+                                                                <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-stone-300">
+                                                                    {Object.entries(itemDef.stats)
+                                                                        .filter(([, value]) => Boolean(value))
+                                                                        .map(([stat, value]) => (
+                                                                            <span key={stat}>
+                                                                                {stat} +{value}
+                                                                            </span>
+                                                                        ))}
+                                                                </div>
+                                                            )}
+                                                            {rewardSkill && (
+                                                                <>
+                                                                    <div className="text-xs text-amber-300">
+                                                                        {getSkillManualCategoryLabel(rewardSkill)}
+                                                                    </div>
+                                                                    <div className="text-xs text-stone-400">
+                                                                        {getSkillManualTierLabel(rewardSkill)}
+                                                                    </div>
+                                                                    <div className="text-xs text-stone-500">
+                                                                        來源：{getSkillManualSourceLabels(rewardSkill).join('、')}
+                                                                    </div>
+                                                                </>
+                                                            )}
+                                                        </GameTooltip>
+                                                    )}
                                                 </span>
                                             );
                                         })}

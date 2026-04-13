@@ -27,6 +27,7 @@
 - 共用 `Modal` 也已開始向 `GamePanel` 的遊戲化框體語言收斂，任務、商店、背包確認與地圖總覽視窗不再維持舊樣式殼層
 - `GamePanel / Modal` 現在都已開始補上 `eyebrow + title + icon` 的正式資訊層級，不再只有單一標題列
 - `GameTooltip` 也已開始補齊 `eyebrow + title + body + footer` 結構，核心資訊浮層往同一套語言收口
+- 任務對話視窗中的裝備 / 技能書獎勵，也已補上 hover `GameTooltip`，不再只剩純文字獎勵列
 - `言出法隨`、`劍道獨尊`、`向死而生` 等高境界被動，已開始同步對齊 world strike 與時間軸戰鬥結果
 - `法力源泉`、`靈力湧動`、`五氣朝元` 這批法修被動，也已開始補齊 world strike 狀態回報
 - `蠻荒血脈`、`銅皮鐵骨`、`金剛法相`、`元素護盾` 這批防禦型被動，也已開始補齊 enemy world strike 狀態回報
