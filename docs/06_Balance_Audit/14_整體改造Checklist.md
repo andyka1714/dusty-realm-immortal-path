@@ -252,6 +252,8 @@
 - [x] 玩家出手主幹也已開始整併到 `resolvePlayerTurn(...)`，把可施放窗口、攻勢判定、主傷害訊息、破甲追擊、共鳴處理與命中後續集中到同一層流程
 - [x] 敵方被控跳過回合的流程，也已開始整併到 `resolveEnemyIncapacitatedTurn(...)`，控制跳過與 `養劍術` 疊層不再在主循環散寫
 - [x] battle snapshot provider 與 DOT / 吸生 tick 迴圈，也已開始抽成 `createCombatSnapshotProvider(...) / createStatusTickProcessor(...)`，主循環不再直接維護整段閉包式基礎設施
+- [x] 玩家出手前置流程也已開始整併到 `resolvePlayerTurnPrelude(...)`，週期護體與 Boss 破綻窗口已集中在同一層處理
+- [x] 敵方出手窗口也已開始整併到 `resolveEnemyActionWindow(...)`，控制跳過、特招延後、特招窗口與敵方攻勢判定不再在主循環平鋪散寫
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---

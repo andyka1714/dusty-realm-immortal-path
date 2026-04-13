@@ -176,6 +176,8 @@
 - 玩家出手主幹也已開始收斂到 `resolvePlayerTurn(...)`，把可施放窗口、攻勢判定、主傷害訊息、破甲追擊、共鳴消耗與命中後續處理集中在同一層流程。
 - 敵方被控跳過回合的流程，也已開始整併到 `resolveEnemyIncapacitatedTurn(...)`，控制跳過與 `養劍術` 疊層不再在主循環散寫。
 - 戰鬥 snapshot provider 與 DOT / 吸生 tick 迴圈，也已開始抽成 `createCombatSnapshotProvider(...) / createStatusTickProcessor(...)`，主循環不再直接背著整段閉包式基礎設施。
+- 玩家出手前置流程也已開始整併到 `resolvePlayerTurnPrelude(...)`，週期護體與 Boss 破綻窗口不再在主循環平鋪散寫。
+- 敵方出手窗口也已開始整併到 `resolveEnemyActionWindow(...)`，控制跳過、特招延後、特招窗口與敵方攻勢判定已收進同一層 helper。
 - `enemy special` 的 incoming status 過濾、狀態推入、戰鬥日誌與免疫提示，也已開始收斂到更完整的共用 helper，world / timeline 的差異進一步縮小。
 - `絕仙劍` 的 `絕仙封脈` 也已正式接進 timeline combat，會在敵方特招將要出手時把節奏再壓後 `1` 秒，高境界劍修的節奏壓制已不再只是狀態名義存在。
 - 敵方特招的初始延後與後續節奏壓制，也已開始抽成共用 helper，`萬法歸宗 / 絕仙封脈` 不再在時間軸主循環內分散處理。

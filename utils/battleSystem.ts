@@ -1962,6 +1962,163 @@ const resolveEnemyIncapacitatedTurn = ({
   };
 };
 
+const resolvePlayerTurnPrelude = ({
+  currentTimeMs,
+  turn,
+  player,
+  enemy,
+  logs,
+  pVsE,
+  bossBroken,
+  playerHp,
+  playerStatuses,
+  nextSwordImmortalGuardAtMs,
+  hasSwordImmortalPassive,
+}: {
+  currentTimeMs: number;
+  turn: number;
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  logs: CombatLog[];
+  pVsE: { isEffective: boolean; isResisted: boolean };
+  bossBroken: boolean;
+  playerHp: number;
+  playerStatuses: CombatStatus[];
+  nextSwordImmortalGuardAtMs: number;
+  hasSwordImmortalPassive: boolean;
+}) => {
+  ({ playerStatuses, nextSwordImmortalGuardAtMs } = applyPeriodicPassiveStatuses({
+    logs,
+    turn,
+    timeMs: currentTimeMs,
+    player,
+    playerHp,
+    enemyHp: enemy.hp,
+    enemyMaxHp: enemy.maxHp,
+    playerStatuses,
+    hasSwordImmortalPassive,
+    nextSwordImmortalGuardAtMs,
+  }));
+
+  bossBroken = rollBossBreakOpportunity({
+    enemy,
+    restriction: pVsE,
+    bossBroken,
+    currentTimeMs,
+    turn,
+    logs,
+    playerHp,
+    playerMaxHp: player.maxHp,
+    enemyHp: enemy.hp,
+    enemyMaxHp: enemy.maxHp,
+  });
+
+  return {
+    playerStatuses,
+    nextSwordImmortalGuardAtMs,
+    bossBroken,
+  };
+};
+
+const resolveEnemyActionWindow = ({
+  currentTimeMs,
+  turn,
+  player,
+  enemy,
+  logs,
+  passiveFlags,
+  playerStatuses,
+  enemyStatuses,
+  playerHp,
+  playerMp,
+  enemyHp,
+  enemyAttackIntervalMs,
+  enemySpecialReadyAtMs,
+  bodyTribulationStacks,
+  hasSwordHeartPassive,
+  playerDamagedSinceSwordHeartWindow,
+  swordHeartStacks,
+}: {
+  currentTimeMs: number;
+  turn: number;
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  logs: CombatLog[];
+  passiveFlags: PlayerPassiveFlags;
+  playerStatuses: CombatStatus[];
+  enemyStatuses: CombatStatus[];
+  playerHp: number;
+  playerMp: number;
+  enemyHp: number;
+  enemyAttackIntervalMs: number;
+  enemySpecialReadyAtMs: number;
+  bodyTribulationStacks: number;
+  hasSwordHeartPassive: boolean;
+  playerDamagedSinceSwordHeartWindow: boolean;
+  swordHeartStacks: number;
+}) => {
+  if (hasIncapacitatingStatus(enemyStatuses, currentTimeMs)) {
+    return {
+      skipped: true as const,
+      ...resolveEnemyIncapacitatedTurn({
+        currentTimeMs,
+        enemy,
+        enemyAttackIntervalMs,
+        hasSwordHeartPassive,
+        playerDamagedSinceSwordHeartWindow,
+        swordHeartStacks,
+        logs,
+        turn,
+        playerHp,
+        playerMaxHp: player.maxHp,
+        enemyHp,
+        enemyMaxHp: enemy.maxHp,
+      }),
+    };
+  }
+
+  enemySpecialReadyAtMs = applyEnemySpecialTimingDelay({
+    logs,
+    turn,
+    timeMs: currentTimeMs,
+    enemy,
+    enemyStatuses,
+    enemySpecialReadyAtMs,
+    playerHp,
+    playerMaxHp: player.maxHp,
+    enemyHp,
+    enemyMaxHp: enemy.maxHp,
+  });
+  const enemySpecialReady =
+    enemy.specialAttack && currentTimeMs >= enemySpecialReadyAtMs;
+  const enemySpecialTimelineProfile = enemySpecialReady
+    ? getEnemySpecialTimelineProfile(enemy)
+    : undefined;
+  const offenseRoll = resolveEnemyOffenseRoll({
+    enemy,
+    player: {
+      ...player,
+      hp: playerHp,
+      mp: playerMp,
+    },
+    enemyStatuses,
+    playerStatuses,
+    currentTimeMs,
+    enemySpecialReady: Boolean(enemySpecialReady),
+    enemySpecialTimelineProfile: enemySpecialTimelineProfile ?? undefined,
+    passiveFlags,
+    bodyTribulationStacks,
+  });
+
+  return {
+    skipped: false as const,
+    enemySpecialReadyAtMs,
+    enemySpecialReady: Boolean(enemySpecialReady),
+    enemySpecialTimelineProfile,
+    ...offenseRoll,
+  };
+};
+
 const resolvePlayerTurn = ({
   currentTimeMs,
   turn,
@@ -6121,31 +6278,23 @@ export const runAutoBattle = (
       ({
         playerStatuses,
         nextSwordImmortalGuardAtMs,
-      } = applyPeriodicPassiveStatuses({
-        logs,
-        turn,
-        timeMs: currentTimeMs,
-        player,
-        playerHp,
-        enemyHp,
-        enemyMaxHp: enemy.maxHp,
-        playerStatuses,
-        hasSwordImmortalPassive,
-        nextSwordImmortalGuardAtMs,
-      }));
-
-      bossBroken = rollBossBreakOpportunity({
-        enemy,
-        restriction: pVsE,
         bossBroken,
+      } = resolvePlayerTurnPrelude({
         currentTimeMs,
         turn,
+        player,
+        enemy: {
+          ...enemy,
+          hp: enemyHp,
+        },
         logs,
+        pVsE,
+        bossBroken,
         playerHp,
-        playerMaxHp: player.maxHp,
-        enemyHp,
-        enemyMaxHp: enemy.maxHp,
-      });
+        playerStatuses,
+        nextSwordImmortalGuardAtMs,
+        hasSwordImmortalPassive,
+      }));
 
       ({
         enemyHp,
@@ -6180,132 +6329,116 @@ export const runAutoBattle = (
       }));
       if (enemyHp <= 0) break;
     } else {
-      if (hasIncapacitatingStatus(enemyStatuses, currentTimeMs)) {
+      const enemyActionWindow = resolveEnemyActionWindow({
+        currentTimeMs,
+        turn,
+        player,
+        enemy,
+        logs,
+        passiveFlags,
+        playerStatuses,
+        enemyStatuses,
+        playerHp,
+        playerMp,
+        enemyHp,
+        enemyAttackIntervalMs,
+        enemySpecialReadyAtMs,
+        bodyTribulationStacks,
+        hasSwordHeartPassive,
+        playerDamagedSinceSwordHeartWindow,
+        swordHeartStacks,
+      });
+
+      if (enemyActionWindow.skipped) {
         ({
           enemyNextActionMs,
           swordHeartStacks,
           playerDamagedSinceSwordHeartWindow,
-        } = resolveEnemyIncapacitatedTurn({
-          currentTimeMs,
-          enemy,
-          enemyAttackIntervalMs,
-          hasSwordHeartPassive,
-          playerDamagedSinceSwordHeartWindow,
-          swordHeartStacks,
-          logs,
-          turn,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        }));
+        } = enemyActionWindow);
         turn++;
         continue;
-      }
+      } else {
+        const resolvedEnemyActionWindow = enemyActionWindow as Exclude<
+          ReturnType<typeof resolveEnemyActionWindow>,
+          { skipped: true }
+        >;
+        enemySpecialReadyAtMs = resolvedEnemyActionWindow.enemySpecialReadyAtMs;
+        const enemySpecialReady = resolvedEnemyActionWindow.enemySpecialReady;
+        const enemySpecialTimelineProfile =
+          resolvedEnemyActionWindow.enemySpecialTimelineProfile;
+        let {
+          enemyDamage,
+          isDodge,
+          voidEvasion,
+          isBlock,
+          bodyFoundationStacks,
+        } = resolvedEnemyActionWindow;
 
-      enemySpecialReadyAtMs = applyEnemySpecialTimingDelay({
-        logs,
-        turn,
-        timeMs: currentTimeMs,
-        enemy,
-        enemyStatuses,
-        enemySpecialReadyAtMs,
-        playerHp,
-        playerMaxHp: player.maxHp,
-        enemyHp,
-        enemyMaxHp: enemy.maxHp,
-      });
-      const enemySpecialReady =
-        enemy.specialAttack && currentTimeMs >= enemySpecialReadyAtMs;
-      const enemySpecialTimelineProfile = enemySpecialReady
-        ? getEnemySpecialTimelineProfile(enemy)
-        : undefined;
-      let {
-        enemyDamage,
-        isDodge,
-        voidEvasion,
-        isBlock,
-        bodyFoundationStacks,
-      } = resolveEnemyOffenseRoll({
-        enemy,
-        player: {
-          ...player,
-          hp: playerHp,
-          mp: playerMp,
-        },
-        enemyStatuses,
-        playerStatuses,
-        currentTimeMs,
-        enemySpecialReady: Boolean(enemySpecialReady),
-        enemySpecialTimelineProfile: enemySpecialTimelineProfile ?? undefined,
-        passiveFlags,
-        bodyTribulationStacks,
-      });
-
-      ({
-        enemyDamage,
-        playerHp,
-        playerMp,
-        enemyHp,
-        playerStatuses,
-        swordDeathWardUsed,
-        bodyTribulationStacks,
-        bodyRebirthTrueUsed,
-      } = resolveEnemyTurnAftermath({
-        enemyDamage,
-        isDodge,
-        voidEvasion,
-        isBlock,
-        enemySpecialReady: Boolean(enemySpecialReady),
-        currentTimeMs,
-        turn,
-        logs,
-        enemy,
-        player: {
-          ...player,
-          hp: playerHp,
-          mp: playerMp,
-        },
-        playerHp,
-        playerMp,
-        enemyHp,
-        playerStatuses,
-        passiveFlags,
-        bodyFoundationStacks,
-        swordDeathWardUsed,
-        bodyTribulationStacks,
-        bodyRebirthTrueUsed,
-      }));
-      if (enemyDamage > 0 && !isDodge && !voidEvasion) {
-        playerDamagedSinceSwordHeartWindow = true;
-      }
-
-      if (hasSwordHeartPassive && !playerDamagedSinceSwordHeartWindow) {
-        swordHeartStacks = applySwordHeartUpkeep({
-          swordHeartStacks,
-          logs,
-          turn,
-          timeMs: currentTimeMs,
+        ({
+          enemyDamage,
           playerHp,
-          playerMaxHp: player.maxHp,
+          playerMp,
           enemyHp,
-          enemyMaxHp: enemy.maxHp,
-          blockedMessage:
-            "【養劍術】劍勢已滿，敵招雖過，劍意已抵當前可凝的極限。",
-          stackingMessage: (nextStacks) =>
-            `【養劍術】劍勢沉澱更深，攻勢提升至第 ${nextStacks} 層。`,
-        });
-      }
-      playerDamagedSinceSwordHeartWindow = false;
+          playerStatuses,
+          swordDeathWardUsed,
+          bodyTribulationStacks,
+          bodyRebirthTrueUsed,
+        } = resolveEnemyTurnAftermath({
+          enemyDamage,
+          isDodge,
+          voidEvasion,
+          isBlock,
+          enemySpecialReady: Boolean(enemySpecialReady),
+          currentTimeMs,
+          turn,
+          logs,
+          enemy,
+          player: {
+            ...player,
+            hp: playerHp,
+            mp: playerMp,
+          },
+          playerHp,
+          playerMp,
+          enemyHp,
+          playerStatuses,
+          passiveFlags,
+          bodyFoundationStacks,
+          swordDeathWardUsed,
+          bodyTribulationStacks,
+          bodyRebirthTrueUsed,
+        }));
+        if (enemyDamage > 0 && !isDodge && !voidEvasion) {
+          playerDamagedSinceSwordHeartWindow = true;
+        }
 
-      if (enemySpecialReady && enemy.specialAttack) {
-        const specialCooldown = getResolvedEnemySpecialCooldownSeconds(enemy);
-        enemySpecialReadyAtMs =
-          currentTimeMs +
-          Math.floor(specialCooldown * 1000) +
-          (enemySpecialTimelineProfile?.executionTimeMs ?? 0);
+        if (hasSwordHeartPassive && !playerDamagedSinceSwordHeartWindow) {
+          swordHeartStacks = applySwordHeartUpkeep({
+            swordHeartStacks,
+            logs,
+            turn,
+            timeMs: currentTimeMs,
+            playerHp,
+            playerMaxHp: player.maxHp,
+            enemyHp,
+            enemyMaxHp: enemy.maxHp,
+            blockedMessage:
+              "【養劍術】劍勢已滿，敵招雖過，劍意已抵當前可凝的極限。",
+            stackingMessage: (nextStacks) =>
+              `【養劍術】劍勢沉澱更深，攻勢提升至第 ${nextStacks} 層。`,
+          });
+        }
+        playerDamagedSinceSwordHeartWindow = false;
+
+        if (enemySpecialReady && enemy.specialAttack) {
+          const specialCooldown = getResolvedEnemySpecialCooldownSeconds(enemy);
+          enemySpecialReadyAtMs =
+            currentTimeMs +
+            Math.floor(specialCooldown * 1000) +
+            (enemySpecialTimelineProfile?.executionTimeMs ?? 0);
+        }
+        enemyNextActionMs = currentTimeMs + enemyAttackIntervalMs;
       }
-      enemyNextActionMs = currentTimeMs + enemyAttackIntervalMs;
     }
 
     bossBroken = false;
