@@ -2532,6 +2532,94 @@ const createCombatInfrastructure = ({
   };
 };
 
+const prepareCombatLoopEnvironment = ({
+  player,
+  enemy,
+  logs,
+  runtimeContext,
+  getTurn,
+  playerStatusesRef,
+  enemyStatusesRef,
+  activeSkillReadyAtMsRef,
+  getPlayerHp,
+  getEnemyHp,
+  setPlayerHp,
+  setEnemyHp,
+  setPlayerStatuses,
+  setEnemyStatuses,
+  getLastStatusTickMs,
+  setLastStatusTickMs,
+  getPlayerDamagedSinceSwordHeartWindow,
+  setPlayerDamagedSinceSwordHeartWindow,
+  playerHp,
+  enemyHp,
+  playerStatuses,
+}: {
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  logs: CombatLog[];
+  runtimeContext: CombatRuntimeContext;
+  getTurn: () => number;
+  playerStatusesRef: () => CombatStatus[];
+  enemyStatusesRef: () => CombatStatus[];
+  activeSkillReadyAtMsRef: () => number;
+  getPlayerHp: () => number;
+  getEnemyHp: () => number;
+  setPlayerHp: (value: number) => void;
+  setEnemyHp: (value: number) => void;
+  setPlayerStatuses: (value: CombatStatus[]) => void;
+  setEnemyStatuses: (value: CombatStatus[]) => void;
+  getLastStatusTickMs: () => number;
+  setLastStatusTickMs: (value: number) => void;
+  getPlayerDamagedSinceSwordHeartWindow: () => boolean;
+  setPlayerDamagedSinceSwordHeartWindow: (value: boolean) => void;
+  playerHp: number;
+  enemyHp: number;
+  playerStatuses: CombatStatus[];
+}) => {
+  const { activeSkill, passiveFlags, pVsE, enemyElementalAffinity } = runtimeContext;
+  const { previousSnapshotProvider, processStatusTicks } = createCombatInfrastructure({
+    player,
+    enemy,
+    logs,
+    passiveFlags,
+    activeSkill,
+    learnedSkills: player.learnedSkills,
+    getTurn,
+    playerStatusesRef,
+    enemyStatusesRef,
+    activeSkillReadyAtMsRef,
+    getPlayerHp,
+    getEnemyHp,
+    setPlayerHp,
+    setEnemyHp,
+    setPlayerStatuses,
+    setEnemyStatuses,
+    getLastStatusTickMs,
+    setLastStatusTickMs,
+    getPlayerDamagedSinceSwordHeartWindow,
+    setPlayerDamagedSinceSwordHeartWindow,
+  });
+
+  const seededEncounter = seedCombatEncounter({
+    player,
+    enemy,
+    logs,
+    passiveFlags,
+    restriction: pVsE,
+    elementalAffinity: enemyElementalAffinity,
+    playerHp,
+    enemyHp,
+    playerStatuses,
+  });
+
+  return {
+    previousSnapshotProvider,
+    processStatusTicks,
+    ...seededEncounter,
+  };
+};
+
 const createCombatRuntimeContext = (
   player: PlayerCombatStats,
   enemy: Enemy
@@ -7773,13 +7861,25 @@ export const runAutoBattle = (
   } = createCombatRuntimeContext(player, enemy);
   const featureFlags = createCombatLoopFeatureFlags(passiveFlags);
 
-  const { previousSnapshotProvider, processStatusTicks } = createCombatInfrastructure({
+  const runtimeContext = {
+    activeSkill: activeSkill ?? undefined,
+    playerAttackIntervalMs,
+    enemyAttackIntervalMs,
+    pVsE,
+    enemyElementalAffinity,
+    passiveFlags,
+  } satisfies CombatRuntimeContext;
+
+  const {
+    previousSnapshotProvider,
+    processStatusTicks,
+    playerStatuses: seededPlayerStatuses,
+    enemySpecialReadyAtMs: seededEnemySpecialReadyAtMs,
+  } = prepareCombatLoopEnvironment({
     player,
     enemy,
     logs,
-    passiveFlags,
-    activeSkill,
-    learnedSkills: player.learnedSkills,
+    runtimeContext,
     getTurn: () => turn,
     playerStatusesRef: () => playerStatuses,
     enemyStatusesRef: () => enemyStatuses,
@@ -7806,22 +7906,12 @@ export const runAutoBattle = (
     setPlayerDamagedSinceSwordHeartWindow: (value) => {
       playerDamagedSinceSwordHeartWindow = value;
     },
-  });
-
-  ({
-    playerStatuses,
-    enemySpecialReadyAtMs,
-  } = seedCombatEncounter({
-    player,
-    enemy,
-    logs,
-    passiveFlags,
-    restriction: pVsE,
-    elementalAffinity: enemyElementalAffinity,
     playerHp,
     enemyHp,
     playerStatuses,
-  }));
+  });
+  playerStatuses = seededPlayerStatuses;
+  enemySpecialReadyAtMs = seededEnemySpecialReadyAtMs;
 
   while (playerHp > 0 && enemyHp > 0) {
     const loopStep = resolveCombatLoopStep({
@@ -7852,14 +7942,7 @@ export const runAutoBattle = (
       player,
       enemy,
       logs,
-      runtimeContext: {
-        activeSkill: activeSkill ?? undefined,
-        playerAttackIntervalMs,
-        enemyAttackIntervalMs,
-        pVsE,
-        enemyElementalAffinity,
-        passiveFlags,
-      },
+      runtimeContext,
       featureFlags,
     });
 
