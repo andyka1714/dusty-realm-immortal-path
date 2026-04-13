@@ -12,6 +12,7 @@ import {
 import {
   ALL_RETIRED_PASSIVE_ALIASES,
   BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS,
+  RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_ID_SET,
   RETIRED_PASSIVE_ALIASES_BY_REALM,
   RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_VIEWS,
   stripBattleAbsorbedPassiveAliases as stripBattleAbsorbedPassiveAliasesForTest,
@@ -48,6 +49,8 @@ import {
   normalizeLearnedSkills,
   RETIRED_SKILL_MAP,
   RETIRED_SKILL_NAME_INDEX,
+  RETIREMENT_READY_RETIRED_PASSIVE_SKILLS,
+  RETIREMENT_READY_RETIRED_PASSIVE_SKILL_MAP,
   RETIREMENT_READY_RETIRED_SKILL_MAP,
   RETIRED_SKILLS_BY_REALM,
   SKILLS,
@@ -345,6 +348,16 @@ describe("skill pool registry", () => {
     expect(passiveIds).toContain("s_f_passive");
     expect(passiveIds).toContain("b_ie_passive");
     expect(passiveIds).toContain("m_tr_passive");
+    expect(RETIREMENT_READY_RETIRED_PASSIVE_SKILLS.map((skill) => skill.id).sort()).toEqual(
+      passiveIds.slice().sort()
+    );
+    expect(RETIREMENT_READY_RETIRED_PASSIVE_SKILL_MAP.s_f_passive?.replacementSkillId).toBe(
+      "s_g_passive"
+    );
+    expect(RETIREMENT_READY_RETIRED_PASSIVE_SKILL_MAP.b_ie_passive?.replacementSkillId).toBe(
+      "b_sf_passive"
+    );
+    expect(RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_ID_SET.has("m_tr_passive")).toBe(true);
     expect(
       getRetirementReadyRetiredPassiveSkills().every(
         (skill) =>

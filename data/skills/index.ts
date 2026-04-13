@@ -307,33 +307,43 @@ export const RETIRED_SKILL_NAME_INDEX: Record<string, Skill> = Object.fromEntrie
   RETIRED_SKILLS.map((skill) => [skill.name, skill])
 ) as Record<string, Skill>;
 
-export const BATTLE_ABSORBED_RETIRED_SKILLS = BATTLE_ABSORBED_RETIRED_ACTIVE_ALIAS_VIEWS
-  .map((skill) => SKILLS[skill.id])
-  .filter((skill): skill is Skill => Boolean(skill));
+const resolveSkillViews = (skills: Skill[]) =>
+  skills.map((skill) => SKILLS[skill.id]).filter((skill): skill is Skill => Boolean(skill));
 
-export const BATTLE_ABSORBED_RETIRED_SKILL_MAP: Record<string, Skill> =
-  Object.fromEntries(
-    BATTLE_ABSORBED_RETIRED_SKILLS.map((skill) => [skill.id, skill])
-  ) as Record<string, Skill>;
+const buildSkillMap = (skills: Skill[]) =>
+  Object.fromEntries(skills.map((skill) => [skill.id, skill])) as Record<string, Skill>;
 
-export const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILLS =
+export const BATTLE_ABSORBED_RETIRED_SKILLS = resolveSkillViews(
+  BATTLE_ABSORBED_RETIRED_ACTIVE_ALIAS_VIEWS
+);
+
+export const BATTLE_ABSORBED_RETIRED_SKILL_MAP: Record<string, Skill> = buildSkillMap(
+  BATTLE_ABSORBED_RETIRED_SKILLS
+);
+
+export const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILLS = resolveSkillViews(
   BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS
-    .map((skill) => SKILLS[skill.id])
-    .filter((skill): skill is Skill => Boolean(skill));
+);
 
-export const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP: Record<string, Skill> =
-  Object.fromEntries(
-    BATTLE_ABSORBED_RETIRED_PASSIVE_SKILLS.map((skill) => [skill.id, skill])
-  ) as Record<string, Skill>;
+export const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP: Record<string, Skill> = buildSkillMap(
+  BATTLE_ABSORBED_RETIRED_PASSIVE_SKILLS
+);
 
-export const RETIREMENT_READY_RETIRED_SKILLS = RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_VIEWS
-  .map((skill) => SKILLS[skill.id])
-  .filter((skill): skill is Skill => Boolean(skill));
+export const RETIREMENT_READY_RETIRED_SKILLS = resolveSkillViews(
+  RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_VIEWS
+);
 
-export const RETIREMENT_READY_RETIRED_SKILL_MAP: Record<string, Skill> =
-  Object.fromEntries(
-    RETIREMENT_READY_RETIRED_SKILLS.map((skill) => [skill.id, skill])
-  ) as Record<string, Skill>;
+export const RETIREMENT_READY_RETIRED_SKILL_MAP: Record<string, Skill> = buildSkillMap(
+  RETIREMENT_READY_RETIRED_SKILLS
+);
+
+export const RETIREMENT_READY_RETIRED_PASSIVE_SKILLS = resolveSkillViews(
+  RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_VIEWS
+);
+
+export const RETIREMENT_READY_RETIRED_PASSIVE_SKILL_MAP: Record<string, Skill> = buildSkillMap(
+  RETIREMENT_READY_RETIRED_PASSIVE_SKILLS
+);
 
 export const isFormalCoreSkill = (skillId: string) =>
   FORMAL_CORE_SKILL_IDS.has(skillId);
@@ -350,10 +360,7 @@ export const isRetirementReadyRetiredSkill = (skillId: string) =>
 export const getRetirementReadyRetiredSkills = () =>
   [...RETIREMENT_READY_RETIRED_SKILLS].sort(compareSkills);
 export const getRetirementReadyRetiredPassiveSkills = () =>
-  RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_VIEWS
-    .map((skill) => SKILLS[skill.id])
-    .filter((skill): skill is Skill => Boolean(skill))
-    .sort(compareSkills);
+  [...RETIREMENT_READY_RETIRED_PASSIVE_SKILLS].sort(compareSkills);
 
 export const getSkill = (id: string): Skill | undefined => SKILLS[id];
 export const getFormalSkillId = (skillId: string) => resolveReplacementSkillId(skillId);
