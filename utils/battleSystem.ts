@@ -3094,6 +3094,154 @@ const resolvePlayerSkillStatusApplication = ({
   };
 };
 
+const applyPlayerActiveFollowupEffects = ({
+  activeSkillCanonicalId,
+  playerDamage,
+  currentTimeMs,
+  enemy,
+  enemyHp,
+  playerHp,
+  playerMaxHp,
+  turn,
+  logs,
+  hasBodyImmortalPassive,
+  enemyStatuses,
+  activeSkillReadyAtMs,
+}: {
+  activeSkillCanonicalId?: string;
+  playerDamage: number;
+  currentTimeMs: number;
+  enemy: Enemy;
+  enemyHp: number;
+  playerHp: number;
+  playerMaxHp: number;
+  turn: number;
+  logs: CombatLog[];
+  hasBodyImmortalPassive: boolean;
+  enemyStatuses: CombatStatus[];
+  activeSkillReadyAtMs: number;
+}) => {
+  let nextEnemyHp = enemyHp;
+  let nextPlayerHp = playerHp;
+  let nextActiveSkillReadyAtMs = activeSkillReadyAtMs;
+
+  if (activeSkillCanonicalId === "b_ma_active" && playerDamage > 0) {
+    const lifestealAmount = Math.max(
+      1,
+      Math.floor(playerDamage * 0.5 * (hasBodyImmortalPassive ? 1.5 : 1))
+    );
+    nextPlayerHp = Math.min(playerMaxHp, nextPlayerHp + lifestealAmount);
+    pushCombatLog(logs, {
+      turn,
+      timeMs: currentTimeMs,
+      isPlayer: true,
+      message: `【祖巫降臨】吞納戰果，你回復了 <heal>${lifestealAmount}</heal> 點氣血。`,
+      damage: 0,
+      playerHp: nextPlayerHp,
+      playerMaxHp,
+      enemyHp: nextEnemyHp,
+      enemyMaxHp: enemy.maxHp,
+    });
+  }
+
+  if (activeSkillCanonicalId === "b_ma_active") {
+    const giantHeal = Math.max(1, Math.floor(playerMaxHp * 0.35));
+    nextPlayerHp = Math.min(playerMaxHp, nextPlayerHp + giantHeal);
+    pushCombatLog(logs, {
+      turn,
+      timeMs: currentTimeMs,
+      isPlayer: true,
+      message: `【法天象地】肉身擴張如山，回復了 <heal>${giantHeal}</heal> 點氣血並撐起巨靈護體。`,
+      damage: 0,
+      playerHp: nextPlayerHp,
+      playerMaxHp,
+      enemyHp: nextEnemyHp,
+      enemyMaxHp: enemy.maxHp,
+    });
+  }
+
+  if (activeSkillCanonicalId === "b_ma_active" && nextEnemyHp > 0) {
+    const siphonAmount = Math.max(1, Math.floor(enemy.maxHp * 0.1));
+    nextEnemyHp = Math.max(0, nextEnemyHp - siphonAmount);
+    nextPlayerHp = Math.min(playerMaxHp, nextPlayerHp + siphonAmount);
+    pushCombatLog(logs, {
+      turn,
+      timeMs: currentTimeMs,
+      isPlayer: true,
+      message: `【掌中神國】神國抽離敵方本源，額外造成 <dmg>${siphonAmount}</dmg> 點侵蝕傷害，並回復 <heal>${siphonAmount}</heal> 點氣血。`,
+      damage: siphonAmount,
+      playerHp: nextPlayerHp,
+      playerMaxHp,
+      enemyHp: nextEnemyHp,
+      enemyMaxHp: enemy.maxHp,
+    });
+  }
+
+  if (activeSkillCanonicalId === "m_tr_active" && nextEnemyHp > 0) {
+    const invertedStatuses: CombatStatus[] = [
+      {
+        id: "dao_bloom_break",
+        name: "萬象反噬",
+        kind: "armorBreak",
+        value: 0.28,
+        expiresAtMs: currentTimeMs + 3000,
+      },
+      {
+        id: "dao_bloom_burn",
+        name: "道火反噬",
+        kind: "burn",
+        value: 0.025,
+        expiresAtMs: currentTimeMs + 3000,
+        nextTickAtMs: currentTimeMs + 1000,
+      },
+    ];
+
+    if ((enemy.affixes?.length ?? 0) >= 2 || enemy.rank === EnemyRank.Boss) {
+      invertedStatuses.push({
+        id: "dao_bloom_banish",
+        name: "萬象寂滅",
+        kind: "incapacitate",
+        value: 0,
+        expiresAtMs: currentTimeMs + 1000,
+      });
+    }
+
+    enemyStatuses.push(...invertedStatuses);
+    pushCombatLog(logs, {
+      turn,
+      timeMs: currentTimeMs,
+      isPlayer: true,
+      message: `【一念花開】逆轉敵方氣運與護體，將其優勢翻成劫火與枯寂。`,
+      damage: 0,
+      playerHp: nextPlayerHp,
+      playerMaxHp,
+      enemyHp: nextEnemyHp,
+      enemyMaxHp: enemy.maxHp,
+    });
+  }
+
+  if (activeSkillCanonicalId === "s_tr_active" && nextEnemyHp <= 0) {
+    nextActiveSkillReadyAtMs = currentTimeMs;
+    pushCombatLog(logs, {
+      turn,
+      timeMs: currentTimeMs,
+      isPlayer: true,
+      message: `【破劫一擊】一擊斷劫，冷卻即刻重置。`,
+      damage: 0,
+      playerHp: nextPlayerHp,
+      playerMaxHp,
+      enemyHp: nextEnemyHp,
+      enemyMaxHp: enemy.maxHp,
+    });
+  }
+
+  return {
+    enemyHp: nextEnemyHp,
+    playerHp: nextPlayerHp,
+    activeSkillReadyAtMs: nextActiveSkillReadyAtMs,
+  };
+};
+
 export const resolvePlayerWorldStrike = (
   player: PlayerCombatStats,
   enemy: Enemy,
@@ -4307,115 +4455,24 @@ export const runAutoBattle = (
           });
         }
 
-        if (activeSkillCanonicalId === "b_ma_active" && playerDamage > 0) {
-          const lifestealAmount = Math.max(
-            1,
-            Math.floor(playerDamage * 0.5 * (hasBodyImmortalPassive ? 1.5 : 1))
-          );
-          playerHp = Math.min(player.maxHp, playerHp + lifestealAmount);
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【祖巫降臨】吞納戰果，你回復了 <heal>${lifestealAmount}</heal> 點氣血。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
-
-        if (activeSkillCanonicalId === "b_ma_active") {
-          const giantHeal = Math.max(1, Math.floor(player.maxHp * 0.35));
-          playerHp = Math.min(player.maxHp, playerHp + giantHeal);
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【法天象地】肉身擴張如山，回復了 <heal>${giantHeal}</heal> 點氣血並撐起巨靈護體。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
-
-        if (activeSkillCanonicalId === "b_ma_active" && enemyHp > 0) {
-          const siphonAmount = Math.max(1, Math.floor(enemy.maxHp * 0.1));
-          enemyHp = Math.max(0, enemyHp - siphonAmount);
-          playerHp = Math.min(player.maxHp, playerHp + siphonAmount);
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【掌中神國】神國抽離敵方本源，額外造成 <dmg>${siphonAmount}</dmg> 點侵蝕傷害，並回復 <heal>${siphonAmount}</heal> 點氣血。`,
-            damage: siphonAmount,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
-
-        if (activeSkillCanonicalId === "m_tr_active" && enemyHp > 0) {
-          const invertedStatuses: CombatStatus[] = [
-            {
-              id: "dao_bloom_break",
-              name: "萬象反噬",
-              kind: "armorBreak",
-              value: 0.28,
-              expiresAtMs: currentTimeMs + 3000,
-            },
-            {
-              id: "dao_bloom_burn",
-              name: "道火反噬",
-              kind: "burn",
-              value: 0.025,
-              expiresAtMs: currentTimeMs + 3000,
-              nextTickAtMs: currentTimeMs + 1000,
-            },
-          ];
-
-          if ((enemy.affixes?.length ?? 0) >= 2 || enemy.rank === EnemyRank.Boss) {
-            invertedStatuses.push({
-              id: "dao_bloom_banish",
-              name: "萬象寂滅",
-              kind: "incapacitate",
-              value: 0,
-              expiresAtMs: currentTimeMs + 1000,
-            });
-          }
-
-          enemyStatuses.push(...invertedStatuses);
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【一念花開】逆轉敵方氣運與護體，將其優勢翻成劫火與枯寂。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
-
-        if (activeSkillCanonicalId === "s_tr_active" && enemyHp <= 0) {
-          activeSkillReadyAtMs = currentTimeMs;
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【破劫一擊】一擊斷劫，冷卻即刻重置。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
+        ({
+          enemyHp,
+          playerHp,
+          activeSkillReadyAtMs,
+        } = applyPlayerActiveFollowupEffects({
+          activeSkillCanonicalId,
+          playerDamage,
+          currentTimeMs,
+          enemy,
+          enemyHp,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          turn,
+          logs,
+          hasBodyImmortalPassive,
+          enemyStatuses,
+          activeSkillReadyAtMs,
+        }));
       }
 
       const skillExecutionTimeMs =

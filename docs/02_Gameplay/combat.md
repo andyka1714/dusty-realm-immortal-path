@@ -171,6 +171,7 @@
 - `enemy special` 的狀態套用、戰鬥日誌與免疫觸發，已開始進一步收斂到同一層 helper，減少 timeline 內核殘留的散寫分支
 - `絕仙劍` 的 `絕仙封脈` 也已正式接進 timeline combat，會在敵方特招將要就緒時把術式節奏再壓後 `1` 秒，而不再只剩狀態標記
 - 敵方特招的初始延後與後續節奏壓制，現在也已開始共用同一層 helper，`萬法歸宗` 與 `絕仙封脈` 不再在 `runAutoBattle()` 內各自散寫
+- `祖巫降臨 / 法天象地 / 掌中神國 / 一念花開 / 破劫一擊` 這批高境界主動的後續追加效果，也已開始抽成共用 follow-up helper，降低主循環分支密度
 - 玩家主動術式施加給敵方的控制型狀態與後續破甲追擊，現在也已開始和 timeline combat 共用同一層 enemy-status resolver；`霸體` 過濾與 `劍脈破甲` 不再 world / timeline 各寫一份
 - 玩家主動術式施加的 `盾、破甲、DOT、反震、劍氣` 等狀態，也已開始走共用 status logger，不再在時間軸戰鬥內逐段手寫訊息
 - `m_tr_passive`：enemy special 造成控制時，也已開始在 enemy world strike 正式回報 `雷劫煉心`
