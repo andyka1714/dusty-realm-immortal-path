@@ -149,6 +149,7 @@
 - 主動術式後的多種被動觸發、資源回復、冷卻縮短、疊層訊息，與主動術式施加的 `盾、破甲、DOT、反震、劍氣` 等狀態，也已開始走共用 logger helper。
 - 玩家主動術式施加後的 player-side / enemy-side 狀態推入與戰鬥日誌，也已開始走共用 append logger helper，時間軸戰鬥不再逐段手寫同一套流程。
 - 玩家主動術式的可施放窗口、資源 / 冷卻流，也已開始抽成共用 `resolvePlayerActiveSkillWindow(...) / resolvePlayerActiveResourceFlow(...)`，把可施放判定、術式免耗、冷卻縮短、靈潮回補、劍心重置與法修築基層數累進集中處理。
+- 玩家主動術式的主傷害訊息與 `劍脈破甲` 提示，也已開始收斂到共用 helper，主循環不再重複散寫攻擊文案與破甲追擊提示。
 - `劍意化形 / 虛空劍陣 / 撒豆成兵` 這批多段追擊與召喚後續傷害，也已開始抽成共用 `applyPlayerEchoAndSummonFollowupEffects(...)`。
 - 敵方出手前的攻勢計算、承傷鏈與命中後反應鏈，也已開始收斂到 `resolveEnemyOffenseRoll(...) / resolveIncomingEnemyDamage(...) / applyEnemyHitAftermath(...)`，把克制、特招倍率、格擋 / 閃避 / 虛空轉移、減傷、護盾、保命與命中後續事件集中到同一條處理鏈。
 - `runAutoBattle()` 內的致命保命流程，也已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡 / 滴血重生（真） / 不死不滅`。
@@ -161,6 +162,7 @@
 - formal realm dataset 現在已透過 alias-layer 聚合表與單一 retired-alias 剝離 helper 統一移除 `retirement-ready active + battle-absorbed passive`；`data/skills/index.ts` 不再重複維護 alias 清單、過濾規則與 `battle-absorbed / retirement-ready` record 組裝。
 - formal realm dataset 的組裝也已開始走單一 `buildRealmSkillSet(...)` helper，各境界不再重複拼接 retired alias。
 - `言出法隨 / 劍道獨尊 / 向死而生 / 法力源泉 / 靈力湧動 / 五氣朝元 / 仙法通神 / 萬法歸宗 / 萬法皆空 / 劍意化形` 等被動，已陸續補齊 world strike 與 timeline combat 的狀態回報。
+- `劍心通明` 也已開始補齊劍修 world strike 的狀態回報，不再只在 timeline combat 的冷卻重置事件裡可見。
 - `荒古戰體 / 仙元護體 / 劍意化形 / 肉身成聖 / 道法自然` 這批被動，也已開始補齊 timeline combat 開場待命訊息，不再只有內部效果在跑。
 - `劍脈初成 / 銅皮鐵骨 / 靈潮循環 / 法力源泉` 這批前中期核心被動，也已開始補齊 timeline combat 開場待命訊息，避免只有高境界被動有可見性。
 - `劍心通明 / 護體劍罡 / 蠻荒血脈 / 滴血重生 / 靈力湧動` 這批築基到元嬰的關鍵被動，也已開始補齊 timeline combat 開場待命訊息，前中期核心 build 不再缺少待命可見性。

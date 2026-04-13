@@ -101,6 +101,7 @@
 - formal core 被動的基礎屬性收益，已改成逐招明確對照表；absorbed retired passive 透過 formal id 承接時，也會吃到同一份 explicit 對照
 - timeline combat 內主動術式施加的 player-side / enemy-side 狀態，已開始走共用的「狀態推入 + 戰鬥日誌」helper，降低 world / timeline 分叉風險
 - 玩家主動術式的可施放窗口，也已開始抽成共用 `resolvePlayerActiveSkillWindow(...)`，可施放判定、profile 組裝與主循環不再重複耦合
+- 玩家主動術式的主傷害訊息與 `劍脈破甲` 提示，也已開始抽成共用 helper，主循環不再重複散寫攻擊文案與破甲追擊提示
 - 部分技能與被動已開始接入專屬效果，而不再只是通用加成：
   - `b_g_active`：護盾會真正吸收傷害
   - `s_q_passive`：暴擊時會追加 `劍脈破甲`
@@ -148,6 +149,7 @@
 - `m_sf_passive`：在 player world strike 的法修主動術式也已開始正式回報 `道法自然`
 - `b_im_passive` / `s_ie_passive`：在 enemy special world strike 也已開始正式回報 `仙體無垢` / `萬法皆空`，不再只在 timeline combat 內部靜默過濾 DOT 與負面狀態
 - `b_f_passive` / `m_q_passive` / `s_q_passive` / `s_vr_passive`：在 player world strike 也開始明確回報 `蠻荒血脈`、`靈潮循環`、`劍脈初成`、`法則之劍`
+- `s_g_passive`：在劍修 world strike 暴擊時也已開始明確回報 `劍心通明`
   - `s_tr_passive`：低血量必暴與額外增傷
   - `b_ma_passive`：死亡逆轉並短暫無敵
   - `m_tr_passive`：控制免疫外，雷屬反擊會轉為回復

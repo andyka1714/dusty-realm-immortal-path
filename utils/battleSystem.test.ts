@@ -1332,6 +1332,40 @@ describe("battle system balance", () => {
     expect(strike.playerStatusNames).toContain("劍脈初成");
   });
 
+  it("surfaces sword golden passive on crit-enabled sword world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 102,
+        rootBone: 118,
+        insight: 86,
+        comprehension: 28,
+        fortune: 18,
+        charm: 10,
+      },
+      MajorRealm.GoldenCore,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 980,
+        defense: 220,
+        hp: 4200,
+        crit: 100,
+      },
+      "劍心通明",
+      ProfessionType.Sword,
+      ["s_g_passive", "s_q_active"]
+    );
+
+    const strike = resolvePlayerWorldStrike(
+      sword,
+      COMMON_ENEMIES.m50_c1,
+      getSkill("s_q_active")
+    );
+
+    expect(strike.playerStatusNames).toContain("劍心通明");
+  });
+
   it("lets nascent soul sword passive prevent a fatal hit once and reflect it", () => {
     fixedRandom.mockReturnValue(0.5);
 

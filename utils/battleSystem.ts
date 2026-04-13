@@ -827,6 +827,15 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
     statusNames.push("劍道獨尊");
   }
 
+  if (
+    passiveFlags.hasSwordGoldenPassive &&
+    isCrit &&
+    dealsDirectDamage &&
+    skill?.profession === ProfessionType.Sword
+  ) {
+    statusNames.push("劍心通明");
+  }
+
   if (swordTribulationActive) {
     statusNames.push("向死而生");
   }
@@ -889,6 +898,66 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
   }
 
   return statusNames;
+};
+
+const createPlayerAttackLogMessage = ({
+  player,
+  skillReady,
+  activeSkill,
+  isCrit,
+  playerDamage,
+}: {
+  player: PlayerCombatStats;
+  skillReady: boolean;
+  activeSkill?: Skill;
+  isCrit: boolean;
+  playerDamage: number;
+}) => {
+  if (!skillReady || !activeSkill) {
+    return `<player>${player.name}</player> 發動攻擊，${isCrit ? "暴擊！" : ""}造成 <dmg>${playerDamage}</dmg> 點傷害！`;
+  }
+
+  if (activeSkill.effectType === "damage" || activeSkill.damageMultiplier !== undefined) {
+    return `<player>${player.name}</player> 施展【${activeSkill.name}】${activeSkill.areaShape && activeSkill.areaShape !== "single" && activeSkill.areaShape !== "self" ? "，範圍術式震盪四散，" : "，"}${isCrit ? "暴擊！" : ""}造成 <dmg>${playerDamage}</dmg> 點傷害！`;
+  }
+
+  return `<player>${player.name}</player> 施展【${activeSkill.name}】，靈力在戰場上激盪開來！`;
+};
+
+const logSwordQiArmorBreak = ({
+  shouldTrigger,
+  logs,
+  turn,
+  timeMs,
+  enemy,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+}: {
+  shouldTrigger: boolean;
+  logs: CombatLog[];
+  turn: number;
+  timeMs: number;
+  enemy: Enemy;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+}) => {
+  if (!shouldTrigger) return;
+
+  pushCombatLog(logs, {
+    turn,
+    timeMs,
+    isPlayer: true,
+    message: `【劍脈初成】劍勢貫通護體，為 <enemy rank="${enemy.rank}">${enemy.name}</enemy> 施加【劍脈破甲】。`,
+    damage: 0,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp,
+  });
 };
 
 const getResolvedEnemyWorldIncomingStatuses = ({
@@ -5761,37 +5830,35 @@ export const runAutoBattle = (
         turn,
         timeMs: currentTimeMs,
         isPlayer: true,
-        message: skillReady
-          ? dealsDirectDamage
-            ? `<player>${player.name}</player> 施展【${activeSkill!.name}】${activeSkill!.areaShape && activeSkill!.areaShape !== "single" && activeSkill!.areaShape !== "self" ? "，範圍術式震盪四散，" : "，"}${isCrit ? "暴擊！" : ""}造成 <dmg>${playerDamage}</dmg> 點傷害！`
-            : `<player>${player.name}</player> 施展【${activeSkill!.name}】，靈力在戰場上激盪開來！`
-          : `<player>${player.name}</player> 發動攻擊，${isCrit ? "暴擊！" : ""}造成 <dmg>${playerDamage}</dmg> 點傷害！`,
+        message: createPlayerAttackLogMessage({
+          player,
+          skillReady,
+          activeSkill: activeSkill ?? undefined,
+          isCrit,
+          playerDamage,
+        }),
         damage: playerDamage,
         playerHp,
         playerMaxHp: player.maxHp,
         enemyHp,
         enemyMaxHp: enemy.maxHp,
       });
-      if (
-        shouldApplySwordQiArmorBreak({
+      logSwordQiArmorBreak({
+        shouldTrigger: shouldApplySwordQiArmorBreak({
           passiveFlags,
           skill: skillReady ? activeSkill ?? undefined : undefined,
           isCrit,
           enemyHp,
-        })
-      ) {
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【劍脈初成】劍勢貫通護體，為 <enemy rank="${enemy.rank}">${enemy.name}</enemy> 施加【劍脈破甲】。`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-      }
+        }),
+        logs,
+        turn,
+        timeMs: currentTimeMs,
+        enemy,
+        playerHp,
+        playerMaxHp: player.maxHp,
+        enemyHp,
+        enemyMaxHp: enemy.maxHp,
+      });
 
       if (
         logPlayerSwordResonance({

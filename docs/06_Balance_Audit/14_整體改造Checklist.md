@@ -244,6 +244,7 @@
 - [x] 玩家出手前的攻勢計算與暴擊 / 破防判定，已開始抽成共用 `resolvePlayerOffenseRoll(...)`，縮小 `runAutoBattle()` 主循環內的 inline 分支
 - [x] 玩家主動技能命中後的資源流、狀態推入、回響追擊與高境界後續效果，已開始整併到 `resolvePlayerActiveAftermath(...)`
 - [x] 玩家主動術式的可施放窗口，也已開始抽成共用 `resolvePlayerActiveSkillWindow(...)`，不再由 `runAutoBattle()` 主循環手動判斷可施放與 profile 組裝
+- [x] 玩家主動術式的主傷害訊息與 `劍脈破甲` 提示，也已開始抽成共用 helper，主循環不再重複散寫攻擊文案與破甲追擊提示
 - [x] 敵方出手後的格擋、承傷、反震、enemy special 狀態套用與命中後續事件，已開始整併到 `resolveEnemyTurnAftermath(...)`
 - [x] DOT / 吸生 tick 的雙側處理迴圈，已開始整併到 `applyStatusTickBatch(...)`
 - [x] 開場初始護體、待命訊息與帝境初始特招延後，已開始整併到 `initializeCombatEncounter(...)`
@@ -328,6 +329,7 @@
 - [x] `m_tr_passive` 已補上 enemy special world strike 對齊，正式回報 `雷劫煉心`
 - [x] 道途內的突破按鈕提示也已切到 `GameHintBubble`，再少一個原生 `title` 提示
 - [x] player world strike 的被動狀態回報已開始抽成共用 helper，並補上 `蠻荒血脈` / `靈潮循環` / `劍脈初成` / `法則之劍`
+- [x] `s_g_passive`：在劍修 world strike 暴擊時也已開始明確回報 `劍心通明`
 - [x] `getPlayerPassiveFlags()` 已改成明確 skill id 對照，不再把不同 retired passive 透過 formal id 錯誤折疊成同一串 battle flag
 - [x] formal core 對 retired passive 的承接已改成顯式 alias 對照，不再靠模糊 canonical 折疊維持 battle 行為
 - [x] `m_n_passive` / `m_f_passive` / `m_bi_passive` 已開始補齊 world strike 狀態回報，正式標出 `法力源泉` / `靈力湧動` / `五氣朝元`
