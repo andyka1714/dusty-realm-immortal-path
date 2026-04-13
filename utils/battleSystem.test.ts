@@ -1688,6 +1688,35 @@ describe("battle system balance", () => {
     expect(strike.playerStatusNames).toContain("銅皮鐵骨");
   });
 
+  it("surfaces golden-core body reflect stance on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const body = calculatePlayerStats(
+      {
+        physique: 76,
+        rootBone: 70,
+        insight: 52,
+        comprehension: 18,
+        fortune: 12,
+        charm: 8,
+      },
+      MajorRealm.GoldenCore,
+      SpiritRootId.MIXED_FIVE,
+      {
+        attack: 420,
+        defense: 140,
+        speed: 8,
+        hp: 1650,
+      },
+      "荊棘",
+      ProfessionType.Body,
+      ["b_g_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(body, COMMON_ENEMIES.m30_c1);
+    expect(strike.playerStatusNames).toContain("荊棘皮層");
+  });
+
   it("surfaces nascent soul body passive on basic world strikes", () => {
     fixedRandom.mockReturnValue(0.5);
 

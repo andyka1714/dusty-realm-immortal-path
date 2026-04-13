@@ -872,6 +872,10 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
     statusNames.push("金剛法相");
   }
 
+  if (!skill && passiveFlags.hasReflectPassive) {
+    statusNames.push("荊棘皮層");
+  }
+
   if (!skill && passiveFlags.hasBodySaintPassive) {
     statusNames.push("肉身成聖");
   }
