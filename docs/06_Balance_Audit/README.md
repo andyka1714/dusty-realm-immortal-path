@@ -151,6 +151,7 @@
 - 玩家主動術式的資源 / 冷卻流，也已開始抽成共用 `resolvePlayerActiveResourceFlow(...)`，把術式免耗、冷卻縮短、靈潮回補、劍心重置與法修築基層數累進集中處理。
 - `劍意化形 / 虛空劍陣 / 撒豆成兵` 這批多段追擊與召喚後續傷害，也已開始抽成共用 `applyPlayerEchoAndSummonFollowupEffects(...)`。
 - 敵方來襲後的承傷流程，也已開始抽成共用 `resolveIncomingEnemyDamage(...)`，把 `銅皮鐵骨 / 金剛法相 / 肉身成聖 / 元素護盾 / 護體劍罡` 這批減傷、護盾與保命流程集中到同一條處理鏈。
+- 敵方命中後的承傷反應鏈，也已開始抽成共用 `applyEnemyHitAftermath(...)`，把 `萬劫不滅 / 雷劫煉心 / 噬生 / 滴血重生（真） / 不死不滅` 這批後處理事件集中處理。
 - `runAutoBattle()` 內的致命保命流程，也已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡 / 滴血重生（真） / 不死不滅`。
 - `祖巫降臨 / 法天象地 / 掌中神國 / 一念花開 / 破劫一擊` 這批高境界主動的後續效果，也已開始收斂到共用 follow-up helper，進一步縮小 `runAutoBattle()` 的 inline 分支。
 - 戰鬥中的 DOT / 吸血 tick 結算，也已開始共用同一個 status outcome resolver，`燃燒 / 中毒 / 流血 / 吸生` 不再由玩家與敵方各寫一套。

@@ -333,6 +333,7 @@
 - [x] 玩家主動術式的資源 / 冷卻流，也已開始抽成 `resolvePlayerActiveResourceFlow(...)`，把術式免耗、冷卻縮短、靈潮回補、劍心重置與法修築基層數累進集中處理
 - [x] `劍意化形 / 虛空劍陣 / 撒豆成兵` 這批多段追擊與召喚後續傷害，也已開始抽成 `applyPlayerEchoAndSummonFollowupEffects(...)`
 - [x] 敵方來襲後的承傷流程，也已開始抽成 `resolveIncomingEnemyDamage(...)`，把 `銅皮鐵骨 / 金剛法相 / 肉身成聖 / 元素護盾 / 護體劍罡` 這批減傷、護盾與保命流程集中到同一條處理鏈
+- [x] 敵方命中後的承傷反應鏈，也已開始抽成 `applyEnemyHitAftermath(...)`，把 `萬劫不滅 / 雷劫煉心 / 噬生 / 滴血重生（真） / 不死不滅` 這批後處理事件集中處理
 - [x] timeline combat 的致命保命流程已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`
 - [x] formal core 被動的 stat bonus 已改成逐招明確對照表，不再依職業 + 境界通用公式自動推導
 - [x] absorbed retired passive 透過 formal id 承接時，也會吃到同一份逐招 stat bonus 對照，不再靠模糊 profession-tier fallback 撐場

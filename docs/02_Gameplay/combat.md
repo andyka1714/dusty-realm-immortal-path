@@ -188,6 +188,12 @@
   - `肉身成聖`
   - `元素護盾`
   - `護體劍罡`
+- 敵方命中後的承傷反應鏈，也已開始抽成 `applyEnemyHitAftermath(...)`：
+  - `萬劫不滅`
+  - `雷劫煉心`
+  - `噬生`
+  - `滴血重生（真）`
+  - `不死不滅`
 - `m_tr_passive`：enemy special 造成控制時，也已開始在 enemy world strike 正式回報 `雷劫煉心`
 - `enemy special` 的免疫 / 控制縮短訊息，已開始抽成共用 resistance helper，避免 timeline combat 再散寫 `仙體無垢 / 萬法皆空 / 雷劫煉心 / 人劍合神`
 - 時間軸戰鬥內的致命保命分支，也已開始抽成共用 helper，集中處理 `護體劍罡`、`滴血重生（真）`、`不死不滅` 這批生死線特例

@@ -1681,10 +1681,9 @@ export const getResolvedSkillCooldownSeconds = (
     typeof learnedSkillIdsOrSkills[0] !== "string"
       ? (learnedSkillIdsOrSkills as Skill[])
       : getLearnedSkills(learnedSkillIdsOrSkills as string[]);
-  const hasExplicitCooldownReductionPassive = hasPassiveSkillId(
-    learnedSkills,
-    "m_sf_passive"
-  );
+  const passiveFlags = getPlayerPassiveFlags(learnedSkills);
+  const hasExplicitCooldownReductionPassive =
+    passiveFlags.hasMageSpiritSeveringPassive;
 
   return hasExplicitCooldownReductionPassive
     ? Math.max(1, baseCooldownSeconds - 1)
@@ -3092,6 +3091,132 @@ const resolveIncomingEnemyDamage = ({
     playerMp: nextPlayerMp,
     enemyHp: nextEnemyHp,
     swordDeathWardUsed: nextSwordDeathWardUsed,
+  };
+};
+
+const applyEnemyHitAftermath = ({
+  enemyDamage,
+  currentTimeMs,
+  logs,
+  turn,
+  enemy,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+  playerStatuses,
+  hasBodyTribulationPassive,
+  bodyTribulationStacks,
+  hasMageTribulationPassive,
+  hasEnemyLeech,
+  hasBodyRebirthTruePassive,
+  bodyRebirthTrueUsed,
+  hasBodyEmperorPassive,
+}: {
+  enemyDamage: number;
+  currentTimeMs: number;
+  logs: CombatLog[];
+  turn: number;
+  enemy: Enemy;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  playerStatuses: CombatStatus[];
+  hasBodyTribulationPassive: boolean;
+  bodyTribulationStacks: number;
+  hasMageTribulationPassive: boolean;
+  hasEnemyLeech: boolean;
+  hasBodyRebirthTruePassive: boolean;
+  bodyRebirthTrueUsed: boolean;
+  hasBodyEmperorPassive: boolean;
+}) => {
+  let nextPlayerHp = playerHp;
+  let nextEnemyHp = enemyHp;
+  let nextPlayerStatuses = playerStatuses;
+  let nextBodyTribulationStacks = bodyTribulationStacks;
+  let nextBodyRebirthTrueUsed = bodyRebirthTrueUsed;
+
+  if (
+    hasBodyTribulationPassive &&
+    enemyDamage > 0 &&
+    nextBodyTribulationStacks < 50
+  ) {
+    nextBodyTribulationStacks += 1;
+    pushCombatLog(logs, {
+      turn,
+      timeMs: currentTimeMs,
+      isPlayer: true,
+      message: `【萬劫不滅】借劫煉體，防禦再疊 1 層，當前 ${nextBodyTribulationStacks} 層。`,
+      damage: 0,
+      playerHp: nextPlayerHp,
+      playerMaxHp,
+      enemyHp: nextEnemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  if (
+    hasMageTribulationPassive &&
+    enemyDamage > 0 &&
+    enemy.element === ElementType.Metal
+  ) {
+    const thunderHeal = Math.max(1, Math.floor(enemyDamage * 0.35));
+    nextPlayerHp = Math.min(playerMaxHp, nextPlayerHp + thunderHeal);
+    pushCombatLog(logs, {
+      turn,
+      timeMs: currentTimeMs,
+      isPlayer: true,
+      message: `【雷劫煉心】借天雷反煉自身，回復了 <heal>${thunderHeal}</heal> 點氣血。`,
+      damage: 0,
+      playerHp: nextPlayerHp,
+      playerMaxHp,
+      enemyHp: nextEnemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  if (hasEnemyLeech && enemyDamage > 0) {
+    const leechAmount = Math.max(1, Math.floor(enemyDamage * 0.06));
+    nextEnemyHp = Math.min(enemyMaxHp, nextEnemyHp + leechAmount);
+    pushCombatLog(logs, {
+      turn,
+      timeMs: currentTimeMs,
+      isPlayer: false,
+      message: `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 的【噬生】發作，回復了 <heal>${leechAmount}</heal> 點氣血。`,
+      damage: 0,
+      playerHp: nextPlayerHp,
+      playerMaxHp,
+      enemyHp: nextEnemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  const fatalSurvivalResult = applyFatalSurvivalPassives({
+    logs,
+    turn,
+    timeMs: currentTimeMs,
+    playerHp: nextPlayerHp,
+    playerMaxHp,
+    enemyHp: nextEnemyHp,
+    enemyMaxHp,
+    playerStatuses: nextPlayerStatuses,
+    bodyRebirthTrueAvailable:
+      hasBodyRebirthTruePassive && !nextBodyRebirthTrueUsed,
+    bodyEmperorAvailable: hasBodyEmperorPassive,
+  });
+  nextPlayerHp = fatalSurvivalResult.playerHp;
+  nextPlayerStatuses = fatalSurvivalResult.playerStatuses;
+  if (fatalSurvivalResult.bodyRebirthTrueTriggered) {
+    nextBodyRebirthTrueUsed = true;
+  }
+
+  return {
+    playerHp: nextPlayerHp,
+    enemyHp: nextEnemyHp,
+    playerStatuses: nextPlayerStatuses,
+    bodyTribulationStacks: nextBodyTribulationStacks,
+    bodyRebirthTrueUsed: nextBodyRebirthTrueUsed,
   };
 };
 
@@ -5006,77 +5131,31 @@ export const runAutoBattle = (
       if (enemyDamage > 0) {
         playerDamagedSinceSwordHeartWindow = true;
       }
-      if (
-        hasBodyTribulationPassive &&
-        enemyDamage > 0 &&
-        bodyTribulationStacks < 50
-      ) {
-        bodyTribulationStacks += 1;
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【萬劫不滅】借劫煉體，防禦再疊 1 層，當前 ${bodyTribulationStacks} 層。`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-      }
-      if (
-        hasMageTribulationPassive &&
-        enemyDamage > 0 &&
-        enemy.element === ElementType.Metal
-      ) {
-        const thunderHeal = Math.max(1, Math.floor(enemyDamage * 0.35));
-        playerHp = Math.min(player.maxHp, playerHp + thunderHeal);
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【雷劫煉心】借天雷反煉自身，回復了 <heal>${thunderHeal}</heal> 點氣血。`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-      }
-      if (hasEnemyAffix(enemy, "噬生") && enemyDamage > 0) {
-        const leechAmount = Math.max(1, Math.floor(enemyDamage * 0.06));
-        enemyHp = Math.min(enemy.maxHp, enemyHp + leechAmount);
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: false,
-          message: `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 的【噬生】發作，回復了 <heal>${leechAmount}</heal> 點氣血。`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-      }
-
-        const fatalSurvivalResult = applyFatalSurvivalPassives({
-          logs,
-          turn,
-          timeMs: currentTimeMs,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-          playerStatuses,
-          bodyRebirthTrueAvailable:
-            hasBodyRebirthTruePassive && !bodyRebirthTrueUsed,
-          bodyEmperorAvailable: hasBodyEmperorPassive,
-        });
-        playerHp = fatalSurvivalResult.playerHp;
-        playerStatuses = fatalSurvivalResult.playerStatuses;
-        if (fatalSurvivalResult.bodyRebirthTrueTriggered) {
-          bodyRebirthTrueUsed = true;
-        }
+      ({
+        playerHp,
+        enemyHp,
+        playerStatuses,
+        bodyTribulationStacks,
+        bodyRebirthTrueUsed,
+      } = applyEnemyHitAftermath({
+        enemyDamage,
+        currentTimeMs,
+        logs,
+        turn,
+        enemy,
+        playerHp,
+        playerMaxHp: player.maxHp,
+        enemyHp,
+        enemyMaxHp: enemy.maxHp,
+        playerStatuses,
+        hasBodyTribulationPassive,
+        bodyTribulationStacks,
+        hasMageTribulationPassive,
+        hasEnemyLeech: hasEnemyAffix(enemy, "噬生"),
+        hasBodyRebirthTruePassive,
+        bodyRebirthTrueUsed,
+        hasBodyEmperorPassive,
+      }));
 
         pushCombatLog(logs, {
           turn,
