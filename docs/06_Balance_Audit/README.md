@@ -146,6 +146,8 @@
 - 技能 / 怪物特招的狀態建立、時間正規化與 player/enemy 分側，也已開始走共用 resolver
 - 玩家被動技能判定已開始抽成共用 passive flags helper，降低 world / timeline 分散重寫風險
 - 玩家被動技能判定已補成共用 skill-id 對照表，world strike 與 timeline combat 的 passive flag 來源不再各自手寫
+- `getPlayerPassiveFlags()` 已改成明確 skill id 對照，不再把不同 retired passive 透過 formal id 錯誤折疊成同一串 battle flag
+- formal core 對 retired passive 的承接已改成顯式 alias 對照，避免 battle 內核再靠模糊 canonical 折疊維持行為
 - 戰鬥開場的元素克制、弱點洞察、護體展開與高境界開場壓制，也已開始整併成共用 opener helper
 - 主動術式後的多種被動觸發訊息，也已開始整併到共用 passive-proc helper
 - 主動術式後的資源回復、冷卻縮短、冷卻重置與疊層訊息，也已開始收斂到共用 logger helper，降低 `runAutoBattle()` 在 `五氣朝元 / 道法自然 / 靈潮循環 / 劍心通明 / 靈力湧動` 這批事件上的散寫

@@ -60,6 +60,8 @@
 - 即時戰鬥表現層的投射物、施法圈、AOE 與命中特效參數，已抽成可測的 presentation helper，後續調整不必只靠人工目測
 - 世界戰鬥、時間軸戰鬥與右下角技能 CD HUD，現在已開始共用同一套技能冷卻解析，不再各自直接讀 `cooldownSeconds`
 - 被動技能開關判定也已抽成共用 skill-id 對照表，world strike 與 timeline combat 對齊時不必再重複鋪一大串 `hasPassiveSkillId(...)`
+- `getPlayerPassiveFlags()` 現在改成明確 skill id 對照，不再把不同 retired passive 透過 formal id 錯誤折疊成同一串旗標
+- formal core 與 retired passive 的承接，現在改成顯式 alias 對照，而不是再靠 canonical skill id 模糊折疊
 - 戰鬥開場的被動狀態與對應戰鬥訊息，已開始走共用初始化 helper，不再由 `runAutoBattle()` 散寫 `荊棘皮層` / `元素護盾` 等開場事件
 - 屬性克制、弱點洞察、元素抗性、開場被動與高境界開場壓制提示，也已開始收斂到共用 opener helper，降低 `runAutoBattle()` 前置事件散落風險
 - 主動術式後的被動觸發訊息，已開始抽成共用 passive-proc helper，逐步收斂 `法力源泉` / `言出法隨` / `法則之劍` / `劍道獨尊` / `靈潮循環` / `蠻荒血脈` 等事件的散寫

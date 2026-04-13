@@ -359,6 +359,13 @@ const hasPassiveSkillId = (learnedSkills: Skill[], skillId: string) =>
       getFormalSkillId(skill.id) === getFormalSkillId(skillId)
   );
 
+const hasExactPassiveSkillId = (learnedSkills: Skill[], skillIds: string | string[]) => {
+  const acceptedIds = new Set(Array.isArray(skillIds) ? skillIds : [skillIds]);
+  return learnedSkills.some(
+    (skill) => skill.type === "Passive" && acceptedIds.has(skill.id)
+  );
+};
+
 const hasLearnedSkillId = (learnedSkills: Skill[], skillId: string) =>
   learnedSkills.some(
     (skill) => getFormalSkillId(skill.id) === getFormalSkillId(skillId)
@@ -399,7 +406,7 @@ type PlayerPassiveFlags = {
   hasMageEmperorPassive: boolean;
 };
 
-const PLAYER_PASSIVE_FLAG_SKILL_IDS: Record<keyof PlayerPassiveFlags, string> = {
+const PLAYER_PASSIVE_FLAG_SKILL_IDS: Record<keyof PlayerPassiveFlags, string | string[]> = {
   hasSwordQiPassive: "s_q_passive",
   hasBodyQiPassive: "b_q_passive",
   hasMageQiPassive: "m_q_passive",
@@ -412,10 +419,10 @@ const PLAYER_PASSIVE_FLAG_SKILL_IDS: Record<keyof PlayerPassiveFlags, string> = 
   hasMageFoundationPassive: "m_f_passive",
   hasSwordGoldenPassive: "s_g_passive",
   hasSwordEchoPassive: "s_sf_passive",
-  hasSwordHeartPassive: "s_f_passive",
+  hasSwordHeartPassive: ["s_f_passive", "s_g_passive"],
   hasBodySaintPassive: "b_sf_passive",
-  hasSwordFusionPassive: "s_bi_passive",
-  hasSwordVoidPassive: "s_vr_passive",
+  hasSwordFusionPassive: ["s_bi_passive", "s_tr_passive"],
+  hasSwordVoidPassive: ["s_vr_passive", "s_tr_passive"],
   hasBodyFusionPassive: "b_bi_passive",
   hasMageFusionPassive: "m_bi_passive",
   hasBodyAncientPassive: "b_vr_passive",
@@ -430,15 +437,15 @@ const PLAYER_PASSIVE_FLAG_SKILL_IDS: Record<keyof PlayerPassiveFlags, string> = 
   hasMageImmortalPassive: "m_im_passive",
   hasSwordImmortalPassive: "s_im_passive",
   hasBodyEmperorPassive: "b_ie_passive",
-  hasSwordEmperorPassive: "s_ie_passive",
-  hasMageEmperorPassive: "m_ie_passive",
+  hasSwordEmperorPassive: ["s_ie_passive", "s_tr_passive"],
+  hasMageEmperorPassive: ["m_ie_passive", "m_sf_passive"],
 };
 
 const getPlayerPassiveFlags = (learnedSkills: Skill[]): PlayerPassiveFlags =>
   Object.fromEntries(
     Object.entries(PLAYER_PASSIVE_FLAG_SKILL_IDS).map(([flagName, skillId]) => [
       flagName,
-      hasPassiveSkillId(learnedSkills, skillId),
+      hasExactPassiveSkillId(learnedSkills, skillId),
     ])
   ) as PlayerPassiveFlags;
 

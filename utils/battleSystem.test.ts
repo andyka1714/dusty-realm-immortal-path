@@ -1616,6 +1616,49 @@ describe("battle system balance", () => {
     expect(strike.statusNames).not.toContain("麻痺");
   });
 
+  it("does not collapse retired fusion sword passive into emperor immunity flags", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 84,
+        rootBone: 92,
+        insight: 70,
+        comprehension: 24,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.Fusion,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 1400,
+        defense: 320,
+        hp: 7200,
+      },
+      "人劍合神",
+      ProfessionType.Sword,
+      ["s_bi_passive"]
+    );
+
+    const enemy = {
+      ...BOSS_ENEMIES.m161_b1,
+      specialAttack: {
+        name: "雷縛天刑",
+        cooldownSeconds: 1,
+        damageMultiplier: 1.1,
+        statusEffect: { id: "paralyze", duration: 2, chance: 1 },
+        areaShape: "single" as const,
+        areaRadius: 0,
+        maxTargets: 1,
+      },
+    };
+
+    const strike = resolveEnemyWorldStrike(enemy, sword, true);
+
+    expect(strike.statusNames).toContain("人劍合神");
+    expect(strike.statusNames).not.toContain("萬法皆空");
+  });
+
   it("surfaces sword death-ward passive on lethal enemy world strikes", () => {
     fixedRandom.mockReturnValue(0.5);
 
