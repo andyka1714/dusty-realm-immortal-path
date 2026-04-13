@@ -192,6 +192,7 @@
 - 戰鬥 snapshot provider 與 DOT / 吸生 tick 迴圈，也已開始抽成 `createCombatSnapshotProvider(...) / createStatusTickProcessor(...)`，主循環不再直接背著整段閉包式基礎設施。
 - 戰鬥開場的 runtime 組裝，也已開始整併到 `createCombatRuntimeContext(...)`，主動術式、攻速、克制、元素修正與被動旗標不再在 `runAutoBattle()` 開頭散寫。
 - 回合主循環需要的被動能力旗標，也已開始整併到 `createCombatLoopFeatureFlags(...)`，`resolveCombatLoopStep(...)` 不再額外攜帶一長串布林參數。
+- `resolveCombatLoopStep(...)` 的 state/result 組裝，也已開始收斂到 `buildCombatLoopState(...) / buildCombatLoopStepResult(...)`，主循環不再重複鋪開同一份長狀態物件。
 - 戰鬥基礎設施的 snapshot / tick wiring，也已開始整併到 `createCombatInfrastructure(...)`，`runAutoBattle()` 不再同時手動拼裝 snapshot provider 與 status tick processor。
 - 戰鬥開場的 infrastructure wiring 與 encounter seed，也已開始整併到 `prepareCombatLoopEnvironment(...)`，不再把 infrastructure 建立與 seed 流程拆成兩段散寫。
 - 初始 combat loop state 也已開始整併到 `createInitialCombatLoopState(...)`，hp/mp、冷卻、疊層、護體與回合旗標不再在 `runAutoBattle()` 開頭逐項手寫。

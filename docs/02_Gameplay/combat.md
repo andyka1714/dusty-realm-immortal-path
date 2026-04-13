@@ -124,6 +124,7 @@
 - 敵方行動分支也已開始整併到 `resolveEnemyTurnPhase(...)`，敵方出手窗口、控制跳過與完整出手鏈不再直接在主循環維護雙段流程
 - 戰鬥勝敗尾端也已開始整併到 `finalizeCombatResult(...)`，勝利掉落與敗北記錄不再直接堆在主流程尾端
 - 單回合 orchestration 也已開始收斂到 `resolveCombatLoopStep(...)`，回合維護、玩家 / 敵方行動與 turn advance 不再全部直接平鋪在 `runAutoBattle()` while 迴圈內
+- `resolveCombatLoopStep(...)` 的 state/result 組裝，也已開始收斂到 `buildCombatLoopState(...) / buildCombatLoopStepResult(...)`，主循環不再重複鋪開同一份長狀態物件
 - 法修高境界被動的開場待命訊息已補齊到 `仙法通神 / 萬法歸宗`
 - `養劍術 / 金剛法相 / 五氣朝元` 的開場待命訊息也已補齊，前中後期核心被動的可見性更一致
 - 部分技能與被動已開始接入專屬效果，而不再只是通用加成：

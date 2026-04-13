@@ -2407,6 +2407,19 @@ type CombatLoopState = {
   nextSwordImmortalGuardAtMs: number;
 };
 
+const buildCombatLoopState = (state: CombatLoopState): CombatLoopState => ({ ...state });
+
+const buildCombatLoopStepResult = ({
+  combatEnded,
+  state,
+}: {
+  combatEnded: boolean;
+  state: CombatLoopState;
+}) => ({
+  combatEnded,
+  state: buildCombatLoopState(state),
+});
+
 const createInitialCombatLoopState = (
   player: PlayerCombatStats,
   enemy: Enemy
@@ -2734,7 +2747,7 @@ const resolveCombatLoopStep = ({
   });
 
   if (combatEnded) {
-    return {
+    return buildCombatLoopStepResult({
       combatEnded: true,
       state: {
         turn,
@@ -2759,7 +2772,7 @@ const resolveCombatLoopStep = ({
         playerDamagedSinceSwordHeartWindow,
         nextSwordImmortalGuardAtMs,
       },
-    };
+    });
   }
 
   if (playerActsFirst) {
@@ -2800,7 +2813,7 @@ const resolveCombatLoopStep = ({
     }));
 
     if (enemyHp <= 0) {
-      return {
+      return buildCombatLoopStepResult({
         combatEnded: true,
         state: {
           turn,
@@ -2825,7 +2838,7 @@ const resolveCombatLoopStep = ({
           playerDamagedSinceSwordHeartWindow,
           nextSwordImmortalGuardAtMs,
         },
-      };
+      });
     }
   } else {
     const enemyTurnResult = resolveEnemyTurnPhase({
@@ -2851,7 +2864,7 @@ const resolveCombatLoopStep = ({
     });
 
     if (enemyTurnResult.skipped) {
-      return {
+      return buildCombatLoopStepResult({
         combatEnded: false,
         state: {
           turn: turn + 1,
@@ -2877,7 +2890,7 @@ const resolveCombatLoopStep = ({
             enemyTurnResult.playerDamagedSinceSwordHeartWindow,
           nextSwordImmortalGuardAtMs,
         },
-      };
+      });
     }
 
     const resolvedEnemyTurnResult = enemyTurnResult as Exclude<
@@ -2908,7 +2921,7 @@ const resolveCombatLoopStep = ({
   });
   ({ bossBroken, playerDebuffed, turn } = turnAdvance);
 
-  return {
+  return buildCombatLoopStepResult({
     combatEnded: turnAdvance.exceededTurnLimit,
     state: {
       turn,
@@ -2933,7 +2946,7 @@ const resolveCombatLoopStep = ({
       playerDamagedSinceSwordHeartWindow,
       nextSwordImmortalGuardAtMs,
     },
-  };
+  });
 };
 
 const resolvePlayerTurnPrelude = ({
