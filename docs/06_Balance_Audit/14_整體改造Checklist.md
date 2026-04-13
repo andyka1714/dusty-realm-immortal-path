@@ -263,11 +263,14 @@
 - [x] `resolveCombatLoopStep(...)` 的 state/result 組裝，也已開始收斂到 `buildCombatLoopState(...) / buildCombatLoopStepResult(...)`，主循環不再重複鋪開同一份長狀態物件
 - [x] 戰鬥基礎設施的 snapshot / tick wiring，也已開始整併到 `createCombatInfrastructure(...)`，snapshot provider 與 status tick processor 不再在 `runAutoBattle()` 內各自散寫
 - [x] 戰鬥開場的 infrastructure wiring 與 encounter seed，也已開始整併到 `prepareCombatLoopEnvironment(...)`，不再把 infrastructure 建立與 seed 流程拆成兩段散寫
+- [x] 戰鬥環境 seed 的回寫，也已開始整併到 `applyPreparedCombatLoopState(...)`，開場補入的護體狀態與 enemy special 延後不再在主函式逐欄覆寫
 - [x] 初始 combat loop state 也已開始整併到 `createInitialCombatLoopState(...)`，hp/mp、冷卻、疊層、護體與回合旗標不再在 `runAutoBattle()` 開頭逐項手寫
 - [x] 玩家出手階段也已開始整併到 `resolvePlayerActionPhase(...)`，週期護體、Boss 破綻與正式出手流程不再在主循環拆成兩段散寫
 - [x] 玩家先手分支也已開始整併到 `resolvePlayerTurnPhase(...)`，玩家先手時的正式出手鏈不再直接鋪在主循環裡
 - [x] 勝利掉落結算也已開始整併到 `resolveVictoryRewards(...)`，擊殺訊息與戰利品組裝不再直接堆在 `runAutoBattle()` 尾端
 - [x] 敵方完整出手階段也已開始整併到 `resolveEnemyActionPhase(...)`，承傷、保命、劍勢回補與特招冷卻回推不再在主循環散寫
+- [x] battle while 迴圈本身也已開始整併到 `runCombatTimelineLoop(...)`，`runAutoBattle()` 不再自己持有整段 loop / 解構 / 回寫流程
+- [x] 法修高境界 stance 的 `player world strike` 可見性也已補齊到基本攻擊視角，`道法自然 / 五氣朝元 / 仙法通神 / 萬法歸宗` 不再只在施法 world strike 或 timeline combat 才看得到
 - [x] 敵方出手後的劍勢回補與特招冷卻回推，也已開始拆到 `resolveEnemySwordHeartAftermath(...) / resolveEnemySpecialReadyAfterAction(...)`，enemy action phase 的尾端流程更接近單一 resolver
 - [x] 敵方行動分支也已開始整併到 `resolveEnemyTurnPhase(...)`，敵方出手窗口、控制跳過與完整出手鏈不再直接在主循環維護雙段流程
 - [x] 戰鬥勝敗尾端也已開始整併到 `finalizeCombatResult(...)`，勝利掉落與敗北記錄不再直接堆在主流程尾端

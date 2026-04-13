@@ -953,6 +953,7 @@ const getPlayerWorldBodyPassiveStatusNames = (options: PlayerWorldPassiveStatusO
 const getPlayerWorldMagePassiveStatusNames = (options: PlayerWorldPassiveStatusOptions) => {
   const statusNames: string[] = [];
   const { passiveFlags, player, skill } = options;
+  const isMageActionContext = !skill || skill.profession === ProfessionType.Mage;
 
   if (!skill && passiveFlags.hasMageQiPassive && player.profession === ProfessionType.Mage) {
     statusNames.push("靈潮循環");
@@ -970,23 +971,23 @@ const getPlayerWorldMagePassiveStatusNames = (options: PlayerWorldPassiveStatusO
     statusNames.push("靈力湧動");
   }
 
-  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageSpiritSeveringPassive) {
+  if (isMageActionContext && passiveFlags.hasMageSpiritSeveringPassive) {
     statusNames.push("道法自然");
   }
 
-  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageFusionPassive) {
+  if (isMageActionContext && passiveFlags.hasMageFusionPassive) {
     statusNames.push("五氣朝元");
   }
 
-  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageTribulationPassive) {
+  if (isMageActionContext && passiveFlags.hasMageTribulationPassive) {
     statusNames.push("雷劫煉心");
   }
 
-  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageImmortalPassive) {
+  if (isMageActionContext && passiveFlags.hasMageImmortalPassive) {
     statusNames.push("仙法通神");
   }
 
-  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageEmperorPassive) {
+  if (isMageActionContext && passiveFlags.hasMageEmperorPassive) {
     statusNames.push("萬法歸宗");
   }
 
@@ -2420,6 +2421,18 @@ const buildCombatLoopStepResult = ({
   state: buildCombatLoopState(state),
 });
 
+const applyPreparedCombatLoopState = (
+  state: CombatLoopState,
+  prepared: Pick<
+    ReturnType<typeof prepareCombatLoopEnvironment>,
+    "playerStatuses" | "enemySpecialReadyAtMs"
+  >
+): CombatLoopState => ({
+  ...state,
+  playerStatuses: prepared.playerStatuses,
+  enemySpecialReadyAtMs: prepared.enemySpecialReadyAtMs,
+});
+
 const createInitialCombatLoopState = (
   player: PlayerCombatStats,
   enemy: Enemy
@@ -2947,6 +2960,44 @@ const resolveCombatLoopStep = ({
       nextSwordImmortalGuardAtMs,
     },
   });
+};
+
+const runCombatTimelineLoop = ({
+  initialState,
+  processStatusTicks,
+  player,
+  enemy,
+  logs,
+  runtimeContext,
+  featureFlags,
+}: {
+  initialState: CombatLoopState;
+  processStatusTicks: (currentMs: number) => void;
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  logs: CombatLog[];
+  runtimeContext: CombatRuntimeContext;
+  featureFlags: CombatLoopFeatureFlags;
+}) => {
+  const state = initialState;
+
+  while (state.playerHp > 0 && state.enemyHp > 0) {
+    const loopStep = resolveCombatLoopStep({
+      state,
+      processStatusTicks,
+      player,
+      enemy,
+      logs,
+      runtimeContext,
+      featureFlags,
+    });
+
+    Object.assign(state, loopStep.state);
+
+    if (loopStep.combatEnded) break;
+  }
+
+  return state;
 };
 
 const resolvePlayerTurnPrelude = ({
@@ -7904,29 +7955,7 @@ export const runAutoBattle = (
   };
 } => {
   const logs: CombatLog[] = [];
-  let {
-    turn,
-    currentTimeMs,
-    playerNextActionMs,
-    enemyNextActionMs,
-    activeSkillReadyAtMs,
-    enemySpecialReadyAtMs,
-    bossBroken,
-    playerDebuffed,
-    lastRegenTimeMs,
-    playerHp,
-    enemyHp,
-    playerMp,
-    playerStatuses,
-    enemyStatuses,
-    swordDeathWardUsed,
-    bodyRebirthTrueUsed,
-    bodyTribulationStacks,
-    mageFoundationStacks,
-    swordHeartStacks,
-    playerDamagedSinceSwordHeartWindow,
-    nextSwordImmortalGuardAtMs,
-  } = createInitialCombatLoopState(player, enemy);
+  let state = createInitialCombatLoopState(player, enemy);
   let lastStatusTickMs = 0;
   const {
     activeSkill,
@@ -7957,109 +7986,61 @@ export const runAutoBattle = (
     enemy,
     logs,
     runtimeContext,
-    getTurn: () => turn,
-    playerStatusesRef: () => playerStatuses,
-    enemyStatusesRef: () => enemyStatuses,
-    activeSkillReadyAtMsRef: () => activeSkillReadyAtMs,
-    getPlayerHp: () => playerHp,
-    getEnemyHp: () => enemyHp,
+    getTurn: () => state.turn,
+    playerStatusesRef: () => state.playerStatuses,
+    enemyStatusesRef: () => state.enemyStatuses,
+    activeSkillReadyAtMsRef: () => state.activeSkillReadyAtMs,
+    getPlayerHp: () => state.playerHp,
+    getEnemyHp: () => state.enemyHp,
     setPlayerHp: (value) => {
-      playerHp = value;
+      state.playerHp = value;
     },
     setEnemyHp: (value) => {
-      enemyHp = value;
+      state.enemyHp = value;
     },
     setPlayerStatuses: (value) => {
-      playerStatuses = value;
+      state.playerStatuses = value;
     },
     setEnemyStatuses: (value) => {
-      enemyStatuses = value;
+      state.enemyStatuses = value;
     },
     getLastStatusTickMs: () => lastStatusTickMs,
     setLastStatusTickMs: (value) => {
       lastStatusTickMs = value;
     },
-    getPlayerDamagedSinceSwordHeartWindow: () => playerDamagedSinceSwordHeartWindow,
+    getPlayerDamagedSinceSwordHeartWindow: () => state.playerDamagedSinceSwordHeartWindow,
     setPlayerDamagedSinceSwordHeartWindow: (value) => {
-      playerDamagedSinceSwordHeartWindow = value;
+      state.playerDamagedSinceSwordHeartWindow = value;
     },
-    playerHp,
-    enemyHp,
-    playerStatuses,
+    playerHp: state.playerHp,
+    enemyHp: state.enemyHp,
+    playerStatuses: state.playerStatuses,
   });
-  playerStatuses = seededPlayerStatuses;
-  enemySpecialReadyAtMs = seededEnemySpecialReadyAtMs;
+  state = applyPreparedCombatLoopState(state, {
+    playerStatuses: seededPlayerStatuses,
+    enemySpecialReadyAtMs: seededEnemySpecialReadyAtMs,
+  });
 
-  while (playerHp > 0 && enemyHp > 0) {
-    const loopStep = resolveCombatLoopStep({
-      state: {
-        turn,
-        currentTimeMs,
-        playerNextActionMs,
-        enemyNextActionMs,
-        activeSkillReadyAtMs,
-        enemySpecialReadyAtMs,
-        bossBroken,
-        playerDebuffed,
-        lastRegenTimeMs,
-        playerHp,
-        enemyHp,
-        playerMp,
-        playerStatuses,
-        enemyStatuses,
-        swordDeathWardUsed,
-        bodyRebirthTrueUsed,
-        bodyTribulationStacks,
-        mageFoundationStacks,
-        swordHeartStacks,
-        playerDamagedSinceSwordHeartWindow,
-        nextSwordImmortalGuardAtMs,
-      },
-      processStatusTicks,
-      player,
-      enemy,
-      logs,
-      runtimeContext,
-      featureFlags,
-    });
+  state = runCombatTimelineLoop({
+    initialState: state,
+    processStatusTicks,
+    player,
+    enemy,
+    logs,
+    runtimeContext,
+    featureFlags,
+  });
 
-    ({
-      turn,
-      currentTimeMs,
-      playerNextActionMs,
-      enemyNextActionMs,
-      activeSkillReadyAtMs,
-      enemySpecialReadyAtMs,
-      bossBroken,
-      playerDebuffed,
-      lastRegenTimeMs,
-      playerHp,
-      enemyHp,
-      playerMp,
-      playerStatuses,
-      enemyStatuses,
-      swordDeathWardUsed,
-      bodyRebirthTrueUsed,
-      bodyTribulationStacks,
-      mageFoundationStacks,
-      swordHeartStacks,
-      playerDamagedSinceSwordHeartWindow,
-      nextSwordImmortalGuardAtMs,
-    } = loopStep.state);
-
-    if (loopStep.combatEnded) break;
-  }
-
-  const won = playerHp > 0 && enemyHp <= 0;
+  const won = state.playerHp > 0 && state.enemyHp <= 0;
   return finalizeCombatResult({
     won,
     logs,
-    turn,
-    currentTimeMs,
+    turn: state.turn,
+    currentTimeMs: state.currentTimeMs,
     player,
     enemy,
-    playerHp,
-    enemyHp,
+    playerHp: state.playerHp,
+    enemyHp: state.enemyHp,
     previousSnapshotProvider,
   });
 };

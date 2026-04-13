@@ -114,6 +114,7 @@
 - 回合主循環需要的被動能力旗標，也已開始整併到 `createCombatLoopFeatureFlags(...)`，`resolveCombatLoopStep(...)` 不再額外攜帶一長串布林參數
 - 戰鬥基礎設施的 snapshot / tick wiring，也已開始整併到 `createCombatInfrastructure(...)`，snapshot provider 與 status tick processor 不再在 `runAutoBattle()` 內各自散寫
 - 戰鬥開場的 infrastructure wiring 與 encounter seed，也已開始整併到 `prepareCombatLoopEnvironment(...)`，不再把 infrastructure 建立與 seed 流程分成兩段散寫
+- 戰鬥環境 seed 的回寫，也已開始整併到 `applyPreparedCombatLoopState(...)`，開場補入的護體狀態與 enemy special 延後不再在主函式逐欄覆寫
 - 初始 combat loop state 也已開始整併到 `createInitialCombatLoopState(...)`，hp/mp、冷卻、疊層、護體與回合旗標不再在 `runAutoBattle()` 開頭逐項手寫
 - 開場被動狀態、待命訊息與 enemy special 起始延後，也已開始透過 `resolveInitialPassiveStateBundle(...)` 收斂，不再讓 `initializeCombatEncounter(...)` 長期維護一整串被動布林參數
 - 玩家出手階段也已開始整併到 `resolvePlayerActionPhase(...)`，週期護體、Boss 破綻與正式出手流程不再在主循環拆成兩段散寫
@@ -125,6 +126,8 @@
 - 戰鬥勝敗尾端也已開始整併到 `finalizeCombatResult(...)`，勝利掉落與敗北記錄不再直接堆在主流程尾端
 - 單回合 orchestration 也已開始收斂到 `resolveCombatLoopStep(...)`，回合維護、玩家 / 敵方行動與 turn advance 不再全部直接平鋪在 `runAutoBattle()` while 迴圈內
 - `resolveCombatLoopStep(...)` 的 state/result 組裝，也已開始收斂到 `buildCombatLoopState(...) / buildCombatLoopStepResult(...)`，主循環不再重複鋪開同一份長狀態物件
+- battle while 迴圈本身也已開始整併到 `runCombatTimelineLoop(...)`，`runAutoBattle()` 不再自己持有整段 loop / 解構 / 回寫流程
+- 法修高境界 stance 的 `player world strike` 可見性也已補齊到基本攻擊視角，`道法自然 / 五氣朝元 / 仙法通神 / 萬法歸宗` 不再只在施法 world strike 或 timeline combat 才看得到
 - 法修高境界被動的開場待命訊息已補齊到 `仙法通神 / 萬法歸宗`
 - `養劍術 / 金剛法相 / 五氣朝元` 的開場待命訊息也已補齊，前中後期核心被動的可見性更一致
 - 部分技能與被動已開始接入專屬效果，而不再只是通用加成：
