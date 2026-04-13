@@ -185,6 +185,7 @@
 - Boss 破綻的觸發與戰鬥訊息，也已開始整併到 `rollBossBreakOpportunity(...)`，減少主循環內對同一條爆發窗口的重複敘述。
 - 玩家出手主幹也已開始收斂到 `resolvePlayerTurn(...)`，把可施放窗口、攻勢判定、主傷害訊息、破甲追擊、共鳴消耗與命中後續處理集中在同一層流程。
 - world strike 結果組裝也已開始拆成 `buildPlayerWorldStrikeResult(...) / buildEnemyWorldStrikeResult(...)`；enemy 端 timing metadata 也已抽成 `buildEnemyWorldStrikeTiming(...)`。
+- player / enemy world strike 的前置 runtime 組裝，也已開始拆成 `createPlayerWorldStrikeRuntime(...) / createEnemyWorldStrikeRuntime(...)`，world 視角的攻勢上下文、被動旗標、克制、元素修正與 incoming status 不再在結果函式中重複鋪排。
 - world strike 的被動狀態整理也已拆層：enemy 端改成 `defensive / survival` 兩段 helper，player 端改成 `sword / body / mage` 三段 helper，降低單一 world-status collector 的維護風險。
 - 第一批高境界 retired active alias 已補上明確 realtime metadata，像 `m_bi_active / s_im_active / m_ie_active` 不再持續依賴 default shape fallback。
 - 敵方被控跳過回合的流程，也已開始整併到 `resolveEnemyIncapacitatedTurn(...)`，控制跳過與 `養劍術` 疊層不再在主循環散寫。

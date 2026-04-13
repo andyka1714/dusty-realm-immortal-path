@@ -379,6 +379,7 @@
 - [x] 敵方命中後的承傷反應鏈，也已開始抽成 `applyEnemyHitAftermath(...)`，把 `萬劫不滅 / 雷劫煉心 / 噬生 / 滴血重生（真） / 不死不滅` 這批後處理事件集中處理
 - [x] 敵方出手前的攻勢計算，也已開始抽成 `resolveEnemyOffenseRoll(...)`，把屬性克制、特招倍率、格擋 / 閃避 / 虛空轉移與承傷前數值準備集中處理
 - [x] world strike 結果組裝也已開始拆成 `buildPlayerWorldStrikeResult(...) / buildEnemyWorldStrikeResult(...)`，enemy 端 timing metadata 亦已抽成 `buildEnemyWorldStrikeTiming(...)`
+- [x] player / enemy world strike 的前置 runtime 組裝，也已開始拆成 `createPlayerWorldStrikeRuntime(...) / createEnemyWorldStrikeRuntime(...)`，world 視角的攻勢上下文、被動旗標、克制、元素修正與 incoming status 不再在結果函式中重複鋪排
 - [x] world strike 的被動狀態整理也已拆層：enemy 端改成 `defensive / survival` 兩段 helper，player 端改成 `sword / body / mage` 三段 helper
 - [x] 第一批高境界 retired active alias 已補上明確 realtime metadata，像 `m_bi_active / s_im_active / m_ie_active` 不再只靠 default fallback 推估範圍與施法節奏
 - [x] timeline combat 的致命保命流程已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`
@@ -392,6 +393,7 @@
 - [x] retired active / passive alias 也已補上 alias-layer 聚合表，正式 realm dataset 現在可直接由 alias-layer 組裝，不再在 `data/skills/index.ts` 手動攤開多份 alias 清單
 - [x] `battle-absorbed / retirement-ready` 的 active / passive alias record，也已開始直接由 alias-layer 聚合表和 skill ID 名單組裝，不再在 alias 檔裡平鋪手寫同一份 retired alias map
 - [x] formal realm dataset 的組裝也已開始走單一 `buildRealmSkillSet(...)` helper，各境界不再重複拼接 retired alias
+- [x] retired alias 在 realm 視圖中的拼接，也已開始收斂到 `getRetiredAliasesForRealm(...)`，formal realm dataset 不再各境界重複攤開 active / passive alias 組裝
 - [x] retirement-ready passive 視圖也已改成直接由 alias-layer 聚合表組裝，skill index 不再額外以 ID 清單重建同一份資料
 - [x] battle-absorbed passive 視圖也已改成直接由 alias-layer 聚合表組裝，skill index 不再額外以 ID 清單重建同一份資料
 - [x] `StatsPanel / ShopPanel` 的主要資訊浮層已進一步對齊 `GameTooltip` 的標題 / 註腳結構

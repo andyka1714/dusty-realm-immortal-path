@@ -7454,33 +7454,103 @@ const logEnemyAvoidance = ({
   });
 };
 
+type PlayerWorldStrikeRuntime = {
+  attackContext: ReturnType<typeof getPlayerAttackContext>;
+  canonicalSkillId?: string;
+  passiveFlags: PlayerPassiveFlags;
+  restriction: ReturnType<typeof getRestriction>;
+  elementalAffinity: ReturnType<typeof getEnemyElementalModifier>;
+  dealsDirectDamage: boolean;
+  hasSwordQiChain: boolean;
+  swordTribulationActive: boolean;
+  bodyFoundationStacks: number;
+  timelineProfile: SkillTimelineProfile;
+};
+
+const createPlayerWorldStrikeRuntime = (
+  player: PlayerCombatStats,
+  enemy: Enemy,
+  skill?: Skill
+): PlayerWorldStrikeRuntime => {
+  const passiveFlags = getPlayerPassiveFlags(player.learnedSkills);
+  const canonicalSkillId = getCanonicalSkillId(skill);
+
+  return {
+    attackContext: getPlayerAttackContext(player, enemy, skill),
+    canonicalSkillId,
+    passiveFlags,
+    restriction: getRestriction(player.element, enemy.element),
+    elementalAffinity: getEnemyElementalModifier(player.element, enemy),
+    dealsDirectDamage:
+      !skill || skill.effectType === "damage" || skill.damageMultiplier !== undefined,
+    hasSwordQiChain: hasLearnedSkillId(player.learnedSkills, "s_f_active"),
+    swordTribulationActive: hasSwordTribulationWindow(
+      player.hp,
+      player.maxHp,
+      passiveFlags
+    ),
+    bodyFoundationStacks: passiveFlags.hasBodyFoundationPassive
+      ? getBodyFoundationBloodlineStacks(player.hp, player.maxHp)
+      : 0,
+    timelineProfile: getSkillTimelineProfile(skill),
+  };
+};
+
+type EnemyWorldStrikeRuntime = {
+  attackContext: ReturnType<typeof getEnemyAttackContext>;
+  passiveFlags: PlayerPassiveFlags;
+  restriction: ReturnType<typeof getRestriction>;
+  effectiveDefense: number;
+  timelineProfile: EnemySpecialTimelineProfile;
+  incomingStatuses: ReturnType<typeof resolveIncomingEnemySpecialStatuses>;
+};
+
+const createEnemyWorldStrikeRuntime = (
+  enemy: Enemy,
+  player: PlayerCombatStats,
+  useSpecial = false
+): EnemyWorldStrikeRuntime => {
+  const passiveFlags = getPlayerPassiveFlags(player.learnedSkills);
+  const special = useSpecial ? enemy.specialAttack : undefined;
+  const timelineProfile = getEnemySpecialTimelineProfile(enemy);
+  const attackContext = getEnemyAttackContext(enemy, player);
+
+  return {
+    attackContext,
+    passiveFlags,
+    restriction: getRestriction(enemy.element, player.element),
+    effectiveDefense:
+      attackContext.defense * (special ? timelineProfile.areaDamageModifier : 1),
+    timelineProfile,
+    incomingStatuses: resolveIncomingEnemySpecialStatuses({
+      special,
+      player,
+      passiveFlags,
+      currentTimeMs: 0,
+      shortenControlDuration: passiveFlags.hasSwordFusionPassive,
+    }),
+  };
+};
+
 export const resolvePlayerWorldStrike = (
   player: PlayerCombatStats,
   enemy: Enemy,
   skill?: Skill
 ): WorldStrikeResult => {
-  const attackContext = getPlayerAttackContext(player, enemy, skill);
-  const canonicalSkillId = getCanonicalSkillId(skill);
-  const passiveFlags = getPlayerPassiveFlags(player.learnedSkills);
-  const restriction = getRestriction(player.element, enemy.element);
-  const elementalAffinity = getEnemyElementalModifier(player.element, enemy);
-  const dealsDirectDamage =
-    !skill ||
-    skill.effectType === "damage" ||
-    skill.damageMultiplier !== undefined;
+  const {
+    attackContext,
+    canonicalSkillId,
+    passiveFlags,
+    restriction,
+    elementalAffinity,
+    dealsDirectDamage,
+    hasSwordQiChain,
+    swordTribulationActive,
+    bodyFoundationStacks,
+    timelineProfile,
+  } = createPlayerWorldStrikeRuntime(player, enemy, skill);
   const { hasSwordVoidPassive, hasSwordQiPassive, hasMageQiPassive, hasBodyFoundationPassive, hasSwordEmperorPassive, hasSwordMahayanaPassive, hasMageMahayanaPassive } =
     passiveFlags;
-  const hasSwordQiChain = hasLearnedSkillId(player.learnedSkills, "s_f_active");
-  const swordTribulationActive = hasSwordTribulationWindow(
-    player.hp,
-    player.maxHp,
-    passiveFlags
-  );
-  const bodyFoundationStacks = hasBodyFoundationPassive
-    ? getBodyFoundationBloodlineStacks(player.hp, player.maxHp)
-    : 0;
-
-  const timelineProfile = getSkillTimelineProfile(skill);
   let effectivePower = attackContext.power;
   if (restriction.isEffective) effectivePower *= 1.12;
   if (restriction.isResisted) effectivePower *= 0.88;
@@ -7590,19 +7660,20 @@ export const resolveEnemyWorldStrike = (
   useSpecial = false
 ) => {
   const special = useSpecial ? enemy.specialAttack : undefined;
-  const timelineProfile = getEnemySpecialTimelineProfile(enemy);
-  const attackContext = getEnemyAttackContext(enemy, player);
-  const passiveFlags = getPlayerPassiveFlags(player.learnedSkills);
-  const restriction = getRestriction(enemy.element, player.element);
+  const {
+    attackContext,
+    passiveFlags,
+    restriction,
+    effectiveDefense,
+    timelineProfile,
+    incomingStatuses,
+  } = createEnemyWorldStrikeRuntime(enemy, player, useSpecial);
   let effectivePower =
     attackContext.power * (special?.damageMultiplier ?? 1);
 
   if (restriction.isEffective) effectivePower *= 1.1;
   if (restriction.isResisted) effectivePower *= 0.9;
 
-  const effectiveDefense =
-    attackContext.defense *
-    (special ? timelineProfile.areaDamageModifier : 1);
   let damage = resolveDamage(effectivePower, effectiveDefense);
   if (attackContext.damageBonus) {
     damage = Math.floor(damage * (1 + attackContext.damageBonus / 100));
@@ -7621,7 +7692,7 @@ export const resolveEnemyWorldStrike = (
     bodyEmperorTriggered,
     swordDeathWardTriggered,
     voidEvasion,
-  } = getEnemyWorldPassiveTriggerState({
+    } = getEnemyWorldPassiveTriggerState({
     enemy,
     player,
     passiveFlags,
@@ -7630,13 +7701,6 @@ export const resolveEnemyWorldStrike = (
     special,
   });
   damage = resolvedDamage;
-  const incomingStatuses = resolveIncomingEnemySpecialStatuses({
-    special,
-    player,
-    passiveFlags,
-    currentTimeMs: 0,
-    shortenControlDuration: passiveFlags.hasSwordFusionPassive,
-  });
 
   return buildEnemyWorldStrikeResult({
     damage,

@@ -212,6 +212,8 @@
 - `enemy world strike` 的承傷 / 生存型被動觸發計算，已開始抽成共用 helper，避免 `resolveEnemyWorldStrike()` 內重複堆疊同一批減傷與保命判定
 - `enemy world strike` 的 incoming status 過濾，也已開始和 timeline combat 對齊，正式處理 `DOT / 負面狀態免疫` 的共用規則
 - `enemy world strike` 的 timing metadata 也已開始抽成 `buildEnemyWorldStrikeTiming(...)`，不再把 `nextActionDelay / cooldown / execution / area` 散寫在結果組裝內
+- `player world strike` 的前置 runtime 組裝也已開始抽成 `createPlayerWorldStrikeRuntime(...)`，攻勢上下文、被動旗標、克制、元素修正、劍氣鏈與高境界窗口不再散寫在結果函式內
+- `enemy world strike` 的前置 runtime 組裝也已開始抽成 `createEnemyWorldStrikeRuntime(...)`，敵方攻勢上下文、特招 timing、incoming status 與承傷前參數不再各自重算
 - world strike 的被動狀態整理也已拆層：enemy 端改成 `defensive / survival` 兩段 helper，player 端改成 `sword / body / mage` 三段 helper，降低單一函式持續膨脹的風險
 - `enemy special` 的 incoming status 過濾與控制縮短，也已開始抽成 world / timeline 共用 resolver，不再只在 `runAutoBattle()` 內手寫 `filteredEnemyStatuses / normalizedIncomingStatuses`
 - Boss 破綻觸發與戰鬥事件，也已開始整併到 `rollBossBreakOpportunity(...)`，主循環不再直接散寫同一段爆發窗口判定

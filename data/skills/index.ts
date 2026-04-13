@@ -184,14 +184,18 @@ const RAW_SKILLS: Record<string, Skill> = {
 const stripRetiredAliasesForRealmView = (skills: Record<string, Skill>) =>
   stripBattleAbsorbedPassiveAliases(stripRetirementReadyActiveAliases(skills));
 
+const getRetiredAliasesForRealm = (realm: MajorRealm) => ({
+  ...(RETIRED_ACTIVE_ALIASES_BY_REALM[realm] ?? {}),
+  ...(RETIRED_PASSIVE_ALIASES_BY_REALM[realm] ?? {}),
+});
+
 const buildRealmSkillSet = (
   realm: MajorRealm,
   baseSkills: Record<string, Skill>
 ) =>
   stripRetiredAliasesForRealmView({
     ...baseSkills,
-    ...(RETIRED_ACTIVE_ALIASES_BY_REALM[realm] ?? {}),
-    ...(RETIRED_PASSIVE_ALIASES_BY_REALM[realm] ?? {}),
+    ...getRetiredAliasesForRealm(realm),
   });
 
 const RAW_SKILL_SETS_BY_REALM: Record<MajorRealm, Record<string, Skill>> = {
