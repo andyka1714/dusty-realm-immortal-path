@@ -255,6 +255,8 @@
 - [x] 玩家出手前置流程也已開始整併到 `resolvePlayerTurnPrelude(...)`，週期護體與 Boss 破綻窗口已集中在同一層處理
 - [x] 敵方出手窗口也已開始整併到 `resolveEnemyActionWindow(...)`，控制跳過、特招延後、特招窗口與敵方攻勢判定不再在主循環平鋪散寫
 - [x] 回合開場維護也已開始整併到 `resolveTurnStartMaintenance(...)`，狀態 tick、被動回復與淨化流程不再直接散在主循環開頭
+- [x] 玩家出手階段也已開始整併到 `resolvePlayerActionPhase(...)`，週期護體、Boss 破綻與正式出手流程不再在主循環拆成兩段散寫
+- [x] 勝利掉落結算也已開始整併到 `resolveVictoryRewards(...)`，擊殺訊息與戰利品組裝不再直接堆在 `runAutoBattle()` 尾端
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---

@@ -179,6 +179,8 @@
 - 玩家出手前置流程也已開始整併到 `resolvePlayerTurnPrelude(...)`，週期護體與 Boss 破綻窗口不再在主循環平鋪散寫。
 - 敵方出手窗口也已開始整併到 `resolveEnemyActionWindow(...)`，控制跳過、特招延後、特招窗口與敵方攻勢判定已收進同一層 helper。
 - 回合開場維護也已開始整併到 `resolveTurnStartMaintenance(...)`，狀態 tick、被動回復與淨化流程不再直接散在主循環開頭。
+- 玩家出手階段也已開始整併到 `resolvePlayerActionPhase(...)`，週期護體、Boss 破綻與正式出手流程已收進同一層 helper。
+- 勝利掉落結算也已開始整併到 `resolveVictoryRewards(...)`，擊殺訊息與戰利品組裝不再直接堆在 `runAutoBattle()` 尾端。
 - `enemy special` 的 incoming status 過濾、狀態推入、戰鬥日誌與免疫提示，也已開始收斂到更完整的共用 helper，world / timeline 的差異進一步縮小。
 - `絕仙劍` 的 `絕仙封脈` 也已正式接進 timeline combat，會在敵方特招將要出手時把節奏再壓後 `1` 秒，高境界劍修的節奏壓制已不再只是狀態名義存在。
 - 敵方特招的初始延後與後續節奏壓制，也已開始抽成共用 helper，`萬法歸宗 / 絕仙封脈` 不再在時間軸主循環內分散處理。

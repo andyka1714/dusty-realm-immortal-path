@@ -2425,6 +2425,104 @@ const resolvePlayerTurn = ({
   };
 };
 
+const resolvePlayerActionPhase = ({
+  currentTimeMs,
+  turn,
+  player,
+  enemy,
+  logs,
+  passiveFlags,
+  pVsE,
+  bossBroken,
+  playerDebuffed,
+  playerHp,
+  playerMp,
+  enemyHp,
+  playerStatuses,
+  enemyStatuses,
+  activeSkill,
+  activeSkillReadyAtMs,
+  mageFoundationStacks,
+  swordHeartStacks,
+  playerAttackIntervalMs,
+  nextSwordImmortalGuardAtMs,
+  hasMageFusionPassive,
+  hasSwordImmortalPassive,
+}: {
+  currentTimeMs: number;
+  turn: number;
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  logs: CombatLog[];
+  passiveFlags: PlayerPassiveFlags;
+  pVsE: { isEffective: boolean; isResisted: boolean };
+  bossBroken: boolean;
+  playerDebuffed: boolean;
+  playerHp: number;
+  playerMp: number;
+  enemyHp: number;
+  playerStatuses: CombatStatus[];
+  enemyStatuses: CombatStatus[];
+  activeSkill?: Skill;
+  activeSkillReadyAtMs: number;
+  mageFoundationStacks: number;
+  swordHeartStacks: number;
+  playerAttackIntervalMs: number;
+  nextSwordImmortalGuardAtMs: number;
+  hasMageFusionPassive: boolean;
+  hasSwordImmortalPassive: boolean;
+}) => {
+  ({
+    playerStatuses,
+    nextSwordImmortalGuardAtMs,
+    bossBroken,
+  } = resolvePlayerTurnPrelude({
+    currentTimeMs,
+    turn,
+    player,
+    enemy: {
+      ...enemy,
+      hp: enemyHp,
+    },
+    logs,
+    pVsE,
+    bossBroken,
+    playerHp,
+    playerStatuses,
+    nextSwordImmortalGuardAtMs,
+    hasSwordImmortalPassive,
+  }));
+
+  const playerTurnResult = resolvePlayerTurn({
+    currentTimeMs,
+    turn,
+    player,
+    enemy,
+    logs,
+    passiveFlags,
+    pVsE,
+    bossBroken,
+    playerDebuffed,
+    playerHp,
+    playerMp,
+    enemyHp,
+    playerStatuses,
+    enemyStatuses,
+    activeSkill,
+    activeSkillReadyAtMs,
+    mageFoundationStacks,
+    swordHeartStacks,
+    playerAttackIntervalMs,
+    hasMageFusionPassive,
+  });
+
+  return {
+    ...playerTurnResult,
+    nextSwordImmortalGuardAtMs,
+    bossBroken,
+  };
+};
+
 const resolveDamage = (
   power: number,
   defense: number,
@@ -2459,6 +2557,95 @@ const getEnemyAttackIntervalMs = (enemy: Enemy) => {
   const rangePenalty = (enemy.attackRange ?? 1) > 1 ? 120 : 0;
   const affixReduction = hasEnemyAffix(enemy, "迅影") ? 120 : 0;
   return Math.max(650, rankBase[enemy.rank] + rangePenalty - affixReduction);
+};
+
+const resolveVictoryRewards = ({
+  enemy,
+  logs,
+  turn,
+  currentTimeMs,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+}: {
+  enemy: Enemy;
+  logs: CombatLog[];
+  turn: number;
+  currentTimeMs: number;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+}) => {
+  const exp = enemy.exp || 0;
+  pushCombatLog(logs, {
+    turn,
+    timeMs: currentTimeMs,
+    isPlayer: true,
+    message: `<acc>擊敗了</acc> <enemy rank="${enemy.rank}">${enemy.name}</enemy>，獲得 <exp>${exp} 修為</exp>`,
+    damage: 0,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp: enemy.maxHp,
+  });
+
+  let { spiritStones } = getDropRewards(enemy);
+  const drops = generateDrops(enemy);
+  const finalDrops: { itemId: string; count: number; instance?: ItemInstance }[] = [];
+
+  drops.forEach((d) => {
+    if (d.itemId === "spirit_stone") {
+      spiritStones += d.count;
+    } else {
+      finalDrops.push(d);
+    }
+  });
+
+  if (spiritStones > 0 || finalDrops.length > 0) {
+    let lootMsg = "";
+
+    if (spiritStones > 0) {
+      lootMsg += formatSpiritStones(spiritStones);
+    }
+
+    if (finalDrops.length > 0) {
+      if (lootMsg) lootMsg += "，";
+      const dropNames = finalDrops.map((d) => {
+        const item = getItem(d.itemId);
+        const name = item ? item.name : d.itemId;
+        let qStr = "";
+        let qVal = 0;
+
+        if (d.instance) {
+          qVal = d.instance.quality;
+        } else if (item) {
+          qVal = item.quality || 0;
+        }
+
+        if (qVal === ItemQuality.Low) qStr = "(下品)";
+        if (qVal === ItemQuality.Medium) qStr = "(中品)";
+        if (qVal === ItemQuality.High) qStr = "(上品)";
+        if (qVal === ItemQuality.Immortal) qStr = "(仙品)";
+
+        return `<item q="${qVal}">${name}${qStr}</item>`;
+      });
+      lootMsg += dropNames.join("，");
+    }
+
+    pushCombatLog(logs, {
+      turn,
+      timeMs: currentTimeMs,
+      isPlayer: true,
+      message: `獲得戰利品：${lootMsg}`,
+      damage: 0,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp: enemy.maxHp,
+    });
+  }
+
+  return { spiritStones, exp, drops };
 };
 
 const resolvePlayerActiveSkillWindow = ({
@@ -6356,27 +6543,6 @@ export const runAutoBattle = (
 
     if (playerActsFirst) {
       ({
-        playerStatuses,
-        nextSwordImmortalGuardAtMs,
-        bossBroken,
-      } = resolvePlayerTurnPrelude({
-        currentTimeMs,
-        turn,
-        player,
-        enemy: {
-          ...enemy,
-          hp: enemyHp,
-        },
-        logs,
-        pVsE,
-        bossBroken,
-        playerHp,
-        playerStatuses,
-        nextSwordImmortalGuardAtMs,
-        hasSwordImmortalPassive,
-      }));
-
-      ({
         enemyHp,
         playerHp,
         playerMp,
@@ -6385,7 +6551,9 @@ export const runAutoBattle = (
         activeSkillReadyAtMs,
         mageFoundationStacks,
         playerNextActionMs,
-      } = resolvePlayerTurn({
+        nextSwordImmortalGuardAtMs,
+        bossBroken,
+      } = resolvePlayerActionPhase({
         currentTimeMs,
         turn,
         player,
@@ -6405,7 +6573,9 @@ export const runAutoBattle = (
         mageFoundationStacks,
         swordHeartStacks,
         playerAttackIntervalMs,
+        nextSwordImmortalGuardAtMs,
         hasMageFusionPassive,
+        hasSwordImmortalPassive,
       }));
       if (enemyHp <= 0) break;
     } else {
@@ -6530,74 +6700,15 @@ export const runAutoBattle = (
 
   const won = playerHp > 0 && enemyHp <= 0;
   if (won) {
-    const exp = enemy.exp || 0;
-    pushCombatLog(logs, {
+    const { spiritStones, exp, drops } = resolveVictoryRewards({
+      enemy,
+      logs,
       turn,
-      timeMs: currentTimeMs,
-      isPlayer: true,
-      message: `<acc>擊敗了</acc> <enemy rank="${enemy.rank}">${enemy.name}</enemy>，獲得 <exp>${exp} 修為</exp>`,
-      damage: 0,
+      currentTimeMs,
       playerHp,
       playerMaxHp: player.maxHp,
       enemyHp,
-      enemyMaxHp: enemy.maxHp,
     });
-
-    let { spiritStones } = getDropRewards(enemy);
-    const drops = generateDrops(enemy);
-    const finalDrops: { itemId: string; count: number; instance?: ItemInstance }[] = [];
-
-    drops.forEach((d) => {
-      if (d.itemId === "spirit_stone") {
-        spiritStones += d.count;
-      } else {
-        finalDrops.push(d);
-      }
-    });
-
-    if (spiritStones > 0 || finalDrops.length > 0) {
-      let lootMsg = "";
-
-      if (spiritStones > 0) {
-        lootMsg += formatSpiritStones(spiritStones);
-      }
-
-      if (finalDrops.length > 0) {
-        if (lootMsg) lootMsg += "，";
-        const dropNames = finalDrops.map((d) => {
-          const item = getItem(d.itemId);
-          const name = item ? item.name : d.itemId;
-          let qStr = "";
-          let qVal = 0;
-
-          if (d.instance) {
-            qVal = d.instance.quality;
-          } else if (item) {
-            qVal = item.quality || 0;
-          }
-
-          if (qVal === ItemQuality.Low) qStr = "(下品)";
-          if (qVal === ItemQuality.Medium) qStr = "(中品)";
-          if (qVal === ItemQuality.High) qStr = "(上品)";
-          if (qVal === ItemQuality.Immortal) qStr = "(仙品)";
-
-          return `<item q="${qVal}">${name}${qStr}</item>`;
-        });
-        lootMsg += dropNames.join("，");
-      }
-
-      pushCombatLog(logs, {
-        turn,
-        timeMs: currentTimeMs,
-        isPlayer: true,
-        message: `獲得戰利品：${lootMsg}`,
-        damage: 0,
-        playerHp,
-        playerMaxHp: player.maxHp,
-        enemyHp,
-        enemyMaxHp: enemy.maxHp,
-      });
-    }
 
     combatLogSnapshotProvider = previousSnapshotProvider;
     return { won, logs, rewards: { spiritStones, exp, drops } };
