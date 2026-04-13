@@ -2693,6 +2693,137 @@ describe("battle system balance", () => {
     expect(runAutoBattle(body, BOSS_ENEMIES.m180_b1).logs.some((log) => log.message.includes("不死不滅"))).toBe(true);
   });
 
+  it("surfaces immortal and emperor mage passive opening logs", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const immortalMage = calculatePlayerStats(
+      {
+        physique: 48,
+        rootBone: 42,
+        insight: 112,
+        comprehension: 56,
+        fortune: 18,
+        charm: 10,
+      },
+      MajorRealm.Immortal,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 2140,
+        mp: 4800,
+        defense: 260,
+        hp: 6800,
+      },
+      "仙法通神",
+      ProfessionType.Mage,
+      ["m_im_passive"]
+    );
+
+    const emperorMage = calculatePlayerStats(
+      {
+        physique: 52,
+        rootBone: 46,
+        insight: 126,
+        comprehension: 62,
+        fortune: 22,
+        charm: 10,
+      },
+      MajorRealm.ImmortalEmperor,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 2680,
+        mp: 6200,
+        defense: 320,
+        hp: 8200,
+      },
+      "萬法歸宗",
+      ProfessionType.Mage,
+      ["m_ie_passive"]
+    );
+
+    expect(
+      runAutoBattle(immortalMage, BOSS_ENEMIES.m180_b1).logs.some((log) =>
+        log.message.includes("仙法通神")
+      )
+    ).toBe(true);
+    expect(
+      runAutoBattle(emperorMage, BOSS_ENEMIES.m180_b1).logs.some((log) =>
+        log.message.includes("萬法歸宗")
+      )
+    ).toBe(true);
+  });
+
+  it("surfaces foundation and fusion passive opening logs for sword heart, body fusion, and mage fusion styles", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 82,
+        rootBone: 90,
+        insight: 70,
+        comprehension: 24,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.Foundation,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 520,
+        defense: 180,
+        hp: 3600,
+      },
+      "養劍術",
+      ProfessionType.Sword,
+      ["s_f_passive"]
+    );
+
+    const body = calculatePlayerStats(
+      {
+        physique: 104,
+        rootBone: 88,
+        insight: 58,
+        comprehension: 20,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.Fusion,
+      SpiritRootId.TRUE_METAL_EARTH,
+      {
+        attack: 980,
+        defense: 300,
+        hp: 8600,
+      },
+      "金剛法相",
+      ProfessionType.Body,
+      ["b_bi_passive"]
+    );
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 82,
+        rootBone: 74,
+        insight: 102,
+        comprehension: 28,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.Fusion,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1480,
+        mp: 3600,
+        defense: 220,
+        hp: 6200,
+      },
+      "五氣朝元",
+      ProfessionType.Mage,
+      ["m_im_passive"]
+    );
+
+    expect(runAutoBattle(sword, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("養劍術"))).toBe(true);
+    expect(runAutoBattle(body, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("金剛法相"))).toBe(true);
+    expect(runAutoBattle(mage, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("五氣朝元"))).toBe(true);
+  });
+
   it("surfaces fusion and tribulation passive opening logs for sword, body, and mage styles", () => {
     fixedRandom.mockReturnValue(0.5);
 

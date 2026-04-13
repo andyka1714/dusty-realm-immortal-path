@@ -2193,6 +2193,136 @@ const resolveEnemyActionWindow = ({
   };
 };
 
+const resolveEnemyActionPhase = ({
+  enemyActionWindow,
+  currentTimeMs,
+  turn,
+  player,
+  enemy,
+  logs,
+  passiveFlags,
+  playerHp,
+  playerMp,
+  enemyHp,
+  playerStatuses,
+  swordDeathWardUsed,
+  bodyTribulationStacks,
+  bodyRebirthTrueUsed,
+  hasSwordHeartPassive,
+  playerDamagedSinceSwordHeartWindow,
+  swordHeartStacks,
+  enemyAttackIntervalMs,
+}: {
+  enemyActionWindow: Exclude<
+    ReturnType<typeof resolveEnemyActionWindow>,
+    { skipped: true }
+  >;
+  currentTimeMs: number;
+  turn: number;
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  logs: CombatLog[];
+  passiveFlags: PlayerPassiveFlags;
+  playerHp: number;
+  playerMp: number;
+  enemyHp: number;
+  playerStatuses: CombatStatus[];
+  swordDeathWardUsed: boolean;
+  bodyTribulationStacks: number;
+  bodyRebirthTrueUsed: boolean;
+  hasSwordHeartPassive: boolean;
+  playerDamagedSinceSwordHeartWindow: boolean;
+  swordHeartStacks: number;
+  enemyAttackIntervalMs: number;
+}) => {
+  let {
+    enemyDamage,
+    isDodge,
+    voidEvasion,
+    isBlock,
+    bodyFoundationStacks,
+  } = enemyActionWindow;
+
+  ({
+    enemyDamage,
+    playerHp,
+    playerMp,
+    enemyHp,
+    playerStatuses,
+    swordDeathWardUsed,
+    bodyTribulationStacks,
+    bodyRebirthTrueUsed,
+  } = resolveEnemyTurnAftermath({
+    enemyDamage,
+    isDodge,
+    voidEvasion,
+    isBlock,
+    enemySpecialReady: Boolean(enemyActionWindow.enemySpecialReady),
+    currentTimeMs,
+    turn,
+    logs,
+    enemy,
+    player: {
+      ...player,
+      hp: playerHp,
+      mp: playerMp,
+    },
+    playerHp,
+    playerMp,
+    enemyHp,
+    playerStatuses,
+    passiveFlags,
+    bodyFoundationStacks,
+    swordDeathWardUsed,
+    bodyTribulationStacks,
+    bodyRebirthTrueUsed,
+  }));
+  if (enemyDamage > 0 && !isDodge && !voidEvasion) {
+    playerDamagedSinceSwordHeartWindow = true;
+  }
+
+  if (hasSwordHeartPassive && !playerDamagedSinceSwordHeartWindow) {
+    swordHeartStacks = applySwordHeartUpkeep({
+      swordHeartStacks,
+      logs,
+      turn,
+      timeMs: currentTimeMs,
+      playerHp,
+      playerMaxHp: player.maxHp,
+      enemyHp,
+      enemyMaxHp: enemy.maxHp,
+      blockedMessage:
+        "【養劍術】劍勢已滿，敵招雖過，劍意已抵當前可凝的極限。",
+      stackingMessage: (nextStacks) =>
+        `【養劍術】劍勢沉澱更深，攻勢提升至第 ${nextStacks} 層。`,
+    });
+  }
+  playerDamagedSinceSwordHeartWindow = false;
+
+  let enemySpecialReadyAtMs = enemyActionWindow.enemySpecialReadyAtMs;
+  if (enemyActionWindow.enemySpecialReady && enemy.specialAttack) {
+    const specialCooldown = getResolvedEnemySpecialCooldownSeconds(enemy);
+    enemySpecialReadyAtMs =
+      currentTimeMs +
+      Math.floor(specialCooldown * 1000) +
+      (enemyActionWindow.enemySpecialTimelineProfile?.executionTimeMs ?? 0);
+  }
+
+  return {
+    playerHp,
+    playerMp,
+    enemyHp,
+    playerStatuses,
+    swordDeathWardUsed,
+    bodyTribulationStacks,
+    bodyRebirthTrueUsed,
+    playerDamagedSinceSwordHeartWindow,
+    swordHeartStacks,
+    enemySpecialReadyAtMs,
+    enemyNextActionMs: currentTimeMs + enemyAttackIntervalMs,
+  };
+};
+
 const resolvePlayerTurn = ({
   currentTimeMs,
   turn,
@@ -2646,6 +2776,86 @@ const resolveVictoryRewards = ({
   }
 
   return { spiritStones, exp, drops };
+};
+
+const createCombatDefeatLog = ({
+  logs,
+  turn,
+  currentTimeMs,
+  enemy,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+}: {
+  logs: CombatLog[];
+  turn: number;
+  currentTimeMs: number;
+  enemy: Enemy;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+}) => {
+  pushCombatLog(logs, {
+    turn,
+    timeMs: currentTimeMs,
+    isPlayer: false,
+    message: `不敵 [${enemy.name}]，身受重傷...`,
+    damage: 0,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp: enemy.maxHp,
+  });
+};
+
+const finalizeCombatResult = ({
+  won,
+  logs,
+  turn,
+  currentTimeMs,
+  player,
+  enemy,
+  playerHp,
+  enemyHp,
+  previousSnapshotProvider,
+}: {
+  won: boolean;
+  logs: CombatLog[];
+  turn: number;
+  currentTimeMs: number;
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  playerHp: number;
+  enemyHp: number;
+  previousSnapshotProvider?: typeof combatLogSnapshotProvider;
+}) => {
+  if (won) {
+    const { spiritStones, exp, drops } = resolveVictoryRewards({
+      enemy,
+      logs,
+      turn,
+      currentTimeMs,
+      playerHp,
+      playerMaxHp: player.maxHp,
+      enemyHp,
+    });
+
+    combatLogSnapshotProvider = previousSnapshotProvider;
+    return { won, logs, rewards: { spiritStones, exp, drops } };
+  }
+
+  createCombatDefeatLog({
+    logs,
+    turn,
+    currentTimeMs,
+    enemy,
+    playerHp,
+    playerMaxHp: player.maxHp,
+    enemyHp,
+  });
+
+  combatLogSnapshotProvider = previousSnapshotProvider;
+  return { won, logs };
 };
 
 const resolvePlayerActiveSkillWindow = ({
@@ -3417,11 +3627,16 @@ const getInitialPassiveBattleLogMessages = ({
   hasMageVoidPassive,
   hasSwordEmperorPassive,
   hasBodyEmperorPassive,
+  hasSwordHeartPassive,
+  hasBodyFusionPassive,
+  hasMageFusionPassive,
   hasSwordFusionPassive,
   hasBodyTribulationPassive,
   hasMageTribulationPassive,
   hasSwordMahayanaPassive,
   hasMageMahayanaPassive,
+  hasMageImmortalPassive,
+  hasMageEmperorPassive,
 }: {
   hasReflectPassive: boolean;
   hasInitialShieldPassive: boolean;
@@ -3443,6 +3658,11 @@ const getInitialPassiveBattleLogMessages = ({
   hasMageVoidPassive: boolean;
   hasSwordEmperorPassive: boolean;
   hasBodyEmperorPassive: boolean;
+  hasSwordHeartPassive: boolean;
+  hasBodyFusionPassive: boolean;
+  hasMageFusionPassive: boolean;
+  hasMageImmortalPassive: boolean;
+  hasMageEmperorPassive: boolean;
   hasSwordFusionPassive: boolean;
   hasBodyTribulationPassive: boolean;
   hasMageTribulationPassive: boolean;
@@ -3487,6 +3707,10 @@ const getInitialPassiveBattleLogMessages = ({
     messages.push("【滴血重生】血氣已盤踞命宮，重傷時將自行回生續戰。");
   }
 
+  if (hasSwordHeartPassive) {
+    messages.push("【養劍術】劍勢已在心湖沉澱，敵招受阻時將持續蓄起更深殺機。");
+  }
+
   if (hasBodySaintPassive) {
     messages.push("【肉身成聖】聖軀已穩，重擊將被大幅化去。");
   }
@@ -3507,8 +3731,16 @@ const getInitialPassiveBattleLogMessages = ({
     messages.push("【道法自然】術式流轉圓融，萬法冷卻將提早歸位。");
   }
 
+  if (hasMageFusionPassive) {
+    messages.push("【五氣朝元】五氣已在丹府間周天輪轉，術式回補與免耗隨時可被喚醒。");
+  }
+
   if (hasBodyAncientPassive) {
     messages.push("【荒古戰體】荒古血肉盤踞周身，負面侵蝕將被持續震散。");
+  }
+
+  if (hasBodyFusionPassive) {
+    messages.push("【金剛法相】法相已在筋骨間待命，來襲重擊將被再次硬生生卸去。");
   }
 
   if (hasSwordImmortalPassive) {
@@ -3529,6 +3761,14 @@ const getInitialPassiveBattleLogMessages = ({
 
   if (hasBodyEmperorPassive) {
     messages.push("【不死不滅】霸體鎮住命門，最後一線生機尚未斷絕。");
+  }
+
+  if (hasMageImmortalPassive) {
+    messages.push("【仙法通神】仙元灌注靈海，術式回響已待命啟動。");
+  }
+
+  if (hasMageEmperorPassive) {
+    messages.push("【萬法歸宗】萬法歸一鎮住靈臺，敵方特招節奏將被持續遲滯。");
   }
 
   if (hasSwordFusionPassive) {
@@ -3579,6 +3819,9 @@ const getCombatOpeningMessages = (options: {
   hasMageVoidPassive: boolean;
   hasSwordEmperorPassive: boolean;
   hasBodyEmperorPassive: boolean;
+  hasSwordHeartPassive: boolean;
+  hasBodyFusionPassive: boolean;
+  hasMageFusionPassive: boolean;
   hasSwordFusionPassive: boolean;
   hasBodyTribulationPassive: boolean;
   hasMageTribulationPassive: boolean;
@@ -3612,6 +3855,9 @@ const getCombatOpeningMessages = (options: {
     hasMageVoidPassive,
     hasSwordEmperorPassive,
     hasBodyEmperorPassive,
+    hasSwordHeartPassive,
+    hasBodyFusionPassive,
+    hasMageFusionPassive,
     hasSwordFusionPassive,
     hasBodyTribulationPassive,
     hasMageTribulationPassive,
@@ -3666,6 +3912,11 @@ const getCombatOpeningMessages = (options: {
       hasMageVoidPassive,
       hasSwordEmperorPassive,
       hasBodyEmperorPassive,
+      hasSwordHeartPassive,
+      hasBodyFusionPassive,
+      hasMageFusionPassive,
+      hasMageImmortalPassive,
+      hasMageEmperorPassive,
       hasSwordFusionPassive,
       hasBodyTribulationPassive,
       hasMageTribulationPassive,
@@ -3673,14 +3924,6 @@ const getCombatOpeningMessages = (options: {
       hasMageMahayanaPassive,
     })
   );
-
-  if (hasMageImmortalPassive) {
-    messages.push("【仙法通神】法則共鳴已展開，術式有機會再次應現。");
-  }
-
-  if (hasMageEmperorPassive) {
-    messages.push("【萬法歸宗】先天法則壓制降下，敵方術式運轉被延後。");
-  }
 
   return messages;
 };
@@ -3734,6 +3977,9 @@ const initializeCombatEncounter = ({
     hasMageVoidPassive: passiveFlags.hasMageVoidPassive,
     hasSwordEmperorPassive: passiveFlags.hasSwordEmperorPassive,
     hasBodyEmperorPassive: passiveFlags.hasBodyEmperorPassive,
+    hasSwordHeartPassive: passiveFlags.hasSwordHeartPassive,
+    hasBodyFusionPassive: passiveFlags.hasBodyFusionPassive,
+    hasMageFusionPassive: passiveFlags.hasMageFusionPassive,
     hasSwordFusionPassive: passiveFlags.hasSwordFusionPassive,
     hasBodyTribulationPassive: passiveFlags.hasBodyTribulationPassive,
     hasMageTribulationPassive: passiveFlags.hasMageTribulationPassive,
@@ -6612,20 +6858,7 @@ export const runAutoBattle = (
           ReturnType<typeof resolveEnemyActionWindow>,
           { skipped: true }
         >;
-        enemySpecialReadyAtMs = resolvedEnemyActionWindow.enemySpecialReadyAtMs;
-        const enemySpecialReady = resolvedEnemyActionWindow.enemySpecialReady;
-        const enemySpecialTimelineProfile =
-          resolvedEnemyActionWindow.enemySpecialTimelineProfile;
-        let {
-          enemyDamage,
-          isDodge,
-          voidEvasion,
-          isBlock,
-          bodyFoundationStacks,
-        } = resolvedEnemyActionWindow;
-
         ({
-          enemyDamage,
           playerHp,
           playerMp,
           enemyHp,
@@ -6633,61 +6866,34 @@ export const runAutoBattle = (
           swordDeathWardUsed,
           bodyTribulationStacks,
           bodyRebirthTrueUsed,
-        } = resolveEnemyTurnAftermath({
-          enemyDamage,
-          isDodge,
-          voidEvasion,
-          isBlock,
-          enemySpecialReady: Boolean(enemySpecialReady),
+          playerDamagedSinceSwordHeartWindow,
+          swordHeartStacks,
+          enemySpecialReadyAtMs,
+          enemyNextActionMs,
+        } = resolveEnemyActionPhase({
+          enemyActionWindow: resolvedEnemyActionWindow,
           currentTimeMs,
           turn,
-          logs,
-          enemy,
           player: {
             ...player,
             hp: playerHp,
             mp: playerMp,
           },
+          enemy,
+          logs,
+          passiveFlags,
           playerHp,
           playerMp,
           enemyHp,
           playerStatuses,
-          passiveFlags,
-          bodyFoundationStacks,
           swordDeathWardUsed,
           bodyTribulationStacks,
           bodyRebirthTrueUsed,
+          hasSwordHeartPassive,
+          playerDamagedSinceSwordHeartWindow,
+          swordHeartStacks,
+          enemyAttackIntervalMs,
         }));
-        if (enemyDamage > 0 && !isDodge && !voidEvasion) {
-          playerDamagedSinceSwordHeartWindow = true;
-        }
-
-        if (hasSwordHeartPassive && !playerDamagedSinceSwordHeartWindow) {
-          swordHeartStacks = applySwordHeartUpkeep({
-            swordHeartStacks,
-            logs,
-            turn,
-            timeMs: currentTimeMs,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-            blockedMessage:
-              "【養劍術】劍勢已滿，敵招雖過，劍意已抵當前可凝的極限。",
-            stackingMessage: (nextStacks) =>
-              `【養劍術】劍勢沉澱更深，攻勢提升至第 ${nextStacks} 層。`,
-          });
-        }
-        playerDamagedSinceSwordHeartWindow = false;
-
-        if (enemySpecialReady && enemy.specialAttack) {
-          const specialCooldown = getResolvedEnemySpecialCooldownSeconds(enemy);
-          enemySpecialReadyAtMs =
-            currentTimeMs +
-            Math.floor(specialCooldown * 1000) +
-            (enemySpecialTimelineProfile?.executionTimeMs ?? 0);
-        }
-        enemyNextActionMs = currentTimeMs + enemyAttackIntervalMs;
       }
     }
 
@@ -6699,33 +6905,15 @@ export const runAutoBattle = (
   }
 
   const won = playerHp > 0 && enemyHp <= 0;
-  if (won) {
-    const { spiritStones, exp, drops } = resolveVictoryRewards({
-      enemy,
-      logs,
-      turn,
-      currentTimeMs,
-      playerHp,
-      playerMaxHp: player.maxHp,
-      enemyHp,
-    });
-
-    combatLogSnapshotProvider = previousSnapshotProvider;
-    return { won, logs, rewards: { spiritStones, exp, drops } };
-  }
-
-  pushCombatLog(logs, {
+  return finalizeCombatResult({
+    won,
+    logs,
     turn,
-    timeMs: currentTimeMs,
-    isPlayer: false,
-    message: `不敵 [${enemy.name}]，身受重傷...`,
-    damage: 0,
+    currentTimeMs,
+    player,
+    enemy,
     playerHp,
-    playerMaxHp: player.maxHp,
     enemyHp,
-    enemyMaxHp: enemy.maxHp,
+    previousSnapshotProvider,
   });
-
-  combatLogSnapshotProvider = previousSnapshotProvider;
-  return { won, logs };
 };
