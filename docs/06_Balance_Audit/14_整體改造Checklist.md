@@ -358,6 +358,7 @@
 - [x] `m_n_passive` / `m_f_passive` / `m_bi_passive` 已開始補齊 world strike 狀態回報，正式標出 `法力源泉` / `靈力湧動` / `五氣朝元`
 - [x] `s_ie_passive` 已開始補齊 player world strike 對齊，正式標出 `萬法皆空`
 - [x] `s_sf_passive` 已開始補齊 player world strike 對齊，正式標出 `劍意化形`
+- [x] `s_n_passive` / `b_n_passive` 已開始補齊 player world strike 對齊，正式標出 `護體劍罡` / `滴血重生`
 - [x] `m_sf_passive` 已開始補齊 player world strike 對齊，正式標出 `道法自然`
 - [x] enemy world strike 的減傷 / 保命被動判定已開始抽成共用 trigger helper，減少 `resolveEnemyWorldStrike()` 內的重複流程
 - [x] enemy world strike 的 incoming status 過濾已開始和 timeline combat 對齊，正式共用 DOT / 負面狀態免疫規則

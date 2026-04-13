@@ -1543,6 +1543,35 @@ describe("battle system balance", () => {
     expect(strike.playerStatusNames).toContain("劍意化形");
   });
 
+  it("surfaces nascent soul sword passive on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 70,
+        rootBone: 70,
+        insight: 64,
+        comprehension: 24,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.NascentSoul,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 720,
+        defense: 220,
+        speed: 11,
+        hp: 2600,
+      },
+      "劍魄",
+      ProfessionType.Sword,
+      ["s_n_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(sword, COMMON_ENEMIES.m30_c1);
+    expect(strike.playerStatusNames).toContain("護體劍罡");
+  });
+
   it("lets nascent soul body passive heal based on missing hp each tick", () => {
     fixedRandom.mockReturnValue(0.5);
 
@@ -1628,6 +1657,35 @@ describe("battle system balance", () => {
 
     const strike = resolvePlayerWorldStrike(body, COMMON_ENEMIES.m30_c1);
     expect(strike.playerStatusNames).toContain("肉身成聖");
+  });
+
+  it("surfaces nascent soul body passive on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const body = calculatePlayerStats(
+      {
+        physique: 82,
+        rootBone: 76,
+        insight: 60,
+        comprehension: 22,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.NascentSoul,
+      SpiritRootId.MIXED_FIVE,
+      {
+        attack: 680,
+        defense: 240,
+        speed: 9,
+        hp: 3200,
+      },
+      "武魂",
+      ProfessionType.Body,
+      ["b_n_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(body, COMMON_ENEMIES.m30_c1);
+    expect(strike.playerStatusNames).toContain("滴血重生");
   });
 
   it("lets nascent soul mage passive regenerate mana and boost high-mp damage", () => {

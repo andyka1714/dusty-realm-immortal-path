@@ -169,6 +169,7 @@
   - `b_tr_passive` / `m_tr_passive`：在 enemy world strike 也已開始正式回報 `萬劫不滅` / `雷劫煉心`
 - `s_n_passive` / `b_ma_passive` / `b_ie_passive`：在 enemy world strike 也已開始正式回報 `護體劍罡` / `滴血重生` / `不死不滅`
 - `s_sf_passive`：在 player world strike 的普攻也已開始正式回報 `劍意化形`
+- `s_n_passive` / `b_n_passive`：在 player world strike 的普攻也已開始正式回報 `護體劍罡` / `滴血重生`
 - `m_sf_passive`：在 player world strike 的法修主動術式也已開始正式回報 `道法自然`
 - `b_im_passive` / `s_ie_passive`：在 enemy special world strike 也已開始正式回報 `仙體無垢` / `萬法皆空`，不再只在 timeline combat 內部靜默過濾 DOT 與負面狀態
 - `b_f_passive` / `m_q_passive` / `s_q_passive` / `s_vr_passive`：在 player world strike 也開始明確回報 `蠻荒血脈`、`靈潮循環`、`劍脈初成`、`法則之劍`

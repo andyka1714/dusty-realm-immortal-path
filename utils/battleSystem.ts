@@ -835,6 +835,10 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
     statusNames.push("養劍術");
   }
 
+  if (!skill && passiveFlags.hasSwordDeathWardPassive) {
+    statusNames.push("護體劍罡");
+  }
+
   if (
     passiveFlags.hasSwordGoldenPassive &&
     isCrit &&
@@ -866,6 +870,10 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
 
   if (!skill && passiveFlags.hasBodySaintPassive) {
     statusNames.push("肉身成聖");
+  }
+
+  if (!skill && passiveFlags.hasBodyRebirthPassive) {
+    statusNames.push("滴血重生");
   }
 
   if (!skill && passiveFlags.hasMageQiPassive && player.profession === ProfessionType.Mage) {
@@ -7643,6 +7651,7 @@ export const runAutoBattle = (
     drops: { itemId: string; count: number; instance?: ItemInstance }[];
   };
 } => {
+  const logs: CombatLog[] = [];
   let {
     turn,
     currentTimeMs,
@@ -7666,7 +7675,6 @@ export const runAutoBattle = (
     playerDamagedSinceSwordHeartWindow,
     nextSwordImmortalGuardAtMs,
   } = createInitialCombatLoopState(player, enemy);
-  const logs: CombatLog[] = [];
   let lastStatusTickMs = 0;
   const {
     activeSkill,
