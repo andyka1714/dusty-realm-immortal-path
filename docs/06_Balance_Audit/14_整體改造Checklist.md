@@ -249,6 +249,8 @@
 - [x] DOT / 吸生 tick 的雙側處理迴圈，已開始整併到 `applyStatusTickBatch(...)`
 - [x] 開場初始護體、待命訊息與帝境初始特招延後，已開始整併到 `initializeCombatEncounter(...)`
 - [x] Boss 破綻觸發與對應戰鬥事件，已開始整併到 `rollBossBreakOpportunity(...)`
+- [x] 玩家出手主幹也已開始整併到 `resolvePlayerTurn(...)`，把可施放窗口、攻勢判定、主傷害訊息、破甲追擊、共鳴處理與命中後續集中到同一層流程
+- [x] 敵方被控跳過回合的流程，也已開始整併到 `resolveEnemyIncapacitatedTurn(...)`，控制跳過與 `養劍術` 疊層不再在主循環散寫
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---

@@ -1899,6 +1899,301 @@ const resolvePlayerActiveAftermath = ({
   };
 };
 
+const resolveEnemyIncapacitatedTurn = ({
+  currentTimeMs,
+  enemy,
+  enemyAttackIntervalMs,
+  hasSwordHeartPassive,
+  playerDamagedSinceSwordHeartWindow,
+  swordHeartStacks,
+  logs,
+  turn,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+}: {
+  currentTimeMs: number;
+  enemy: Enemy;
+  enemyAttackIntervalMs: number;
+  hasSwordHeartPassive: boolean;
+  playerDamagedSinceSwordHeartWindow: boolean;
+  swordHeartStacks: number;
+  logs: CombatLog[];
+  turn: number;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+}) => {
+  pushCombatLog(logs, {
+    turn,
+    timeMs: currentTimeMs,
+    isPlayer: false,
+    message: `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 被控制中，無法出手！`,
+    damage: 0,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp,
+  });
+
+  if (hasSwordHeartPassive && !playerDamagedSinceSwordHeartWindow) {
+    swordHeartStacks = applySwordHeartUpkeep({
+      swordHeartStacks,
+      logs,
+      turn,
+      timeMs: currentTimeMs,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+      blockedMessage:
+        "【養劍術】劍勢已滿，當前回合的停滯不再繼續積蓄殺機。",
+      stackingMessage: (nextStacks) =>
+        `【養劍術】敵勢受阻，劍勢提升至第 ${nextStacks} 層。`,
+    });
+  }
+
+  return {
+    enemyNextActionMs: currentTimeMs + enemyAttackIntervalMs,
+    swordHeartStacks,
+    playerDamagedSinceSwordHeartWindow: false,
+  };
+};
+
+const resolvePlayerTurn = ({
+  currentTimeMs,
+  turn,
+  player,
+  enemy,
+  logs,
+  passiveFlags,
+  pVsE,
+  bossBroken,
+  playerDebuffed,
+  playerHp,
+  playerMp,
+  enemyHp,
+  playerStatuses,
+  enemyStatuses,
+  activeSkill,
+  activeSkillReadyAtMs,
+  mageFoundationStacks,
+  swordHeartStacks,
+  playerAttackIntervalMs,
+  hasMageFusionPassive,
+}: {
+  currentTimeMs: number;
+  turn: number;
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  logs: CombatLog[];
+  passiveFlags: PlayerPassiveFlags;
+  pVsE: { isEffective: boolean; isResisted: boolean };
+  bossBroken: boolean;
+  playerDebuffed: boolean;
+  playerHp: number;
+  playerMp: number;
+  enemyHp: number;
+  playerStatuses: CombatStatus[];
+  enemyStatuses: CombatStatus[];
+  activeSkill?: Skill;
+  activeSkillReadyAtMs: number;
+  mageFoundationStacks: number;
+  swordHeartStacks: number;
+  playerAttackIntervalMs: number;
+  hasMageFusionPassive: boolean;
+}) => {
+  const { skillReady, activeSkillTimelineProfile, activeSkillCanonicalId } =
+    resolvePlayerActiveSkillWindow({
+      activeSkill,
+      currentTimeMs,
+      activeSkillReadyAtMs,
+      playerMp,
+      hasMageFusionPassive,
+    });
+
+  const {
+    dealsDirectDamage,
+    effectiveDefense,
+    bodyFoundationStacks,
+    voidSwordProc,
+    manaSpringEmpowered,
+    hasSwordQiChain,
+    activeSwordQiStatuses,
+    isCrit,
+    playerDamage,
+    pVsE: playerRestriction,
+    enemyElementalAffinity: playerEnemyElementalAffinity,
+  } = resolvePlayerOffenseRoll({
+    player: {
+      ...player,
+      hp: playerHp,
+      mp: playerMp,
+    },
+    enemy: {
+      ...enemy,
+      hp: enemyHp,
+    },
+    activeSkill: activeSkill ?? undefined,
+    activeSkillCanonicalId,
+    activeSkillTimelineProfile,
+    skillReady,
+    passiveFlags,
+    playerHp,
+    playerMp,
+    playerStatuses,
+    enemyStatuses,
+    bossBroken,
+    playerDebuffed,
+    mageFoundationStacks,
+    swordHeartStacks,
+    currentTimeMs,
+  });
+
+  enemyHp = Math.max(0, enemyHp - playerDamage);
+
+  getPlayerActivePassiveProcMessages({
+    player,
+    enemy,
+    currentTimeMs,
+    playerHp,
+    enemyHp,
+    skillReady,
+    activeSkill: activeSkill ?? undefined,
+    isCrit,
+    manaSpringEmpowered,
+    hasMageMahayanaPassive: passiveFlags.hasMageMahayanaPassive,
+    hasSwordMahayanaPassive: passiveFlags.hasSwordMahayanaPassive,
+    hasMageQiPassive: passiveFlags.hasMageQiPassive,
+    bodyFoundationStacks,
+    voidSwordProc,
+  }).forEach((log) => {
+    pushCombatLog(logs, {
+      ...log,
+      turn,
+    });
+  });
+
+  pushCombatLog(logs, {
+    turn,
+    timeMs: currentTimeMs,
+    isPlayer: true,
+    message: createPlayerAttackLogMessage({
+      player,
+      skillReady,
+      activeSkill: activeSkill ?? undefined,
+      isCrit,
+      playerDamage,
+    }),
+    damage: playerDamage,
+    playerHp,
+    playerMaxHp: player.maxHp,
+    enemyHp,
+    enemyMaxHp: enemy.maxHp,
+  });
+
+  logSwordQiArmorBreak({
+    shouldTrigger: shouldApplySwordQiArmorBreak({
+      passiveFlags,
+      skill: skillReady ? activeSkill ?? undefined : undefined,
+      isCrit,
+      enemyHp,
+    }),
+    logs,
+    turn,
+    timeMs: currentTimeMs,
+    enemy,
+    playerHp,
+    playerMaxHp: player.maxHp,
+    enemyHp,
+    enemyMaxHp: enemy.maxHp,
+  });
+
+  if (
+    logPlayerSwordResonance({
+      skillReady,
+      activeSkillCanonicalId,
+      activeSwordQiStatuses,
+      hasSwordQiChain,
+      currentTimeMs,
+      logs,
+      turn,
+      playerHp,
+      playerMaxHp: player.maxHp,
+      enemyHp,
+      enemyMaxHp: enemy.maxHp,
+    })
+  ) {
+    playerStatuses = playerStatuses.filter(
+      (status) =>
+        !(
+          status.kind === "critBoost" &&
+          status.expiresAtMs > currentTimeMs
+        )
+    );
+  }
+
+  ({
+    enemyHp,
+    playerHp,
+    playerStatuses,
+    enemyStatuses,
+    playerMp,
+    activeSkillReadyAtMs,
+    mageFoundationStacks,
+  } = resolvePlayerActiveAftermath({
+    player: {
+      ...player,
+      hp: playerHp,
+      mp: playerMp,
+    },
+    skillReady,
+    activeSkill: activeSkill ?? undefined,
+    activeSkillCanonicalId,
+    currentTimeMs,
+    turn,
+    logs,
+    enemy: {
+      ...enemy,
+      hp: enemyHp,
+    },
+    playerHp,
+    playerMaxHp: player.maxHp,
+    enemyHp,
+    enemyMaxHp: enemy.maxHp,
+    playerStatuses,
+    enemyStatuses,
+    playerMp,
+    playerDamage,
+    effectiveDefense,
+    pVsE: playerRestriction,
+    enemyElementalAffinity: playerEnemyElementalAffinity,
+    activeSkillReadyAtMs,
+    mageFoundationStacks,
+    isCrit,
+    dealsDirectDamage,
+    passiveFlags,
+  }));
+
+  const skillExecutionTimeMs =
+    activeSkillTimelineProfile?.executionTimeMs ??
+    getSkillExecutionTimeMs(skillReady ? activeSkill! : undefined);
+
+  return {
+    enemyHp,
+    playerHp,
+    playerMp,
+    playerStatuses,
+    enemyStatuses,
+    activeSkillReadyAtMs,
+    mageFoundationStacks,
+    playerNextActionMs:
+      currentTimeMs + Math.max(playerAttackIntervalMs, skillExecutionTimeMs),
+  };
+};
+
 const resolveDamage = (
   power: number,
   defense: number,
@@ -5755,214 +6050,58 @@ export const runAutoBattle = (
         enemyMaxHp: enemy.maxHp,
       });
 
-      const {
-        skillReady,
-        activeSkillTimelineProfile,
-        activeSkillCanonicalId,
-      } = resolvePlayerActiveSkillWindow({
-        activeSkill: activeSkill ?? undefined,
-        currentTimeMs,
-        activeSkillReadyAtMs,
-        playerMp,
-        hasMageFusionPassive,
-      });
-      let {
-        dealsDirectDamage,
-        effectiveDefense,
-        bodyFoundationStacks,
-        voidSwordProc,
-        manaSpringEmpowered,
-        hasSwordQiChain,
-        activeSwordQiStatuses,
-        isCrit,
-        playerDamage,
-        pVsE: playerRestriction,
-        enemyElementalAffinity: playerEnemyElementalAffinity,
-      } = resolvePlayerOffenseRoll({
-        player: {
-          ...player,
-          hp: playerHp,
-          mp: playerMp,
-        },
-        enemy: {
-          ...enemy,
-          hp: enemyHp,
-        },
-        activeSkill: activeSkill ?? undefined,
-        activeSkillCanonicalId,
-        activeSkillTimelineProfile,
-        skillReady,
-        passiveFlags,
+      ({
+        enemyHp,
         playerHp,
         playerMp,
         playerStatuses,
         enemyStatuses,
-        bossBroken,
-        playerDebuffed,
+        activeSkillReadyAtMs,
         mageFoundationStacks,
-        swordHeartStacks,
+        playerNextActionMs,
+      } = resolvePlayerTurn({
         currentTimeMs,
-      });
-
-      enemyHp = Math.max(0, enemyHp - playerDamage);
-      getPlayerActivePassiveProcMessages({
+        turn,
         player,
         enemy,
-        currentTimeMs,
-        playerHp,
-        enemyHp,
-        skillReady,
-        activeSkill: activeSkill ?? undefined,
-        isCrit,
-        manaSpringEmpowered,
-        hasMageMahayanaPassive,
-        hasSwordMahayanaPassive,
-        hasMageQiPassive,
-        bodyFoundationStacks,
-        voidSwordProc,
-      }).forEach((log) => {
-        pushCombatLog(logs, {
-          ...log,
-          turn,
-        });
-      });
-      pushCombatLog(logs, {
-        turn,
-        timeMs: currentTimeMs,
-        isPlayer: true,
-        message: createPlayerAttackLogMessage({
-          player,
-          skillReady,
-          activeSkill: activeSkill ?? undefined,
-          isCrit,
-          playerDamage,
-        }),
-        damage: playerDamage,
-        playerHp,
-        playerMaxHp: player.maxHp,
-        enemyHp,
-        enemyMaxHp: enemy.maxHp,
-      });
-      logSwordQiArmorBreak({
-        shouldTrigger: shouldApplySwordQiArmorBreak({
-          passiveFlags,
-          skill: skillReady ? activeSkill ?? undefined : undefined,
-          isCrit,
-          enemyHp,
-        }),
         logs,
-        turn,
-        timeMs: currentTimeMs,
-        enemy,
+        passiveFlags,
+        pVsE,
+        bossBroken,
+        playerDebuffed,
         playerHp,
-        playerMaxHp: player.maxHp,
+        playerMp,
         enemyHp,
-        enemyMaxHp: enemy.maxHp,
-      });
-
-      if (
-        logPlayerSwordResonance({
-          skillReady,
-          activeSkillCanonicalId,
-          activeSwordQiStatuses,
-          hasSwordQiChain,
+        playerStatuses,
+        enemyStatuses,
+        activeSkill: activeSkill ?? undefined,
+        activeSkillReadyAtMs,
+        mageFoundationStacks,
+        swordHeartStacks,
+        playerAttackIntervalMs,
+        hasMageFusionPassive,
+      }));
+      if (enemyHp <= 0) break;
+    } else {
+      if (hasIncapacitatingStatus(enemyStatuses, currentTimeMs)) {
+        ({
+          enemyNextActionMs,
+          swordHeartStacks,
+          playerDamagedSinceSwordHeartWindow,
+        } = resolveEnemyIncapacitatedTurn({
           currentTimeMs,
+          enemy,
+          enemyAttackIntervalMs,
+          hasSwordHeartPassive,
+          playerDamagedSinceSwordHeartWindow,
+          swordHeartStacks,
           logs,
           turn,
           playerHp,
           playerMaxHp: player.maxHp,
           enemyHp,
           enemyMaxHp: enemy.maxHp,
-        })
-      ) {
-        playerStatuses = playerStatuses.filter(
-          (status) =>
-            !(
-              status.kind === "critBoost" &&
-              status.expiresAtMs > currentTimeMs
-            )
-        );
-      }
-
-      ({
-        enemyHp,
-        playerHp,
-        playerStatuses,
-        enemyStatuses,
-        playerMp,
-        activeSkillReadyAtMs,
-        mageFoundationStacks,
-      } = resolvePlayerActiveAftermath({
-        player: {
-          ...player,
-          hp: playerHp,
-          mp: playerMp,
-        },
-        skillReady,
-        activeSkill: activeSkill ?? undefined,
-        activeSkillCanonicalId,
-        currentTimeMs,
-        turn,
-        logs,
-        enemy: {
-          ...enemy,
-          hp: enemyHp,
-        },
-        playerHp,
-        playerMaxHp: player.maxHp,
-        enemyHp,
-        enemyMaxHp: enemy.maxHp,
-        playerStatuses,
-        enemyStatuses,
-        playerMp,
-        playerDamage,
-        effectiveDefense,
-        pVsE: playerRestriction,
-        enemyElementalAffinity: playerEnemyElementalAffinity,
-        activeSkillReadyAtMs,
-        mageFoundationStacks,
-        isCrit,
-        dealsDirectDamage,
-        passiveFlags,
-      }));
-
-      const skillExecutionTimeMs =
-        activeSkillTimelineProfile?.executionTimeMs ??
-        getSkillExecutionTimeMs(skillReady ? activeSkill! : undefined);
-      playerNextActionMs =
-        currentTimeMs + Math.max(playerAttackIntervalMs, skillExecutionTimeMs);
-      if (enemyHp <= 0) break;
-    } else {
-      if (hasIncapacitatingStatus(enemyStatuses, currentTimeMs)) {
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: false,
-          message: `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 被控制中，無法出手！`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-        enemyNextActionMs = currentTimeMs + enemyAttackIntervalMs;
-        if (hasSwordHeartPassive && !playerDamagedSinceSwordHeartWindow) {
-          swordHeartStacks = applySwordHeartUpkeep({
-            swordHeartStacks,
-            logs,
-            turn,
-            timeMs: currentTimeMs,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-            blockedMessage:
-              "【養劍術】劍勢已滿，當前回合的停滯不再繼續積蓄殺機。",
-            stackingMessage: (nextStacks) =>
-              `【養劍術】敵勢受阻，劍勢提升至第 ${nextStacks} 層。`,
-          });
-        }
-        playerDamagedSinceSwordHeartWindow = false;
+        }));
         turn++;
         continue;
       }
