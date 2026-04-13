@@ -386,6 +386,7 @@
 - [x] 敵方出手前的攻勢計算，也已開始抽成 `resolveEnemyOffenseRoll(...)`，把屬性克制、特招倍率、格擋 / 閃避 / 虛空轉移與承傷前數值準備集中處理
 - [x] world strike 結果組裝也已開始拆成 `buildPlayerWorldStrikeResult(...) / buildEnemyWorldStrikeResult(...)`，enemy 端 timing metadata 亦已抽成 `buildEnemyWorldStrikeTiming(...)`
 - [x] player / enemy world strike 的前置 runtime 組裝，也已開始拆成 `createPlayerWorldStrikeRuntime(...) / createEnemyWorldStrikeRuntime(...)`，world 視角的攻勢上下文、被動旗標、克制、元素修正與 incoming status 不再在結果函式中重複鋪排
+- [x] world strike 的結果運算本體，也已開始拆成 `resolvePlayerWorldStrikeOutcome(...) / resolveEnemyWorldStrikeOutcome(...)`，strike 入口逐步退回 orchestration 角色
 - [x] world strike 的被動狀態整理也已拆層：enemy 端改成 `defensive / survival` 兩段 helper，player 端改成 `sword / body / mage` 三段 helper
 - [x] 第一批高境界 retired active alias 已補上明確 realtime metadata，像 `m_bi_active / s_im_active / m_ie_active` 不再只靠 default fallback 推估範圍與施法節奏
 - [x] timeline combat 的致命保命流程已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`

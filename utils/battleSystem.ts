@@ -7725,6 +7725,25 @@ export const resolvePlayerWorldStrike = (
   enemy: Enemy,
   skill?: Skill
 ): WorldStrikeResult => {
+  return resolvePlayerWorldStrikeOutcome({
+    player,
+    enemy,
+    skill,
+    runtime: createPlayerWorldStrikeRuntime(player, enemy, skill),
+  });
+};
+
+const resolvePlayerWorldStrikeOutcome = ({
+  player,
+  enemy,
+  skill,
+  runtime,
+}: {
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  skill?: Skill;
+  runtime: ReturnType<typeof createPlayerWorldStrikeRuntime>;
+}): WorldStrikeResult => {
   const {
     attackContext,
     canonicalSkillId,
@@ -7736,7 +7755,7 @@ export const resolvePlayerWorldStrike = (
     swordTribulationActive,
     bodyFoundationStacks,
     timelineProfile,
-  } = createPlayerWorldStrikeRuntime(player, enemy, skill);
+  } = runtime;
   const { hasSwordVoidPassive, hasSwordQiPassive, hasMageQiPassive, hasBodyFoundationPassive, hasSwordEmperorPassive, hasSwordMahayanaPassive, hasMageMahayanaPassive } =
     passiveFlags;
   let effectivePower = attackContext.power;
@@ -7847,6 +7866,25 @@ export const resolveEnemyWorldStrike = (
   player: PlayerCombatStats,
   useSpecial = false
 ) => {
+  return resolveEnemyWorldStrikeOutcome({
+    enemy,
+    player,
+    useSpecial,
+    runtime: createEnemyWorldStrikeRuntime(enemy, player, useSpecial),
+  });
+};
+
+const resolveEnemyWorldStrikeOutcome = ({
+  enemy,
+  player,
+  useSpecial,
+  runtime,
+}: {
+  enemy: Enemy;
+  player: PlayerCombatStats;
+  useSpecial: boolean;
+  runtime: ReturnType<typeof createEnemyWorldStrikeRuntime>;
+}) => {
   const special = useSpecial ? enemy.specialAttack : undefined;
   const {
     attackContext,
@@ -7855,7 +7893,7 @@ export const resolveEnemyWorldStrike = (
     effectiveDefense,
     timelineProfile,
     incomingStatuses,
-  } = createEnemyWorldStrikeRuntime(enemy, player, useSpecial);
+  } = runtime;
   let effectivePower =
     attackContext.power * (special?.damageMultiplier ?? 1);
 
