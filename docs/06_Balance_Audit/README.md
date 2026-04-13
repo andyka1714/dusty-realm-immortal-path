@@ -148,6 +148,7 @@
 - 玩家被動技能判定已補成共用 skill-id 對照表，world strike 與 timeline combat 的 passive flag 來源不再各自手寫
 - 戰鬥開場的元素克制、弱點洞察、護體展開與高境界開場壓制，也已開始整併成共用 opener helper
 - 主動術式後的多種被動觸發訊息，也已開始整併到共用 passive-proc helper
+- 主動術式後的資源回復、冷卻縮短、冷卻重置與疊層訊息，也已開始收斂到共用 logger helper，降低 `runAutoBattle()` 在 `五氣朝元 / 道法自然 / 靈潮循環 / 劍心通明 / 靈力湧動` 這批事件上的散寫
 - 來襲傷害的防禦型被動事件，也已開始整併到共用 defensive-passive helper
 - `言出法隨`、`劍道獨尊`、`向死而生` 等高境界被動，已開始同步對齊 world strike 與時間軸戰鬥結果
 - retired 技能已分成：
@@ -160,6 +161,7 @@
 - `法力源泉`、`靈力湧動`、`五氣朝元` 這批法修被動，也已開始補齊 world strike 狀態回報
 - `仙法通神`、`萬法歸宗` 這批高境界法修被動，也已開始補齊 world strike 狀態回報
 - `萬法皆空` 也已開始在 player world strike 的普攻中正式回報，不再只在時間軸戰鬥裡隱性生效
+- `劍意化形` 也已開始在 player world strike 的普攻中正式回報，不再只在 timeline combat 的追加斬擊事件裡可見
 - `荊棘皮層`、`蠻荒血脈`、`銅皮鐵骨`、`金剛法相`、`元素護盾` 這批防禦型被動，也已開始補齊 enemy world strike 狀態回報
 - `萬劫不滅`、`雷劫煉心` 這批高境界承傷 / 生存被動，也已開始補齊 enemy world strike 狀態回報
 - `護體劍罡`、`滴血重生`、`不死不滅` 這批致命生存型被動，也已開始補齊 enemy world strike 狀態回報

@@ -861,6 +861,10 @@ const getPlayerWorldPassiveStatusNames = (options: {
     statusNames.push("萬法皆空");
   }
 
+  if (!skill && passiveFlags.hasSwordEchoPassive && dealsDirectDamage) {
+    statusNames.push("劍意化形");
+  }
+
   if (
     passiveFlags.hasSwordQiPassive &&
     isCrit &&
@@ -1570,6 +1574,106 @@ const getPlayerActivePassiveProcMessages = (options: {
     enemyHp,
     enemyMaxHp: enemy.maxHp,
   }));
+};
+
+const logResolvedActivePassiveEffects = (options: {
+  logs: CombatLog[];
+  turn: number;
+  timeMs: number;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  noManaCostTriggered: boolean;
+  cooldownReductionMessage?: string;
+  manaCycleRecovery?: number;
+  swordGoldenResetTriggered: boolean;
+  mageFoundationStacksGained?: number;
+}) => {
+  const {
+    logs,
+    turn,
+    timeMs,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp,
+    noManaCostTriggered,
+    cooldownReductionMessage,
+    manaCycleRecovery,
+    swordGoldenResetTriggered,
+    mageFoundationStacksGained,
+  } = options;
+
+  if (noManaCostTriggered) {
+    pushCombatLog(logs, {
+      turn,
+      timeMs,
+      isPlayer: true,
+      message: `【五氣朝元】術式運轉不再消耗靈力。`,
+      damage: 0,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  if (cooldownReductionMessage) {
+    pushCombatLog(logs, {
+      turn,
+      timeMs,
+      isPlayer: true,
+      message: cooldownReductionMessage,
+      damage: 0,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  if (manaCycleRecovery && manaCycleRecovery > 0) {
+    pushCombatLog(logs, {
+      turn,
+      timeMs,
+      isPlayer: true,
+      message: `【靈潮循環】術式回潮歸海，你回復了 ${manaCycleRecovery} 點靈力。`,
+      damage: 0,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  if (swordGoldenResetTriggered) {
+    pushCombatLog(logs, {
+      turn,
+      timeMs,
+      isPlayer: true,
+      message: `【劍心通明】你在暴擊中瞬息回氣，流光劍影冷卻即刻重置。`,
+      damage: 0,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  if (mageFoundationStacksGained && mageFoundationStacksGained > 0) {
+    pushCombatLog(logs, {
+      turn,
+      timeMs,
+      isPlayer: true,
+      message: `【靈力湧動】術式餘波回流，下一輪法術威能提升，當前 ${mageFoundationStacksGained} 層。`,
+      damage: 0,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
 };
 
 const logShieldAbsorption = ({
@@ -3226,21 +3330,12 @@ export const runAutoBattle = (
           activeSkillTimelineProfile?.cooldownSeconds ??
           activeSkill!.cooldownSeconds ??
           activeSkill!.cooldown;
-        if (
+        const noManaCostTriggered =
           hasMageFusionPassive &&
-          activeSkill!.profession === ProfessionType.Mage
+          activeSkill!.profession === ProfessionType.Mage;
+        if (
+          noManaCostTriggered
         ) {
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【五氣朝元】術式運轉不再消耗靈力。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
         } else {
           playerMp = Math.max(0, playerMp - (activeSkill!.cost || 0));
         }
@@ -3250,39 +3345,19 @@ export const runAutoBattle = (
         );
         activeSkillReadyAtMs =
           currentTimeMs + Math.floor(effectiveCooldownSeconds * 1000);
-        if (
+        const cooldownReductionMessage =
           effectiveCooldownSeconds < baseCooldownSeconds &&
           activeSkill!.profession === ProfessionType.Mage
-        ) {
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【道法自然】術式流轉提前歸位，冷卻縮短至 ${effectiveCooldownSeconds.toFixed(1)} 秒。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
+            ? `【道法自然】術式流轉提前歸位，冷卻縮短至 ${effectiveCooldownSeconds.toFixed(1)} 秒。`
+            : undefined;
 
+        let recoveredMana = 0;
         if (hasMageQiPassive && activeSkill!.profession === ProfessionType.Mage) {
-          const recoveredMana = getMageQiCycleRecovery(player.maxMp);
+          recoveredMana = getMageQiCycleRecovery(player.maxMp);
           playerMp = Math.min(player.maxMp, playerMp + recoveredMana);
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【靈潮循環】術式回潮歸海，你回復了 ${recoveredMana} 點靈力。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
         }
 
+        let swordGoldenResetTriggered = false;
         if (
           hasSwordGoldenPassive &&
           activeSkillCanonicalId === "s_f_active" &&
@@ -3290,33 +3365,29 @@ export const runAutoBattle = (
           Math.random() < 0.3
         ) {
           activeSkillReadyAtMs = currentTimeMs;
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【劍心通明】你在暴擊中瞬息回氣，流光劍影冷卻即刻重置。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
+          swordGoldenResetTriggered = true;
         }
 
+        let mageFoundationStacksGained: number | undefined;
         if (hasMageFoundationPassive && activeSkill!.profession === ProfessionType.Mage) {
           mageFoundationStacks = Math.min(3, mageFoundationStacks + 1);
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: `【靈力湧動】術式餘波回流，下一輪法術威能提升，當前 ${mageFoundationStacks} 層。`,
-            damage: 0,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
+          mageFoundationStacksGained = mageFoundationStacks;
         }
+
+        logResolvedActivePassiveEffects({
+          logs,
+          turn,
+          timeMs: currentTimeMs,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+          noManaCostTriggered,
+          cooldownReductionMessage,
+          manaCycleRecovery: recoveredMana,
+          swordGoldenResetTriggered,
+          mageFoundationStacksGained,
+        });
 
         const { createdStatuses, playerSideStatuses, enemySideStatuses } =
           resolveNormalizedSkillStatuses(

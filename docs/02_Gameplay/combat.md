@@ -63,6 +63,7 @@
 - 戰鬥開場的被動狀態與對應戰鬥訊息，已開始走共用初始化 helper，不再由 `runAutoBattle()` 散寫 `荊棘皮層` / `元素護盾` 等開場事件
 - 屬性克制、弱點洞察、元素抗性、開場被動與高境界開場壓制提示，也已開始收斂到共用 opener helper，降低 `runAutoBattle()` 前置事件散落風險
 - 主動術式後的被動觸發訊息，已開始抽成共用 passive-proc helper，逐步收斂 `法力源泉` / `言出法隨` / `法則之劍` / `劍道獨尊` / `靈潮循環` / `蠻荒血脈` 等事件的散寫
+- 主動術式後的資源、冷卻、疊層與重置類被動訊息，也已開始收斂到共用 logger helper，集中處理 `五氣朝元` / `道法自然` / `靈潮循環` / `劍心通明` / `靈力湧動`
 - 來襲傷害的防禦型被動事件，也已開始抽成共用 defensive-passive helper，集中處理 `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `肉身成聖` / `元素護盾`
 - 第一批與第二批法術型怪物、遠程怪與 Boss 已補上 `specialAttack` 資料，戰鬥中不再只剩普通攻擊模板
 - `createEnemy()` 已加入預設怪物特招規則：
@@ -127,6 +128,7 @@
   - `b_g_passive` / `b_f_passive` / `b_q_passive` / `b_bi_passive` / `m_g_passive`：在 enemy world strike 也已開始正式回報 `反震` / `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `元素護盾`
   - `b_tr_passive` / `m_tr_passive`：在 enemy world strike 也已開始正式回報 `萬劫不滅` / `雷劫煉心`
 - `s_n_passive` / `b_ma_passive` / `b_ie_passive`：在 enemy world strike 也已開始正式回報 `護體劍罡` / `滴血重生` / `不死不滅`
+- `s_sf_passive`：在 player world strike 的普攻也已開始正式回報 `劍意化形`
 - `b_im_passive` / `s_ie_passive`：在 enemy special world strike 也已開始正式回報 `仙體無垢` / `萬法皆空`，不再只在 timeline combat 內部靜默過濾 DOT 與負面狀態
 - `b_f_passive` / `m_q_passive` / `s_q_passive` / `s_vr_passive`：在 player world strike 也開始明確回報 `蠻荒血脈`、`靈潮循環`、`劍脈初成`、`法則之劍`
   - `s_tr_passive`：低血量必暴與額外增傷

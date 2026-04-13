@@ -233,6 +233,7 @@
 - [x] 來襲傷害的防禦型被動事件已開始抽成共用 defensive-passive helper，集中處理 `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `肉身成聖` / `元素護盾`
 - [x] enemy special 的 incoming status 過濾與控制縮短，現在也開始走 world / timeline 共用 resolver，不再在 `runAutoBattle()` 內手寫一套獨立分支
 - [x] enemy special 的免疫觸發訊息，也已開始抽成共用 helper，避免 `仙體無垢 / 萬法皆空` 在時間軸戰鬥內重複散寫
+- [x] 主動術式後的資源回復、冷卻縮短、冷卻重置與疊層訊息，也已開始抽成共用 logger helper，收斂 `五氣朝元 / 道法自然 / 靈潮循環 / 劍心通明 / 靈力湧動`
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---
@@ -312,6 +313,7 @@
 - [x] player world strike 的被動狀態回報已開始抽成共用 helper，並補上 `蠻荒血脈` / `靈潮循環` / `劍脈初成` / `法則之劍`
 - [x] `m_n_passive` / `m_f_passive` / `m_bi_passive` 已開始補齊 world strike 狀態回報，正式標出 `法力源泉` / `靈力湧動` / `五氣朝元`
 - [x] `s_ie_passive` 已開始補齊 player world strike 對齊，正式標出 `萬法皆空`
+- [x] `s_sf_passive` 已開始補齊 player world strike 對齊，正式標出 `劍意化形`
 - [x] enemy world strike 的減傷 / 保命被動判定已開始抽成共用 trigger helper，減少 `resolveEnemyWorldStrike()` 內的重複流程
 - [x] enemy world strike 的 incoming status 過濾已開始和 timeline combat 對齊，正式共用 DOT / 負面狀態免疫規則
 - [x] timeline combat 的致命保命流程已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`

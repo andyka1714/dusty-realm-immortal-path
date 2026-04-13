@@ -1004,6 +1004,36 @@ describe("battle system balance", () => {
     expect(result.logs.some((log) => log.message.includes("劍意化形"))).toBe(true);
   });
 
+  it("surfaces spirit severing sword passive on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 70,
+        rootBone: 70,
+        insight: 64,
+        comprehension: 24,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.SpiritSevering,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 760,
+        defense: 210,
+        speed: 12,
+        hp: 2800,
+      },
+      "劍君",
+      ProfessionType.Sword,
+      ["s_sf_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(sword, COMMON_ENEMIES.m30_c1);
+
+    expect(strike.playerStatusNames).toContain("劍意化形");
+  });
+
   it("lets nascent soul body passive heal based on missing hp each tick", () => {
     fixedRandom.mockReturnValue(0.5);
 
