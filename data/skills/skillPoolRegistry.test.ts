@@ -418,4 +418,26 @@ describe("skill pool registry", () => {
     expect(getSkill("s_bi_active")?.replacementSkillId).toBe("s_tr_active");
     expect(getSkill("s_im_passive")?.replacementSkillId).toBe("s_tr_passive");
   });
+
+  it("gives high-realm retired active aliases explicit realtime combat metadata", () => {
+    const immortalSword = getSkill("s_im_active");
+    const emperorMage = getSkill("m_ie_active");
+    const fusionMage = getSkill("m_bi_active");
+
+    expect(immortalSword?.areaShape).toBe("line");
+    expect(immortalSword?.areaRadius).toBe(2);
+    expect(immortalSword?.maxTargets).toBe(4);
+    expect(immortalSword?.castTimeMs).toBe(360);
+
+    expect(emperorMage?.areaShape).toBe("circle");
+    expect(emperorMage?.areaRadius).toBe(3);
+    expect(emperorMage?.maxTargets).toBe(6);
+    expect(emperorMage?.projectileSpeed).toBe(14);
+    expect(emperorMage?.castRange).toBe(6);
+
+    expect(fusionMage?.areaShape).toBe("circle");
+    expect(fusionMage?.areaRadius).toBe(2);
+    expect(fusionMage?.maxTargets).toBe(6);
+    expect(fusionMage?.projectileSpeed).toBe(12);
+  });
 });

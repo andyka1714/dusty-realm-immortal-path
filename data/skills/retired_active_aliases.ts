@@ -9,7 +9,21 @@ const buildRetiredActiveAlias = (
     Skill,
     "id" | "name" | "description" | "minRealm" | "profession" | "targetType" | "effectType"
   > &
-    Partial<Pick<Skill, "cooldown" | "damageMultiplier" | "statusEffect">>
+    Partial<
+      Pick<
+        Skill,
+        | "cooldown"
+        | "damageMultiplier"
+        | "statusEffect"
+        | "cooldownSeconds"
+        | "castRange"
+        | "castTimeMs"
+        | "projectileSpeed"
+        | "areaShape"
+        | "areaRadius"
+        | "maxTargets"
+      >
+    >
 ): Skill => ({
   ...replacementSkill,
   ...overrides,
@@ -30,6 +44,13 @@ export const VOID_REFINING_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
     cooldown: 7,
     damageMultiplier: undefined,
     statusEffect: undefined,
+    cooldownSeconds: 6.8,
+    castRange: 2,
+    castTimeMs: 280,
+    projectileSpeed: undefined,
+    areaShape: "line",
+    areaRadius: 1,
+    maxTargets: 4,
   }),
 };
 
@@ -46,6 +67,13 @@ export const FUSION_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
     cooldown: 6,
     damageMultiplier: 8.0,
     statusEffect: undefined,
+    cooldownSeconds: 5.8,
+    castRange: 1,
+    castTimeMs: 260,
+    projectileSpeed: undefined,
+    areaShape: "single",
+    areaRadius: 0,
+    maxTargets: 1,
   }),
   b_bi_active: buildRetiredActiveAlias(MAHAYANA_SKILLS.b_ma_active, {
     id: "b_bi_active",
@@ -63,6 +91,13 @@ export const FUSION_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
       duration: 5,
       chance: 1.0,
     },
+    cooldownSeconds: 11,
+    castRange: 0,
+    castTimeMs: 360,
+    projectileSpeed: undefined,
+    areaShape: "self",
+    areaRadius: 0,
+    maxTargets: 1,
   }),
   m_bi_active: buildRetiredActiveAlias(TRIBULATION_SKILLS.m_tr_active, {
     id: "m_bi_active",
@@ -76,6 +111,13 @@ export const FUSION_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
     cooldown: 6,
     damageMultiplier: 4.0,
     statusEffect: undefined,
+    cooldownSeconds: 5.5,
+    castRange: 5,
+    castTimeMs: 420,
+    projectileSpeed: 12,
+    areaShape: "circle",
+    areaRadius: 2,
+    maxTargets: 6,
   }),
 };
 
@@ -96,6 +138,13 @@ export const MAHAYANA_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
       duration: 1,
       chance: 0.8,
     },
+    cooldownSeconds: 3.8,
+    castRange: 5,
+    castTimeMs: 360,
+    projectileSpeed: 13,
+    areaShape: "single",
+    areaRadius: 0,
+    maxTargets: 1,
   }),
 };
 
@@ -117,6 +166,13 @@ export const TRIBULATION_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
       chance: 1.0,
       value: 0.5,
     },
+    cooldownSeconds: 5.6,
+    castRange: 1,
+    castTimeMs: 320,
+    projectileSpeed: undefined,
+    areaShape: "cone",
+    areaRadius: 1,
+    maxTargets: 3,
   }),
 };
 
@@ -138,6 +194,13 @@ export const IMMORTAL_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
       chance: 1.0,
       value: 0.3,
     },
+    cooldownSeconds: 13.5,
+    castRange: 2,
+    castTimeMs: 360,
+    projectileSpeed: undefined,
+    areaShape: "line",
+    areaRadius: 2,
+    maxTargets: 4,
   }),
   b_im_active: buildRetiredActiveAlias(MAHAYANA_SKILLS.b_ma_active, {
     id: "b_im_active",
@@ -151,6 +214,13 @@ export const IMMORTAL_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
     cooldown: 10,
     damageMultiplier: 8.0,
     statusEffect: undefined,
+    cooldownSeconds: 9,
+    castRange: 1,
+    castTimeMs: 340,
+    projectileSpeed: undefined,
+    areaShape: "cone",
+    areaRadius: 1,
+    maxTargets: 3,
   }),
   m_im_active: buildRetiredActiveAlias(TRIBULATION_SKILLS.m_tr_active, {
     id: "m_im_active",
@@ -163,6 +233,13 @@ export const IMMORTAL_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
     cooldown: 12,
     damageMultiplier: undefined,
     statusEffect: undefined,
+    cooldownSeconds: 11,
+    castRange: 0,
+    castTimeMs: 420,
+    projectileSpeed: undefined,
+    areaShape: "self",
+    areaRadius: 0,
+    maxTargets: 1,
   }),
 };
 
@@ -179,6 +256,13 @@ export const IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
     cooldown: 20,
     damageMultiplier: 20.0,
     statusEffect: undefined,
+    cooldownSeconds: 18,
+    castRange: 3,
+    castTimeMs: 420,
+    projectileSpeed: undefined,
+    areaShape: "line",
+    areaRadius: 2,
+    maxTargets: 5,
   }),
   b_ie_active: buildRetiredActiveAlias(MAHAYANA_SKILLS.b_ma_active, {
     id: "b_ie_active",
@@ -197,6 +281,13 @@ export const IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
       chance: 1.0,
       value: 0.1,
     },
+    cooldownSeconds: 13.5,
+    castRange: 2,
+    castTimeMs: 380,
+    projectileSpeed: undefined,
+    areaShape: "cone",
+    areaRadius: 2,
+    maxTargets: 4,
   }),
   m_ie_active: buildRetiredActiveAlias(TRIBULATION_SKILLS.m_tr_active, {
     id: "m_ie_active",
@@ -210,6 +301,13 @@ export const IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = {
     cooldown: 15,
     damageMultiplier: 15.0,
     statusEffect: undefined,
+    cooldownSeconds: 13.5,
+    castRange: 6,
+    castTimeMs: 460,
+    projectileSpeed: 14,
+    areaShape: "circle",
+    areaRadius: 3,
+    maxTargets: 6,
   }),
 };
 

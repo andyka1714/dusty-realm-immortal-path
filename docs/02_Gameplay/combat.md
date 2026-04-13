@@ -166,6 +166,10 @@
 - `b_im_passive` / `s_ie_passive`：在 enemy special world strike 也已開始正式回報 `仙體無垢` / `萬法皆空`，不再只在 timeline combat 內部靜默過濾 DOT 與負面狀態
 - `b_f_passive` / `m_q_passive` / `s_q_passive` / `s_vr_passive`：在 player world strike 也開始明確回報 `蠻荒血脈`、`靈潮循環`、`劍脈初成`、`法則之劍`
 - `s_g_passive`：在劍修 world strike 暴擊時也已開始明確回報 `劍心通明`
+- 第一批高境界 retired active alias，也已補上明確即時戰鬥欄位，不再只靠 default fallback 推估：
+  - `m_bi_active`：固定 `circle / 2 / 6 / projectile`
+  - `s_im_active`：固定 `line / 2 / 4`
+  - `m_ie_active`：固定 `circle / 3 / 6 / projectile`
   - `s_tr_passive`：低血量必暴與額外增傷
   - `b_ma_passive`：死亡逆轉並短暫無敵
   - `m_tr_passive`：控制免疫外，雷屬反擊會轉為回復
@@ -190,6 +194,7 @@
   - `m_ie_active`：一念花開會把敵方優勢逆轉為多重 debuff
 - `enemy world strike` 的承傷 / 生存型被動觸發計算，已開始抽成共用 helper，避免 `resolveEnemyWorldStrike()` 內重複堆疊同一批減傷與保命判定
 - `enemy world strike` 的 incoming status 過濾，也已開始和 timeline combat 對齊，正式處理 `DOT / 負面狀態免疫` 的共用規則
+- `enemy world strike` 的 timing metadata 也已開始抽成 `buildEnemyWorldStrikeTiming(...)`，不再把 `nextActionDelay / cooldown / execution / area` 散寫在結果組裝內
 - `enemy special` 的 incoming status 過濾與控制縮短，也已開始抽成 world / timeline 共用 resolver，不再只在 `runAutoBattle()` 內手寫 `filteredEnemyStatuses / normalizedIncomingStatuses`
 - Boss 破綻觸發與戰鬥事件，也已開始整併到 `rollBossBreakOpportunity(...)`，主循環不再直接散寫同一段爆發窗口判定
 - `enemy special` 的狀態套用、戰鬥日誌與免疫觸發，已開始進一步收斂到同一層 helper，減少 timeline 內核殘留的散寫分支

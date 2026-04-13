@@ -1140,6 +1140,25 @@ const buildPlayerWorldStrikeResult = ({
   isProjectile: timelineProfile.isProjectile,
 });
 
+const buildEnemyWorldStrikeTiming = ({
+  enemy,
+  special,
+  timelineProfile,
+}: {
+  enemy: Enemy;
+  special?: Enemy["specialAttack"];
+  timelineProfile: ReturnType<typeof getEnemySpecialTimelineProfile>;
+}) => ({
+  nextActionDelayMs: getEnemyAttackIntervalMs(enemy),
+  specialCooldownMs: special
+    ? Math.floor(getResolvedEnemySpecialCooldownSeconds(enemy) * 1000)
+    : 0,
+  executionTimeMs: timelineProfile.executionTimeMs,
+  areaShape: timelineProfile.areaShape,
+  areaRadius: timelineProfile.areaRadius,
+  isProjectile: timelineProfile.isProjectile,
+});
+
 const buildEnemyWorldStrikeResult = ({
   damage,
   special,
@@ -1217,14 +1236,11 @@ const buildEnemyWorldStrikeResult = ({
     damage,
     skillName: special?.name,
     statusNames,
-    nextActionDelayMs: getEnemyAttackIntervalMs(enemy),
-    specialCooldownMs: special
-      ? Math.floor(getResolvedEnemySpecialCooldownSeconds(enemy) * 1000)
-      : 0,
-    executionTimeMs: timelineProfile.executionTimeMs,
-    areaShape: timelineProfile.areaShape,
-    areaRadius: timelineProfile.areaRadius,
-    isProjectile: timelineProfile.isProjectile,
+    ...buildEnemyWorldStrikeTiming({
+      enemy,
+      special,
+      timelineProfile,
+    }),
   };
 };
 
