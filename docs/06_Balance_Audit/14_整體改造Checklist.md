@@ -362,6 +362,7 @@
 - [x] `b_q_passive` / `m_g_passive` 已開始補齊 player world strike 對齊，正式標出 `銅皮鐵骨` / `元素護盾`
 - [x] `b_g_passive` 已開始補齊 player world strike 對齊，正式標出 `荊棘皮層`
 - [x] `s_f_passive` / `b_bi_passive` 已開始補齊 player world strike 對齊，正式標出 `養劍術` / `金剛法相`
+- [x] `b_tr_passive` / `m_tr_passive` 已開始補齊 player world strike 對齊，正式標出 `萬劫不滅` / `雷劫煉心`
 - [x] `m_sf_passive` 已開始補齊 player world strike 對齊，正式標出 `道法自然`
 - [x] enemy world strike 的減傷 / 保命被動判定已開始抽成共用 trigger helper，減少 `resolveEnemyWorldStrike()` 內的重複流程
 - [x] enemy world strike 的 incoming status 過濾已開始和 timeline combat 對齊，正式共用 DOT / 負面狀態免疫規則

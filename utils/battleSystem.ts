@@ -884,6 +884,10 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
     statusNames.push("滴血重生");
   }
 
+  if (!skill && passiveFlags.hasBodyTribulationPassive) {
+    statusNames.push("萬劫不滅");
+  }
+
   if (!skill && passiveFlags.hasMageQiPassive && player.profession === ProfessionType.Mage) {
     statusNames.push("靈潮循環");
   }
@@ -906,6 +910,10 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
 
   if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageFusionPassive) {
     statusNames.push("五氣朝元");
+  }
+
+  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageTribulationPassive) {
+    statusNames.push("雷劫煉心");
   }
 
   if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageImmortalPassive) {

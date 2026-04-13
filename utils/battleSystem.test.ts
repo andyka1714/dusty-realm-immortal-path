@@ -1746,6 +1746,35 @@ describe("battle system balance", () => {
     expect(strike.playerStatusNames).toContain("滴血重生");
   });
 
+  it("surfaces tribulation body passive on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const body = calculatePlayerStats(
+      {
+        physique: 100,
+        rootBone: 88,
+        insight: 66,
+        comprehension: 24,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.MIXED_FIVE,
+      {
+        attack: 980,
+        defense: 420,
+        hp: 14000,
+        speed: 9,
+      },
+      "萬劫戰軀",
+      ProfessionType.Body,
+      ["b_tr_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(body, COMMON_ENEMIES.m121_c1);
+    expect(strike.playerStatusNames).toContain("萬劫不滅");
+  });
+
   it("lets nascent soul mage passive regenerate mana and boost high-mp damage", () => {
     fixedRandom.mockReturnValue(0.5);
 
@@ -5709,6 +5738,40 @@ describe("battle system balance", () => {
     );
 
     expect(strike.playerStatusNames).toContain("萬法歸宗");
+  });
+
+  it("surfaces tribulation mage passive on world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 94,
+        rootBone: 82,
+        insight: 102,
+        comprehension: 30,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1800,
+        hp: 7600,
+        mp: 4200,
+        defense: 260,
+      },
+      "劫雷法尊",
+      ProfessionType.Mage,
+      ["m_tr_active", "m_tr_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(
+      mage,
+      COMMON_ENEMIES.m170_c1,
+      getSkill("m_tr_active")
+    );
+
+    expect(strike.playerStatusNames).toContain("雷劫煉心");
   });
 
   it("surfaces sword emperor passive on basic world strikes", () => {
