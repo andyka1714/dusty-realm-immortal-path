@@ -1393,6 +1393,54 @@ const getCombatStatusSnapshot = (
   return Array.from(new Set(labels));
 };
 
+const resolveStatusTickOutcome = ({
+  status,
+  targetMaxHp,
+  targetIsPlayer,
+  enemy,
+}: {
+  status: CombatStatus;
+  targetMaxHp: number;
+  targetIsPlayer: boolean;
+  enemy?: Enemy;
+}) => {
+  let damage = 0;
+  let message = "";
+  let restoreToPlayer = false;
+  let restoreToEnemy = false;
+
+  switch (status.kind) {
+    case "burn":
+      damage = Math.max(1, Math.floor(targetMaxHp * Math.max(0.02, status.value)));
+      message = targetIsPlayer
+        ? `你身陷【${status.name}】，承受 <dmg>${damage}</dmg> 點傷害！`
+        : `<enemy rank="${enemy?.rank}">${enemy?.name}</enemy> 身陷【${status.name}】，承受 <dmg>${damage}</dmg> 點傷害！`;
+      break;
+    case "poison":
+      damage = Math.max(1, Math.floor(targetMaxHp * Math.max(0.018, status.value)));
+      message = targetIsPlayer
+        ? `你遭【${status.name}】侵蝕，承受 <dmg>${damage}</dmg> 點傷害！`
+        : `<enemy rank="${enemy?.rank}">${enemy?.name}</enemy> 遭【${status.name}】侵蝕，承受 <dmg>${damage}</dmg> 點傷害！`;
+      break;
+    case "bleed":
+      damage = Math.max(1, Math.floor(targetMaxHp * Math.max(0.015, status.value)));
+      message = targetIsPlayer
+        ? `你氣血流失，因【${status.name}】承受 <dmg>${damage}</dmg> 點傷害！`
+        : `<enemy rank="${enemy?.rank}">${enemy?.name}</enemy> 傷口撕裂，流失 <dmg>${damage}</dmg> 點氣血！`;
+      break;
+    case "drain":
+      damage = Math.max(1, Math.floor(targetMaxHp * Math.max(0.04, status.value)));
+      restoreToPlayer = !targetIsPlayer;
+      restoreToEnemy = targetIsPlayer;
+      message = targetIsPlayer
+        ? `你被【${status.name}】抽離生機，承受 <dmg>${damage}</dmg> 點傷害，敵方恢復同等氣血。`
+        : `<enemy rank="${enemy?.rank}">${enemy?.name}</enemy> 遭【${status.name}】吞噬，承受 <dmg>${damage}</dmg> 點傷害，你回復了同等氣血。`;
+      break;
+  }
+
+  return { damage, message, restoreToPlayer, restoreToEnemy };
+};
+
 const pushCombatLog = (logs: CombatLog[], log: CombatLog) => {
   const snapshotTimeMs = log.timeMs ?? 0;
   const snapshots = combatLogSnapshotProvider?.(snapshotTimeMs);
@@ -3798,27 +3846,19 @@ export const runAutoBattle = (
           return;
         }
 
-        let tickDamage = 0;
-        let tickMessage = "";
+        const {
+          damage: tickDamage,
+          message: tickMessage,
+          restoreToPlayer,
+        } = resolveStatusTickOutcome({
+          status,
+          targetMaxHp: enemy.maxHp,
+          targetIsPlayer: false,
+          enemy,
+        });
 
-        switch (status.kind) {
-          case "burn":
-            tickDamage = Math.max(1, Math.floor(enemy.maxHp * Math.max(0.02, status.value)));
-            tickMessage = `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 身陷【${status.name}】，承受 <dmg>${tickDamage}</dmg> 點傷害！`;
-            break;
-          case "poison":
-            tickDamage = Math.max(1, Math.floor(enemy.maxHp * Math.max(0.018, status.value)));
-            tickMessage = `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 遭【${status.name}】侵蝕，承受 <dmg>${tickDamage}</dmg> 點傷害！`;
-            break;
-          case "bleed":
-            tickDamage = Math.max(1, Math.floor(enemy.maxHp * Math.max(0.015, status.value)));
-            tickMessage = `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 傷口撕裂，流失 <dmg>${tickDamage}</dmg> 點氣血！`;
-            break;
-          case "drain":
-            tickDamage = Math.max(1, Math.floor(enemy.maxHp * Math.max(0.04, status.value)));
-            playerHp = Math.min(player.maxHp, playerHp + tickDamage);
-            tickMessage = `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 遭【${status.name}】吞噬，承受 <dmg>${tickDamage}</dmg> 點傷害，你回復了同等氣血。`;
-            break;
+        if (restoreToPlayer && tickDamage > 0) {
+          playerHp = Math.min(player.maxHp, playerHp + tickDamage);
         }
 
         if (tickDamage > 0) {
@@ -3878,27 +3918,18 @@ export const runAutoBattle = (
           return;
         }
 
-        let tickDamage = 0;
-        let tickMessage = "";
+        const {
+          damage: tickDamage,
+          message: tickMessage,
+          restoreToEnemy,
+        } = resolveStatusTickOutcome({
+          status,
+          targetMaxHp: player.maxHp,
+          targetIsPlayer: true,
+        });
 
-        switch (status.kind) {
-          case "burn":
-            tickDamage = Math.max(1, Math.floor(player.maxHp * Math.max(0.02, status.value)));
-            tickMessage = `你身陷【${status.name}】，承受 <dmg>${tickDamage}</dmg> 點傷害！`;
-            break;
-          case "poison":
-            tickDamage = Math.max(1, Math.floor(player.maxHp * Math.max(0.018, status.value)));
-            tickMessage = `你遭【${status.name}】侵蝕，承受 <dmg>${tickDamage}</dmg> 點傷害！`;
-            break;
-          case "bleed":
-            tickDamage = Math.max(1, Math.floor(player.maxHp * Math.max(0.015, status.value)));
-            tickMessage = `你氣血流失，因【${status.name}】承受 <dmg>${tickDamage}</dmg> 點傷害！`;
-            break;
-          case "drain":
-            tickDamage = Math.max(1, Math.floor(player.maxHp * Math.max(0.04, status.value)));
-            enemyHp = Math.min(enemy.maxHp, enemyHp + tickDamage);
-            tickMessage = `你被【${status.name}】抽離生機，承受 <dmg>${tickDamage}</dmg> 點傷害，敵方恢復同等氣血。`;
-            break;
+        if (restoreToEnemy && tickDamage > 0) {
+          enemyHp = Math.min(enemy.maxHp, enemyHp + tickDamage);
         }
 
         if (tickDamage > 0) {

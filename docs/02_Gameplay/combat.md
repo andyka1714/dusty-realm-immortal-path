@@ -169,6 +169,7 @@
 - `enemy world strike` 的 incoming status 過濾，也已開始和 timeline combat 對齊，正式處理 `DOT / 負面狀態免疫` 的共用規則
 - `enemy special` 的 incoming status 過濾與控制縮短，也已開始抽成 world / timeline 共用 resolver，不再只在 `runAutoBattle()` 內手寫 `filteredEnemyStatuses / normalizedIncomingStatuses`
 - `enemy special` 的狀態套用、戰鬥日誌與免疫觸發，已開始進一步收斂到同一層 helper，減少 timeline 內核殘留的散寫分支
+- DOT / 吸血 tick 的傷害、回復與戰鬥訊息，也已開始共用同一個 status outcome resolver，玩家與敵方不再各寫一套 `燃燒 / 中毒 / 流血 / 吸生` 結算
 - `絕仙劍` 的 `絕仙封脈` 也已正式接進 timeline combat，會在敵方特招將要就緒時把術式節奏再壓後 `1` 秒，而不再只剩狀態標記
 - 敵方特招的初始延後與後續節奏壓制，現在也已開始共用同一層 helper，`萬法歸宗` 與 `絕仙封脈` 不再在 `runAutoBattle()` 內各自散寫
 - `祖巫降臨 / 法天象地 / 掌中神國 / 一念花開 / 破劫一擊` 這批高境界主動的後續追加效果，也已開始抽成共用 follow-up helper，降低主循環分支密度

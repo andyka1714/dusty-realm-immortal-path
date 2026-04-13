@@ -184,46 +184,29 @@ const RAW_SKILLS: Record<string, Skill> = {
 const stripRetiredAliasesForRealmView = (skills: Record<string, Skill>) =>
   stripBattleAbsorbedPassiveAliases(stripRetirementReadyActiveAliases(skills));
 
+const buildRealmSkillSet = (
+  realm: MajorRealm,
+  baseSkills: Record<string, Skill>
+) =>
+  stripRetiredAliasesForRealmView({
+    ...baseSkills,
+    ...(RETIRED_ACTIVE_ALIASES_BY_REALM[realm] ?? {}),
+    ...(RETIRED_PASSIVE_ALIASES_BY_REALM[realm] ?? {}),
+  });
+
 const RAW_SKILL_SETS_BY_REALM: Record<MajorRealm, Record<string, Skill>> = {
   [MajorRealm.Mortal]: {},
   [MajorRealm.QiRefining]: QI_REFINING_SKILLS,
-  [MajorRealm.Foundation]: stripRetiredAliasesForRealmView({
-    ...FOUNDATION_SKILLS,
-    ...(RETIRED_PASSIVE_ALIASES_BY_REALM[MajorRealm.Foundation] ?? {}),
-  }),
+  [MajorRealm.Foundation]: buildRealmSkillSet(MajorRealm.Foundation, FOUNDATION_SKILLS),
   [MajorRealm.GoldenCore]: GOLDEN_CORE_SKILLS,
   [MajorRealm.NascentSoul]: NASCENT_SOUL_SKILLS,
   [MajorRealm.SpiritSevering]: SPIRIT_SEVERING_SKILLS,
-  [MajorRealm.VoidRefining]: stripRetiredAliasesForRealmView({
-    ...VOID_REFINING_SKILLS,
-    ...(RETIRED_ACTIVE_ALIASES_BY_REALM[MajorRealm.VoidRefining] ?? {}),
-    ...(RETIRED_PASSIVE_ALIASES_BY_REALM[MajorRealm.VoidRefining] ?? {}),
-  }),
-  [MajorRealm.Fusion]: stripRetiredAliasesForRealmView({
-      ...FUSION_SKILLS,
-      ...(RETIRED_ACTIVE_ALIASES_BY_REALM[MajorRealm.Fusion] ?? {}),
-      ...(RETIRED_PASSIVE_ALIASES_BY_REALM[MajorRealm.Fusion] ?? {}),
-  }),
-  [MajorRealm.Mahayana]: stripRetiredAliasesForRealmView({
-      ...MAHAYANA_SKILLS,
-      ...(RETIRED_ACTIVE_ALIASES_BY_REALM[MajorRealm.Mahayana] ?? {}),
-      ...(RETIRED_PASSIVE_ALIASES_BY_REALM[MajorRealm.Mahayana] ?? {}),
-  }),
-  [MajorRealm.Tribulation]: stripRetiredAliasesForRealmView({
-      ...TRIBULATION_SKILLS,
-      ...(RETIRED_ACTIVE_ALIASES_BY_REALM[MajorRealm.Tribulation] ?? {}),
-      ...(RETIRED_PASSIVE_ALIASES_BY_REALM[MajorRealm.Tribulation] ?? {}),
-  }),
-  [MajorRealm.Immortal]: stripRetiredAliasesForRealmView({
-      ...IMMORTAL_SKILLS,
-      ...(RETIRED_ACTIVE_ALIASES_BY_REALM[MajorRealm.Immortal] ?? {}),
-      ...(RETIRED_PASSIVE_ALIASES_BY_REALM[MajorRealm.Immortal] ?? {}),
-  }),
-  [MajorRealm.ImmortalEmperor]: stripRetiredAliasesForRealmView({
-      ...IMMORTAL_EMPEROR_SKILLS,
-      ...(RETIRED_ACTIVE_ALIASES_BY_REALM[MajorRealm.ImmortalEmperor] ?? {}),
-      ...(RETIRED_PASSIVE_ALIASES_BY_REALM[MajorRealm.ImmortalEmperor] ?? {}),
-  }),
+  [MajorRealm.VoidRefining]: buildRealmSkillSet(MajorRealm.VoidRefining, VOID_REFINING_SKILLS),
+  [MajorRealm.Fusion]: buildRealmSkillSet(MajorRealm.Fusion, FUSION_SKILLS),
+  [MajorRealm.Mahayana]: buildRealmSkillSet(MajorRealm.Mahayana, MAHAYANA_SKILLS),
+  [MajorRealm.Tribulation]: buildRealmSkillSet(MajorRealm.Tribulation, TRIBULATION_SKILLS),
+  [MajorRealm.Immortal]: buildRealmSkillSet(MajorRealm.Immortal, IMMORTAL_SKILLS),
+  [MajorRealm.ImmortalEmperor]: buildRealmSkillSet(MajorRealm.ImmortalEmperor, IMMORTAL_EMPEROR_SKILLS),
 };
 
 export const SKILLS: Record<string, Skill> = Object.fromEntries(

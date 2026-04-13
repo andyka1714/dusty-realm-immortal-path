@@ -237,6 +237,7 @@
 - [x] enemy special 的 incoming status 過濾與控制縮短，現在也開始走 world / timeline 共用 resolver，不再在 `runAutoBattle()` 內手寫一套獨立分支
 - [x] enemy special 的免疫觸發訊息，也已開始抽成共用 helper，避免 `仙體無垢 / 萬法皆空` 在時間軸戰鬥內重複散寫
 - [x] enemy special 的狀態套用、戰鬥日誌與免疫提示，已開始進一步收斂到同一層 helper，減少 timeline 內核殘留散寫
+- [x] DOT / 吸血 tick 的傷害、回復與戰鬥訊息，已開始共用同一個 status outcome resolver，玩家與敵方不再各維護一套
 - [x] 主動術式後的資源回復、冷卻縮短、冷卻重置與疊層訊息，也已開始抽成共用 logger helper，收斂 `五氣朝元 / 道法自然 / 靈潮循環 / 劍心通明 / 靈力湧動`
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
@@ -337,6 +338,7 @@
 - [x] `World / UI / Audit` 文件已再做一輪交叉校對，地圖情報 tooltip、短提示 eyebrow 與 battle shared resolver 的描述開始對齊目前實作
 - [x] retired active / passive 的 alias 剝離 helper，已回收到 alias 檔本體，realm view 不再在 `data/skills/index.ts` 額外重複維護同一套過濾規則
 - [x] retired active / passive alias 也已補上 alias-layer 聚合表，正式 realm dataset 現在可直接由 alias-layer 組裝，不再在 `data/skills/index.ts` 手動攤開多份 alias 清單
+- [x] formal realm dataset 的組裝也已開始走單一 `buildRealmSkillSet(...)` helper，各境界不再重複拼接 retired alias
 - [x] retirement-ready passive 視圖也已改成直接由 alias-layer 聚合表組裝，skill index 不再額外以 ID 清單重建同一份資料
 - [x] battle-absorbed passive 視圖也已改成直接由 alias-layer 聚合表組裝，skill index 不再額外以 ID 清單重建同一份資料
 - [x] `StatsPanel / ShopPanel` 的主要資訊浮層已進一步對齊 `GameTooltip` 的標題 / 註腳結構
