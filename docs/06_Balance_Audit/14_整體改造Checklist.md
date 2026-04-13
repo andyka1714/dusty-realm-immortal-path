@@ -352,6 +352,7 @@
 - [x] 道途內的突破按鈕提示也已切到 `GameHintBubble`，再少一個原生 `title` 提示
 - [x] player world strike 的被動狀態回報已開始抽成共用 helper，並補上 `蠻荒血脈` / `靈潮循環` / `劍脈初成` / `法則之劍`
 - [x] `s_g_passive`：在劍修 world strike 暴擊時也已開始明確回報 `劍心通明`
+- [x] `b_sf_passive`：在 player world strike 也已開始明確回報 `肉身成聖`
 - [x] `getPlayerPassiveFlags()` 已改成明確 skill id 對照，不再把不同 retired passive 透過 formal id 錯誤折疊成同一串 battle flag
 - [x] formal core 對 retired passive 的承接已改成顯式 alias 對照，不再靠模糊 canonical 折疊維持 battle 行為
 - [x] `m_n_passive` / `m_f_passive` / `m_bi_passive` 已開始補齊 world strike 狀態回報，正式標出 `法力源泉` / `靈力湧動` / `五氣朝元`

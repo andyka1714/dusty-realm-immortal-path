@@ -163,6 +163,7 @@
 - formal realm dataset 的組裝也已開始走單一 `buildRealmSkillSet(...)` helper，各境界不再重複拼接 retired alias。
 - `言出法隨 / 劍道獨尊 / 向死而生 / 法力源泉 / 靈力湧動 / 五氣朝元 / 仙法通神 / 萬法歸宗 / 萬法皆空 / 劍意化形` 等被動，已陸續補齊 world strike 與 timeline combat 的狀態回報。
 - `劍心通明` 也已開始補齊劍修 world strike 的狀態回報，不再只在 timeline combat 的冷卻重置事件裡可見。
+- `肉身成聖` 也已開始補齊 player world strike 的狀態回報，體修前中期 build 的進攻視角不再缺少被動可見性。
 - `荒古戰體 / 仙元護體 / 劍意化形 / 肉身成聖 / 道法自然` 這批被動，也已開始補齊 timeline combat 開場待命訊息，不再只有內部效果在跑。
 - `劍脈初成 / 銅皮鐵骨 / 靈潮循環 / 法力源泉` 這批前中期核心被動，也已開始補齊 timeline combat 開場待命訊息，避免只有高境界被動有可見性。
 - `劍心通明 / 護體劍罡 / 蠻荒血脈 / 滴血重生 / 靈力湧動` 這批築基到元嬰的關鍵被動，也已開始補齊 timeline combat 開場待命訊息，前中期核心 build 不再缺少待命可見性。
