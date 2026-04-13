@@ -71,6 +71,7 @@
 - `circle / line / cone` 範圍技能已不只存在於欄位或特效，現在會依玩家與主目標相對位置正式波及附近怪物。
 - 世界戰鬥與 `runAutoBattle()` 已開始共用技能 / 特招的 cooldown、execution、AOE、部分 status resolver，以及 enemy special 的 incoming status 過濾與控制縮短規則，但仍未完全統一成單一引擎。
 - 區域地圖的地點懸停情報，也已開始收進共用 `GameTooltip` 外觀，不再維持獨立樣式的浮窗。
+- 區域地圖中的傳送點與 NPC 節點提示，也已開始補齊 `GameHintBubble` 的 eyebrow，和 dock / 側欄 / 背包操作提示收成同一套短提示語言。
 
 怪物根據地圖名稱自動生成 (Auto-populate) 以保持多樣性與合理性：
 

@@ -22,3 +22,4 @@
 - `QuestModal` 的裝備 / 技能書任務獎勵，也已補上 hover `GameTooltip`，不再只剩純文字獎勵列。
 - `QuestModal` 的獎勵 tooltip 標題，也已開始對齊品質色階，和商店 / 背包裝備共用同一套辨識語言。
 - `GameHintBubble`：操作提示、dock 切換、背包按鈕等短提示，作為輕量級懸停語言；現在也開始補齊 `eyebrow + body` 層級，讓短提示不再只是裸文字浮泡。
+- 區域地圖傳送點 / NPC、工坊升級、圖鑑掉落品階 badge、背包物品操作等尾端提示，也已補齊 `eyebrow`，短提示層級更一致。

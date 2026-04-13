@@ -549,7 +549,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                                           >
                                             {badge.l}
                                           </span>
-                                          <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+                                          <GameHintBubble eyebrow="DROP TIER" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
                                             可掉落{badge.l}品
                                           </GameHintBubble>
                                         </span>

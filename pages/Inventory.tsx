@@ -817,7 +817,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                             >
                                <Trash2 size={18} />
                             </button>
-                            <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+                            <GameHintBubble eyebrow="ITEM ACTION" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
                               {selectedSlot.instanceId && isEquipped(selectedSlot.instanceId)
                                 ? '裝備中不可丟棄'
                                 : '丟棄'}

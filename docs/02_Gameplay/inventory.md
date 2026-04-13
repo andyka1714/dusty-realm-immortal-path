@@ -63,6 +63,7 @@
 - 這樣 UI 不會再把 `transition / legacy` 當成正式可取得技能對外呈現
 - 背包內的丟棄確認與批量丟棄視窗，也已開始對齊 `Modal` 的正式 eyebrow 殼層語言
 - 背包格內的裝備、技能書與消耗品懸停浮層，也已開始對齊 `GameTooltip` 的完整 `eyebrow + title + body + footer` 結構
+- 背包內的批量整理、批量管理與單件丟棄等尾端操作提示，也已補齊 `GameHintBubble` 的 eyebrow，和其他遊戲提示語言一致
 - 技能書 hover 現在會直接顯示：
   - 主動 / 被動分類
   - 技能書品階

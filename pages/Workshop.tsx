@@ -75,7 +75,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
                 </button>
                 
                 {/* Tooltip */}
-                <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2 group-hover/btn:opacity-100">
+                <GameHintBubble eyebrow="CRAFT FLOW" className="bottom-full left-1/2 mb-2 -translate-x-1/2 group-hover/btn:opacity-100">
                    <div className={canAfford ? "text-emerald-400" : "text-red-400"}>
                        {canAfford ? "點擊升級" : "靈石不足"}
                    </div>

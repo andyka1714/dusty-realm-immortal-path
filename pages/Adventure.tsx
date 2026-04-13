@@ -2378,7 +2378,7 @@ export const Adventure: React.FC<AdventureProps> = ({
                                     style={{ left: `${(p.x / mapData.width) * 100}%`, top: `${(p.y / mapData.height) * 100}%`, transform: 'translate(-50%, -50%)' }}
                                   >
                                     <div className="w-1.5 h-1.5 rounded-full border border-blue-400 bg-blue-500/50 shadow-[0_0_10px_blue] md:h-2 md:w-2"></div>
-                                    <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+                                    <GameHintBubble eyebrow="MAP PORTAL" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
                                       {p.label}
                                     </GameHintBubble>
                                   </div>
@@ -2424,7 +2424,7 @@ export const Adventure: React.FC<AdventureProps> = ({
                                       >
                                       {npc.symbol}
                                       </div>
-                                      <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+                                      <GameHintBubble eyebrow="MAP NPC" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
                                         {npc.name}
                                       </GameHintBubble>
                                   </div>

@@ -182,6 +182,7 @@
 - `QuestModal` 的裝備 / 技能書任務獎勵，也已補上 hover `GameTooltip`，不再只剩純文字獎勵列
 - `QuestModal` 的獎勵 tooltip 標題也已開始吃品質色階，和商店 / 背包裝備顯示更一致
 - `Stats / Dashboard / Shop / 地圖 / 圖鑑` 這批核心浮層，已開始補齊 `eyebrow`，往 `GameTooltip` 的完整 `eyebrow + title + body + footer` 語言收口
+- 區域地圖傳送點 / NPC、工坊升級、圖鑑掉落品階 badge、背包尾端物品操作等短提示，也已補齊 `GameHintBubble` 的 eyebrow，讓尾端提示不再混雜不同語氣
 - `GamePanel / Modal` 這條 UI 殼層也已開始對齊 `eyebrow + title + icon` 結構，主頁面板與互動視窗不再分裂成兩套語言
 - retirement-ready / battle-absorbed 的 retired alias ID 清單，也已回收至 alias 檔本體，skill index 不再重複維護同一份清單
 
