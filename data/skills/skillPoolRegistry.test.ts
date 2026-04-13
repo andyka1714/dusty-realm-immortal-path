@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { MajorRealm, ProfessionType } from "../../types";
 import {
   ALL_RETIRED_ACTIVE_ALIASES,
+  BATTLE_ABSORBED_RETIRED_ACTIVE_ALIAS_VIEWS,
   BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES,
+  RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_VIEWS,
   RETIREMENT_READY_RETIRED_ACTIVE_ALIASES,
   RETIRED_ACTIVE_ALIASES_BY_REALM,
   stripRetirementReadyActiveAliases as stripRetirementReadyActiveAliasesForTest,
@@ -248,6 +250,9 @@ describe("skill pool registry", () => {
   });
 
   it("keeps retirement-ready retired actives out of realm datasets after centralizing aliases", () => {
+    expect(BATTLE_ABSORBED_RETIRED_ACTIVE_ALIAS_VIEWS.map((skill) => skill.id)).toEqual(
+      Object.keys(BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES)
+    );
     expect(getSkillsByRealm(MajorRealm.VoidRefining).some((skill) => skill.id === "s_vr_active")).toBe(false);
     expect(getSkillsByRealm(MajorRealm.Fusion).some((skill) => skill.id === "s_bi_active")).toBe(false);
     expect(getSkillsByRealm(MajorRealm.Fusion).some((skill) => skill.id === "b_bi_active")).toBe(false);
@@ -304,6 +309,9 @@ describe("skill pool registry", () => {
   });
 
   it("keeps retirement-ready retired skills scoped to absorbed active aliases after pending cleanup", () => {
+    expect(RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_VIEWS.map((skill) => skill.id)).toEqual(
+      BATTLE_ABSORBED_RETIRED_ACTIVE_ALIAS_VIEWS.map((skill) => skill.id)
+    );
     expect(RETIREMENT_READY_RETIRED_SKILL_MAP.s_bi_active?.replacementSkillId).toBe(
       "s_tr_active"
     );
