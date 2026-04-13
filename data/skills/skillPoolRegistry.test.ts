@@ -482,12 +482,19 @@ describe("skill pool registry", () => {
   });
 
   it("removes generic passive tags from skills that already use explicit passive wiring", () => {
-    const explicitPassiveIds = ["s_tr_passive", "b_ie_passive", "m_im_passive"];
+    const explicitPassiveIds = [
+      "s_q_passive",
+      "b_q_passive",
+      "m_q_passive",
+      "s_tr_passive",
+      "b_ie_passive",
+      "m_im_passive",
+    ];
     explicitPassiveIds.forEach((skillId) => {
       expect(EXPLICIT_PASSIVE_EFFECT_SKILL_IDS.has(skillId)).toBe(true);
       expect(SKILLS[skillId]?.passiveEffectTags).toBeUndefined();
     });
 
-    expect(SKILLS.s_q_passive?.passiveEffectTags?.length).toBeGreaterThan(0);
+    expect(SKILLS.s_f_passive?.passiveEffectTags).toBeUndefined();
   });
 });

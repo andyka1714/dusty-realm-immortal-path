@@ -144,6 +144,7 @@ const getDefaultPassiveTags = (skill: Skill): Skill["passiveEffectTags"] => {
 };
 
 export const EXPLICIT_PASSIVE_EFFECT_SKILL_IDS = new Set<string>([
+  "s_q_passive",
   "s_f_passive",
   "s_g_passive",
   "s_n_passive",
@@ -154,6 +155,7 @@ export const EXPLICIT_PASSIVE_EFFECT_SKILL_IDS = new Set<string>([
   "s_tr_passive",
   "s_im_passive",
   "s_ie_passive",
+  "b_q_passive",
   "b_f_passive",
   "b_g_passive",
   "b_n_passive",
@@ -164,6 +166,7 @@ export const EXPLICIT_PASSIVE_EFFECT_SKILL_IDS = new Set<string>([
   "b_tr_passive",
   "b_im_passive",
   "b_ie_passive",
+  "m_q_passive",
   "m_f_passive",
   "m_g_passive",
   "m_n_passive",

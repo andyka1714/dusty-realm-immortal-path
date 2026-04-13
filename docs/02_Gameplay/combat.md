@@ -97,7 +97,7 @@
 - 主場景底部已補上第一版戰鬥快捷列，可直接執行接戰、主動術式、掛機與地圖操作
 - 舊的中央戰報窗已退場，戰鬥結果改為右下角 HUD 短暫顯示後自動收起
 - 尚未完全專屬化的被動，仍保留 `passiveEffectTags` 作為 HUD / 文件 / 資料索引的 generic 描述
-- 已完成專屬接線的被動，現在已開始正式退出 generic `passiveEffectTags` fallback，避免資料層繼續誤導成仍主要依賴通用加成
+- 練氣三職業核心被動與第一批高境界被動，現在都已退出 generic `passiveEffectTags` fallback，資料層不再假裝它們仍主要依賴通用模板
 - formal core 被動的基礎屬性收益，已改成逐招明確對照表；absorbed retired passive 透過 formal id 承接時，也會吃到同一份 explicit 對照
 - 所有正式核心被動現在都至少會對一項正式戰鬥屬性產生明確變化，可直接透過測試驗證不再只靠職業 / 境界 fallback 才看得出差異
 - timeline combat 內主動術式施加的 player-side / enemy-side 狀態，已開始走共用的「狀態推入 + 戰鬥日誌」helper，降低 world / timeline 分叉風險

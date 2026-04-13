@@ -417,6 +417,7 @@
 - [x] `m_vr_passive` / `b_im_passive` / `s_ma_passive` / `m_ma_passive` 已開始補齊 timeline combat 開場待命訊息，正式標出 `空間法則` / `仙體無垢` / `劍道獨尊` / `言出法隨`
 - [x] 多個已完成專屬接線的 passive，已開始移除手寫 generic `passiveEffectTags`，降低資料層誤導
 - [x] 第一批已完成專屬接線的 passive，現在也已退出 generic `passiveEffectTags` fallback，skill index 不再自動替它們補通用標籤
+- [x] 練氣三職業核心被動 (`劍脈初成 / 銅皮鐵骨 / 靈潮循環`) 也已退出 generic `passiveEffectTags` fallback，前中期技能資料不再維持假 generic 狀態
 - [x] `b_n_passive` / `m_n_passive` 的回復事件已補回技能專屬戰鬥訊息，不再只走 generic regen log
 - [x] battle 開場被動狀態初始化已抽成共用 helper，`b_g_passive` 開場護體也補上明確戰鬥事件
 - [x] 護盾吸收與反震傷害事件，已開始抽成 battleSystem 共用 logger helper
