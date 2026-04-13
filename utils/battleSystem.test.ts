@@ -5659,6 +5659,35 @@ describe("battle system balance", () => {
     expect(empoweredStrike.playerStatusNames).toContain("言出法隨");
   });
 
+  it("surfaces mahayana mage passive on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 88,
+        rootBone: 80,
+        insight: 94,
+        comprehension: 28,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Mahayana,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1800,
+        mp: 4200,
+        hp: 7600,
+        defense: 260,
+      },
+      "言出法隨",
+      ProfessionType.Mage,
+      ["m_ma_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(mage, COMMON_ENEMIES.m170_c1);
+    expect(strike.playerStatusNames).toContain("言出法隨");
+  });
+
   it("surfaces mage foundation passive on world strikes", () => {
     fixedRandom.mockReturnValue(0.5);
 
@@ -5689,6 +5718,34 @@ describe("battle system balance", () => {
       getSkill("m_f_active")
     );
 
+    expect(strike.playerStatusNames).toContain("靈力湧動");
+  });
+
+  it("surfaces mage foundation passive on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 66,
+        rootBone: 62,
+        insight: 78,
+        comprehension: 24,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.Foundation,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 780,
+        mp: 2200,
+        defense: 160,
+      },
+      "靈力湧動",
+      ProfessionType.Mage,
+      ["m_f_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(mage, COMMON_ENEMIES.m50_c1);
     expect(strike.playerStatusNames).toContain("靈力湧動");
   });
 

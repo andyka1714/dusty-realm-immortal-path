@@ -971,7 +971,7 @@ const getPlayerWorldMagePassiveStatusNames = (options: PlayerWorldPassiveStatusO
     statusNames.push("法力源泉");
   }
 
-  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageFoundationPassive) {
+  if (isMageActionContext && passiveFlags.hasMageFoundationPassive) {
     statusNames.push("靈力湧動");
   }
 
@@ -981,6 +981,10 @@ const getPlayerWorldMagePassiveStatusNames = (options: PlayerWorldPassiveStatusO
 
   if (isMageActionContext && passiveFlags.hasMageFusionPassive) {
     statusNames.push("五氣朝元");
+  }
+
+  if (isMageActionContext && passiveFlags.hasMageMahayanaPassive) {
+    statusNames.push("言出法隨");
   }
 
   if (isMageActionContext && passiveFlags.hasMageTribulationPassive) {
@@ -3084,6 +3088,40 @@ const prepareAutoBattleExecution = (
     previousSnapshotProvider,
     processStatusTicks,
   };
+};
+
+const executeAutoBattleTimeline = ({
+  player,
+  enemy,
+  logs,
+  prepared,
+}: {
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  logs: CombatLog[];
+  prepared: ReturnType<typeof prepareAutoBattleExecution>;
+}) => {
+  const finalState = runCombatTimelineLoop({
+    initialState: prepared.state,
+    processStatusTicks: prepared.processStatusTicks,
+    player,
+    enemy,
+    logs,
+    runtimeContext: prepared.runtimeContext,
+    featureFlags: prepared.featureFlags,
+  });
+
+  return finalizeCombatResult({
+    won: finalState.playerHp > 0 && finalState.enemyHp <= 0,
+    logs,
+    turn: finalState.turn,
+    currentTimeMs: finalState.currentTimeMs,
+    player,
+    enemy,
+    playerHp: finalState.playerHp,
+    enemyHp: finalState.enemyHp,
+    previousSnapshotProvider: prepared.previousSnapshotProvider,
+  });
 };
 
 const resolvePlayerTurnPrelude = ({
@@ -8041,34 +8079,10 @@ export const runAutoBattle = (
   };
 } => {
   const logs: CombatLog[] = [];
-  const {
-    state,
-    runtimeContext,
-    featureFlags,
-    previousSnapshotProvider,
-    processStatusTicks,
-  } = prepareAutoBattleExecution(player, enemy, logs);
-
-  const finalState = runCombatTimelineLoop({
-    initialState: state,
-    processStatusTicks,
+  return executeAutoBattleTimeline({
     player,
     enemy,
     logs,
-    runtimeContext,
-    featureFlags,
-  });
-
-  const won = finalState.playerHp > 0 && finalState.enemyHp <= 0;
-  return finalizeCombatResult({
-    won,
-    logs,
-    turn: finalState.turn,
-    currentTimeMs: finalState.currentTimeMs,
-    player,
-    enemy,
-    playerHp: finalState.playerHp,
-    enemyHp: finalState.enemyHp,
-    previousSnapshotProvider,
+    prepared: prepareAutoBattleExecution(player, enemy, logs),
   });
 };
