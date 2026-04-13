@@ -327,6 +327,7 @@
 - [x] timeline combat 的致命保命流程已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`
 - [x] formal core 被動的 stat bonus 已改成逐招明確對照表，不再依職業 + 境界通用公式自動推導
 - [x] absorbed retired passive 透過 formal id 承接時，也會吃到同一份逐招 stat bonus 對照，不再靠模糊 profession-tier fallback 撐場
+- [x] timeline combat 內主動術式施加的 player-side / enemy-side 狀態，已開始共用「狀態推入 + 戰鬥日誌」helper，不再在 `runAutoBattle()` 裡逐段手寫
 - [x] retired active / passive 的 alias 剝離 helper，已回收到 alias 檔本體，realm view 不再在 `data/skills/index.ts` 額外重複維護同一套過濾規則
 - [x] `StatsPanel / ShopPanel` 的主要資訊浮層已進一步對齊 `GameTooltip` 的標題 / 註腳結構
 - [x] `Adventure` 區域地圖情報與 `Compendium` 額外掉落來源浮層，已開始對齊同一套 `GameTooltip` 標題 / 註腳結構

@@ -1306,6 +1306,53 @@ const logAppliedCombatStatuses = ({
   });
 };
 
+const appendAndLogCombatStatuses = ({
+  container,
+  statuses,
+  logs,
+  turn,
+  timeMs,
+  isPlayer,
+  targetIsPlayer,
+  enemy,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+}: {
+  container: CombatStatus[];
+  statuses: CombatStatus[];
+  logs: CombatLog[];
+  turn: number;
+  timeMs: number;
+  isPlayer: boolean;
+  targetIsPlayer: boolean;
+  enemy: Enemy;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+}) => {
+  if (statuses.length === 0) {
+    return;
+  }
+
+  container.push(...statuses);
+  logAppliedCombatStatuses({
+    logs,
+    turn,
+    timeMs,
+    isPlayer,
+    statuses,
+    targetIsPlayer,
+    enemy,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp,
+  });
+};
+
 const getSkillExecutionTimeMs = (skill?: Skill) => {
   if (!skill) return 0;
 
@@ -3651,9 +3698,6 @@ export const runAutoBattle = (
             currentTimeMs
           );
 
-        if (playerSideStatuses.length > 0) {
-          playerStatuses.push(...playerSideStatuses);
-        }
         const filteredEnemyStatuses = dealsDirectDamage
           ? resolvePlayerAppliedEnemyStatuses({
               enemy,
@@ -3666,41 +3710,35 @@ export const runAutoBattle = (
             })
           : filterPlayerAppliedEnemyStatuses(enemy, enemySideStatuses);
 
-        if (filteredEnemyStatuses.length > 0) {
-          enemyStatuses.push(...filteredEnemyStatuses);
-        }
+        appendAndLogCombatStatuses({
+          container: playerStatuses,
+          statuses: playerSideStatuses,
+          logs,
+          turn,
+          timeMs: currentTimeMs,
+          isPlayer: true,
+          targetIsPlayer: true,
+          enemy,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+        });
 
-        if (playerSideStatuses.length > 0) {
-          logAppliedCombatStatuses({
-            logs,
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            statuses: playerSideStatuses,
-            targetIsPlayer: true,
-            enemy,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
-
-        if (filteredEnemyStatuses.length > 0) {
-          logAppliedCombatStatuses({
-            logs,
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            statuses: filteredEnemyStatuses,
-            targetIsPlayer: false,
-            enemy,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
+        appendAndLogCombatStatuses({
+          container: enemyStatuses,
+          statuses: filteredEnemyStatuses,
+          logs,
+          turn,
+          timeMs: currentTimeMs,
+          isPlayer: true,
+          targetIsPlayer: false,
+          enemy,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+        });
 
         if (
           hasMageImmortalPassive &&
@@ -4165,13 +4203,13 @@ export const runAutoBattle = (
             enemyIncomingStatusResult.normalizedIncomingStatuses;
 
           if (filteredEnemyStatuses.length > 0) {
-            playerStatuses.push(...normalizedIncomingStatuses);
-            logAppliedCombatStatuses({
+            appendAndLogCombatStatuses({
+              container: playerStatuses,
+              statuses: normalizedIncomingStatuses,
               logs,
               turn,
               timeMs: currentTimeMs,
               isPlayer: false,
-              statuses: normalizedIncomingStatuses,
               targetIsPlayer: true,
               enemy,
               playerHp,

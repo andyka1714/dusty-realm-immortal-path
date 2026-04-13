@@ -95,6 +95,8 @@
 - 舊的中央戰報窗已退場，戰鬥結果改為右下角 HUD 短暫顯示後自動收起
 - 所有被動技能現在都具備 `passiveEffectTags`，後續逐招專屬效果與 HUD / 文件可共用同一套標記資料
 - 已完成專屬接線的被動，開始移除手寫 generic `passiveEffectTags`，避免資料層繼續誤導成仍主要依賴通用加成
+- formal core 被動的基礎屬性收益，已改成逐招明確對照表；absorbed retired passive 透過 formal id 承接時，也會吃到同一份 explicit 對照
+- timeline combat 內主動術式施加的 player-side / enemy-side 狀態，已開始走共用的「狀態推入 + 戰鬥日誌」helper，降低 world / timeline 分叉風險
 - 部分技能與被動已開始接入專屬效果，而不再只是通用加成：
   - `b_g_active`：護盾會真正吸收傷害
   - `s_q_passive`：暴擊時會追加 `劍脈破甲`
