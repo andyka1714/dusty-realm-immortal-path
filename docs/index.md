@@ -28,6 +28,7 @@
 - [flow.md](04_UI/flow.md): 遊戲初始化流程 (序幕->抽卡->主頁) 與導航結構。
 - [components.md](04_UI/components.md): UI 組件庫規範 (Tailwind 配色、按鈕樣式)。
   - 補充：角色屬性、商店、圖鑑、區域地圖情報、任務獎勵、底部 dock、道途頁資訊與多個操作提示，已開始共用 `GameTooltip / GameHintBubble` 遊戲化外觀；`GamePanel / Modal / GameTooltip` 的標題層已開始共用 `GameTitleStack`，裝飾框體則已開始共用 `GameOrnamentFrame`。
+  - 補充：`StatsPanel / ShopPanel / Inventory` 內部的主要資訊區，也已開始共用 `GameSection`，面板內層不再只是零散的 border box。
   - 補充：`World / UI / Audit` 對於地圖情報 tooltip、短提示 eyebrow 與 battle shared resolver 的說法，已開始回到同一套正式描述。
 
 ### [05_Data] 數據表 (Data Tables)
@@ -38,7 +39,7 @@
 
 ### [06_Balance_Audit] 數值平衡審計
 本輪針對實作數值做的審計文件，重點在於比對文件與程式、驗算修為曲線、戰鬥曲線、裝備與技能落地狀態。
-- [README.md](06_Balance_Audit/README.md): 審計總覽、尚未補完的核心缺口，以及 battle / UI shared helper 的最新收斂狀態與文件去重進度。
+- [README.md](06_Balance_Audit/README.md): 審計總覽與正式來源索引，集中指向各審計文件與程式 registry，避免 README 本身再重複攤開長篇狀態清單。
 - [01_修為與境界曲線審計.md](06_Balance_Audit/01_修為與境界曲線審計.md): 修為需求、通道效率、時長試算，以及後期乘區 / 追趕機制正式表。
 - [02_戰鬥與裝備曲線審計.md](06_Balance_Audit/02_戰鬥與裝備曲線審計.md): 怪物、裝備、掉落、戰鬥實作審計與每境界 TTK 目標表。
 - [03_職業與技能審計.md](06_Balance_Audit/03_職業與技能審計.md): 三職業、技能資料與實戰接線現況。

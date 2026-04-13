@@ -16,8 +16,6 @@ import {
   ALL_RETIRED_ACTIVE_ALIASES,
   RETIREMENT_READY_RETIRED_ACTIVE_ALIASES,
   RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_VIEWS,
-  RETIRED_ACTIVE_ALIASES_BY_REALM,
-  stripRetirementReadyActiveAliases,
 } from "./retired_active_aliases";
 import {
   ALL_RETIRED_PASSIVE_ALIASES,
@@ -25,9 +23,11 @@ import {
   BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS,
   RETIREMENT_READY_RETIRED_PASSIVE_ALIASES,
   RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_VIEWS,
-  RETIRED_PASSIVE_ALIASES_BY_REALM,
-  stripBattleAbsorbedPassiveAliases,
 } from "./retired_passive_aliases";
+import {
+  getRetiredAliasesForRealm,
+  stripRetiredAliasesForRealmView,
+} from "./retired_aliases";
 import {
   getSkillPoolEntry,
   normalizeFormalSkillIds,
@@ -180,14 +180,6 @@ const RAW_SKILLS: Record<string, Skill> = {
   ...ALL_RETIRED_ACTIVE_ALIASES,
   ...ALL_RETIRED_PASSIVE_ALIASES,
 };
-
-const stripRetiredAliasesForRealmView = (skills: Record<string, Skill>) =>
-  stripBattleAbsorbedPassiveAliases(stripRetirementReadyActiveAliases(skills));
-
-const getRetiredAliasesForRealm = (realm: MajorRealm) => ({
-  ...(RETIRED_ACTIVE_ALIASES_BY_REALM[realm] ?? {}),
-  ...(RETIRED_PASSIVE_ALIASES_BY_REALM[realm] ?? {}),
-});
 
 const buildRealmSkillSet = (
   realm: MajorRealm,

@@ -13,6 +13,7 @@ import { X, ShoppingBag, Coins, Package, Shield, Sword, FlaskConical, CircleDash
 import clsx from 'clsx';
 import { Modal } from '../Modal';
 import { GameTooltip } from '../game/GameTooltip';
+import { GameSection } from '../game/GameSection';
 
 
 // Helper for attribute names (Moved from Inventory to be shared concept ideally, but kept here for now)
@@ -159,7 +160,13 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                 </div>
 
                 {/* Item List */}
-                <div className="flex-1 overflow-y-auto p-2 custom-scrollbar space-y-2">
+                <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
+                  <GameSection
+                    title="當期貨單"
+                    eyebrow="MARKET LEDGER"
+                    className="min-h-full"
+                    bodyClassName="space-y-2"
+                  >
                     {shop.items.map((shopItem, idx) => {
                         const item = ITEMS[shopItem.itemId];
                         if (!item) return null; // Skip invalid items
@@ -294,6 +301,7 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                             </div>
                         );
                     })}
+                  </GameSection>
                 </div>
             </div>
             

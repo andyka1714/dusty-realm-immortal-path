@@ -1,4 +1,5 @@
 import { MajorRealm, ProfessionType, Skill } from "../../types";
+import { getSkillPoolEntry } from "./pool";
 import { MAHAYANA_SKILLS } from "./mahayana";
 import { TRIBULATION_SKILLS } from "./tribulation";
 import { VOID_REFINING_SKILLS } from "./void_refining";
@@ -27,6 +28,8 @@ const buildRetiredActiveAlias = (
 ): Skill => ({
   ...replacementSkill,
   ...overrides,
+  replacementSkillId:
+    getSkillPoolEntry(overrides.id)?.replacementSkillId ?? replacementSkill.replacementSkillId,
   cooldown: overrides.cooldown ?? replacementSkill.cooldown,
   damageMultiplier: overrides.damageMultiplier ?? replacementSkill.damageMultiplier,
   statusEffect: overrides.statusEffect ?? replacementSkill.statusEffect,

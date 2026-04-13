@@ -1,4 +1,5 @@
 import { MajorRealm, ProfessionType, Skill } from "../../types";
+import { getSkillPoolEntry } from "./pool";
 import { GOLDEN_CORE_SKILLS } from "./golden_core";
 import { NASCENT_SOUL_SKILLS } from "./nascent_soul";
 import { SPIRIT_SEVERING_SKILLS } from "./spirit_severing";
@@ -13,6 +14,8 @@ const buildRetiredPassiveAlias = (
 ): Skill => ({
   ...replacementSkill,
   ...overrides,
+  replacementSkillId:
+    getSkillPoolEntry(overrides.id)?.replacementSkillId ?? replacementSkill.replacementSkillId,
   type: "Passive",
   cooldown: 0,
 });

@@ -15,6 +15,7 @@ import { getMissingPrerequisiteSkillIds, resolveReplacementSkillId } from '../da
 import { getSkillManualCategoryLabel, getSkillManualSourceLabels, getSkillManualTierLabel } from '../data/items/manuals';
 import { GameHintBubble } from '../components/game/GameHintBubble';
 import { GameTooltip } from '../components/game/GameTooltip';
+import { GameSection } from '../components/game/GameSection';
 
 interface InventoryProps {
   embedded?: boolean;
@@ -183,11 +184,12 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
   );
 
   const equipmentSection = (
-    <div className={clsx("shrink-0 p-4", embedded ? "border-t border-stone-800/80" : "bg-stone-900 border border-stone-800 rounded-xl")}>
-      <h3 className="text-stone-400 text-sm md:text-base mb-3 font-bold border-b border-stone-800 pb-2 flex justify-between tracking-wider">
-         <span>當前裝備</span>
-      </h3>
-      <div className="grid grid-cols-2 gap-2 md:gap-3">
+    <GameSection
+      title="當前裝備"
+      eyebrow="CURRENT LOADOUT"
+      className={clsx("shrink-0", embedded ? "border-t border-stone-800/80" : "")}
+      bodyClassName="grid grid-cols-2 gap-2 md:gap-3"
+    >
         <EquipSlot 
           label="武器" icon={Sword} 
           instance={getEquippedInstance(EquipmentSlot.Weapon)} 
@@ -248,8 +250,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
              if (slot) setSelectedSlot(slot);
           }}
         />
-      </div>
-    </div>
+    </GameSection>
   );
 
   const handleUseSelectedItem = () => {
@@ -577,10 +578,12 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                 </div>
            ) : (
                selectedSlot && selectedItemDef ? (
-                 <div className={clsx(
-                   "flex-1 min-h-[300px] p-4 flex flex-col",
-                   embedded ? "" : "bg-stone-900 border border-stone-800 rounded-xl"
-                 )}>
+                 <GameSection
+                   title="物品詳情"
+                   eyebrow="ITEM RECORD"
+                   className="flex-1 min-h-[300px]"
+                   bodyClassName="flex h-full min-h-[300px] flex-col"
+                 >
                     <div className="flex justify-between items-start mb-2">
                        <div className="flex flex-col">
                             <h3 className={`text-lg font-bold ${getQualityTextColor(selectedSlot.instance?.quality ?? selectedItemDef.quality)}`}>
@@ -826,7 +829,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                       )}
                    </div>
                 </div>
-             </div>
+             </GameSection>
                ) : (
                     <div className={clsx(
                       "p-4 flex-1 min-h-[300px] flex flex-col items-center justify-center text-stone-600",

@@ -423,6 +423,7 @@
 - [x] `GamePanel / Modal / GameTooltip` 的標題層已開始共用 `GameTitleStack`，面板與資訊浮層的遊戲化資訊階層更一致
 - [x] `GamePanel / Modal` 內原本重複存在的 eyebrow 裝飾也已移除，正式改由 `GameTitleStack` 單點承接標題階層，不再重複堆兩層同名標識
 - [x] `GamePanel / Modal / GameTooltip` 的角飾、內框、頂部光帶與背景光暈，也已開始收斂到共用 `GameOrnamentFrame`
+- [x] `StatsPanel / ShopPanel / Inventory` 內部的關鍵資訊區，也已開始改走共用 `GameSection`，面板內層框體語言不再各自維護
 - [ ] 被動技能改成逐招專屬效果，而不是通用屬性加成
 
 ---

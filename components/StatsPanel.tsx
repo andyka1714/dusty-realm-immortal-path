@@ -7,6 +7,7 @@ import { formatSpiritStone } from '../utils/currency';
 import { calculatePlayerStats } from '../utils/battleSystem';
 import clsx from 'clsx';
 import { GameTooltip } from './game/GameTooltip';
+import { GameSection } from './game/GameSection';
 
 interface StatsPanelProps {
   embedded?: boolean;
@@ -148,7 +149,7 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
                 </div>
             </div>
 
-            <div className="space-y-1">
+            <GameSection title="靈根與本命" eyebrow="CHARACTER CORE" bodyClassName="space-y-1">
               <StatRow icon={Dna} label="靈根" value={rootDetails.name} highlightColor={rootDetails.colorClass}
                 desc={`【${rootDetails.destiny}】${rootDetails.description}`} subDesc={`加成：${rootDetails.statsDescription}`} />
               
@@ -164,7 +165,7 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
                 desc="氣運。影響「暴擊率」、「閃避率」與「掉落品質」。" subDesc={`基礎值 + 裝備(${equipmentStats.fortune||0})`} />
               <StatRow icon={Heart} label="魅力" value={attributes.charm} 
                 desc="個人魅力。影響「NPC好感度」與「特殊事件觸發」。" subDesc={`基礎值 + 裝備(${equipmentStats.charm||0})`} />
-            </div>
+            </GameSection>
           </div>
         )}
 
@@ -172,8 +173,7 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
         {activeTab === 'combat' && (
           <div className="space-y-6 animate-in fade-in duration-300">
             {/* Combat Stats */}
-            <div>
-              <h4 className="text-stone-500 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-2 border-l-2 border-stone-700 pl-2">戰鬥能力</h4>
+            <GameSection title="戰鬥能力" eyebrow="BATTLE CORE">
               <div className="grid grid-cols-2 gap-2">
                  <StatRow icon={Sword} label="攻擊" value={Math.floor(combatStats.attack)} 
                    desc="物理攻擊力，影響普通攻擊與物理技能傷害。" highlightColor="text-amber-200" 
@@ -225,11 +225,10 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
                       desc="戰鬥獲取靈石的額外加成。" highlightColor="text-amber-400" subDesc="加成來源：木火真靈根 / 裝備" />
                  )}
               </div>
-            </div>
+            </GameSection>
 
             {/* Utility Stats */}
-            <div>
-              <h4 className="text-stone-500 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-2 border-l-2 border-stone-700 pl-2">特殊加成</h4>
+            <GameSection title="特殊加成" eyebrow="AUXILIARY ARTS">
               <div className="grid grid-cols-2 gap-2">
                 <StatRow icon={FlaskConical} label="煉丹" value={`+${combatStats.alchemyBonus.toFixed(1)}%`} 
                    desc="煉製丹藥時的額外成功率。" subDesc={`公式：${combatStats.alchemyBonus > 0 ? "特殊靈根(+10%)" : "基礎(0%)"} + 裝備加成`} />
@@ -242,7 +241,7 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
                 <StatRow icon={Flame} label="修煉" value={`+${combatStats.cultivationSpeedBonus.toFixed(0)}%`} 
                    desc="運轉功法時獲取修為的額外速度。" highlightColor="text-orange-400" subDesc="公式：裝備效率加成" />
               </div>
-            </div>
+            </GameSection>
           </div>
         )}
       </div>

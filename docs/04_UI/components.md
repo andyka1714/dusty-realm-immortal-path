@@ -17,10 +17,12 @@
 
 - `GamePanel`：主遊戲大面板，已正式具備 `eyebrow + title + icon` 結構。
 - `Modal`：任務、商店、突破、地圖總覽、背包確認等視窗，已開始對齊同一套 `eyebrow + title + icon` 語言。
+- `GameSection`：面板內部的次級資訊框體，統一 `eyebrow + title + ornament frame`，避免屬性區、貨單區、裝備區各自維護近似框體。
 - `GameTooltip`：角色屬性、商店、圖鑑、地圖情報等資訊浮層，已開始對齊同一套 `eyebrow + title + body + footer` 結構。
 - `GameTitleStack`：`GamePanel / Modal / GameTooltip` 共用的標題層組件，統一 `eyebrow + title (+ icon)` 的字階與間距。
 - `GameOrnamentFrame`：`GamePanel / Modal / GameTooltip` 共用的內框、角飾、頂部光帶與背景光暈裝飾層，不再各自維護一份近似 ornament markup。
 - `GamePanel / Modal` 內原本重複存在的 eyebrow 裝飾已移除，現在正式由 `GameTitleStack` 單點承接標題階層，不再重複堆兩層同名標識。
+- `StatsPanel / ShopPanel / Inventory` 內部的關鍵資訊區，也已開始改走 `GameSection`，面板內部不再只有單純的邊框盒與 `border-l` 小標。
 - `Inventory` 的裝備、技能書與消耗品 hover，也已切到同一套 `GameTooltip` 結構，不再只靠右側詳情面板承接全部資訊。
 - `QuestModal` 的裝備 / 技能書任務獎勵，也已補上 hover `GameTooltip`，不再只剩純文字獎勵列。
 - `QuestModal` 的獎勵 tooltip 標題，也已開始對齊品質色階，和商店 / 背包裝備共用同一套辨識語言。
