@@ -2368,6 +2368,22 @@ const resolveNormalizedEnemySpecialStatuses = (
     currentTimeMs
   );
 
+const filterPlayerAppliedEnemyStatuses = (
+  enemy: Enemy,
+  statuses: CombatStatus[]
+) =>
+  statuses.filter((status) => {
+    if (
+      hasEnemyAffix(enemy, "霸體") &&
+      status.kind === "incapacitate" &&
+      Math.random() < 0.35
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
 export const resolvePlayerWorldStrike = (
   player: PlayerCombatStats,
   enemy: Enemy,
@@ -2467,17 +2483,10 @@ export const resolvePlayerWorldStrike = (
         0
       )
     : { playerSideStatuses: [], enemySideStatuses: [] };
-  const filteredEnemyStatuses = enemySideStatuses.filter((status) => {
-    if (playerSideStatuses.includes(status)) return false;
-    if (
-      hasEnemyAffix(enemy, "霸體") &&
-      status.kind === "incapacitate" &&
-      Math.random() < 0.35
-    ) {
-      return false;
-    }
-    return true;
-  });
+  const filteredEnemyStatuses = filterPlayerAppliedEnemyStatuses(
+    enemy,
+    enemySideStatuses
+  );
 
   if (hasSwordQiPassive && isCrit && dealsDirectDamage && skill?.profession === ProfessionType.Sword) {
     filteredEnemyStatuses.push(createSwordQiArmorBreakStatus(0));
@@ -3593,8 +3602,13 @@ export const runAutoBattle = (
         if (playerSideStatuses.length > 0) {
           playerStatuses.push(...playerSideStatuses);
         }
-        if (enemySideStatuses.length > 0) {
-          enemyStatuses.push(...enemySideStatuses);
+        const filteredEnemyStatuses = filterPlayerAppliedEnemyStatuses(
+          enemy,
+          enemySideStatuses
+        );
+
+        if (filteredEnemyStatuses.length > 0) {
+          enemyStatuses.push(...filteredEnemyStatuses);
         }
 
         if (playerSideStatuses.length > 0) {
@@ -3613,13 +3627,13 @@ export const runAutoBattle = (
           });
         }
 
-        if (enemySideStatuses.length > 0) {
+        if (filteredEnemyStatuses.length > 0) {
           logAppliedCombatStatuses({
             logs,
             turn,
             timeMs: currentTimeMs,
             isPlayer: true,
-            statuses: enemySideStatuses,
+            statuses: filteredEnemyStatuses,
             targetIsPlayer: false,
             enemy,
             playerHp,

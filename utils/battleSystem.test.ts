@@ -638,6 +638,42 @@ describe("battle system balance", () => {
     ).toBe(true);
   });
 
+  it("shares enemy tyrant-control resistance between world strikes and timeline combat", () => {
+    fixedRandom.mockReturnValue(0.1);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 28,
+        rootBone: 26,
+        insight: 38,
+        comprehension: 22,
+        fortune: 14,
+        charm: 8,
+      },
+      MajorRealm.GoldenCore,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {},
+      "寒域法修",
+      ProfessionType.Mage,
+      ["m_g_active"]
+    );
+
+    const tyrantEnemy = {
+      ...COMMON_ENEMIES.m52_c1,
+      hp: 2200,
+      maxHp: 2200,
+      affixes: ["霸體"],
+    };
+
+    const strike = resolvePlayerWorldStrike(mage, tyrantEnemy, getSkill("m_g_active"));
+    const timeline = runAutoBattle(mage, tyrantEnemy);
+
+    expect(strike.enemyStatusNames).not.toContain("凍結");
+    expect(
+      timeline.logs.some((log) => (log.enemyStatuses || []).includes("凍結"))
+    ).toBe(false);
+  });
+
   it("lets non-damaging active skills grant protection instead of sneaking in a normal hit", () => {
     fixedRandom.mockReturnValue(0.5);
 
