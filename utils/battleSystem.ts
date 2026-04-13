@@ -2480,6 +2480,56 @@ const resolvePlayerAppliedEnemyStatuses = ({
   return filteredStatuses;
 };
 
+const resolvePlayerSkillStatusApplication = ({
+  skill,
+  targetMaxHp,
+  enemy,
+  passiveFlags,
+  dealsDirectDamage,
+  isCrit,
+  currentTimeMs,
+  enemyHp,
+}: {
+  skill: Skill | undefined;
+  targetMaxHp: number;
+  enemy: Enemy;
+  passiveFlags: PlayerPassiveFlags;
+  dealsDirectDamage: boolean;
+  isCrit: boolean;
+  currentTimeMs: number;
+  enemyHp: number;
+}) => {
+  if (!skill) {
+    return {
+      playerSideStatuses: [] as CombatStatus[],
+      filteredEnemyStatuses: [] as CombatStatus[],
+    };
+  }
+
+  const { playerSideStatuses, enemySideStatuses } = resolveNormalizedSkillStatuses(
+    skill,
+    targetMaxHp,
+    currentTimeMs
+  );
+
+  const filteredEnemyStatuses = dealsDirectDamage
+    ? resolvePlayerAppliedEnemyStatuses({
+        enemy,
+        statuses: enemySideStatuses,
+        passiveFlags,
+        skill,
+        isCrit,
+        currentTimeMs,
+        enemyHp,
+      })
+    : filterPlayerAppliedEnemyStatuses(enemy, enemySideStatuses);
+
+  return {
+    playerSideStatuses,
+    filteredEnemyStatuses,
+  };
+};
+
 export const resolvePlayerWorldStrike = (
   player: PlayerCombatStats,
   enemy: Enemy,
@@ -2572,24 +2622,17 @@ export const resolvePlayerWorldStrike = (
     }
   }
 
-  const { playerSideStatuses, enemySideStatuses } = skill
-    ? resolveNormalizedSkillStatuses(
-        skill,
-        skill.targetType === "self" ? player.maxHp : enemy.maxHp,
-        0
-      )
-    : { playerSideStatuses: [], enemySideStatuses: [] };
-  const filteredEnemyStatuses = dealsDirectDamage
-    ? resolvePlayerAppliedEnemyStatuses({
-        enemy,
-        statuses: enemySideStatuses,
-        passiveFlags,
-        skill,
-        isCrit,
-        currentTimeMs: 0,
-        enemyHp: enemy.hp,
-      })
-    : filterPlayerAppliedEnemyStatuses(enemy, enemySideStatuses);
+  const { playerSideStatuses, filteredEnemyStatuses } =
+    resolvePlayerSkillStatusApplication({
+      skill,
+      targetMaxHp: skill?.targetType === "self" ? player.maxHp : enemy.maxHp,
+      enemy,
+      passiveFlags,
+      dealsDirectDamage,
+      isCrit,
+      currentTimeMs: 0,
+      enemyHp: enemy.hp,
+    });
 
   return {
     damage,
@@ -3691,24 +3734,18 @@ export const runAutoBattle = (
           mageFoundationStacksGained,
         });
 
-        const { createdStatuses, playerSideStatuses, enemySideStatuses } =
-          resolveNormalizedSkillStatuses(
-            activeSkill!,
-            activeSkill!.targetType === "self" ? player.maxHp : enemy.maxHp,
-            currentTimeMs
-          );
-
-        const filteredEnemyStatuses = dealsDirectDamage
-          ? resolvePlayerAppliedEnemyStatuses({
-              enemy,
-              statuses: enemySideStatuses,
-              passiveFlags,
-              skill: activeSkill ?? undefined,
-              isCrit,
-              currentTimeMs,
-              enemyHp,
-            })
-          : filterPlayerAppliedEnemyStatuses(enemy, enemySideStatuses);
+        const { playerSideStatuses, filteredEnemyStatuses } =
+          resolvePlayerSkillStatusApplication({
+            skill: activeSkill ?? undefined,
+            targetMaxHp:
+              activeSkill!.targetType === "self" ? player.maxHp : enemy.maxHp,
+            enemy,
+            passiveFlags,
+            dealsDirectDamage,
+            isCrit,
+            currentTimeMs,
+            enemyHp,
+          });
 
         appendAndLogCombatStatuses({
           container: playerStatuses,
