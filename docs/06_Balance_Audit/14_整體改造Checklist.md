@@ -162,6 +162,7 @@
 - [x] 原先 pending-retirement retired 被動技能已全部併回正式 retired passive alias 層，不再獨立維護資料檔
 - [x] 更多已落地的 pending-retirement retired 被動技能已正式推進到 battle-absorbed 分類，降低後續本體刪整阻力
 - [x] retirement-ready / battle-absorbed 的 retired alias ID 清單已回收至 alias 檔本體，skill index 不再重複維護同一份清單
+- [x] formal realm dataset 已開始透過單一 retired-alias 剝離 helper 統一移除 `retirement-ready active + battle-absorbed passive`
 - [x] `s_vr_passive` 已正式承接進 formal core 劍修被動分支，從 pending-retirement 推進到 battle-absorbed
 - [x] `s_bi_active` 已正式承接進 formal core 劍修 burst 分支，從 pending-retirement 推進到 battle-absorbed
 - [x] `s_f_passive` 已正式承接進 formal core 劍修被動分支，從 pending-retirement 推進到 battle-absorbed
@@ -325,6 +326,7 @@
 - [x] `Adventure` 區域地圖情報與 `Compendium` 額外掉落來源浮層，已開始對齊同一套 `GameTooltip` 標題 / 註腳結構
 - [x] `Stats / Dashboard / Shop / 地圖 / 圖鑑` 這批核心浮層，已開始補齊 `GameTooltip` 的 `eyebrow`，往完整 `eyebrow + title + body + footer` 語言收口
 - [x] `GamePanel / Modal` 已開始對齊 `eyebrow + title + icon` 的正式殼層語言，主頁面板、商店、任務、突破、背包確認與地圖總覽不再各自為政
+- [x] `GameHintBubble` 也已開始補齊 `eyebrow + body` 的短提示層級，dock、側欄、背包與道途操作提示不再只是裸文字浮泡
 - [x] `m_im_passive` / `m_ie_passive` 已開始補齊 world strike 狀態回報，正式標出 `仙法通神` / `萬法歸宗`
 - [x] 多個已完成專屬接線的 passive，已開始移除手寫 generic `passiveEffectTags`，降低資料層誤導
 - [x] `b_n_passive` / `m_n_passive` 的回復事件已補回技能專屬戰鬥訊息，不再只走 generic regen log

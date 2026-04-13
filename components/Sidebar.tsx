@@ -134,6 +134,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {/* Tooltip for Disabled Adventure */}
                 {isDisabled && (
                   <GameHintBubble
+                    eyebrow="STATUS LOCK"
                     className={clsx(
                       "top-1/2 -translate-y-1/2",
                       isCollapsed ? "left-full ml-4" : "left-full ml-2"
@@ -145,7 +146,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                 {/* Tooltip for Collapsed State Hover */}
                 {isCollapsed && !isDisabled && (
-                  <GameHintBubble className="left-full top-1/2 ml-4 -translate-y-1/2">
+                  <GameHintBubble
+                    eyebrow="MENU NAV"
+                    className="left-full top-1/2 ml-4 -translate-y-1/2"
+                  >
                     {item.label}
                   </GameHintBubble>
                 )}
@@ -174,7 +178,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
 
             {isCollapsed && (
-              <GameHintBubble className="left-full top-1/2 ml-4 -translate-y-1/2">
+              <GameHintBubble
+                eyebrow="ARCHIVE"
+                className="left-full top-1/2 ml-4 -translate-y-1/2"
+              >
                 萬界圖鑑
               </GameHintBubble>
             )}

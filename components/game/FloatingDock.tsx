@@ -64,7 +64,10 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
                 </div>
                 <span>{item.label}</span>
               </button>
-              <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+              <GameHintBubble
+                eyebrow="PANEL SWITCH"
+                className="bottom-full left-1/2 mb-2 -translate-x-1/2"
+              >
                 {isActive ? `收起${item.label}` : `打開${item.label}`}
               </GameHintBubble>
             </div>

@@ -1751,7 +1751,10 @@ export const Adventure: React.FC<AdventureProps> = ({
                      >
                          <Swords size={16} />
                          
-                         <GameHintBubble className="left-1/2 top-full mt-1 -translate-x-1/2">
+                         <GameHintBubble
+                           eyebrow="BATTLE FLOW"
+                           className="left-1/2 top-full mt-1 -translate-x-1/2"
+                         >
                             {isAutoBattling ? "停止掛機" : "自動戰鬥"}
                          </GameHintBubble>
                      </button>

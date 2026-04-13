@@ -148,6 +148,7 @@
 - 玩家被動技能判定已補成共用 skill-id 對照表，world strike 與 timeline combat 的 passive flag 來源不再各自手寫
 - `getPlayerPassiveFlags()` 已改成明確 skill id 對照，不再把不同 retired passive 透過 formal id 錯誤折疊成同一串 battle flag
 - formal core 對 retired passive 的承接已改成顯式 alias 對照，避免 battle 內核再靠模糊 canonical 折疊維持行為
+- formal realm dataset 也已開始透過單一 retired-alias 剝離 helper 統一移除 `retirement-ready active + battle-absorbed passive`，減少 realm view 重複維護風險
 - 戰鬥開場的元素克制、弱點洞察、護體展開與高境界開場壓制，也已開始整併成共用 opener helper
 - 主動術式後的多種被動觸發訊息，也已開始整併到共用 passive-proc helper
 - 主動術式後的資源回復、冷卻縮短、冷卻重置與疊層訊息，也已開始收斂到共用 logger helper，降低 `runAutoBattle()` 在 `五氣朝元 / 道法自然 / 靈潮循環 / 劍心通明 / 靈力湧動` 這批事件上的散寫
@@ -172,6 +173,7 @@
 - `enemy world strike` 的 incoming status 過濾，也已開始和 timeline combat 對齊，不再讓 DOT / 負面狀態免疫只存在於時間軸戰鬥
 - `enemy special` 的 incoming status 過濾與控制縮短，現在也已開始走 world / timeline 共用 resolver，降低 `runAutoBattle()` 與 world strike 各自手寫分支的風險
 - `雷劫煉心` 這條控制對抗型被動，也已開始補齊 enemy special world strike 狀態回報
+- `GameHintBubble` 也已開始補齊 `eyebrow + body` 的短提示層級，讓 dock、側欄、背包與道途操作提示和主 tooltip 語言更一致
 - `enemy special` 的免疫 / 控制縮短訊息，已開始抽成共用 resistance helper，減少 `仙體無垢 / 萬法皆空 / 雷劫煉心 / 人劍合神` 在 timeline 戰鬥散寫
 - `runAutoBattle()` 內的致命保命流程，也已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`
 - `StatsPanel / ShopPanel` 的主要資訊浮層已進一步收進 `GameTooltip` 的統一標題 / 註腳結構，UI 殼層更接近單一語言

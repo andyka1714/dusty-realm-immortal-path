@@ -467,7 +467,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                      
                      {/* Tooltip - Shows when disabled */}
                      {(isBreakthroughAvailable || isInSeclusion) && (
-                         <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+                         <GameHintBubble eyebrow="CULTIVATION" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
                              {isBreakthroughAvailable ? "修為已滿，請先突破" : "閉關中無法運功"}
                          </GameHintBubble>
                      )}
@@ -499,7 +499,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
 
                      {/* Tooltip - Shows when disabled */}
                      {(isBreakthroughAvailable || isInSeclusion || !canAffordSeclusion) && (
-                         <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+                         <GameHintBubble eyebrow="SECLUSION" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
                              {isBreakthroughAvailable ? "修為已滿，請先突破" : isInSeclusion ? "閉關修煉進行中" : "靈石不足"}
                          </GameHintBubble>
                      )}
@@ -524,7 +524,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                       {isBreakthroughAvailable ? "瓶頸已至，點擊破境" : "積累修為中..."}
                     </span>
                 </div>
-                <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+                <GameHintBubble eyebrow="BREAKTHROUGH" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
                   {isMajorBreakthrough ? "衝擊大境界" : "突破小境界"}
                 </GameHintBubble>
               </button>

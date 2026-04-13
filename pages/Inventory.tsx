@@ -145,7 +145,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
         >
             <ArrowUpDown size={18} />
         </button>
-        <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+        <GameHintBubble eyebrow="PACK FLOW" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
           整理
         </GameHintBubble>
       </div>
@@ -166,7 +166,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
             {isDeleteMode ? <CheckSquare size={18} /> : <Trash2 size={18} />}
             {isDeleteMode && <span className="hidden md:inline">選擇模式</span>}
         </button>
-        <GameHintBubble className="bottom-full left-1/2 mb-2 -translate-x-1/2">
+        <GameHintBubble eyebrow="PACK FLOW" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
           批量管理
         </GameHintBubble>
       </div>
