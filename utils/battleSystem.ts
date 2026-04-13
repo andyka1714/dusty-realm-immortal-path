@@ -1681,6 +1681,60 @@ const getEnemySpecialDelayFromStatuses = (
     ? 1000
     : 0;
 
+const getInitialEnemySpecialReadyAtMs = (hasMageEmperorPassive: boolean) =>
+  hasMageEmperorPassive ? 2000 : 0;
+
+const applyEnemySpecialTimingDelay = ({
+  logs,
+  turn,
+  timeMs,
+  enemy,
+  enemyStatuses,
+  enemySpecialReadyAtMs,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+}: {
+  logs: CombatLog[];
+  turn: number;
+  timeMs: number;
+  enemy: Enemy;
+  enemyStatuses: CombatStatus[];
+  enemySpecialReadyAtMs: number;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+}) => {
+  const enemySpecialDelayMs = getEnemySpecialDelayFromStatuses(
+    enemyStatuses,
+    timeMs
+  );
+  if (
+    !enemy.specialAttack ||
+    timeMs < enemySpecialReadyAtMs ||
+    enemySpecialDelayMs <= 0
+  ) {
+    return enemySpecialReadyAtMs;
+  }
+
+  const delayedReadyAtMs = timeMs + enemySpecialDelayMs;
+  pushCombatLog(logs, {
+    turn,
+    timeMs,
+    isPlayer: true,
+    message: `【絕仙劍】斬斷敵方靈機流轉，將其術式節奏再壓後 ${(enemySpecialDelayMs / 1000).toFixed(0)} 秒。`,
+    damage: 0,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp,
+  });
+
+  return delayedReadyAtMs;
+};
+
 const getInitialPassiveStatuses = ({
   hasReflectPassive,
   hasInitialShieldPassive,
@@ -3365,7 +3419,9 @@ export const runAutoBattle = (
       enemyMaxHp: enemy.maxHp,
     });
   });
-  if (hasMageEmperorPassive) enemySpecialReadyAtMs = 2000;
+  enemySpecialReadyAtMs = getInitialEnemySpecialReadyAtMs(
+    hasMageEmperorPassive
+  );
 
   while (playerHp > 0 && enemyHp > 0) {
     const playerActsFirst = playerNextActionMs <= enemyNextActionMs;
@@ -4111,28 +4167,18 @@ export const runAutoBattle = (
       }
 
       const enemyContext = getEnemyAttackContext(enemy, player);
-      const enemySpecialDelayMs = getEnemySpecialDelayFromStatuses(
+      enemySpecialReadyAtMs = applyEnemySpecialTimingDelay({
+        logs,
+        turn,
+        timeMs: currentTimeMs,
+        enemy,
         enemyStatuses,
-        currentTimeMs
-      );
-      if (
-        enemy.specialAttack &&
-        currentTimeMs >= enemySpecialReadyAtMs &&
-        enemySpecialDelayMs > 0
-      ) {
-        enemySpecialReadyAtMs = currentTimeMs + enemySpecialDelayMs;
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【絕仙劍】斬斷敵方靈機流轉，將其術式節奏再壓後 ${(enemySpecialDelayMs / 1000).toFixed(0)} 秒。`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-      }
+        enemySpecialReadyAtMs,
+        playerHp,
+        playerMaxHp: player.maxHp,
+        enemyHp,
+        enemyMaxHp: enemy.maxHp,
+      });
       const enemySpecialReady =
         enemy.specialAttack && currentTimeMs >= enemySpecialReadyAtMs;
       const enemySpecialTimelineProfile = enemySpecialReady
