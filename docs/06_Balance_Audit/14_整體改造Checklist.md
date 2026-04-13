@@ -243,6 +243,7 @@
 - [x] `養劍術` 的非受傷疊層流程，也已開始抽成共用 upkeep helper，停手與承傷後回合不再各自散寫一份劍勢累進邏輯
 - [x] 玩家出手前的攻勢計算與暴擊 / 破防判定，已開始抽成共用 `resolvePlayerOffenseRoll(...)`，縮小 `runAutoBattle()` 主循環內的 inline 分支
 - [x] 玩家主動技能命中後的資源流、狀態推入、回響追擊與高境界後續效果，已開始整併到 `resolvePlayerActiveAftermath(...)`
+- [x] 玩家主動術式的可施放窗口，也已開始抽成共用 `resolvePlayerActiveSkillWindow(...)`，不再由 `runAutoBattle()` 主循環手動判斷可施放與 profile 組裝
 - [x] 敵方出手後的格擋、承傷、反震、enemy special 狀態套用與命中後續事件，已開始整併到 `resolveEnemyTurnAftermath(...)`
 - [x] DOT / 吸生 tick 的雙側處理迴圈，已開始整併到 `applyStatusTickBatch(...)`
 - [x] 開場初始護體、待命訊息與帝境初始特招延後，已開始整併到 `initializeCombatEncounter(...)`

@@ -134,7 +134,7 @@
 
 這一輪還沒有全部做完，剩下的真缺口是：
 
-1. 被動技能雖已改成 explicit passive bonus 對照並補出多招專屬效果，且高境界 passive 的基礎屬性收益也已開始改成逐招明確表，但仍有少數高境界被動尚未完全脫離共用模板
+1. 被動技能雖已改成 explicit passive bonus 對照，並補出多招專屬效果與開場 / world strike 可見性，但仍有少數高境界被動尚未完全脫離共用模板
 2. 三職業正式技能池雖已收斂出 `battle-absorbed / retirement-ready` 正式查詢層，且舊的 `pending-retirement` 過渡名單已清空，但還沒把重複技能真正刪整乾淨
 3. 地圖世界戰鬥已是主路徑，投射物、範圍、狀態與技能特效都已上線，但世界戰鬥與 `runAutoBattle()` 還沒完全統一成單一引擎
 4. 後期丹藥、洞府、奇遇對修為的乘區還沒完整進場
@@ -148,7 +148,7 @@
 - 玩家主動術式施加給敵方的控制型狀態與後續破甲追擊，也已開始和 timeline combat 共用同一層 enemy-status resolver；`霸體` 過濾與 `劍脈破甲` 不再 world / timeline 各寫一份。
 - 主動術式後的多種被動觸發、資源回復、冷卻縮短、疊層訊息，與主動術式施加的 `盾、破甲、DOT、反震、劍氣` 等狀態，也已開始走共用 logger helper。
 - 玩家主動術式施加後的 player-side / enemy-side 狀態推入與戰鬥日誌，也已開始走共用 append logger helper，時間軸戰鬥不再逐段手寫同一套流程。
-- 玩家主動術式的資源 / 冷卻流，也已開始抽成共用 `resolvePlayerActiveResourceFlow(...)`，把術式免耗、冷卻縮短、靈潮回補、劍心重置與法修築基層數累進集中處理。
+- 玩家主動術式的可施放窗口、資源 / 冷卻流，也已開始抽成共用 `resolvePlayerActiveSkillWindow(...) / resolvePlayerActiveResourceFlow(...)`，把可施放判定、術式免耗、冷卻縮短、靈潮回補、劍心重置與法修築基層數累進集中處理。
 - `劍意化形 / 虛空劍陣 / 撒豆成兵` 這批多段追擊與召喚後續傷害，也已開始抽成共用 `applyPlayerEchoAndSummonFollowupEffects(...)`。
 - 敵方出手前的攻勢計算、承傷鏈與命中後反應鏈，也已開始收斂到 `resolveEnemyOffenseRoll(...) / resolveIncomingEnemyDamage(...) / applyEnemyHitAftermath(...)`，把克制、特招倍率、格擋 / 閃避 / 虛空轉移、減傷、護盾、保命與命中後續事件集中到同一條處理鏈。
 - `runAutoBattle()` 內的致命保命流程，也已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡 / 滴血重生（真） / 不死不滅`。

@@ -100,6 +100,7 @@
 - 已完成專屬接線的被動，開始移除手寫 generic `passiveEffectTags`，避免資料層繼續誤導成仍主要依賴通用加成
 - formal core 被動的基礎屬性收益，已改成逐招明確對照表；absorbed retired passive 透過 formal id 承接時，也會吃到同一份 explicit 對照
 - timeline combat 內主動術式施加的 player-side / enemy-side 狀態，已開始走共用的「狀態推入 + 戰鬥日誌」helper，降低 world / timeline 分叉風險
+- 玩家主動術式的可施放窗口，也已開始抽成共用 `resolvePlayerActiveSkillWindow(...)`，可施放判定、profile 組裝與主循環不再重複耦合
 - 部分技能與被動已開始接入專屬效果，而不再只是通用加成：
   - `b_g_active`：護盾會真正吸收傷害
   - `s_q_passive`：暴擊時會追加 `劍脈破甲`

@@ -1866,6 +1866,41 @@ const getEnemyAttackIntervalMs = (enemy: Enemy) => {
   return Math.max(650, rankBase[enemy.rank] + rangePenalty - affixReduction);
 };
 
+const resolvePlayerActiveSkillWindow = ({
+  activeSkill,
+  currentTimeMs,
+  activeSkillReadyAtMs,
+  playerMp,
+  hasMageFusionPassive,
+}: {
+  activeSkill?: Skill;
+  currentTimeMs: number;
+  activeSkillReadyAtMs: number;
+  playerMp: number;
+  hasMageFusionPassive: boolean;
+}) => {
+  const skillReady =
+    Boolean(activeSkill) &&
+    currentTimeMs >= activeSkillReadyAtMs &&
+    (playerMp >= (activeSkill?.cost || 0) ||
+      (hasMageFusionPassive &&
+        activeSkill?.profession === ProfessionType.Mage));
+
+  if (!skillReady || !activeSkill) {
+    return {
+      skillReady: false,
+      activeSkillTimelineProfile: undefined,
+      activeSkillCanonicalId: undefined,
+    };
+  }
+
+  return {
+    skillReady: true,
+    activeSkillTimelineProfile: getSkillTimelineProfile(activeSkill),
+    activeSkillCanonicalId: getCanonicalSkillId(activeSkill),
+  };
+};
+
 const getCombatStatusSnapshot = (
   statuses: CombatStatus[],
   timeMs: number
@@ -5651,18 +5686,17 @@ export const runAutoBattle = (
         enemyMaxHp: enemy.maxHp,
       });
 
-      const skillReady =
-        activeSkill &&
-        currentTimeMs >= activeSkillReadyAtMs &&
-        (playerMp >= (activeSkill.cost || 0) ||
-          (hasMageFusionPassive &&
-            activeSkill.profession === ProfessionType.Mage));
-      const activeSkillTimelineProfile = skillReady
-        ? getSkillTimelineProfile(activeSkill!)
-        : undefined;
-      const activeSkillCanonicalId = skillReady
-        ? getCanonicalSkillId(activeSkill!)
-        : undefined;
+      const {
+        skillReady,
+        activeSkillTimelineProfile,
+        activeSkillCanonicalId,
+      } = resolvePlayerActiveSkillWindow({
+        activeSkill: activeSkill ?? undefined,
+        currentTimeMs,
+        activeSkillReadyAtMs,
+        playerMp,
+        hasMageFusionPassive,
+      });
       let {
         dealsDirectDamage,
         effectiveDefense,
