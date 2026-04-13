@@ -115,6 +115,7 @@
 - 玩家先手分支也已開始整併到 `resolvePlayerTurnPhase(...)`，玩家先手時的正式出手鏈不再直接鋪在主循環裡
 - 勝利掉落結算也已開始整併到 `resolveVictoryRewards(...)`，擊殺訊息與戰利品組裝不再直接堆在 `runAutoBattle()` 尾端
 - 敵方完整出手階段也已開始整併到 `resolveEnemyActionPhase(...)`，承傷、保命、劍勢回補與特招冷卻回推不再在主循環散寫
+- 敵方出手後的劍勢回補與特招冷卻回推，也已開始拆到 `resolveEnemySwordHeartAftermath(...) / resolveEnemySpecialReadyAfterAction(...)`，enemy action phase 的尾端流程更接近單一 battle resolver
 - 敵方行動分支也已開始整併到 `resolveEnemyTurnPhase(...)`，敵方出手窗口、控制跳過與完整出手鏈不再直接在主循環維護雙段流程
 - 戰鬥勝敗尾端也已開始整併到 `finalizeCombatResult(...)`，勝利掉落與敗北記錄不再直接堆在主流程尾端
 - 單回合 orchestration 也已開始收斂到 `resolveCombatLoopStep(...)`，回合維護、玩家 / 敵方行動與 turn advance 不再全部直接平鋪在 `runAutoBattle()` while 迴圈內

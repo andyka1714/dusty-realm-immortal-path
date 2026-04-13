@@ -186,6 +186,7 @@
 - 玩家出手階段也已開始整併到 `resolvePlayerActionPhase(...)`，週期護體、Boss 破綻與正式出手流程已收進同一層 helper。
 - 勝利掉落結算也已開始整併到 `resolveVictoryRewards(...)`，擊殺訊息與戰利品組裝不再直接堆在 `runAutoBattle()` 尾端。
 - 敵方完整出手階段也已開始整併到 `resolveEnemyActionPhase(...)`，承傷、保命、劍勢回補與特招冷卻回推已收進同一層 helper。
+- 敵方出手後的劍勢回補與特招冷卻回推，也已進一步拆成 `resolveEnemySwordHeartAftermath(...) / resolveEnemySpecialReadyAfterAction(...)`，enemy action phase 不再把這兩段尾端流程內嵌在同一塊。
 - 戰鬥勝敗尾端也已開始整併到 `finalizeCombatResult(...)`，battle 主循環尾端不再自己拼勝負結果分支。
 - 法修高境界被動的開場待命訊息也已補齊到 `仙法通神 / 萬法歸宗`。
 - `養劍術 / 金剛法相 / 五氣朝元` 也已補齊 timeline combat 開場待命訊息，前中期與高境界被動的可見性更一致。
