@@ -366,7 +366,7 @@
 - [x] absorbed retired passive 透過 formal id 承接時，也會吃到同一份逐招 stat bonus 對照，不再靠模糊 profession-tier fallback 撐場
 - [x] timeline combat 內主動術式施加的 player-side / enemy-side 狀態，已開始共用「狀態推入 + 戰鬥日誌」helper，不再在 `runAutoBattle()` 裡逐段手寫
 - [x] `祖巫降臨 / 法天象地 / 掌中神國 / 一念花開 / 破劫一擊` 這批高境界主動的後續效果，也已開始收斂到共用 follow-up helper
-- [x] `World / UI / Audit` 文件已再做一輪交叉校對，地圖情報 tooltip、短提示 eyebrow 與 battle shared resolver 的描述開始對齊目前實作
+- [x] `World / UI / Audit` 文件已再做多輪交叉校對，地圖情報 tooltip、短提示 eyebrow 與 battle shared resolver 的描述已開始對齊目前實作
 - [x] retired active / passive 的 alias 剝離 helper，已回收到 alias 檔本體，realm view 不再在 `data/skills/index.ts` 額外重複維護同一套過濾規則
 - [x] retired active / passive alias 也已補上 alias-layer 聚合表，正式 realm dataset 現在可直接由 alias-layer 組裝，不再在 `data/skills/index.ts` 手動攤開多份 alias 清單
 - [x] `battle-absorbed / retirement-ready` 的 active / passive alias record，也已開始直接由 alias-layer 聚合表和 skill ID 名單組裝，不再在 alias 檔裡平鋪手寫同一份 retired alias map
