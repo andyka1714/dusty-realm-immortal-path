@@ -160,7 +160,6 @@
 - formal core 被動的 stat bonus 也已改成逐招明確對照表，不再沿用職業 + 境界通用公式；absorbed retired passive 會透過同一份 formal 對照表承接屬性收益。
 - retired 技能目前正式收斂成 `battle-absorbed / retirement-ready`；舊的 `pending-retirement` 過渡層已清空並移除。
 - formal realm dataset 已開始透過單一 retired-alias 剝離 helper 統一移除 `retirement-ready active + battle-absorbed passive`，降低 realm view 重複維護風險。
-- `battle-absorbed active` 與 `retirement-ready passive` 視圖，也已改成直接由 alias-layer 聚合表組裝，不再由 skill index 額外重建同一份清單。
 - retired active / passive 的 alias 剝離 helper，現在也已回收到 alias 檔本體，realm view 不再在 `data/skills/index.ts` 額外重複維護同一套過濾規則。
 - retired active / passive alias 也已補上 alias-layer 聚合表，正式 realm dataset 現在可直接由 alias-layer 組裝，不再在 `data/skills/index.ts` 手動攤開多份 alias 清單。
 - `battle-absorbed / retirement-ready` 的 active / passive alias record，現在也已開始直接由 alias-layer 聚合表和 skill ID 名單組裝，不再在各別 alias 檔裡手寫平鋪同一份 retired alias map。
@@ -171,7 +170,6 @@
 - `人劍合神 / 萬劫不滅 / 雷劫煉心` 也已開始補齊 timeline combat 開場待命訊息，融合 / 渡劫期的控制與承傷型被動不再只在被動觸發後才有可見性。
 - `空間法則 / 仙體無垢 / 劍道獨尊 / 言出法隨` 也已開始補齊 timeline combat 開場待命訊息，虛煉 / 仙境 / 大乘期被動不再只在觸發後才有可見性。
 - `荊棘皮層 / 蠻荒血脈 / 銅皮鐵骨 / 金剛法相 / 元素護盾 / 萬劫不滅 / 雷劫煉心 / 護體劍罡 / 滴血重生 / 不死不滅 / 仙體無垢` 這批承傷、生存與免疫被動，也已開始補齊 enemy world strike 或 enemy special world strike 的可見狀態。
-- `battle-absorbed passive` 視圖也已改成直接由 alias-layer 聚合表組裝，skill index 不再額外以 ID 清單重建同一份資料。
 - `enemy special` 的 incoming status 過濾、狀態推入、戰鬥日誌與免疫提示，也已開始收斂到更完整的共用 helper，world / timeline 的差異進一步縮小。
 - `絕仙劍` 的 `絕仙封脈` 也已正式接進 timeline combat，會在敵方特招將要出手時把節奏再壓後 `1` 秒，高境界劍修的節奏壓制已不再只是狀態名義存在。
 - 敵方特招的初始延後與後續節奏壓制，也已開始抽成共用 helper，`萬法歸宗 / 絕仙封脈` 不再在時間軸主循環內分散處理。

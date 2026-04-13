@@ -3930,6 +3930,103 @@ const applyPlayerEchoAndSummonFollowupEffects = ({
   return nextEnemyHp;
 };
 
+const logPlayerSwordResonance = ({
+  skillReady,
+  activeSkillCanonicalId,
+  activeSwordQiStatuses,
+  hasSwordQiChain,
+  currentTimeMs,
+  logs,
+  turn,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+}: {
+  skillReady: boolean;
+  activeSkillCanonicalId?: string;
+  activeSwordQiStatuses: CombatStatus[];
+  hasSwordQiChain: boolean;
+  currentTimeMs: number;
+  logs: CombatLog[];
+  turn: number;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+}) => {
+  if (
+    skillReady &&
+    activeSkillCanonicalId === "s_tr_active" &&
+    activeSwordQiStatuses.length > 0
+  ) {
+    pushCombatLog(logs, {
+      turn,
+      timeMs: currentTimeMs,
+      isPlayer: true,
+      message: `【萬劍歸一】引爆 ${activeSwordQiStatuses.length} 層劍氣共鳴，劍勢瞬間攀升。`,
+      damage: 0,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+    return true;
+  }
+
+  if (skillReady && activeSkillCanonicalId === "s_tr_active" && hasSwordQiChain) {
+    pushCombatLog(logs, {
+      turn,
+      timeMs: currentTimeMs,
+      isPlayer: true,
+      message: `【萬劍歸一】殘存劍勢與破劫一擊共鳴，爆發再度攀升。`,
+      damage: 0,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  return false;
+};
+
+const logEnemyAvoidance = ({
+  logs,
+  turn,
+  timeMs,
+  enemy,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+  voidEvasion,
+}: {
+  logs: CombatLog[];
+  turn: number;
+  timeMs: number;
+  enemy: Enemy;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  voidEvasion: boolean;
+}) => {
+  pushCombatLog(logs, {
+    turn,
+    timeMs,
+    isPlayer: false,
+    message: voidEvasion
+      ? `【空間法則】扭曲了攻勢，你將這次傷害轉入虛空。`
+      : `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 的攻勢被你避開了！`,
+    damage: 0,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp,
+  });
+};
+
 export const resolvePlayerWorldStrike = (
   player: PlayerCombatStats,
   enemy: Enemy,
@@ -4889,9 +4986,19 @@ export const runAutoBattle = (
       }
 
       if (
-        skillReady &&
-        activeSkillCanonicalId === "s_tr_active" &&
-        activeSwordQiStatuses.length > 0
+        logPlayerSwordResonance({
+          skillReady,
+          activeSkillCanonicalId,
+          activeSwordQiStatuses,
+          hasSwordQiChain,
+          currentTimeMs,
+          logs,
+          turn,
+          playerHp,
+          playerMaxHp: player.maxHp,
+          enemyHp,
+          enemyMaxHp: enemy.maxHp,
+        })
       ) {
         playerStatuses = playerStatuses.filter(
           (status) =>
@@ -4900,33 +5007,6 @@ export const runAutoBattle = (
               status.expiresAtMs > currentTimeMs
             )
         );
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【萬劍歸一】引爆 ${activeSwordQiStatuses.length} 層劍氣共鳴，劍勢瞬間攀升。`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-      } else if (
-        skillReady &&
-        activeSkillCanonicalId === "s_tr_active" &&
-        hasSwordQiChain
-      ) {
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【萬劍歸一】殘存劍勢與破劫一擊共鳴，爆發再度攀升。`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
       }
 
       enemyHp = applyPlayerEchoAndSummonFollowupEffects({
@@ -5137,18 +5217,16 @@ export const runAutoBattle = (
       });
 
       if (isDodge || voidEvasion) {
-        pushCombatLog(logs, {
+        logEnemyAvoidance({
+          logs,
           turn,
           timeMs: currentTimeMs,
-          isPlayer: false,
-          message: voidEvasion
-            ? `【空間法則】扭曲了攻勢，你將這次傷害轉入虛空。`
-            : `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 的攻勢被你避開了！`,
-          damage: 0,
+          enemy,
           playerHp,
           playerMaxHp: player.maxHp,
           enemyHp,
           enemyMaxHp: enemy.maxHp,
+          voidEvasion,
         });
       } else {
         if (isBlock) {
