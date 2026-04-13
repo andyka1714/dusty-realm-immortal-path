@@ -132,6 +132,7 @@
   - `m_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `言出法隨` 的術式增幅
 - `b_vr_passive` / `s_im_passive`：在 timeline combat 開場也會明確標出 `荒古戰體` / `仙元護體` 已進入待命狀態
 - `s_sf_passive` / `b_sf_passive` / `m_sf_passive`：在 timeline combat 開場也會明確標出 `劍意化形` / `肉身成聖` / `道法自然` 已進入待命狀態
+- `s_q_passive` / `b_q_passive` / `m_q_passive` / `m_n_passive`：在 timeline combat 開場也已開始標出 `劍脈初成` / `銅皮鐵骨` / `靈潮循環` / `法力源泉` 的待命狀態
 - `s_ie_passive` / `b_ie_passive`：在 timeline combat 開場也已開始明確標出 `萬法皆空` / `不死不滅` 的待命狀態
 - `s_bi_passive` / `b_tr_passive` / `m_tr_passive`：在 timeline combat 開場也已開始明確標出 `人劍合神` / `萬劫不滅` / `雷劫煉心` 的待命狀態
 - `m_vr_passive` / `b_im_passive` / `s_ma_passive` / `m_ma_passive`：在 timeline combat 開場也已開始明確標出 `空間法則` / `仙體無垢` / `劍道獨尊` / `言出法隨` 的待命狀態

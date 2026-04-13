@@ -2450,8 +2450,12 @@ const getInitialPassiveStatuses = ({
 const getInitialPassiveBattleLogMessages = ({
   hasReflectPassive,
   hasInitialShieldPassive,
+  hasSwordQiPassive,
+  hasBodyQiPassive,
   hasSwordEchoPassive,
   hasBodySaintPassive,
+  hasMageQiPassive,
+  hasManaSpringPassive,
   hasMageSpiritSeveringPassive,
   hasBodyAncientPassive,
   hasSwordImmortalPassive,
@@ -2467,8 +2471,12 @@ const getInitialPassiveBattleLogMessages = ({
 }: {
   hasReflectPassive: boolean;
   hasInitialShieldPassive: boolean;
+  hasSwordQiPassive: boolean;
+  hasBodyQiPassive: boolean;
   hasSwordEchoPassive: boolean;
   hasBodySaintPassive: boolean;
+  hasMageQiPassive: boolean;
+  hasManaSpringPassive: boolean;
   hasMageSpiritSeveringPassive: boolean;
   hasBodyAncientPassive: boolean;
   hasSwordImmortalPassive: boolean;
@@ -2496,8 +2504,24 @@ const getInitialPassiveBattleLogMessages = ({
     messages.push("【劍意化形】劍意凝影待發，普攻將化作雙段追斬。");
   }
 
+  if (hasSwordQiPassive) {
+    messages.push("【劍脈初成】劍勢已然循環，暴擊將牽動破甲追擊。");
+  }
+
+  if (hasBodyQiPassive) {
+    messages.push("【銅皮鐵骨】筋骨已提前繃緊，凡俗重擊將被層層卸去。");
+  }
+
   if (hasBodySaintPassive) {
     messages.push("【肉身成聖】聖軀已穩，重擊將被大幅化去。");
+  }
+
+  if (hasMageQiPassive) {
+    messages.push("【靈潮循環】靈潮已在經脈間往復，普攻空窗也會持續回潮。");
+  }
+
+  if (hasManaSpringPassive) {
+    messages.push("【法力源泉】靈海滿溢時，術式威能將再向上拔高。");
   }
 
   if (hasMageSpiritSeveringPassive) {
@@ -2558,8 +2582,12 @@ const getCombatOpeningMessages = (options: {
   elementalAffinity: { multiplier: number; reason?: "resistance" | "weakness" };
   hasReflectPassive: boolean;
   hasInitialShieldPassive: boolean;
+  hasSwordQiPassive: boolean;
+  hasBodyQiPassive: boolean;
   hasSwordEchoPassive: boolean;
   hasBodySaintPassive: boolean;
+  hasMageQiPassive: boolean;
+  hasManaSpringPassive: boolean;
   hasMageSpiritSeveringPassive: boolean;
   hasBodyAncientPassive: boolean;
   hasSwordImmortalPassive: boolean;
@@ -2582,8 +2610,12 @@ const getCombatOpeningMessages = (options: {
     elementalAffinity,
     hasReflectPassive,
     hasInitialShieldPassive,
+    hasSwordQiPassive,
+    hasBodyQiPassive,
     hasSwordEchoPassive,
     hasBodySaintPassive,
+    hasMageQiPassive,
+    hasManaSpringPassive,
     hasMageSpiritSeveringPassive,
     hasBodyAncientPassive,
     hasSwordImmortalPassive,
@@ -2627,8 +2659,12 @@ const getCombatOpeningMessages = (options: {
     ...getInitialPassiveBattleLogMessages({
       hasReflectPassive,
       hasInitialShieldPassive,
+      hasSwordQiPassive,
+      hasBodyQiPassive,
       hasSwordEchoPassive,
       hasBodySaintPassive,
+      hasMageQiPassive,
+      hasManaSpringPassive,
       hasMageSpiritSeveringPassive,
       hasBodyAncientPassive,
       hasSwordImmortalPassive,
@@ -3701,6 +3737,195 @@ const applyEnemyHitAftermath = ({
     playerHp: nextPlayerHp,
     enemyHp: nextEnemyHp,
     playerStatuses: nextPlayerStatuses,
+    bodyTribulationStacks: nextBodyTribulationStacks,
+    bodyRebirthTrueUsed: nextBodyRebirthTrueUsed,
+  };
+};
+
+const resolveEnemyTurnAftermath = ({
+  enemyDamage,
+  isDodge,
+  voidEvasion,
+  isBlock,
+  enemySpecialReady,
+  currentTimeMs,
+  turn,
+  logs,
+  enemy,
+  player,
+  playerHp,
+  playerMp,
+  enemyHp,
+  playerStatuses,
+  passiveFlags,
+  bodyFoundationStacks,
+  swordDeathWardUsed,
+  bodyTribulationStacks,
+  bodyRebirthTrueUsed,
+}: {
+  enemyDamage: number;
+  isDodge: boolean;
+  voidEvasion: boolean;
+  isBlock: boolean;
+  enemySpecialReady: boolean;
+  currentTimeMs: number;
+  turn: number;
+  logs: CombatLog[];
+  enemy: Enemy;
+  player: PlayerCombatStats;
+  playerHp: number;
+  playerMp: number;
+  enemyHp: number;
+  playerStatuses: CombatStatus[];
+  passiveFlags: PlayerPassiveFlags;
+  bodyFoundationStacks: number;
+  swordDeathWardUsed: boolean;
+  bodyTribulationStacks: number;
+  bodyRebirthTrueUsed: boolean;
+}) => {
+  let nextEnemyDamage = enemyDamage;
+  let nextPlayerHp = playerHp;
+  let nextPlayerMp = playerMp;
+  let nextEnemyHp = enemyHp;
+  let nextPlayerStatuses = playerStatuses;
+  let nextSwordDeathWardUsed = swordDeathWardUsed;
+  let nextBodyTribulationStacks = bodyTribulationStacks;
+  let nextBodyRebirthTrueUsed = bodyRebirthTrueUsed;
+
+  if (isDodge || voidEvasion) {
+    logEnemyAvoidance({
+      logs,
+      turn,
+      timeMs: currentTimeMs,
+      enemy,
+      playerHp: nextPlayerHp,
+      playerMaxHp: player.maxHp,
+      enemyHp: nextEnemyHp,
+      enemyMaxHp: enemy.maxHp,
+      voidEvasion,
+    });
+  } else {
+    if (isBlock) {
+      nextEnemyDamage = Math.max(1, Math.floor(nextEnemyDamage * 0.6));
+    }
+    ({
+      enemyDamage: nextEnemyDamage,
+      playerStatuses: nextPlayerStatuses,
+      playerMp: nextPlayerMp,
+      enemyHp: nextEnemyHp,
+      swordDeathWardUsed: nextSwordDeathWardUsed,
+    } = resolveIncomingEnemyDamage({
+      enemyDamage: nextEnemyDamage,
+      enemySpecialReady,
+      currentTimeMs,
+      playerStatuses: nextPlayerStatuses,
+      logs,
+      turn,
+      enemy,
+      playerHp: nextPlayerHp,
+      playerMaxHp: player.maxHp,
+      playerMp: nextPlayerMp,
+      enemyHp: nextEnemyHp,
+      enemyMaxHp: enemy.maxHp,
+      bodyFoundationStacks,
+      hasBodyQiPassive: passiveFlags.hasBodyQiPassive,
+      hasBodyFusionPassive: passiveFlags.hasBodyFusionPassive,
+      hasBodySaintPassive: passiveFlags.hasBodySaintPassive,
+      hasSwordDeathWardPassive: passiveFlags.hasSwordDeathWardPassive,
+      swordDeathWardUsed: nextSwordDeathWardUsed,
+    }));
+
+    nextPlayerHp = Math.max(0, nextPlayerHp - nextEnemyDamage);
+    ({
+      playerHp: nextPlayerHp,
+      enemyHp: nextEnemyHp,
+      playerStatuses: nextPlayerStatuses,
+      bodyTribulationStacks: nextBodyTribulationStacks,
+      bodyRebirthTrueUsed: nextBodyRebirthTrueUsed,
+    } = applyEnemyHitAftermath({
+      enemyDamage: nextEnemyDamage,
+      currentTimeMs,
+      logs,
+      turn,
+      enemy,
+      playerHp: nextPlayerHp,
+      playerMaxHp: player.maxHp,
+      enemyHp: nextEnemyHp,
+      enemyMaxHp: enemy.maxHp,
+      playerStatuses: nextPlayerStatuses,
+      hasBodyTribulationPassive: passiveFlags.hasBodyTribulationPassive,
+      bodyTribulationStacks: nextBodyTribulationStacks,
+      hasMageTribulationPassive: passiveFlags.hasMageTribulationPassive,
+      hasEnemyLeech: hasEnemyAffix(enemy, "噬生"),
+      hasBodyRebirthTruePassive: passiveFlags.hasBodyRebirthTruePassive,
+      bodyRebirthTrueUsed: nextBodyRebirthTrueUsed,
+      hasBodyEmperorPassive: passiveFlags.hasBodyEmperorPassive,
+    }));
+
+    pushCombatLog(logs, {
+      turn,
+      timeMs: currentTimeMs,
+      isPlayer: false,
+      message: enemySpecialReady && enemy.specialAttack
+        ? `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 施展【${enemy.specialAttack.name}】${isBlock ? "，被你格擋後，" : "，"}造成 <dmg>${nextEnemyDamage}</dmg> 點傷害！`
+        : `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 反擊，${isBlock ? "被你格擋後，" : ""}造成 <dmg>${nextEnemyDamage}</dmg> 點傷害！`,
+      damage: nextEnemyDamage,
+      playerHp: nextPlayerHp,
+      playerMaxHp: player.maxHp,
+      enemyHp: nextEnemyHp,
+      enemyMaxHp: enemy.maxHp,
+    });
+
+    if (enemySpecialReady && enemy.specialAttack) {
+      applyEnemySpecialStatusApplication({
+        special: enemy.specialAttack,
+        player,
+        passiveFlags,
+        currentTimeMs,
+        shortenControlDuration: passiveFlags.hasSwordFusionPassive,
+        container: nextPlayerStatuses,
+        logs,
+        turn,
+        enemy,
+        playerHp: nextPlayerHp,
+        playerMaxHp: player.maxHp,
+        enemyHp: nextEnemyHp,
+        enemyMaxHp: enemy.maxHp,
+      });
+    }
+
+    const reflectValue = getReflectValue(nextPlayerStatuses, currentTimeMs);
+    const isMeleeEnemyHit = (enemy.attackRange ?? 1) <= 1;
+    if (
+      reflectValue > 0 &&
+      nextEnemyDamage > 0 &&
+      nextEnemyHp > 0 &&
+      isMeleeEnemyHit
+    ) {
+      const reflected = Math.max(1, Math.floor(nextEnemyDamage * reflectValue));
+      nextEnemyHp = Math.max(0, nextEnemyHp - reflected);
+      logReflectRetaliation({
+        logs,
+        turn,
+        timeMs: currentTimeMs,
+        playerHp: nextPlayerHp,
+        playerMaxHp: player.maxHp,
+        enemyHp: nextEnemyHp,
+        enemyMaxHp: enemy.maxHp,
+        reflected,
+        enemy,
+        sourceName: "荊棘皮層",
+      });
+    }
+  }
+
+  return {
+    enemyDamage: nextEnemyDamage,
+    playerHp: nextPlayerHp,
+    playerMp: nextPlayerMp,
+    enemyHp: nextEnemyHp,
+    playerStatuses: nextPlayerStatuses,
+    swordDeathWardUsed: nextSwordDeathWardUsed,
     bodyTribulationStacks: nextBodyTribulationStacks,
     bodyRebirthTrueUsed: nextBodyRebirthTrueUsed,
   };
@@ -5079,8 +5304,12 @@ export const runAutoBattle = (
     elementalAffinity: enemyElementalAffinity,
     hasReflectPassive,
     hasInitialShieldPassive,
+    hasSwordQiPassive,
+    hasBodyQiPassive,
     hasSwordEchoPassive,
     hasBodySaintPassive,
+    hasMageQiPassive,
+    hasManaSpringPassive,
     hasMageSpiritSeveringPassive,
     hasBodyAncientPassive,
     hasSwordImmortalPassive,
@@ -5426,134 +5655,42 @@ export const runAutoBattle = (
         bodyTribulationStacks,
       });
 
-      if (isDodge || voidEvasion) {
-        logEnemyAvoidance({
-          logs,
-          turn,
-          timeMs: currentTimeMs,
-          enemy,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-          voidEvasion,
-        });
-      } else {
-        if (isBlock) {
-          enemyDamage = Math.max(1, Math.floor(enemyDamage * 0.6));
-        }
-        ({
-          enemyDamage,
-          playerStatuses,
-          playerMp,
-          enemyHp,
-          swordDeathWardUsed,
-        } = resolveIncomingEnemyDamage({
-          enemyDamage,
-          enemySpecialReady,
-          currentTimeMs,
-          playerStatuses,
-          logs,
-          turn,
-          enemy,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          playerMp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-          bodyFoundationStacks,
-          hasBodyQiPassive,
-          hasBodyFusionPassive,
-          hasBodySaintPassive,
-          hasSwordDeathWardPassive,
-          swordDeathWardUsed,
-        }));
-
-      playerHp = Math.max(0, playerHp - enemyDamage);
-      if (enemyDamage > 0) {
-        playerDamagedSinceSwordHeartWindow = true;
-      }
       ({
-        playerHp,
-        enemyHp,
-        playerStatuses,
-        bodyTribulationStacks,
-        bodyRebirthTrueUsed,
-      } = applyEnemyHitAftermath({
         enemyDamage,
-        currentTimeMs,
-        logs,
-        turn,
-        enemy,
         playerHp,
-        playerMaxHp: player.maxHp,
+        playerMp,
         enemyHp,
-        enemyMaxHp: enemy.maxHp,
         playerStatuses,
-        hasBodyTribulationPassive,
+        swordDeathWardUsed,
         bodyTribulationStacks,
-        hasMageTribulationPassive,
-        hasEnemyLeech: hasEnemyAffix(enemy, "噬生"),
-        hasBodyRebirthTruePassive,
         bodyRebirthTrueUsed,
-        hasBodyEmperorPassive,
+      } = resolveEnemyTurnAftermath({
+        enemyDamage,
+        isDodge,
+        voidEvasion,
+        isBlock,
+        enemySpecialReady: Boolean(enemySpecialReady),
+        currentTimeMs,
+        turn,
+        logs,
+        enemy,
+        player: {
+          ...player,
+          hp: playerHp,
+          mp: playerMp,
+        },
+        playerHp,
+        playerMp,
+        enemyHp,
+        playerStatuses,
+        passiveFlags,
+        bodyFoundationStacks,
+        swordDeathWardUsed,
+        bodyTribulationStacks,
+        bodyRebirthTrueUsed,
       }));
-
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: false,
-          message: enemySpecialReady && enemy.specialAttack
-            ? `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 施展【${enemy.specialAttack.name}】${enemySpecialTimelineProfile && enemySpecialTimelineProfile.areaShape !== "single" && enemySpecialTimelineProfile.areaShape !== "self" ? "，術式波及周遭，" : "，"}${isBlock ? "被你格擋後，" : ""}造成 <dmg>${enemyDamage}</dmg> 點傷害！`
-            : `<enemy rank="${enemy.rank}">${enemy.name}</enemy> 反擊，${isBlock ? "被你格擋後，" : ""}造成 <dmg>${enemyDamage}</dmg> 點傷害！`,
-          damage: enemyDamage,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-
-        if (enemySpecialReady && enemy.specialAttack) {
-          applyEnemySpecialStatusApplication({
-            special: enemy.specialAttack,
-            player,
-            passiveFlags,
-            currentTimeMs,
-            shortenControlDuration: hasSwordFusionPassive,
-            container: playerStatuses,
-            logs,
-            turn,
-            enemy,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
-
-        const reflectValue = getReflectValue(playerStatuses, currentTimeMs);
-        const isMeleeEnemyHit = (enemy.attackRange ?? 1) <= 1;
-        if (
-          reflectValue > 0 &&
-          enemyDamage > 0 &&
-          enemyHp > 0 &&
-          isMeleeEnemyHit
-        ) {
-          const reflected = Math.max(1, Math.floor(enemyDamage * reflectValue));
-          enemyHp = Math.max(0, enemyHp - reflected);
-          logReflectRetaliation({
-            logs,
-            turn,
-            timeMs: currentTimeMs,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-            reflected,
-            enemy,
-            sourceName: "荊棘皮層",
-          });
-        }
+      if (enemyDamage > 0 && !isDodge && !voidEvasion) {
+        playerDamagedSinceSwordHeartWindow = true;
       }
 
       if (hasSwordHeartPassive && !playerDamagedSinceSwordHeartWindow && swordHeartStacks < 5) {
