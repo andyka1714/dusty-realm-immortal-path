@@ -490,6 +490,8 @@ const getEnemyWorldPassiveStatusNames = (
     enemyElement: ElementType;
     bodyTribulationTriggered: boolean;
     mageTribulationTriggered: boolean;
+    mageTribulationControlTriggered: boolean;
+    swordFusionControlTriggered: boolean;
     bodyRebirthTrueTriggered: boolean;
     swordDeathWardTriggered: boolean;
     bodyEmperorTriggered: boolean;
@@ -509,6 +511,8 @@ const getEnemyWorldPassiveStatusNames = (
     enemyElement,
     bodyTribulationTriggered,
     mageTribulationTriggered,
+    mageTribulationControlTriggered,
+    swordFusionControlTriggered,
     bodyRebirthTrueTriggered,
     swordDeathWardTriggered,
     bodyEmperorTriggered,
@@ -548,6 +552,14 @@ const getEnemyWorldPassiveStatusNames = (
 
   if (mageTribulationTriggered && enemyElement === ElementType.Metal) {
     statusNames.push("雷劫煉心");
+  }
+
+  if (mageTribulationControlTriggered) {
+    statusNames.push("雷劫煉心");
+  }
+
+  if (swordFusionControlTriggered) {
+    statusNames.push("人劍合神");
   }
 
   if (bodyRebirthTrueTriggered) {
@@ -603,10 +615,16 @@ const getResolvedEnemyWorldIncomingStatuses = ({
     createdStatuses.some((status) => isNegativeStatusKind(status.kind)) &&
     filteredStatuses.every((status) => !isNegativeStatusKind(status.kind));
 
+  const mageTribulationControlTriggered =
+    passiveFlags.hasMageTribulationPassive &&
+    createdStatuses.some((status) => status.kind === "incapacitate") &&
+    filteredStatuses.every((status) => status.kind !== "incapacitate");
+
   return {
     filteredStatuses,
     bodyImmortalTriggered,
     swordEmperorTriggered,
+    mageTribulationControlTriggered,
   };
 };
 
@@ -629,9 +647,12 @@ const resolveIncomingEnemySpecialStatuses = ({
     passiveFlags,
   });
 
+  let swordFusionControlTriggered = false;
+
   const normalizedIncomingStatuses = incomingStatuses.filteredStatuses
     .map((status) => {
       if (shortenControlDuration && status.kind === "incapacitate") {
+        swordFusionControlTriggered = true;
         return {
           ...status,
           expiresAtMs: Math.max(currentTimeMs, status.expiresAtMs - 1000),
@@ -647,10 +668,11 @@ const resolveIncomingEnemySpecialStatuses = ({
   return {
     ...incomingStatuses,
     normalizedIncomingStatuses,
+    swordFusionControlTriggered,
   };
 };
 
-const logEnemySpecialImmunityTriggers = ({
+const logEnemySpecialResistanceTriggers = ({
   logs,
   turn,
   timeMs,
@@ -660,6 +682,8 @@ const logEnemySpecialImmunityTriggers = ({
   enemyMaxHp,
   bodyImmortalTriggered,
   swordEmperorTriggered,
+  mageTribulationControlTriggered,
+  swordFusionControlTriggered,
 }: {
   logs: CombatLog[];
   turn: number;
@@ -670,6 +694,8 @@ const logEnemySpecialImmunityTriggers = ({
   enemyMaxHp: number;
   bodyImmortalTriggered: boolean;
   swordEmperorTriggered: boolean;
+  mageTribulationControlTriggered: boolean;
+  swordFusionControlTriggered: boolean;
 }) => {
   if (bodyImmortalTriggered) {
     pushCombatLog(logs, {
@@ -691,6 +717,34 @@ const logEnemySpecialImmunityTriggers = ({
       timeMs,
       isPlayer: true,
       message: `【萬法皆空】你不受任何負面狀態束縛。`,
+      damage: 0,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  if (mageTribulationControlTriggered) {
+    pushCombatLog(logs, {
+      turn,
+      timeMs,
+      isPlayer: true,
+      message: `【雷劫煉心】雷痕護住識海，你直接掙脫了控制侵蝕。`,
+      damage: 0,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  if (swordFusionControlTriggered) {
+    pushCombatLog(logs, {
+      turn,
+      timeMs,
+      isPlayer: true,
+      message: `【人劍合神】強行縮短了控制侵蝕的持續時間。`,
       damage: 0,
       playerHp,
       playerMaxHp,
@@ -2381,14 +2435,16 @@ export const resolveEnemyWorldStrike = (
     special,
   });
   damage = resolvedDamage;
-  const incomingStatuses = getResolvedEnemyWorldIncomingStatuses({
+  const incomingStatuses = resolveIncomingEnemySpecialStatuses({
     special,
     player,
     passiveFlags,
+    currentTimeMs: 0,
+    shortenControlDuration: passiveFlags.hasSwordFusionPassive,
   });
 
   const statusNames = [
-    ...incomingStatuses.filteredStatuses.map((status) => status.name),
+    ...incomingStatuses.normalizedIncomingStatuses.map((status) => status.name),
     ...getEnemyWorldPassiveStatusNames({
       passiveFlags,
       prePassiveDamage: preBodySaintDamage,
@@ -2402,6 +2458,10 @@ export const resolveEnemyWorldStrike = (
       enemyElement: enemy.element,
       bodyTribulationTriggered,
       mageTribulationTriggered,
+      mageTribulationControlTriggered:
+        incomingStatuses.mageTribulationControlTriggered,
+      swordFusionControlTriggered:
+        incomingStatuses.swordFusionControlTriggered,
       bodyRebirthTrueTriggered,
       bodyEmperorTriggered,
       swordDeathWardTriggered,
@@ -3963,25 +4023,9 @@ export const runAutoBattle = (
                 enemyMaxHp: enemy.maxHp,
               });
             });
-            if (
-              hasSwordFusionPassive &&
-              filteredEnemyStatuses.some((status) => status.kind === "incapacitate")
-            ) {
-              pushCombatLog(logs, {
-                turn,
-                timeMs: currentTimeMs,
-                isPlayer: true,
-                message: `【人劍合神】強行縮短了控制侵蝕的持續時間。`,
-                damage: 0,
-                playerHp,
-                playerMaxHp: player.maxHp,
-                enemyHp,
-                enemyMaxHp: enemy.maxHp,
-              });
-            }
           }
 
-          logEnemySpecialImmunityTriggers({
+          logEnemySpecialResistanceTriggers({
             logs,
             turn,
             timeMs: currentTimeMs,
@@ -3991,6 +4035,10 @@ export const runAutoBattle = (
             enemyMaxHp: enemy.maxHp,
             bodyImmortalTriggered: enemyIncomingStatusResult.bodyImmortalTriggered,
             swordEmperorTriggered: enemyIncomingStatusResult.swordEmperorTriggered,
+            mageTribulationControlTriggered:
+              enemyIncomingStatusResult.mageTribulationControlTriggered,
+            swordFusionControlTriggered:
+              enemyIncomingStatusResult.swordFusionControlTriggered,
           });
         }
 

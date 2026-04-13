@@ -1572,6 +1572,50 @@ describe("battle system balance", () => {
     expect(strike.statusNames).toContain("雷劫煉心");
   });
 
+  it("surfaces tribulation mage control immunity on enemy special world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 94,
+        rootBone: 82,
+        insight: 102,
+        comprehension: 30,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1800,
+        hp: 7600,
+        mp: 4200,
+        defense: 260,
+      },
+      "劫雷法尊",
+      ProfessionType.Mage,
+      ["m_tr_passive"]
+    );
+
+    const enemy = {
+      ...BOSS_ENEMIES.m180_b1,
+      specialAttack: {
+        name: "震魂雷獄",
+        cooldownSeconds: 2,
+        damageMultiplier: 1.1,
+        statusEffect: { id: "paralyze", duration: 2, chance: 1 },
+        areaShape: "single" as const,
+        areaRadius: 0,
+        maxTargets: 1,
+      },
+    };
+
+    const strike = resolveEnemyWorldStrike(enemy, mage, true);
+
+    expect(strike.statusNames).toContain("雷劫煉心");
+    expect(strike.statusNames).not.toContain("麻痺");
+  });
+
   it("surfaces sword death-ward passive on lethal enemy world strikes", () => {
     fixedRandom.mockReturnValue(0.5);
 
@@ -1948,6 +1992,52 @@ describe("battle system balance", () => {
 
     const result = runAutoBattle(thunderMage, enemy);
     expect(result.logs.some((log) => log.message.includes("雷劫煉心"))).toBe(true);
+  });
+
+  it("lets tribulation mage passive ignore incoming control in timeline combat", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const thunderMage = calculatePlayerStats(
+      {
+        physique: 92,
+        rootBone: 84,
+        insight: 96,
+        comprehension: 30,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1900,
+        mp: 4200,
+        hp: 8600,
+        defense: 280,
+      },
+      "雷劫煉心",
+      ProfessionType.Mage,
+      ["m_tr_passive"]
+    );
+
+    const enemy = {
+      ...BOSS_ENEMIES.m161_b1,
+      specialAttack: {
+        name: "震魂雷獄",
+        cooldownSeconds: 1,
+        damageMultiplier: 1.1,
+        statusEffect: { id: "paralyze", duration: 2, chance: 1 },
+        areaShape: "single" as const,
+        areaRadius: 0,
+        maxTargets: 1,
+      },
+    };
+
+    const result = runAutoBattle(thunderMage, enemy);
+
+    expect(result.logs.some((log) => log.message.includes("【雷劫煉心】"))).toBe(true);
+    expect(
+      result.logs.some((log) => (log.playerStatuses || []).includes("麻痺"))
+    ).toBe(false);
   });
 
   it("keeps same-realm qi bosses as progression gates for full low gear", () => {
