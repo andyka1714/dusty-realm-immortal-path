@@ -9,7 +9,9 @@ import {
 } from "./retired_active_aliases";
 import {
   ALL_RETIRED_PASSIVE_ALIASES,
+  BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS,
   RETIRED_PASSIVE_ALIASES_BY_REALM,
+  RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_VIEWS,
   stripBattleAbsorbedPassiveAliases as stripBattleAbsorbedPassiveAliasesForTest,
 } from "./retired_passive_aliases";
 import {
@@ -326,6 +328,12 @@ describe("skill pool registry", () => {
   it("keeps retirement-ready retired passive lookups centralized in the alias layer", () => {
     const passiveIds = getRetirementReadyRetiredPassiveSkills().map((skill) => skill.id);
 
+    expect(BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS.map((skill) => skill.id)).toEqual(
+      Object.keys(ALL_RETIRED_PASSIVE_ALIASES)
+    );
+    expect(RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_VIEWS.map((skill) => skill.id)).toEqual(
+      BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS.map((skill) => skill.id)
+    );
     expect(passiveIds).toContain("s_f_passive");
     expect(passiveIds).toContain("b_ie_passive");
     expect(passiveIds).toContain("m_tr_passive");
