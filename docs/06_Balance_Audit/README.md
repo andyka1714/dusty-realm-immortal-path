@@ -29,6 +29,7 @@
 - 技能池已收斂出 `core / battle-absorbed / retirement-ready` 的正式視圖，realm dataset 已開始排除 retired alias
 - `runAutoBattle()` 已拆出多個 shared helper，world strike 與 timeline combat 的冷卻、status、runtime、outcome 正持續收斂
 - `GameTooltip / GameHintBubble / GamePanel / Modal / GameSection` 已成為主要 UI 殼層語言，且 `Dashboard / QuestModal` 內部資訊區也已開始套入同一套 section chrome
+- 已完成專屬接線的一批 passive，現在已開始退出 generic `passiveEffectTags` fallback，技能資料不再假裝它們仍主要依賴通用模板
 
 ## 尚未結案的主線
 

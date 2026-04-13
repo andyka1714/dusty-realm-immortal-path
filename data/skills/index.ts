@@ -143,6 +143,39 @@ const getDefaultPassiveTags = (skill: Skill): Skill["passiveEffectTags"] => {
   return Array.from(tags);
 };
 
+export const EXPLICIT_PASSIVE_EFFECT_SKILL_IDS = new Set<string>([
+  "s_f_passive",
+  "s_g_passive",
+  "s_n_passive",
+  "s_sf_passive",
+  "s_vr_passive",
+  "s_bi_passive",
+  "s_ma_passive",
+  "s_tr_passive",
+  "s_im_passive",
+  "s_ie_passive",
+  "b_f_passive",
+  "b_g_passive",
+  "b_n_passive",
+  "b_sf_passive",
+  "b_vr_passive",
+  "b_bi_passive",
+  "b_ma_passive",
+  "b_tr_passive",
+  "b_im_passive",
+  "b_ie_passive",
+  "m_f_passive",
+  "m_g_passive",
+  "m_n_passive",
+  "m_sf_passive",
+  "m_vr_passive",
+  "m_bi_passive",
+  "m_ma_passive",
+  "m_tr_passive",
+  "m_im_passive",
+  "m_ie_passive",
+]);
+
 const normalizeSkill = (skill: Skill): Skill => {
   const realtime = getDefaultRealtimeShape(skill);
   const poolEntry = getSkillPoolEntry(skill.id);
@@ -156,7 +189,11 @@ const normalizeSkill = (skill: Skill): Skill => {
     areaShape: skill.areaShape ?? realtime.areaShape,
     areaRadius: skill.areaRadius ?? realtime.areaRadius,
     maxTargets: skill.maxTargets ?? realtime.maxTargets,
-    passiveEffectTags: skill.passiveEffectTags ?? getDefaultPassiveTags(skill),
+    passiveEffectTags:
+      skill.passiveEffectTags ??
+      (EXPLICIT_PASSIVE_EFFECT_SKILL_IDS.has(skill.id)
+        ? undefined
+        : getDefaultPassiveTags(skill)),
     poolStatus: skill.poolStatus ?? poolEntry?.poolStatus,
     formalRole: skill.formalRole ?? poolEntry?.formalRole,
     formalSourceTier: skill.formalSourceTier ?? poolEntry?.formalSourceTier,

@@ -28,6 +28,7 @@ import {
   BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP,
   BATTLE_ABSORBED_RETIRED_SKILLS,
   BATTLE_ABSORBED_RETIRED_SKILL_MAP,
+  EXPLICIT_PASSIVE_EFFECT_SKILL_IDS,
   FORMAL_CORE_ACTIVE_SKILLS,
   FORMAL_CORE_SKILL_MAP,
   FORMAL_CORE_SKILL_NAME_INDEX,
@@ -478,5 +479,15 @@ describe("skill pool registry", () => {
     expect(fusionMage?.areaRadius).toBe(2);
     expect(fusionMage?.maxTargets).toBe(6);
     expect(fusionMage?.projectileSpeed).toBe(12);
+  });
+
+  it("removes generic passive tags from skills that already use explicit passive wiring", () => {
+    const explicitPassiveIds = ["s_tr_passive", "b_ie_passive", "m_im_passive"];
+    explicitPassiveIds.forEach((skillId) => {
+      expect(EXPLICIT_PASSIVE_EFFECT_SKILL_IDS.has(skillId)).toBe(true);
+      expect(SKILLS[skillId]?.passiveEffectTags).toBeUndefined();
+    });
+
+    expect(SKILLS.s_q_passive?.passiveEffectTags?.length).toBeGreaterThan(0);
   });
 });
