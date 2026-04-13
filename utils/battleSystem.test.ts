@@ -2267,6 +2267,77 @@ describe("battle system balance", () => {
     expect(swordResult.logs.some((log) => log.message.includes("仙元護體"))).toBe(true);
   });
 
+  it("surfaces spirit-severing passive opening logs for sword, body, and mage styles", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 90,
+        rootBone: 104,
+        insight: 76,
+        comprehension: 26,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.SpiritSevering,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 900,
+        defense: 240,
+        hp: 5800,
+      },
+      "劍意化形",
+      ProfessionType.Sword,
+      ["s_sf_passive"]
+    );
+
+    const body = calculatePlayerStats(
+      {
+        physique: 110,
+        rootBone: 90,
+        insight: 60,
+        comprehension: 22,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.SpiritSevering,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 760,
+        defense: 320,
+        hp: 7600,
+      },
+      "肉身成聖",
+      ProfessionType.Body,
+      ["b_sf_passive"]
+    );
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 78,
+        rootBone: 72,
+        insight: 98,
+        comprehension: 30,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.SpiritSevering,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1500,
+        mp: 3800,
+        defense: 200,
+      },
+      "道法自然",
+      ProfessionType.Mage,
+      ["m_sf_passive"]
+    );
+
+    expect(runAutoBattle(sword, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("劍意化形"))).toBe(true);
+    expect(runAutoBattle(body, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("肉身成聖"))).toBe(true);
+    expect(runAutoBattle(mage, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("道法自然"))).toBe(true);
+  });
+
   it("lets tribulation mage passive heal from thunder-aligned retaliation", () => {
     fixedRandom.mockReturnValue(0.5);
 
@@ -4508,6 +4579,40 @@ describe("battle system balance", () => {
     );
 
     expect(strike.playerStatusNames).toContain("五氣朝元");
+  });
+
+  it("surfaces spirit-severing mage passive on world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const mage = calculatePlayerStats(
+      {
+        physique: 84,
+        rootBone: 78,
+        insight: 96,
+        comprehension: 28,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.SpiritSevering,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1320,
+        mp: 3400,
+        defense: 220,
+        res: 180,
+      },
+      "道法自然",
+      ProfessionType.Mage,
+      ["m_sf_active", "m_sf_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(
+      mage,
+      COMMON_ENEMIES.m170_c1,
+      getSkill("m_sf_active")
+    );
+
+    expect(strike.playerStatusNames).toContain("道法自然");
   });
 
   it("surfaces immortal mage passive on world strikes", () => {

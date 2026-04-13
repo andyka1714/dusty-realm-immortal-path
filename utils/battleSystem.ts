@@ -467,6 +467,7 @@ type PlayerPassiveFlags = {
   hasSwordEchoPassive: boolean;
   hasSwordHeartPassive: boolean;
   hasBodySaintPassive: boolean;
+  hasMageSpiritSeveringPassive: boolean;
   hasSwordFusionPassive: boolean;
   hasSwordVoidPassive: boolean;
   hasBodyFusionPassive: boolean;
@@ -502,6 +503,7 @@ const PLAYER_PASSIVE_FLAG_SKILL_IDS: Record<keyof PlayerPassiveFlags, string | s
   hasSwordEchoPassive: "s_sf_passive",
   hasSwordHeartPassive: ["s_f_passive", "s_g_passive"],
   hasBodySaintPassive: "b_sf_passive",
+  hasMageSpiritSeveringPassive: "m_sf_passive",
   hasSwordFusionPassive: ["s_bi_passive", "s_tr_passive"],
   hasSwordVoidPassive: ["s_vr_passive", "s_tr_passive"],
   hasBodyFusionPassive: "b_bi_passive",
@@ -760,6 +762,79 @@ const resolveIncomingEnemySpecialStatuses = ({
   };
 };
 
+const applyEnemySpecialStatusApplication = ({
+  special,
+  player,
+  passiveFlags,
+  currentTimeMs,
+  shortenControlDuration,
+  container,
+  logs,
+  turn,
+  enemy,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+}: {
+  special?: Enemy["specialAttack"];
+  player: PlayerCombatStats;
+  passiveFlags: PlayerPassiveFlags;
+  currentTimeMs: number;
+  shortenControlDuration: boolean;
+  container: CombatStatus[];
+  logs: CombatLog[];
+  turn: number;
+  enemy: Enemy;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+}) => {
+  const enemyIncomingStatusResult = resolveIncomingEnemySpecialStatuses({
+    special,
+    player,
+    passiveFlags,
+    currentTimeMs,
+    shortenControlDuration,
+  });
+
+  if (enemyIncomingStatusResult.filteredStatuses.length > 0) {
+    appendAndLogCombatStatuses({
+      container,
+      statuses: enemyIncomingStatusResult.normalizedIncomingStatuses,
+      logs,
+      turn,
+      timeMs: currentTimeMs,
+      isPlayer: false,
+      targetIsPlayer: true,
+      enemy,
+      playerHp,
+      playerMaxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  logEnemySpecialResistanceTriggers({
+    logs,
+    turn,
+    timeMs: currentTimeMs,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp,
+    bodyImmortalTriggered: enemyIncomingStatusResult.bodyImmortalTriggered,
+    swordEmperorTriggered: enemyIncomingStatusResult.swordEmperorTriggered,
+    mageTribulationControlTriggered:
+      enemyIncomingStatusResult.mageTribulationControlTriggered,
+    swordFusionControlTriggered:
+      enemyIncomingStatusResult.swordFusionControlTriggered,
+  });
+
+  return enemyIncomingStatusResult;
+};
+
 const logEnemySpecialResistanceTriggers = ({
   logs,
   turn,
@@ -985,6 +1060,10 @@ const getPlayerWorldPassiveStatusNames = (options: {
 
   if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageFoundationPassive) {
     statusNames.push("靈力湧動");
+  }
+
+  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageSpiritSeveringPassive) {
+    statusNames.push("道法自然");
   }
 
   if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageFusionPassive) {
@@ -1625,11 +1704,17 @@ const getInitialPassiveStatuses = ({
 const getInitialPassiveBattleLogMessages = ({
   hasReflectPassive,
   hasInitialShieldPassive,
+  hasSwordEchoPassive,
+  hasBodySaintPassive,
+  hasMageSpiritSeveringPassive,
   hasBodyAncientPassive,
   hasSwordImmortalPassive,
 }: {
   hasReflectPassive: boolean;
   hasInitialShieldPassive: boolean;
+  hasSwordEchoPassive: boolean;
+  hasBodySaintPassive: boolean;
+  hasMageSpiritSeveringPassive: boolean;
   hasBodyAncientPassive: boolean;
   hasSwordImmortalPassive: boolean;
 }) => {
@@ -1641,6 +1726,18 @@ const getInitialPassiveBattleLogMessages = ({
 
   if (hasInitialShieldPassive) {
     messages.push("戰鬥開始時，你獲得了【元素護盾】。");
+  }
+
+  if (hasSwordEchoPassive) {
+    messages.push("【劍意化形】劍意凝影待發，普攻將化作雙段追斬。");
+  }
+
+  if (hasBodySaintPassive) {
+    messages.push("【肉身成聖】聖軀已穩，重擊將被大幅化去。");
+  }
+
+  if (hasMageSpiritSeveringPassive) {
+    messages.push("【道法自然】術式流轉圓融，萬法冷卻將提早歸位。");
   }
 
   if (hasBodyAncientPassive) {
@@ -1661,6 +1758,9 @@ const getCombatOpeningMessages = (options: {
   elementalAffinity: { multiplier: number; reason?: "resistance" | "weakness" };
   hasReflectPassive: boolean;
   hasInitialShieldPassive: boolean;
+  hasSwordEchoPassive: boolean;
+  hasBodySaintPassive: boolean;
+  hasMageSpiritSeveringPassive: boolean;
   hasBodyAncientPassive: boolean;
   hasSwordImmortalPassive: boolean;
   hasMageImmortalPassive: boolean;
@@ -1673,6 +1773,9 @@ const getCombatOpeningMessages = (options: {
     elementalAffinity,
     hasReflectPassive,
     hasInitialShieldPassive,
+    hasSwordEchoPassive,
+    hasBodySaintPassive,
+    hasMageSpiritSeveringPassive,
     hasBodyAncientPassive,
     hasSwordImmortalPassive,
     hasMageImmortalPassive,
@@ -1706,6 +1809,9 @@ const getCombatOpeningMessages = (options: {
     ...getInitialPassiveBattleLogMessages({
       hasReflectPassive,
       hasInitialShieldPassive,
+      hasSwordEchoPassive,
+      hasBodySaintPassive,
+      hasMageSpiritSeveringPassive,
       hasBodyAncientPassive,
       hasSwordImmortalPassive,
     })
@@ -3014,6 +3120,7 @@ export const runAutoBattle = (
     hasSwordEchoPassive,
     hasSwordHeartPassive,
     hasBodySaintPassive,
+    hasMageSpiritSeveringPassive,
     hasSwordFusionPassive,
     hasSwordVoidPassive,
     hasBodyFusionPassive,
@@ -3206,6 +3313,9 @@ export const runAutoBattle = (
     elementalAffinity: enemyElementalAffinity,
     hasReflectPassive,
     hasInitialShieldPassive,
+    hasSwordEchoPassive,
+    hasBodySaintPassive,
+    hasMageSpiritSeveringPassive,
     hasBodyAncientPassive,
     hasSwordImmortalPassive,
     hasMageImmortalPassive,
@@ -4247,49 +4357,20 @@ export const runAutoBattle = (
         });
 
         if (enemySpecialReady && enemy.specialAttack) {
-          const enemyIncomingStatusResult = resolveIncomingEnemySpecialStatuses({
+          applyEnemySpecialStatusApplication({
             special: enemy.specialAttack,
             player,
             passiveFlags,
             currentTimeMs,
             shortenControlDuration: hasSwordFusionPassive,
-          });
-          const filteredEnemyStatuses =
-            enemyIncomingStatusResult.filteredStatuses;
-          const normalizedIncomingStatuses =
-            enemyIncomingStatusResult.normalizedIncomingStatuses;
-
-          if (filteredEnemyStatuses.length > 0) {
-            appendAndLogCombatStatuses({
-              container: playerStatuses,
-              statuses: normalizedIncomingStatuses,
-              logs,
-              turn,
-              timeMs: currentTimeMs,
-              isPlayer: false,
-              targetIsPlayer: true,
-              enemy,
-              playerHp,
-              playerMaxHp: player.maxHp,
-              enemyHp,
-              enemyMaxHp: enemy.maxHp,
-            });
-          }
-
-          logEnemySpecialResistanceTriggers({
+            container: playerStatuses,
             logs,
             turn,
-            timeMs: currentTimeMs,
+            enemy,
             playerHp,
             playerMaxHp: player.maxHp,
             enemyHp,
             enemyMaxHp: enemy.maxHp,
-            bodyImmortalTriggered: enemyIncomingStatusResult.bodyImmortalTriggered,
-            swordEmperorTriggered: enemyIncomingStatusResult.swordEmperorTriggered,
-            mageTribulationControlTriggered:
-              enemyIncomingStatusResult.mageTribulationControlTriggered,
-            swordFusionControlTriggered:
-              enemyIncomingStatusResult.swordFusionControlTriggered,
           });
         }
 
