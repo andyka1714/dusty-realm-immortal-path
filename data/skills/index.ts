@@ -19,7 +19,7 @@ import {
 } from "./retired_active_aliases";
 import {
   ALL_RETIRED_PASSIVE_ALIASES,
-  BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS,
+  BATTLE_ABSORBED_RETIRED_PASSIVE_ALIASES,
   RETIREMENT_READY_RETIRED_PASSIVE_ALIASES,
   RETIRED_PASSIVE_ALIASES_BY_REALM,
   stripBattleAbsorbedPassiveAliases,
@@ -332,9 +332,9 @@ export const BATTLE_ABSORBED_RETIRED_SKILL_MAP: Record<string, Skill> =
   ) as Record<string, Skill>;
 
 export const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILLS =
-  BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS.map((skillId) => SKILLS[skillId]).filter(
-    (skill): skill is Skill => Boolean(skill)
-  );
+  Object.values(BATTLE_ABSORBED_RETIRED_PASSIVE_ALIASES)
+    .map((skill) => SKILLS[skill.id])
+    .filter((skill): skill is Skill => Boolean(skill));
 
 export const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP: Record<string, Skill> =
   Object.fromEntries(

@@ -2184,7 +2184,9 @@ describe("battle system balance", () => {
 
     const result = runAutoBattle(player, BOSS_ENEMIES.m180_b1);
     expect(result.logs.some((log) => log.message.includes("不死不滅"))).toBe(true);
-    const emperorLog = result.logs.find((log) => log.message.includes("不死不滅"));
+    const emperorLog = result.logs.find((log) =>
+      log.message.includes("強行續住最後一線生機")
+    );
     expect(emperorLog?.playerHp).toBe(1);
   });
 
@@ -2375,6 +2377,55 @@ describe("battle system balance", () => {
     expect(runAutoBattle(sword, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("劍意化形"))).toBe(true);
     expect(runAutoBattle(body, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("肉身成聖"))).toBe(true);
     expect(runAutoBattle(mage, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("道法自然"))).toBe(true);
+  });
+
+  it("surfaces emperor passive opening logs for sword and body styles", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 94,
+        rootBone: 112,
+        insight: 86,
+        comprehension: 30,
+        fortune: 18,
+        charm: 10,
+      },
+      MajorRealm.ImmortalEmperor,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 1880,
+        defense: 360,
+        hp: 11200,
+      },
+      "萬法皆空",
+      ProfessionType.Sword,
+      ["s_ie_passive"]
+    );
+
+    const body = calculatePlayerStats(
+      {
+        physique: 128,
+        rootBone: 96,
+        insight: 70,
+        comprehension: 24,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.ImmortalEmperor,
+      SpiritRootId.TRUE_METAL_EARTH,
+      {
+        attack: 1520,
+        defense: 420,
+        hp: 14600,
+      },
+      "不死不滅",
+      ProfessionType.Body,
+      ["b_ie_passive"]
+    );
+
+    expect(runAutoBattle(sword, BOSS_ENEMIES.m180_b1).logs.some((log) => log.message.includes("萬法皆空"))).toBe(true);
+    expect(runAutoBattle(body, BOSS_ENEMIES.m180_b1).logs.some((log) => log.message.includes("不死不滅"))).toBe(true);
   });
 
   it("lets tribulation mage passive heal from thunder-aligned retaliation", () => {

@@ -1721,6 +1721,8 @@ const getInitialPassiveBattleLogMessages = ({
   hasMageSpiritSeveringPassive,
   hasBodyAncientPassive,
   hasSwordImmortalPassive,
+  hasSwordEmperorPassive,
+  hasBodyEmperorPassive,
 }: {
   hasReflectPassive: boolean;
   hasInitialShieldPassive: boolean;
@@ -1729,6 +1731,8 @@ const getInitialPassiveBattleLogMessages = ({
   hasMageSpiritSeveringPassive: boolean;
   hasBodyAncientPassive: boolean;
   hasSwordImmortalPassive: boolean;
+  hasSwordEmperorPassive: boolean;
+  hasBodyEmperorPassive: boolean;
 }) => {
   const messages: string[] = [];
 
@@ -1760,6 +1764,14 @@ const getInitialPassiveBattleLogMessages = ({
     messages.push("【仙元護體】劍元護體已待命，將定時凝成一次絕對護盾。");
   }
 
+  if (hasSwordEmperorPassive) {
+    messages.push("【萬法皆空】劍意已斷萬法因果，負面侵蝕將被直接抹去。");
+  }
+
+  if (hasBodyEmperorPassive) {
+    messages.push("【不死不滅】霸體鎮住命門，最後一線生機尚未斷絕。");
+  }
+
   return messages;
 };
 
@@ -1775,6 +1787,8 @@ const getCombatOpeningMessages = (options: {
   hasMageSpiritSeveringPassive: boolean;
   hasBodyAncientPassive: boolean;
   hasSwordImmortalPassive: boolean;
+  hasSwordEmperorPassive: boolean;
+  hasBodyEmperorPassive: boolean;
   hasMageImmortalPassive: boolean;
   hasMageEmperorPassive: boolean;
 }) => {
@@ -1790,6 +1804,8 @@ const getCombatOpeningMessages = (options: {
     hasMageSpiritSeveringPassive,
     hasBodyAncientPassive,
     hasSwordImmortalPassive,
+    hasSwordEmperorPassive,
+    hasBodyEmperorPassive,
     hasMageImmortalPassive,
     hasMageEmperorPassive,
   } = options;
@@ -1826,6 +1842,8 @@ const getCombatOpeningMessages = (options: {
       hasMageSpiritSeveringPassive,
       hasBodyAncientPassive,
       hasSwordImmortalPassive,
+      hasSwordEmperorPassive,
+      hasBodyEmperorPassive,
     })
   );
 
@@ -3330,6 +3348,8 @@ export const runAutoBattle = (
     hasMageSpiritSeveringPassive,
     hasBodyAncientPassive,
     hasSwordImmortalPassive,
+    hasSwordEmperorPassive,
+    hasBodyEmperorPassive,
     hasMageImmortalPassive,
     hasMageEmperorPassive,
   }).forEach((message) => {
