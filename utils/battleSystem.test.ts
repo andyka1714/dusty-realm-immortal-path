@@ -2623,6 +2623,101 @@ describe("battle system balance", () => {
     expect(runAutoBattle(tribulationMage, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("雷劫煉心"))).toBe(true);
   });
 
+  it("surfaces void, immortal, and mahayana passive opening logs across the three professions", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const voidMage = calculatePlayerStats(
+      {
+        physique: 40,
+        rootBone: 38,
+        insight: 96,
+        comprehension: 48,
+        fortune: 18,
+        charm: 10,
+      },
+      MajorRealm.VoidRefining,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1320,
+        mp: 2800,
+        defense: 170,
+        hp: 5200,
+      },
+      "虛煉法修",
+      ProfessionType.Mage,
+      ["m_vr_passive"]
+    );
+
+    const immortalBody = calculatePlayerStats(
+      {
+        physique: 92,
+        rootBone: 72,
+        insight: 42,
+        comprehension: 24,
+        fortune: 18,
+        charm: 10,
+      },
+      MajorRealm.Immortal,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 1450,
+        defense: 320,
+        hp: 9800,
+      },
+      "仙境體修",
+      ProfessionType.Body,
+      ["b_im_passive"]
+    );
+
+    const mahayanaSword = calculatePlayerStats(
+      {
+        physique: 82,
+        rootBone: 108,
+        insight: 86,
+        comprehension: 44,
+        fortune: 18,
+        charm: 10,
+      },
+      MajorRealm.Mahayana,
+      SpiritRootId.TRUE_METAL_EARTH,
+      {
+        attack: 1580,
+        hp: 7200,
+        defense: 240,
+      },
+      "大乘劍修",
+      ProfessionType.Sword,
+      ["s_ma_passive"]
+    );
+
+    const mahayanaMage = calculatePlayerStats(
+      {
+        physique: 44,
+        rootBone: 40,
+        insight: 108,
+        comprehension: 54,
+        fortune: 20,
+        charm: 10,
+      },
+      MajorRealm.Mahayana,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1840,
+        mp: 3900,
+        defense: 220,
+        hp: 6200,
+      },
+      "大乘法修",
+      ProfessionType.Mage,
+      ["m_ma_passive"]
+    );
+
+    expect(runAutoBattle(voidMage, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("空間法則"))).toBe(true);
+    expect(runAutoBattle(immortalBody, BOSS_ENEMIES.m180_b1).logs.some((log) => log.message.includes("仙體無垢"))).toBe(true);
+    expect(runAutoBattle(mahayanaSword, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("劍道獨尊"))).toBe(true);
+    expect(runAutoBattle(mahayanaMage, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("言出法隨"))).toBe(true);
+  });
+
   it("lets tribulation mage passive heal from thunder-aligned retaliation", () => {
     fixedRandom.mockReturnValue(0.5);
 

@@ -1878,11 +1878,15 @@ const getInitialPassiveBattleLogMessages = ({
   hasMageSpiritSeveringPassive,
   hasBodyAncientPassive,
   hasSwordImmortalPassive,
+  hasBodyImmortalPassive,
+  hasMageVoidPassive,
   hasSwordEmperorPassive,
   hasBodyEmperorPassive,
   hasSwordFusionPassive,
   hasBodyTribulationPassive,
   hasMageTribulationPassive,
+  hasSwordMahayanaPassive,
+  hasMageMahayanaPassive,
 }: {
   hasReflectPassive: boolean;
   hasInitialShieldPassive: boolean;
@@ -1891,11 +1895,15 @@ const getInitialPassiveBattleLogMessages = ({
   hasMageSpiritSeveringPassive: boolean;
   hasBodyAncientPassive: boolean;
   hasSwordImmortalPassive: boolean;
+  hasBodyImmortalPassive: boolean;
+  hasMageVoidPassive: boolean;
   hasSwordEmperorPassive: boolean;
   hasBodyEmperorPassive: boolean;
   hasSwordFusionPassive: boolean;
   hasBodyTribulationPassive: boolean;
   hasMageTribulationPassive: boolean;
+  hasSwordMahayanaPassive: boolean;
+  hasMageMahayanaPassive: boolean;
 }) => {
   const messages: string[] = [];
 
@@ -1927,6 +1935,14 @@ const getInitialPassiveBattleLogMessages = ({
     messages.push("【仙元護體】劍元護體已待命，將定時凝成一次絕對護盾。");
   }
 
+  if (hasBodyImmortalPassive) {
+    messages.push("【仙體無垢】仙血流轉無垢，灼毒與流血將被直接抹除。");
+  }
+
+  if (hasMageVoidPassive) {
+    messages.push("【空間法則】虛空褶皺護住法身，部分來襲將被挪入虛空。");
+  }
+
   if (hasSwordEmperorPassive) {
     messages.push("【萬法皆空】劍意已斷萬法因果，負面侵蝕將被直接抹去。");
   }
@@ -1947,6 +1963,14 @@ const getInitialPassiveBattleLogMessages = ({
     messages.push("【雷劫煉心】雷痕纏身護識，控制侵蝕將被天雷反煉。");
   }
 
+  if (hasSwordMahayanaPassive) {
+    messages.push("【劍道獨尊】劍勢已鎖定全場，敵勢越盛越助你凝出殺機。");
+  }
+
+  if (hasMageMahayanaPassive) {
+    messages.push("【言出法隨】法言既出即成天條，主動術式威能已被抬升。");
+  }
+
   return messages;
 };
 
@@ -1962,11 +1986,15 @@ const getCombatOpeningMessages = (options: {
   hasMageSpiritSeveringPassive: boolean;
   hasBodyAncientPassive: boolean;
   hasSwordImmortalPassive: boolean;
+  hasBodyImmortalPassive: boolean;
+  hasMageVoidPassive: boolean;
   hasSwordEmperorPassive: boolean;
   hasBodyEmperorPassive: boolean;
   hasSwordFusionPassive: boolean;
   hasBodyTribulationPassive: boolean;
   hasMageTribulationPassive: boolean;
+  hasSwordMahayanaPassive: boolean;
+  hasMageMahayanaPassive: boolean;
   hasMageImmortalPassive: boolean;
   hasMageEmperorPassive: boolean;
 }) => {
@@ -1982,11 +2010,15 @@ const getCombatOpeningMessages = (options: {
     hasMageSpiritSeveringPassive,
     hasBodyAncientPassive,
     hasSwordImmortalPassive,
+    hasBodyImmortalPassive,
+    hasMageVoidPassive,
     hasSwordEmperorPassive,
     hasBodyEmperorPassive,
     hasSwordFusionPassive,
     hasBodyTribulationPassive,
     hasMageTribulationPassive,
+    hasSwordMahayanaPassive,
+    hasMageMahayanaPassive,
     hasMageImmortalPassive,
     hasMageEmperorPassive,
   } = options;
@@ -2023,11 +2055,15 @@ const getCombatOpeningMessages = (options: {
       hasMageSpiritSeveringPassive,
       hasBodyAncientPassive,
       hasSwordImmortalPassive,
+      hasBodyImmortalPassive,
+      hasMageVoidPassive,
       hasSwordEmperorPassive,
       hasBodyEmperorPassive,
       hasSwordFusionPassive,
       hasBodyTribulationPassive,
       hasMageTribulationPassive,
+      hasSwordMahayanaPassive,
+      hasMageMahayanaPassive,
     })
   );
 
@@ -3722,11 +3758,15 @@ export const runAutoBattle = (
     hasMageSpiritSeveringPassive,
     hasBodyAncientPassive,
     hasSwordImmortalPassive,
+    hasBodyImmortalPassive,
+    hasMageVoidPassive,
     hasSwordEmperorPassive,
     hasBodyEmperorPassive,
     hasSwordFusionPassive,
     hasBodyTribulationPassive,
     hasMageTribulationPassive,
+    hasSwordMahayanaPassive,
+    hasMageMahayanaPassive,
     hasMageImmortalPassive,
     hasMageEmperorPassive,
   }).forEach((message) => {
