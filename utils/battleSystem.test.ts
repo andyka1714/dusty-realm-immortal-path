@@ -2877,6 +2877,35 @@ describe("battle system balance", () => {
     expect(bodyStrike.playerStatusNames).toContain("金剛法相");
   });
 
+  it("surfaces fusion sword passive on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 86,
+        rootBone: 94,
+        insight: 72,
+        comprehension: 26,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Fusion,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 1180,
+        defense: 240,
+        hp: 5600,
+        speed: 12,
+      },
+      "劍魂合一",
+      ProfessionType.Sword,
+      ["s_bi_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(sword, COMMON_ENEMIES.m121_c1);
+    expect(strike.playerStatusNames).toContain("人劍合神");
+  });
+
   it("surfaces high-realm passive opening logs for ancient body and immortal sword styles", () => {
     fixedRandom.mockReturnValue(0.5);
 
@@ -5796,6 +5825,35 @@ describe("battle system balance", () => {
 
     const strike = resolvePlayerWorldStrike(body, COMMON_ENEMIES.m170_c1);
     expect(strike.playerStatusNames).toContain("不死不滅");
+  });
+
+  it("surfaces mahayana body passive on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const body = calculatePlayerStats(
+      {
+        physique: 92,
+        rootBone: 80,
+        insight: 66,
+        comprehension: 24,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.Mahayana,
+      SpiritRootId.MIXED_FIVE,
+      {
+        attack: 880,
+        defense: 280,
+        hp: 5600,
+        speed: 9,
+      },
+      "真武聖者",
+      ProfessionType.Body,
+      ["b_ma_passive"]
+    );
+
+    const strike = resolvePlayerWorldStrike(body, COMMON_ENEMIES.m170_c1);
+    expect(strike.playerStatusNames).toContain("滴血重生（真）");
   });
 
   it("surfaces tribulation mage passive on world strikes", () => {

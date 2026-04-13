@@ -364,6 +364,7 @@
 - [x] `s_f_passive` / `b_bi_passive` 已開始補齊 player world strike 對齊，正式標出 `養劍術` / `金剛法相`
 - [x] `b_tr_passive` / `m_tr_passive` 已開始補齊 player world strike 對齊，正式標出 `萬劫不滅` / `雷劫煉心`
 - [x] `b_im_passive` / `b_ie_passive` 已開始補齊 player world strike 對齊，正式標出 `仙體無垢` / `不死不滅`
+- [x] `s_bi_passive` / `b_ma_passive` 已開始補齊 player world strike 對齊，正式標出 `人劍合神` / `滴血重生（真）`
 - [x] `m_sf_passive` 已開始補齊 player world strike 對齊，正式標出 `道法自然`
 - [x] enemy world strike 的減傷 / 保命被動判定已開始抽成共用 trigger helper，減少 `resolveEnemyWorldStrike()` 內的重複流程
 - [x] enemy world strike 的 incoming status 過濾已開始和 timeline combat 對齊，正式共用 DOT / 負面狀態免疫規則

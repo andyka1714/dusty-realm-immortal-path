@@ -839,6 +839,10 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
     statusNames.push("護體劍罡");
   }
 
+  if (!skill && passiveFlags.hasSwordFusionPassive) {
+    statusNames.push("人劍合神");
+  }
+
   if (
     passiveFlags.hasSwordGoldenPassive &&
     isCrit &&
@@ -882,6 +886,10 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
 
   if (!skill && passiveFlags.hasBodyRebirthPassive) {
     statusNames.push("滴血重生");
+  }
+
+  if (!skill && passiveFlags.hasBodyRebirthTruePassive) {
+    statusNames.push("滴血重生（真）");
   }
 
   if (!skill && passiveFlags.hasBodyTribulationPassive) {
