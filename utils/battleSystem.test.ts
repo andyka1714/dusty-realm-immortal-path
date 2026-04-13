@@ -335,6 +335,129 @@ describe("battle system balance", () => {
     expect(withMagePassive.critDamage).toBeGreaterThan(baseline.critDamage);
   });
 
+  it("uses explicit high-realm sword passive bonuses instead of leaving them on generic fallback", () => {
+    const baseSword = calculatePlayerStats(
+      {
+        physique: 72,
+        rootBone: 92,
+        insight: 84,
+        comprehension: 40,
+        fortune: 18,
+        charm: 10,
+      },
+      MajorRealm.Immortal,
+      SpiritRootId.TRUE_METAL_EARTH,
+      {},
+      "仙境劍修",
+      ProfessionType.Sword,
+      []
+    );
+
+    const immortalSword = calculatePlayerStats(
+      {
+        physique: 72,
+        rootBone: 92,
+        insight: 84,
+        comprehension: 40,
+        fortune: 18,
+        charm: 10,
+      },
+      MajorRealm.Immortal,
+      SpiritRootId.TRUE_METAL_EARTH,
+      {},
+      "仙境劍修",
+      ProfessionType.Sword,
+      ["s_im_passive"]
+    );
+
+    expect(immortalSword.attack).toBeGreaterThan(baseSword.attack);
+    expect(immortalSword.crit).toBeGreaterThan(baseSword.crit);
+    expect(immortalSword.critDamage).toBeGreaterThan(baseSword.critDamage);
+  });
+
+  it("uses explicit high-realm body passive bonuses instead of relying on realm fallback", () => {
+    const baseBody = calculatePlayerStats(
+      {
+        physique: 96,
+        rootBone: 72,
+        insight: 40,
+        comprehension: 26,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.ImmortalEmperor,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {},
+      "帝境體修",
+      ProfessionType.Body,
+      []
+    );
+
+    const emperorBody = calculatePlayerStats(
+      {
+        physique: 96,
+        rootBone: 72,
+        insight: 40,
+        comprehension: 26,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.ImmortalEmperor,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {},
+      "帝境體修",
+      ProfessionType.Body,
+      ["b_ie_passive"]
+    );
+
+    expect(emperorBody.maxHp).toBeGreaterThan(baseBody.maxHp);
+    expect(emperorBody.defense).toBeGreaterThan(baseBody.defense);
+    expect(emperorBody.damageReduction).toBeGreaterThan(baseBody.damageReduction);
+    expect(emperorBody.regenHp).toBeGreaterThan(baseBody.regenHp);
+  });
+
+  it("uses explicit high-realm mage passive bonuses through absorbed retired aliases", () => {
+    const baseMage = calculatePlayerStats(
+      {
+        physique: 44,
+        rootBone: 42,
+        insight: 104,
+        comprehension: 54,
+        fortune: 20,
+        charm: 10,
+      },
+      MajorRealm.Mahayana,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {},
+      "大乘法修",
+      ProfessionType.Mage,
+      []
+    );
+
+    const empoweredMage = calculatePlayerStats(
+      {
+        physique: 44,
+        rootBone: 42,
+        insight: 104,
+        comprehension: 54,
+        fortune: 20,
+        charm: 10,
+      },
+      MajorRealm.Mahayana,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {},
+      "大乘法修",
+      ProfessionType.Mage,
+      ["m_ma_passive"]
+    );
+
+    expect(empoweredMage.magic).toBeGreaterThan(baseMage.magic);
+    expect(empoweredMage.maxMp).toBeGreaterThan(baseMage.maxMp);
+    expect(empoweredMage.res).toBeGreaterThan(baseMage.res);
+    expect(empoweredMage.critDamage).toBeGreaterThan(baseMage.critDamage);
+    expect(empoweredMage.dodge).toBeGreaterThan(baseMage.dodge);
+  });
+
   it("keeps formal skill world-strike statuses on the same shared split logic as timeline combat", () => {
     fixedRandom.mockReturnValue(0.5);
 

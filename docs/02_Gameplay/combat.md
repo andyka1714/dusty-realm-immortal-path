@@ -60,6 +60,7 @@
 - 即時戰鬥表現層的投射物、施法圈、AOE 與命中特效參數，已抽成可測的 presentation helper，後續調整不必只靠人工目測
 - 世界戰鬥、時間軸戰鬥與右下角技能 CD HUD，現在已開始共用同一套技能冷卻解析，不再各自直接讀 `cooldownSeconds`
 - 被動技能開關判定也已抽成共用 skill-id 對照表，world strike 與 timeline combat 對齊時不必再重複鋪一大串 `hasPassiveSkillId(...)`
+- 高境界 passive 的基礎屬性收益也已開始補成逐招 explicit 對照，劍 / 體 / 法三條線不再只靠「職業 + 境界」通用 fallback 推估
 - `getPlayerPassiveFlags()` 現在改成明確 skill id 對照，不再把不同 retired passive 透過 formal id 錯誤折疊成同一串旗標
 - formal core 與 retired passive 的承接，現在改成顯式 alias 對照，而不是再靠 canonical skill id 模糊折疊
 - formal core 被動的基礎屬性收益，現在也已改成逐招明確對照表；absorbed retired passive 會透過同一份 formal 對照承接，不再用職業 + 境界通用公式補值

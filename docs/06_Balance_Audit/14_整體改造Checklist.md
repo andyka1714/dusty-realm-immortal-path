@@ -230,6 +230,7 @@
 - [x] 世界戰鬥、時間軸戰鬥與戰鬥 HUD 的主動技能冷卻顯示，已開始共用同一套 cooldown resolver
 - [x] 玩家被動技能判定已開始抽成共用 passive flags helper，降低 world / timeline / HUD 分散重寫風險
 - [x] 玩家被動技能判定已補成共用 skill-id 對照表，world strike 與 timeline combat 的 passive flag 來源不再各自手寫維護
+- [x] 高境界 passive 的基礎屬性收益已開始補成逐招 explicit 對照表，不再只靠職業 / 境界 fallback 推估
 - [x] 開場被動狀態與對應戰鬥事件已開始走共用初始化 helper，降低 `runAutoBattle()` 散寫 `荊棘皮層` / `元素護盾` 等訊息的重複度
 - [x] 屬性克制、弱點洞察、元素抗性、開場被動與高境界開場壓制提示，已開始整併成共用 opener helper，縮減 `runAutoBattle()` 的前置事件散寫範圍
 - [x] 來襲傷害的防禦型被動事件已開始抽成共用 defensive-passive helper，集中處理 `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `肉身成聖` / `元素護盾`
