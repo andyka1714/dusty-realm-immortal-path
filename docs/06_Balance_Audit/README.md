@@ -148,6 +148,7 @@
 - 主動術式後的多種被動觸發、資源回復、冷卻縮短、疊層訊息，與主動術式施加的 `盾、破甲、DOT、反震、劍氣` 等狀態，也已開始走共用 logger helper。
 - `runAutoBattle()` 內的致命保命流程，也已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡 / 滴血重生（真） / 不死不滅`。
 - 玩家被動技能判定已改成明確 skill id / alias 對照，formal core 對 retired passive 的承接也不再依賴模糊 canonical 折疊。
+- formal core 被動的 stat bonus 也已改成逐招明確對照表，不再沿用職業 + 境界通用公式；absorbed retired passive 會透過同一份 formal 對照表承接屬性收益。
 - retired 技能目前正式收斂成 `battle-absorbed / retirement-ready`；舊的 `pending-retirement` 過渡層已清空並移除。
 - formal realm dataset 已開始透過單一 retired-alias 剝離 helper 統一移除 `retirement-ready active + battle-absorbed passive`，降低 realm view 重複維護風險。
 - `言出法隨 / 劍道獨尊 / 向死而生 / 法力源泉 / 靈力湧動 / 五氣朝元 / 仙法通神 / 萬法歸宗 / 萬法皆空 / 劍意化形` 等被動，已陸續補齊 world strike 與 timeline combat 的狀態回報。

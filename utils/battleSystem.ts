@@ -89,6 +89,121 @@ interface PassiveSkillBonuses {
   regenHpBonus: number;
 }
 
+const createEmptyPassiveSkillBonuses = (): PassiveSkillBonuses => ({
+  hpPercent: 0,
+  mpPercent: 0,
+  attackPercent: 0,
+  magicPercent: 0,
+  defensePercent: 0,
+  resPercent: 0,
+  critBonus: 0,
+  critDamageBonus: 0,
+  dodgeBonus: 0,
+  damageReductionBonus: 0,
+  regenHpBonus: 0,
+});
+
+const addPassiveSkillBonuses = (
+  target: PassiveSkillBonuses,
+  source: Partial<PassiveSkillBonuses>
+) => {
+  target.hpPercent += source.hpPercent ?? 0;
+  target.mpPercent += source.mpPercent ?? 0;
+  target.attackPercent += source.attackPercent ?? 0;
+  target.magicPercent += source.magicPercent ?? 0;
+  target.defensePercent += source.defensePercent ?? 0;
+  target.resPercent += source.resPercent ?? 0;
+  target.critBonus += source.critBonus ?? 0;
+  target.critDamageBonus += source.critDamageBonus ?? 0;
+  target.dodgeBonus += source.dodgeBonus ?? 0;
+  target.damageReductionBonus += source.damageReductionBonus ?? 0;
+  target.regenHpBonus += source.regenHpBonus ?? 0;
+};
+
+const FORMAL_PASSIVE_SKILL_BONUS_MAP: Record<string, Partial<PassiveSkillBonuses>> = {
+  s_q_passive: {
+    attackPercent: 6,
+    critBonus: 2,
+    critDamageBonus: 11,
+  },
+  s_g_passive: {
+    attackPercent: 10,
+    critBonus: 3,
+    critDamageBonus: 17,
+  },
+  s_n_passive: {
+    attackPercent: 12,
+    critBonus: 3.4,
+    critDamageBonus: 20,
+  },
+  s_sf_passive: {
+    attackPercent: 14,
+    critBonus: 4,
+    critDamageBonus: 23,
+  },
+  s_tr_passive: {
+    attackPercent: 20,
+    critBonus: 5.8,
+    critDamageBonus: 32,
+  },
+  b_q_passive: {
+    damageReductionBonus: 1,
+  },
+  b_f_passive: {
+    hpPercent: 11,
+    defensePercent: 8,
+    damageReductionBonus: 1,
+  },
+  b_g_passive: {
+    hpPercent: 14,
+    defensePercent: 10,
+    damageReductionBonus: 1,
+  },
+  b_n_passive: {
+    hpPercent: 17,
+    defensePercent: 12,
+    damageReductionBonus: 1,
+    regenHpBonus: 1,
+  },
+  b_sf_passive: {
+    hpPercent: 20,
+    defensePercent: 14,
+    damageReductionBonus: 1,
+    regenHpBonus: 1,
+  },
+  m_q_passive: {
+    magicPercent: 9,
+    mpPercent: 10,
+    resPercent: 6,
+    critDamageBonus: 6,
+  },
+  m_f_passive: {
+    magicPercent: 16,
+    mpPercent: 18,
+    resPercent: 10,
+    critDamageBonus: 12,
+  },
+  m_g_passive: {
+    magicPercent: 15,
+    mpPercent: 18,
+    resPercent: 10,
+    critDamageBonus: 10,
+  },
+  m_n_passive: {
+    magicPercent: 18,
+    mpPercent: 22,
+    resPercent: 12,
+    critDamageBonus: 12,
+  },
+  m_sf_passive: {
+    magicPercent: 21,
+    mpPercent: 26,
+    resPercent: 14,
+    critDamageBonus: 14,
+    dodgeBonus: 1,
+  },
+};
+
 export interface WorldStrikeResult {
   damage: number;
   isCrit: boolean;
@@ -296,49 +411,15 @@ const getLearnedSkills = (learnedSkillIds: string[]): Skill[] =>
 const getPassiveSkillBonuses = (
   learnedSkills: Skill[]
 ): PassiveSkillBonuses => {
-  const bonuses: PassiveSkillBonuses = {
-    hpPercent: 0,
-    mpPercent: 0,
-    attackPercent: 0,
-    magicPercent: 0,
-    defensePercent: 0,
-    resPercent: 0,
-    critBonus: 0,
-    critDamageBonus: 0,
-    dodgeBonus: 0,
-    damageReductionBonus: 0,
-    regenHpBonus: 0,
-  };
+  const bonuses = createEmptyPassiveSkillBonuses();
 
   learnedSkills
     .filter((skill) => skill.type === "Passive" && skill.profession)
     .forEach((skill) => {
-      if (getFormalSkillId(skill.id) === "b_q_passive") {
-        return;
-      }
-      const tier = skill.minRealm + 1;
-
-      switch (skill.profession) {
-        case ProfessionType.Sword:
-          bonuses.attackPercent += 4 + tier * 2;
-          bonuses.critBonus += 1 + tier * 0.6;
-          bonuses.critDamageBonus += 8 + tier * 3;
-          break;
-        case ProfessionType.Body:
-          bonuses.hpPercent += 5 + tier * 3;
-          bonuses.defensePercent += 4 + tier * 2;
-          bonuses.damageReductionBonus += tier >= 2 ? 1 : 0;
-          bonuses.damageReductionBonus += tier >= 6 ? 1 : 0;
-          bonuses.regenHpBonus += tier >= 4 ? 1 : 0;
-          break;
-        case ProfessionType.Mage:
-          bonuses.magicPercent += 6 + tier * 3;
-          bonuses.mpPercent += 6 + tier * 4;
-          bonuses.resPercent += 4 + tier * 2;
-          bonuses.critDamageBonus += 4 + tier * 2;
-          bonuses.dodgeBonus += tier >= 5 ? 1 : 0;
-          break;
-      }
+      addPassiveSkillBonuses(
+        bonuses,
+        FORMAL_PASSIVE_SKILL_BONUS_MAP[getFormalSkillId(skill.id)] ?? {}
+      );
     });
 
   return bonuses;

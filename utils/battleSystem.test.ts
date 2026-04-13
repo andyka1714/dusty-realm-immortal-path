@@ -213,6 +213,128 @@ describe("battle system balance", () => {
     );
   });
 
+  it("uses explicit sword passive stat bonuses instead of profession-tier fallback", () => {
+    const baseline = calculatePlayerStats(
+      {
+        physique: 20,
+        rootBone: 30,
+        insight: 24,
+        comprehension: 18,
+        fortune: 12,
+        charm: 8,
+      },
+      MajorRealm.GoldenCore,
+      SpiritRootId.TRUE_METAL_EARTH,
+      {},
+      "劍修",
+      ProfessionType.Sword,
+      []
+    );
+
+    const withSwordPassive = calculatePlayerStats(
+      {
+        physique: 20,
+        rootBone: 30,
+        insight: 24,
+        comprehension: 18,
+        fortune: 12,
+        charm: 8,
+      },
+      MajorRealm.GoldenCore,
+      SpiritRootId.TRUE_METAL_EARTH,
+      {},
+      "劍修",
+      ProfessionType.Sword,
+      ["s_g_passive"]
+    );
+
+    expect(withSwordPassive.attack).toBeGreaterThan(baseline.attack);
+    expect(withSwordPassive.crit).toBeGreaterThan(baseline.crit);
+    expect(withSwordPassive.critDamage).toBeGreaterThan(baseline.critDamage);
+  });
+
+  it("applies explicit body passive stat bonuses through absorbed retired aliases", () => {
+    const corePassive = calculatePlayerStats(
+      {
+        physique: 36,
+        rootBone: 24,
+        insight: 16,
+        comprehension: 12,
+        fortune: 10,
+        charm: 8,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {},
+      "體修",
+      ProfessionType.Body,
+      ["b_sf_passive"]
+    );
+
+    const retiredAliasPassive = calculatePlayerStats(
+      {
+        physique: 36,
+        rootBone: 24,
+        insight: 16,
+        comprehension: 12,
+        fortune: 10,
+        charm: 8,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {},
+      "體修",
+      ProfessionType.Body,
+      ["b_ie_passive"]
+    );
+
+    expect(retiredAliasPassive.maxHp).toBe(corePassive.maxHp);
+    expect(retiredAliasPassive.defense).toBe(corePassive.defense);
+    expect(retiredAliasPassive.damageReduction).toBe(corePassive.damageReduction);
+    expect(retiredAliasPassive.regenHp).toBe(corePassive.regenHp);
+  });
+
+  it("applies explicit mage passive stat bonuses through formal-core inheritance", () => {
+    const baseline = calculatePlayerStats(
+      {
+        physique: 18,
+        rootBone: 18,
+        insight: 34,
+        comprehension: 22,
+        fortune: 14,
+        charm: 8,
+      },
+      MajorRealm.SpiritSevering,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {},
+      "法修",
+      ProfessionType.Mage,
+      []
+    );
+
+    const withMagePassive = calculatePlayerStats(
+      {
+        physique: 18,
+        rootBone: 18,
+        insight: 34,
+        comprehension: 22,
+        fortune: 14,
+        charm: 8,
+      },
+      MajorRealm.SpiritSevering,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {},
+      "法修",
+      ProfessionType.Mage,
+      ["m_ie_passive"]
+    );
+
+    expect(withMagePassive.magic).toBeGreaterThan(baseline.magic);
+    expect(withMagePassive.maxMp).toBeGreaterThan(baseline.maxMp);
+    expect(withMagePassive.res).toBeGreaterThan(baseline.res);
+    expect(withMagePassive.critDamage).toBeGreaterThan(baseline.critDamage);
+  });
+
   it("keeps formal skill world-strike statuses on the same shared split logic as timeline combat", () => {
     fixedRandom.mockReturnValue(0.5);
 
