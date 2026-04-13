@@ -2384,6 +2384,55 @@ const filterPlayerAppliedEnemyStatuses = (
     return true;
   });
 
+const shouldApplySwordQiArmorBreak = ({
+  passiveFlags,
+  skill,
+  isCrit,
+  enemyHp,
+}: {
+  passiveFlags: PlayerPassiveFlags;
+  skill?: Skill;
+  isCrit: boolean;
+  enemyHp: number;
+}) =>
+  passiveFlags.hasSwordQiPassive &&
+  skill?.profession === ProfessionType.Sword &&
+  isCrit &&
+  enemyHp > 0;
+
+const resolvePlayerAppliedEnemyStatuses = ({
+  enemy,
+  statuses,
+  passiveFlags,
+  skill,
+  isCrit,
+  currentTimeMs,
+  enemyHp,
+}: {
+  enemy: Enemy;
+  statuses: CombatStatus[];
+  passiveFlags: PlayerPassiveFlags;
+  skill?: Skill;
+  isCrit: boolean;
+  currentTimeMs: number;
+  enemyHp: number;
+}) => {
+  const filteredStatuses = filterPlayerAppliedEnemyStatuses(enemy, statuses);
+
+  if (
+    shouldApplySwordQiArmorBreak({
+      passiveFlags,
+      skill,
+      isCrit,
+      enemyHp,
+    })
+  ) {
+    filteredStatuses.push(createSwordQiArmorBreakStatus(currentTimeMs));
+  }
+
+  return filteredStatuses;
+};
+
 export const resolvePlayerWorldStrike = (
   player: PlayerCombatStats,
   enemy: Enemy,
@@ -2483,14 +2532,17 @@ export const resolvePlayerWorldStrike = (
         0
       )
     : { playerSideStatuses: [], enemySideStatuses: [] };
-  const filteredEnemyStatuses = filterPlayerAppliedEnemyStatuses(
-    enemy,
-    enemySideStatuses
-  );
-
-  if (hasSwordQiPassive && isCrit && dealsDirectDamage && skill?.profession === ProfessionType.Sword) {
-    filteredEnemyStatuses.push(createSwordQiArmorBreakStatus(0));
-  }
+  const filteredEnemyStatuses = dealsDirectDamage
+    ? resolvePlayerAppliedEnemyStatuses({
+        enemy,
+        statuses: enemySideStatuses,
+        passiveFlags,
+        skill,
+        isCrit,
+        currentTimeMs: 0,
+        enemyHp: enemy.hp,
+      })
+    : filterPlayerAppliedEnemyStatuses(enemy, enemySideStatuses);
 
   return {
     damage,
@@ -3388,13 +3440,13 @@ export const runAutoBattle = (
         enemyMaxHp: enemy.maxHp,
       });
       if (
-        hasSwordQiPassive &&
-        skillReady &&
-        activeSkill?.profession === ProfessionType.Sword &&
-        isCrit &&
-        enemyHp > 0
+        shouldApplySwordQiArmorBreak({
+          passiveFlags,
+          skill: skillReady ? activeSkill ?? undefined : undefined,
+          isCrit,
+          enemyHp,
+        })
       ) {
-        enemyStatuses.push(createSwordQiArmorBreakStatus(currentTimeMs));
         pushCombatLog(logs, {
           turn,
           timeMs: currentTimeMs,
@@ -3602,10 +3654,17 @@ export const runAutoBattle = (
         if (playerSideStatuses.length > 0) {
           playerStatuses.push(...playerSideStatuses);
         }
-        const filteredEnemyStatuses = filterPlayerAppliedEnemyStatuses(
-          enemy,
-          enemySideStatuses
-        );
+        const filteredEnemyStatuses = dealsDirectDamage
+          ? resolvePlayerAppliedEnemyStatuses({
+              enemy,
+              statuses: enemySideStatuses,
+              passiveFlags,
+              skill: activeSkill ?? undefined,
+              isCrit,
+              currentTimeMs,
+              enemyHp,
+            })
+          : filterPlayerAppliedEnemyStatuses(enemy, enemySideStatuses);
 
         if (filteredEnemyStatuses.length > 0) {
           enemyStatuses.push(...filteredEnemyStatuses);

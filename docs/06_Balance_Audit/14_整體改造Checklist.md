@@ -322,7 +322,7 @@
 - [x] enemy world strike 的減傷 / 保命被動判定已開始抽成共用 trigger helper，減少 `resolveEnemyWorldStrike()` 內的重複流程
 - [x] enemy world strike 的 incoming status 過濾已開始和 timeline combat 對齊，正式共用 DOT / 負面狀態免疫規則
 - [x] enemy special 的免疫 / 控制縮短訊息，也已開始抽成共用 resistance helper，減少 `仙體無垢` / `萬法皆空` / `雷劫煉心` / `人劍合神` 的散寫風險
-- [x] 玩家主動術式施加給敵方的控制型狀態，也已開始和 timeline combat 共用 `霸體` 過濾規則，不再只有 world strike 先做免控判定
+- [x] 玩家主動術式施加給敵方的控制型狀態與後續破甲追擊，也已開始和 timeline combat 共用同一層 enemy-status resolver；`霸體` 過濾與 `劍脈破甲` 不再 world / timeline 各寫一份
 - [x] 玩家主動術式施加的 `盾、破甲、DOT、反震、劍氣` 訊息，也已開始抽成共用 status logger，降低時間軸戰鬥內逐段手寫的重複度
 - [x] timeline combat 的致命保命流程已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`
 - [x] formal core 被動的 stat bonus 已改成逐招明確對照表，不再依職業 + 境界通用公式自動推導

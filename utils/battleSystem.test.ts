@@ -886,6 +886,36 @@ describe("battle system balance", () => {
     expect(strike.enemyStatusNames).toContain("劍脈破甲");
   });
 
+  it("shares qi sword armor-break follow-up between world strikes and timeline combat", () => {
+    fixedRandom.mockReturnValue(0);
+
+    const sword = calculatePlayerStats(
+      {
+        physique: 43,
+        rootBone: 48,
+        insight: 45,
+        comprehension: 16,
+        fortune: 12,
+        charm: 10,
+      },
+      MajorRealm.QiRefining,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 150,
+        crit: 45,
+      },
+      "劍脈弟子",
+      ProfessionType.Sword,
+      ["s_q_active", "s_q_passive"]
+    );
+
+    const timeline = runAutoBattle(sword, COMMON_ENEMIES.m7_c2);
+
+    expect(
+      timeline.logs.some((log) => (log.enemyStatuses || []).includes("劍脈破甲"))
+    ).toBe(true);
+  });
+
   it("lets qi body passive explicitly reduce incoming strike damage", () => {
     fixedRandom.mockReturnValue(0.5);
 
