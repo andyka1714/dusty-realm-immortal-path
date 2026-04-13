@@ -2450,6 +2450,58 @@ describe("battle system balance", () => {
     expect(result.logs.some((log) => log.message.includes("護盾替你抵擋了"))).toBe(true);
   });
 
+  it("surfaces ancient body and immortal sword passives on basic world strikes", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const ancientBody = calculatePlayerStats(
+      {
+        physique: 108,
+        rootBone: 96,
+        insight: 58,
+        comprehension: 24,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.VoidRefining,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        hp: 7800,
+        defense: 280,
+        attack: 620,
+      },
+      "荒古戰體",
+      ProfessionType.Body,
+      ["b_vr_passive"]
+    );
+
+    const immortalSword = calculatePlayerStats(
+      {
+        physique: 96,
+        rootBone: 112,
+        insight: 82,
+        comprehension: 30,
+        fortune: 18,
+        charm: 10,
+      },
+      MajorRealm.Immortal,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 960,
+        defense: 260,
+        hp: 6600,
+      },
+      "仙元護體",
+      ProfessionType.Sword,
+      ["s_im_passive"]
+    );
+
+    const bodyStrike = resolvePlayerWorldStrike(ancientBody, COMMON_ENEMIES.m121_c1);
+    const swordStrike = resolvePlayerWorldStrike(immortalSword, COMMON_ENEMIES.m151_c1);
+
+    expect(bodyStrike.playerStatusNames).toContain("荒古戰體");
+    expect(swordStrike.playerStatusNames).toContain("仙元護體");
+  });
+
   it("surfaces high-realm passive opening logs for ancient body and immortal sword styles", () => {
     fixedRandom.mockReturnValue(0.5);
 

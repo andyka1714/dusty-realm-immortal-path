@@ -108,6 +108,7 @@
 - 玩家出手前置流程也已開始整併到 `resolvePlayerTurnPrelude(...)`，把週期護體與 Boss 破綻窗口集中在同一層處理
 - 敵方出手窗口也已開始整併到 `resolveEnemyActionWindow(...)`，控制跳過、特招延後、特招窗口與敵方攻勢判定不再在主循環平鋪散寫
 - 回合開場維護也已開始整併到 `resolveTurnStartMaintenance(...)`，狀態 tick、被動回復與淨化流程不再直接散在主循環開頭
+- 戰鬥開場 seed 流程也已開始整併到 `seedCombatEncounter(...)`，初始護體與 enemy special 起始冷卻不再直接在主循環鋪開
 - 玩家出手階段也已開始整併到 `resolvePlayerActionPhase(...)`，週期護體、Boss 破綻與正式出手流程不再在主循環拆成兩段散寫
 - 玩家先手分支也已開始整併到 `resolvePlayerTurnPhase(...)`，玩家先手時的正式出手鏈不再直接鋪在主循環裡
 - 勝利掉落結算也已開始整併到 `resolveVictoryRewards(...)`，擊殺訊息與戰利品組裝不再直接堆在 `runAutoBattle()` 尾端
@@ -149,6 +150,7 @@
   - `s_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `劍道獨尊` 的暴擊強化
   - `m_ma_passive`：在 world strike 與 timeline combat 都會明確標出 `言出法隨` 的術式增幅
 - `b_vr_passive` / `s_im_passive`：在 timeline combat 開場也會明確標出 `荒古戰體` / `仙元護體` 已進入待命狀態
+- `b_vr_passive` / `s_im_passive`：在 player world strike 的普攻也已開始正式回報 `荒古戰體` / `仙元護體`
 - `s_sf_passive` / `b_sf_passive` / `m_sf_passive`：在 timeline combat 開場也會明確標出 `劍意化形` / `肉身成聖` / `道法自然` 已進入待命狀態
 - `s_q_passive` / `b_q_passive` / `m_q_passive` / `m_n_passive`：在 timeline combat 開場也已開始標出 `劍脈初成` / `銅皮鐵骨` / `靈潮循環` / `法力源泉` 的待命狀態
 - `s_g_passive` / `s_n_passive` / `b_f_passive` / `b_n_passive` / `m_f_passive`：在 timeline combat 開場也已開始標出 `劍心通明` / `護體劍罡` / `蠻荒血脈` / `滴血重生` / `靈力湧動` 的待命狀態

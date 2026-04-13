@@ -827,6 +827,10 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
     statusNames.push("劍道獨尊");
   }
 
+  if (!skill && passiveFlags.hasSwordImmortalPassive) {
+    statusNames.push("仙元護體");
+  }
+
   if (
     passiveFlags.hasSwordGoldenPassive &&
     isCrit &&
@@ -846,6 +850,10 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
 
   if (bodyFoundationStacks > 0) {
     statusNames.push("蠻荒血脈");
+  }
+
+  if (!skill && passiveFlags.hasBodyAncientPassive) {
+    statusNames.push("荒古戰體");
   }
 
   if (!skill && passiveFlags.hasMageQiPassive && player.profession === ProfessionType.Mage) {
@@ -2035,6 +2043,63 @@ const resolveTurnStartMaintenance = ({
 
   return { combatEnded: false };
 };
+
+const seedCombatEncounter = ({
+  player,
+  enemy,
+  logs,
+  passiveFlags,
+  restriction,
+  elementalAffinity,
+  playerHp,
+  enemyHp,
+  playerStatuses,
+}: {
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  logs: CombatLog[];
+  passiveFlags: PlayerPassiveFlags;
+  restriction: { isEffective: boolean; isResisted: boolean };
+  elementalAffinity: ReturnType<typeof getEnemyElementalModifier>;
+  playerHp: number;
+  enemyHp: number;
+  playerStatuses: CombatStatus[];
+}) => {
+  const { initialPassiveStatuses, initialEnemySpecialReadyAtMs } =
+    initializeCombatEncounter({
+      player,
+      enemy,
+      logs,
+      passiveFlags,
+      restriction,
+      elementalAffinity,
+      playerHp,
+      enemyHp,
+    });
+
+  return {
+    playerStatuses:
+      initialPassiveStatuses.length > 0
+        ? [...playerStatuses, ...initialPassiveStatuses]
+        : playerStatuses,
+    enemySpecialReadyAtMs: initialEnemySpecialReadyAtMs,
+  };
+};
+
+const advanceCombatLoop = ({
+  bossBroken,
+  playerDebuffed,
+  turn,
+}: {
+  bossBroken: boolean;
+  playerDebuffed: boolean;
+  turn: number;
+}) => ({
+  bossBroken: false,
+  playerDebuffed: false,
+  turn: turn + 1,
+  exceededTurnLimit: turn + 1 > 500,
+});
 
 const resolvePlayerTurnPrelude = ({
   currentTimeMs,
@@ -6925,21 +6990,20 @@ export const runAutoBattle = (
     },
   });
 
-  const { initialPassiveStatuses, initialEnemySpecialReadyAtMs } =
-    initializeCombatEncounter({
-      player,
-      enemy,
-      logs,
-      passiveFlags,
-      restriction: pVsE,
-      elementalAffinity: enemyElementalAffinity,
-      playerHp,
-      enemyHp,
-    });
-  if (initialPassiveStatuses.length > 0) {
-    playerStatuses.push(...initialPassiveStatuses);
-  }
-  enemySpecialReadyAtMs = initialEnemySpecialReadyAtMs;
+  ({
+    playerStatuses,
+    enemySpecialReadyAtMs,
+  } = seedCombatEncounter({
+    player,
+    enemy,
+    logs,
+    passiveFlags,
+    restriction: pVsE,
+    elementalAffinity: enemyElementalAffinity,
+    playerHp,
+    enemyHp,
+    playerStatuses,
+  }));
 
   while (playerHp > 0 && enemyHp > 0) {
     const playerActsFirst = playerNextActionMs <= enemyNextActionMs;
@@ -7067,11 +7131,14 @@ export const runAutoBattle = (
       }
     }
 
-    bossBroken = false;
-    playerDebuffed = false;
-    turn++;
+    const turnAdvance = advanceCombatLoop({
+      bossBroken,
+      playerDebuffed,
+      turn,
+    });
+    ({ bossBroken, playerDebuffed, turn } = turnAdvance);
 
-    if (turn > 500) break;
+    if (turnAdvance.exceededTurnLimit) break;
   }
 
   const won = playerHp > 0 && enemyHp <= 0;
