@@ -2428,6 +2428,78 @@ describe("battle system balance", () => {
     expect(runAutoBattle(body, BOSS_ENEMIES.m180_b1).logs.some((log) => log.message.includes("不死不滅"))).toBe(true);
   });
 
+  it("surfaces fusion and tribulation passive opening logs for sword, body, and mage styles", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const fusionSword = calculatePlayerStats(
+      {
+        physique: 92,
+        rootBone: 106,
+        insight: 78,
+        comprehension: 28,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Fusion,
+      SpiritRootId.TRUE_FIRE_METAL,
+      {
+        attack: 1280,
+        defense: 280,
+        hp: 7200,
+      },
+      "人劍合神",
+      ProfessionType.Sword,
+      ["s_bi_passive"]
+    );
+
+    const tribulationBody = calculatePlayerStats(
+      {
+        physique: 120,
+        rootBone: 96,
+        insight: 68,
+        comprehension: 24,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_METAL_EARTH,
+      {
+        attack: 1360,
+        defense: 360,
+        hp: 11800,
+      },
+      "萬劫不滅",
+      ProfessionType.Body,
+      ["b_tr_passive"]
+    );
+
+    const tribulationMage = calculatePlayerStats(
+      {
+        physique: 86,
+        rootBone: 78,
+        insight: 104,
+        comprehension: 30,
+        fortune: 16,
+        charm: 10,
+      },
+      MajorRealm.Tribulation,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 1980,
+        mp: 4300,
+        defense: 260,
+        hp: 8700,
+      },
+      "雷劫煉心",
+      ProfessionType.Mage,
+      ["m_tr_passive"]
+    );
+
+    expect(runAutoBattle(fusionSword, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("人劍合神"))).toBe(true);
+    expect(runAutoBattle(tribulationBody, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("萬劫不滅"))).toBe(true);
+    expect(runAutoBattle(tribulationMage, BOSS_ENEMIES.m121_b1).logs.some((log) => log.message.includes("雷劫煉心"))).toBe(true);
+  });
+
   it("lets tribulation mage passive heal from thunder-aligned retaliation", () => {
     fixedRandom.mockReturnValue(0.5);
 

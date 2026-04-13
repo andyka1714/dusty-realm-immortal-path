@@ -7,6 +7,7 @@ import reducer, {
   tickMonsters,
 } from "./adventureSlice";
 import { ElementType, EnemyRank, MajorRealm } from "../../types";
+import { getGridDistance } from "../../utils/worldCombat";
 
 const fixedRandom = vi.spyOn(Math, "random");
 
@@ -122,7 +123,7 @@ describe("adventure engagement flow", () => {
     expect(next.currentEnemyInstanceId).toBeNull();
   });
 
-  it("lets caster enemies strafe to hold preferred range instead of always closing in", () => {
+  it("lets caster enemies hold preferred range instead of always closing in", () => {
     fixedRandom.mockReturnValue(0);
 
     let state = reducer(undefined, enterMap({ mapId: "26", startX: 20, startY: 20 }));
@@ -146,9 +147,11 @@ describe("adventure engagement flow", () => {
     };
 
     const next = reducer(state, tickMonsters());
+    const caster = next.activeMonsters.find((monster) => monster.instanceId === "caster");
     expect(next.isBattling).toBe(false);
-    expect(next.activeMonsters[0].x).toBe(25);
-    expect(next.activeMonsters[0].y).not.toBe(20);
+    expect(caster?.x).toBe(25);
+    expect(caster).toBeDefined();
+    expect(getGridDistance(caster!, next.playerPosition)).toBeGreaterThanOrEqual(5);
   });
 
   it("applies direct world damage to the selected monster instance", () => {

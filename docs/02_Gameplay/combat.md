@@ -132,6 +132,7 @@
 - `b_vr_passive` / `s_im_passive`：在 timeline combat 開場也會明確標出 `荒古戰體` / `仙元護體` 已進入待命狀態
 - `s_sf_passive` / `b_sf_passive` / `m_sf_passive`：在 timeline combat 開場也會明確標出 `劍意化形` / `肉身成聖` / `道法自然` 已進入待命狀態
 - `s_ie_passive` / `b_ie_passive`：在 timeline combat 開場也已開始明確標出 `萬法皆空` / `不死不滅` 的待命狀態
+- `s_bi_passive` / `b_tr_passive` / `m_tr_passive`：在 timeline combat 開場也已開始明確標出 `人劍合神` / `萬劫不滅` / `雷劫煉心` 的待命狀態
 - `b_sf_passive` / `m_vr_passive`：在 enemy world strike 也會正式回報 `肉身成聖` / `空間法則`，不再只在時間軸戰鬥內有感
   - `b_g_passive` / `b_f_passive` / `b_q_passive` / `b_bi_passive` / `m_g_passive`：在 enemy world strike 也已開始正式回報 `反震` / `蠻荒血脈` / `銅皮鐵骨` / `金剛法相` / `元素護盾`
   - `b_tr_passive` / `m_tr_passive`：在 enemy world strike 也已開始正式回報 `萬劫不滅` / `雷劫煉心`

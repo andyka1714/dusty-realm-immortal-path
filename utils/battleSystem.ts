@@ -1777,6 +1777,9 @@ const getInitialPassiveBattleLogMessages = ({
   hasSwordImmortalPassive,
   hasSwordEmperorPassive,
   hasBodyEmperorPassive,
+  hasSwordFusionPassive,
+  hasBodyTribulationPassive,
+  hasMageTribulationPassive,
 }: {
   hasReflectPassive: boolean;
   hasInitialShieldPassive: boolean;
@@ -1787,6 +1790,9 @@ const getInitialPassiveBattleLogMessages = ({
   hasSwordImmortalPassive: boolean;
   hasSwordEmperorPassive: boolean;
   hasBodyEmperorPassive: boolean;
+  hasSwordFusionPassive: boolean;
+  hasBodyTribulationPassive: boolean;
+  hasMageTribulationPassive: boolean;
 }) => {
   const messages: string[] = [];
 
@@ -1826,6 +1832,18 @@ const getInitialPassiveBattleLogMessages = ({
     messages.push("【不死不滅】霸體鎮住命門，最後一線生機尚未斷絕。");
   }
 
+  if (hasSwordFusionPassive) {
+    messages.push("【人劍合神】劍魂已與識海相融，控制侵蝕將被強行縮短。");
+  }
+
+  if (hasBodyTribulationPassive) {
+    messages.push("【萬劫不滅】劫火護體待發，每次承傷都將反煉肉身。");
+  }
+
+  if (hasMageTribulationPassive) {
+    messages.push("【雷劫煉心】雷痕纏身護識，控制侵蝕將被天雷反煉。");
+  }
+
   return messages;
 };
 
@@ -1843,6 +1861,9 @@ const getCombatOpeningMessages = (options: {
   hasSwordImmortalPassive: boolean;
   hasSwordEmperorPassive: boolean;
   hasBodyEmperorPassive: boolean;
+  hasSwordFusionPassive: boolean;
+  hasBodyTribulationPassive: boolean;
+  hasMageTribulationPassive: boolean;
   hasMageImmortalPassive: boolean;
   hasMageEmperorPassive: boolean;
 }) => {
@@ -1860,6 +1881,9 @@ const getCombatOpeningMessages = (options: {
     hasSwordImmortalPassive,
     hasSwordEmperorPassive,
     hasBodyEmperorPassive,
+    hasSwordFusionPassive,
+    hasBodyTribulationPassive,
+    hasMageTribulationPassive,
     hasMageImmortalPassive,
     hasMageEmperorPassive,
   } = options;
@@ -1898,6 +1922,9 @@ const getCombatOpeningMessages = (options: {
       hasSwordImmortalPassive,
       hasSwordEmperorPassive,
       hasBodyEmperorPassive,
+      hasSwordFusionPassive,
+      hasBodyTribulationPassive,
+      hasMageTribulationPassive,
     })
   );
 
@@ -1945,6 +1972,196 @@ const getPassiveRegenMessages = (options: {
             : `法力源泉湧動，你回復了 ${manaAmount} 點靈力。`
         : "",
   };
+};
+
+const applyPassiveRegenAndCleanse = ({
+  player,
+  logs,
+  turn,
+  timeMs,
+  playerHp,
+  playerMp,
+  enemyHp,
+  enemyMaxHp,
+  playerStatuses,
+  lastRegenTimeMs,
+  hasBodyRebirthPassive,
+  hasManaSpringPassive,
+  hasMageFusionPassive,
+  hasBodyImmortalPassive,
+  hasBodyAncientPassive,
+}: {
+  player: PlayerCombatStats;
+  logs: CombatLog[];
+  turn: number;
+  timeMs: number;
+  playerHp: number;
+  playerMp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  playerStatuses: CombatStatus[];
+  lastRegenTimeMs: number;
+  hasBodyRebirthPassive: boolean;
+  hasManaSpringPassive: boolean;
+  hasMageFusionPassive: boolean;
+  hasBodyImmortalPassive: boolean;
+  hasBodyAncientPassive: boolean;
+}) => {
+  if (
+    !(player.regenHp > 0 || hasBodyRebirthPassive || hasManaSpringPassive || hasMageFusionPassive) ||
+    (playerHp >= player.maxHp && playerMp >= player.maxMp)
+  ) {
+    return { playerHp, playerMp, playerStatuses, lastRegenTimeMs };
+  }
+
+  const regenIntervals = Math.floor((timeMs - lastRegenTimeMs) / 1000);
+  if (regenIntervals <= 0) {
+    return { playerHp, playerMp, playerStatuses, lastRegenTimeMs };
+  }
+
+  let nextPlayerHp = playerHp;
+  let nextPlayerMp = playerMp;
+  const nextPlayerStatuses = playerStatuses;
+  let healPerSecond = Math.floor(player.maxHp * (player.regenHp / 100));
+
+  if (hasBodyRebirthPassive) {
+    const missingHp = Math.max(0, player.maxHp - nextPlayerHp);
+    healPerSecond +=
+      Math.floor(player.maxHp * 0.02) + Math.floor(missingHp * 0.05);
+  }
+
+  if (hasMageFusionPassive) {
+    healPerSecond += Math.floor(player.maxHp * 0.05);
+  }
+
+  const healAmount = Math.floor(
+    healPerSecond * regenIntervals * (hasBodyImmortalPassive ? 1.5 : 1)
+  );
+  if (healAmount > 0) {
+    nextPlayerHp = Math.min(player.maxHp, nextPlayerHp + healAmount);
+    const { healMessage } = getPassiveRegenMessages({
+      healAmount,
+      manaAmount: 0,
+      hasBodyRebirthPassive,
+      hasManaSpringPassive,
+      hasMageFusionPassive,
+    });
+    pushCombatLog(logs, {
+      turn,
+      timeMs,
+      isPlayer: true,
+      message: healMessage,
+      damage: -healAmount,
+      playerHp: nextPlayerHp,
+      playerMaxHp: player.maxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  if ((hasManaSpringPassive || hasMageFusionPassive) && nextPlayerMp < player.maxMp) {
+    const manaPerSecond =
+      (hasManaSpringPassive ? Math.floor(player.maxMp * 0.1) : 0) +
+      (hasMageFusionPassive ? Math.floor(player.maxMp * 0.05) : 0);
+    const manaAmount = manaPerSecond * regenIntervals;
+    if (manaAmount > 0) {
+      nextPlayerMp = Math.min(player.maxMp, nextPlayerMp + manaAmount);
+      const { manaMessage } = getPassiveRegenMessages({
+        healAmount: 0,
+        manaAmount,
+        hasBodyRebirthPassive,
+        hasManaSpringPassive,
+        hasMageFusionPassive,
+      });
+      pushCombatLog(logs, {
+        turn,
+        timeMs,
+        isPlayer: true,
+        message: manaMessage,
+        damage: 0,
+        playerHp: nextPlayerHp,
+        playerMaxHp: player.maxHp,
+        enemyHp,
+        enemyMaxHp,
+      });
+    }
+  }
+
+  if (hasBodyAncientPassive) {
+    const removableIndex = nextPlayerStatuses.findIndex(
+      (status) => status.expiresAtMs > timeMs && isNegativeStatusKind(status.kind)
+    );
+    if (removableIndex >= 0) {
+      const [removedStatus] = nextPlayerStatuses.splice(removableIndex, 1);
+      pushCombatLog(logs, {
+        turn,
+        timeMs,
+        isPlayer: true,
+        message: `【荒古戰體】震散了【${removedStatus.name}】。`,
+        damage: 0,
+        playerHp: nextPlayerHp,
+        playerMaxHp: player.maxHp,
+        enemyHp,
+        enemyMaxHp,
+      });
+    }
+  }
+
+  return {
+    playerHp: nextPlayerHp,
+    playerMp: nextPlayerMp,
+    playerStatuses: nextPlayerStatuses,
+    lastRegenTimeMs: lastRegenTimeMs + regenIntervals * 1000,
+  };
+};
+
+const applyPeriodicPassiveStatuses = ({
+  logs,
+  turn,
+  timeMs,
+  player,
+  playerHp,
+  enemyHp,
+  enemyMaxHp,
+  playerStatuses,
+  hasSwordImmortalPassive,
+  nextSwordImmortalGuardAtMs,
+}: {
+  logs: CombatLog[];
+  turn: number;
+  timeMs: number;
+  player: PlayerCombatStats;
+  playerHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  playerStatuses: CombatStatus[];
+  hasSwordImmortalPassive: boolean;
+  nextSwordImmortalGuardAtMs: number;
+}) => {
+  let nextGuardAtMs = nextSwordImmortalGuardAtMs;
+  if (hasSwordImmortalPassive && timeMs >= nextGuardAtMs) {
+    playerStatuses.push({
+      id: "immortal_sword_guard",
+      name: "仙元護體",
+      kind: "shield",
+      value: 999999,
+      expiresAtMs: timeMs + 1000,
+    });
+    nextGuardAtMs += 5000;
+    pushCombatLog(logs, {
+      turn,
+      timeMs,
+      isPlayer: true,
+      message: `【仙元護體】再次凝成，可抵擋一次任意傷害。`,
+      damage: 0,
+      playerHp,
+      playerMaxHp: player.maxHp,
+      enemyHp,
+      enemyMaxHp,
+    });
+  }
+
+  return { playerStatuses, nextSwordImmortalGuardAtMs: nextGuardAtMs };
 };
 
 const getPlayerActivePassiveProcMessages = (options: {
@@ -3404,6 +3621,9 @@ export const runAutoBattle = (
     hasSwordImmortalPassive,
     hasSwordEmperorPassive,
     hasBodyEmperorPassive,
+    hasSwordFusionPassive,
+    hasBodyTribulationPassive,
+    hasMageTribulationPassive,
     hasMageImmortalPassive,
     hasMageEmperorPassive,
   }).forEach((message) => {
@@ -3430,117 +3650,45 @@ export const runAutoBattle = (
     processStatusTicks(currentTimeMs);
     if (playerHp <= 0 || enemyHp <= 0) break;
 
-    if ((player.regenHp > 0 || hasBodyRebirthPassive || hasManaSpringPassive || hasMageFusionPassive) && (playerHp < player.maxHp || playerMp < player.maxMp)) {
-      const regenIntervals = Math.floor((currentTimeMs - lastRegenTimeMs) / 1000);
-      if (regenIntervals > 0) {
-        let healPerSecond = Math.floor(player.maxHp * (player.regenHp / 100));
-        if (hasBodyRebirthPassive) {
-          const missingHp = Math.max(0, player.maxHp - playerHp);
-          healPerSecond +=
-            Math.floor(player.maxHp * 0.02) + Math.floor(missingHp * 0.05);
-        }
-        if (hasMageFusionPassive) {
-          healPerSecond += Math.floor(player.maxHp * 0.05);
-        }
-        const healAmount = Math.floor(
-          healPerSecond * regenIntervals * (hasBodyImmortalPassive ? 1.5 : 1)
-        );
-        if (healAmount > 0) {
-          playerHp = Math.min(player.maxHp, playerHp + healAmount);
-          const { healMessage } = getPassiveRegenMessages({
-            healAmount,
-            manaAmount: 0,
-            hasBodyRebirthPassive,
-            hasManaSpringPassive,
-            hasMageFusionPassive,
-          });
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs,
-            isPlayer: true,
-            message: healMessage,
-            damage: -healAmount,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
-
-        if ((hasManaSpringPassive || hasMageFusionPassive) && playerMp < player.maxMp) {
-          const manaPerSecond =
-            (hasManaSpringPassive ? Math.floor(player.maxMp * 0.1) : 0) +
-            (hasMageFusionPassive ? Math.floor(player.maxMp * 0.05) : 0);
-          const manaAmount = manaPerSecond * regenIntervals;
-          if (manaAmount > 0) {
-            playerMp = Math.min(player.maxMp, playerMp + manaAmount);
-            const { manaMessage } = getPassiveRegenMessages({
-              healAmount: 0,
-              manaAmount,
-              hasBodyRebirthPassive,
-              hasManaSpringPassive,
-              hasMageFusionPassive,
-            });
-            pushCombatLog(logs, {
-              turn,
-              timeMs: currentTimeMs,
-              isPlayer: true,
-              message: manaMessage,
-              damage: 0,
-              playerHp,
-              playerMaxHp: player.maxHp,
-              enemyHp,
-              enemyMaxHp: enemy.maxHp,
-            });
-          }
-        }
-        if (hasBodyAncientPassive) {
-          const removableIndex = playerStatuses.findIndex(
-            (status) =>
-              status.expiresAtMs > currentTimeMs &&
-              isNegativeStatusKind(status.kind)
-          );
-          if (removableIndex >= 0) {
-            const [removedStatus] = playerStatuses.splice(removableIndex, 1);
-            pushCombatLog(logs, {
-              turn,
-              timeMs: currentTimeMs,
-              isPlayer: true,
-              message: `【荒古戰體】震散了【${removedStatus.name}】。`,
-              damage: 0,
-              playerHp,
-              playerMaxHp: player.maxHp,
-              enemyHp,
-              enemyMaxHp: enemy.maxHp,
-            });
-          }
-        }
-        lastRegenTimeMs += regenIntervals * 1000;
-      }
-    }
+    ({
+      playerHp,
+      playerMp,
+      playerStatuses,
+      lastRegenTimeMs,
+    } = applyPassiveRegenAndCleanse({
+      player,
+      logs,
+      turn,
+      timeMs: currentTimeMs,
+      playerHp,
+      playerMp,
+      enemyHp,
+      enemyMaxHp: enemy.maxHp,
+      playerStatuses,
+      lastRegenTimeMs,
+      hasBodyRebirthPassive,
+      hasManaSpringPassive,
+      hasMageFusionPassive,
+      hasBodyImmortalPassive,
+      hasBodyAncientPassive,
+    }));
 
     if (playerActsFirst) {
-      if (hasSwordImmortalPassive && currentTimeMs >= nextSwordImmortalGuardAtMs) {
-        playerStatuses.push({
-          id: "immortal_sword_guard",
-          name: "仙元護體",
-          kind: "shield",
-          value: 999999,
-          expiresAtMs: currentTimeMs + 1000,
-        });
-        nextSwordImmortalGuardAtMs += 5000;
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【仙元護體】再次凝成，可抵擋一次任意傷害。`,
-          damage: 0,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-      }
+      ({
+        playerStatuses,
+        nextSwordImmortalGuardAtMs,
+      } = applyPeriodicPassiveStatuses({
+        logs,
+        turn,
+        timeMs: currentTimeMs,
+        player,
+        playerHp,
+        enemyHp,
+        enemyMaxHp: enemy.maxHp,
+        playerStatuses,
+        hasSwordImmortalPassive,
+        nextSwordImmortalGuardAtMs,
+      }));
 
       if (enemy.rank === EnemyRank.Boss && pVsE.isEffective && !bossBroken && Math.random() < 0.12) {
         bossBroken = true;

@@ -346,6 +346,7 @@
 - [x] `b_vr_passive` / `s_im_passive` 已開始補齊 timeline combat 開場待命訊息，正式標出 `荒古戰體` / `仙元護體`
 - [x] `s_sf_passive` / `b_sf_passive` / `m_sf_passive` 已開始補齊 timeline combat 開場待命訊息，正式標出 `劍意化形` / `肉身成聖` / `道法自然`
 - [x] `s_ie_passive` / `b_ie_passive` 已開始補齊 timeline combat 開場待命訊息，正式標出 `萬法皆空` / `不死不滅`
+- [x] `s_bi_passive` / `b_tr_passive` / `m_tr_passive` 已開始補齊 timeline combat 開場待命訊息，正式標出 `人劍合神` / `萬劫不滅` / `雷劫煉心`
 - [x] 多個已完成專屬接線的 passive，已開始移除手寫 generic `passiveEffectTags`，降低資料層誤導
 - [x] `b_n_passive` / `m_n_passive` 的回復事件已補回技能專屬戰鬥訊息，不再只走 generic regen log
 - [x] battle 開場被動狀態初始化已抽成共用 helper，`b_g_passive` 開場護體也補上明確戰鬥事件
