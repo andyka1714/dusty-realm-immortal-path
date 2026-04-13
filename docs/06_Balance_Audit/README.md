@@ -141,50 +141,18 @@
 
 ### 最新收斂狀態
 
-- 世界戰鬥 AOE 已不是只有欄位與提示，`circle / line / cone` 已正式命中附近怪物
-- 世界戰鬥、時間軸戰鬥與 HUD 的冷卻顯示，已開始共用同一套 cooldown resolver
-- 技能 / 怪物特招的狀態建立、時間正規化與 player/enemy 分側，也已開始走共用 resolver
-- 玩家被動技能判定已開始抽成共用 passive flags helper，降低 world / timeline 分散重寫風險
-- 玩家被動技能判定已補成共用 skill-id 對照表，world strike 與 timeline combat 的 passive flag 來源不再各自手寫
-- `getPlayerPassiveFlags()` 已改成明確 skill id 對照，不再把不同 retired passive 透過 formal id 錯誤折疊成同一串 battle flag
-- formal core 對 retired passive 的承接已改成顯式 alias 對照，避免 battle 內核再靠模糊 canonical 折疊維持行為
-- formal realm dataset 也已開始透過單一 retired-alias 剝離 helper 統一移除 `retirement-ready active + battle-absorbed passive`，減少 realm view 重複維護風險
-- 戰鬥開場的元素克制、弱點洞察、護體展開與高境界開場壓制，也已開始整併成共用 opener helper
-- 主動術式後的多種被動觸發訊息，也已開始整併到共用 passive-proc helper
-- 主動術式後的資源回復、冷卻縮短、冷卻重置與疊層訊息，也已開始收斂到共用 logger helper，降低 `runAutoBattle()` 在 `五氣朝元 / 道法自然 / 靈潮循環 / 劍心通明 / 靈力湧動` 這批事件上的散寫
-- 來襲傷害的防禦型被動事件，也已開始整併到共用 defensive-passive helper
-- `言出法隨`、`劍道獨尊`、`向死而生` 等高境界被動，已開始同步對齊 world strike 與時間軸戰鬥結果
-- retired 技能已分成：
-  - `battle-absorbed`
-  - `retirement-ready`
-- 舊的 `pending-retirement` 僅作為過渡階段使用，現在已清空並移除
-- 其中 `m_bi_active`、`b_tr_active` 已在先前批次從 `pending-retirement` 推進到 `battle-absorbed`
-- 角色屬性、商店、圖鑑、側欄、背包與區域地圖節點提示，已開始共用 `GameTooltip / GameHintBubble` 遊戲化外觀，面板框體語言也進一步向同一套殼層收斂
-- `五氣朝元` 的回春 / 回藍事件也已改成專屬戰鬥訊息，不再落回 generic regen 文案
-- `法力源泉`、`靈力湧動`、`五氣朝元` 這批法修被動，也已開始補齊 world strike 狀態回報
-- `仙法通神`、`萬法歸宗` 這批高境界法修被動，也已開始補齊 world strike 狀態回報
-- `萬法皆空` 也已開始在 player world strike 的普攻中正式回報，不再只在時間軸戰鬥裡隱性生效
-- `劍意化形` 也已開始在 player world strike 的普攻中正式回報，不再只在 timeline combat 的追加斬擊事件裡可見
-- `荊棘皮層`、`蠻荒血脈`、`銅皮鐵骨`、`金剛法相`、`元素護盾` 這批防禦型被動，也已開始補齊 enemy world strike 狀態回報
-- `萬劫不滅`、`雷劫煉心` 這批高境界承傷 / 生存被動，也已開始補齊 enemy world strike 狀態回報
-- `護體劍罡`、`滴血重生`、`不死不滅` 這批致命生存型被動，也已開始補齊 enemy world strike 狀態回報
-- `仙體無垢`、`萬法皆空` 這批高境界免疫型被動，也已開始補齊 enemy special world strike 狀態回報
-- `enemy world strike` 這條線的減傷 / 保命被動判定，也已開始抽成共用 trigger helper，往單一 battle resolver 再收一層
-- `enemy world strike` 的 incoming status 過濾，也已開始和 timeline combat 對齊，不再讓 DOT / 負面狀態免疫只存在於時間軸戰鬥
-- `enemy special` 的 incoming status 過濾與控制縮短，現在也已開始走 world / timeline 共用 resolver，降低 `runAutoBattle()` 與 world strike 各自手寫分支的風險
-- 玩家主動術式施加的 `盾、破甲、DOT、反震、劍氣` 訊息，也已開始走共用 status logger，減少 `runAutoBattle()` 內逐段手寫套用訊息的重複度
-- `雷劫煉心` 這條控制對抗型被動，也已開始補齊 enemy special world strike 狀態回報
-- `GameHintBubble` 也已開始補齊 `eyebrow + body` 的短提示層級，讓 dock、側欄、背包與道途操作提示和主 tooltip 語言更一致
-- `enemy special` 的免疫 / 控制縮短訊息，已開始抽成共用 resistance helper，減少 `仙體無垢 / 萬法皆空 / 雷劫煉心 / 人劍合神` 在 timeline 戰鬥散寫
-- `runAutoBattle()` 內的致命保命流程，也已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`
-- `StatsPanel / ShopPanel` 的主要資訊浮層已進一步收進 `GameTooltip` 的統一標題 / 註腳結構，UI 殼層更接近單一語言
-- `Adventure` 的區域地圖情報與 `Compendium` 的額外掉落來源浮層，也已開始對齊到同一套 `GameTooltip` 結構
-- `QuestModal` 的裝備 / 技能書任務獎勵，也已補上 hover `GameTooltip`，不再只剩純文字獎勵列
-- `QuestModal` 的獎勵 tooltip 標題也已開始吃品質色階，和商店 / 背包裝備顯示更一致
-- `Stats / Dashboard / Shop / 地圖 / 圖鑑` 這批核心浮層，已開始補齊 `eyebrow`，往 `GameTooltip` 的完整 `eyebrow + title + body + footer` 語言收口
-- 區域地圖傳送點 / NPC、工坊升級、圖鑑掉落品階 badge、背包尾端物品操作等短提示，也已補齊 `GameHintBubble` 的 eyebrow，讓尾端提示不再混雜不同語氣
-- `GamePanel / Modal` 這條 UI 殼層也已開始對齊 `eyebrow + title + icon` 結構，主頁面板與互動視窗不再分裂成兩套語言
-- retirement-ready / battle-absorbed 的 retired alias ID 清單，也已回收至 alias 檔本體，skill index 不再重複維護同一份清單
+- 世界戰鬥 AOE 已不是只有欄位與提示，`circle / line / cone` 已正式命中附近怪物。
+- 世界戰鬥、時間軸戰鬥與 HUD 的冷卻顯示，已開始共用同一套 cooldown resolver。
+- 技能 / 怪物特招的 timeline metadata、status 建立、時間正規化與 player/enemy 分側，都已開始走共用 resolver。
+- `enemy world strike` 的減傷 / 保命判定、incoming status 過濾，以及 `enemy special` 的控制縮短 / 免疫提示，也已開始往共用 battle helper 收斂。
+- 主動術式後的多種被動觸發、資源回復、冷卻縮短、疊層訊息，與主動術式施加的 `盾、破甲、DOT、反震、劍氣` 等狀態，也已開始走共用 logger helper。
+- `runAutoBattle()` 內的致命保命流程，也已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡 / 滴血重生（真） / 不死不滅`。
+- 玩家被動技能判定已改成明確 skill id / alias 對照，formal core 對 retired passive 的承接也不再依賴模糊 canonical 折疊。
+- retired 技能目前正式收斂成 `battle-absorbed / retirement-ready`；舊的 `pending-retirement` 過渡層已清空並移除。
+- formal realm dataset 已開始透過單一 retired-alias 剝離 helper 統一移除 `retirement-ready active + battle-absorbed passive`，降低 realm view 重複維護風險。
+- `言出法隨 / 劍道獨尊 / 向死而生 / 法力源泉 / 靈力湧動 / 五氣朝元 / 仙法通神 / 萬法歸宗 / 萬法皆空 / 劍意化形` 等被動，已陸續補齊 world strike 與 timeline combat 的狀態回報。
+- `荊棘皮層 / 蠻荒血脈 / 銅皮鐵骨 / 金剛法相 / 元素護盾 / 萬劫不滅 / 雷劫煉心 / 護體劍罡 / 滴血重生 / 不死不滅 / 仙體無垢` 這批承傷、生存與免疫被動，也已開始補齊 enemy world strike 或 enemy special world strike 的可見狀態。
+- `GamePanel / Modal / GameTooltip / GameHintBubble` 這條 UI 殼層語言已進一步收斂；角色屬性、商店、圖鑑、背包、任務獎勵、區域地圖情報與多個短提示已開始共用同一套遊戲化外觀。
 
 ---
 

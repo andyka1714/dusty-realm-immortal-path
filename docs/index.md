@@ -37,7 +37,7 @@
 
 ### [06_Balance_Audit] 數值平衡審計
 本輪針對實作數值做的審計文件，重點在於比對文件與程式、驗算修為曲線、戰鬥曲線、裝備與技能落地狀態。
-- [README.md](06_Balance_Audit/README.md): 審計總覽、戰鬥 shared resolver 收斂進度與核心結論。
+- [README.md](06_Balance_Audit/README.md): 審計總覽、尚未補完的核心缺口，以及 battle / UI shared helper 的最新收斂狀態。
 - [01_修為與境界曲線審計.md](06_Balance_Audit/01_修為與境界曲線審計.md): 修為需求、通道效率與時長試算。
 - [02_戰鬥與裝備曲線審計.md](06_Balance_Audit/02_戰鬥與裝備曲線審計.md): 怪物、裝備、掉落與戰鬥實作審計。
 - [03_職業與技能審計.md](06_Balance_Audit/03_職業與技能審計.md): 三職業、技能資料與實戰接線現況。
@@ -46,10 +46,10 @@
 - [06_實作修正落點.md](06_Balance_Audit/06_實作修正落點.md): 這一輪已改哪些檔案、後續要從哪裡繼續改。
 - [07_路線分流與主題掉落設計.md](06_Balance_Audit/07_路線分流與主題掉落設計.md): 三路分流、聚合期與職業主題掉落設計整理。
 - [08_技能系統與技能書規劃.md](06_Balance_Audit/08_技能系統與技能書規劃.md): 技能改成技能書取得的整理與落地方案。
-- [09_即時戰鬥改造分析.md](06_Balance_Audit/09_即時戰鬥改造分析.md): 從戰報回放轉成即時碰撞戰鬥的架構分析，以及 cooldown / opener / passive-proc / defensive-passive 等 shared resolver 的收斂進度。
+- [09_即時戰鬥改造分析.md](06_Balance_Audit/09_即時戰鬥改造分析.md): 從戰報回放轉成即時碰撞戰鬥的架構分析，以及 cooldown / opener / passive-proc / defensive-passive / status logger 等 shared resolver 的收斂進度。
 - [10_技能數量與功能分類收斂.md](06_Balance_Audit/10_技能數量與功能分類收斂.md): 技能數量控制、功能分類與主流遊戲對照分析。
 - [11_三職業核心技能池草案.md](06_Balance_Audit/11_三職業核心技能池草案.md): 劍修、體修、法修的核心技能池草案，以及 retired 技能收斂到 `battle-absorbed / retirement-ready` 的正式規則，並持續對齊 world strike / timeline combat。
-- 補充：formal realm view 現在已透過單一 retired-alias 剝離 helper 移除 `retirement-ready active + battle-absorbed passive`，realm dataset 更接近正式技能池視角。
+- 補充：formal realm view 現在已透過單一 retired-alias 剝離 helper 移除 `retirement-ready active + battle-absorbed passive`，realm dataset 更接近正式技能池視角；舊技能仍保留中央 alias / 相容查詢層。
 - [12_技能書實作收斂.md](06_Balance_Audit/12_技能書實作收斂.md): 技能書正式實作、來源規則、前置條件與與程式對齊結果。
 - [13_3D渲染與戰鬥呈現評估.md](06_Balance_Audit/13_3D渲染與戰鬥呈現評估.md): 3D、Three.js 與目前 Pixi 戰鬥呈現層的可行性評估。
 - [14_整體改造Checklist.md](06_Balance_Audit/14_整體改造Checklist.md): 本輪所有已完成 / 未完成細項的逐條追蹤表。

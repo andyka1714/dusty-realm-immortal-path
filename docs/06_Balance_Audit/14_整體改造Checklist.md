@@ -27,6 +27,7 @@
 - [x] 建立 3D / Three.js / WebGL 可行性評估文件
 - [x] 把平衡審計文件掛到 [docs/index.md](/Users/andyka1714/Desktop/Ascend-Spark/dusty-realm-immortal-path/docs/index.md)
 - [x] 建立本 checklist 文件
+- [x] `README.md`、`docs/index.md` 與平衡審計總覽已持續做分批交叉同步，避免文件敘述與最新 battle / UI helper 狀態脫節
 - [ ] 讓所有平衡審計文件彼此完全去重，避免同一件事在多份文件重複描述
 - [ ] 把 `README.md`、`docs/02_Gameplay/*`、`docs/03_World/*` 與平衡審計全部再做一次全面交叉校對
 
