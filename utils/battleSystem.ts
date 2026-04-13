@@ -770,6 +770,121 @@ const getEnemyWorldPassiveStatusNames = (
   return statusNames;
 };
 
+const getEnemyWorldIncomingStatusNames = ({
+  bodyImmortalTriggered,
+  swordEmperorTriggered,
+}: {
+  bodyImmortalTriggered: boolean;
+  swordEmperorTriggered: boolean;
+}) => {
+  const statusNames: string[] = [];
+
+  if (bodyImmortalTriggered) {
+    statusNames.push("仙體無垢");
+  }
+
+  if (swordEmperorTriggered) {
+    statusNames.push("萬法皆空");
+  }
+
+  return statusNames;
+};
+
+const getPlayerWorldProfessionPassiveStatusNames = (options: {
+  passiveFlags: PlayerPassiveFlags;
+  player: PlayerCombatStats;
+  skill?: Skill;
+  isCrit: boolean;
+  dealsDirectDamage: boolean;
+  canonicalSkillId?: string;
+  hasSwordQiChain: boolean;
+  swordTribulationActive: boolean;
+  bodyFoundationStacks: number;
+  voidSwordProc: boolean;
+}) => {
+  const {
+    passiveFlags,
+    player,
+    skill,
+    isCrit,
+    dealsDirectDamage,
+    canonicalSkillId,
+    hasSwordQiChain,
+    swordTribulationActive,
+    bodyFoundationStacks,
+    voidSwordProc,
+  } = options;
+
+  const statusNames: string[] = [];
+
+  if (passiveFlags.hasSwordMahayanaPassive && isCrit) {
+    statusNames.push("劍道獨尊");
+  }
+
+  if (swordTribulationActive) {
+    statusNames.push("向死而生");
+  }
+
+  if (canonicalSkillId === "s_tr_active" && hasSwordQiChain) {
+    statusNames.push("萬劍歸一");
+  }
+
+  if (bodyFoundationStacks > 0) {
+    statusNames.push("蠻荒血脈");
+  }
+
+  if (!skill && passiveFlags.hasMageQiPassive && player.profession === ProfessionType.Mage) {
+    statusNames.push("靈潮循環");
+  }
+
+  if (passiveFlags.hasManaSpringPassive && player.mp >= player.maxMp * 0.8) {
+    statusNames.push("法力源泉");
+  }
+
+  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageFoundationPassive) {
+    statusNames.push("靈力湧動");
+  }
+
+  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageSpiritSeveringPassive) {
+    statusNames.push("道法自然");
+  }
+
+  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageFusionPassive) {
+    statusNames.push("五氣朝元");
+  }
+
+  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageImmortalPassive) {
+    statusNames.push("仙法通神");
+  }
+
+  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageEmperorPassive) {
+    statusNames.push("萬法歸宗");
+  }
+
+  if (!skill && passiveFlags.hasSwordEmperorPassive && dealsDirectDamage) {
+    statusNames.push("萬法皆空");
+  }
+
+  if (!skill && passiveFlags.hasSwordEchoPassive && dealsDirectDamage) {
+    statusNames.push("劍意化形");
+  }
+
+  if (
+    passiveFlags.hasSwordQiPassive &&
+    isCrit &&
+    dealsDirectDamage &&
+    skill?.profession === ProfessionType.Sword
+  ) {
+    statusNames.push("劍脈初成");
+  }
+
+  if (voidSwordProc) {
+    statusNames.push("法則之劍");
+  }
+
+  return statusNames;
+};
+
 const getResolvedEnemyWorldIncomingStatuses = ({
   special,
   player,
@@ -1118,88 +1233,11 @@ const getPlayerWorldPassiveStatusNames = (options: {
   bodyFoundationStacks: number;
   voidSwordProc: boolean;
 }) => {
-  const {
-    passiveFlags,
-    player,
-    skill,
-    isCrit,
-    dealsDirectDamage,
-    canonicalSkillId,
-    hasSwordQiChain,
-    swordTribulationActive,
-    bodyFoundationStacks,
-    voidSwordProc,
-  } = options;
-
-  const statusNames: string[] = [];
+  const { passiveFlags, skill } = options;
+  const statusNames = getPlayerWorldProfessionPassiveStatusNames(options);
 
   if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageMahayanaPassive) {
-    statusNames.push("言出法隨");
-  }
-
-  if (passiveFlags.hasSwordMahayanaPassive && isCrit) {
-    statusNames.push("劍道獨尊");
-  }
-
-  if (swordTribulationActive) {
-    statusNames.push("向死而生");
-  }
-
-  if (canonicalSkillId === "s_tr_active" && hasSwordQiChain) {
-    statusNames.push("萬劍歸一");
-  }
-
-  if (bodyFoundationStacks > 0) {
-    statusNames.push("蠻荒血脈");
-  }
-
-  if (!skill && passiveFlags.hasMageQiPassive && player.profession === ProfessionType.Mage) {
-    statusNames.push("靈潮循環");
-  }
-
-  if (passiveFlags.hasManaSpringPassive && player.mp >= player.maxMp * 0.8) {
-    statusNames.push("法力源泉");
-  }
-
-  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageFoundationPassive) {
-    statusNames.push("靈力湧動");
-  }
-
-  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageSpiritSeveringPassive) {
-    statusNames.push("道法自然");
-  }
-
-  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageFusionPassive) {
-    statusNames.push("五氣朝元");
-  }
-
-  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageImmortalPassive) {
-    statusNames.push("仙法通神");
-  }
-
-  if (skill?.profession === ProfessionType.Mage && passiveFlags.hasMageEmperorPassive) {
-    statusNames.push("萬法歸宗");
-  }
-
-  if (!skill && passiveFlags.hasSwordEmperorPassive && dealsDirectDamage) {
-    statusNames.push("萬法皆空");
-  }
-
-  if (!skill && passiveFlags.hasSwordEchoPassive && dealsDirectDamage) {
-    statusNames.push("劍意化形");
-  }
-
-  if (
-    passiveFlags.hasSwordQiPassive &&
-    isCrit &&
-    dealsDirectDamage &&
-    skill?.profession === ProfessionType.Sword
-  ) {
-    statusNames.push("劍脈初成");
-  }
-
-  if (voidSwordProc) {
-    statusNames.push("法則之劍");
+    statusNames.unshift("言出法隨");
   }
 
   return statusNames;
@@ -3465,13 +3503,12 @@ export const resolveEnemyWorldStrike = (
     }),
   ];
 
-  if (incomingStatuses.bodyImmortalTriggered) {
-    statusNames.push("仙體無垢");
-  }
-
-  if (incomingStatuses.swordEmperorTriggered) {
-    statusNames.push("萬法皆空");
-  }
+  statusNames.push(
+    ...getEnemyWorldIncomingStatusNames({
+      bodyImmortalTriggered: incomingStatuses.bodyImmortalTriggered,
+      swordEmperorTriggered: incomingStatuses.swordEmperorTriggered,
+    })
+  );
 
   return {
     damage,

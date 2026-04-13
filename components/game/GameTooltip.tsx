@@ -1,5 +1,6 @@
 import React from "react";
 import clsx from "clsx";
+import { GameTitleStack } from "./GameTitleStack";
 
 interface GameTooltipProps {
   eyebrow?: React.ReactNode;
@@ -40,20 +41,14 @@ export const GameTooltip: React.FC<GameTooltipProps> = ({
     </div>
 
     <div className="relative z-10">
-      {eyebrow && (
-        <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.28em] text-stone-500">
-          {eyebrow}
-        </div>
-      )}
-      {title && (
-        <div
-          className={clsx(
-            "mb-2 text-base font-bold tracking-[0.12em] text-amber-400",
-            titleClassName
-          )}
-        >
-          {title}
-        </div>
+      {(eyebrow || title) && (
+        <GameTitleStack
+          eyebrow={eyebrow}
+          title={title}
+          compact
+          className="mb-2"
+          titleClassName={titleClassName}
+        />
       )}
       <div className="space-y-2 text-sm leading-relaxed">{children}</div>
       {footer && (

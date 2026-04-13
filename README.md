@@ -18,7 +18,7 @@
 - formal realm dataset 已透過單一 retired-alias 剝離 helper 統一移除 `retirement-ready active + battle-absorbed passive`，更接近正式技能池視角。
 - formal core 被動的基礎屬性收益，現在也已改成逐招明確對照表；absorbed retired passive 會透過同一份 formal 對照承接，不再靠職業 / 境界通用公式補值。
 - 多個高境界被動已補齊 world strike / enemy world strike / enemy special world strike 對齊，避免只有時間軸戰鬥才看得到實際效果。
-- UI 殼層已開始統一：`GamePanel / Modal / GameTooltip / GameHintBubble` 正在收斂成同一套 `eyebrow + title + body + footer` 遊戲化語言。
+- UI 殼層已開始統一：`GamePanel / Modal / GameTooltip / GameHintBubble` 正在收斂成同一套遊戲化語言，`GamePanel / Modal / GameTooltip` 的標題層也已開始共用 `GameTitleStack`。
 - 區域地圖情報、圖鑑掉落來源、任務獎勵、背包 hover、dock 提示、道途資訊與工坊操作等浮層，已開始共用同一套 tooltip / hint 元件。
 - `Gameplay / World / UI / Audit` 文件也已開始按 battle shared resolver、地圖情報 tooltip 與短提示語言做交叉校對，避免文件描述再次漂移。
 

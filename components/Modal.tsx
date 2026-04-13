@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { X } from 'lucide-react';
 import clsx from 'clsx';
+import { GameTitleStack } from './game/GameTitleStack';
 
 interface ModalProps {
   isOpen: boolean;
@@ -63,23 +64,25 @@ export const Modal: React.FC<ModalProps> = ({
           <div className="absolute inset-x-6 top-[10px] h-px bg-gradient-to-r from-transparent via-amber-400/20 to-transparent"></div>
           <div className="absolute inset-x-10 top-[58px] h-px bg-gradient-to-r from-transparent via-stone-500/20 to-transparent"></div>
           <div className="absolute -right-10 top-3 h-28 w-28 rounded-full bg-amber-500/10 blur-3xl"></div>
+          <div className="absolute left-8 top-5 rounded-full border border-amber-500/15 bg-black/20 px-3 py-1 text-[10px] tracking-[0.28em] text-amber-200/65">
+            {eyebrow}
+          </div>
         </div>
 
         {/* Header */}
         <div className="relative z-10 flex items-center justify-between border-b border-stone-800/90 p-4 flex-none">
-          <div className="flex min-w-0 items-center gap-3">
-            {icon && (
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-amber-700/30 bg-black/25 text-amber-400 shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
-                {icon}
-              </div>
-            )}
-            <div className="min-w-0">
-              <div className="text-[10px] uppercase tracking-[0.28em] text-amber-200/60">
-                {eyebrow}
-              </div>
-              <h3 className="truncate text-xl font-bold tracking-[0.16em] text-amber-400">{title}</h3>
-            </div>
-          </div>
+          <GameTitleStack
+            eyebrow={eyebrow}
+            title={title}
+            icon={
+              icon ? (
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-amber-700/30 bg-black/25 text-amber-400 shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
+                  {icon}
+                </div>
+              ) : undefined
+            }
+            titleClassName="truncate text-xl tracking-[0.16em] text-amber-400"
+          />
           <button 
             onClick={onClose}
             className="rounded-full border border-stone-700/80 bg-stone-950/78 p-2 text-stone-500 transition-colors hover:border-amber-500 hover:text-stone-200"
@@ -89,7 +92,7 @@ export const Modal: React.FC<ModalProps> = ({
         </div>
 
         {/* Content - Flex grow to fill available space */}
-        <div className="relative z-10 p-0 md:p-6 overflow-y-auto text-stone-300 flex-1 bg-stone-950/35">
+        <div className="relative z-10 p-0 pt-2 md:p-6 md:pt-8 overflow-y-auto text-stone-300 flex-1 bg-stone-950/35">
           {children}
         </div>
 
