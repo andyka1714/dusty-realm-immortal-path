@@ -175,6 +175,13 @@
 - `祖巫降臨 / 法天象地 / 掌中神國 / 一念花開 / 破劫一擊` 這批高境界主動的後續追加效果，也已開始抽成共用 follow-up helper，降低主循環分支密度
 - 玩家主動術式施加給敵方的控制型狀態與後續破甲追擊，現在也已開始和 timeline combat 共用同一層 enemy-status resolver；`霸體` 過濾與 `劍脈破甲` 不再 world / timeline 各寫一份
 - 玩家主動術式施加的 `盾、破甲、DOT、反震、劍氣` 等狀態，也已開始走共用 status logger，不再在時間軸戰鬥內逐段手寫訊息
+- 玩家主動術式的資源 / 冷卻流，已開始抽成 `resolvePlayerActiveResourceFlow(...)`：
+  - 術式免耗
+  - 冷卻縮短
+  - 靈潮回補
+  - 劍心重置
+  - 法修築基層數累進
+- `劍意化形 / 虛空劍陣 / 撒豆成兵` 的多段追擊與召喚後續傷害，也已開始抽成 `applyPlayerEchoAndSummonFollowupEffects(...)`
 - `m_tr_passive`：enemy special 造成控制時，也已開始在 enemy world strike 正式回報 `雷劫煉心`
 - `enemy special` 的免疫 / 控制縮短訊息，已開始抽成共用 resistance helper，避免 timeline combat 再散寫 `仙體無垢 / 萬法皆空 / 雷劫煉心 / 人劍合神`
 - 時間軸戰鬥內的致命保命分支，也已開始抽成共用 helper，集中處理 `護體劍罡`、`滴血重生（真）`、`不死不滅` 這批生死線特例

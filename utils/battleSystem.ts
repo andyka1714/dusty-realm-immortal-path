@@ -2605,6 +2605,110 @@ const logShieldAbsorption = ({
   });
 };
 
+const resolvePlayerActiveResourceFlow = ({
+  activeSkill,
+  activeSkillCanonicalId,
+  player,
+  playerMp,
+  currentTimeMs,
+  activeSkillReadyAtMs,
+  mageFoundationStacks,
+  isCrit,
+  logs,
+  turn,
+  playerHp,
+  playerMaxHp,
+  enemyHp,
+  enemyMaxHp,
+  hasMageFusionPassive,
+  hasMageQiPassive,
+  hasSwordGoldenPassive,
+  hasMageFoundationPassive,
+}: {
+  activeSkill: Skill;
+  activeSkillCanonicalId?: string;
+  player: PlayerCombatStats;
+  playerMp: number;
+  currentTimeMs: number;
+  activeSkillReadyAtMs: number;
+  mageFoundationStacks: number;
+  isCrit: boolean;
+  logs: CombatLog[];
+  turn: number;
+  playerHp: number;
+  playerMaxHp: number;
+  enemyHp: number;
+  enemyMaxHp: number;
+  hasMageFusionPassive: boolean;
+  hasMageQiPassive: boolean;
+  hasSwordGoldenPassive: boolean;
+  hasMageFoundationPassive: boolean;
+}) => {
+  const baseCooldownSeconds =
+    activeSkill.cooldownSeconds ?? activeSkill.cooldown;
+  const noManaCostTriggered =
+    hasMageFusionPassive && activeSkill.profession === ProfessionType.Mage;
+  let nextPlayerMp = noManaCostTriggered
+    ? playerMp
+    : Math.max(0, playerMp - (activeSkill.cost || 0));
+  const effectiveCooldownSeconds = getResolvedSkillCooldownSeconds(
+    activeSkill,
+    player.learnedSkills
+  );
+  let nextActiveSkillReadyAtMs =
+    currentTimeMs + Math.floor(effectiveCooldownSeconds * 1000);
+  const cooldownReductionMessage =
+    effectiveCooldownSeconds < baseCooldownSeconds &&
+    activeSkill.profession === ProfessionType.Mage
+      ? `【道法自然】術式流轉提前歸位，冷卻縮短至 ${effectiveCooldownSeconds.toFixed(1)} 秒。`
+      : undefined;
+
+  let recoveredMana = 0;
+  if (hasMageQiPassive && activeSkill.profession === ProfessionType.Mage) {
+    recoveredMana = getMageQiCycleRecovery(player.maxMp);
+    nextPlayerMp = Math.min(player.maxMp, nextPlayerMp + recoveredMana);
+  }
+
+  let swordGoldenResetTriggered = false;
+  if (
+    hasSwordGoldenPassive &&
+    activeSkillCanonicalId === "s_f_active" &&
+    isCrit &&
+    Math.random() < 0.3
+  ) {
+    nextActiveSkillReadyAtMs = currentTimeMs;
+    swordGoldenResetTriggered = true;
+  }
+
+  let nextMageFoundationStacks = mageFoundationStacks;
+  let mageFoundationStacksGained: number | undefined;
+  if (hasMageFoundationPassive && activeSkill.profession === ProfessionType.Mage) {
+    nextMageFoundationStacks = Math.min(3, nextMageFoundationStacks + 1);
+    mageFoundationStacksGained = nextMageFoundationStacks;
+  }
+
+  logResolvedActivePassiveEffects({
+    logs,
+    turn,
+    timeMs: currentTimeMs,
+    playerHp,
+    playerMaxHp,
+    enemyHp,
+    enemyMaxHp,
+    noManaCostTriggered,
+    cooldownReductionMessage,
+    manaCycleRecovery: recoveredMana,
+    swordGoldenResetTriggered,
+    mageFoundationStacksGained,
+  });
+
+  return {
+    playerMp: nextPlayerMp,
+    activeSkillReadyAtMs: nextActiveSkillReadyAtMs,
+    mageFoundationStacks: nextMageFoundationStacks,
+  };
+};
+
 const logReflectRetaliation = ({
   logs,
   turn,
@@ -3332,6 +3436,122 @@ const applyPlayerActiveFollowupEffects = ({
     playerHp: nextPlayerHp,
     activeSkillReadyAtMs: nextActiveSkillReadyAtMs,
   };
+};
+
+const applyPlayerEchoAndSummonFollowupEffects = ({
+  skillReady,
+  activeSkillCanonicalId,
+  hasSwordEchoPassive,
+  currentTimeMs,
+  turn,
+  logs,
+  player,
+  enemy,
+  enemyHp,
+  playerHp,
+  playerMaxHp,
+  playerDamage,
+  effectiveDefense,
+  enemyStatuses,
+  pVsE,
+  enemyElementalAffinity,
+}: {
+  skillReady: boolean;
+  activeSkillCanonicalId?: string;
+  hasSwordEchoPassive: boolean;
+  currentTimeMs: number;
+  turn: number;
+  logs: CombatLog[];
+  player: PlayerCombatStats;
+  enemy: Enemy;
+  enemyHp: number;
+  playerHp: number;
+  playerMaxHp: number;
+  playerDamage: number;
+  effectiveDefense: number;
+  enemyStatuses: CombatStatus[];
+  pVsE: ReturnType<typeof getRestriction>;
+  enemyElementalAffinity: ReturnType<typeof getEnemyElementalModifier>;
+}) => {
+  let nextEnemyHp = enemyHp;
+
+  if (
+    hasSwordEchoPassive &&
+    !skillReady &&
+    nextEnemyHp > 0 &&
+    playerDamage > 0
+  ) {
+    const echoPower = player.attack * 0.6;
+    let echoDamage = resolveDamage(
+      echoPower,
+      effectiveDefense * getArmorBreakMultiplier(enemyStatuses, currentTimeMs)
+    );
+    if (pVsE.isEffective) echoDamage = Math.floor(echoDamage * 1.12);
+    if (pVsE.isResisted) echoDamage = Math.floor(echoDamage * 0.88);
+    echoDamage = Math.floor(echoDamage * enemyElementalAffinity.multiplier);
+    echoDamage = Math.floor(
+      echoDamage * getEnemyDamageReductionMultiplier(enemy)
+    );
+    nextEnemyHp = Math.max(0, nextEnemyHp - echoDamage);
+    pushCombatLog(logs, {
+      turn,
+      timeMs: currentTimeMs,
+      isPlayer: true,
+      message: `【劍意化形】追擊斬落，追加造成 <dmg>${echoDamage}</dmg> 點傷害！`,
+      damage: echoDamage,
+      playerHp,
+      playerMaxHp,
+      enemyHp: nextEnemyHp,
+      enemyMaxHp: enemy.maxHp,
+    });
+  }
+
+  if (skillReady && activeSkillCanonicalId === "s_ma_active" && nextEnemyHp > 0) {
+    for (let echoIndex = 0; echoIndex < 2 && nextEnemyHp > 0; echoIndex += 1) {
+      let echoDamage = resolveDamage(
+        player.attack,
+        effectiveDefense * getArmorBreakMultiplier(enemyStatuses, currentTimeMs)
+      );
+      echoDamage = Math.floor(
+        echoDamage * getEnemyDamageReductionMultiplier(enemy)
+      );
+      nextEnemyHp = Math.max(0, nextEnemyHp - echoDamage);
+      pushCombatLog(logs, {
+        turn,
+        timeMs: currentTimeMs + echoIndex + 1,
+        isPlayer: true,
+        message: `【虛空劍陣】陣眼再斬，追加造成 <dmg>${echoDamage}</dmg> 點傷害！`,
+        damage: echoDamage,
+        playerHp,
+        playerMaxHp,
+        enemyHp: nextEnemyHp,
+        enemyMaxHp: enemy.maxHp,
+      });
+    }
+  }
+
+  if (skillReady && activeSkillCanonicalId === "m_tr_active" && nextEnemyHp > 0) {
+    for (let summonIndex = 0; summonIndex < 3 && nextEnemyHp > 0; summonIndex += 1) {
+      let summonDamage = resolveDamage(player.magic, effectiveDefense * 0.9);
+      summonDamage = Math.floor(
+        summonDamage * getEnemyDamageReductionMultiplier(enemy)
+      );
+      nextEnemyHp = Math.max(0, nextEnemyHp - summonDamage);
+      pushCombatLog(logs, {
+        turn,
+        timeMs: currentTimeMs + summonIndex + 1,
+        isPlayer: true,
+        message: `【撒豆成兵】金甲天兵出擊，造成 <dmg>${summonDamage}</dmg> 點傷害！`,
+        damage: summonDamage,
+        playerHp,
+        playerMaxHp,
+        enemyHp: nextEnemyHp,
+        enemyMaxHp: enemy.maxHp,
+      });
+    }
+  }
+
+  return nextEnemyHp;
 };
 
 export const resolvePlayerWorldStrike = (
@@ -4333,148 +4553,50 @@ export const runAutoBattle = (
         });
       }
 
-      if (
-        hasSwordEchoPassive &&
-        !skillReady &&
-        enemyHp > 0 &&
-        playerDamage > 0
-      ) {
-        const echoPower = player.attack * 0.6;
-        let echoDamage = resolveDamage(
-          echoPower,
-          effectiveDefense * getArmorBreakMultiplier(enemyStatuses, currentTimeMs)
-        );
-        if (pVsE.isEffective) echoDamage = Math.floor(echoDamage * 1.12);
-        if (pVsE.isResisted) echoDamage = Math.floor(echoDamage * 0.88);
-        echoDamage = Math.floor(echoDamage * enemyElementalAffinity.multiplier);
-        echoDamage = Math.floor(
-          echoDamage * getEnemyDamageReductionMultiplier(enemy)
-        );
-        enemyHp = Math.max(0, enemyHp - echoDamage);
-        pushCombatLog(logs, {
-          turn,
-          timeMs: currentTimeMs,
-          isPlayer: true,
-          message: `【劍意化形】追擊斬落，追加造成 <dmg>${echoDamage}</dmg> 點傷害！`,
-          damage: echoDamage,
-          playerHp,
-          playerMaxHp: player.maxHp,
-          enemyHp,
-          enemyMaxHp: enemy.maxHp,
-        });
-      }
-
-      if (skillReady && activeSkillCanonicalId === "s_ma_active" && enemyHp > 0) {
-        for (let echoIndex = 0; echoIndex < 2 && enemyHp > 0; echoIndex += 1) {
-          let echoDamage = resolveDamage(
-            player.attack,
-            effectiveDefense * getArmorBreakMultiplier(enemyStatuses, currentTimeMs)
-          );
-          echoDamage = Math.floor(
-            echoDamage * getEnemyDamageReductionMultiplier(enemy)
-          );
-          enemyHp = Math.max(0, enemyHp - echoDamage);
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs + echoIndex + 1,
-            isPlayer: true,
-            message: `【虛空劍陣】陣眼再斬，追加造成 <dmg>${echoDamage}</dmg> 點傷害！`,
-            damage: echoDamage,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
-      }
-
-      if (skillReady && activeSkillCanonicalId === "m_tr_active" && enemyHp > 0) {
-        for (let summonIndex = 0; summonIndex < 3 && enemyHp > 0; summonIndex += 1) {
-          let summonDamage = resolveDamage(
-            player.magic,
-            effectiveDefense * 0.9
-          );
-          summonDamage = Math.floor(
-            summonDamage * getEnemyDamageReductionMultiplier(enemy)
-          );
-          enemyHp = Math.max(0, enemyHp - summonDamage);
-          pushCombatLog(logs, {
-            turn,
-            timeMs: currentTimeMs + summonIndex + 1,
-            isPlayer: true,
-            message: `【撒豆成兵】金甲天兵出擊，造成 <dmg>${summonDamage}</dmg> 點傷害！`,
-            damage: summonDamage,
-            playerHp,
-            playerMaxHp: player.maxHp,
-            enemyHp,
-            enemyMaxHp: enemy.maxHp,
-          });
-        }
-      }
+      enemyHp = applyPlayerEchoAndSummonFollowupEffects({
+        skillReady,
+        activeSkillCanonicalId,
+        hasSwordEchoPassive,
+        currentTimeMs,
+        turn,
+        logs,
+        player,
+        enemy,
+        enemyHp,
+        playerHp,
+        playerMaxHp: player.maxHp,
+        playerDamage,
+        effectiveDefense,
+        enemyStatuses,
+        pVsE,
+        enemyElementalAffinity,
+      });
 
       if (skillReady) {
-        const baseCooldownSeconds =
-          activeSkillTimelineProfile?.cooldownSeconds ??
-          activeSkill!.cooldownSeconds ??
-          activeSkill!.cooldown;
-        const noManaCostTriggered =
-          hasMageFusionPassive &&
-          activeSkill!.profession === ProfessionType.Mage;
-        if (
-          noManaCostTriggered
-        ) {
-        } else {
-          playerMp = Math.max(0, playerMp - (activeSkill!.cost || 0));
-        }
-        const effectiveCooldownSeconds = getResolvedSkillCooldownSeconds(
-          activeSkill!,
-          player.learnedSkills
-        );
-        activeSkillReadyAtMs =
-          currentTimeMs + Math.floor(effectiveCooldownSeconds * 1000);
-        const cooldownReductionMessage =
-          effectiveCooldownSeconds < baseCooldownSeconds &&
-          activeSkill!.profession === ProfessionType.Mage
-            ? `【道法自然】術式流轉提前歸位，冷卻縮短至 ${effectiveCooldownSeconds.toFixed(1)} 秒。`
-            : undefined;
-
-        let recoveredMana = 0;
-        if (hasMageQiPassive && activeSkill!.profession === ProfessionType.Mage) {
-          recoveredMana = getMageQiCycleRecovery(player.maxMp);
-          playerMp = Math.min(player.maxMp, playerMp + recoveredMana);
-        }
-
-        let swordGoldenResetTriggered = false;
-        if (
-          hasSwordGoldenPassive &&
-          activeSkillCanonicalId === "s_f_active" &&
-          isCrit &&
-          Math.random() < 0.3
-        ) {
-          activeSkillReadyAtMs = currentTimeMs;
-          swordGoldenResetTriggered = true;
-        }
-
-        let mageFoundationStacksGained: number | undefined;
-        if (hasMageFoundationPassive && activeSkill!.profession === ProfessionType.Mage) {
-          mageFoundationStacks = Math.min(3, mageFoundationStacks + 1);
-          mageFoundationStacksGained = mageFoundationStacks;
-        }
-
-        logResolvedActivePassiveEffects({
+        ({
+          playerMp,
+          activeSkillReadyAtMs,
+          mageFoundationStacks,
+        } = resolvePlayerActiveResourceFlow({
+          activeSkill: activeSkill!,
+          activeSkillCanonicalId,
+          player,
+          playerMp,
+          currentTimeMs,
+          activeSkillReadyAtMs,
+          mageFoundationStacks,
+          isCrit,
           logs,
           turn,
-          timeMs: currentTimeMs,
           playerHp,
           playerMaxHp: player.maxHp,
           enemyHp,
           enemyMaxHp: enemy.maxHp,
-          noManaCostTriggered,
-          cooldownReductionMessage,
-          manaCycleRecovery: recoveredMana,
-          swordGoldenResetTriggered,
-          mageFoundationStacksGained,
-        });
+          hasMageFusionPassive,
+          hasMageQiPassive,
+          hasSwordGoldenPassive,
+          hasMageFoundationPassive,
+        }));
 
         const { playerSideStatuses, filteredEnemyStatuses } =
           resolvePlayerSkillStatusApplication({

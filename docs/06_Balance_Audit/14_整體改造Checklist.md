@@ -330,6 +330,8 @@
 - [x] enemy special 的免疫 / 控制縮短訊息，也已開始抽成共用 resistance helper，減少 `仙體無垢` / `萬法皆空` / `雷劫煉心` / `人劍合神` 的散寫風險
 - [x] 玩家主動術式施加給敵方的控制型狀態與後續破甲追擊，也已開始和 timeline combat 共用同一層 enemy-status resolver；`霸體` 過濾與 `劍脈破甲` 不再 world / timeline 各寫一份
 - [x] 玩家主動術式施加的 `盾、破甲、DOT、反震、劍氣` 訊息，也已開始抽成共用 status logger，降低時間軸戰鬥內逐段手寫的重複度
+- [x] 玩家主動術式的資源 / 冷卻流，也已開始抽成 `resolvePlayerActiveResourceFlow(...)`，把術式免耗、冷卻縮短、靈潮回補、劍心重置與法修築基層數累進集中處理
+- [x] `劍意化形 / 虛空劍陣 / 撒豆成兵` 這批多段追擊與召喚後續傷害，也已開始抽成 `applyPlayerEchoAndSummonFollowupEffects(...)`
 - [x] timeline combat 的致命保命流程已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`
 - [x] formal core 被動的 stat bonus 已改成逐招明確對照表，不再依職業 + 境界通用公式自動推導
 - [x] absorbed retired passive 透過 formal id 承接時，也會吃到同一份逐招 stat bonus 對照，不再靠模糊 profession-tier fallback 撐場
