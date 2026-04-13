@@ -675,51 +675,39 @@ const hasSwordTribulationWindow = (
   passiveFlags: Pick<PlayerPassiveFlags, "hasSwordTribulationPassive">
 ) => passiveFlags.hasSwordTribulationPassive && currentHp <= maxHp * 0.2;
 
-const getEnemyWorldPassiveStatusNames = (
-  options: {
-    passiveFlags: PlayerPassiveFlags;
-    prePassiveDamage: number;
-    playerMaxHp: number;
-    voidEvasion: boolean;
-    bodyFoundationStacks: number;
-    copperSkinTriggered: boolean;
-    bodyFusionTriggered: boolean;
-    elementalBarrierTriggered: boolean;
-    reflectTriggered: boolean;
-    enemyElement: ElementType;
-    bodyTribulationTriggered: boolean;
-    mageTribulationTriggered: boolean;
-    mageTribulationControlTriggered: boolean;
-    swordFusionControlTriggered: boolean;
-    bodyRebirthTrueTriggered: boolean;
-    swordDeathWardTriggered: boolean;
-    bodyEmperorTriggered: boolean;
-  }
+type EnemyWorldPassiveStatusOptions = {
+  passiveFlags: PlayerPassiveFlags;
+  prePassiveDamage: number;
+  playerMaxHp: number;
+  voidEvasion: boolean;
+  bodyFoundationStacks: number;
+  copperSkinTriggered: boolean;
+  bodyFusionTriggered: boolean;
+  elementalBarrierTriggered: boolean;
+  reflectTriggered: boolean;
+  enemyElement: ElementType;
+  bodyTribulationTriggered: boolean;
+  mageTribulationTriggered: boolean;
+  mageTribulationControlTriggered: boolean;
+  swordFusionControlTriggered: boolean;
+  bodyRebirthTrueTriggered: boolean;
+  swordDeathWardTriggered: boolean;
+  bodyEmperorTriggered: boolean;
+};
+
+const getEnemyWorldDefensivePassiveStatusNames = (
+  options: EnemyWorldPassiveStatusOptions
 ) => {
   const statusNames: string[] = [];
   const {
-    passiveFlags,
     prePassiveDamage,
     playerMaxHp,
-    voidEvasion,
     bodyFoundationStacks,
     copperSkinTriggered,
     bodyFusionTriggered,
     elementalBarrierTriggered,
     reflectTriggered,
-    enemyElement,
-    bodyTribulationTriggered,
-    mageTribulationTriggered,
-    mageTribulationControlTriggered,
-    swordFusionControlTriggered,
-    bodyRebirthTrueTriggered,
-    swordDeathWardTriggered,
-    bodyEmperorTriggered,
   } = options;
-
-  if (swordDeathWardTriggered) {
-    statusNames.push("護體劍罡");
-  }
 
   if (reflectTriggered) {
     statusNames.push("反震");
@@ -737,12 +725,35 @@ const getEnemyWorldPassiveStatusNames = (
     statusNames.push("金剛法相");
   }
 
-  if (passiveFlags.hasBodySaintPassive && prePassiveDamage > 0) {
+  if (options.passiveFlags.hasBodySaintPassive && prePassiveDamage > 0) {
     statusNames.push("肉身成聖");
   }
 
   if (elementalBarrierTriggered) {
     statusNames.push("元素護盾");
+  }
+
+  return statusNames;
+};
+
+const getEnemyWorldSurvivalPassiveStatusNames = (
+  options: EnemyWorldPassiveStatusOptions
+) => {
+  const statusNames: string[] = [];
+  const {
+    voidEvasion,
+    bodyTribulationTriggered,
+    mageTribulationTriggered,
+    mageTribulationControlTriggered,
+    swordFusionControlTriggered,
+    bodyRebirthTrueTriggered,
+    swordDeathWardTriggered,
+    bodyEmperorTriggered,
+    enemyElement,
+  } = options;
+
+  if (swordDeathWardTriggered) {
+    statusNames.push("護體劍罡");
   }
 
   if (bodyTribulationTriggered) {
@@ -776,6 +787,11 @@ const getEnemyWorldPassiveStatusNames = (
   return statusNames;
 };
 
+const getEnemyWorldPassiveStatusNames = (options: EnemyWorldPassiveStatusOptions) => [
+  ...getEnemyWorldDefensivePassiveStatusNames(options),
+  ...getEnemyWorldSurvivalPassiveStatusNames(options),
+];
+
 const getEnemyWorldIncomingStatusNames = ({
   bodyImmortalTriggered,
   swordEmperorTriggered,
@@ -796,7 +812,7 @@ const getEnemyWorldIncomingStatusNames = ({
   return statusNames;
 };
 
-const getPlayerWorldProfessionPassiveStatusNames = (options: {
+type PlayerWorldPassiveStatusOptions = {
   passiveFlags: PlayerPassiveFlags;
   player: PlayerCombatStats;
   skill?: Skill;
@@ -807,21 +823,20 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
   swordTribulationActive: boolean;
   bodyFoundationStacks: number;
   voidSwordProc: boolean;
-}) => {
+};
+
+const getPlayerWorldSwordPassiveStatusNames = (options: PlayerWorldPassiveStatusOptions) => {
+  const statusNames: string[] = [];
   const {
     passiveFlags,
-    player,
     skill,
     isCrit,
     dealsDirectDamage,
     canonicalSkillId,
     hasSwordQiChain,
     swordTribulationActive,
-    bodyFoundationStacks,
     voidSwordProc,
   } = options;
-
-  const statusNames: string[] = [];
 
   if (passiveFlags.hasSwordMahayanaPassive && isCrit) {
     statusNames.push("劍道獨尊");
@@ -859,6 +874,34 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
   if (canonicalSkillId === "s_tr_active" && hasSwordQiChain) {
     statusNames.push("萬劍歸一");
   }
+
+  if (!skill && passiveFlags.hasSwordEmperorPassive && dealsDirectDamage) {
+    statusNames.push("萬法皆空");
+  }
+
+  if (!skill && passiveFlags.hasSwordEchoPassive && dealsDirectDamage) {
+    statusNames.push("劍意化形");
+  }
+
+  if (
+    passiveFlags.hasSwordQiPassive &&
+    isCrit &&
+    dealsDirectDamage &&
+    skill?.profession === ProfessionType.Sword
+  ) {
+    statusNames.push("劍脈初成");
+  }
+
+  if (voidSwordProc) {
+    statusNames.push("法則之劍");
+  }
+
+  return statusNames;
+};
+
+const getPlayerWorldBodyPassiveStatusNames = (options: PlayerWorldPassiveStatusOptions) => {
+  const statusNames: string[] = [];
+  const { passiveFlags, skill, bodyFoundationStacks } = options;
 
   if (bodyFoundationStacks > 0) {
     statusNames.push("蠻荒血脈");
@@ -904,6 +947,13 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
     statusNames.push("不死不滅");
   }
 
+  return statusNames;
+};
+
+const getPlayerWorldMagePassiveStatusNames = (options: PlayerWorldPassiveStatusOptions) => {
+  const statusNames: string[] = [];
+  const { passiveFlags, player, skill } = options;
+
   if (!skill && passiveFlags.hasMageQiPassive && player.profession === ProfessionType.Mage) {
     statusNames.push("靈潮循環");
   }
@@ -912,7 +962,7 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
     statusNames.push("元素護盾");
   }
 
-  if (passiveFlags.hasManaSpringPassive && player.mp >= player.maxMp * 0.8) {
+  if (isManaSpringEmpowered(player.mp, player.maxMp, passiveFlags)) {
     statusNames.push("法力源泉");
   }
 
@@ -940,29 +990,16 @@ const getPlayerWorldProfessionPassiveStatusNames = (options: {
     statusNames.push("萬法歸宗");
   }
 
-  if (!skill && passiveFlags.hasSwordEmperorPassive && dealsDirectDamage) {
-    statusNames.push("萬法皆空");
-  }
-
-  if (!skill && passiveFlags.hasSwordEchoPassive && dealsDirectDamage) {
-    statusNames.push("劍意化形");
-  }
-
-  if (
-    passiveFlags.hasSwordQiPassive &&
-    isCrit &&
-    dealsDirectDamage &&
-    skill?.profession === ProfessionType.Sword
-  ) {
-    statusNames.push("劍脈初成");
-  }
-
-  if (voidSwordProc) {
-    statusNames.push("法則之劍");
-  }
-
   return statusNames;
 };
+
+const getPlayerWorldProfessionPassiveStatusNames = (
+  options: PlayerWorldPassiveStatusOptions
+) => [
+  ...getPlayerWorldSwordPassiveStatusNames(options),
+  ...getPlayerWorldBodyPassiveStatusNames(options),
+  ...getPlayerWorldMagePassiveStatusNames(options),
+];
 
 const createPlayerAttackLogMessage = ({
   player,

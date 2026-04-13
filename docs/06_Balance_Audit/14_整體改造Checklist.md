@@ -377,6 +377,7 @@
 - [x] 敵方命中後的承傷反應鏈，也已開始抽成 `applyEnemyHitAftermath(...)`，把 `萬劫不滅 / 雷劫煉心 / 噬生 / 滴血重生（真） / 不死不滅` 這批後處理事件集中處理
 - [x] 敵方出手前的攻勢計算，也已開始抽成 `resolveEnemyOffenseRoll(...)`，把屬性克制、特招倍率、格擋 / 閃避 / 虛空轉移與承傷前數值準備集中處理
 - [x] world strike 結果組裝也已開始拆成 `buildPlayerWorldStrikeResult(...) / buildEnemyWorldStrikeResult(...)`，enemy 端 timing metadata 亦已抽成 `buildEnemyWorldStrikeTiming(...)`
+- [x] world strike 的被動狀態整理也已拆層：enemy 端改成 `defensive / survival` 兩段 helper，player 端改成 `sword / body / mage` 三段 helper
 - [x] 第一批高境界 retired active alias 已補上明確 realtime metadata，像 `m_bi_active / s_im_active / m_ie_active` 不再只靠 default fallback 推估範圍與施法節奏
 - [x] timeline combat 的致命保命流程已開始抽成共用 fatal-survival helper，集中處理 `護體劍罡` / `滴血重生（真）` / `不死不滅`
 - [x] formal core 被動的 stat bonus 已改成逐招明確對照表，不再依職業 + 境界通用公式自動推導
