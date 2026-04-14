@@ -165,6 +165,7 @@
 - [x] 更多已落地的 pending-retirement retired 被動技能已正式推進到 battle-absorbed 分類，降低後續本體刪整阻力
 - [x] retirement-ready / battle-absorbed 的 retired alias ID 清單已回收至 alias 檔本體，skill index 不再重複維護同一份清單
 - [x] formal realm dataset 已不再透過 retired-alias 剝離 helper 做二次清洗，直接以正式 `core` skill set 組裝
+- [x] retired skill 的 active / passive 正式視圖分組，也已開始共用 `buildRetiredAliasViewGroups(...)`，skill index 不再各自維護兩組近似樣板
 - [x] `s_vr_passive` 已正式承接進 formal core 劍修被動分支，從 pending-retirement 推進到 battle-absorbed
 - [x] `s_bi_active` 已正式承接進 formal core 劍修 burst 分支，從 pending-retirement 推進到 battle-absorbed
 - [x] `s_f_passive` 已正式承接進 formal core 劍修被動分支，從 pending-retirement 推進到 battle-absorbed
@@ -280,6 +281,7 @@
 - [x] 法修高境界被動的開場待命訊息也已補齊到 `仙法通神 / 萬法歸宗`
 - [x] `s_f_passive` / `b_bi_passive` / `m_im_passive` 也已補齊 timeline combat 開場待命訊息，正式標出 `養劍術` / `金剛法相` / `五氣朝元`
 - [x] 戰利品字串組裝也已開始整併到 `buildVictoryLootMessage(...)`，勝利結算函式不再直接攤開品質字樣與掉落名稱拼裝
+- [x] 舊戰報 replay 的 context、step delay 與 visual payload 組裝，也已開始收斂到 `createBattleReplayContext(...) / createBattleReplayStepPlan(...) / queueBattleReplayStep(...) / createBattleReplayVisualPlan(...)`
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---

@@ -25,6 +25,21 @@ export const buildRetiredAliasViewSet = (
   };
 };
 
+export const buildRetiredAliasViewGroups = ({
+  activeSkillIds,
+  passiveSkillIds,
+  activeAliases,
+  passiveAliases,
+}: {
+  activeSkillIds: string[];
+  passiveSkillIds: string[];
+  activeAliases: Record<string, Skill>;
+  passiveAliases: Record<string, Skill>;
+}) => ({
+  active: buildRetiredAliasViewSet(activeSkillIds, activeAliases),
+  passive: buildRetiredAliasViewSet(passiveSkillIds, passiveAliases),
+});
+
 export const mergeRetiredAliasRealmMaps = (
   ...realmMaps: Array<Partial<Record<MajorRealm, Record<string, Skill>>>>
 ): Partial<Record<MajorRealm, Record<string, Skill>>> =>

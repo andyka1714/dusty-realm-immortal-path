@@ -12,7 +12,7 @@
 
 - 地圖戰鬥已成主路徑：玩家可在地圖內直接移動、鎖定目標、普攻與施放主動術式；投射物、AOE、浮字與掉落都直接在場景內完成。
 - `runAutoBattle()` 目前保留作為時間軸數值驗證內核；世界戰鬥、時間軸戰鬥與 HUD 已開始共用 cooldown、status、passive flags、部分 incoming-status resolver，以及 world strike runtime / queue / execute / replay helper。
-- `Adventure` 內 player / enemy world strike 的 preview、queue、execute、resolution、visual dispatch、replay step 與 replay context，現在都已開始走共用 helper，不再各自維護兩套近似流程。
+- `Adventure` 內 player / enemy world strike 的 preview、queue、execute、resolution、visual dispatch，以及舊戰報 replay 的 step、context、visual plan，現在都已開始走共用 helper，不再各自維護兩套近似流程。
 - 技能改為透過技能書學習，不再隨職業 / 突破自動送；技能池已收斂為 `formal core / retired` 視角，retired skill 只保留中央 alias / 相容查詢層。
 - 正式 realm 技能視圖目前已鎖定為 `core only`，並由 `CORE_SKILL_SETS_BY_REALM` 作為正式 export；retired alias 的 realm 聚合、record 合併與正式視圖組裝，都已收斂到 alias-layer / skill index 的共用 util。
 - 所有 passive 現在都已改成逐招專屬效果，`passiveEffectTags` 欄位也已自技能資料層完全移除；高境界與 retired passive alias 也不再依賴 generic fallback。

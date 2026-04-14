@@ -1264,6 +1264,20 @@ export const Adventure: React.FC<AdventureProps> = ({
     });
   };
 
+  const createBattleReplayVisualPlan = ({
+    nextLog,
+    targetMonster,
+    normalizedUsedSkill,
+  }: {
+    nextLog: NonNullable<typeof replayQueue>[number];
+    targetMonster: ActiveMonster | null;
+    normalizedUsedSkill?: ReturnType<typeof getFormalSkillByName>;
+  }) => ({
+    nextLog,
+    targetMonster,
+    normalizedUsedSkill,
+  });
+
   const createBattleReplayContext = (
     nextLog: NonNullable<typeof replayQueue>[number]
   ) => {
@@ -1303,11 +1317,13 @@ export const Adventure: React.FC<AdventureProps> = ({
     const logContainer = document.getElementById('battle-log-container');
     if (logContainer) logContainer.scrollTop = logContainer.scrollHeight;
 
-    dispatchBattleReplayVisuals({
-      nextLog,
-      targetMonster,
-      normalizedUsedSkill,
-    });
+    dispatchBattleReplayVisuals(
+      createBattleReplayVisualPlan({
+        nextLog,
+        targetMonster,
+        normalizedUsedSkill,
+      })
+    );
   };
 
   const scheduleBattleReplayStep = ({
