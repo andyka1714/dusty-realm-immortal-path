@@ -1,6 +1,6 @@
 import { MajorRealm, ProfessionType, Skill } from "../../types";
 import { getSkillPoolEntry } from "./pool";
-import { buildRetiredAliasRecord, buildRetiredAliasViews } from "./retired_alias_utils";
+import { buildRetiredAliasViewSet } from "./retired_alias_utils";
 import { GOLDEN_CORE_SKILLS } from "./golden_core";
 import { NASCENT_SOUL_SKILLS } from "./nascent_soul";
 import { SPIRIT_SEVERING_SKILLS } from "./spirit_severing";
@@ -225,16 +225,16 @@ export const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS = Object.keys(
   ALL_RETIRED_PASSIVE_ALIASES
 );
 
-export const BATTLE_ABSORBED_RETIRED_PASSIVE_ALIASES: Record<string, Skill> =
-  buildRetiredAliasRecord(
-    BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS,
-    ALL_RETIRED_PASSIVE_ALIASES
-  );
-
-export const BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS = buildRetiredAliasViews(
+const battleAbsorbedRetiredPassiveAliasSet = buildRetiredAliasViewSet(
   BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS,
   ALL_RETIRED_PASSIVE_ALIASES
 );
+
+export const BATTLE_ABSORBED_RETIRED_PASSIVE_ALIASES: Record<string, Skill> =
+  battleAbsorbedRetiredPassiveAliasSet.aliases;
+
+export const BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS =
+  battleAbsorbedRetiredPassiveAliasSet.views;
 
 export const RETIREMENT_READY_RETIRED_PASSIVE_ALIASES =
   BATTLE_ABSORBED_RETIRED_PASSIVE_ALIASES;
@@ -244,20 +244,3 @@ export const RETIREMENT_READY_RETIRED_PASSIVE_SKILL_IDS =
 
 export const RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_VIEWS =
   BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS;
-
-export const RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_ID_SET = new Set<string>(
-  RETIREMENT_READY_RETIRED_PASSIVE_SKILL_IDS
-);
-
-export const BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_ID_SET = new Set<string>(
-  BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS
-);
-
-export const stripBattleAbsorbedPassiveAliases = (
-  skills: Record<string, Skill>
-) =>
-  Object.fromEntries(
-    Object.entries(skills).filter(
-      ([skillId]) => !BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_ID_SET.has(skillId)
-    )
-  ) as Record<string, Skill>;

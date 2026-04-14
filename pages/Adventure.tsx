@@ -758,6 +758,25 @@ export const Adventure: React.FC<AdventureProps> = ({
     scheduleWorldActionExecution(delayMs, execute);
   };
 
+  const queueResolvedWorldStrike = ({
+    delayMs,
+    applyCastEffect,
+    applyPreview,
+    execute,
+  }: {
+    delayMs: number | undefined;
+    applyCastEffect?: () => void;
+    applyPreview: () => void;
+    execute: () => void;
+  }) => {
+    applyCastEffect?.();
+    queueWorldStrikeExecution({
+      delayMs,
+      applyPreview,
+      execute,
+    });
+  };
+
   const getPlayerWorldStrikePreviewMessage = (
     targetName: string,
     chosenSkill?: typeof primaryActiveSkill
@@ -952,6 +971,44 @@ export const Adventure: React.FC<AdventureProps> = ({
       radius: 0.7,
       durationMs,
     }));
+  };
+
+  const dispatchPlayerWorldStrikeCastEffect = ({
+    chosenSkill,
+    strike,
+  }: {
+    chosenSkill?: typeof primaryActiveSkill;
+    strike: ReturnType<typeof resolvePlayerWorldStrike>;
+  }) => {
+    if ((!strike.executionTimeMs && !chosenSkill?.castTimeMs) || !chosenSkill) {
+      return;
+    }
+
+    dispatchWorldStrikeCastEffect({
+      color: chosenSkill.profession === ProfessionType.Mage ? '#60a5fa' : '#f59e0b',
+      colorInt: chosenSkill.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
+      targetX: playerPosition.x,
+      targetY: playerPosition.y,
+      durationMs: Math.max(180, chosenSkill.castTimeMs ?? 220),
+    });
+  };
+
+  const dispatchEnemyWorldStrikeCastEffect = ({
+    strike,
+  }: {
+    strike: ReturnType<typeof resolveEnemyWorldStrike>;
+  }) => {
+    if (!strike.skillName) {
+      return;
+    }
+
+    dispatchWorldStrikeCastEffect({
+      color: '#f87171',
+      colorInt: 0xf87171,
+      targetX: targetedMonster?.x ?? playerPosition.x,
+      targetY: targetedMonster?.y ?? playerPosition.y,
+      durationMs: 220,
+    });
   };
 
   const applyWorldStrikeImpactBundle = ({
@@ -1303,18 +1360,9 @@ export const Adventure: React.FC<AdventureProps> = ({
       : undefined;
     const strike = resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill);
 
-    if ((strike.executionTimeMs > 0 || chosenSkill?.castTimeMs) && chosenSkill) {
-      dispatchWorldStrikeCastEffect({
-        color: chosenSkill.profession === ProfessionType.Mage ? '#60a5fa' : '#f59e0b',
-        colorInt: chosenSkill.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
-        targetX: playerPosition.x,
-        targetY: playerPosition.y,
-        durationMs: Math.max(180, chosenSkill.castTimeMs ?? 220),
-      });
-    }
-
-    queueWorldStrikeExecution({
+    queueResolvedWorldStrike({
       delayMs: strike.executionTimeMs,
+      applyCastEffect: () => dispatchPlayerWorldStrikeCastEffect({ chosenSkill, strike }),
       applyPreview: () => {
         setWorldCombatTargetId(targetedMonster.instanceId);
         applyPlayerWorldStrikePreview({
@@ -1345,18 +1393,9 @@ export const Adventure: React.FC<AdventureProps> = ({
     const canUseSpecial = now >= (enemySpecialReadyAtById[enemyInstanceId] ?? 0);
     const strike = resolveEnemyWorldStrike(enemyTemplate, playerStats, canUseSpecial);
 
-    if (strike.skillName) {
-      dispatchWorldStrikeCastEffect({
-        color: '#f87171',
-        colorInt: 0xf87171,
-        targetX: targetedMonster?.x ?? playerPosition.x,
-        targetY: targetedMonster?.y ?? playerPosition.y,
-        durationMs: 220,
-      });
-    }
-
-    queueWorldStrikeExecution({
+    queueResolvedWorldStrike({
       delayMs: strike.executionTimeMs,
+      applyCastEffect: () => dispatchEnemyWorldStrikeCastEffect({ strike }),
       applyPreview: () =>
         applyEnemyWorldStrikePreview({
           now,

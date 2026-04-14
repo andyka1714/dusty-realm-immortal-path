@@ -400,6 +400,7 @@
 - [x] retired active / passive 的 alias 剝離 helper，已回收到 alias 檔本體，realm view 不再在 `data/skills/index.ts` 額外重複維護同一套過濾規則
 - [x] retired active / passive alias 也已補上 alias-layer 聚合表，正式 realm dataset 現在可直接由 alias-layer 組裝，不再在 `data/skills/index.ts` 手動攤開多份 alias 清單
 - [x] retired active / passive alias 的 record / view 組裝，也已開始共用 `retired_alias_utils.ts`，alias-layer 不再維護兩份近似的 `Object.fromEntries / Object.values` 樣板
+- [x] `battle-absorbed / retirement-ready` 的 retired alias 視圖尾端，也已開始共用 `buildRetiredAliasViewSet(...)`，active / passive alias 檔不再各自維護同一組視圖樣板
 - [x] `battle-absorbed / retirement-ready` 的 active / passive alias record，也已開始直接由 alias-layer 聚合表和 skill ID 名單組裝，不再在 alias 檔裡平鋪手寫同一份 retired alias map
 - [x] formal realm dataset 的組裝現在已直接回到各境界 `core` skill set，本體不再重複拼接 retired alias
 - [x] retired alias 的 realm 聚合已回收到 alias-layer，formal realm dataset 不再注入 retired alias 後再剝離
@@ -434,7 +435,7 @@
 - [x] `StatsPanel / ShopPanel / Inventory / Dashboard / QuestModal` 內部的關鍵資訊區，也已開始改走共用 `GameSection`，面板內層框體語言不再各自維護，內頁 section chrome 已開始往同一套遊戲面板語言收口
 - [x] `Workshop` 的聚靈陣 / 煉丹 / 煉器卡片，也已開始改走 `GameSection`，洞府百業不再維持獨立 card chrome
 - [x] `Adventure` 的底部戰鬥快捷列也已開始改走 `GameSection`，地圖即時戰鬥操作面已接上同一套 section chrome
-- [x] `Adventure` 內 player / enemy world strike 的預覽、排程與結算訊息，也已開始共用 queue / preview / resolution helper，地圖即時戰鬥分支不再各自維護兩套 readyAt / 傷害文案流程
+- [x] `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，也已開始共用 queue / preview / resolution helper，地圖即時戰鬥分支不再各自維護兩套 readyAt / 傷害文案流程
 - [x] `Adventure` 內 player / enemy world strike 的 projectile / area / impact / text dispatch 也已開始共用 visual helper，地圖即時戰鬥效果派發不再各自維護兩套流程
 - [x] `Adventure` 內 player / enemy world strike 的實際執行鏈也已開始抽成 `executePlayerWorldStrike(...) / executeEnemyWorldStrike(...)`，命中後流程不再各自攤開
 - [x] 被動技能改成逐招專屬效果，而不是通用屬性加成

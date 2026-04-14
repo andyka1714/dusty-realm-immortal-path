@@ -98,7 +98,7 @@
 - 戰鬥快捷列內部也已開始改走 `GameSection`，底部操作面不再只是裸按鈕列，而是正式收進遊戲化 section chrome
 - 舊的中央戰報窗已退場，戰鬥結果改為右下角 HUD 短暫顯示後自動收起
 - 所有被動技能目前都已改成逐招專屬效果，資料層不再保留 generic `passiveEffectTags` fallback，`passiveEffectTags` 欄位本身也已移除
-- `Adventure` 內 player / enemy world strike 的預覽、排程與結算訊息，現在也已開始共用 queue / preview / resolution helper，不再各自維護兩套 readyAt 與傷害文案流程
+- `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，現在也已開始共用 queue / preview / resolution helper，不再各自維護兩套 readyAt 與傷害文案流程
 - `Adventure` 內 player / enemy world strike 的投射物、範圍、命中特效與傷害浮字，也已開始共用 visual helper，地圖即時戰鬥不再各自維護兩套 effect dispatch 流程
 - `Adventure` 內 player / enemy world strike 的實際執行鏈，也已開始抽成 `executePlayerWorldStrike(...) / executeEnemyWorldStrike(...)`，玩家與怪物分支不再各自攤開整段命中後流程
 - formal core 被動的基礎屬性收益，已改成逐招明確對照表；absorbed retired passive 透過 formal id 承接時，也會吃到同一份 explicit 對照

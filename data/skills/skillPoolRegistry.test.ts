@@ -7,15 +7,12 @@ import {
   RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_VIEWS,
   RETIREMENT_READY_RETIRED_ACTIVE_ALIASES,
   RETIRED_ACTIVE_ALIASES_BY_REALM,
-  stripRetirementReadyActiveAliases as stripRetirementReadyActiveAliasesForTest,
 } from "./retired_active_aliases";
 import {
   ALL_RETIRED_PASSIVE_ALIASES,
   BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS,
-  RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_ID_SET,
   RETIRED_PASSIVE_ALIASES_BY_REALM,
   RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_VIEWS,
-  stripBattleAbsorbedPassiveAliases as stripBattleAbsorbedPassiveAliasesForTest,
 } from "./retired_passive_aliases";
 import {
   ALL_RETIRED_ALIASES,
@@ -373,7 +370,7 @@ describe("skill pool registry", () => {
     expect(RETIREMENT_READY_RETIRED_PASSIVE_SKILL_MAP.b_ie_passive?.replacementSkillId).toBe(
       "b_sf_passive"
     );
-    expect(RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_ID_SET.has("m_tr_passive")).toBe(true);
+    expect(RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_VIEWS.some((skill) => skill.id === "m_tr_passive")).toBe(true);
     expect(
       getRetirementReadyRetiredPassiveSkills().every(
         (skill) =>
@@ -408,29 +405,15 @@ describe("skill pool registry", () => {
     ).toBe(false);
   });
 
-  it("reuses alias-layer strip helpers instead of duplicating realm-view filtering logic", () => {
-    const mixedSkills = {
-      s_q_active: SKILLS.s_q_active,
-      s_bi_active: SKILLS.s_bi_active,
-      b_ie_active: SKILLS.b_ie_active,
-      s_f_passive: SKILLS.s_f_passive,
-      m_ie_passive: SKILLS.m_ie_passive,
-      m_f_passive: SKILLS.m_f_passive,
-    };
+  it("keeps retired-alias filtering localized to core-only realm datasets instead of exposing strip helpers", () => {
+    const immortalRealmSkillIds = getSkillsByRealm(MajorRealm.Immortal).map((skill) => skill.id);
+    const retiredImmortalAliasIds = Object.keys(RETIRED_ALIASES_BY_REALM[MajorRealm.Immortal] ?? {});
 
-    const withoutRetirementReadyActives =
-      stripRetirementReadyActiveAliasesForTest(mixedSkills);
-    expect(Object.keys(withoutRetirementReadyActives)).toEqual([
-      "s_q_active",
-      "s_f_passive",
-      "m_ie_passive",
-      "m_f_passive",
-    ]);
-
-    const realmView = stripBattleAbsorbedPassiveAliasesForTest(
-      withoutRetirementReadyActives
-    );
-    expect(Object.keys(realmView)).toEqual(["s_q_active", "m_f_passive"]);
+    expect(retiredImmortalAliasIds).toContain("s_im_active");
+    expect(retiredImmortalAliasIds).toContain("s_im_passive");
+    expect(immortalRealmSkillIds).not.toContain("s_im_active");
+    expect(immortalRealmSkillIds).not.toContain("s_im_passive");
+    expect(immortalRealmSkillIds.every((skillId) => !retiredImmortalAliasIds.includes(skillId))).toBe(true);
   });
 
   it("centralizes retired alias aggregation in alias-layer maps before composing realm datasets", () => {

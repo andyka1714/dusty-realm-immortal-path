@@ -12,3 +12,15 @@ export const buildRetiredAliasViews = (
   skillIds: string[],
   allAliases: Record<string, Skill>
 ) => Object.values(buildRetiredAliasRecord(skillIds, allAliases));
+
+export const buildRetiredAliasViewSet = (
+  skillIds: string[],
+  allAliases: Record<string, Skill>
+) => {
+  const aliases = buildRetiredAliasRecord(skillIds, allAliases);
+  return {
+    skillIds,
+    aliases,
+    views: Object.values(aliases),
+  };
+};
