@@ -140,7 +140,7 @@ const RAW_SKILLS: Record<string, Skill> = {
   ...ALL_RETIRED_ALIASES,
 };
 
-const RAW_SKILL_SETS_BY_REALM: Record<MajorRealm, Record<string, Skill>> = {
+export const CORE_SKILL_SETS_BY_REALM: Record<MajorRealm, Record<string, Skill>> = {
   [MajorRealm.Mortal]: {},
   [MajorRealm.QiRefining]: QI_REFINING_SKILLS,
   [MajorRealm.Foundation]: FOUNDATION_SKILLS,
@@ -214,7 +214,7 @@ export const FORMAL_CORE_SKILLS_BY_PROFESSION: Record<
 };
 
 export const SKILLS_BY_REALM: Record<MajorRealm, Skill[]> = Object.fromEntries(
-  Object.entries(RAW_SKILL_SETS_BY_REALM).map(([realm, skills]) => [
+  Object.entries(CORE_SKILL_SETS_BY_REALM).map(([realm, skills]) => [
     Number(realm),
     Object.values(skills)
       .map((skill) => SKILLS[skill.id])

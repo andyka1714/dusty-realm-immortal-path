@@ -434,6 +434,7 @@
 - [x] `Workshop` 的聚靈陣 / 煉丹 / 煉器卡片，也已開始改走 `GameSection`，洞府百業不再維持獨立 card chrome
 - [x] `Adventure` 的底部戰鬥快捷列也已開始改走 `GameSection`，地圖即時戰鬥操作面已接上同一套 section chrome
 - [x] `Adventure` 內 player / enemy world strike 的預覽、排程與結算訊息，也已開始共用 queue / preview / resolution helper，地圖即時戰鬥分支不再各自維護兩套 readyAt / 傷害文案流程
+- [x] `Adventure` 內 player / enemy world strike 的 projectile / area / impact / text dispatch 也已開始共用 visual helper，地圖即時戰鬥效果派發不再各自維護兩套流程
 - [x] 被動技能改成逐招專屬效果，而不是通用屬性加成
 
 ---

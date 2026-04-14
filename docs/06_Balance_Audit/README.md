@@ -35,6 +35,7 @@
 - 所有 passive，包含 formal core 與 retired passive alias，現在都已退出 generic `passiveEffectTags` fallback，`passiveEffectTags` 欄位也已從技能資料層移除
 - `Adventure` 內 player / enemy world strike 的 preview 與延遲執行排程，也已開始共用 `scheduleWorldActionExecution(...) / queueWorldStrikeExecution(...)`，地圖即時戰鬥分支不再各自維護 readyAt / 狀態 / 戰鬥訊息流程
 - `Adventure` 內 player / enemy world strike 的結算訊息與護盾承傷，也已開始共用 resolution helper，地圖即時戰鬥分支不再各自維護傷害文案與承傷拆分流程
+- `Adventure` 內 player / enemy world strike 的 projectile / area / impact / text dispatch 也已開始共用 visual helper，地圖即時戰鬥效果派發不再各自維護兩套流程
 
 ## 尚未結案的主線
 

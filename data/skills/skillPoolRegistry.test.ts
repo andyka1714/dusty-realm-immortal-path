@@ -26,6 +26,7 @@ import {
   BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP,
   BATTLE_ABSORBED_RETIRED_SKILLS,
   BATTLE_ABSORBED_RETIRED_SKILL_MAP,
+  CORE_SKILL_SETS_BY_REALM,
   FORMAL_CORE_ACTIVE_SKILLS,
   FORMAL_CORE_SKILL_MAP,
   FORMAL_CORE_SKILL_NAME_INDEX,
@@ -208,6 +209,17 @@ describe("skill pool registry", () => {
         (skill) => skill.poolStatus !== "core"
       )
     ).toBe(true);
+  });
+
+  it("locks exported core realm datasets to core-only skill sets", () => {
+    Object.entries(CORE_SKILL_SETS_BY_REALM).forEach(([realm, skills]) => {
+      const realmId = Number(realm) as MajorRealm;
+      const skillIds = Object.keys(skills);
+
+      skillIds.forEach((skillId) => {
+        expect(SKILLS[skillId]?.poolStatus, `${realmId} 的 ${skillId} 不應再混入 retired alias`).toBe("core");
+      });
+    });
   });
 
   it("builds name and id indexes for formal and retired skills", () => {

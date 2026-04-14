@@ -99,6 +99,7 @@
 - 舊的中央戰報窗已退場，戰鬥結果改為右下角 HUD 短暫顯示後自動收起
 - 所有被動技能目前都已改成逐招專屬效果，資料層不再保留 generic `passiveEffectTags` fallback，`passiveEffectTags` 欄位本身也已移除
 - `Adventure` 內 player / enemy world strike 的預覽、排程與結算訊息，現在也已開始共用 queue / preview / resolution helper，不再各自維護兩套 readyAt 與傷害文案流程
+- `Adventure` 內 player / enemy world strike 的投射物、範圍、命中特效與傷害浮字，也已開始共用 visual helper，地圖即時戰鬥不再各自維護兩套 effect dispatch 流程
 - formal core 被動的基礎屬性收益，已改成逐招明確對照表；absorbed retired passive 透過 formal id 承接時，也會吃到同一份 explicit 對照
 - 所有正式核心被動現在都至少會對一項正式戰鬥屬性產生明確變化，可直接透過測試驗證不再只靠職業 / 境界 fallback 才看得出差異
 - timeline combat 內主動術式施加的 player-side / enemy-side 狀態，已開始走共用的「狀態推入 + 戰鬥日誌」helper，降低 world / timeline 分叉風險
