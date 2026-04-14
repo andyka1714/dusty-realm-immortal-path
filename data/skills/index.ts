@@ -21,7 +21,10 @@ import {
 import {
   ALL_RETIRED_ALIASES,
 } from "./retired_aliases";
-import { buildRetiredAliasViewGroups } from "./retired_alias_utils";
+import {
+  buildResolvedRetiredAliasViewGroups,
+  buildRetiredAliasViewGroups,
+} from "./retired_alias_utils";
 import {
   getSkillPoolEntry,
   normalizeFormalSkillIds,
@@ -243,27 +246,6 @@ export const RETIRED_SKILL_NAME_INDEX: Record<string, Skill> = Object.fromEntrie
   RETIRED_SKILLS.map((skill) => [skill.name, skill])
 ) as Record<string, Skill>;
 
-const resolveSkillViews = (skills: Skill[]) =>
-  skills.map((skill) => SKILLS[skill.id]).filter((skill): skill is Skill => Boolean(skill));
-
-const buildSkillMap = (skills: Skill[]) =>
-  Object.fromEntries(skills.map((skill) => [skill.id, skill])) as Record<string, Skill>;
-
-const buildSkillViewSet = (skills: Skill[]) => ({
-  skills,
-  skillMap: buildSkillMap(skills),
-});
-
-const createRetiredSkillViewSet = (skillViews: Skill[]) =>
-  buildSkillViewSet(resolveSkillViews(skillViews));
-
-const buildResolvedRetiredSkillViewGroups = (
-  aliasViewGroups: ReturnType<typeof buildRetiredAliasViewGroups>
-) => ({
-  active: createRetiredSkillViewSet(aliasViewGroups.active.views),
-  passive: createRetiredSkillViewSet(aliasViewGroups.passive.views),
-});
-
 const battleAbsorbedRetiredAliasViewGroups = buildRetiredAliasViewGroups({
   activeSkillIds: Object.keys(BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES),
   passiveSkillIds: Object.keys(BATTLE_ABSORBED_RETIRED_PASSIVE_ALIASES),
@@ -272,7 +254,7 @@ const battleAbsorbedRetiredAliasViewGroups = buildRetiredAliasViewGroups({
 });
 
 const battleAbsorbedRetiredSkillViewGroups =
-  buildResolvedRetiredSkillViewGroups(battleAbsorbedRetiredAliasViewGroups);
+  buildResolvedRetiredAliasViewGroups(battleAbsorbedRetiredAliasViewGroups, SKILLS);
 
 const battleAbsorbedRetiredSkillViewSet = battleAbsorbedRetiredSkillViewGroups.active;
 
@@ -297,7 +279,7 @@ const retirementReadyRetiredAliasViewGroups = buildRetiredAliasViewGroups({
 });
 
 const retirementReadyRetiredSkillViewGroups =
-  buildResolvedRetiredSkillViewGroups(retirementReadyRetiredAliasViewGroups);
+  buildResolvedRetiredAliasViewGroups(retirementReadyRetiredAliasViewGroups, SKILLS);
 
 const retirementReadyRetiredSkillViewSet = retirementReadyRetiredSkillViewGroups.active;
 

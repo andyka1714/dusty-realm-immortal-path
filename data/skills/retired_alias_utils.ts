@@ -40,6 +40,32 @@ export const buildRetiredAliasViewGroups = ({
   passive: buildRetiredAliasViewSet(passiveSkillIds, passiveAliases),
 });
 
+type SkillViewSet = {
+  skills: Skill[];
+  skillMap: Record<string, Skill>;
+};
+
+const buildResolvedSkillViewSet = (skills: Skill[]): SkillViewSet => ({
+  skills,
+  skillMap: Object.fromEntries(skills.map((skill) => [skill.id, skill])) as Record<string, Skill>,
+});
+
+export const buildResolvedRetiredAliasViewGroups = (
+  aliasViewGroups: ReturnType<typeof buildRetiredAliasViewGroups>,
+  skillLookup: Record<string, Skill>
+) => ({
+  active: buildResolvedSkillViewSet(
+    aliasViewGroups.active.views
+      .map((skill) => skillLookup[skill.id])
+      .filter((skill): skill is Skill => Boolean(skill))
+  ),
+  passive: buildResolvedSkillViewSet(
+    aliasViewGroups.passive.views
+      .map((skill) => skillLookup[skill.id])
+      .filter((skill): skill is Skill => Boolean(skill))
+  ),
+});
+
 export const mergeRetiredAliasRealmMaps = (
   ...realmMaps: Array<Partial<Record<MajorRealm, Record<string, Skill>>>>
 ): Partial<Record<MajorRealm, Record<string, Skill>>> =>

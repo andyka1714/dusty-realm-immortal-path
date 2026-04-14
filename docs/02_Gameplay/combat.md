@@ -101,6 +101,7 @@
 - `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，現在也已開始共用 queue / preview / resolution helper，不再各自維護兩套 readyAt 與傷害文案流程
 - `Adventure` 內 player / enemy world strike 的完整 queue orchestration，也已開始抽成 `queuePlayerWorldStrike(...) / queueEnemyWorldStrike(...)`，分支本身只保留 strike resolve 與最少的條件判斷
 - `Adventure` 內 player / enemy world strike 的 action plan 也已開始抽成 `createPlayerWorldStrikePlan(...) / createEnemyWorldStrikePlan(...)`，queue helper 不再各自臨時拼接 cast、preview 與 execute 閉包
+- `Adventure` 內 player / enemy world strike 與 replay step 的 visual payload，也已開始共用 `WorldStrikeVisualPlan` 路徑；live / replay 不再各自手拼 projectile、area 與 impact payload
 - 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再另外維護一套 effect dispatch
 - `Adventure` 內 player / enemy world strike 的投射物、範圍、命中特效與傷害浮字，也已開始共用 visual helper，地圖即時戰鬥不再各自維護兩套 effect dispatch 流程
 - `Adventure` 內 player / enemy world strike 的實際執行鏈，也已開始抽成 `executePlayerWorldStrike(...) / executeEnemyWorldStrike(...)`，玩家與怪物分支不再各自攤開整段命中後流程
