@@ -23,6 +23,7 @@ import AdventureStage from '../components/adventure/AdventureStage';
 import ShopPanel from '../components/adventure/ShopPanel';
 import { QuestModal } from '../components/adventure/QuestModal';
 import { GameHintBubble } from '../components/game/GameHintBubble';
+import { GameSection } from '../components/game/GameSection';
 import { GameTooltip } from '../components/game/GameTooltip';
 import { SHOPS } from '../data/shops';
 import { getEnemyEngagementRange, getGridDistance, getPlayerEngagementRange, getWorldSkillAreaTargets } from '../utils/worldCombat';
@@ -744,6 +745,22 @@ export const Adventure: React.FC<AdventureProps> = ({
     execute();
   };
 
+  const getPlayerWorldStrikePreviewMessage = (
+    targetName: string,
+    chosenSkill?: typeof primaryActiveSkill
+  ) =>
+    chosenSkill
+      ? `你開始施展【${chosenSkill.name}】。`
+      : `你朝 ${targetName} 發動攻擊。`;
+
+  const getEnemyWorldStrikePreviewMessage = (
+    enemyName: string,
+    strike: ReturnType<typeof resolveEnemyWorldStrike>
+  ) =>
+    strike.skillName
+      ? `${enemyName} 正在施展【${strike.skillName}】。`
+      : `${enemyName} 朝你撲殺而來。`;
+
   const applyPlayerWorldStrikePreview = ({
     now,
     strike,
@@ -758,11 +775,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     setWorldCombatTargetStatuses(strike.enemyStatusNames);
     setWorldCombatPlayerStatuses(strike.playerStatusNames);
     setWorldPlayerShield((prev) => prev + strike.playerShieldGain);
-    setWorldLastCombatMessage(
-      chosenSkill
-        ? `你開始施展【${chosenSkill.name}】。`
-        : `你朝 ${targetName} 發動攻擊。`
-    );
+    setWorldLastCombatMessage(getPlayerWorldStrikePreviewMessage(targetName, chosenSkill));
     setPlayerActionReadyAt(now + strike.nextActionDelayMs);
     if (chosenSkill) {
       setPlayerSkillReadyAt(now + strike.skillCooldownMs);
@@ -794,11 +807,7 @@ export const Adventure: React.FC<AdventureProps> = ({
       }));
     }
 
-    setWorldLastCombatMessage(
-      strike.skillName
-        ? `${enemyName} 正在施展【${strike.skillName}】。`
-        : `${enemyName} 朝你撲殺而來。`
-    );
+    setWorldLastCombatMessage(getEnemyWorldStrikePreviewMessage(enemyName, strike));
   };
 
   const recoverAfterWorldKill = () => {
@@ -2202,90 +2211,98 @@ export const Adventure: React.FC<AdventureProps> = ({
 
         {!showIntro && !isBattling && !isMapModalOpen && (
             <div className="pointer-events-none fixed bottom-4 left-1/2 z-[5001] -translate-x-1/2">
-                <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-stone-700/80 bg-black/75 px-3 py-2 shadow-[0_0_30px_rgba(0,0,0,0.55)] backdrop-blur">
-                    <button
-                        onClick={() => {
-                            if (targetedMonster && canEngageTarget) {
-                                performWorldPlayerAction(false);
-                                setAutoMovePath([]);
-                            }
-                        }}
-                        disabled={!targetedMonster || !canEngageTarget}
-                        className={clsx(
-                            "min-w-24 rounded-xl border px-3 py-2 text-left transition-colors",
-                            targetedMonster && canEngageTarget
-                              ? "border-red-700 bg-red-950/50 text-red-200 hover:bg-red-900/60"
-                              : "cursor-not-allowed border-stone-800 bg-stone-950/60 text-stone-500"
-                        )}
+                <div className="pointer-events-auto">
+                    <GameSection
+                        eyebrow="BATTLE COMMAND"
+                        title="戰鬥快捷列"
+                        titleIcon={<Swords size={15} className="text-amber-500" />}
+                        className="min-w-[min(92vw,44rem)] shadow-[0_0_30px_rgba(0,0,0,0.55)] backdrop-blur"
+                        bodyClassName="grid grid-cols-2 gap-2 p-3 md:grid-cols-4"
                     >
-                        <div className="flex items-center justify-between gap-3">
-                            <span className="text-sm font-bold">普攻</span>
-                            <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">F</span>
-                        </div>
-                        <div className="mt-1 text-[11px] text-stone-400">
-                            {targetedMonster
-                              ? canEngageTarget
-                                ? '直接在場景內出手'
-                                : '目標尚未進入距離'
-                              : '未鎖定目標'}
-                        </div>
-                    </button>
+                        <button
+                            onClick={() => {
+                                if (targetedMonster && canEngageTarget) {
+                                    performWorldPlayerAction(false);
+                                    setAutoMovePath([]);
+                                }
+                            }}
+                            disabled={!targetedMonster || !canEngageTarget}
+                            className={clsx(
+                                "min-w-24 rounded-xl border px-3 py-2 text-left transition-colors",
+                                targetedMonster && canEngageTarget
+                                  ? "border-red-700 bg-red-950/50 text-red-200 hover:bg-red-900/60"
+                                  : "cursor-not-allowed border-stone-800 bg-stone-950/60 text-stone-500"
+                            )}
+                        >
+                            <div className="flex items-center justify-between gap-3">
+                                <span className="text-sm font-bold">普攻</span>
+                                <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">F</span>
+                            </div>
+                            <div className="mt-1 text-[11px] text-stone-400">
+                                {targetedMonster
+                                  ? canEngageTarget
+                                    ? '直接在場景內出手'
+                                    : '目標尚未進入距離'
+                                  : '未鎖定目標'}
+                            </div>
+                        </button>
 
-                    <button
-                        onClick={() => {
-                            if (targetedMonster && canEngageTarget) {
-                                performWorldPlayerAction(true);
-                                setAutoMovePath([]);
-                            }
-                        }}
-                        disabled={!primaryActiveSkill || !targetedMonster || !canEngageTarget}
-                        className={clsx(
-                            "min-w-36 rounded-xl border px-3 py-2 text-left transition-colors",
-                            primaryActiveSkill && targetedMonster && canEngageTarget
-                              ? "border-amber-700 bg-amber-950/45 text-amber-200 hover:bg-amber-900/60"
-                              : "cursor-not-allowed border-stone-800 bg-stone-950/60 text-stone-500"
-                        )}
-                    >
-                        <div className="flex items-center justify-between gap-3">
-                            <span className="truncate text-sm font-bold">
-                                {primaryActiveSkill?.name ?? '主動術式'}
-                            </span>
-                            <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">Q</span>
-                        </div>
-                        <div className="mt-1 text-[11px] text-stone-400">
-                            {primaryActiveSkill ? '直接施放主修術式' : '尚未習得主動術式'}
-                        </div>
-                    </button>
+                        <button
+                            onClick={() => {
+                                if (targetedMonster && canEngageTarget) {
+                                    performWorldPlayerAction(true);
+                                    setAutoMovePath([]);
+                                }
+                            }}
+                            disabled={!primaryActiveSkill || !targetedMonster || !canEngageTarget}
+                            className={clsx(
+                                "min-w-36 rounded-xl border px-3 py-2 text-left transition-colors",
+                                primaryActiveSkill && targetedMonster && canEngageTarget
+                                  ? "border-amber-700 bg-amber-950/45 text-amber-200 hover:bg-amber-900/60"
+                                  : "cursor-not-allowed border-stone-800 bg-stone-950/60 text-stone-500"
+                            )}
+                        >
+                            <div className="flex items-center justify-between gap-3">
+                                <span className="truncate text-sm font-bold">
+                                    {primaryActiveSkill?.name ?? '主動術式'}
+                                </span>
+                                <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">Q</span>
+                            </div>
+                            <div className="mt-1 text-[11px] text-stone-400">
+                                {primaryActiveSkill ? '直接施放主修術式' : '尚未習得主動術式'}
+                            </div>
+                        </button>
 
-                    <button
-                        onClick={() => setIsAutoBattling((prev) => !prev)}
-                        className={clsx(
-                            "min-w-24 rounded-xl border px-3 py-2 text-left transition-colors",
-                            isAutoBattling
-                              ? "border-emerald-700 bg-emerald-950/45 text-emerald-200 hover:bg-emerald-900/60"
-                              : "border-stone-700 bg-stone-950/60 text-stone-300 hover:bg-stone-900/70"
-                        )}
-                    >
-                        <div className="flex items-center justify-between gap-3">
-                            <span className="text-sm font-bold">{isAutoBattling ? '掛機中' : '掛機'}</span>
-                            <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">R</span>
-                        </div>
-                        <div className="mt-1 text-[11px] text-stone-400">自動尋敵與追擊</div>
-                    </button>
+                        <button
+                            onClick={() => setIsAutoBattling((prev) => !prev)}
+                            className={clsx(
+                                "min-w-24 rounded-xl border px-3 py-2 text-left transition-colors",
+                                isAutoBattling
+                                  ? "border-emerald-700 bg-emerald-950/45 text-emerald-200 hover:bg-emerald-900/60"
+                                  : "border-stone-700 bg-stone-950/60 text-stone-300 hover:bg-stone-900/70"
+                            )}
+                        >
+                            <div className="flex items-center justify-between gap-3">
+                                <span className="text-sm font-bold">{isAutoBattling ? '掛機中' : '掛機'}</span>
+                                <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">R</span>
+                            </div>
+                            <div className="mt-1 text-[11px] text-stone-400">自動尋敵與追擊</div>
+                        </button>
 
-                    <button
-                        onClick={() => {
-                            setIsMapModalOpen(true);
-                            setMapTab('area');
-                        }}
-                        className="min-w-24 rounded-xl border border-stone-700 bg-stone-950/60 px-3 py-2 text-left text-stone-300 transition-colors hover:bg-stone-900/70"
-                    >
-                        <div className="flex items-center justify-between gap-3">
-                            <span className="text-sm font-bold">地圖</span>
-                            <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">M</span>
-                        </div>
-                        <div className="mt-1 text-[11px] text-stone-400">展開地區 / 世界地圖</div>
-                    </button>
+                        <button
+                            onClick={() => {
+                                setIsMapModalOpen(true);
+                                setMapTab('area');
+                            }}
+                            className="min-w-24 rounded-xl border border-stone-700 bg-stone-950/60 px-3 py-2 text-left text-stone-300 transition-colors hover:bg-stone-900/70"
+                        >
+                            <div className="flex items-center justify-between gap-3">
+                                <span className="text-sm font-bold">地圖</span>
+                                <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">M</span>
+                            </div>
+                            <div className="mt-1 text-[11px] text-stone-400">展開地區 / 世界地圖</div>
+                        </button>
+                    </GameSection>
                 </div>
             </div>
         )}

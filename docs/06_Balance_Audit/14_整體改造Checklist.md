@@ -428,6 +428,7 @@
 - [x] `GamePanel / Modal` 內原本重複存在的 eyebrow 裝飾也已移除，正式改由 `GameTitleStack` 單點承接標題階層，不再重複堆兩層同名標識
 - [x] `GamePanel / Modal / GameTooltip` 的角飾、內框、頂部光帶與背景光暈，也已開始收斂到共用 `GameOrnamentFrame`
 - [x] `StatsPanel / ShopPanel / Inventory / Dashboard / QuestModal` 內部的關鍵資訊區，也已開始改走共用 `GameSection`，面板內層框體語言不再各自維護，內頁 section chrome 已開始往同一套遊戲面板語言收口
+- [x] `Adventure` 的底部戰鬥快捷列也已開始改走 `GameSection`，地圖即時戰鬥操作面已接上同一套 section chrome
 - [x] 被動技能改成逐招專屬效果，而不是通用屬性加成
 
 ---

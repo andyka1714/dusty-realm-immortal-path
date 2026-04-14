@@ -95,6 +95,7 @@
   - 中裝搭少量高品裝應可挑戰通過
   - 劍修 / 體修 / 法修三條分流線已分別校正到這個區間
 - 主場景底部已補上第一版戰鬥快捷列，可直接執行接戰、主動術式、掛機與地圖操作
+- 戰鬥快捷列內部也已開始改走 `GameSection`，底部操作面不再只是裸按鈕列，而是正式收進遊戲化 section chrome
 - 舊的中央戰報窗已退場，戰鬥結果改為右下角 HUD 短暫顯示後自動收起
 - 所有被動技能目前都已改成逐招專屬效果，資料層不再保留 generic `passiveEffectTags` fallback
 - formal core 被動的基礎屬性收益，已改成逐招明確對照表；absorbed retired passive 透過 formal id 承接時，也會吃到同一份 explicit 對照
@@ -226,6 +227,7 @@
 - world strike 的狀態名組裝，也已開始拆成 `buildPlayerWorldStrikeStatusNames(...) / buildEnemyWorldStrikeStatusNames(...)`，player-side 與 enemy-side 的 stance / incoming status 不再在結果組裝裡直接攤平
 - world strike 的被動狀態整理也已拆層：enemy 端改成 `defensive / survival` 兩段 helper，player 端改成 `sword / body / mage` 三段 helper，降低單一函式持續膨脹的風險
 - `Adventure` 的 world strike 預覽與延遲執行排程，也已開始抽成 `scheduleWorldActionExecution(...) / applyPlayerWorldStrikePreview(...) / applyEnemyWorldStrikePreview(...)`，玩家與怪物分支不再各自維護 readyAt / 狀態 / 戰鬥訊息的重複流程
+- world strike 的預覽文案也已開始收斂到共用 helper，玩家與怪物分支不再各自手寫 preview message
 - `enemy special` 的 incoming status 過濾與控制縮短，也已開始抽成 world / timeline 共用 resolver，不再只在 `runAutoBattle()` 內手寫 `filteredEnemyStatuses / normalizedIncomingStatuses`
 - Boss 破綻觸發與戰鬥事件，也已開始整併到 `rollBossBreakOpportunity(...)`，主循環不再直接散寫同一段爆發窗口判定
 - `enemy special` 的狀態套用、戰鬥日誌與免疫觸發，已開始進一步收斂到同一層 helper，減少 timeline 內核殘留的散寫分支

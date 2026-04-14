@@ -30,6 +30,7 @@
 - realm dataset 目前已正式鎖定為 `core only` 視圖，retired skill 僅保留中央 alias / 相容查詢層
 - `runAutoBattle()` 已拆出多個 shared helper，world strike 與 timeline combat 的冷卻、status、runtime、outcome 正持續收斂
 - `GameTooltip / GameHintBubble / GamePanel / Modal / GameSection` 已成為主要 UI 殼層語言，且 `Dashboard / QuestModal` 內部資訊區也已開始套入同一套 section chrome
+- `Adventure` 的底部戰鬥快捷列也已開始改走 `GameSection`，地圖即時戰鬥操作面不再是獨立風格。
 - 所有 passive，包含 formal core 與 retired passive alias，現在都已退出 generic `passiveEffectTags` fallback，技能資料層只保留逐招專屬效果
 - `Adventure` 內 player / enemy world strike 的 preview 與延遲執行排程，也已開始共用 helper，地圖即時戰鬥分支不再各自維護 readyAt / 狀態 / 戰鬥訊息流程
 
