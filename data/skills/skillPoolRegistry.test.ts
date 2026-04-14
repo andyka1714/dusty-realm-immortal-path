@@ -34,6 +34,9 @@ import {
   LEGACY_SKILL_MAP,
   LEGACY_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
   LEGACY_SKILLS_BY_REPLACEMENT,
+  MERGE_READY_NON_CORE_SKILL_MAP,
+  MERGE_READY_NON_CORE_SKILLS,
+  MERGE_READY_NON_CORE_SKILLS_BY_PROFESSION,
   MERGE_READY_NON_CORE_SKILL_GROUPS,
   MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION,
   NON_CORE_SKILL_PROFESSION_POOLS,
@@ -244,6 +247,20 @@ describe("skill pool registry", () => {
     ).toEqual(
       ["b_vr_passive", "b_bi_passive", "b_ma_passive", "b_tr_passive", "b_im_passive", "b_ie_passive"].sort()
     );
+  });
+
+  it("builds merge-ready non-core skill views for direct final cull work", () => {
+    expect(MERGE_READY_NON_CORE_SKILLS.every((skill) => skill.poolStatus !== "core")).toBe(true);
+    expect(MERGE_READY_NON_CORE_SKILL_MAP.s_bi_active?.replacementSkillId).toBe("s_tr_active");
+    expect(
+      MERGE_READY_NON_CORE_SKILLS_BY_PROFESSION[ProfessionType.Sword].map((skill) => skill.id)
+    ).toContain("s_ie_active");
+    expect(
+      MERGE_READY_NON_CORE_SKILLS_BY_PROFESSION[ProfessionType.Body].map((skill) => skill.id)
+    ).toContain("b_ma_passive");
+    expect(
+      MERGE_READY_NON_CORE_SKILLS_BY_PROFESSION[ProfessionType.Mage].map((skill) => skill.id)
+    ).toContain("m_ie_passive");
   });
 
   it("ensures prerequisite chains only point to skills of the same profession", () => {

@@ -171,6 +171,7 @@
 - [x] `TRANSITION_SKILLS_BY_REPLACEMENT / LEGACY_SKILLS_BY_REPLACEMENT / NON_CORE_SKILLS_BY_REPLACEMENT` 也已補齊，最後一批合併刪整可直接按 formal replacement target 盤點
 - [x] `TRANSITION_SKILLS_BY_PROFESSION_AND_REPLACEMENT / LEGACY_SKILLS_BY_PROFESSION_AND_REPLACEMENT` 也已補齊，最後一批技能本體刪整可直接按職業與 formal replacement 交叉盤點
 - [x] `MERGE_READY_NON_CORE_SKILL_GROUPS / MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION` 也已補齊，最後一批刪整可直接聚焦真正有重複 replacement cluster 的技能群
+- [x] `MERGE_READY_NON_CORE_SKILLS / MERGE_READY_NON_CORE_SKILL_MAP / MERGE_READY_NON_CORE_SKILLS_BY_PROFESSION` 也已補齊，最後一批技能本體刪整已有可直接操作的 merge-ready skill 視圖
 - [x] `TRANSITION_SKILLS / LEGACY_SKILLS` 與對應 skill map 也已補齊，最後一批重複技能的本體刪整已有正式視圖可直接盤點
 - [x] retired skill 的 active / passive 正式視圖分組，現在已正式回收到 alias util 的單一路徑，skill index 不再各自維護兩組近似樣板
 - [x] `battle-absorbed / retirement-ready` 的 active / passive resolved skill view，也已開始共用 `buildResolvedRetiredSkillViewGroups(...)`，skill index 不再各自維護兩段近似的 resolved view set 組裝
@@ -464,6 +465,7 @@
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，也已開始共用 `scheduleTimedCombatAction(...)`，不再各自維護一套 `setTimeout` orchestration
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的 timed plan，也已開始共用 `queueTimedCombatPlan(...)` 的 onQueue/execute 模型，battle timer orchestration 不再維持兩種樣板
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的 timed plan，現在也已共用同一個 `TimedCombatQueuePlan` 形狀，battle timer orchestration 不再拆成 world / replay 兩種資料結構
+- [x] `Adventure` 內 world strike 的 queue plan 現在也已直接使用 `createWorldStrikeQueuePlan(...)`；`createTimedWorldStrikePlan(...) / queueBattleReplayStep(...)` 這類單一用途 wrapper 已移除
 - [x] 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再額外維護第二套 effect dispatch
 - [x] 舊戰報 replay 的逐步播片流程，也已開始抽成 `processBattleReplayStep(...) / queueBattleReplayStep(...)`，log、snapshot 與特效派發不再直接塞在 replay effect 的定時器分支內
 - [x] 舊戰報 replay 的目標怪解析與技能名正規化，也已開始抽成 `createBattleReplayContext(...)`，replay orchestration 不再每次在 effect 內重做 target / skill 組裝

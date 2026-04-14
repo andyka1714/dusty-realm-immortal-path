@@ -324,6 +324,33 @@ export const MERGE_READY_NON_CORE_SKILL_GROUPS = buildMergeReadySkillGroups(
 export const MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION =
   buildMergeReadySkillGroupsByProfession(NON_CORE_SKILLS_BY_PROFESSION_AND_REPLACEMENT);
 
+export const MERGE_READY_NON_CORE_SKILLS = Object.values(MERGE_READY_NON_CORE_SKILL_GROUPS)
+  .flat()
+  .sort(compareSkills);
+
+export const MERGE_READY_NON_CORE_SKILL_MAP: Record<string, Skill> = Object.fromEntries(
+  MERGE_READY_NON_CORE_SKILLS.map((skill) => [skill.id, skill])
+) as Record<string, Skill>;
+
+export const MERGE_READY_NON_CORE_SKILLS_BY_PROFESSION: Record<ProfessionType, Skill[]> = {
+  [ProfessionType.None]: [],
+  [ProfessionType.Sword]: Object.values(
+    MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Sword]
+  )
+    .flat()
+    .sort(compareSkills),
+  [ProfessionType.Body]: Object.values(
+    MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Body]
+  )
+    .flat()
+    .sort(compareSkills),
+  [ProfessionType.Mage]: Object.values(
+    MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Mage]
+  )
+    .flat()
+    .sort(compareSkills),
+};
+
 export const SKILLS_BY_REALM: Record<MajorRealm, Skill[]> = Object.fromEntries(
   Object.entries(CORE_SKILL_SETS_BY_REALM).map(([realm, skills]) => [
     Number(realm),
