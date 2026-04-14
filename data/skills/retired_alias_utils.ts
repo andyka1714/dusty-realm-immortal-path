@@ -35,6 +35,14 @@ export const buildRetiredAliasExportSet = ({
   };
 };
 
+export const buildRetiredAliasExportSetFromRecord = (
+  allAliases: Record<string, Skill>
+) =>
+  buildRetiredAliasExportSet({
+    skillIds: Object.keys(allAliases),
+    allAliases,
+  });
+
 export const mergeRetiredAliasRealmMaps = (
   ...realmMaps: Array<Partial<Record<MajorRealm, Record<string, Skill>>>>
 ): Partial<Record<MajorRealm, Record<string, Skill>>> =>

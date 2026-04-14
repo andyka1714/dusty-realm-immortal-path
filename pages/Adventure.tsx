@@ -938,61 +938,25 @@ export const Adventure: React.FC<AdventureProps> = ({
     queueStrike(strike);
   };
 
-  const resolveAndQueuePlayerWorldStrike = ({
-    now,
-    chosenSkill,
-    targetedMonster,
+  const queueResolvedTimedWorldStrike = <TStrike,>({
+    readyAt,
+    canExecute,
+    resolveStrike,
+    queueStrike,
   }: {
-    now: number;
-    chosenSkill?: typeof primaryActiveSkill;
-    targetedMonster: {
-      instanceId: string;
-      templateId: string;
-      name: string;
-      x: number;
-      y: number;
-      currentHp: number;
-    };
+    readyAt?: number;
+    canExecute?: () => boolean;
+    resolveStrike: (now: number) => TStrike;
+    queueStrike: (now: number, strike: TStrike) => void;
   }) =>
-    resolveAndQueueWorldStrike({
-      resolveStrike: () =>
-        resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill),
-      queueStrike: (strike) => {
-        queuePlayerWorldStrike({
-          now,
-          strike,
-          chosenSkill,
-          targetedMonster,
-        });
-      },
-    });
-
-  const resolveAndQueueEnemyWorldStrike = ({
-    now,
-    enemyInstanceId,
-    enemyTemplate,
-  }: {
-    now: number;
-    enemyInstanceId: string;
-    enemyTemplate: NonNullable<typeof targetedMonsterTemplate>;
-  }) =>
-    resolveAndQueueWorldStrike({
-      resolveStrike: () => {
-        const canUseSpecial = now >= (enemySpecialReadyAtById[enemyInstanceId] ?? 0);
-        return {
-          strike: resolveEnemyWorldStrike(enemyTemplate, playerStats, canUseSpecial),
-          canUseSpecial,
-        };
-      },
-      queueStrike: ({ strike, canUseSpecial }) => {
-        queueEnemyWorldStrike({
-          now,
-          enemyInstanceId,
-          enemyTemplate,
-          strike,
-          canUseSpecial,
-        });
-      },
+    performTimedWorldAction({
+      readyAt,
+      canExecute,
+      execute: (now) =>
+        resolveAndQueueWorldStrike({
+          resolveStrike: () => resolveStrike(now),
+          queueStrike: (strike) => queueStrike(now, strike),
+        }),
     });
 
   const getPlayerWorldStrikePreviewMessage = (
@@ -1850,19 +1814,28 @@ export const Adventure: React.FC<AdventureProps> = ({
   };
 
   const performWorldPlayerAction = (useSkill: boolean) => {
-    return performTimedWorldAction({
+    return queueResolvedTimedWorldStrike({
       readyAt: playerActionReadyAt,
       canExecute: () => Boolean(targetedMonster && targetedMonsterTemplate && canEngageTarget),
-      execute: (now) => {
+      resolveStrike: (now) => {
         if (!targetedMonster) return;
 
         const chosenSkill = useSkill && primaryActiveSkill && now >= playerSkillReadyAt
           ? primaryActiveSkill
           : undefined;
-        resolveAndQueuePlayerWorldStrike({
-          now,
+        return {
           chosenSkill,
           targetedMonster,
+          strike: resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill),
+        };
+      },
+      queueStrike: (now, resolved) => {
+        if (!resolved) return;
+        queuePlayerWorldStrike({
+          now,
+          strike: resolved.strike,
+          chosenSkill: resolved.chosenSkill,
+          targetedMonster: resolved.targetedMonster,
         });
       },
     });
@@ -1872,12 +1845,21 @@ export const Adventure: React.FC<AdventureProps> = ({
     enemyInstanceId: string,
     enemyTemplate: NonNullable<typeof targetedMonsterTemplate>
   ) =>
-    performTimedWorldAction({
-      execute: (now) => {
-        resolveAndQueueEnemyWorldStrike({
+    queueResolvedTimedWorldStrike({
+      resolveStrike: (now) => {
+        const canUseSpecial = now >= (enemySpecialReadyAtById[enemyInstanceId] ?? 0);
+        return {
+          strike: resolveEnemyWorldStrike(enemyTemplate, playerStats, canUseSpecial),
+          canUseSpecial,
+        };
+      },
+      queueStrike: (now, resolved) => {
+        queueEnemyWorldStrike({
           now,
           enemyInstanceId,
           enemyTemplate,
+          strike: resolved.strike,
+          canUseSpecial: resolved.canUseSpecial,
         });
       },
     });

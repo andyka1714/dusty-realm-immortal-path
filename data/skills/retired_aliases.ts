@@ -8,7 +8,7 @@ import {
   RETIRED_PASSIVE_ALIASES_BY_REALM,
 } from "./retired_passive_aliases";
 import {
-  buildRetiredAliasExportSet,
+  buildRetiredAliasExportSetFromRecord,
   mergeRetiredAliasRealmMaps,
   mergeRetiredAliasRecords,
 } from "./retired_alias_utils";
@@ -24,10 +24,8 @@ export const ALL_RETIRED_ALIASES: Record<string, Skill> = mergeRetiredAliasRecor
   ALL_RETIRED_PASSIVE_ALIASES
 );
 
-const battleAbsorbedRetiredActiveAliasExports = buildRetiredAliasExportSet({
-  skillIds: Object.keys(ALL_RETIRED_ACTIVE_ALIASES),
-  allAliases: ALL_RETIRED_ACTIVE_ALIASES,
-});
+const battleAbsorbedRetiredActiveAliasExports =
+  buildRetiredAliasExportSetFromRecord(ALL_RETIRED_ACTIVE_ALIASES);
 
 export const BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS =
   battleAbsorbedRetiredActiveAliasExports.skillIds;
@@ -38,10 +36,8 @@ export const BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES: Record<string, Skill> =
 export const BATTLE_ABSORBED_RETIRED_ACTIVE_ALIAS_VIEWS =
   battleAbsorbedRetiredActiveAliasExports.views;
 
-const battleAbsorbedRetiredPassiveAliasExports = buildRetiredAliasExportSet({
-  skillIds: Object.keys(ALL_RETIRED_PASSIVE_ALIASES),
-  allAliases: ALL_RETIRED_PASSIVE_ALIASES,
-});
+const battleAbsorbedRetiredPassiveAliasExports =
+  buildRetiredAliasExportSetFromRecord(ALL_RETIRED_PASSIVE_ALIASES);
 
 export const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS =
   battleAbsorbedRetiredPassiveAliasExports.skillIds;
