@@ -19,6 +19,7 @@
 - 舊戰報 replay 的逐步播片與 replay context，現在也已開始共用 `processBattleReplayStep(...) / scheduleBattleReplayStep(...) / createBattleReplayContext(...)`，回放 effect 不再直接鋪開 target、skill 與視覺派發整段流程。
 - `Adventure` 內 player / enemy world strike 的實際執行鏈，也已開始抽成 `executePlayerWorldStrike(...) / executeEnemyWorldStrike(...)`，玩家與怪物分支不再各自攤開整段命中後流程。
 - `Adventure` 內 player / enemy world strike 的 queue orchestration，也已開始抽成 `queuePlayerWorldStrike(...) / queueEnemyWorldStrike(...)`，player / enemy 分支不再各自串接 cast / preview / execute 流程。
+- `Adventure` 內 player / enemy world strike 的 action plan 也已開始抽成 `createPlayerWorldStrikePlan(...) / createEnemyWorldStrikePlan(...)`，queue helper 不再各自臨時拼接 cast、preview 與 execute 閉包。
 - world strike 結果組裝也已開始拆成 player / enemy 專用 helper，timing 與 area metadata 不再長期散寫在 strike resolver 內。
 - 靈化期核心被動 `劍意化形 / 肉身成聖 / 道法自然` 也已補進 timeline combat 開場待命訊息；其中 `道法自然` 也已開始在 player world strike 顯式回報。
 - 技能改為透過技能書學習，不再隨職業 / 突破自動送；技能池也已切成 `formal core / retired` 視角，retired 進一步收斂為 `battle-absorbed / retirement-ready`。
