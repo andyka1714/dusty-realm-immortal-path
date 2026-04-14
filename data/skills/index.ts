@@ -11,12 +11,6 @@ import { TRIBULATION_SKILLS } from "./tribulation";
 import { IMMORTAL_SKILLS } from "./immortal";
 import { IMMORTAL_EMPEROR_SKILLS } from "./immortal_emperor";
 import {
-  BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES,
-} from "./retired_active_aliases";
-import {
-  BATTLE_ABSORBED_RETIRED_PASSIVE_ALIASES,
-} from "./retired_passive_aliases";
-import {
   ALL_RETIRED_ALIASES,
 } from "./retired_aliases";
 import {

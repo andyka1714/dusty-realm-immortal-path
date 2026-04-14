@@ -927,6 +927,17 @@ export const Adventure: React.FC<AdventureProps> = ({
     );
   };
 
+  const resolveAndQueueWorldStrike = <TStrike,>({
+    resolveStrike,
+    queueStrike,
+  }: {
+    resolveStrike: () => TStrike;
+    queueStrike: (strike: TStrike) => void;
+  }) => {
+    const strike = resolveStrike();
+    queueStrike(strike);
+  };
+
   const resolveAndQueuePlayerWorldStrike = ({
     now,
     chosenSkill,
@@ -942,15 +953,19 @@ export const Adventure: React.FC<AdventureProps> = ({
       y: number;
       currentHp: number;
     };
-  }) => {
-    const strike = resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill);
-    queuePlayerWorldStrike({
-      now,
-      strike,
-      chosenSkill,
-      targetedMonster,
+  }) =>
+    resolveAndQueueWorldStrike({
+      resolveStrike: () =>
+        resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill),
+      queueStrike: (strike) => {
+        queuePlayerWorldStrike({
+          now,
+          strike,
+          chosenSkill,
+          targetedMonster,
+        });
+      },
     });
-  };
 
   const resolveAndQueueEnemyWorldStrike = ({
     now,
@@ -960,17 +975,25 @@ export const Adventure: React.FC<AdventureProps> = ({
     now: number;
     enemyInstanceId: string;
     enemyTemplate: NonNullable<typeof targetedMonsterTemplate>;
-  }) => {
-    const canUseSpecial = now >= (enemySpecialReadyAtById[enemyInstanceId] ?? 0);
-    const strike = resolveEnemyWorldStrike(enemyTemplate, playerStats, canUseSpecial);
-    queueEnemyWorldStrike({
-      now,
-      enemyInstanceId,
-      enemyTemplate,
-      strike,
-      canUseSpecial,
+  }) =>
+    resolveAndQueueWorldStrike({
+      resolveStrike: () => {
+        const canUseSpecial = now >= (enemySpecialReadyAtById[enemyInstanceId] ?? 0);
+        return {
+          strike: resolveEnemyWorldStrike(enemyTemplate, playerStats, canUseSpecial),
+          canUseSpecial,
+        };
+      },
+      queueStrike: ({ strike, canUseSpecial }) => {
+        queueEnemyWorldStrike({
+          now,
+          enemyInstanceId,
+          enemyTemplate,
+          strike,
+          canUseSpecial,
+        });
+      },
     });
-  };
 
   const getPlayerWorldStrikePreviewMessage = (
     targetName: string,

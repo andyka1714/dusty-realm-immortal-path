@@ -406,7 +406,7 @@
 - [x] retired active / passive alias 也已補上 alias-layer 聚合表，正式 realm dataset 現在可直接由 alias-layer 組裝，不再在 `data/skills/index.ts` 手動攤開多份 alias 清單
 - [x] retired active / passive alias 的 record / view 組裝，也已開始共用 `retired_alias_utils.ts`，alias-layer 不再維護兩份近似的 `Object.fromEntries / Object.values` 樣板
 - [x] retired active / passive alias 的總表合併，現在也已開始共用 `mergeRetiredAliasRecords(...)`，alias-layer 不再各自維護 `Object.assign(...Object.values(...))` 樣板
-- [x] `battle-absorbed / retirement-ready` 的 retired alias 視圖尾端，也已開始共用 `buildRetiredAliasViewSet(...)`，active / passive alias 檔不再各自維護同一組視圖樣板
+- [x] `battle-absorbed` 的 retired alias 輸出尾端，也已開始共用 `buildRetiredAliasExportSet(...)`，active / passive alias 檔不再各自維護同一組視圖樣板
 - [x] skill index 內 `battle-absorbed / retirement-ready` retired skill 的正式視圖組裝，也已開始共用 `buildSkillViewSet(...)`，不再四段重複 map 同一批 alias view
 - [x] `battle-absorbed / retirement-ready` 的 active / passive alias record，也已開始直接由 alias-layer 聚合表和 skill ID 名單組裝，不再在 alias 檔裡平鋪手寫同一份 retired alias map
 - [x] formal realm dataset 的組裝現在已直接回到各境界 `core` skill set，本體不再重複拼接 retired alias
@@ -446,7 +446,7 @@
 - [x] `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，也已開始共用 queue / preview / resolution helper，地圖即時戰鬥分支不再各自維護兩套 readyAt / 傷害文案流程
 - [x] `Adventure` 內 player / enemy world strike 的 queue orchestration，也已開始抽成 `queuePlayerWorldStrike(...) / queueEnemyWorldStrike(...)`，player / enemy 分支不再各自串接 cast / preview / execute 流程
 - [x] `Adventure` 內 player / enemy world strike 的 action plan 也已開始抽成 `createPlayerWorldStrikePlan(...) / createEnemyWorldStrikePlan(...)`，queue helper 不再各自臨時拼接 cast、preview 與 execute 閉包
-- [x] `Adventure` 內 player / enemy world strike 的 resolve + queue 串接，也已開始抽成 `resolveAndQueuePlayerWorldStrike(...) / resolveAndQueueEnemyWorldStrike(...)`，live 分支不再同時維護 resolve 與 queue 細節
+- [x] `Adventure` 內 player / enemy world strike 的 resolve + queue 串接，也已開始共用 `resolveAndQueueWorldStrike(...)`，live 分支不再同時維護 resolve 與 queue 細節
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，也已開始共用 `scheduleTimedCombatAction(...)`，不再各自維護一套 `setTimeout` orchestration
 - [x] 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再額外維護第二套 effect dispatch
 - [x] 舊戰報 replay 的逐步播片流程，也已開始抽成 `processBattleReplayStep(...) / queueBattleReplayStep(...)`，log、snapshot 與特效派發不再直接塞在 replay effect 的定時器分支內
