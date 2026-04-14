@@ -261,6 +261,7 @@
 - [x] 戰鬥開場的 runtime 組裝，也已開始整併到 `createCombatRuntimeContext(...)`，主動術式、攻速、克制、元素修正與被動旗標不再在 `runAutoBattle()` 開頭散寫
 - [x] 回合主循環需要的被動能力旗標，也已開始整併到 `createCombatLoopFeatureFlags(...)`，`resolveCombatLoopStep(...)` 不再額外攜帶一長串布林參數
 - [x] `resolveCombatLoopStep(...)` 的 state/result 組裝，也已開始收斂到 `buildCombatLoopState(...) / buildCombatLoopStepResult(...)`，主循環不再重複鋪開同一份長狀態物件
+- [x] `resolveCombatLoopStep(...)` 現在也已改成單一 `nextState + finalizeLoopStep(...)` 路徑，battle loop 不再在多個提前 return 分支各自手組完整狀態回傳
 - [x] 戰鬥基礎設施的 snapshot / tick wiring，也已開始整併到 `createCombatInfrastructure(...)`，snapshot provider 與 status tick processor 不再在 `runAutoBattle()` 內各自散寫
 - [x] 戰鬥開場的 infrastructure wiring 與 encounter seed，也已開始整併到 `prepareCombatLoopEnvironment(...)`，不再把 infrastructure 建立與 seed 流程拆成兩段散寫
 - [x] 戰鬥環境 seed 的回寫，也已開始整併到 `applyPreparedCombatLoopState(...)`，開場補入的護體狀態與 enemy special 延後不再在主函式逐欄覆寫
@@ -398,6 +399,7 @@
 - [x] `荒古戰體 / 仙元護體` 也已開始在 player world strike 直接回報，不再只靠 timeline combat 開場待命訊息呈現
 - [x] retired active / passive 的 alias 剝離 helper，已回收到 alias 檔本體，realm view 不再在 `data/skills/index.ts` 額外重複維護同一套過濾規則
 - [x] retired active / passive alias 也已補上 alias-layer 聚合表，正式 realm dataset 現在可直接由 alias-layer 組裝，不再在 `data/skills/index.ts` 手動攤開多份 alias 清單
+- [x] retired active / passive alias 的 record / view 組裝，也已開始共用 `retired_alias_utils.ts`，alias-layer 不再維護兩份近似的 `Object.fromEntries / Object.values` 樣板
 - [x] `battle-absorbed / retirement-ready` 的 active / passive alias record，也已開始直接由 alias-layer 聚合表和 skill ID 名單組裝，不再在 alias 檔裡平鋪手寫同一份 retired alias map
 - [x] formal realm dataset 的組裝也已開始走單一 `buildRealmSkillSet(...)` helper，各境界不再重複拼接 retired alias
 - [x] retired alias 的 realm 聚合已回收到 alias-layer，formal realm dataset 不再注入 retired alias 後再剝離

@@ -29,6 +29,7 @@
 - 技能池已收斂出 `core / battle-absorbed / retirement-ready` 的正式視圖，realm dataset 已開始排除 retired alias
 - realm dataset 目前已正式鎖定為 `core only` 視圖，retired skill 僅保留中央 alias / 相容查詢層
 - retired alias 的 realm 聚合現在只保留在 alias-layer，正式 realm dataset 已不再注入 retired alias 再做剝離
+- retired active / passive alias 的 record / view 組裝，也已改由 `retired_alias_utils.ts` 單點承接，alias-layer 不再維護兩份近似樣板
 - `runAutoBattle()` 已拆出多個 shared helper，world strike 與 timeline combat 的冷卻、status、runtime、outcome 正持續收斂
 - `GameTooltip / GameHintBubble / GamePanel / Modal / GameSection` 已成為主要 UI 殼層語言，且 `Dashboard / QuestModal` 內部資訊區也已開始套入同一套 section chrome
 - `Adventure` 的底部戰鬥快捷列也已開始改走 `GameSection`，地圖即時戰鬥操作面不再是獨立風格。

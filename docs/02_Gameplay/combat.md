@@ -126,6 +126,7 @@
 - 戰鬥勝敗尾端也已開始整併到 `finalizeCombatResult(...)`，勝利掉落與敗北記錄不再直接堆在主流程尾端
 - 單回合 orchestration 也已開始收斂到 `resolveCombatLoopStep(...)`，回合維護、玩家 / 敵方行動與 turn advance 不再全部直接平鋪在 `runAutoBattle()` while 迴圈內
 - `resolveCombatLoopStep(...)` 的 state/result 組裝，也已開始收斂到 `buildCombatLoopState(...) / buildCombatLoopStepResult(...)`，主循環不再重複鋪開同一份長狀態物件
+- `resolveCombatLoopStep(...)` 現在也已改成單一 `nextState + finalizeLoopStep(...)` 路徑，玩家先手、敵方行動與 combat end 不再各自手組同一份長狀態回傳
 - battle while 迴圈本身也已開始整併到 `runCombatTimelineLoop(...)`，`runAutoBattle()` 不再自己持有整段 loop / 解構 / 回寫流程
 - 法修高境界 stance 的 `player world strike` 可見性也已補齊到基本攻擊視角，`道法自然 / 五氣朝元 / 仙法通神 / 萬法歸宗` 不再只在施法 world strike 或 timeline combat 才看得到
 - `空間法則` 也已補進法修基本攻擊的 `player world strike` stance，可直接從進攻視角看到虛空轉移待命
