@@ -28,6 +28,7 @@
 - 高境界修為乘區、追趕機制與各大境界 TTK 目標，已落地到 `data/progression/balanceAudit.ts`
 - 技能池已收斂出 `core / battle-absorbed / retirement-ready` 的正式視圖，realm dataset 目前已正式鎖定為 `core only`
 - retired skill 現在只保留中央 alias / 相容查詢層；retired alias 的 realm 聚合、record 合併與 view 組裝，已集中到 alias-layer 與 skill index 的共用 util
+- skill index 目前也已不再保留 `battle-absorbed / retirement-ready` 的 resolved retired skill 過渡出口；resolved 視圖正式只留 alias-layer 與測試側組裝
 - 所有 passive，包含 formal core 與 retired passive alias，現在都已退出 generic fallback，`passiveEffectTags` 欄位也已從技能資料層移除
 - `runAutoBattle()` 已拆出多個 shared helper，world strike 與 timeline combat 的 cooldown、status、runtime、outcome 與 action queue 正持續收斂
 - `Adventure` 內 world strike 與舊戰報 replay 的 preview、queue、execute、resolution、visual dispatch、replay step、replay context，現在都已開始共用 helper，不再維護多套近似流程

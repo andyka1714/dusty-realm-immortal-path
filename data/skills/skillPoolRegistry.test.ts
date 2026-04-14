@@ -3,6 +3,7 @@ import { MajorRealm, ProfessionType } from "../../types";
 import {
   ALL_RETIRED_ACTIVE_ALIASES,
   BATTLE_ABSORBED_RETIRED_ACTIVE_ALIAS_VIEWS,
+  BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS,
   BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES,
   RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_VIEWS,
   RETIREMENT_READY_RETIRED_ACTIVE_ALIASES,
@@ -11,7 +12,9 @@ import {
 import {
   ALL_RETIRED_PASSIVE_ALIASES,
   BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS,
+  BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS,
   RETIRED_PASSIVE_ALIASES_BY_REALM,
+  RETIREMENT_READY_RETIRED_PASSIVE_SKILL_IDS,
   RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_VIEWS,
 } from "./retired_passive_aliases";
 import {
@@ -19,10 +22,6 @@ import {
   RETIRED_ALIASES_BY_REALM,
 } from "./retired_aliases";
 import {
-  BATTLE_ABSORBED_RETIRED_PASSIVE_SKILLS,
-  BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP,
-  BATTLE_ABSORBED_RETIRED_SKILLS,
-  BATTLE_ABSORBED_RETIRED_SKILL_MAP,
   CORE_SKILL_SETS_BY_REALM,
   FORMAL_CORE_ACTIVE_SKILLS,
   FORMAL_CORE_SKILL_MAP,
@@ -32,8 +31,6 @@ import {
   FORMAL_CORE_SKILLS_SORTED,
   FORMAL_CORE_SKILLS_BY_PROFESSION,
   FORMAL_CORE_SKILLS_BY_SOURCE_TIER,
-  getBattleAbsorbedRetiredSkills,
-  getBattleAbsorbedRetiredPassiveSkills,
   getFormalCoreSkillsByRealm,
   getFormalCoreSkills,
   getSkill,
@@ -41,23 +38,36 @@ import {
   getFormalSkillByNameExact,
   getFormalSkillId,
   getFormalSkillByName,
-  getRetirementReadyRetiredSkills,
-  getRetirementReadyRetiredPassiveSkills,
   getSkillsByRealm,
-  isBattleAbsorbedRetiredSkill,
-  isBattleAbsorbedRetiredPassiveSkill,
-  isRetirementReadyRetiredSkill,
   normalizeLearnedSkills,
   RETIRED_SKILL_MAP,
   RETIRED_SKILL_NAME_INDEX,
-  RETIREMENT_READY_RETIRED_PASSIVE_SKILLS,
-  RETIREMENT_READY_RETIRED_PASSIVE_SKILL_MAP,
-  RETIREMENT_READY_RETIRED_SKILL_MAP,
   SKILLS,
   SKILL_NAME_INDEX,
   SKILL_POOL_REGISTRY,
   SKILL_PROFESSION_POOLS,
 } from ".";
+
+const sortSkills = <T extends { id: string; minRealm: number; type: string; name: string }>(
+  skills: T[]
+) =>
+  [...skills].sort((left, right) => {
+    if (left.minRealm !== right.minRealm) return left.minRealm - right.minRealm;
+    if (left.type !== right.type) return left.type === "Active" ? -1 : 1;
+    return left.name.localeCompare(right.name, "zh-Hant");
+  });
+
+const buildSkillMap = <T extends { id: string }>(skills: T[]) =>
+  Object.fromEntries(skills.map((skill) => [skill.id, skill])) as Record<string, T>;
+
+const BATTLE_ABSORBED_RETIRED_SKILL_MAP = buildSkillMap(BATTLE_ABSORBED_RETIRED_ACTIVE_ALIAS_VIEWS);
+const RETIREMENT_READY_RETIRED_SKILL_MAP = buildSkillMap(RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_VIEWS);
+const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP = buildSkillMap(
+  BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS
+);
+const RETIREMENT_READY_RETIRED_PASSIVE_SKILL_MAP = buildSkillMap(
+  RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_VIEWS
+);
 
 describe("skill pool registry", () => {
   it("assigns formal pool metadata to every defined skill", () => {
@@ -231,21 +241,19 @@ describe("skill pool registry", () => {
     expect(BATTLE_ABSORBED_RETIRED_SKILL_MAP.s_bi_active?.replacementSkillId).toBe("s_tr_active");
     expect(BATTLE_ABSORBED_RETIRED_SKILL_MAP.b_ie_active?.replacementSkillId).toBe("b_ma_active");
     expect(BATTLE_ABSORBED_RETIRED_SKILL_MAP.m_ie_active?.replacementSkillId).toBe("m_tr_active");
-    expect(isBattleAbsorbedRetiredSkill("m_im_active")).toBe(true);
-    expect(isBattleAbsorbedRetiredSkill("m_bi_active")).toBe(true);
-    expect(isBattleAbsorbedRetiredSkill("b_tr_active")).toBe(true);
-    expect(isBattleAbsorbedRetiredSkill("s_bi_active")).toBe(true);
-
-    const absorbedIds = getBattleAbsorbedRetiredSkills().map((skill) => skill.id);
-    const expectedIds = [...BATTLE_ABSORBED_RETIRED_SKILLS]
-      .sort((left, right) => {
-        if (left.minRealm !== right.minRealm) return left.minRealm - right.minRealm;
-        if (left.type !== right.type) return left.type === "Active" ? -1 : 1;
-        return left.name.localeCompare(right.name, "zh-Hant");
+    expect(BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS).toContain("m_im_active");
+    expect(BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS).toContain("m_bi_active");
+    expect(BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS).toContain("b_tr_active");
+    expect(BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS).toContain("s_bi_active");
+    expect(sortSkills(BATTLE_ABSORBED_RETIRED_ACTIVE_ALIAS_VIEWS).map((skill) => skill.id)).toEqual(
+      BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS.slice().sort((left, right) => {
+        const leftSkill = BATTLE_ABSORBED_RETIRED_SKILL_MAP[left];
+        const rightSkill = BATTLE_ABSORBED_RETIRED_SKILL_MAP[right];
+        if (leftSkill.minRealm !== rightSkill.minRealm) return leftSkill.minRealm - rightSkill.minRealm;
+        if (leftSkill.type !== rightSkill.type) return leftSkill.type === "Active" ? -1 : 1;
+        return leftSkill.name.localeCompare(rightSkill.name, "zh-Hant");
       })
-      .map((skill) => skill.id);
-
-    expect(absorbedIds).toEqual(expectedIds);
+    );
   });
 
   it("surfaces retirement-ready retired actives for the next data cleanup step", () => {
@@ -254,10 +262,12 @@ describe("skill pool registry", () => {
     expect(RETIREMENT_READY_RETIRED_SKILL_MAP.s_vr_active?.type).toBe("Active");
     expect(RETIREMENT_READY_RETIRED_SKILL_MAP.b_ie_active?.replacementSkillId).toBe("b_ma_active");
     expect(RETIREMENT_READY_RETIRED_SKILL_MAP.m_ie_active?.replacementSkillId).toBe("m_tr_active");
-    expect(isRetirementReadyRetiredSkill("s_im_active")).toBe(true);
-    expect(isRetirementReadyRetiredSkill("s_bi_passive")).toBe(false);
+    expect(BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS).toContain("s_im_active");
+    expect(BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS).not.toContain("s_bi_passive");
     expect(
-      getRetirementReadyRetiredSkills().every((skill) => skill.poolStatus !== "core" && skill.type === "Active")
+      RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_VIEWS.every(
+        (skill) => skill.poolStatus !== "core" && skill.type === "Active"
+      )
     ).toBe(true);
   });
 
@@ -300,18 +310,17 @@ describe("skill pool registry", () => {
     expect(BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP.m_ie_passive?.replacementSkillId).toBe(
       "m_sf_passive"
     );
-    expect(isBattleAbsorbedRetiredPassiveSkill("s_im_passive")).toBe(true);
-    expect(isBattleAbsorbedRetiredPassiveSkill("s_f_passive")).toBe(true);
-    expect(isBattleAbsorbedRetiredPassiveSkill("s_vr_passive")).toBe(true);
-    expect(isBattleAbsorbedRetiredPassiveSkill("m_tr_passive")).toBe(true);
-    expect(isBattleAbsorbedRetiredPassiveSkill("b_vr_passive")).toBe(true);
-    expect(isBattleAbsorbedRetiredPassiveSkill("m_ma_passive")).toBe(true);
+    expect(BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS).toContain("s_im_passive");
+    expect(BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS).toContain("s_f_passive");
+    expect(BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS).toContain("s_vr_passive");
+    expect(BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS).toContain("m_tr_passive");
+    expect(BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS).toContain("b_vr_passive");
+    expect(BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS).toContain("m_ma_passive");
     expect(
       getSkillsByRealm(MajorRealm.Immortal).some((skill) => skill.id === "b_im_passive")
     ).toBe(false);
-    expect(
-      getBattleAbsorbedRetiredPassiveSkills().map((skill) => skill.id)
-    ).toEqual(BATTLE_ABSORBED_RETIRED_PASSIVE_SKILLS.map((skill) => skill.id).sort((left, right) => {
+    expect(sortSkills(BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS).map((skill) => skill.id)).toEqual(
+      BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS.slice().sort((left, right) => {
       const leftSkill = BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP[left];
       const rightSkill = BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP[right];
       if (leftSkill.minRealm !== rightSkill.minRealm) return leftSkill.minRealm - rightSkill.minRealm;
@@ -334,10 +343,10 @@ describe("skill pool registry", () => {
       "m_tr_active"
     );
     expect(
-      getRetirementReadyRetiredSkills().every(
+      RETIREMENT_READY_RETIRED_ACTIVE_ALIAS_VIEWS.every(
         (skill) =>
-          isBattleAbsorbedRetiredSkill(skill.id) &&
-          !isBattleAbsorbedRetiredPassiveSkill(skill.id)
+          BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS.includes(skill.id) &&
+          !BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS.includes(skill.id)
       )
     ).toBe(true);
     expect(
@@ -346,7 +355,7 @@ describe("skill pool registry", () => {
   });
 
   it("keeps retirement-ready retired passive lookups centralized in the alias layer", () => {
-    const passiveIds = getRetirementReadyRetiredPassiveSkills().map((skill) => skill.id);
+    const passiveIds = RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_VIEWS.map((skill) => skill.id);
 
     expect(BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS.map((skill) => skill.id)).toEqual(
       Object.keys(ALL_RETIRED_PASSIVE_ALIASES)
@@ -357,9 +366,6 @@ describe("skill pool registry", () => {
     expect(passiveIds).toContain("s_f_passive");
     expect(passiveIds).toContain("b_ie_passive");
     expect(passiveIds).toContain("m_tr_passive");
-    expect(RETIREMENT_READY_RETIRED_PASSIVE_SKILLS.map((skill) => skill.id).sort()).toEqual(
-      passiveIds.slice().sort()
-    );
     expect(RETIREMENT_READY_RETIRED_PASSIVE_SKILL_MAP.s_f_passive?.replacementSkillId).toBe(
       "s_g_passive"
     );
@@ -368,9 +374,9 @@ describe("skill pool registry", () => {
     );
     expect(RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_VIEWS.some((skill) => skill.id === "m_tr_passive")).toBe(true);
     expect(
-      getRetirementReadyRetiredPassiveSkills().every(
+      RETIREMENT_READY_RETIRED_PASSIVE_ALIAS_VIEWS.every(
         (skill) =>
-          isBattleAbsorbedRetiredPassiveSkill(skill.id) &&
+          RETIREMENT_READY_RETIRED_PASSIVE_SKILL_IDS.includes(skill.id) &&
           getSkillsByRealm(skill.minRealm).every((realmSkill) => realmSkill.id !== skill.id)
       )
     ).toBe(true);

@@ -168,6 +168,7 @@
 - [x] retired skill 的 active / passive 正式視圖分組，也已開始共用 `buildRetiredAliasViewGroups(...)`，skill index 不再各自維護兩組近似樣板
 - [x] `battle-absorbed / retirement-ready` 的 active / passive resolved skill view，也已開始共用 `buildResolvedRetiredSkillViewGroups(...)`，skill index 不再各自維護兩段近似的 resolved view set 組裝
 - [x] `battle-absorbed / retirement-ready` 的 retired skill resolved view，也已正式回收到 alias util 層，skill index 不再手組 active / passive 解析樣板
+- [x] skill index 目前已不再 export `battle-absorbed / retirement-ready` 的 resolved retired skill 過渡出口，正式 resolved 視圖只留 alias-layer 與測試側組裝
 - [x] `s_vr_passive` 已正式承接進 formal core 劍修被動分支，從 pending-retirement 推進到 battle-absorbed
 - [x] `s_bi_active` 已正式承接進 formal core 劍修 burst 分支，從 pending-retirement 推進到 battle-absorbed
 - [x] `s_f_passive` 已正式承接進 formal core 劍修被動分支，從 pending-retirement 推進到 battle-absorbed
@@ -445,6 +446,7 @@
 - [x] `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，也已開始共用 queue / preview / resolution helper，地圖即時戰鬥分支不再各自維護兩套 readyAt / 傷害文案流程
 - [x] `Adventure` 內 player / enemy world strike 的 queue orchestration，也已開始抽成 `queuePlayerWorldStrike(...) / queueEnemyWorldStrike(...)`，player / enemy 分支不再各自串接 cast / preview / execute 流程
 - [x] `Adventure` 內 player / enemy world strike 的 action plan 也已開始抽成 `createPlayerWorldStrikePlan(...) / createEnemyWorldStrikePlan(...)`，queue helper 不再各自臨時拼接 cast、preview 與 execute 閉包
+- [x] `Adventure` 內 player / enemy world strike 的 resolve + queue 串接，也已開始抽成 `resolveAndQueuePlayerWorldStrike(...) / resolveAndQueueEnemyWorldStrike(...)`，live 分支不再同時維護 resolve 與 queue 細節
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，也已開始共用 `scheduleTimedCombatAction(...)`，不再各自維護一套 `setTimeout` orchestration
 - [x] 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再額外維護第二套 effect dispatch
 - [x] 舊戰報 replay 的逐步播片流程，也已開始抽成 `processBattleReplayStep(...) / scheduleBattleReplayStep(...)`，log、snapshot 與特效派發不再直接塞在 replay effect 的定時器分支內

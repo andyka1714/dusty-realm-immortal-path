@@ -21,10 +21,7 @@ import {
 import {
   ALL_RETIRED_ALIASES,
 } from "./retired_aliases";
-import {
-  buildResolvedRetiredAliasViewGroups,
-  buildRetiredAliasViewGroups,
-} from "./retired_alias_utils";
+import { buildRetiredAliasViewGroups } from "./retired_alias_utils";
 import {
   getSkillPoolEntry,
   normalizeFormalSkillIds,
@@ -246,72 +243,8 @@ export const RETIRED_SKILL_NAME_INDEX: Record<string, Skill> = Object.fromEntrie
   RETIRED_SKILLS.map((skill) => [skill.name, skill])
 ) as Record<string, Skill>;
 
-const battleAbsorbedRetiredAliasViewGroups = buildRetiredAliasViewGroups({
-  activeSkillIds: Object.keys(BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES),
-  passiveSkillIds: Object.keys(BATTLE_ABSORBED_RETIRED_PASSIVE_ALIASES),
-  activeAliases: BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES,
-  passiveAliases: BATTLE_ABSORBED_RETIRED_PASSIVE_ALIASES,
-});
-
-const battleAbsorbedRetiredSkillViewGroups =
-  buildResolvedRetiredAliasViewGroups(battleAbsorbedRetiredAliasViewGroups, SKILLS);
-
-const battleAbsorbedRetiredSkillViewSet = battleAbsorbedRetiredSkillViewGroups.active;
-
-export const BATTLE_ABSORBED_RETIRED_SKILLS = battleAbsorbedRetiredSkillViewSet.skills;
-
-export const BATTLE_ABSORBED_RETIRED_SKILL_MAP: Record<string, Skill> =
-  battleAbsorbedRetiredSkillViewSet.skillMap;
-
-const battleAbsorbedRetiredPassiveSkillViewSet = battleAbsorbedRetiredSkillViewGroups.passive;
-
-export const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILLS =
-  battleAbsorbedRetiredPassiveSkillViewSet.skills;
-
-export const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP: Record<string, Skill> =
-  battleAbsorbedRetiredPassiveSkillViewSet.skillMap;
-
-const retirementReadyRetiredAliasViewGroups = buildRetiredAliasViewGroups({
-  activeSkillIds: Object.keys(RETIREMENT_READY_RETIRED_ACTIVE_ALIASES),
-  passiveSkillIds: Object.keys(RETIREMENT_READY_RETIRED_PASSIVE_ALIASES),
-  activeAliases: RETIREMENT_READY_RETIRED_ACTIVE_ALIASES,
-  passiveAliases: RETIREMENT_READY_RETIRED_PASSIVE_ALIASES,
-});
-
-const retirementReadyRetiredSkillViewGroups =
-  buildResolvedRetiredAliasViewGroups(retirementReadyRetiredAliasViewGroups, SKILLS);
-
-const retirementReadyRetiredSkillViewSet = retirementReadyRetiredSkillViewGroups.active;
-
-export const RETIREMENT_READY_RETIRED_SKILLS = retirementReadyRetiredSkillViewSet.skills;
-
-export const RETIREMENT_READY_RETIRED_SKILL_MAP: Record<string, Skill> =
-  retirementReadyRetiredSkillViewSet.skillMap;
-
-const retirementReadyRetiredPassiveSkillViewSet = retirementReadyRetiredSkillViewGroups.passive;
-
-export const RETIREMENT_READY_RETIRED_PASSIVE_SKILLS =
-  retirementReadyRetiredPassiveSkillViewSet.skills;
-
-export const RETIREMENT_READY_RETIRED_PASSIVE_SKILL_MAP: Record<string, Skill> =
-  retirementReadyRetiredPassiveSkillViewSet.skillMap;
-
 export const isFormalCoreSkill = (skillId: string) =>
   FORMAL_CORE_SKILL_IDS.has(skillId);
-export const isBattleAbsorbedRetiredSkill = (skillId: string) =>
-  Boolean(BATTLE_ABSORBED_RETIRED_SKILL_MAP[skillId]);
-export const getBattleAbsorbedRetiredSkills = () =>
-  [...BATTLE_ABSORBED_RETIRED_SKILLS].sort(compareSkills);
-export const isBattleAbsorbedRetiredPassiveSkill = (skillId: string) =>
-  Boolean(BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP[skillId]);
-export const getBattleAbsorbedRetiredPassiveSkills = () =>
-  [...BATTLE_ABSORBED_RETIRED_PASSIVE_SKILLS].sort(compareSkills);
-export const isRetirementReadyRetiredSkill = (skillId: string) =>
-  Boolean(RETIREMENT_READY_RETIRED_SKILL_MAP[skillId]);
-export const getRetirementReadyRetiredSkills = () =>
-  [...RETIREMENT_READY_RETIRED_SKILLS].sort(compareSkills);
-export const getRetirementReadyRetiredPassiveSkills = () =>
-  [...RETIREMENT_READY_RETIRED_PASSIVE_SKILLS].sort(compareSkills);
 
 export const getSkill = (id: string): Skill | undefined => SKILLS[id];
 export const getFormalSkillId = (skillId: string) => resolveReplacementSkillId(skillId);

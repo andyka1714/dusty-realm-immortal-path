@@ -928,6 +928,51 @@ export const Adventure: React.FC<AdventureProps> = ({
     );
   };
 
+  const resolveAndQueuePlayerWorldStrike = ({
+    now,
+    chosenSkill,
+    targetedMonster,
+  }: {
+    now: number;
+    chosenSkill?: typeof primaryActiveSkill;
+    targetedMonster: {
+      instanceId: string;
+      templateId: string;
+      name: string;
+      x: number;
+      y: number;
+      currentHp: number;
+    };
+  }) => {
+    const strike = resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill);
+    queuePlayerWorldStrike({
+      now,
+      strike,
+      chosenSkill,
+      targetedMonster,
+    });
+  };
+
+  const resolveAndQueueEnemyWorldStrike = ({
+    now,
+    enemyInstanceId,
+    enemyTemplate,
+  }: {
+    now: number;
+    enemyInstanceId: string;
+    enemyTemplate: NonNullable<typeof targetedMonsterTemplate>;
+  }) => {
+    const canUseSpecial = now >= (enemySpecialReadyAtById[enemyInstanceId] ?? 0);
+    const strike = resolveEnemyWorldStrike(enemyTemplate, playerStats, canUseSpecial);
+    queueEnemyWorldStrike({
+      now,
+      enemyInstanceId,
+      enemyTemplate,
+      strike,
+      canUseSpecial,
+    });
+  };
+
   const getPlayerWorldStrikePreviewMessage = (
     targetName: string,
     chosenSkill?: typeof primaryActiveSkill
@@ -1781,11 +1826,8 @@ export const Adventure: React.FC<AdventureProps> = ({
     const chosenSkill = useSkill && primaryActiveSkill && now >= playerSkillReadyAt
       ? primaryActiveSkill
       : undefined;
-    const strike = resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill);
-
-    queuePlayerWorldStrike({
+    resolveAndQueuePlayerWorldStrike({
       now,
-      strike,
       chosenSkill,
       targetedMonster,
     });
@@ -1798,15 +1840,10 @@ export const Adventure: React.FC<AdventureProps> = ({
     enemyTemplate: NonNullable<typeof targetedMonsterTemplate>
   ) => {
     const now = Date.now();
-    const canUseSpecial = now >= (enemySpecialReadyAtById[enemyInstanceId] ?? 0);
-    const strike = resolveEnemyWorldStrike(enemyTemplate, playerStats, canUseSpecial);
-
-    queueEnemyWorldStrike({
+    resolveAndQueueEnemyWorldStrike({
       now,
       enemyInstanceId,
       enemyTemplate,
-      strike,
-      canUseSpecial,
     });
   };
 
