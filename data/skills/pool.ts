@@ -142,6 +142,14 @@ export const SKILL_PROFESSION_POOL_GROUPS = {
     professionPools: SKILL_POOL_ENTRIES_BY_PROFESSION,
     predicate: (entry) => entry.poolStatus === "core",
   }),
+  transition: buildProfessionSkillPools({
+    professionPools: SKILL_POOL_ENTRIES_BY_PROFESSION,
+    predicate: (entry) => entry.poolStatus === "transition",
+  }),
+  legacy: buildProfessionSkillPools({
+    professionPools: SKILL_POOL_ENTRIES_BY_PROFESSION,
+    predicate: (entry) => entry.poolStatus === "legacy",
+  }),
   nonCore: buildProfessionSkillPools({
     professionPools: SKILL_POOL_ENTRIES_BY_PROFESSION,
     predicate: (entry) => entry.poolStatus !== "core",
@@ -156,11 +164,25 @@ export const NON_CORE_SKILL_POOL_REGISTRY = buildSkillPoolRegistry(
   SKILL_PROFESSION_POOL_GROUPS.nonCore
 );
 
+export const TRANSITION_SKILL_POOL_REGISTRY = buildSkillPoolRegistry(
+  SKILL_PROFESSION_POOL_GROUPS.transition
+);
+
+export const LEGACY_SKILL_POOL_REGISTRY = buildSkillPoolRegistry(
+  SKILL_PROFESSION_POOL_GROUPS.legacy
+);
+
 export const SKILL_PROFESSION_POOLS: Record<ProfessionType, SkillPoolEntry[]> =
   SKILL_PROFESSION_POOL_GROUPS.core;
 
 export const NON_CORE_SKILL_PROFESSION_POOLS: Record<ProfessionType, SkillPoolEntry[]> =
   SKILL_PROFESSION_POOL_GROUPS.nonCore;
+
+export const TRANSITION_SKILL_PROFESSION_POOLS: Record<ProfessionType, SkillPoolEntry[]> =
+  SKILL_PROFESSION_POOL_GROUPS.transition;
+
+export const LEGACY_SKILL_PROFESSION_POOLS: Record<ProfessionType, SkillPoolEntry[]> =
+  SKILL_PROFESSION_POOL_GROUPS.legacy;
 
 export const getSkillPoolEntry = (skillId: string) => SKILL_POOL_REGISTRY[skillId];
 

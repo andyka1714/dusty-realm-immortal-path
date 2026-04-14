@@ -875,38 +875,6 @@ export const Adventure: React.FC<AdventureProps> = ({
       execute: () => executeEnemyWorldStrike({ strike, enemyTemplate }),
     });
 
-  const resolveAndQueueWorldStrike = <TStrike,>({
-    resolveStrike,
-    queueStrike,
-  }: {
-    resolveStrike: () => TStrike;
-    queueStrike: (strike: TStrike) => void;
-  }) => {
-    const strike = resolveStrike();
-    queueStrike(strike);
-  };
-
-  const queueResolvedTimedWorldStrike = <TStrike,>({
-    readyAt,
-    canExecute,
-    resolveStrike,
-    queueStrike,
-  }: {
-    readyAt?: number;
-    canExecute?: () => boolean;
-    resolveStrike: (now: number) => TStrike;
-    queueStrike: (now: number, strike: TStrike) => void;
-  }) =>
-    performTimedWorldAction({
-      readyAt,
-      canExecute,
-      execute: (now) =>
-        resolveAndQueueWorldStrike({
-          resolveStrike: () => resolveStrike(now),
-          queueStrike: (strike) => queueStrike(now, strike),
-        }),
-    });
-
   const performResolvedTimedWorldAction = <TStrike,>({
     readyAt,
     canExecute,
@@ -918,11 +886,11 @@ export const Adventure: React.FC<AdventureProps> = ({
     resolveStrike: (now: number) => TStrike | undefined;
     createPlan: (now: number, strike: TStrike) => ReturnType<typeof createResolvedWorldStrikePlan>;
   }) =>
-    queueResolvedTimedWorldStrike({
+    performTimedWorldAction({
       readyAt,
       canExecute,
-      resolveStrike,
-      queueStrike: (now, resolved) => {
+      execute: (now) => {
+        const resolved = resolveStrike(now);
         if (!resolved) return;
         queueResolvedWorldStrike(createPlan(now, resolved));
       },

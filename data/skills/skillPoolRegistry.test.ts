@@ -37,6 +37,8 @@ import {
   getFormalSkillId,
   getFormalSkillByName,
   getSkillsByRealm,
+  LEGACY_SKILL_POOL_REGISTRY,
+  LEGACY_SKILL_PROFESSION_POOLS,
   normalizeLearnedSkills,
   NON_CORE_SKILL_POOL_REGISTRY,
   RETIRED_SKILL_MAP,
@@ -46,6 +48,8 @@ import {
   SKILL_POOL_REGISTRY,
   SKILL_PROFESSION_POOL_GROUPS,
   SKILL_PROFESSION_POOLS,
+  TRANSITION_SKILL_POOL_REGISTRY,
+  TRANSITION_SKILL_PROFESSION_POOLS,
 } from ".";
 
 const sortSkills = <T extends { id: string; minRealm: number; type: string; name: string }>(
@@ -123,6 +127,30 @@ describe("skill pool registry", () => {
     expect(Object.keys(CORE_SKILL_POOL_REGISTRY)).not.toEqual(
       Object.keys(NON_CORE_SKILL_POOL_REGISTRY)
     );
+  });
+
+  it("splits transition and legacy pools into explicit cleanup groups", () => {
+    [ProfessionType.Sword, ProfessionType.Body, ProfessionType.Mage].forEach((profession) => {
+      expect(
+        TRANSITION_SKILL_PROFESSION_POOLS[profession].every(
+          (entry) => entry.poolStatus === "transition"
+        )
+      ).toBe(true);
+      expect(
+        LEGACY_SKILL_PROFESSION_POOLS[profession].every((entry) => entry.poolStatus === "legacy")
+      ).toBe(true);
+      expect(
+        [
+          ...TRANSITION_SKILL_PROFESSION_POOLS[profession],
+          ...LEGACY_SKILL_PROFESSION_POOLS[profession],
+        ]
+          .map((entry) => entry.skillId)
+          .sort()
+      ).toEqual(NON_CORE_SKILL_PROFESSION_POOLS[profession].map((entry) => entry.skillId).sort());
+    });
+
+    expect(Object.values(TRANSITION_SKILL_POOL_REGISTRY).every((entry) => entry.poolStatus === "transition")).toBe(true);
+    expect(Object.values(LEGACY_SKILL_POOL_REGISTRY).every((entry) => entry.poolStatus === "legacy")).toBe(true);
   });
 
   it("ensures prerequisite chains only point to skills of the same profession", () => {
