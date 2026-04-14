@@ -1831,35 +1831,56 @@ export const Adventure: React.FC<AdventureProps> = ({
     resetWorldCombatState();
   };
 
-  const performWorldPlayerAction = (useSkill: boolean) => {
-    if (!targetedMonster || !targetedMonsterTemplate || !canEngageTarget) return false;
+  const performTimedWorldAction = ({
+    readyAt,
+    canExecute = () => true,
+    execute,
+  }: {
+    readyAt?: number;
+    canExecute?: () => boolean;
+    execute: (now: number) => void;
+  }) => {
+    if (!canExecute()) return false;
 
     const now = Date.now();
-    if (now < playerActionReadyAt) return false;
+    if (readyAt !== undefined && now < readyAt) return false;
 
-    const chosenSkill = useSkill && primaryActiveSkill && now >= playerSkillReadyAt
-      ? primaryActiveSkill
-      : undefined;
-    resolveAndQueuePlayerWorldStrike({
-      now,
-      chosenSkill,
-      targetedMonster,
-    });
-
+    execute(now);
     return true;
+  };
+
+  const performWorldPlayerAction = (useSkill: boolean) => {
+    return performTimedWorldAction({
+      readyAt: playerActionReadyAt,
+      canExecute: () => Boolean(targetedMonster && targetedMonsterTemplate && canEngageTarget),
+      execute: (now) => {
+        if (!targetedMonster) return;
+
+        const chosenSkill = useSkill && primaryActiveSkill && now >= playerSkillReadyAt
+          ? primaryActiveSkill
+          : undefined;
+        resolveAndQueuePlayerWorldStrike({
+          now,
+          chosenSkill,
+          targetedMonster,
+        });
+      },
+    });
   };
 
   const performWorldEnemyAction = (
     enemyInstanceId: string,
     enemyTemplate: NonNullable<typeof targetedMonsterTemplate>
-  ) => {
-    const now = Date.now();
-    resolveAndQueueEnemyWorldStrike({
-      now,
-      enemyInstanceId,
-      enemyTemplate,
+  ) =>
+    performTimedWorldAction({
+      execute: (now) => {
+        resolveAndQueueEnemyWorldStrike({
+          now,
+          enemyInstanceId,
+          enemyTemplate,
+        });
+      },
     });
-  };
 
   // Stop auto-move if battle starts or map changes
   useEffect(() => {

@@ -1,7 +1,6 @@
 import { MajorRealm, ProfessionType, Skill } from "../../types";
 import { getSkillPoolEntry } from "./pool";
 import {
-  buildRetiredAliasExportSet,
   mergeRetiredAliasRecords,
 } from "./retired_alias_utils";
 import { MAHAYANA_SKILLS } from "./mahayana";
@@ -332,30 +331,3 @@ export const RETIRED_ACTIVE_ALIASES_BY_REALM: Partial<
 export const ALL_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = mergeRetiredAliasRecords(
   ...Object.values(RETIRED_ACTIVE_ALIASES_BY_REALM)
 );
-
-const battleAbsorbedRetiredActiveAliasExports = buildRetiredAliasExportSet({
-  skillIds: [
-  "s_vr_active",
-  "s_bi_active",
-  "b_bi_active",
-  "m_bi_active",
-  "m_ma_active",
-  "b_tr_active",
-  "s_im_active",
-  "b_im_active",
-  "m_im_active",
-  "s_ie_active",
-  "b_ie_active",
-  "m_ie_active",
-  ],
-  allAliases: ALL_RETIRED_ACTIVE_ALIASES,
-});
-
-export const BATTLE_ABSORBED_RETIRED_ACTIVE_SKILL_IDS =
-  battleAbsorbedRetiredActiveAliasExports.skillIds;
-
-export const BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES: Record<string, Skill> =
-  battleAbsorbedRetiredActiveAliasExports.aliases;
-
-export const BATTLE_ABSORBED_RETIRED_ACTIVE_ALIAS_VIEWS =
-  battleAbsorbedRetiredActiveAliasExports.views;
