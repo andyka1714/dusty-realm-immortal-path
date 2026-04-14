@@ -814,6 +814,14 @@ export const Adventure: React.FC<AdventureProps> = ({
     buildPlan: (strike: TStrike) => TimedCombatQueuePlan;
   }) => buildPlan(resolveStrike());
 
+  const queueResolvedCombatPlan = (
+    resolvePlan: () => TimedCombatQueuePlan | undefined
+  ) => {
+    const plan = resolvePlan();
+    if (!plan) return undefined;
+    return queueTimedCombatPlan(plan);
+  };
+
   const getPlayerWorldStrikePreviewMessage = (
     targetName: string,
     chosenSkill?: typeof primaryActiveSkill
@@ -1667,9 +1675,7 @@ export const Adventure: React.FC<AdventureProps> = ({
       readyAt,
       canExecute,
       execute: (now) => {
-        const plan = resolvePlan(now);
-        if (!plan) return;
-        queueTimedCombatPlan(plan);
+        queueResolvedCombatPlan(() => resolvePlan(now));
       },
     });
 
@@ -2150,7 +2156,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     }
 
     const nextLog = replayQueue[0];
-    const timer = queueTimedCombatPlan(createBattleReplayStepPlan(nextLog));
+    const timer = queueResolvedCombatPlan(() => createBattleReplayStepPlan(nextLog));
 
     return () => clearTimeout(timer);
   }, [isReplayingBattle, replayQueue, battleSnapshot, displayedLogs, currentEnemyInstanceId, activeMonsters, playerPosition, dispatch]);
