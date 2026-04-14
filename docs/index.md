@@ -13,7 +13,7 @@
 ### [02_Gameplay] 遊玩系統
 具體的遊戲功能模組。
 - [cultivation.md](02_Gameplay/cultivation.md): 修煉、閉關、境界突破流程，以及高境界修為乘區 / 追趕規格入口。
-- [combat.md](02_Gameplay/combat.md): 地圖內直接出手、世界戰鬥第一版多目標 AOE、時間軸驗證內核、怪物特招、技能專屬效果、world strike result helper 與共用 battle resolver。
+- [combat.md](02_Gameplay/combat.md): 地圖內直接出手、世界戰鬥第一版多目標 AOE、時間軸驗證內核、怪物特招、技能專屬效果、world strike result helper、Adventure world strike preview helper 與共用 battle resolver。
 - [inventory.md](02_Gameplay/inventory.md): 背包管理、裝備限制、技能書學習、formal core 技能池與退場技能映射規則。
 - [workshop.md](02_Gameplay/workshop.md): 洞府功能 (聚靈陣、煉丹、煉器)。
 
@@ -51,7 +51,7 @@
 - [09_即時戰鬥改造分析.md](06_Balance_Audit/09_即時戰鬥改造分析.md): 從戰報回放轉成即時碰撞戰鬥的架構分析，以及 cooldown / opener / passive-proc / defensive-passive / world-strike result / status logger 等 shared resolver 的收斂進度。
 - [10_技能數量與功能分類收斂.md](06_Balance_Audit/10_技能數量與功能分類收斂.md): 技能數量控制、功能分類與主流遊戲對照分析。
 - [11_三職業核心技能池草案.md](06_Balance_Audit/11_三職業核心技能池草案.md): 劍修、體修、法修的核心技能池草案，以及 retired 技能收斂到 `battle-absorbed / retirement-ready` 的正式規則，並持續對齊 world strike / timeline combat。
-- 補充：formal realm view 現在已透過單一 retired-alias 剝離 helper 移除 `retirement-ready active + battle-absorbed passive`，realm dataset 更接近正式技能池視角；formal core 與 retired passive alias 也都已開始退出 generic `passiveEffectTags` fallback，舊技能則仍保留中央 alias / 相容查詢層。
+- 補充：formal realm view 現在已透過單一 retired-alias 剝離 helper 移除 `retirement-ready active + battle-absorbed passive`，realm dataset 更接近正式技能池視角；所有 passive 也都已退出 generic `passiveEffectTags` fallback，舊技能則仍保留中央 alias / 相容查詢層。
 - [12_技能書實作收斂.md](06_Balance_Audit/12_技能書實作收斂.md): 技能書正式實作、來源規則、前置條件與與程式對齊結果。
 - [13_3D渲染與戰鬥呈現評估.md](06_Balance_Audit/13_3D渲染與戰鬥呈現評估.md): 3D、Three.js 與目前 Pixi 戰鬥呈現層的可行性評估。
 - [14_整體改造Checklist.md](06_Balance_Audit/14_整體改造Checklist.md): 本輪所有已完成 / 未完成細項的逐條追蹤表。

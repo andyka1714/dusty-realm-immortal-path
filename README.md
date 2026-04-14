@@ -13,6 +13,7 @@
 - 地圖戰鬥已成主路徑：玩家可在地圖內直接移動、鎖定目標、普攻與施放主動術式；投射物、AOE、浮字與掉落都直接在場景內完成。
 - `runAutoBattle()` 目前保留作為時間軸數值驗證內核；世界戰鬥、時間軸戰鬥與 HUD 已開始共用 cooldown、status、passive flags 與部分 incoming-status resolver。
 - 戰鬥內核已開始收斂成共用 helper：開場敘事、被動觸發、主動術式施加狀態、防禦型被動、致命保命與 enemy special 抗性，都不再完全散寫在 `runAutoBattle()` 主流程裡。
+- `Adventure` 內 player / enemy world strike 的 preview 與延遲執行排程，也已開始共用 helper，地圖即時戰鬥不再各自維護 readyAt / 狀態 / 戰鬥訊息更新。
 - world strike 結果組裝也已開始拆成 player / enemy 專用 helper，timing 與 area metadata 不再長期散寫在 strike resolver 內。
 - 靈化期核心被動 `劍意化形 / 肉身成聖 / 道法自然` 也已補進 timeline combat 開場待命訊息；其中 `道法自然` 也已開始在 player world strike 顯式回報。
 - 技能改為透過技能書學習，不再隨職業 / 突破自動送；技能池也已切成 `formal core / retired` 視角，retired 進一步收斂為 `battle-absorbed / retirement-ready`。
@@ -20,6 +21,7 @@
 - formal core 被動的基礎屬性收益，現在也已改成逐招明確對照表；absorbed retired passive 會透過同一份 formal 對照承接，不再靠職業 / 境界通用公式補值。
 - retired passive alias 現在也已跟著 explicit passive 視角退出 generic `passiveEffectTags` fallback，資料層不再把舊被動誤導成仍主要依賴通用模板。
 - 多個高境界被動已補齊 world strike / enemy world strike / enemy special world strike 對齊，避免只有時間軸戰鬥才看得到實際效果。
+- 所有 passive 現在都已改成逐招專屬效果，generic `passiveEffectTags` fallback 已自技能資料層移除。
 - 第一批高境界 retired active alias 也已補上明確 realtime metadata，避免範圍、目標數與施法節奏持續依賴 default fallback。
 - `化神 -> 仙帝` 的後期修為乘區、高境界追趕機制，以及 `凡人 -> 仙帝` 的三職業 TTK 目標表，也已正式收進 progression registry 與測試，不再只停在 balance audit 文件。
 - UI 殼層已開始統一：`GamePanel / Modal / GameTooltip / GameHintBubble` 正在收斂成同一套遊戲化語言，`GamePanel / Modal / GameTooltip` 的標題層也已開始共用 `GameTitleStack`。

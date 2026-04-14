@@ -29,13 +29,13 @@
 - 技能池已收斂出 `core / battle-absorbed / retirement-ready` 的正式視圖，realm dataset 已開始排除 retired alias
 - `runAutoBattle()` 已拆出多個 shared helper，world strike 與 timeline combat 的冷卻、status、runtime、outcome 正持續收斂
 - `GameTooltip / GameHintBubble / GamePanel / Modal / GameSection` 已成為主要 UI 殼層語言，且 `Dashboard / QuestModal` 內部資訊區也已開始套入同一套 section chrome
-- 已完成專屬接線的一批 passive，包含練氣三職業核心被動與 retired passive alias，現在都已開始退出 generic `passiveEffectTags` fallback，技能資料不再假裝它們仍主要依賴通用模板
+- 所有 passive，包含 formal core 與 retired passive alias，現在都已退出 generic `passiveEffectTags` fallback，技能資料層只保留逐招專屬效果
+- `Adventure` 內 player / enemy world strike 的 preview 與延遲執行排程，也已開始共用 helper，地圖即時戰鬥分支不再各自維護 readyAt / 狀態 / 戰鬥訊息流程
 
 ## 尚未結案的主線
 
 - 刪除或合併重複功能技能
 - 高境界技能欄位與效果補完
-- 被動技能逐招專屬效果最後收口
 - 世界戰鬥與 timeline battle 收成單一最終引擎
 - `README / Gameplay / World / Audit` 最後一輪完全交叉校對
 - 面板內部視覺的最後一輪遊戲化收口

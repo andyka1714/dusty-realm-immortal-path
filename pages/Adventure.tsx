@@ -728,6 +728,79 @@ export const Adventure: React.FC<AdventureProps> = ({
     setEnemySpecialReadyAtById({});
   };
 
+  const scheduleWorldActionExecution = (
+    delayMs: number | undefined,
+    execute: () => void
+  ) => {
+    if ((delayMs ?? 0) > 0) {
+      const timer = setTimeout(() => {
+        worldActionTimersRef.current.delete(timer);
+        execute();
+      }, delayMs);
+      worldActionTimersRef.current.add(timer);
+      return;
+    }
+
+    execute();
+  };
+
+  const applyPlayerWorldStrikePreview = ({
+    now,
+    strike,
+    chosenSkill,
+    targetName,
+  }: {
+    now: number;
+    strike: ReturnType<typeof resolvePlayerWorldStrike>;
+    chosenSkill?: typeof primaryActiveSkill;
+    targetName: string;
+  }) => {
+    setWorldCombatTargetStatuses(strike.enemyStatusNames);
+    setWorldCombatPlayerStatuses(strike.playerStatusNames);
+    setWorldPlayerShield((prev) => prev + strike.playerShieldGain);
+    setWorldLastCombatMessage(
+      chosenSkill
+        ? `你開始施展【${chosenSkill.name}】。`
+        : `你朝 ${targetName} 發動攻擊。`
+    );
+    setPlayerActionReadyAt(now + strike.nextActionDelayMs);
+    if (chosenSkill) {
+      setPlayerSkillReadyAt(now + strike.skillCooldownMs);
+    }
+  };
+
+  const applyEnemyWorldStrikePreview = ({
+    now,
+    enemyInstanceId,
+    enemyName,
+    strike,
+    canUseSpecial,
+  }: {
+    now: number;
+    enemyInstanceId: string;
+    enemyName: string;
+    strike: ReturnType<typeof resolveEnemyWorldStrike>;
+    canUseSpecial: boolean;
+  }) => {
+    setEnemyActionReadyAtById((prev) => ({
+      ...prev,
+      [enemyInstanceId]: now + strike.nextActionDelayMs,
+    }));
+
+    if (canUseSpecial && strike.specialCooldownMs > 0) {
+      setEnemySpecialReadyAtById((prev) => ({
+        ...prev,
+        [enemyInstanceId]: now + strike.specialCooldownMs,
+      }));
+    }
+
+    setWorldLastCombatMessage(
+      strike.skillName
+        ? `${enemyName} 正在施展【${strike.skillName}】。`
+        : `${enemyName} 朝你撲殺而來。`
+    );
+  };
+
   const recoverAfterWorldKill = () => {
     const healAmount = Math.max(8, Math.floor(playerStats.maxHp * 0.08));
     setWorldPlayerHp((prev) => Math.min(playerStats.maxHp, prev + healAmount));
@@ -832,18 +905,12 @@ export const Adventure: React.FC<AdventureProps> = ({
     }
 
     setWorldCombatTargetId(targetedMonster.instanceId);
-    setWorldCombatTargetStatuses(strike.enemyStatusNames);
-    setWorldCombatPlayerStatuses(strike.playerStatusNames);
-    setWorldPlayerShield((prev) => prev + strike.playerShieldGain);
-    setWorldLastCombatMessage(
-      chosenSkill
-        ? `你開始施展【${chosenSkill.name}】。`
-        : `你朝 ${targetedMonster.name} 發動攻擊。`
-    );
-    setPlayerActionReadyAt(now + strike.nextActionDelayMs);
-    if (chosenSkill) {
-      setPlayerSkillReadyAt(now + strike.skillCooldownMs);
-    }
+    applyPlayerWorldStrikePreview({
+      now,
+      strike,
+      chosenSkill,
+      targetName: targetedMonster.name,
+    });
 
     const executeStrike = () => {
       const impactedMonsters = getWorldSkillAreaTargets({
@@ -943,15 +1010,7 @@ export const Adventure: React.FC<AdventureProps> = ({
       }
     };
 
-    if ((strike.executionTimeMs ?? 0) > 0) {
-      const timer = setTimeout(() => {
-        worldActionTimersRef.current.delete(timer);
-        executeStrike();
-      }, strike.executionTimeMs);
-      worldActionTimersRef.current.add(timer);
-    } else {
-      executeStrike();
-    }
+    scheduleWorldActionExecution(strike.executionTimeMs, executeStrike);
 
     return true;
   };
@@ -977,22 +1036,13 @@ export const Adventure: React.FC<AdventureProps> = ({
       }));
     }
 
-    setEnemyActionReadyAtById((prev) => ({
-      ...prev,
-      [enemyInstanceId]: now + strike.nextActionDelayMs,
-    }));
-    if (canUseSpecial && strike.specialCooldownMs > 0) {
-      setEnemySpecialReadyAtById((prev) => ({
-        ...prev,
-        [enemyInstanceId]: now + strike.specialCooldownMs,
-      }));
-    }
-
-    setWorldLastCombatMessage(
-      strike.skillName
-        ? `${enemyTemplate.name} 正在施展【${strike.skillName}】。`
-        : `${enemyTemplate.name} 朝你撲殺而來。`
-    );
+    applyEnemyWorldStrikePreview({
+      now,
+      enemyInstanceId,
+      enemyName: enemyTemplate.name,
+      strike,
+      canUseSpecial,
+    });
 
     const executeStrike = () => {
       let incomingDamage = strike.damage;
@@ -1064,15 +1114,7 @@ export const Adventure: React.FC<AdventureProps> = ({
       }
     };
 
-    if ((strike.executionTimeMs ?? 0) > 0) {
-      const timer = setTimeout(() => {
-        worldActionTimersRef.current.delete(timer);
-        executeStrike();
-      }, strike.executionTimeMs);
-      worldActionTimersRef.current.add(timer);
-    } else {
-      executeStrike();
-    }
+    scheduleWorldActionExecution(strike.executionTimeMs, executeStrike);
   };
 
   // Stop auto-move if battle starts or map changes

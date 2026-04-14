@@ -5,7 +5,7 @@ import { BOSS_ENEMIES } from "../enemies/boss";
 import { QUESTS } from "../quests";
 import { SHOPS } from "../shops";
 import { ConsumableItem } from "../../types";
-import { EXPLICIT_PASSIVE_EFFECT_SKILL_IDS, FORMAL_CORE_SKILLS, SKILLS } from ".";
+import { FORMAL_CORE_SKILLS, SKILLS } from ".";
 import { getSkillManualId, SKILL_MANUAL_SOURCE_REGISTRY } from "../items/manuals";
 
 const getAllObtainableItemIds = () => {
@@ -81,21 +81,14 @@ describe("skill book coverage", () => {
       });
   });
 
-  it("keeps passive tag fallback only on passives that still rely on generic descriptors", () => {
+  it("keeps all passive skills on explicit effect wiring without generic passive tags", () => {
     Object.values(SKILLS)
       .filter((skill) => skill.type === "Passive")
       .forEach((skill) => {
-        if (EXPLICIT_PASSIVE_EFFECT_SKILL_IDS.has(skill.id)) {
-          expect(
-            skill.passiveEffectTags,
-            `${skill.id} 已轉成逐招專屬效果，不應再保留 generic passiveEffectTags`
-          ).toBeUndefined();
-        } else {
-          expect(
-            skill.passiveEffectTags && skill.passiveEffectTags.length > 0,
-            `${skill.id} 缺少 passiveEffectTags`
-          ).toBe(true);
-        }
+        expect(
+          skill.passiveEffectTags,
+          `${skill.id} 已全面改成逐招專屬效果，不應再保留 generic passiveEffectTags`
+        ).toBeUndefined();
       });
   });
 

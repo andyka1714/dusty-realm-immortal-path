@@ -107,79 +107,6 @@ const getDefaultRealtimeShape = (
   }
 };
 
-const getDefaultPassiveTags = (skill: Skill): Skill["passiveEffectTags"] => {
-  if (skill.type !== "Passive") return undefined;
-
-  const text = `${skill.name} ${skill.description}`;
-  const tags = new Set<NonNullable<Skill["passiveEffectTags"]>[number]>();
-
-  if (/暴擊|劍心|劍脈/.test(text)) tags.add("crit");
-  if (/減傷|銅皮|防禦|護體/.test(text)) tags.add("damage_reduction");
-  if (/反彈|反傷|反震|荊棘/.test(text)) tags.add("reflect");
-  if (/護盾/.test(text)) tags.add("shield");
-  if (/冷卻|重置/.test(text)) tags.add("cooldown_reduction");
-  if (/回復|回春|重生|生命/.test(text)) tags.add("regen");
-  if (/法力|靈力/.test(text)) tags.add("mana_flow");
-  if (/閃避/.test(text)) tags.add("evasion");
-  if (/破甲|無視.*防禦/.test(text)) tags.add("armor_break");
-  if (/致命傷害|抵擋該次傷害/.test(text)) tags.add("death_prevention");
-  if (/免疫控制/.test(text)) tags.add("control_immunity");
-  if (/解除自身一個負面狀態/.test(text)) tags.add("cleanse");
-
-  if (tags.size === 0) {
-    switch (skill.profession) {
-      case "Sword":
-        tags.add("offense");
-        break;
-      case "Body":
-        tags.add("durability");
-        break;
-      case "Mage":
-        tags.add("spellpower");
-        break;
-    }
-  }
-
-  return Array.from(tags);
-};
-
-export const EXPLICIT_PASSIVE_EFFECT_SKILL_IDS = new Set<string>([
-  "s_q_passive",
-  "s_f_passive",
-  "s_g_passive",
-  "s_n_passive",
-  "s_sf_passive",
-  "s_vr_passive",
-  "s_bi_passive",
-  "s_ma_passive",
-  "s_tr_passive",
-  "s_im_passive",
-  "s_ie_passive",
-  "b_q_passive",
-  "b_f_passive",
-  "b_g_passive",
-  "b_n_passive",
-  "b_sf_passive",
-  "b_vr_passive",
-  "b_bi_passive",
-  "b_ma_passive",
-  "b_tr_passive",
-  "b_im_passive",
-  "b_ie_passive",
-  "m_q_passive",
-  "m_f_passive",
-  "m_g_passive",
-  "m_n_passive",
-  "m_sf_passive",
-  "m_vr_passive",
-  "m_bi_passive",
-  "m_ma_passive",
-  "m_tr_passive",
-  "m_im_passive",
-  "m_ie_passive",
-  ...Object.keys(ALL_RETIRED_PASSIVE_ALIASES),
-]);
-
 const normalizeSkill = (skill: Skill): Skill => {
   const realtime = getDefaultRealtimeShape(skill);
   const poolEntry = getSkillPoolEntry(skill.id);
@@ -193,11 +120,7 @@ const normalizeSkill = (skill: Skill): Skill => {
     areaShape: skill.areaShape ?? realtime.areaShape,
     areaRadius: skill.areaRadius ?? realtime.areaRadius,
     maxTargets: skill.maxTargets ?? realtime.maxTargets,
-    passiveEffectTags:
-      skill.passiveEffectTags ??
-      (EXPLICIT_PASSIVE_EFFECT_SKILL_IDS.has(skill.id)
-        ? undefined
-        : getDefaultPassiveTags(skill)),
+    passiveEffectTags: skill.passiveEffectTags,
     poolStatus: skill.poolStatus ?? poolEntry?.poolStatus,
     formalRole: skill.formalRole ?? poolEntry?.formalRole,
     formalSourceTier: skill.formalSourceTier ?? poolEntry?.formalSourceTier,

@@ -28,7 +28,6 @@ import {
   BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP,
   BATTLE_ABSORBED_RETIRED_SKILLS,
   BATTLE_ABSORBED_RETIRED_SKILL_MAP,
-  EXPLICIT_PASSIVE_EFFECT_SKILL_IDS,
   FORMAL_CORE_ACTIVE_SKILLS,
   FORMAL_CORE_SKILL_MAP,
   FORMAL_CORE_SKILL_NAME_INDEX,
@@ -481,29 +480,14 @@ describe("skill pool registry", () => {
     expect(fusionMage?.projectileSpeed).toBe(12);
   });
 
-  it("removes generic passive tags from skills that already use explicit passive wiring", () => {
-    const explicitPassiveIds = [
-      "s_q_passive",
-      "b_q_passive",
-      "m_q_passive",
-      "s_f_passive",
-      "b_tr_passive",
-      "m_ie_passive",
-      "s_tr_passive",
-      "b_ie_passive",
-      "m_im_passive",
-    ];
-    explicitPassiveIds.forEach((skillId) => {
-      expect(EXPLICIT_PASSIVE_EFFECT_SKILL_IDS.has(skillId)).toBe(true);
-      expect(SKILLS[skillId]?.passiveEffectTags).toBeUndefined();
-    });
+  it("removes generic passive tags from all passive skills and retired passive aliases", () => {
+    Object.values(SKILLS)
+      .filter((skill) => skill.type === "Passive")
+      .forEach((skill) => {
+        expect(SKILLS[skill.id]?.passiveEffectTags).toBeUndefined();
+      });
 
-    expect(SKILLS.s_f_passive?.passiveEffectTags).toBeUndefined();
-  });
-
-  it("removes generic passive tags from all retired passive aliases that now inherit explicit passive wiring", () => {
     BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS.forEach((skill) => {
-      expect(EXPLICIT_PASSIVE_EFFECT_SKILL_IDS.has(skill.id)).toBe(true);
       expect(SKILLS[skill.id]?.passiveEffectTags).toBeUndefined();
     });
   });
