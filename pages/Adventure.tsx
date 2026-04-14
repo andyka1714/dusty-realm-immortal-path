@@ -929,6 +929,67 @@ export const Adventure: React.FC<AdventureProps> = ({
     }));
   };
 
+  const dispatchWorldStrikeCastEffect = ({
+    color,
+    colorInt,
+    targetX,
+    targetY,
+    durationMs,
+  }: {
+    color: string;
+    colorInt: number;
+    targetX: number;
+    targetY: number;
+    durationMs: number;
+  }) => {
+    dispatch(addVisualEffect({
+      type: 'cast',
+      text: '',
+      color,
+      colorInt,
+      targetX,
+      targetY,
+      radius: 0.7,
+      durationMs,
+    }));
+  };
+
+  const applyWorldStrikeImpactBundle = ({
+    color,
+    colorInt,
+    targetX,
+    targetY,
+    damageText,
+    damageTextColor,
+    damageTextColorInt,
+    radius,
+  }: {
+    color: string;
+    colorInt: number;
+    targetX: number;
+    targetY: number;
+    damageText: string;
+    damageTextColor: string;
+    damageTextColorInt: number;
+    radius: number;
+  }) => {
+    dispatchWorldStrikeImpactEffect({
+      color,
+      colorInt,
+      targetX,
+      targetY,
+      radius,
+      durationMs: 220,
+    });
+    dispatchWorldStrikeTextEffect({
+      text: damageText,
+      color: damageTextColor,
+      colorInt: damageTextColorInt,
+      x: targetX,
+      y: targetY,
+    });
+  };
+
   const applyPlayerWorldStrikePreview = ({
     now,
     strike,
@@ -1069,16 +1130,13 @@ export const Adventure: React.FC<AdventureProps> = ({
     const strike = resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill);
 
     if ((strike.executionTimeMs > 0 || chosenSkill?.castTimeMs) && chosenSkill) {
-      dispatch(addVisualEffect({
-        type: 'cast',
-        text: '',
+      dispatchWorldStrikeCastEffect({
         color: chosenSkill.profession === ProfessionType.Mage ? '#60a5fa' : '#f59e0b',
         colorInt: chosenSkill.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
         targetX: playerPosition.x,
         targetY: playerPosition.y,
-        radius: 0.7,
         durationMs: Math.max(180, chosenSkill.castTimeMs ?? 220),
-      }));
+      });
     }
 
     const executeStrike = () => {
@@ -1100,20 +1158,15 @@ export const Adventure: React.FC<AdventureProps> = ({
           damage: strike.damage,
         }));
 
-        dispatchWorldStrikeImpactEffect({
+        applyWorldStrikeImpactBundle({
           color: '#f59e0b',
           colorInt: chosenSkill?.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
           targetX: monster.x,
           targetY: monster.y,
           radius: strike.areaShape && strike.areaShape !== 'single' ? 0.8 : 0.45,
-          durationMs: 220,
-        });
-        dispatchWorldStrikeTextEffect({
-          text: `${index === 0 && strike.isCrit ? '暴擊 ' : ''}${strike.damage}`,
-          color: index === 0 && strike.isCrit ? '#facc15' : '#ffffff',
-          colorInt: index === 0 && strike.isCrit ? 0xfacc15 : 0xffffff,
-          x: monster.x,
-          y: monster.y,
+          damageText: `${index === 0 && strike.isCrit ? '暴擊 ' : ''}${strike.damage}`,
+          damageTextColor: index === 0 && strike.isCrit ? '#facc15' : '#ffffff',
+          damageTextColorInt: index === 0 && strike.isCrit ? 0xfacc15 : 0xffffff,
         });
       });
 
@@ -1200,16 +1253,13 @@ export const Adventure: React.FC<AdventureProps> = ({
     const strike = resolveEnemyWorldStrike(enemyTemplate, playerStats, canUseSpecial);
 
     if (strike.skillName) {
-      dispatch(addVisualEffect({
-        type: 'cast',
-        text: '',
+      dispatchWorldStrikeCastEffect({
         color: '#f87171',
         colorInt: 0xf87171,
         targetX: targetedMonster?.x ?? playerPosition.x,
         targetY: targetedMonster?.y ?? playerPosition.y,
-        radius: 0.7,
         durationMs: 220,
-      }));
+      });
     }
 
     const executeStrike = () => {
@@ -1257,20 +1307,15 @@ export const Adventure: React.FC<AdventureProps> = ({
           durationMs: 360,
         });
       }
-      dispatchWorldStrikeImpactEffect({
+      applyWorldStrikeImpactBundle({
         color: '#f87171',
         colorInt: 0xf87171,
         targetX: playerPosition.x,
         targetY: playerPosition.y,
         radius: 0.45,
-        durationMs: 220,
-      });
-      dispatchWorldStrikeTextEffect({
-        text: absorbed > 0 ? `-${incomingDamage} / 格擋 ${absorbed}` : `-${incomingDamage}`,
-        color: absorbed > 0 ? '#67e8f9' : '#fca5a5',
-        colorInt: absorbed > 0 ? 0x67e8f9 : 0xfca5a5,
-        x: playerPosition.x,
-        y: playerPosition.y,
+        damageText: absorbed > 0 ? `-${incomingDamage} / 格擋 ${absorbed}` : `-${incomingDamage}`,
+        damageTextColor: absorbed > 0 ? '#67e8f9' : '#fca5a5',
+        damageTextColorInt: absorbed > 0 ? 0x67e8f9 : 0xfca5a5,
       });
 
       if (nextHp <= 0) {
