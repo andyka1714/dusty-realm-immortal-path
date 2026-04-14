@@ -165,6 +165,7 @@
 - [x] 更多已落地的 pending-retirement retired 被動技能已正式推進到 battle-absorbed 分類，降低後續本體刪整阻力
 - [x] retirement-ready / battle-absorbed 的 retired alias ID 清單已回收至 alias 檔本體，skill index 不再重複維護同一份清單
 - [x] formal realm dataset 已不再透過 retired-alias 剝離 helper 做二次清洗，直接以正式 `core` skill set 組裝
+- [x] `SKILL_PROFESSION_POOLS` 現在也已正式鎖定為 `core only`，非核心技能改由 `NON_CORE_SKILL_PROFESSION_POOLS` 承接，不再和正式職業池混在同一組
 - [x] retired skill 的 active / passive 正式視圖分組，現在已正式回收到 alias util 的單一路徑，skill index 不再各自維護兩組近似樣板
 - [x] `battle-absorbed / retirement-ready` 的 active / passive resolved skill view，也已開始共用 `buildResolvedRetiredSkillViewGroups(...)`，skill index 不再各自維護兩段近似的 resolved view set 組裝
 - [x] `battle-absorbed / retirement-ready` 的 retired skill resolved view，也已正式回收到 alias util 層，skill index 不再手組 active / passive 解析樣板
@@ -446,7 +447,7 @@
 - [x] `Workshop` 的聚靈陣 / 煉丹 / 煉器卡片，也已開始改走 `GameSection`，洞府百業不再維持獨立 card chrome
 - [x] `Adventure` 的底部戰鬥快捷列也已開始改走 `GameSection`，地圖即時戰鬥操作面已接上同一套 section chrome
 - [x] `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，也已開始共用 queue / preview / resolution helper，地圖即時戰鬥分支不再各自維護兩套 readyAt / 傷害文案流程
-- [x] `Adventure` 內 player / enemy world strike 的 queue orchestration，也已開始抽成 `queuePlayerWorldStrike(...) / queueEnemyWorldStrike(...)`，player / enemy 分支不再各自串接 cast / preview / execute 流程
+- [x] `Adventure` 內 player / enemy world strike 的 queue orchestration，也已開始回收到 `createPlayerWorldStrikePlan(...) / createEnemyWorldStrikePlan(...) + queueResolvedWorldStrike(...)`，player / enemy 分支不再各自串接 cast / preview / execute 流程
 - [x] `Adventure` 內 player / enemy world strike 的 action plan 也已開始抽成 `createPlayerWorldStrikePlan(...) / createEnemyWorldStrikePlan(...)`，queue helper 不再各自臨時拼接 cast、preview 與 execute 閉包
 - [x] `Adventure` 內 player / enemy world strike 的 resolve + queue 串接，也已開始共用 `resolveAndQueueWorldStrike(...)`，live 分支不再同時維護 resolve 與 queue 細節
 - [x] `Adventure` 內 player / enemy world strike 的出手入口，也已開始共用 `performTimedWorldAction(...)`，live 分支不再各自維護 `Date.now()` 與 readyAt 判定樣板

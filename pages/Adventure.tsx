@@ -875,58 +875,6 @@ export const Adventure: React.FC<AdventureProps> = ({
       execute: () => executeEnemyWorldStrike({ strike, enemyTemplate }),
     });
 
-  const queuePlayerWorldStrike = ({
-    now,
-    strike,
-    chosenSkill,
-    targetedMonster,
-  }: {
-    now: number;
-    strike: ReturnType<typeof resolvePlayerWorldStrike>;
-    chosenSkill?: typeof primaryActiveSkill;
-    targetedMonster: {
-      instanceId: string;
-      templateId: string;
-      name: string;
-      x: number;
-      y: number;
-      currentHp: number;
-    };
-  }) => {
-    queueResolvedWorldStrike(
-      createPlayerWorldStrikePlan({
-        now,
-        strike,
-        chosenSkill,
-        targetedMonster,
-      })
-    );
-  };
-
-  const queueEnemyWorldStrike = ({
-    now,
-    enemyInstanceId,
-    enemyTemplate,
-    strike,
-    canUseSpecial,
-  }: {
-    now: number;
-    enemyInstanceId: string;
-    enemyTemplate: NonNullable<typeof targetedMonsterTemplate>;
-    strike: ReturnType<typeof resolveEnemyWorldStrike>;
-    canUseSpecial: boolean;
-  }) => {
-    queueResolvedWorldStrike(
-      createEnemyWorldStrikePlan({
-        now,
-        enemyInstanceId,
-        enemyTemplate,
-        strike,
-        canUseSpecial,
-      })
-    );
-  };
-
   const resolveAndQueueWorldStrike = <TStrike,>({
     resolveStrike,
     queueStrike,
@@ -1831,12 +1779,14 @@ export const Adventure: React.FC<AdventureProps> = ({
       },
       queueStrike: (now, resolved) => {
         if (!resolved) return;
-        queuePlayerWorldStrike({
-          now,
-          strike: resolved.strike,
-          chosenSkill: resolved.chosenSkill,
-          targetedMonster: resolved.targetedMonster,
-        });
+        queueResolvedWorldStrike(
+          createPlayerWorldStrikePlan({
+            now,
+            strike: resolved.strike,
+            chosenSkill: resolved.chosenSkill,
+            targetedMonster: resolved.targetedMonster,
+          })
+        );
       },
     });
   };
@@ -1854,13 +1804,15 @@ export const Adventure: React.FC<AdventureProps> = ({
         };
       },
       queueStrike: (now, resolved) => {
-        queueEnemyWorldStrike({
-          now,
-          enemyInstanceId,
-          enemyTemplate,
-          strike: resolved.strike,
-          canUseSpecial: resolved.canUseSpecial,
-        });
+        queueResolvedWorldStrike(
+          createEnemyWorldStrikePlan({
+            now,
+            enemyInstanceId,
+            enemyTemplate,
+            strike: resolved.strike,
+            canUseSpecial: resolved.canUseSpecial,
+          })
+        );
       },
     });
 

@@ -30,6 +30,7 @@ import {
   getFormalCoreSkillsByRealm,
   getFormalCoreSkills,
   getSkill,
+  NON_CORE_SKILL_PROFESSION_POOLS,
   getFormalSkill,
   getFormalSkillByNameExact,
   getFormalSkillId,
@@ -74,13 +75,28 @@ describe("skill pool registry", () => {
 
   it("keeps exactly 12 core skills per profession with 7 active and 5 passive", () => {
     [ProfessionType.Sword, ProfessionType.Body, ProfessionType.Mage].forEach((profession) => {
-      const coreSkills = SKILL_PROFESSION_POOLS[profession]
-        .map((entry) => SKILLS[entry.skillId])
-        .filter((skill) => skill.poolStatus === "core");
+      const coreSkills = SKILL_PROFESSION_POOLS[profession].map((entry) => SKILLS[entry.skillId]);
 
       expect(coreSkills.length, `${profession} 核心技能數量錯誤`).toBe(12);
       expect(coreSkills.filter((skill) => skill.type === "Active").length, `${profession} 核心主動技能數量錯誤`).toBe(7);
       expect(coreSkills.filter((skill) => skill.type === "Passive").length, `${profession} 核心被動技能數量錯誤`).toBe(5);
+      expect(coreSkills.every((skill) => skill.poolStatus === "core")).toBe(true);
+    });
+  });
+
+  it("separates non-core profession pools from the formal core pools", () => {
+    [ProfessionType.Sword, ProfessionType.Body, ProfessionType.Mage].forEach((profession) => {
+      const nonCoreSkills = NON_CORE_SKILL_PROFESSION_POOLS[profession].map(
+        (entry) => SKILLS[entry.skillId]
+      );
+
+      expect(nonCoreSkills.length).toBeGreaterThan(0);
+      expect(nonCoreSkills.every((skill) => skill.poolStatus !== "core")).toBe(true);
+      expect(
+        [...SKILL_PROFESSION_POOLS[profession], ...NON_CORE_SKILL_PROFESSION_POOLS[profession]].length
+      ).toBe(
+        Object.values(SKILL_POOL_REGISTRY).filter((entry) => entry.profession === profession).length
+      );
     });
   });
 

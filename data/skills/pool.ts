@@ -28,7 +28,7 @@ const defineSkill = (
   replacementSkillId,
 });
 
-const SWORD_SKILL_POOL: SkillPoolEntry[] = [
+const SWORD_SKILL_POOL_ENTRIES: SkillPoolEntry[] = [
   defineSkill(ProfessionType.Sword, "s_q_active", "core", "guaranteed", "shop"),
   defineSkill(ProfessionType.Sword, "s_q_passive", "core", "passive", "shop"),
   defineSkill(ProfessionType.Sword, "s_f_active", "core", "utility", "boss", ["s_q_active"]),
@@ -53,7 +53,7 @@ const SWORD_SKILL_POOL: SkillPoolEntry[] = [
   defineSkill(ProfessionType.Sword, "s_ie_passive", "legacy", "passive", "inheritance", ["s_tr_passive", "s_im_passive"], "s_tr_passive"),
 ];
 
-const BODY_SKILL_POOL: SkillPoolEntry[] = [
+const BODY_SKILL_POOL_ENTRIES: SkillPoolEntry[] = [
   defineSkill(ProfessionType.Body, "b_q_active", "core", "guaranteed", "shop"),
   defineSkill(ProfessionType.Body, "b_q_passive", "core", "passive", "shop"),
   defineSkill(ProfessionType.Body, "b_f_active", "core", "utility", "boss", ["b_q_active"]),
@@ -78,7 +78,7 @@ const BODY_SKILL_POOL: SkillPoolEntry[] = [
   defineSkill(ProfessionType.Body, "b_ie_passive", "legacy", "passive", "inheritance", ["b_im_passive"], "b_sf_passive"),
 ];
 
-const MAGE_SKILL_POOL: SkillPoolEntry[] = [
+const MAGE_SKILL_POOL_ENTRIES: SkillPoolEntry[] = [
   defineSkill(ProfessionType.Mage, "m_q_active", "core", "guaranteed", "shop"),
   defineSkill(ProfessionType.Mage, "m_q_passive", "core", "passive", "shop"),
   defineSkill(ProfessionType.Mage, "m_f_active", "core", "utility", "boss", ["m_q_active"]),
@@ -104,14 +104,21 @@ const MAGE_SKILL_POOL: SkillPoolEntry[] = [
 ];
 
 export const SKILL_POOL_REGISTRY: Record<string, SkillPoolEntry> = Object.fromEntries(
-  [...SWORD_SKILL_POOL, ...BODY_SKILL_POOL, ...MAGE_SKILL_POOL].map((entry) => [entry.skillId, entry])
+  [...SWORD_SKILL_POOL_ENTRIES, ...BODY_SKILL_POOL_ENTRIES, ...MAGE_SKILL_POOL_ENTRIES].map((entry) => [entry.skillId, entry])
 );
 
 export const SKILL_PROFESSION_POOLS: Record<ProfessionType, SkillPoolEntry[]> = {
   [ProfessionType.None]: [],
-  [ProfessionType.Sword]: SWORD_SKILL_POOL,
-  [ProfessionType.Body]: BODY_SKILL_POOL,
-  [ProfessionType.Mage]: MAGE_SKILL_POOL,
+  [ProfessionType.Sword]: SWORD_SKILL_POOL_ENTRIES.filter((entry) => entry.poolStatus === "core"),
+  [ProfessionType.Body]: BODY_SKILL_POOL_ENTRIES.filter((entry) => entry.poolStatus === "core"),
+  [ProfessionType.Mage]: MAGE_SKILL_POOL_ENTRIES.filter((entry) => entry.poolStatus === "core"),
+};
+
+export const NON_CORE_SKILL_PROFESSION_POOLS: Record<ProfessionType, SkillPoolEntry[]> = {
+  [ProfessionType.None]: [],
+  [ProfessionType.Sword]: SWORD_SKILL_POOL_ENTRIES.filter((entry) => entry.poolStatus !== "core"),
+  [ProfessionType.Body]: BODY_SKILL_POOL_ENTRIES.filter((entry) => entry.poolStatus !== "core"),
+  [ProfessionType.Mage]: MAGE_SKILL_POOL_ENTRIES.filter((entry) => entry.poolStatus !== "core"),
 };
 
 export const getSkillPoolEntry = (skillId: string) => SKILL_POOL_REGISTRY[skillId];

@@ -15,6 +15,7 @@ import {
 } from "./retired_aliases";
 import {
   getSkillPoolEntry,
+  NON_CORE_SKILL_PROFESSION_POOLS,
   normalizeFormalSkillIds,
   resolveReplacementSkillId,
   SKILL_POOL_REGISTRY,
@@ -281,4 +282,9 @@ export const normalizeLearnedSkills = (skillIds: string[]) =>
   normalizeFormalSkillIds(skillIds)
     .map((skillId) => SKILLS[skillId])
     .filter((skill): skill is Skill => Boolean(skill));
-export { SKILL_POOL_REGISTRY, SKILL_PROFESSION_POOLS, getSkillPoolEntry };
+export {
+  NON_CORE_SKILL_PROFESSION_POOLS,
+  SKILL_POOL_REGISTRY,
+  SKILL_PROFESSION_POOLS,
+  getSkillPoolEntry,
+};
