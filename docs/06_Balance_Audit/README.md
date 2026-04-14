@@ -31,6 +31,7 @@
 - `CORE_SKILL_SETS_BY_REALM` 現在也已成為正式 export，realm dataset 的 `core only` 組裝不再只是 skill index 內部常數
 - retired active / passive alias 的 record / view 組裝，也已改由 `retired_alias_utils.ts` 單點承接；`battle-absorbed / retirement-ready` 的 alias 視圖尾端也已開始共用 `buildRetiredAliasViewSet(...)`
 - skill index 內對 `battle-absorbed / retirement-ready` retired skill 的正式視圖組裝，現在也已開始共用 `buildSkillViewSet(...)`，不再四段重複 map 同一批 alias view
+- retired active / passive alias 的總表合併，現在也已開始共用 `mergeRetiredAliasRecords(...)`，alias-layer 不再各自維護 `Object.assign(...Object.values(...))` 樣板
 - `runAutoBattle()` 已拆出多個 shared helper，world strike 與 timeline combat 的冷卻、status、runtime、outcome 正持續收斂
 - `GameTooltip / GameHintBubble / GamePanel / Modal / GameSection` 已成為主要 UI 殼層語言，且 `Dashboard / QuestModal / Workshop` 內部資訊區也已開始套入同一套 section chrome
 - `Adventure` 的底部戰鬥快捷列也已開始改走 `GameSection`，地圖即時戰鬥操作面不再是獨立風格。

@@ -1,6 +1,9 @@
 import { MajorRealm, ProfessionType, Skill } from "../../types";
 import { getSkillPoolEntry } from "./pool";
-import { buildRetiredAliasViewSet } from "./retired_alias_utils";
+import {
+  buildRetiredAliasViewSet,
+  mergeRetiredAliasRecords,
+} from "./retired_alias_utils";
 import { MAHAYANA_SKILLS } from "./mahayana";
 import { TRIBULATION_SKILLS } from "./tribulation";
 import { VOID_REFINING_SKILLS } from "./void_refining";
@@ -326,8 +329,7 @@ export const RETIRED_ACTIVE_ALIASES_BY_REALM: Partial<
   [MajorRealm.ImmortalEmperor]: IMMORTAL_EMPEROR_RETIRED_ACTIVE_ALIASES,
 };
 
-export const ALL_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = Object.assign(
-  {},
+export const ALL_RETIRED_ACTIVE_ALIASES: Record<string, Skill> = mergeRetiredAliasRecords(
   ...Object.values(RETIRED_ACTIVE_ALIASES_BY_REALM)
 );
 
