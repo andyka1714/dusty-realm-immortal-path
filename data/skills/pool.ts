@@ -103,23 +103,64 @@ const MAGE_SKILL_POOL_ENTRIES: SkillPoolEntry[] = [
   defineSkill(ProfessionType.Mage, "m_ie_passive", "legacy", "passive", "inheritance", ["m_im_passive"], "m_sf_passive"),
 ];
 
-export const SKILL_POOL_REGISTRY: Record<string, SkillPoolEntry> = Object.fromEntries(
-  [...SWORD_SKILL_POOL_ENTRIES, ...BODY_SKILL_POOL_ENTRIES, ...MAGE_SKILL_POOL_ENTRIES].map((entry) => [entry.skillId, entry])
+const SKILL_POOL_ENTRIES_BY_PROFESSION: Record<ProfessionType, SkillPoolEntry[]> = {
+  [ProfessionType.None]: [],
+  [ProfessionType.Sword]: SWORD_SKILL_POOL_ENTRIES,
+  [ProfessionType.Body]: BODY_SKILL_POOL_ENTRIES,
+  [ProfessionType.Mage]: MAGE_SKILL_POOL_ENTRIES,
+};
+
+const buildSkillPoolRegistry = (
+  professionPools: Record<ProfessionType, SkillPoolEntry[]>
+) =>
+  Object.fromEntries(
+    Object.values(professionPools)
+      .flat()
+      .map((entry) => [entry.skillId, entry])
+  ) as Record<string, SkillPoolEntry>;
+
+const buildProfessionSkillPools = ({
+  professionPools,
+  predicate,
+}: {
+  professionPools: Record<ProfessionType, SkillPoolEntry[]>;
+  predicate: (entry: SkillPoolEntry) => boolean;
+}) =>
+  Object.fromEntries(
+    Object.entries(professionPools).map(([profession, entries]) => [
+      profession,
+      entries.filter(predicate),
+    ])
+  ) as Record<ProfessionType, SkillPoolEntry[]>;
+
+export const SKILL_POOL_REGISTRY: Record<string, SkillPoolEntry> =
+  buildSkillPoolRegistry(SKILL_POOL_ENTRIES_BY_PROFESSION);
+
+export const SKILL_PROFESSION_POOL_GROUPS = {
+  all: SKILL_POOL_ENTRIES_BY_PROFESSION,
+  core: buildProfessionSkillPools({
+    professionPools: SKILL_POOL_ENTRIES_BY_PROFESSION,
+    predicate: (entry) => entry.poolStatus === "core",
+  }),
+  nonCore: buildProfessionSkillPools({
+    professionPools: SKILL_POOL_ENTRIES_BY_PROFESSION,
+    predicate: (entry) => entry.poolStatus !== "core",
+  }),
+} as const;
+
+export const CORE_SKILL_POOL_REGISTRY = buildSkillPoolRegistry(
+  SKILL_PROFESSION_POOL_GROUPS.core
 );
 
-export const SKILL_PROFESSION_POOLS: Record<ProfessionType, SkillPoolEntry[]> = {
-  [ProfessionType.None]: [],
-  [ProfessionType.Sword]: SWORD_SKILL_POOL_ENTRIES.filter((entry) => entry.poolStatus === "core"),
-  [ProfessionType.Body]: BODY_SKILL_POOL_ENTRIES.filter((entry) => entry.poolStatus === "core"),
-  [ProfessionType.Mage]: MAGE_SKILL_POOL_ENTRIES.filter((entry) => entry.poolStatus === "core"),
-};
+export const NON_CORE_SKILL_POOL_REGISTRY = buildSkillPoolRegistry(
+  SKILL_PROFESSION_POOL_GROUPS.nonCore
+);
 
-export const NON_CORE_SKILL_PROFESSION_POOLS: Record<ProfessionType, SkillPoolEntry[]> = {
-  [ProfessionType.None]: [],
-  [ProfessionType.Sword]: SWORD_SKILL_POOL_ENTRIES.filter((entry) => entry.poolStatus !== "core"),
-  [ProfessionType.Body]: BODY_SKILL_POOL_ENTRIES.filter((entry) => entry.poolStatus !== "core"),
-  [ProfessionType.Mage]: MAGE_SKILL_POOL_ENTRIES.filter((entry) => entry.poolStatus !== "core"),
-};
+export const SKILL_PROFESSION_POOLS: Record<ProfessionType, SkillPoolEntry[]> =
+  SKILL_PROFESSION_POOL_GROUPS.core;
+
+export const NON_CORE_SKILL_PROFESSION_POOLS: Record<ProfessionType, SkillPoolEntry[]> =
+  SKILL_PROFESSION_POOL_GROUPS.nonCore;
 
 export const getSkillPoolEntry = (skillId: string) => SKILL_POOL_REGISTRY[skillId];
 

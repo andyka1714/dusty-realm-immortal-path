@@ -18,6 +18,7 @@ import {
   RETIRED_ALIASES_BY_REALM,
 } from "./retired_aliases";
 import {
+  CORE_SKILL_POOL_REGISTRY,
   CORE_SKILL_SETS_BY_REALM,
   FORMAL_CORE_ACTIVE_SKILLS,
   FORMAL_CORE_SKILL_MAP,
@@ -37,11 +38,13 @@ import {
   getFormalSkillByName,
   getSkillsByRealm,
   normalizeLearnedSkills,
+  NON_CORE_SKILL_POOL_REGISTRY,
   RETIRED_SKILL_MAP,
   RETIRED_SKILL_NAME_INDEX,
   SKILLS,
   SKILL_NAME_INDEX,
   SKILL_POOL_REGISTRY,
+  SKILL_PROFESSION_POOL_GROUPS,
   SKILL_PROFESSION_POOLS,
 } from ".";
 
@@ -97,7 +100,29 @@ describe("skill pool registry", () => {
       ).toBe(
         Object.values(SKILL_POOL_REGISTRY).filter((entry) => entry.profession === profession).length
       );
+      expect(
+        SKILL_PROFESSION_POOL_GROUPS.all[profession].map((entry) => entry.skillId).sort()
+      ).toEqual(
+        [
+          ...SKILL_PROFESSION_POOL_GROUPS.core[profession],
+          ...SKILL_PROFESSION_POOL_GROUPS.nonCore[profession],
+        ]
+          .map((entry) => entry.skillId)
+          .sort()
+      );
     });
+  });
+
+  it("keeps core and non-core registries split for final pool cleanup work", () => {
+    expect(Object.values(CORE_SKILL_POOL_REGISTRY).every((entry) => entry.poolStatus === "core")).toBe(
+      true
+    );
+    expect(
+      Object.values(NON_CORE_SKILL_POOL_REGISTRY).every((entry) => entry.poolStatus !== "core")
+    ).toBe(true);
+    expect(Object.keys(CORE_SKILL_POOL_REGISTRY)).not.toEqual(
+      Object.keys(NON_CORE_SKILL_POOL_REGISTRY)
+    );
   });
 
   it("ensures prerequisite chains only point to skills of the same profession", () => {

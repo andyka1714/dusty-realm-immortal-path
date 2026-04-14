@@ -14,11 +14,14 @@ import {
   ALL_RETIRED_ALIASES,
 } from "./retired_aliases";
 import {
+  CORE_SKILL_POOL_REGISTRY,
   getSkillPoolEntry,
   NON_CORE_SKILL_PROFESSION_POOLS,
+  NON_CORE_SKILL_POOL_REGISTRY,
   normalizeFormalSkillIds,
   resolveReplacementSkillId,
   SKILL_POOL_REGISTRY,
+  SKILL_PROFESSION_POOL_GROUPS,
   SKILL_PROFESSION_POOLS,
 } from "./pool";
 
@@ -283,8 +286,11 @@ export const normalizeLearnedSkills = (skillIds: string[]) =>
     .map((skillId) => SKILLS[skillId])
     .filter((skill): skill is Skill => Boolean(skill));
 export {
+  CORE_SKILL_POOL_REGISTRY,
   NON_CORE_SKILL_PROFESSION_POOLS,
+  NON_CORE_SKILL_POOL_REGISTRY,
   SKILL_POOL_REGISTRY,
+  SKILL_PROFESSION_POOL_GROUPS,
   SKILL_PROFESSION_POOLS,
   getSkillPoolEntry,
 };

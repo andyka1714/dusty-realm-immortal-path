@@ -238,6 +238,7 @@
 - `Adventure` 的 world strike 預覽與延遲執行排程，也已開始抽成 `queueTimedCombatPlan(...) / queueResolvedWorldStrike(...) / applyPlayerWorldStrikePreview(...) / applyEnemyWorldStrikePreview(...)`，玩家與怪物分支不再各自維護 readyAt / 狀態 / 戰鬥訊息的重複流程
 - world strike 的預覽文案也已開始收斂到共用 helper，玩家與怪物分支不再各自手寫 preview message
 - `Adventure` 的 world strike queue orchestration，也已開始收斂到 `createPlayerWorldStrikePlan(...) / createEnemyWorldStrikePlan(...) / queueResolvedWorldStrike(...)`，cast、preview 與 execute 不再在 player / enemy 分支重複拼接
+- `Adventure` 的 live world action 出手鏈，也已開始進一步收斂到 `performResolvedTimedWorldAction(...)`，player / enemy 分支只保留 strike resolve 與 plan 組裝
 - `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，也已開始共用 `scheduleTimedCombatAction(...)`，queue 與 replay step 不再各自維護一套 `setTimeout` orchestration
 - 舊戰報 replay 的逐步播片流程，也已開始抽成 `processBattleReplayStep(...) / queueBattleReplayStep(...)`，戰報回放的 log、snapshot 與特效派發不再把整段定時器流程直接攤在 `Adventure` 的 effect 內
 - 舊戰報 replay 的目標怪解析與技能名正規化，也已開始抽成 `createBattleReplayContext(...)`，replay orchestration 不再每次在 effect 內重做 target / skill 組裝
