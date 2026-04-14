@@ -1,5 +1,6 @@
 import { MajorRealm, ProfessionType, Skill } from "../../types";
 import { getSkillPoolEntry } from "./pool";
+import { buildRetiredAliasRecord, buildRetiredAliasViews } from "./retired_alias_utils";
 import { GOLDEN_CORE_SKILLS } from "./golden_core";
 import { NASCENT_SOUL_SKILLS } from "./nascent_soul";
 import { SPIRIT_SEVERING_SKILLS } from "./spirit_severing";
@@ -220,20 +221,19 @@ export const ALL_RETIRED_PASSIVE_ALIASES: Record<string, Skill> = Object.assign(
   ...Object.values(RETIRED_PASSIVE_ALIASES_BY_REALM)
 );
 
-const selectRetiredPassiveAliases = (skillIds: string[]) =>
-  Object.fromEntries(
-    skillIds.map((skillId) => [skillId, ALL_RETIRED_PASSIVE_ALIASES[skillId]])
-  ) as Record<string, Skill>;
-
 export const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS = Object.keys(
   ALL_RETIRED_PASSIVE_ALIASES
 );
 
 export const BATTLE_ABSORBED_RETIRED_PASSIVE_ALIASES: Record<string, Skill> =
-  selectRetiredPassiveAliases(BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS);
+  buildRetiredAliasRecord(
+    BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS,
+    ALL_RETIRED_PASSIVE_ALIASES
+  );
 
-export const BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS = Object.values(
-  BATTLE_ABSORBED_RETIRED_PASSIVE_ALIASES
+export const BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS = buildRetiredAliasViews(
+  BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_IDS,
+  ALL_RETIRED_PASSIVE_ALIASES
 );
 
 export const RETIREMENT_READY_RETIRED_PASSIVE_ALIASES =
