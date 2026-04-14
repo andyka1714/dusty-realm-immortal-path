@@ -750,27 +750,23 @@ export const Adventure: React.FC<AdventureProps> = ({
     execute();
   };
 
-  const scheduleWorldActionExecution = (
-    delayMs: number | undefined,
-    execute: () => void
-  ) =>
-    scheduleTimedCombatAction({
-      delayMs,
-      execute,
-      timerSet: worldActionTimersRef.current,
-    });
-
-  const queueWorldStrikeExecution = ({
+  const queueTimedCombatPlan = ({
     delayMs,
-    applyPreview,
+    timerSet,
+    onQueue,
     execute,
   }: {
     delayMs: number | undefined;
-    applyPreview: () => void;
+    timerSet?: Set<ReturnType<typeof setTimeout>>;
+    onQueue?: () => void;
     execute: () => void;
   }) => {
-    applyPreview();
-    scheduleWorldActionExecution(delayMs, execute);
+    onQueue?.();
+    return scheduleTimedCombatAction({
+      delayMs,
+      execute,
+      timerSet,
+    });
   };
 
   const queueResolvedWorldStrike = ({
@@ -784,10 +780,13 @@ export const Adventure: React.FC<AdventureProps> = ({
     applyPreview: () => void;
     execute: () => void;
   }) => {
-    applyCastEffect?.();
-    queueWorldStrikeExecution({
+    queueTimedCombatPlan({
       delayMs,
-      applyPreview,
+      timerSet: worldActionTimersRef.current,
+      onQueue: () => {
+        applyCastEffect?.();
+        applyPreview();
+      },
       execute,
     });
   };
@@ -1465,28 +1464,6 @@ export const Adventure: React.FC<AdventureProps> = ({
     );
   };
 
-  const scheduleBattleReplayStep = ({
-    replayDelay,
-    nextLog,
-    targetMonster,
-    normalizedUsedSkill,
-  }: {
-    replayDelay: number;
-    nextLog: NonNullable<typeof replayQueue>[number];
-    targetMonster: ActiveMonster | null;
-    normalizedUsedSkill?: ReturnType<typeof getFormalSkillByName>;
-  }) =>
-    scheduleTimedCombatAction({
-      delayMs: replayDelay,
-      execute: () => {
-        processBattleReplayStep({
-          nextLog,
-          targetMonster,
-          normalizedUsedSkill,
-        });
-      },
-    });
-
   const createBattleReplayStepPlan = (
     nextLog: NonNullable<typeof replayQueue>[number]
   ) => {
@@ -1502,7 +1479,21 @@ export const Adventure: React.FC<AdventureProps> = ({
 
   const queueBattleReplayStep = (
     nextLog: NonNullable<typeof replayQueue>[number]
-  ) => scheduleBattleReplayStep(createBattleReplayStepPlan(nextLog));
+  ) => {
+    const { replayDelay, nextLog: replayLog, targetMonster, normalizedUsedSkill } =
+      createBattleReplayStepPlan(nextLog);
+
+    return queueTimedCombatPlan({
+      delayMs: replayDelay,
+      execute: () => {
+        processBattleReplayStep({
+          nextLog: replayLog,
+          targetMonster,
+          normalizedUsedSkill,
+        });
+      },
+    });
+  };
 
   const executePlayerWorldStrike = ({
     strike,

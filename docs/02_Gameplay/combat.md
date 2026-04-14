@@ -235,11 +235,11 @@
 - world strike 的結果運算本體，也已開始拆成 `resolvePlayerWorldStrikeOutcome(...) / resolveEnemyWorldStrikeOutcome(...)`，world 視角的傷害、stance 與狀態套用不再全部擠在入口函式內
 - world strike 的狀態名組裝，也已開始拆成 `buildPlayerWorldStrikeStatusNames(...) / buildEnemyWorldStrikeStatusNames(...)`，player-side 與 enemy-side 的 stance / incoming status 不再在結果組裝裡直接攤平
 - world strike 的被動狀態整理也已拆層：enemy 端改成 `defensive / survival` 兩段 helper，player 端改成 `sword / body / mage` 三段 helper，降低單一函式持續膨脹的風險
-- `Adventure` 的 world strike 預覽與延遲執行排程，也已開始抽成 `scheduleWorldActionExecution(...) / queueWorldStrikeExecution(...) / applyPlayerWorldStrikePreview(...) / applyEnemyWorldStrikePreview(...)`，玩家與怪物分支不再各自維護 readyAt / 狀態 / 戰鬥訊息的重複流程
+- `Adventure` 的 world strike 預覽與延遲執行排程，也已開始抽成 `queueTimedCombatPlan(...) / queueResolvedWorldStrike(...) / applyPlayerWorldStrikePreview(...) / applyEnemyWorldStrikePreview(...)`，玩家與怪物分支不再各自維護 readyAt / 狀態 / 戰鬥訊息的重複流程
 - world strike 的預覽文案也已開始收斂到共用 helper，玩家與怪物分支不再各自手寫 preview message
 - `Adventure` 的 world strike queue orchestration，也已開始抽成 `queuePlayerWorldStrike(...) / queueEnemyWorldStrike(...) / createPlayerWorldStrikePlan(...) / createEnemyWorldStrikePlan(...)`，cast、preview 與 execute 不再在 player / enemy 分支重複拼接
 - `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，也已開始共用 `scheduleTimedCombatAction(...)`，queue 與 replay step 不再各自維護一套 `setTimeout` orchestration
-- 舊戰報 replay 的逐步播片流程，也已開始抽成 `processBattleReplayStep(...) / scheduleBattleReplayStep(...)`，戰報回放的 log、snapshot 與特效派發不再把整段定時器流程直接攤在 `Adventure` 的 effect 內
+- 舊戰報 replay 的逐步播片流程，也已開始抽成 `processBattleReplayStep(...) / queueBattleReplayStep(...)`，戰報回放的 log、snapshot 與特效派發不再把整段定時器流程直接攤在 `Adventure` 的 effect 內
 - 舊戰報 replay 的目標怪解析與技能名正規化，也已開始抽成 `createBattleReplayContext(...)`，replay orchestration 不再每次在 effect 內重做 target / skill 組裝
 - 舊戰報 replay 的 delay 與 context 組裝，也已開始抽成 `createBattleReplayStepPlan(...) / queueBattleReplayStep(...)`，回放 step 不再在 effect 內現場計算 `previousTime / nextTime / replayDelay`
 - `enemy special` 的 incoming status 過濾與控制縮短，也已開始抽成 world / timeline 共用 resolver，不再只在 `runAutoBattle()` 內手寫 `filteredEnemyStatuses / normalizedIncomingStatuses`
