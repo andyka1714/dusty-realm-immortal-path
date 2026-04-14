@@ -27,6 +27,9 @@ import {
   FINAL_CULL_SKILL_POOL_REGISTRY,
   FINAL_CULL_SKILL_PROFESSION_POOLS,
   FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT,
+  FINAL_CULL_REPLACEMENT_TARGET_IDS_BY_PROFESSION,
+  FINAL_CULL_REPLACEMENT_TARGET_POOL_MAP_BY_PROFESSION,
+  FINAL_CULL_REPLACEMENT_TARGET_POOLS_BY_PROFESSION,
   FORMAL_CORE_ACTIVE_SKILLS,
   FORMAL_CORE_SKILL_MAP,
   FORMAL_CORE_SKILL_NAME_INDEX,
@@ -411,6 +414,18 @@ describe("skill pool registry", () => {
     expect(FINAL_CULL_SKILL_POOL_IDS_BY_PROFESSION[ProfessionType.Mage]).toEqual(
       FINAL_CULL_SKILL_PROFESSION_POOLS[ProfessionType.Mage].map((entry) => entry.skillId)
     );
+    expect(FINAL_CULL_REPLACEMENT_TARGET_IDS_BY_PROFESSION[ProfessionType.Sword].sort()).toEqual(
+      ["s_tr_active", "s_tr_passive"].sort()
+    );
+    expect(
+      FINAL_CULL_REPLACEMENT_TARGET_POOL_MAP_BY_PROFESSION[ProfessionType.Body].b_sf_passive
+        ?.poolStatus
+    ).toBe("core");
+    expect(
+      FINAL_CULL_REPLACEMENT_TARGET_POOLS_BY_PROFESSION[ProfessionType.Mage].map(
+        (entry) => entry.skillId
+      )
+    ).toContain("m_sf_passive");
   });
 
   it("ensures prerequisite chains only point to skills of the same profession", () => {

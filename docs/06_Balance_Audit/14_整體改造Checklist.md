@@ -477,6 +477,7 @@
 - [x] `FINAL_CULL_SKILL_MAP_BY_PROFESSION_AND_REPLACEMENT / FINAL_CULL_SKILL_IDS_BY_PROFESSION` 也已補齊，最後一批 `transition / legacy` 技能刪整現在已有可直接批次操作的 id/map 視圖
 - [x] `FINAL_CULL_SKILL_POOL_GROUPS_BY_PROFESSION / FINAL_CULL_SKILL_PROFESSION_POOLS / FINAL_CULL_SKILL_POOL_REGISTRY` 也已補齊，最後一批刪整現在不只可看 skill view，也可直接用 pool entry registry 做 profession / replacement 兩層批次處理
 - [x] `FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION / FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION_AND_REPLACEMENT / FINAL_CULL_SKILL_POOL_IDS_BY_PROFESSION` 也已補齊，最後一批刪整現在已有可直接操作的 pool entry profession / replacement / id 視圖
+- [x] `FINAL_CULL_REPLACEMENT_TARGET_POOLS_BY_PROFESSION / FINAL_CULL_REPLACEMENT_TARGET_POOL_MAP_BY_PROFESSION / FINAL_CULL_REPLACEMENT_TARGET_IDS_BY_PROFESSION` 也已補齊，最後一批刪整現在連保留目標的 core pool 視角都可直接批次核對
 - [x] 被動技能改成逐招專屬效果，而不是通用屬性加成
 
 ---
