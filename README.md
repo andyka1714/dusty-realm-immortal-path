@@ -16,6 +16,7 @@
 - `Adventure` 內 player / enemy world strike 的 preview 與延遲執行排程，也已開始共用 helper，地圖即時戰鬥不再各自維護 readyAt / 狀態 / 戰鬥訊息更新。
 - `Adventure` 內 player / enemy world strike 的投射物、範圍、命中特效與承傷浮字，也已開始共用 helper，地圖即時戰鬥的視覺與傷害結算流程不再各寫一套。
 - `Adventure` 內 player / enemy world strike 的實際執行鏈，也已開始抽成 `executePlayerWorldStrike(...) / executeEnemyWorldStrike(...)`，玩家與怪物分支不再各自攤開整段命中後流程。
+- `Adventure` 內 player / enemy world strike 的 queue orchestration，也已開始抽成 `queuePlayerWorldStrike(...) / queueEnemyWorldStrike(...)`，player / enemy 分支不再各自串接 cast / preview / execute 流程。
 - world strike 結果組裝也已開始拆成 player / enemy 專用 helper，timing 與 area metadata 不再長期散寫在 strike resolver 內。
 - 靈化期核心被動 `劍意化形 / 肉身成聖 / 道法自然` 也已補進 timeline combat 開場待命訊息；其中 `道法自然` 也已開始在 player world strike 顯式回報。
 - 技能改為透過技能書學習，不再隨職業 / 突破自動送；技能池也已切成 `formal core / retired` 視角，retired 進一步收斂為 `battle-absorbed / retirement-ready`。
@@ -23,6 +24,7 @@
 - realm dataset 現在不再注入 retired alias 後再剝離，而是直接以正式 core skill set 組裝；`CORE_SKILL_SETS_BY_REALM` 也已成為正式 export，retired alias 僅保留在 alias-layer 與中央 lookup。
 - formal core 被動的基礎屬性收益，現在也已改成逐招明確對照表；absorbed retired passive 會透過同一份 formal 對照承接，不再靠職業 / 境界通用公式補值。
 - retired passive alias 現在也已跟著 explicit passive 視角退出 generic `passiveEffectTags` fallback，資料層不再把舊被動誤導成仍主要依賴通用模板。
+- `battle-absorbed / retirement-ready` 的 retired skill 視圖組裝，現在也已開始共用 `buildSkillViewSet(...) / buildRetiredAliasViewSet(...)`，skill index 與 alias-layer 不再各自維護近似 map/view 樣板。
 - 多個高境界被動已補齊 world strike / enemy world strike / enemy special world strike 對齊，避免只有時間軸戰鬥才看得到實際效果。
 - 所有 passive 現在都已改成逐招專屬效果，`passiveEffectTags` 欄位也已自技能資料層完全移除。
 - 第一批高境界 retired active alias 也已補上明確 realtime metadata，避免範圍、目標數與施法節奏持續依賴 default fallback。

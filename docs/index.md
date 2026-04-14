@@ -13,7 +13,7 @@
 ### [02_Gameplay] 遊玩系統
 具體的遊戲功能模組。
 - [cultivation.md](02_Gameplay/cultivation.md): 修煉、閉關、境界突破流程，以及高境界修為乘區 / 追趕規格入口。
-- [combat.md](02_Gameplay/combat.md): 地圖內直接出手、世界戰鬥第一版多目標 AOE、時間軸驗證內核、怪物特招、技能專屬效果、world strike result helper、Adventure world strike preview helper 與共用 battle resolver。
+- [combat.md](02_Gameplay/combat.md): 地圖內直接出手、世界戰鬥第一版多目標 AOE、時間軸驗證內核、怪物特招、技能專屬效果、world strike result helper、Adventure world strike queue/preview helper 與共用 battle resolver。
 - [inventory.md](02_Gameplay/inventory.md): 背包管理、裝備限制、技能書學習、formal core 技能池與退場技能映射規則。
 - [workshop.md](02_Gameplay/workshop.md): 洞府功能 (聚靈陣、煉丹、煉器)。
 
