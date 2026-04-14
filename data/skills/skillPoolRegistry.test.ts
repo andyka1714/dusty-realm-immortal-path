@@ -438,6 +438,15 @@ describe("skill pool registry", () => {
     expect(getSkill("s_im_passive")?.replacementSkillId).toBe("s_tr_passive");
   });
 
+  it("keeps every realm dataset on formal core skills only after alias stripping", () => {
+    Object.values(MajorRealm)
+      .filter((realm): realm is MajorRealm => typeof realm === "number" && realm >= MajorRealm.QiRefining)
+      .forEach((realm) => {
+        const nonCoreSkills = getSkillsByRealm(realm).filter((skill) => skill.poolStatus !== "core");
+        expect(nonCoreSkills, `realm ${realm} 不應再保留 retired skill`).toHaveLength(0);
+      });
+  });
+
   it("exposes combined retired alias realm helpers before skill index composes realm views", () => {
     expect(Object.keys(ALL_RETIRED_ALIASES)).toContain("s_bi_active");
     expect(Object.keys(ALL_RETIRED_ALIASES)).toContain("b_ie_passive");

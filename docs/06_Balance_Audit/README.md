@@ -27,6 +27,7 @@
 
 - 高境界修為乘區、追趕機制與各大境界 TTK 目標，已落地到 `data/progression/balanceAudit.ts`
 - 技能池已收斂出 `core / battle-absorbed / retirement-ready` 的正式視圖，realm dataset 已開始排除 retired alias
+- realm dataset 目前已正式鎖定為 `core only` 視圖，retired skill 僅保留中央 alias / 相容查詢層
 - `runAutoBattle()` 已拆出多個 shared helper，world strike 與 timeline combat 的冷卻、status、runtime、outcome 正持續收斂
 - `GameTooltip / GameHintBubble / GamePanel / Modal / GameSection` 已成為主要 UI 殼層語言，且 `Dashboard / QuestModal` 內部資訊區也已開始套入同一套 section chrome
 - 所有 passive，包含 formal core 與 retired passive alias，現在都已退出 generic `passiveEffectTags` fallback，技能資料層只保留逐招專屬效果
@@ -35,7 +36,6 @@
 ## 尚未結案的主線
 
 - 刪除或合併重複功能技能
-- 高境界技能欄位與效果補完
 - 世界戰鬥與 timeline battle 收成單一最終引擎
 - `README / Gameplay / World / Audit` 最後一輪完全交叉校對
 - 面板內部視覺的最後一輪遊戲化收口
