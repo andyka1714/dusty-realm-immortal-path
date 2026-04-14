@@ -41,6 +41,7 @@
 - `Adventure` 內 player / enemy world strike 的實際執行鏈也已開始抽成 `executePlayerWorldStrike(...) / executeEnemyWorldStrike(...)`，命中後的傷害、掉落與承傷流程不再各自攤開
 - `Adventure` 內 player / enemy world strike 的 queue orchestration 也已開始抽成 `queuePlayerWorldStrike(...) / queueEnemyWorldStrike(...)`，player / enemy 分支不再各自串接 cast / preview / execute 流程
 - 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，地圖即時戰鬥與時間軸回放不再各自維護兩套效果派發流程
+- 舊戰報 replay 的逐步播片與 replay context，現在也已開始共用 `processBattleReplayStep(...) / scheduleBattleReplayStep(...) / createBattleReplayContext(...)`，回放 effect 不再直接鋪開 target、skill 與視覺派發整段流程
 
 ## 尚未結案的主線
 

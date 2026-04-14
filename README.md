@@ -16,6 +16,7 @@
 - `Adventure` 內 player / enemy world strike 的 preview 與延遲執行排程，也已開始共用 helper，地圖即時戰鬥不再各自維護 readyAt / 狀態 / 戰鬥訊息更新。
 - `Adventure` 內 player / enemy world strike 的投射物、範圍、命中特效與承傷浮字，也已開始共用 helper，地圖即時戰鬥的視覺與傷害結算流程不再各寫一套。
 - 舊戰報 replay 的 projectile / area / impact / text 派發，也已開始回收使用同一套 world strike 視覺 helper，不再額外維護第二套效果派發流程。
+- 舊戰報 replay 的逐步播片與 replay context，現在也已開始共用 `processBattleReplayStep(...) / scheduleBattleReplayStep(...) / createBattleReplayContext(...)`，回放 effect 不再直接鋪開 target、skill 與視覺派發整段流程。
 - `Adventure` 內 player / enemy world strike 的實際執行鏈，也已開始抽成 `executePlayerWorldStrike(...) / executeEnemyWorldStrike(...)`，玩家與怪物分支不再各自攤開整段命中後流程。
 - `Adventure` 內 player / enemy world strike 的 queue orchestration，也已開始抽成 `queuePlayerWorldStrike(...) / queueEnemyWorldStrike(...)`，player / enemy 分支不再各自串接 cast / preview / execute 流程。
 - world strike 結果組裝也已開始拆成 player / enemy 專用 helper，timing 與 area metadata 不再長期散寫在 strike resolver 內。

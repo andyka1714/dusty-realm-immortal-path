@@ -1,4 +1,4 @@
-import { Skill } from "../../types";
+import { MajorRealm, Skill } from "../../types";
 
 export const buildRetiredAliasRecord = (
   skillIds: string[],
@@ -24,3 +24,20 @@ export const buildRetiredAliasViewSet = (
     views: Object.values(aliases),
   };
 };
+
+export const mergeRetiredAliasRealmMaps = (
+  ...realmMaps: Array<Partial<Record<MajorRealm, Record<string, Skill>>>>
+): Partial<Record<MajorRealm, Record<string, Skill>>> =>
+  Object.fromEntries(
+    Array.from(new Set(realmMaps.flatMap((realmMap) => Object.keys(realmMap)))).map((realm) => [
+      Number(realm),
+      Object.assign(
+        {},
+        ...realmMaps.map((realmMap) => realmMap[Number(realm) as MajorRealm] ?? {})
+      ),
+    ])
+  ) as Partial<Record<MajorRealm, Record<string, Skill>>>;
+
+export const mergeRetiredAliasRecords = (
+  ...aliasRecords: Array<Record<string, Skill>>
+): Record<string, Skill> => Object.assign({}, ...aliasRecords);

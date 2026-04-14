@@ -1196,6 +1196,24 @@ export const Adventure: React.FC<AdventureProps> = ({
     });
   };
 
+  const createBattleReplayContext = (
+    nextLog: NonNullable<typeof replayQueue>[number]
+  ) => {
+    const targetMonster = currentEnemyInstanceId
+      ? activeMonsters.find((monster) => monster.instanceId === currentEnemyInstanceId)
+      : null;
+    const skillMatch = nextLog.message.match(/施展【([^】]+)】/);
+    const normalizedUsedSkill = skillMatch
+      ? getFormalSkillByName(skillMatch[1])
+      : undefined;
+
+    return {
+      nextLog,
+      targetMonster: targetMonster ?? null,
+      normalizedUsedSkill,
+    };
+  };
+
   const processBattleReplayStep = ({
     nextLog,
     targetMonster,
@@ -2003,19 +2021,9 @@ export const Adventure: React.FC<AdventureProps> = ({
     const nextTime = nextLog?.timeMs ?? previousTime + 500;
     const replayDelay = Math.max(180, Math.min(900, nextTime - previousTime || 250));
 
-    const targetMonster = currentEnemyInstanceId
-      ? activeMonsters.find((monster) => monster.instanceId === currentEnemyInstanceId)
-      : null;
-    const skillMatch = nextLog.message.match(/施展【([^】]+)】/);
-    const normalizedUsedSkill = skillMatch
-      ? getFormalSkillByName(skillMatch[1])
-      : undefined;
-
     const timer = scheduleBattleReplayStep({
       replayDelay,
-      nextLog,
-      targetMonster: targetMonster ?? null,
-      normalizedUsedSkill,
+      ...createBattleReplayContext(nextLog),
     });
 
     return () => clearTimeout(timer);
