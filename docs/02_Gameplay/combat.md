@@ -99,7 +99,7 @@
 - 舊的中央戰報窗已退場，戰鬥結果改為右下角 HUD 短暫顯示後自動收起
 - 所有被動技能目前都已改成逐招專屬效果，資料層不再保留 generic `passiveEffectTags` fallback，`passiveEffectTags` 欄位本身也已移除
 - `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，現在也已開始共用 queue / preview / resolution helper，不再各自維護兩套 readyAt 與傷害文案流程
-- `Adventure` 內 player / enemy world strike 的完整 queue orchestration，現在也已進一步回收到 `createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)` 這層，分支本身只保留 strike resolve 與最少的條件判斷
+- `Adventure` 內 player / enemy world strike 的完整 queue orchestration，現在也已進一步回收到 `performQueuedWorldStrikeAction(...) + createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)` 這層，分支本身只保留 strike resolve 與最少的條件判斷
 - `Adventure` 內 player / enemy world strike 的 action plan，也已正式直接回到 `createWorldStrikeQueuePlan(...)`，不再保留只負責轉手的 resolved wrapper
 - `Adventure` 內 player / enemy world strike 與 replay step 的 visual payload，也已開始共用 `WorldStrikeVisualPlan` 路徑；live / replay 不再各自手拼 projectile、area 與 impact payload
 - 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再另外維護一套 effect dispatch
@@ -237,7 +237,7 @@
 - `Adventure` 的 world strike 預覽與延遲執行排程，也已開始抽成 `queueTimedCombatPlan(...) / queueWorldStrikePlan(...) / applyPlayerWorldStrikePreview(...) / applyEnemyWorldStrikePreview(...)`，玩家與怪物分支不再各自維護 readyAt / 狀態 / 戰鬥訊息的重複流程
 - world strike 的預覽文案也已開始收斂到共用 helper，玩家與怪物分支不再各自手寫 preview message
 - `Adventure` 的 world strike queue orchestration，也已開始收斂到 `createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)`，cast、preview 與 execute 不再在 player / enemy 分支重複拼接
-- `Adventure` 的 live world action 出手鏈，現在直接走 `performTimedWorldAction(...) + createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)`
+- `Adventure` 的 live world action 出手鏈，現在直接走 `performQueuedWorldStrikeAction(...) + createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)`
 - `queueResolvedWorldStrike(...)` 也已改成更單純的 `queueWorldStrikePlan(...)`，live world action 現在只保留 timed 判定、strike resolve 與 plan 執行三段
 - `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，也已開始共用 `scheduleTimedCombatAction(...)`，queue 與 replay step 不再各自維護一套 `setTimeout` orchestration
 - `Adventure` 內 world strike 與舊戰報 replay 的定時排程，也已開始共用 `queueTimedCombatPlan(...)` 的 onQueue/execute 模型，battle timer orchestration 不再分成兩種樣板

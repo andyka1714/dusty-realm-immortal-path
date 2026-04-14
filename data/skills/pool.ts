@@ -133,6 +133,63 @@ const buildProfessionSkillPools = ({
     ])
   ) as Record<ProfessionType, SkillPoolEntry[]>;
 
+const buildEntryGroupsByProfessionAndReplacement = (
+  professionPools: Record<ProfessionType, SkillPoolEntry[]>
+) =>
+  Object.fromEntries(
+    Object.entries(professionPools).map(([profession, entries]) => [
+      profession,
+      entries.reduce<Record<string, SkillPoolEntry[]>>((groups, entry) => {
+        const groupKey = entry.replacementSkillId ?? entry.skillId;
+        if (!groups[groupKey]) groups[groupKey] = [];
+        groups[groupKey].push(entry);
+        return groups;
+      }, {}),
+    ])
+  ) as Record<ProfessionType, Record<string, SkillPoolEntry[]>>;
+
+const buildMergeReadyEntryGroupsByProfession = (
+  groupsByProfession: Record<ProfessionType, Record<string, SkillPoolEntry[]>>
+) =>
+  Object.fromEntries(
+    Object.entries(groupsByProfession).map(([profession, groups]) => [
+      profession,
+      Object.fromEntries(
+        Object.entries(groups).filter(([, entries]) => entries.length > 1)
+      ),
+    ])
+  ) as Record<ProfessionType, Record<string, SkillPoolEntry[]>>;
+
+const mergeEntryGroupsByProfession = (
+  left: Record<ProfessionType, Record<string, SkillPoolEntry[]>>,
+  right: Record<ProfessionType, Record<string, SkillPoolEntry[]>>
+) =>
+  ({
+    [ProfessionType.None]: {},
+    [ProfessionType.Sword]: {
+      ...left[ProfessionType.Sword],
+      ...right[ProfessionType.Sword],
+    },
+    [ProfessionType.Body]: {
+      ...left[ProfessionType.Body],
+      ...right[ProfessionType.Body],
+    },
+    [ProfessionType.Mage]: {
+      ...left[ProfessionType.Mage],
+      ...right[ProfessionType.Mage],
+    },
+  }) as Record<ProfessionType, Record<string, SkillPoolEntry[]>>;
+
+const buildFlattenedEntryViewsByProfession = (
+  groupsByProfession: Record<ProfessionType, Record<string, SkillPoolEntry[]>>
+) =>
+  ({
+    [ProfessionType.None]: [],
+    [ProfessionType.Sword]: Object.values(groupsByProfession[ProfessionType.Sword]).flat(),
+    [ProfessionType.Body]: Object.values(groupsByProfession[ProfessionType.Body]).flat(),
+    [ProfessionType.Mage]: Object.values(groupsByProfession[ProfessionType.Mage]).flat(),
+  }) as Record<ProfessionType, SkillPoolEntry[]>;
+
 export const SKILL_POOL_REGISTRY: Record<string, SkillPoolEntry> =
   buildSkillPoolRegistry(SKILL_POOL_ENTRIES_BY_PROFESSION);
 
@@ -183,6 +240,35 @@ export const TRANSITION_SKILL_PROFESSION_POOLS: Record<ProfessionType, SkillPool
 
 export const LEGACY_SKILL_PROFESSION_POOLS: Record<ProfessionType, SkillPoolEntry[]> =
   SKILL_PROFESSION_POOL_GROUPS.legacy;
+
+export const TRANSITION_SKILL_PROFESSION_POOLS_BY_REPLACEMENT =
+  buildEntryGroupsByProfessionAndReplacement(TRANSITION_SKILL_PROFESSION_POOLS);
+
+export const LEGACY_SKILL_PROFESSION_POOLS_BY_REPLACEMENT =
+  buildEntryGroupsByProfessionAndReplacement(LEGACY_SKILL_PROFESSION_POOLS);
+
+export const MERGE_READY_TRANSITION_SKILL_POOL_GROUPS_BY_PROFESSION =
+  buildMergeReadyEntryGroupsByProfession(TRANSITION_SKILL_PROFESSION_POOLS_BY_REPLACEMENT);
+
+export const MERGE_READY_LEGACY_SKILL_POOL_GROUPS_BY_PROFESSION =
+  buildMergeReadyEntryGroupsByProfession(LEGACY_SKILL_PROFESSION_POOLS_BY_REPLACEMENT);
+
+export const FINAL_CULL_SKILL_POOL_GROUPS_BY_PROFESSION = {
+  transition: MERGE_READY_TRANSITION_SKILL_POOL_GROUPS_BY_PROFESSION,
+  legacy: MERGE_READY_LEGACY_SKILL_POOL_GROUPS_BY_PROFESSION,
+} as const;
+
+export const FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT = mergeEntryGroupsByProfession(
+  MERGE_READY_TRANSITION_SKILL_POOL_GROUPS_BY_PROFESSION,
+  MERGE_READY_LEGACY_SKILL_POOL_GROUPS_BY_PROFESSION
+);
+
+export const FINAL_CULL_SKILL_PROFESSION_POOLS =
+  buildFlattenedEntryViewsByProfession(FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT);
+
+export const FINAL_CULL_SKILL_POOL_REGISTRY = buildSkillPoolRegistry(
+  FINAL_CULL_SKILL_PROFESSION_POOLS
+);
 
 export const getSkillPoolEntry = (skillId: string) => SKILL_POOL_REGISTRY[skillId];
 
