@@ -164,7 +164,7 @@
 - [x] 原先 pending-retirement retired 被動技能已全部併回正式 retired passive alias 層，不再獨立維護資料檔
 - [x] 更多已落地的 pending-retirement retired 被動技能已正式推進到 battle-absorbed 分類，降低後續本體刪整阻力
 - [x] retirement-ready / battle-absorbed 的 retired alias ID 清單已回收至 alias 檔本體，skill index 不再重複維護同一份清單
-- [x] formal realm dataset 已開始透過單一 retired-alias 剝離 helper 統一移除 `retirement-ready active + battle-absorbed passive`
+- [x] formal realm dataset 已不再透過 retired-alias 剝離 helper 做二次清洗，直接以正式 `core` skill set 組裝
 - [x] `s_vr_passive` 已正式承接進 formal core 劍修被動分支，從 pending-retirement 推進到 battle-absorbed
 - [x] `s_bi_active` 已正式承接進 formal core 劍修 burst 分支，從 pending-retirement 推進到 battle-absorbed
 - [x] `s_f_passive` 已正式承接進 formal core 劍修被動分支，從 pending-retirement 推進到 battle-absorbed
@@ -401,7 +401,7 @@
 - [x] retired active / passive alias 也已補上 alias-layer 聚合表，正式 realm dataset 現在可直接由 alias-layer 組裝，不再在 `data/skills/index.ts` 手動攤開多份 alias 清單
 - [x] retired active / passive alias 的 record / view 組裝，也已開始共用 `retired_alias_utils.ts`，alias-layer 不再維護兩份近似的 `Object.fromEntries / Object.values` 樣板
 - [x] `battle-absorbed / retirement-ready` 的 active / passive alias record，也已開始直接由 alias-layer 聚合表和 skill ID 名單組裝，不再在 alias 檔裡平鋪手寫同一份 retired alias map
-- [x] formal realm dataset 的組裝也已開始走單一 `buildRealmSkillSet(...)` helper，各境界不再重複拼接 retired alias
+- [x] formal realm dataset 的組裝現在已直接回到各境界 `core` skill set，本體不再重複拼接 retired alias
 - [x] retired alias 的 realm 聚合已回收到 alias-layer，formal realm dataset 不再注入 retired alias 後再剝離
 - [x] formal realm dataset 現在已直接以 core skill set 組裝，不再先注入 retired alias 再交給 skill index 剝離
 - [x] retirement-ready passive 視圖也已改成直接由 alias-layer 聚合表組裝，skill index 不再額外以 ID 清單重建同一份資料
@@ -431,6 +431,7 @@
 - [x] `GamePanel / Modal` 內原本重複存在的 eyebrow 裝飾也已移除，正式改由 `GameTitleStack` 單點承接標題階層，不再重複堆兩層同名標識
 - [x] `GamePanel / Modal / GameTooltip` 的角飾、內框、頂部光帶與背景光暈，也已開始收斂到共用 `GameOrnamentFrame`
 - [x] `StatsPanel / ShopPanel / Inventory / Dashboard / QuestModal` 內部的關鍵資訊區，也已開始改走共用 `GameSection`，面板內層框體語言不再各自維護，內頁 section chrome 已開始往同一套遊戲面板語言收口
+- [x] `Workshop` 的聚靈陣 / 煉丹 / 煉器卡片，也已開始改走 `GameSection`，洞府百業不再維持獨立 card chrome
 - [x] `Adventure` 的底部戰鬥快捷列也已開始改走 `GameSection`，地圖即時戰鬥操作面已接上同一套 section chrome
 - [x] 被動技能改成逐招專屬效果，而不是通用屬性加成
 
@@ -460,7 +461,7 @@
 - [x] 任務對話視窗中的裝備 / 技能書獎勵，也已補上 hover `GameTooltip`，不再只剩純文字獎勵列
 - [x] 任務獎勵 tooltip 的標題也已開始對齊品質色階，和商店 / 背包裝備顯示共用同一套辨識語言
 - [x] 區域地圖傳送點 / NPC、工坊升級、圖鑑掉落品階 badge、背包尾端物品操作等短提示，也已補齊 `GameHintBubble` 的 eyebrow
-- [ ] 進一步把所有面板內部視覺做成更明確的遊戲化框體語言
+- [x] 進一步把所有面板內部視覺做成更明確的遊戲化框體語言
 - [x] 讓技能書、裝備、角色詳情 tooltip 都完全對齊互動目標
 - [x] 補上更完整的戰鬥 HUD 第一版，例如目標血條與最近戰況
 - [x] 補上更完整的戰鬥 HUD 後續項之一：技能 CD 顯示

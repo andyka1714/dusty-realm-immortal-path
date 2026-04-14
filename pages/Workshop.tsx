@@ -4,9 +4,10 @@ import { AppDispatch, RootState } from '../store/store';
 import { upgradeGatheringLevel, deductSpiritStones } from '../store/slices/characterSlice';
 import { addLog } from '../store/slices/logSlice';
 import { calculateGatheringUpgradeCost } from '../constants';
-import { Hammer, CircleDashed, ArrowUpCircle, Flame } from 'lucide-react';
+import { Hammer, ArrowUpCircle, Flame } from 'lucide-react';
 import clsx from 'clsx';
 import { GameHintBubble } from '../components/game/GameHintBubble';
+import { GameSection } from '../components/game/GameSection';
 
 interface WorkshopProps {
   embedded?: boolean;
@@ -45,12 +46,16 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
          {/* Gathering Array */}
-         <div className="bg-stone-900 border border-stone-800 rounded-xl p-6 relative overflow-hidden group">
+         <GameSection
+            eyebrow="CAVE ARRAY"
+            title="聚靈陣"
+            bodyClassName="relative overflow-hidden"
+            className="group"
+         >
             <div className="absolute top-4 right-4 pointer-events-none">
                <Flame size={80} className="text-blue-500 animate-breathing drop-shadow-[0_0_25px_rgba(59,130,246,0.9)]" />
             </div>
-            
-            <h3 className="text-xl font-bold text-emerald-500 mb-2">聚靈陣</h3>
+
             <p className="text-sm text-stone-500 mb-6">匯聚天地靈氣，提升修煉速度。</p>
             
             <div className="flex justify-between items-end mb-4">
@@ -83,27 +88,35 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
                    {!canAfford && <div className="text-stone-600">擁有: {spiritStones.toLocaleString()}</div>}
                 </GameHintBubble>
             </div>
-         </div>
+         </GameSection>
 
          {/* Alchemy (Placeholder) */}
-         <div className="bg-stone-900 border border-stone-800 rounded-xl p-6 opacity-50 relative">
+         <GameSection
+             eyebrow="PILL CRAFT"
+             title="煉丹爐"
+             className="opacity-50"
+             bodyClassName="relative"
+         >
              <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px] rounded-xl z-10">
                  <span className="text-stone-400 font-bold border border-stone-600 px-3 py-1 rounded bg-stone-900">金丹期開放</span>
              </div>
-             <h3 className="text-xl font-bold text-amber-500 mb-2">煉丹爐</h3>
              <p className="text-sm text-stone-500 mb-6">萃取草木精華，煉製輔助丹藥。</p>
              <div className="h-20"></div>
-         </div>
+         </GameSection>
          
          {/* Blacksmith (Placeholder) */}
-         <div className="bg-stone-900 border border-stone-800 rounded-xl p-6 opacity-50 relative">
+         <GameSection
+             eyebrow="FORGE ALTAR"
+             title="煉器台"
+             className="opacity-50"
+             bodyClassName="relative"
+         >
              <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px] rounded-xl z-10">
                  <span className="text-stone-400 font-bold border border-stone-600 px-3 py-1 rounded bg-stone-900">金丹期開放</span>
              </div>
-             <h3 className="text-xl font-bold text-red-500 mb-2">煉器台</h3>
              <p className="text-sm text-stone-500 mb-6">錘鍊天材地寶，鑄造神兵利器。</p>
              <div className="h-20"></div>
-         </div>
+         </GameSection>
       </div>
     </div>
   );

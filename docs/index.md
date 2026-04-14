@@ -28,7 +28,7 @@
 - [flow.md](04_UI/flow.md): 遊戲初始化流程 (序幕->抽卡->主頁) 與導航結構。
 - [components.md](04_UI/components.md): UI 組件庫規範 (Tailwind 配色、按鈕樣式)。
   - 補充：角色屬性、商店、圖鑑、區域地圖情報、任務獎勵、底部 dock、道途頁資訊與多個操作提示，已開始共用 `GameTooltip / GameHintBubble` 遊戲化外觀；`GamePanel / Modal / GameTooltip` 的標題層已開始共用 `GameTitleStack`，裝飾框體則已開始共用 `GameOrnamentFrame`。
-  - 補充：`StatsPanel / ShopPanel / Inventory / Dashboard / QuestModal` 內部的主要資訊區，也已開始共用 `GameSection`，面板內層不再只是零散的 border box。
+  - 補充：`StatsPanel / ShopPanel / Inventory / Dashboard / QuestModal / Workshop` 內部的主要資訊區，也已開始共用 `GameSection`，面板內層不再只是零散的 border box。
   - 補充：`World / UI / Audit` 對於地圖情報 tooltip、短提示 eyebrow 與 battle shared resolver 的說法，已開始回到同一套正式描述。
 
 ### [05_Data] 數據表 (Data Tables)
@@ -51,7 +51,7 @@
 - [09_即時戰鬥改造分析.md](06_Balance_Audit/09_即時戰鬥改造分析.md): 從戰報回放轉成即時碰撞戰鬥的架構分析，以及 cooldown / opener / passive-proc / defensive-passive / world-strike result / status logger 等 shared resolver 的收斂進度。
 - [10_技能數量與功能分類收斂.md](06_Balance_Audit/10_技能數量與功能分類收斂.md): 技能數量控制、功能分類與主流遊戲對照分析。
 - [11_三職業核心技能池草案.md](06_Balance_Audit/11_三職業核心技能池草案.md): 劍修、體修、法修的核心技能池草案，以及 retired 技能收斂到 `battle-absorbed / retirement-ready` 的正式規則，並持續對齊 world strike / timeline combat。
-- 補充：formal realm view 現在已透過單一 retired-alias 剝離 helper 鎖定為 `core only`，realm dataset 不再保留 retired alias；所有 passive 也都已退出 generic `passiveEffectTags` fallback，舊技能則仍保留中央 alias / 相容查詢層。
+  - 補充：formal realm view 現在已直接鎖定為 `core only`，realm dataset 不再保留 retired alias；所有 passive 也都已退出 generic `passiveEffectTags` fallback，舊技能則仍保留中央 alias / 相容查詢層。
 - [12_技能書實作收斂.md](06_Balance_Audit/12_技能書實作收斂.md): 技能書正式實作、來源規則、前置條件與與程式對齊結果。
 - [13_3D渲染與戰鬥呈現評估.md](06_Balance_Audit/13_3D渲染與戰鬥呈現評估.md): 3D、Three.js 與目前 Pixi 戰鬥呈現層的可行性評估。
 - [14_整體改造Checklist.md](06_Balance_Audit/14_整體改造Checklist.md): 本輪所有已完成 / 未完成細項的逐條追蹤表。
