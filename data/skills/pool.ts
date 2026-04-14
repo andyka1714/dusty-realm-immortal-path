@@ -190,6 +190,19 @@ const buildFlattenedEntryViewsByProfession = (
     [ProfessionType.Mage]: Object.values(groupsByProfession[ProfessionType.Mage]).flat(),
   }) as Record<ProfessionType, SkillPoolEntry[]>;
 
+const buildEntryMapByProfession = (entriesByProfession: Record<ProfessionType, SkillPoolEntry[]>) =>
+  Object.fromEntries(
+    Object.entries(entriesByProfession).map(([profession, entries]) => [
+      profession,
+      buildSkillPoolRegistry({
+        [ProfessionType.None]: [],
+        [ProfessionType.Sword]: profession === ProfessionType.Sword ? entries : [],
+        [ProfessionType.Body]: profession === ProfessionType.Body ? entries : [],
+        [ProfessionType.Mage]: profession === ProfessionType.Mage ? entries : [],
+      } as Record<ProfessionType, SkillPoolEntry[]>),
+    ])
+  ) as Record<ProfessionType, Record<string, SkillPoolEntry>>;
+
 export const SKILL_POOL_REGISTRY: Record<string, SkillPoolEntry> =
   buildSkillPoolRegistry(SKILL_POOL_ENTRIES_BY_PROFESSION);
 
@@ -269,6 +282,34 @@ export const FINAL_CULL_SKILL_PROFESSION_POOLS =
 export const FINAL_CULL_SKILL_POOL_REGISTRY = buildSkillPoolRegistry(
   FINAL_CULL_SKILL_PROFESSION_POOLS
 );
+
+export const FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION = buildEntryMapByProfession(
+  FINAL_CULL_SKILL_PROFESSION_POOLS
+);
+
+export const FINAL_CULL_SKILL_POOL_IDS_BY_PROFESSION = Object.fromEntries(
+  Object.entries(FINAL_CULL_SKILL_PROFESSION_POOLS).map(([profession, entries]) => [
+    profession,
+    entries.map((entry) => entry.skillId),
+  ])
+) as Record<ProfessionType, string[]>;
+
+export const FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION_AND_REPLACEMENT = Object.fromEntries(
+  Object.entries(FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT).map(([profession, groups]) => [
+    profession,
+    Object.fromEntries(
+      Object.entries(groups).map(([replacementSkillId, entries]) => [
+        replacementSkillId,
+        buildSkillPoolRegistry({
+          [ProfessionType.None]: [],
+          [ProfessionType.Sword]: profession === ProfessionType.Sword ? entries : [],
+          [ProfessionType.Body]: profession === ProfessionType.Body ? entries : [],
+          [ProfessionType.Mage]: profession === ProfessionType.Mage ? entries : [],
+        } as Record<ProfessionType, SkillPoolEntry[]>),
+      ])
+    ),
+  ])
+) as Record<ProfessionType, Record<string, Record<string, SkillPoolEntry>>>;
 
 export const getSkillPoolEntry = (skillId: string) => SKILL_POOL_REGISTRY[skillId];
 

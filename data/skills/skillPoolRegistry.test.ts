@@ -21,6 +21,9 @@ import {
   CORE_SKILL_POOL_REGISTRY,
   CORE_SKILL_SETS_BY_REALM,
   FINAL_CULL_SKILL_POOL_GROUPS_BY_PROFESSION,
+  FINAL_CULL_SKILL_POOL_IDS_BY_PROFESSION,
+  FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION,
+  FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION_AND_REPLACEMENT,
   FINAL_CULL_SKILL_POOL_REGISTRY,
   FINAL_CULL_SKILL_PROFESSION_POOLS,
   FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT,
@@ -398,6 +401,16 @@ describe("skill pool registry", () => {
     ).toEqual(FINAL_CULL_SKILL_IDS_BY_PROFESSION[ProfessionType.Sword].slice().sort());
     expect(FINAL_CULL_SKILL_POOL_REGISTRY.s_bi_active?.replacementSkillId).toBe("s_tr_active");
     expect(FINAL_CULL_SKILL_POOL_REGISTRY.b_ie_passive?.poolStatus).toBe("legacy");
+    expect(FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION[ProfessionType.Sword].s_im_active?.replacementSkillId).toBe(
+      "s_tr_active"
+    );
+    expect(
+      FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION_AND_REPLACEMENT[ProfessionType.Body].b_sf_passive
+        .b_ie_passive?.poolStatus
+    ).toBe("legacy");
+    expect(FINAL_CULL_SKILL_POOL_IDS_BY_PROFESSION[ProfessionType.Mage]).toEqual(
+      FINAL_CULL_SKILL_PROFESSION_POOLS[ProfessionType.Mage].map((entry) => entry.skillId)
+    );
   });
 
   it("ensures prerequisite chains only point to skills of the same profession", () => {
