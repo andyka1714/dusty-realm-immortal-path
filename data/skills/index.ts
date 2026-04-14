@@ -177,6 +177,7 @@ export const EXPLICIT_PASSIVE_EFFECT_SKILL_IDS = new Set<string>([
   "m_tr_passive",
   "m_im_passive",
   "m_ie_passive",
+  ...Object.keys(ALL_RETIRED_PASSIVE_ALIASES),
 ]);
 
 const normalizeSkill = (skill: Skill): Skill => {

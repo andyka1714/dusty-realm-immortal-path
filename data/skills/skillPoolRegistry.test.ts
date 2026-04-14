@@ -486,6 +486,9 @@ describe("skill pool registry", () => {
       "s_q_passive",
       "b_q_passive",
       "m_q_passive",
+      "s_f_passive",
+      "b_tr_passive",
+      "m_ie_passive",
       "s_tr_passive",
       "b_ie_passive",
       "m_im_passive",
@@ -496,5 +499,12 @@ describe("skill pool registry", () => {
     });
 
     expect(SKILLS.s_f_passive?.passiveEffectTags).toBeUndefined();
+  });
+
+  it("removes generic passive tags from all retired passive aliases that now inherit explicit passive wiring", () => {
+    BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS.forEach((skill) => {
+      expect(EXPLICIT_PASSIVE_EFFECT_SKILL_IDS.has(skill.id)).toBe(true);
+      expect(SKILLS[skill.id]?.passiveEffectTags).toBeUndefined();
+    });
   });
 });
