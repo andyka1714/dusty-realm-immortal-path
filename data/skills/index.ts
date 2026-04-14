@@ -227,13 +227,6 @@ export const FORMAL_CORE_SKILLS_BY_REALM: Record<MajorRealm, Skill[]> = Object.f
   ])
 ) as Record<MajorRealm, Skill[]>;
 
-export const RETIRED_SKILLS_BY_REALM: Record<MajorRealm, Skill[]> = Object.fromEntries(
-  Object.entries(SKILLS_BY_REALM).map(([realm, skills]) => [
-    Number(realm),
-    skills.filter((skill) => skill.poolStatus !== "core"),
-  ])
-) as Record<MajorRealm, Skill[]>;
-
 export const FORMAL_CORE_SKILL_IDS = new Set(
   FORMAL_CORE_SKILLS.map((skill) => skill.id)
 );
@@ -375,8 +368,6 @@ export const getFormalCoreSkills = (options?: {
 export const getSkillsByRealm = (realm: MajorRealm) => SKILLS_BY_REALM[realm] ?? [];
 export const getFormalCoreSkillsByRealm = (realm: MajorRealm) =>
   FORMAL_CORE_SKILLS_BY_REALM[realm] ?? [];
-export const getRetiredSkillsByRealm = (realm: MajorRealm) =>
-  RETIRED_SKILLS_BY_REALM[realm] ?? [];
 export const normalizeLearnedSkills = (skillIds: string[]) =>
   normalizeFormalSkillIds(skillIds)
     .map((skillId) => SKILLS[skillId])

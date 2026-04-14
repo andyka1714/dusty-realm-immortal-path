@@ -29,7 +29,7 @@
 - [x] 建立本 checklist 文件
 - [x] `README.md`、`docs/index.md` 與平衡審計總覽已持續做分批交叉同步，避免文件敘述與最新 battle / UI helper 狀態脫節
 - [x] 平衡審計總覽與即時戰鬥分析文件已開始實際去掉 alias-layer / battle helper 的重複條目，往最終完全去重推進
-- [ ] 讓所有平衡審計文件彼此完全去重，避免同一件事在多份文件重複描述
+- [x] 讓所有平衡審計文件彼此完全去重，避免同一件事在多份文件重複描述
 - [x] 把 `README.md`、`docs/02_Gameplay/*`、`docs/03_World/*` 與平衡審計全部再做一次全面交叉校對
 
 ---
@@ -409,6 +409,7 @@
 - [x] formal realm dataset 的組裝現在已直接回到各境界 `core` skill set，本體不再重複拼接 retired alias
 - [x] retired alias 的 realm 聚合已回收到 alias-layer，formal realm dataset 不再注入 retired alias 後再剝離
 - [x] formal realm dataset 現在已直接以 core skill set 組裝，不再先注入 retired alias 再交給 skill index 剝離
+- [x] `RETIRED_SKILLS_BY_REALM / getRetiredSkillsByRealm` 過渡查詢層已移除，realm dataset 現在只保留 `core only` 正式視角
 - [x] `CORE_SKILL_SETS_BY_REALM` 現在也已成為正式 export，realm dataset 的 `core only` 視圖不再只是 skill index 內部實作細節
 - [x] retirement-ready passive 視圖也已改成直接由 alias-layer 聚合表組裝，skill index 不再額外以 ID 清單重建同一份資料
 - [x] battle-absorbed passive 視圖也已改成直接由 alias-layer 聚合表組裝，skill index 不再額外以 ID 清單重建同一份資料

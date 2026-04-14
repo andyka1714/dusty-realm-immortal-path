@@ -39,7 +39,6 @@
 
 - 刪除或合併重複功能技能
 - 世界戰鬥與 timeline battle 收成單一最終引擎
-- `README / Gameplay / World / Audit` 最後一輪完全交叉校對
 - 面板內部視覺的最後一輪遊戲化收口
 
 ## 建議閱讀順序

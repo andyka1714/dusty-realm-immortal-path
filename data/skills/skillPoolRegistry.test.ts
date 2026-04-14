@@ -43,7 +43,6 @@ import {
   getFormalSkillByName,
   getRetirementReadyRetiredSkills,
   getRetirementReadyRetiredPassiveSkills,
-  getRetiredSkillsByRealm,
   getSkillsByRealm,
   isBattleAbsorbedRetiredSkill,
   isBattleAbsorbedRetiredPassiveSkill,
@@ -54,7 +53,6 @@ import {
   RETIREMENT_READY_RETIRED_PASSIVE_SKILLS,
   RETIREMENT_READY_RETIRED_PASSIVE_SKILL_MAP,
   RETIREMENT_READY_RETIRED_SKILL_MAP,
-  RETIRED_SKILLS_BY_REALM,
   SKILLS,
   SKILL_NAME_INDEX,
   SKILL_POOL_REGISTRY,
@@ -188,22 +186,20 @@ describe("skill pool registry", () => {
     ).toBe(true);
   });
 
-  it("builds realm-level skill datasets for formal and retired slices", () => {
+  it("builds realm-level core datasets and keeps retired aliases out of realm views", () => {
     expect(getSkillsByRealm(MajorRealm.VoidRefining).length).toBeGreaterThan(0);
     expect(getFormalCoreSkillsByRealm(MajorRealm.VoidRefining)).toEqual(
       FORMAL_CORE_SKILLS_BY_REALM[MajorRealm.VoidRefining]
-    );
-    expect(getRetiredSkillsByRealm(MajorRealm.VoidRefining)).toEqual(
-      RETIRED_SKILLS_BY_REALM[MajorRealm.VoidRefining]
     );
     expect(
       getFormalCoreSkillsByRealm(MajorRealm.VoidRefining).every(
         (skill) => skill.poolStatus === "core"
       )
     ).toBe(true);
+    const retiredVoidAliasIds = Object.keys(RETIRED_ALIASES_BY_REALM[MajorRealm.VoidRefining] ?? {});
     expect(
-      getRetiredSkillsByRealm(MajorRealm.VoidRefining).every(
-        (skill) => skill.poolStatus !== "core"
+      getSkillsByRealm(MajorRealm.VoidRefining).every(
+        (skill) => !retiredVoidAliasIds.includes(skill.id)
       )
     ).toBe(true);
   });
