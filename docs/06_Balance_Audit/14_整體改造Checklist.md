@@ -439,6 +439,7 @@
 - [x] `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，也已開始共用 queue / preview / resolution helper，地圖即時戰鬥分支不再各自維護兩套 readyAt / 傷害文案流程
 - [x] `Adventure` 內 player / enemy world strike 的 queue orchestration，也已開始抽成 `queuePlayerWorldStrike(...) / queueEnemyWorldStrike(...)`，player / enemy 分支不再各自串接 cast / preview / execute 流程
 - [x] 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再額外維護第二套 effect dispatch
+- [x] 舊戰報 replay 的逐步播片流程，也已開始抽成 `processBattleReplayStep(...) / scheduleBattleReplayStep(...)`，log、snapshot 與特效派發不再直接塞在 replay effect 的定時器分支內
 - [x] `Adventure` 內 player / enemy world strike 的 projectile / area / impact / text dispatch 也已開始共用 visual helper，地圖即時戰鬥效果派發不再各自維護兩套流程
 - [x] `Adventure` 內 player / enemy world strike 的實際執行鏈也已開始抽成 `executePlayerWorldStrike(...) / executeEnemyWorldStrike(...)`，命中後流程不再各自攤開
 - [x] 被動技能改成逐招專屬效果，而不是通用屬性加成

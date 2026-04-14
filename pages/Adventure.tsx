@@ -1196,6 +1196,57 @@ export const Adventure: React.FC<AdventureProps> = ({
     });
   };
 
+  const processBattleReplayStep = ({
+    nextLog,
+    targetMonster,
+    normalizedUsedSkill,
+  }: {
+    nextLog: NonNullable<typeof replayQueue>[number];
+    targetMonster: ActiveMonster | null;
+    normalizedUsedSkill?: ReturnType<typeof getFormalSkillByName>;
+  }) => {
+    setDisplayedLogs((prev) => [...prev, nextLog]);
+    setReplayQueue((prev) => prev.slice(1));
+
+    if (nextLog.playerHp !== undefined) {
+      setBattleSnapshot((prev) =>
+        prev ? { ...prev, playerHp: nextLog.playerHp, enemyHp: nextLog.enemyHp } : null
+      );
+    }
+
+    const logContainer = document.getElementById('battle-log-container');
+    if (logContainer) logContainer.scrollTop = logContainer.scrollHeight;
+
+    dispatchBattleReplayAttackVisuals({
+      nextLog,
+      targetMonster,
+      normalizedUsedSkill,
+    });
+    dispatchBattleReplayDamageVisuals({
+      nextLog,
+      targetMonster,
+    });
+  };
+
+  const scheduleBattleReplayStep = ({
+    replayDelay,
+    nextLog,
+    targetMonster,
+    normalizedUsedSkill,
+  }: {
+    replayDelay: number;
+    nextLog: NonNullable<typeof replayQueue>[number];
+    targetMonster: ActiveMonster | null;
+    normalizedUsedSkill?: ReturnType<typeof getFormalSkillByName>;
+  }) =>
+    setTimeout(() => {
+      processBattleReplayStep({
+        nextLog,
+        targetMonster,
+        normalizedUsedSkill,
+      });
+    }, replayDelay);
+
   const executePlayerWorldStrike = ({
     strike,
     chosenSkill,
@@ -1952,38 +2003,20 @@ export const Adventure: React.FC<AdventureProps> = ({
     const nextTime = nextLog?.timeMs ?? previousTime + 500;
     const replayDelay = Math.max(180, Math.min(900, nextTime - previousTime || 250));
 
-    const timer = setTimeout(() => {
-        setDisplayedLogs(prev => [...prev, nextLog]);
-        setReplayQueue(prev => prev.slice(1));
-        
-        // Update Snapshot for UI
-        if (nextLog.playerHp !== undefined) {
-             setBattleSnapshot(prev => prev ? { ...prev, playerHp: nextLog.playerHp, enemyHp: nextLog.enemyHp } : null);
-        }
+    const targetMonster = currentEnemyInstanceId
+      ? activeMonsters.find((monster) => monster.instanceId === currentEnemyInstanceId)
+      : null;
+    const skillMatch = nextLog.message.match(/施展【([^】]+)】/);
+    const normalizedUsedSkill = skillMatch
+      ? getFormalSkillByName(skillMatch[1])
+      : undefined;
 
-        // Auto Scroll
-        const logContainer = document.getElementById('battle-log-container');
-        if (logContainer) logContainer.scrollTop = logContainer.scrollHeight;
-
-        const targetMonster = currentEnemyInstanceId
-          ? activeMonsters.find((monster) => monster.instanceId === currentEnemyInstanceId)
-          : null;
-        const skillMatch = nextLog.message.match(/施展【([^】]+)】/);
-        const normalizedUsedSkill = skillMatch
-          ? getFormalSkillByName(skillMatch[1])
-          : undefined;
-
-        dispatchBattleReplayAttackVisuals({
-          nextLog,
-          targetMonster: targetMonster ?? null,
-          normalizedUsedSkill,
-        });
-        dispatchBattleReplayDamageVisuals({
-          nextLog,
-          targetMonster: targetMonster ?? null,
-        });
-
-    }, replayDelay);
+    const timer = scheduleBattleReplayStep({
+      replayDelay,
+      nextLog,
+      targetMonster: targetMonster ?? null,
+      normalizedUsedSkill,
+    });
 
     return () => clearTimeout(timer);
   }, [isReplayingBattle, replayQueue, battleSnapshot, displayedLogs, currentEnemyInstanceId, activeMonsters, playerPosition, dispatch]);
