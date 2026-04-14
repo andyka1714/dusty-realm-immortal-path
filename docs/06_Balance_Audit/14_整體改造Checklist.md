@@ -168,6 +168,8 @@
 - [x] `SKILL_PROFESSION_POOLS` 現在也已正式鎖定為 `core only`，非核心技能改由 `NON_CORE_SKILL_PROFESSION_POOLS` 承接，不再和正式職業池混在同一組
 - [x] `CORE_SKILL_POOL_REGISTRY / NON_CORE_SKILL_POOL_REGISTRY` 也已正式切開，正式技能池與 transition / legacy 查詢不再共用同一份 registry 視角
 - [x] `TRANSITION_SKILL_POOL_REGISTRY / LEGACY_SKILL_POOL_REGISTRY` 與對應 profession pools 也已切開，最後一批技能本體刪整可直接依 transition / legacy 分組處理
+- [x] `TRANSITION_SKILLS_BY_REPLACEMENT / LEGACY_SKILLS_BY_REPLACEMENT / NON_CORE_SKILLS_BY_REPLACEMENT` 也已補齊，最後一批合併刪整可直接按 formal replacement target 盤點
+- [x] `TRANSITION_SKILLS_BY_PROFESSION_AND_REPLACEMENT / LEGACY_SKILLS_BY_PROFESSION_AND_REPLACEMENT` 也已補齊，最後一批技能本體刪整可直接按職業與 formal replacement 交叉盤點
 - [x] `TRANSITION_SKILLS / LEGACY_SKILLS` 與對應 skill map 也已補齊，最後一批重複技能的本體刪整已有正式視圖可直接盤點
 - [x] retired skill 的 active / passive 正式視圖分組，現在已正式回收到 alias util 的單一路徑，skill index 不再各自維護兩組近似樣板
 - [x] `battle-absorbed / retirement-ready` 的 active / passive resolved skill view，也已開始共用 `buildResolvedRetiredSkillViewGroups(...)`，skill index 不再各自維護兩段近似的 resolved view set 組裝
@@ -459,6 +461,7 @@
 - [x] `resolveAndQueueWorldStrike(...) / queueResolvedTimedWorldStrike(...)` 這兩層過渡 wrapper 也已移除，live world action 現在直接走 `performTimedWorldAction(...) + performResolvedTimedWorldAction(...)`
 - [x] `queueResolvedWorldStrike(...)` 也已改成更單純的 `queueWorldStrikePlan(...)`，live world action 現在只保留 timed 判定、strike resolve 與 plan 執行三段
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，也已開始共用 `scheduleTimedCombatAction(...)`，不再各自維護一套 `setTimeout` orchestration
+- [x] `Adventure` 內 world strike 與舊戰報 replay 的 timed plan，也已開始共用 `queueTimedCombatPlan(...)` 的 onQueue/execute 模型，battle timer orchestration 不再維持兩種樣板
 - [x] 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再額外維護第二套 effect dispatch
 - [x] 舊戰報 replay 的逐步播片流程，也已開始抽成 `processBattleReplayStep(...) / queueBattleReplayStep(...)`，log、snapshot 與特效派發不再直接塞在 replay effect 的定時器分支內
 - [x] 舊戰報 replay 的目標怪解析與技能名正規化，也已開始抽成 `createBattleReplayContext(...)`，replay orchestration 不再每次在 effect 內重做 target / skill 組裝

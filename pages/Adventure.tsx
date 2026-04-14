@@ -794,7 +794,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     });
   };
 
-  const createResolvedWorldStrikePlan = ({
+  const createTimedWorldStrikePlan = ({
     delayMs,
     applyCastEffect,
     applyPreview,
@@ -829,7 +829,7 @@ export const Adventure: React.FC<AdventureProps> = ({
       currentHp: number;
     };
   }) =>
-    createResolvedWorldStrikePlan({
+    createTimedWorldStrikePlan({
       delayMs: strike.executionTimeMs,
       applyCastEffect: () => dispatchPlayerWorldStrikeCastEffect({ chosenSkill, strike }),
       applyPreview: () => {
@@ -864,7 +864,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     strike: ReturnType<typeof resolveEnemyWorldStrike>;
     canUseSpecial: boolean;
   }) =>
-    createResolvedWorldStrikePlan({
+    createTimedWorldStrikePlan({
       delayMs: strike.executionTimeMs,
       applyCastEffect: () => dispatchEnemyWorldStrikeCastEffect({ strike }),
       applyPreview: () =>
@@ -887,7 +887,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     readyAt?: number;
     canExecute?: () => boolean;
     resolveStrike: (now: number) => TStrike | undefined;
-    createPlan: (now: number, strike: TStrike) => ReturnType<typeof createResolvedWorldStrikePlan>;
+    createPlan: (now: number, strike: TStrike) => ReturnType<typeof createTimedWorldStrikePlan>;
   }) =>
     performTimedWorldAction({
       readyAt,

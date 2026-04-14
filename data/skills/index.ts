@@ -49,6 +49,16 @@ const buildSkillGroupsByReplacement = (skills: Skill[]) =>
     return groups;
   }, {});
 
+const buildSkillGroupsByProfessionAndReplacement = (
+  skillsByProfession: Record<ProfessionType, Skill[]>
+) =>
+  Object.fromEntries(
+    Object.entries(skillsByProfession).map(([profession, skills]) => [
+      profession,
+      buildSkillGroupsByReplacement(skills),
+    ])
+  ) as Record<ProfessionType, Record<string, Skill[]>>;
+
 const getDefaultRealtimeShape = (
   skill: Skill
 ): Pick<
@@ -268,6 +278,29 @@ export const LEGACY_SKILLS_BY_PROFESSION: Record<ProfessionType, Skill[]> = {
     (skill) => skill.profession === ProfessionType.Mage
   ).sort(compareSkills),
 };
+
+export const TRANSITION_SKILLS_BY_PROFESSION_AND_REPLACEMENT =
+  buildSkillGroupsByProfessionAndReplacement(TRANSITION_SKILLS_BY_PROFESSION);
+
+export const LEGACY_SKILLS_BY_PROFESSION_AND_REPLACEMENT =
+  buildSkillGroupsByProfessionAndReplacement(LEGACY_SKILLS_BY_PROFESSION);
+
+export const NON_CORE_SKILLS_BY_PROFESSION_AND_REPLACEMENT =
+  buildSkillGroupsByProfessionAndReplacement({
+    [ProfessionType.None]: [],
+    [ProfessionType.Sword]: [
+      ...TRANSITION_SKILLS_BY_PROFESSION[ProfessionType.Sword],
+      ...LEGACY_SKILLS_BY_PROFESSION[ProfessionType.Sword],
+    ].sort(compareSkills),
+    [ProfessionType.Body]: [
+      ...TRANSITION_SKILLS_BY_PROFESSION[ProfessionType.Body],
+      ...LEGACY_SKILLS_BY_PROFESSION[ProfessionType.Body],
+    ].sort(compareSkills),
+    [ProfessionType.Mage]: [
+      ...TRANSITION_SKILLS_BY_PROFESSION[ProfessionType.Mage],
+      ...LEGACY_SKILLS_BY_PROFESSION[ProfessionType.Mage],
+    ].sort(compareSkills),
+  });
 
 export const SKILLS_BY_REALM: Record<MajorRealm, Skill[]> = Object.fromEntries(
   Object.entries(CORE_SKILL_SETS_BY_REALM).map(([realm, skills]) => [
