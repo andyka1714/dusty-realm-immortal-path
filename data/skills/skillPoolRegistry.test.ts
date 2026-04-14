@@ -26,6 +26,9 @@ import {
   FORMAL_CORE_PASSIVE_SKILLS,
   FORMAL_CORE_SKILLS_BY_REALM,
   FORMAL_CORE_SKILLS_SORTED,
+  FINAL_CULL_SKILL_GROUPS_BY_PROFESSION,
+  FINAL_CULL_SKILL_MAP_BY_PROFESSION,
+  FINAL_CULL_SKILLS_BY_PROFESSION,
   FORMAL_CORE_SKILLS_BY_PROFESSION,
   FORMAL_CORE_SKILLS_BY_SOURCE_TIER,
   getFormalCoreSkillsByRealm,
@@ -36,7 +39,9 @@ import {
   LEGACY_SKILLS_BY_REPLACEMENT,
   MERGE_READY_LEGACY_SKILL_GROUPS,
   MERGE_READY_LEGACY_SKILL_GROUPS_BY_PROFESSION,
+  MERGE_READY_LEGACY_SKILL_MAP,
   MERGE_READY_LEGACY_SKILLS,
+  MERGE_READY_LEGACY_SKILLS_BY_PROFESSION,
   MERGE_READY_NON_CORE_SKILL_MAP,
   MERGE_READY_NON_CORE_SKILLS,
   MERGE_READY_NON_CORE_SKILLS_BY_PROFESSION,
@@ -44,7 +49,9 @@ import {
   MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION,
   MERGE_READY_TRANSITION_SKILL_GROUPS,
   MERGE_READY_TRANSITION_SKILL_GROUPS_BY_PROFESSION,
+  MERGE_READY_TRANSITION_SKILL_MAP,
   MERGE_READY_TRANSITION_SKILLS,
+  MERGE_READY_TRANSITION_SKILLS_BY_PROFESSION,
   NON_CORE_SKILL_PROFESSION_POOLS,
   NON_CORE_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
   NON_CORE_SKILLS_BY_REPLACEMENT,
@@ -286,6 +293,43 @@ describe("skill pool registry", () => {
         .map((skill) => skill.id)
         .sort()
     ).toEqual(["m_bi_passive", "m_ma_passive", "m_ie_passive"].sort());
+    expect(MERGE_READY_TRANSITION_SKILL_MAP.s_bi_active?.replacementSkillId).toBe("s_tr_active");
+    expect(MERGE_READY_LEGACY_SKILL_MAP.b_ie_passive?.replacementSkillId).toBe("b_sf_passive");
+    expect(
+      MERGE_READY_TRANSITION_SKILLS_BY_PROFESSION[ProfessionType.Sword].map((skill) => skill.id)
+    ).toContain("s_im_active");
+    expect(
+      MERGE_READY_LEGACY_SKILLS_BY_PROFESSION[ProfessionType.Body].map((skill) => skill.id)
+    ).toContain("b_ie_passive");
+  });
+
+  it("builds direct final-cull profession views from merge-ready transition and legacy clusters", () => {
+    expect(
+      Object.keys(FINAL_CULL_SKILL_GROUPS_BY_PROFESSION.transition[ProfessionType.Sword]).sort()
+    ).toEqual(
+      Object.keys(MERGE_READY_TRANSITION_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Sword]).sort()
+    );
+    expect(
+      Object.keys(FINAL_CULL_SKILL_GROUPS_BY_PROFESSION.legacy[ProfessionType.Body]).sort()
+    ).toEqual(
+      Object.keys(MERGE_READY_LEGACY_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Body]).sort()
+    );
+    expect(
+      FINAL_CULL_SKILLS_BY_PROFESSION[ProfessionType.Sword].map((skill) => skill.id).sort()
+    ).toEqual(
+      [
+        ...MERGE_READY_TRANSITION_SKILLS_BY_PROFESSION[ProfessionType.Sword],
+        ...MERGE_READY_LEGACY_SKILLS_BY_PROFESSION[ProfessionType.Sword],
+      ]
+        .map((skill) => skill.id)
+        .sort()
+    );
+    expect(FINAL_CULL_SKILL_MAP_BY_PROFESSION[ProfessionType.Sword].s_bi_active?.replacementSkillId).toBe(
+      "s_tr_active"
+    );
+    expect(FINAL_CULL_SKILL_MAP_BY_PROFESSION[ProfessionType.Mage].m_ie_passive?.poolStatus).toBe(
+      "legacy"
+    );
   });
 
   it("ensures prerequisite chains only point to skills of the same profession", () => {

@@ -74,6 +74,33 @@ const buildMergeReadySkillGroupsByProfession = (
     ])
   ) as Record<ProfessionType, Record<string, Skill[]>>;
 
+const buildSkillMap = (skills: Skill[]) =>
+  Object.fromEntries(skills.map((skill) => [skill.id, skill])) as Record<string, Skill>;
+
+const buildFlattenedSkillViewsByProfession = (
+  groupsByProfession: Record<ProfessionType, Record<string, Skill[]>>
+) =>
+  ({
+    [ProfessionType.None]: [],
+    [ProfessionType.Sword]: Object.values(groupsByProfession[ProfessionType.Sword])
+      .flat()
+      .sort(compareSkills),
+    [ProfessionType.Body]: Object.values(groupsByProfession[ProfessionType.Body])
+      .flat()
+      .sort(compareSkills),
+    [ProfessionType.Mage]: Object.values(groupsByProfession[ProfessionType.Mage])
+      .flat()
+      .sort(compareSkills),
+  }) as Record<ProfessionType, Skill[]>;
+
+const buildSkillMapByProfession = (skillsByProfession: Record<ProfessionType, Skill[]>) =>
+  Object.fromEntries(
+    Object.entries(skillsByProfession).map(([profession, skills]) => [
+      profession,
+      buildSkillMap(skills),
+    ])
+  ) as Record<ProfessionType, Record<string, Skill>>;
+
 const getDefaultRealtimeShape = (
   skill: Skill
 ): Pick<
@@ -342,28 +369,11 @@ export const MERGE_READY_NON_CORE_SKILLS = Object.values(MERGE_READY_NON_CORE_SK
   .flat()
   .sort(compareSkills);
 
-export const MERGE_READY_NON_CORE_SKILL_MAP: Record<string, Skill> = Object.fromEntries(
-  MERGE_READY_NON_CORE_SKILLS.map((skill) => [skill.id, skill])
-) as Record<string, Skill>;
+export const MERGE_READY_NON_CORE_SKILL_MAP: Record<string, Skill> =
+  buildSkillMap(MERGE_READY_NON_CORE_SKILLS);
 
-export const MERGE_READY_NON_CORE_SKILLS_BY_PROFESSION: Record<ProfessionType, Skill[]> = {
-  [ProfessionType.None]: [],
-  [ProfessionType.Sword]: Object.values(
-    MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Sword]
-  )
-    .flat()
-    .sort(compareSkills),
-  [ProfessionType.Body]: Object.values(
-    MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Body]
-  )
-    .flat()
-    .sort(compareSkills),
-  [ProfessionType.Mage]: Object.values(
-    MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Mage]
-  )
-    .flat()
-    .sort(compareSkills),
-};
+export const MERGE_READY_NON_CORE_SKILLS_BY_PROFESSION =
+  buildFlattenedSkillViewsByProfession(MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION);
 
 export const MERGE_READY_TRANSITION_SKILLS = Object.values(MERGE_READY_TRANSITION_SKILL_GROUPS)
   .flat()
@@ -372,6 +382,43 @@ export const MERGE_READY_TRANSITION_SKILLS = Object.values(MERGE_READY_TRANSITIO
 export const MERGE_READY_LEGACY_SKILLS = Object.values(MERGE_READY_LEGACY_SKILL_GROUPS)
   .flat()
   .sort(compareSkills);
+
+export const MERGE_READY_TRANSITION_SKILL_MAP: Record<string, Skill> =
+  buildSkillMap(MERGE_READY_TRANSITION_SKILLS);
+
+export const MERGE_READY_LEGACY_SKILL_MAP: Record<string, Skill> =
+  buildSkillMap(MERGE_READY_LEGACY_SKILLS);
+
+export const MERGE_READY_TRANSITION_SKILLS_BY_PROFESSION =
+  buildFlattenedSkillViewsByProfession(MERGE_READY_TRANSITION_SKILL_GROUPS_BY_PROFESSION);
+
+export const MERGE_READY_LEGACY_SKILLS_BY_PROFESSION =
+  buildFlattenedSkillViewsByProfession(MERGE_READY_LEGACY_SKILL_GROUPS_BY_PROFESSION);
+
+export const FINAL_CULL_SKILL_GROUPS_BY_PROFESSION = {
+  transition: MERGE_READY_TRANSITION_SKILL_GROUPS_BY_PROFESSION,
+  legacy: MERGE_READY_LEGACY_SKILL_GROUPS_BY_PROFESSION,
+} as const;
+
+export const FINAL_CULL_SKILLS_BY_PROFESSION: Record<ProfessionType, Skill[]> = {
+  [ProfessionType.None]: [],
+  [ProfessionType.Sword]: [
+    ...MERGE_READY_TRANSITION_SKILLS_BY_PROFESSION[ProfessionType.Sword],
+    ...MERGE_READY_LEGACY_SKILLS_BY_PROFESSION[ProfessionType.Sword],
+  ].sort(compareSkills),
+  [ProfessionType.Body]: [
+    ...MERGE_READY_TRANSITION_SKILLS_BY_PROFESSION[ProfessionType.Body],
+    ...MERGE_READY_LEGACY_SKILLS_BY_PROFESSION[ProfessionType.Body],
+  ].sort(compareSkills),
+  [ProfessionType.Mage]: [
+    ...MERGE_READY_TRANSITION_SKILLS_BY_PROFESSION[ProfessionType.Mage],
+    ...MERGE_READY_LEGACY_SKILLS_BY_PROFESSION[ProfessionType.Mage],
+  ].sort(compareSkills),
+};
+
+export const FINAL_CULL_SKILL_MAP_BY_PROFESSION = buildSkillMapByProfession(
+  FINAL_CULL_SKILLS_BY_PROFESSION
+);
 
 export const SKILLS_BY_REALM: Record<MajorRealm, Skill[]> = Object.fromEntries(
   Object.entries(CORE_SKILL_SETS_BY_REALM).map(([realm, skills]) => [

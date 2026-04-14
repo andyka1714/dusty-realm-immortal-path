@@ -295,7 +295,7 @@
 - [x] 法修高境界被動的開場待命訊息也已補齊到 `仙法通神 / 萬法歸宗`
 - [x] `s_f_passive` / `b_bi_passive` / `m_im_passive` 也已補齊 timeline combat 開場待命訊息，正式標出 `養劍術` / `金剛法相` / `五氣朝元`
 - [x] 戰利品字串組裝也已開始整併到 `buildVictoryLootMessage(...)`，勝利結算函式不再直接攤開品質字樣與掉落名稱拼裝
-- [x] 舊戰報 replay 的 context、step delay 與 visual payload 組裝，也已開始收斂到 `createBattleReplayContext(...) / createBattleReplayStepPlan(...) / queueBattleReplayStep(...) / createBattleReplayVisualPlan(...)`
+- [x] 舊戰報 replay 的 context、step delay 與 visual payload 組裝，也已開始收斂到 `createBattleReplayContext(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / createBattleReplayVisualPlan(...)`
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---
@@ -455,25 +455,22 @@
 - [x] `Workshop` 的聚靈陣 / 煉丹 / 煉器卡片，也已開始改走 `GameSection`，洞府百業不再維持獨立 card chrome
 - [x] `Adventure` 的底部戰鬥快捷列也已開始改走 `GameSection`，地圖即時戰鬥操作面已接上同一套 section chrome
 - [x] `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，也已開始共用 queue / preview / resolution helper，地圖即時戰鬥分支不再各自維護兩套 readyAt / 傷害文案流程
-- [x] `Adventure` 內 player / enemy world strike 的 queue orchestration，也已開始回收到 `createPlayerWorldStrikePlan(...) / createEnemyWorldStrikePlan(...) + queueResolvedWorldStrike(...)`，player / enemy 分支不再各自串接 cast / preview / execute 流程
-- [x] `Adventure` 內 player / enemy world strike 的 action plan 也已開始抽成 `createPlayerWorldStrikePlan(...) / createEnemyWorldStrikePlan(...)`，queue helper 不再各自臨時拼接 cast、preview 與 execute 閉包
-- [x] `Adventure` 內 player / enemy world strike 的 resolve + queue 串接，也已開始共用 `resolveAndQueueWorldStrike(...)`，live 分支不再同時維護 resolve 與 queue 細節
+- [x] `Adventure` 內 player / enemy world strike 的 queue orchestration，也已開始回收到 `createResolvedWorldStrikePlan(...) + queueTimedCombatPlan(...)`，player / enemy 分支不再各自串接 cast / preview / execute 流程
+- [x] `Adventure` 內 player / enemy world strike 的 action plan 也已開始抽成 `createResolvedWorldStrikePlan(...)`，queue helper 不再各自臨時拼接 cast、preview 與 execute 閉包
 - [x] `Adventure` 內 player / enemy world strike 的出手入口，也已開始共用 `performTimedWorldAction(...)`，live 分支不再各自維護 `Date.now()` 與 readyAt 判定樣板
-- [x] `Adventure` 內 player / enemy world strike 的 readyAt、resolve 與 queue 串接，現在也已開始共用 `queueResolvedTimedWorldStrike(...)`，live 分支不再各自維護完整出手樣板
-- [x] `Adventure` 內 player / enemy world strike 的 live 出手鏈，也已進一步共用 `performResolvedTimedWorldAction(...)`，分支本身只保留 strike resolve 與 plan 組裝
-- [x] `resolveAndQueueWorldStrike(...) / queueResolvedTimedWorldStrike(...)` 這兩層過渡 wrapper 也已移除，live world action 現在直接走 `performTimedWorldAction(...) + performResolvedTimedWorldAction(...)`
+- [x] `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在直接走 `performTimedWorldAction(...) + createResolvedWorldStrikePlan(...) + queueTimedCombatPlan(...)`，分支本身只保留 strike resolve 與 plan 組裝
 - [x] `queueResolvedWorldStrike(...)` 也已改成更單純的 `queueWorldStrikePlan(...)`，live world action 現在只保留 timed 判定、strike resolve 與 plan 執行三段
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，也已開始共用 `scheduleTimedCombatAction(...)`，不再各自維護一套 `setTimeout` orchestration
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的 timed plan，也已開始共用 `queueTimedCombatPlan(...)` 的 onQueue/execute 模型，battle timer orchestration 不再維持兩種樣板
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的 timed plan，現在也已共用同一個 `TimedCombatQueuePlan` 形狀，battle timer orchestration 不再拆成 world / replay 兩種資料結構
-- [x] `Adventure` 內 world strike 的 queue plan 現在也已直接使用 `createWorldStrikeQueuePlan(...)`；`createTimedWorldStrikePlan(...) / queueBattleReplayStep(...)` 這類單一用途 wrapper 已移除
-- [x] `performResolvedTimedWorldAction(...)` 這層過渡 wrapper 也已移除，live world action 現在直接走 `performTimedWorldAction(...) + createPlayerWorldStrikePlan(...) / createEnemyWorldStrikePlan(...) + queueTimedCombatPlan(...)`
+- [x] `Adventure` 內 world strike 的 queue plan 現在也已直接使用 `createWorldStrikeQueuePlan(...)`；player / enemy resolved plan 則已統一改走 `createResolvedWorldStrikePlan(...)`
 - [x] 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再額外維護第二套 effect dispatch
-- [x] 舊戰報 replay 的逐步播片流程，也已開始抽成 `processBattleReplayStep(...) / queueBattleReplayStep(...)`，log、snapshot 與特效派發不再直接塞在 replay effect 的定時器分支內
+- [x] 舊戰報 replay 的逐步播片流程，也已開始抽成 `processBattleReplayStep(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...)`，log、snapshot 與特效派發不再直接塞在 replay effect 的定時器分支內
 - [x] 舊戰報 replay 的目標怪解析與技能名正規化，也已開始抽成 `createBattleReplayContext(...)`，replay orchestration 不再每次在 effect 內重做 target / skill 組裝
 - [x] `Adventure` 內 player / enemy world strike 的 projectile / area / impact / text dispatch 也已開始共用 visual helper，地圖即時戰鬥效果派發不再各自維護兩套流程
 - [x] `Adventure` 內 player / enemy world strike 與 replay step 的 visual payload，也已開始共用 `WorldStrikeVisualPlan` 路徑，live / replay 不再各自手拼 projectile、area 與 impact payload
 - [x] `Adventure` 內 player / enemy world strike 的實際執行鏈也已開始抽成 `executePlayerWorldStrike(...) / executeEnemyWorldStrike(...)`，命中後流程不再各自攤開
+- [x] `FINAL_CULL_SKILL_GROUPS_BY_PROFESSION / FINAL_CULL_SKILLS_BY_PROFESSION / FINAL_CULL_SKILL_MAP_BY_PROFESSION` 也已正式存在，最後一批 `transition / legacy` 技能刪整可以直接按職業切進 merge-ready 視圖
 - [x] 被動技能改成逐招專屬效果，而不是通用屬性加成
 
 ---
