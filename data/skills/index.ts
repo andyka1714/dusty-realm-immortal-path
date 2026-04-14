@@ -101,6 +101,26 @@ const buildSkillMapByProfession = (skillsByProfession: Record<ProfessionType, Sk
     ])
   ) as Record<ProfessionType, Record<string, Skill>>;
 
+const mergeSkillGroupsByProfession = (
+  left: Record<ProfessionType, Record<string, Skill[]>>,
+  right: Record<ProfessionType, Record<string, Skill[]>>
+) =>
+  ({
+    [ProfessionType.None]: {},
+    [ProfessionType.Sword]: {
+      ...left[ProfessionType.Sword],
+      ...right[ProfessionType.Sword],
+    },
+    [ProfessionType.Body]: {
+      ...left[ProfessionType.Body],
+      ...right[ProfessionType.Body],
+    },
+    [ProfessionType.Mage]: {
+      ...left[ProfessionType.Mage],
+      ...right[ProfessionType.Mage],
+    },
+  }) as Record<ProfessionType, Record<string, Skill[]>>;
+
 const getDefaultRealtimeShape = (
   skill: Skill
 ): Pick<
@@ -400,21 +420,14 @@ export const FINAL_CULL_SKILL_GROUPS_BY_PROFESSION = {
   legacy: MERGE_READY_LEGACY_SKILL_GROUPS_BY_PROFESSION,
 } as const;
 
-export const FINAL_CULL_SKILLS_BY_PROFESSION: Record<ProfessionType, Skill[]> = {
-  [ProfessionType.None]: [],
-  [ProfessionType.Sword]: [
-    ...MERGE_READY_TRANSITION_SKILLS_BY_PROFESSION[ProfessionType.Sword],
-    ...MERGE_READY_LEGACY_SKILLS_BY_PROFESSION[ProfessionType.Sword],
-  ].sort(compareSkills),
-  [ProfessionType.Body]: [
-    ...MERGE_READY_TRANSITION_SKILLS_BY_PROFESSION[ProfessionType.Body],
-    ...MERGE_READY_LEGACY_SKILLS_BY_PROFESSION[ProfessionType.Body],
-  ].sort(compareSkills),
-  [ProfessionType.Mage]: [
-    ...MERGE_READY_TRANSITION_SKILLS_BY_PROFESSION[ProfessionType.Mage],
-    ...MERGE_READY_LEGACY_SKILLS_BY_PROFESSION[ProfessionType.Mage],
-  ].sort(compareSkills),
-};
+export const FINAL_CULL_SKILLS_BY_PROFESSION_AND_REPLACEMENT =
+  mergeSkillGroupsByProfession(
+    MERGE_READY_TRANSITION_SKILL_GROUPS_BY_PROFESSION,
+    MERGE_READY_LEGACY_SKILL_GROUPS_BY_PROFESSION
+  );
+
+export const FINAL_CULL_SKILLS_BY_PROFESSION =
+  buildFlattenedSkillViewsByProfession(FINAL_CULL_SKILLS_BY_PROFESSION_AND_REPLACEMENT);
 
 export const FINAL_CULL_SKILL_MAP_BY_PROFESSION = buildSkillMapByProfession(
   FINAL_CULL_SKILLS_BY_PROFESSION

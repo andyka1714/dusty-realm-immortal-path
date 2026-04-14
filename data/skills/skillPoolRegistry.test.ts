@@ -27,6 +27,7 @@ import {
   FORMAL_CORE_SKILLS_BY_REALM,
   FORMAL_CORE_SKILLS_SORTED,
   FINAL_CULL_SKILL_GROUPS_BY_PROFESSION,
+  FINAL_CULL_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
   FINAL_CULL_SKILL_MAP_BY_PROFESSION,
   FINAL_CULL_SKILLS_BY_PROFESSION,
   FORMAL_CORE_SKILLS_BY_PROFESSION,
@@ -315,20 +316,40 @@ describe("skill pool registry", () => {
       Object.keys(MERGE_READY_LEGACY_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Body]).sort()
     );
     expect(
+      Object.keys(FINAL_CULL_SKILLS_BY_PROFESSION_AND_REPLACEMENT[ProfessionType.Sword]).sort()
+    ).toEqual(
+      Object.keys({
+        ...MERGE_READY_TRANSITION_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Sword],
+        ...MERGE_READY_LEGACY_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Sword],
+      }).sort()
+    );
+    expect(
       FINAL_CULL_SKILLS_BY_PROFESSION[ProfessionType.Sword].map((skill) => skill.id).sort()
     ).toEqual(
-      [
-        ...MERGE_READY_TRANSITION_SKILLS_BY_PROFESSION[ProfessionType.Sword],
-        ...MERGE_READY_LEGACY_SKILLS_BY_PROFESSION[ProfessionType.Sword],
-      ]
+      Object.values(FINAL_CULL_SKILLS_BY_PROFESSION_AND_REPLACEMENT[ProfessionType.Sword])
+        .flat()
         .map((skill) => skill.id)
         .sort()
+    );
+    expect(
+      FINAL_CULL_SKILLS_BY_PROFESSION[ProfessionType.Sword].map((skill) => skill.id)
+    ).toEqual(
+      expect.arrayContaining(["s_bi_active", "s_im_active", "s_bi_passive", "s_ie_passive"])
     );
     expect(FINAL_CULL_SKILL_MAP_BY_PROFESSION[ProfessionType.Sword].s_bi_active?.replacementSkillId).toBe(
       "s_tr_active"
     );
     expect(FINAL_CULL_SKILL_MAP_BY_PROFESSION[ProfessionType.Mage].m_ie_passive?.poolStatus).toBe(
       "legacy"
+    );
+    expect(
+      FINAL_CULL_SKILLS_BY_PROFESSION_AND_REPLACEMENT[ProfessionType.Body].b_sf_passive
+        .map((skill) => skill.id)
+        .sort()
+    ).toEqual(
+      MERGE_READY_LEGACY_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Body].b_sf_passive
+        .map((skill) => skill.id)
+        .sort()
     );
   });
 

@@ -793,24 +793,6 @@ export const Adventure: React.FC<AdventureProps> = ({
       execute,
     });
 
-  const createResolvedWorldStrikePlan = ({
-    delayMs,
-    applyCastEffect,
-    applyPreview,
-    execute,
-  }: {
-    delayMs: number | undefined;
-    applyCastEffect?: () => void;
-    applyPreview: () => void;
-    execute: () => void;
-  }) =>
-    createWorldStrikeQueuePlan({
-      delayMs,
-      applyCastEffect,
-      applyPreview,
-      execute,
-    });
-
   const getPlayerWorldStrikePreviewMessage = (
     targetName: string,
     chosenSkill?: typeof primaryActiveSkill
@@ -1663,7 +1645,7 @@ export const Adventure: React.FC<AdventureProps> = ({
           : undefined;
         const strike = resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill);
         queueTimedCombatPlan(
-          createResolvedWorldStrikePlan({
+          createWorldStrikeQueuePlan({
             delayMs: strike.executionTimeMs,
             applyCastEffect: () => dispatchPlayerWorldStrikeCastEffect({ chosenSkill, strike }),
             applyPreview: () => {
@@ -1698,7 +1680,7 @@ export const Adventure: React.FC<AdventureProps> = ({
         const canUseSpecial = now >= (enemySpecialReadyAtById[enemyInstanceId] ?? 0);
         const strike = resolveEnemyWorldStrike(enemyTemplate, playerStats, canUseSpecial);
         queueTimedCombatPlan(
-          createResolvedWorldStrikePlan({
+          createWorldStrikeQueuePlan({
             delayMs: strike.executionTimeMs,
             applyCastEffect: () => dispatchEnemyWorldStrikeCastEffect({ strike }),
             applyPreview: () =>
