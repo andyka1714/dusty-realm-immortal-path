@@ -257,6 +257,13 @@ const buildSkillViewSet = (skills: Skill[]) => ({
 const createRetiredSkillViewSet = (skillViews: Skill[]) =>
   buildSkillViewSet(resolveSkillViews(skillViews));
 
+const buildResolvedRetiredSkillViewGroups = (
+  aliasViewGroups: ReturnType<typeof buildRetiredAliasViewGroups>
+) => ({
+  active: createRetiredSkillViewSet(aliasViewGroups.active.views),
+  passive: createRetiredSkillViewSet(aliasViewGroups.passive.views),
+});
+
 const battleAbsorbedRetiredAliasViewGroups = buildRetiredAliasViewGroups({
   activeSkillIds: Object.keys(BATTLE_ABSORBED_RETIRED_ACTIVE_ALIASES),
   passiveSkillIds: Object.keys(BATTLE_ABSORBED_RETIRED_PASSIVE_ALIASES),
@@ -264,10 +271,8 @@ const battleAbsorbedRetiredAliasViewGroups = buildRetiredAliasViewGroups({
   passiveAliases: BATTLE_ABSORBED_RETIRED_PASSIVE_ALIASES,
 });
 
-const battleAbsorbedRetiredSkillViewGroups = {
-  active: createRetiredSkillViewSet(battleAbsorbedRetiredAliasViewGroups.active.views),
-  passive: createRetiredSkillViewSet(battleAbsorbedRetiredAliasViewGroups.passive.views),
-};
+const battleAbsorbedRetiredSkillViewGroups =
+  buildResolvedRetiredSkillViewGroups(battleAbsorbedRetiredAliasViewGroups);
 
 const battleAbsorbedRetiredSkillViewSet = battleAbsorbedRetiredSkillViewGroups.active;
 
@@ -291,10 +296,8 @@ const retirementReadyRetiredAliasViewGroups = buildRetiredAliasViewGroups({
   passiveAliases: RETIREMENT_READY_RETIRED_PASSIVE_ALIASES,
 });
 
-const retirementReadyRetiredSkillViewGroups = {
-  active: createRetiredSkillViewSet(retirementReadyRetiredAliasViewGroups.active.views),
-  passive: createRetiredSkillViewSet(retirementReadyRetiredAliasViewGroups.passive.views),
-};
+const retirementReadyRetiredSkillViewGroups =
+  buildResolvedRetiredSkillViewGroups(retirementReadyRetiredAliasViewGroups);
 
 const retirementReadyRetiredSkillViewSet = retirementReadyRetiredSkillViewGroups.active;
 

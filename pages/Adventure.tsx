@@ -729,21 +729,36 @@ export const Adventure: React.FC<AdventureProps> = ({
     setEnemySpecialReadyAtById({});
   };
 
-  const scheduleWorldActionExecution = (
-    delayMs: number | undefined,
-    execute: () => void
-  ) => {
+  const scheduleTimedCombatAction = ({
+    delayMs,
+    execute,
+    timerSet,
+  }: {
+    delayMs: number | undefined;
+    execute: () => void;
+    timerSet?: Set<ReturnType<typeof setTimeout>>;
+  }) => {
     if ((delayMs ?? 0) > 0) {
       const timer = setTimeout(() => {
-        worldActionTimersRef.current.delete(timer);
+        timerSet?.delete(timer);
         execute();
       }, delayMs);
-      worldActionTimersRef.current.add(timer);
-      return;
+      timerSet?.add(timer);
+      return timer;
     }
 
     execute();
   };
+
+  const scheduleWorldActionExecution = (
+    delayMs: number | undefined,
+    execute: () => void
+  ) =>
+    scheduleTimedCombatAction({
+      delayMs,
+      execute,
+      timerSet: worldActionTimersRef.current,
+    });
 
   const queueWorldStrikeExecution = ({
     delayMs,
@@ -1356,13 +1371,16 @@ export const Adventure: React.FC<AdventureProps> = ({
     targetMonster: ActiveMonster | null;
     normalizedUsedSkill?: ReturnType<typeof getFormalSkillByName>;
   }) =>
-    setTimeout(() => {
-      processBattleReplayStep({
-        nextLog,
-        targetMonster,
-        normalizedUsedSkill,
-      });
-    }, replayDelay);
+    scheduleTimedCombatAction({
+      delayMs: replayDelay,
+      execute: () => {
+        processBattleReplayStep({
+          nextLog,
+          targetMonster,
+          normalizedUsedSkill,
+        });
+      },
+    });
 
   const createBattleReplayStepPlan = (
     nextLog: NonNullable<typeof replayQueue>[number]

@@ -18,7 +18,7 @@
 - 所有 passive 現在都已改成逐招專屬效果，`passiveEffectTags` 欄位也已自技能資料層完全移除；高境界與 retired passive alias 也不再依賴 generic fallback。
 - `化神 -> 仙帝` 的後期修為乘區、高境界追趕機制，以及 `凡人 -> 仙帝` 的三職業 TTK 目標表，已正式落到 progression registry 與測試。
 - UI 殼層已開始統一：`GamePanel / Modal / GameTooltip / GameHintBubble / GameSection` 正在收斂成同一套遊戲化語言；主要面板、tooltip、hint bubble 與工坊卡片都已開始套用同一套 section chrome。
-- `Gameplay / World / UI / Audit` 文件已完成主要交叉校對；目前剩餘缺口已集中在 battle 單一引擎收口、技能池最終裁剪與少量 UI 尾端一致性。
+- `Gameplay / World / UI / Audit` 文件已完成主要交叉校對與去重；目前剩餘缺口已集中在 battle 單一引擎收口、技能池最終裁剪與少量 UI 尾端一致性。
 
 ## 文件入口
 
