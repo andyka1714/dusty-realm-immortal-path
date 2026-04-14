@@ -41,6 +41,14 @@ const compareSkills = (left: Skill, right: Skill) => {
   return left.name.localeCompare(right.name, "zh-Hant");
 };
 
+const buildSkillGroupsByReplacement = (skills: Skill[]) =>
+  skills.reduce<Record<string, Skill[]>>((groups, skill) => {
+    const groupKey = skill.replacementSkillId ?? skill.id;
+    if (!groups[groupKey]) groups[groupKey] = [];
+    groups[groupKey].push(skill);
+    return groups;
+  }, {});
+
 const getDefaultRealtimeShape = (
   skill: Skill
 ): Pick<
@@ -192,6 +200,12 @@ export const TRANSITION_SKILL_MAP: Record<string, Skill> = Object.fromEntries(
 export const LEGACY_SKILL_MAP: Record<string, Skill> = Object.fromEntries(
   LEGACY_SKILLS.map((skill) => [skill.id, skill])
 ) as Record<string, Skill>;
+
+export const TRANSITION_SKILLS_BY_REPLACEMENT = buildSkillGroupsByReplacement(TRANSITION_SKILLS);
+
+export const LEGACY_SKILLS_BY_REPLACEMENT = buildSkillGroupsByReplacement(LEGACY_SKILLS);
+
+export const NON_CORE_SKILLS_BY_REPLACEMENT = buildSkillGroupsByReplacement(NON_CORE_SKILLS_SORTED);
 
 export const FORMAL_CORE_SKILLS_BY_SOURCE_TIER: Record<
   NonNullable<Skill["formalSourceTier"]>,

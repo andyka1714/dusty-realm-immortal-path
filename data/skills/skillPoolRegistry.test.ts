@@ -32,7 +32,9 @@ import {
   getFormalCoreSkills,
   getSkill,
   LEGACY_SKILL_MAP,
+  LEGACY_SKILLS_BY_REPLACEMENT,
   NON_CORE_SKILL_PROFESSION_POOLS,
+  NON_CORE_SKILLS_BY_REPLACEMENT,
   NON_CORE_SKILLS_SORTED,
   getFormalSkill,
   getFormalSkillByNameExact,
@@ -51,6 +53,7 @@ import {
   SKILL_PROFESSION_POOL_GROUPS,
   SKILL_PROFESSION_POOLS,
   TRANSITION_SKILL_MAP,
+  TRANSITION_SKILLS_BY_REPLACEMENT,
   TRANSITION_SKILL_POOL_REGISTRY,
   TRANSITION_SKILL_PROFESSION_POOLS,
 } from ".";
@@ -169,6 +172,27 @@ describe("skill pool registry", () => {
     );
     expect(Object.values(LEGACY_SKILL_MAP).every((skill) => skill.poolStatus === "legacy")).toBe(
       true
+    );
+  });
+
+  it("groups non-core skills by their formal replacement target for final merge work", () => {
+    expect(TRANSITION_SKILLS_BY_REPLACEMENT.s_tr_active.map((skill) => skill.id).sort()).toEqual(
+      ["s_bi_active", "s_im_active"].sort()
+    );
+    expect(LEGACY_SKILLS_BY_REPLACEMENT.b_sf_passive.map((skill) => skill.id).sort()).toEqual(
+      ["b_bi_passive", "b_tr_passive", "b_im_passive", "b_ie_passive"].sort()
+    );
+    expect(
+      NON_CORE_SKILLS_BY_REPLACEMENT.m_sf_passive.map((skill) => skill.id).sort()
+    ).toEqual(
+      [
+        "m_vr_passive",
+        "m_bi_passive",
+        "m_ma_passive",
+        "m_tr_passive",
+        "m_im_passive",
+        "m_ie_passive",
+      ].sort()
     );
   });
 

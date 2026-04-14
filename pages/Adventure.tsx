@@ -498,6 +498,8 @@ export const Adventure: React.FC<AdventureProps> = ({
     return () => {
         worldActionTimersRef.current.forEach((timer) => clearTimeout(timer));
         worldActionTimersRef.current.clear();
+        battleReplayTimersRef.current.forEach((timer) => clearTimeout(timer));
+        battleReplayTimersRef.current.clear();
         dispatch(cancelBattle());
     };
   }, [dispatch]);
@@ -531,6 +533,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   const [enemyActionReadyAtById, setEnemyActionReadyAtById] = useState<Record<string, number>>({});
   const [enemySpecialReadyAtById, setEnemySpecialReadyAtById] = useState<Record<string, number>>({});
   const worldActionTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+  const battleReplayTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
   
   // NPC Interaction State
   const [interactingNPC, setInteractingNPC] = useState<NPC | null>(null);
@@ -1409,6 +1412,7 @@ export const Adventure: React.FC<AdventureProps> = ({
 
     return queueTimedCombatPlan({
       delayMs: replayDelay,
+      timerSet: battleReplayTimersRef.current,
       execute: () => {
         processBattleReplayStep({
           nextLog: replayLog,
@@ -2226,6 +2230,8 @@ export const Adventure: React.FC<AdventureProps> = ({
       // Reset ref when battle ends
       if (!isBattling) {
           battleProcessedRef.current = false;
+          battleReplayTimersRef.current.forEach((timer) => clearTimeout(timer));
+          battleReplayTimersRef.current.clear();
           setDisplayedLogs([]);
           setReplayQueue([]);
           setIsReplayingBattle(false);
