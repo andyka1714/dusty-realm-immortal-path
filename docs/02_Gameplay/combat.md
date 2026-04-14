@@ -245,6 +245,7 @@
 - `Adventure` 內 world strike 與舊戰報 replay 的定時排程，也已開始共用 `queueTimedCombatPlan(...)` 的 onQueue/execute 模型，battle timer orchestration 不再分成兩種樣板
 - `Adventure` 內 world strike 與舊戰報 replay 的 timed plan，現在也已共用同一個 `TimedCombatQueuePlan` 形狀；battle timer orchestration 不再拆成 world / replay 兩種資料結構
 - `Adventure` 內 world strike 的 queue plan 現在也已直接使用 `createWorldStrikeQueuePlan(...)`；`createTimedWorldStrikePlan(...) / queueBattleReplayStep(...)` 這類單一用途 wrapper 已移除
+- `performResolvedTimedWorldAction(...)` 這層過渡 wrapper 也已移除，live world action 現在直接走 `performTimedWorldAction(...) + createPlayerWorldStrikePlan(...) / createEnemyWorldStrikePlan(...) + queueTimedCombatPlan(...)`
 - 舊戰報 replay 的逐步播片流程，也已開始抽成 `processBattleReplayStep(...) / queueBattleReplayStep(...)`，戰報回放的 log、snapshot 與特效派發不再把整段定時器流程直接攤在 `Adventure` 的 effect 內
 - 舊戰報 replay 的目標怪解析與技能名正規化，也已開始抽成 `createBattleReplayContext(...)`，replay orchestration 不再每次在 effect 內重做 target / skill 組裝
 - 舊戰報 replay 的 delay 與 context 組裝，也已開始抽成 `createBattleReplayStepPlan(...) / queueBattleReplayStep(...)`，回放 step 不再在 effect 內現場計算 `previousTime / nextTime / replayDelay`

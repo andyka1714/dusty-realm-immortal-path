@@ -860,27 +860,6 @@ export const Adventure: React.FC<AdventureProps> = ({
       execute: () => executeEnemyWorldStrike({ strike, enemyTemplate }),
     });
 
-  const performResolvedTimedWorldAction = <TStrike,>({
-    readyAt,
-    canExecute,
-    resolveStrike,
-    createPlan,
-  }: {
-    readyAt?: number;
-    canExecute?: () => boolean;
-    resolveStrike: (now: number) => TStrike | undefined;
-    createPlan: (now: number, strike: TStrike) => TimedCombatQueuePlan;
-  }) =>
-    performTimedWorldAction({
-      readyAt,
-      canExecute,
-      execute: (now) => {
-        const resolved = resolveStrike(now);
-        if (!resolved) return;
-        queueTimedCombatPlan(createPlan(now, resolved));
-      },
-    });
-
   const getPlayerWorldStrikePreviewMessage = (
     targetName: string,
     chosenSkill?: typeof primaryActiveSkill
@@ -1722,28 +1701,29 @@ export const Adventure: React.FC<AdventureProps> = ({
   };
 
   const performWorldPlayerAction = (useSkill: boolean) => {
-    return performResolvedTimedWorldAction({
+    return performTimedWorldAction({
       readyAt: playerActionReadyAt,
       canExecute: () => Boolean(targetedMonster && targetedMonsterTemplate && canEngageTarget),
-      resolveStrike: (now) => {
+      execute: (now) => {
         if (!targetedMonster) return;
 
         const chosenSkill = useSkill && primaryActiveSkill && now >= playerSkillReadyAt
           ? primaryActiveSkill
           : undefined;
-        return {
+        const resolved = {
           chosenSkill,
           targetedMonster,
           strike: resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill),
         };
+        queueTimedCombatPlan(
+          createPlayerWorldStrikePlan({
+            now,
+            strike: resolved.strike,
+            chosenSkill: resolved.chosenSkill,
+            targetedMonster: resolved.targetedMonster,
+          })
+        );
       },
-      createPlan: (now, resolved) =>
-        createPlayerWorldStrikePlan({
-          now,
-          strike: resolved.strike,
-          chosenSkill: resolved.chosenSkill,
-          targetedMonster: resolved.targetedMonster,
-        }),
     });
   };
 
@@ -1751,24 +1731,25 @@ export const Adventure: React.FC<AdventureProps> = ({
     enemyInstanceId: string,
     enemyTemplate: NonNullable<typeof targetedMonsterTemplate>
   ) =>
-    performResolvedTimedWorldAction({
-      resolveStrike: (now) => {
+    performTimedWorldAction({
+      execute: (now) => {
         const canUseSpecial = now >= (enemySpecialReadyAtById[enemyInstanceId] ?? 0);
-        return {
+        const resolved = {
           strike: resolveEnemyWorldStrike(enemyTemplate, playerStats, canUseSpecial),
           canUseSpecial,
         };
+        queueTimedCombatPlan(
+          createEnemyWorldStrikePlan({
+            now,
+            enemyInstanceId,
+            enemyTemplate,
+            strike: resolved.strike,
+            canUseSpecial: resolved.canUseSpecial,
+          })
+        );
       },
-      createPlan: (now, resolved) =>
-        createEnemyWorldStrikePlan({
-          now,
-          enemyInstanceId,
-          enemyTemplate,
-          strike: resolved.strike,
-          canUseSpecial: resolved.canUseSpecial,
-        }),
     });
-
+ 
   // Stop auto-move if battle starts or map changes
   useEffect(() => {
       if (isBattling || showIntro) {

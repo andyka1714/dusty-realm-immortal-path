@@ -321,8 +321,22 @@ export const MERGE_READY_NON_CORE_SKILL_GROUPS = buildMergeReadySkillGroups(
   NON_CORE_SKILLS_BY_REPLACEMENT
 );
 
+export const MERGE_READY_TRANSITION_SKILL_GROUPS = buildMergeReadySkillGroups(
+  TRANSITION_SKILLS_BY_REPLACEMENT
+);
+
+export const MERGE_READY_LEGACY_SKILL_GROUPS = buildMergeReadySkillGroups(
+  LEGACY_SKILLS_BY_REPLACEMENT
+);
+
 export const MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION =
   buildMergeReadySkillGroupsByProfession(NON_CORE_SKILLS_BY_PROFESSION_AND_REPLACEMENT);
+
+export const MERGE_READY_TRANSITION_SKILL_GROUPS_BY_PROFESSION =
+  buildMergeReadySkillGroupsByProfession(TRANSITION_SKILLS_BY_PROFESSION_AND_REPLACEMENT);
+
+export const MERGE_READY_LEGACY_SKILL_GROUPS_BY_PROFESSION =
+  buildMergeReadySkillGroupsByProfession(LEGACY_SKILLS_BY_PROFESSION_AND_REPLACEMENT);
 
 export const MERGE_READY_NON_CORE_SKILLS = Object.values(MERGE_READY_NON_CORE_SKILL_GROUPS)
   .flat()
@@ -350,6 +364,14 @@ export const MERGE_READY_NON_CORE_SKILLS_BY_PROFESSION: Record<ProfessionType, S
     .flat()
     .sort(compareSkills),
 };
+
+export const MERGE_READY_TRANSITION_SKILLS = Object.values(MERGE_READY_TRANSITION_SKILL_GROUPS)
+  .flat()
+  .sort(compareSkills);
+
+export const MERGE_READY_LEGACY_SKILLS = Object.values(MERGE_READY_LEGACY_SKILL_GROUPS)
+  .flat()
+  .sort(compareSkills);
 
 export const SKILLS_BY_REALM: Record<MajorRealm, Skill[]> = Object.fromEntries(
   Object.entries(CORE_SKILL_SETS_BY_REALM).map(([realm, skills]) => [

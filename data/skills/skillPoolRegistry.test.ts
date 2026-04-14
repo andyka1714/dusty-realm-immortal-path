@@ -34,11 +34,17 @@ import {
   LEGACY_SKILL_MAP,
   LEGACY_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
   LEGACY_SKILLS_BY_REPLACEMENT,
+  MERGE_READY_LEGACY_SKILL_GROUPS,
+  MERGE_READY_LEGACY_SKILL_GROUPS_BY_PROFESSION,
+  MERGE_READY_LEGACY_SKILLS,
   MERGE_READY_NON_CORE_SKILL_MAP,
   MERGE_READY_NON_CORE_SKILLS,
   MERGE_READY_NON_CORE_SKILLS_BY_PROFESSION,
   MERGE_READY_NON_CORE_SKILL_GROUPS,
   MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION,
+  MERGE_READY_TRANSITION_SKILL_GROUPS,
+  MERGE_READY_TRANSITION_SKILL_GROUPS_BY_PROFESSION,
+  MERGE_READY_TRANSITION_SKILLS,
   NON_CORE_SKILL_PROFESSION_POOLS,
   NON_CORE_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
   NON_CORE_SKILLS_BY_REPLACEMENT,
@@ -261,6 +267,25 @@ describe("skill pool registry", () => {
     expect(
       MERGE_READY_NON_CORE_SKILLS_BY_PROFESSION[ProfessionType.Mage].map((skill) => skill.id)
     ).toContain("m_ie_passive");
+  });
+
+  it("splits merge-ready transition and legacy skill views for final cull passes", () => {
+    expect(MERGE_READY_TRANSITION_SKILLS.every((skill) => skill.poolStatus === "transition")).toBe(
+      true
+    );
+    expect(MERGE_READY_LEGACY_SKILLS.every((skill) => skill.poolStatus === "legacy")).toBe(true);
+    expect(Object.keys(MERGE_READY_TRANSITION_SKILL_GROUPS)).toContain("s_tr_active");
+    expect(Object.keys(MERGE_READY_LEGACY_SKILL_GROUPS)).toContain("b_sf_passive");
+    expect(
+      MERGE_READY_TRANSITION_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Sword].s_tr_active
+        .map((skill) => skill.id)
+        .sort()
+    ).toEqual(["s_bi_active", "s_im_active"].sort());
+    expect(
+      MERGE_READY_LEGACY_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Mage].m_sf_passive
+        .map((skill) => skill.id)
+        .sort()
+    ).toEqual(["m_bi_passive", "m_ma_passive", "m_ie_passive"].sort());
   });
 
   it("ensures prerequisite chains only point to skills of the same profession", () => {
