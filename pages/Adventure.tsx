@@ -1244,6 +1244,26 @@ export const Adventure: React.FC<AdventureProps> = ({
     });
   };
 
+  const dispatchBattleReplayVisuals = ({
+    nextLog,
+    targetMonster,
+    normalizedUsedSkill,
+  }: {
+    nextLog: NonNullable<typeof replayQueue>[number];
+    targetMonster: ActiveMonster | null;
+    normalizedUsedSkill?: ReturnType<typeof getFormalSkillByName>;
+  }) => {
+    dispatchBattleReplayAttackVisuals({
+      nextLog,
+      targetMonster,
+      normalizedUsedSkill,
+    });
+    dispatchBattleReplayDamageVisuals({
+      nextLog,
+      targetMonster,
+    });
+  };
+
   const createBattleReplayContext = (
     nextLog: NonNullable<typeof replayQueue>[number]
   ) => {
@@ -1283,14 +1303,10 @@ export const Adventure: React.FC<AdventureProps> = ({
     const logContainer = document.getElementById('battle-log-container');
     if (logContainer) logContainer.scrollTop = logContainer.scrollHeight;
 
-    dispatchBattleReplayAttackVisuals({
+    dispatchBattleReplayVisuals({
       nextLog,
       targetMonster,
       normalizedUsedSkill,
-    });
-    dispatchBattleReplayDamageVisuals({
-      nextLog,
-      targetMonster,
     });
   };
 
@@ -1312,6 +1328,23 @@ export const Adventure: React.FC<AdventureProps> = ({
         normalizedUsedSkill,
       });
     }, replayDelay);
+
+  const createBattleReplayStepPlan = (
+    nextLog: NonNullable<typeof replayQueue>[number]
+  ) => {
+    const previousTime = displayedLogs[displayedLogs.length - 1]?.timeMs ?? 0;
+    const nextTime = nextLog?.timeMs ?? previousTime + 500;
+    const replayDelay = Math.max(180, Math.min(900, nextTime - previousTime || 250));
+
+    return {
+      replayDelay,
+      ...createBattleReplayContext(nextLog),
+    };
+  };
+
+  const queueBattleReplayStep = (
+    nextLog: NonNullable<typeof replayQueue>[number]
+  ) => scheduleBattleReplayStep(createBattleReplayStepPlan(nextLog));
 
   const executePlayerWorldStrike = ({
     strike,
@@ -2065,14 +2098,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     }
 
     const nextLog = replayQueue[0];
-    const previousTime = displayedLogs[displayedLogs.length - 1]?.timeMs ?? 0;
-    const nextTime = nextLog?.timeMs ?? previousTime + 500;
-    const replayDelay = Math.max(180, Math.min(900, nextTime - previousTime || 250));
-
-    const timer = scheduleBattleReplayStep({
-      replayDelay,
-      ...createBattleReplayContext(nextLog),
-    });
+    const timer = queueBattleReplayStep(nextLog);
 
     return () => clearTimeout(timer);
   }, [isReplayingBattle, replayQueue, battleSnapshot, displayedLogs, currentEnemyInstanceId, activeMonsters, playerPosition, dispatch]);
