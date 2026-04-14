@@ -12,7 +12,7 @@ import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move, Swords, Flame, Droplets, Shield, ShieldOff, Zap, Snowflake, Sparkles } from 'lucide-react';
 import { parseBattleLog } from '../utils/logParser';
-import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory, NPC, NPCType, ProfessionType } from '../types';
+import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory, NPC, NPCType, ProfessionType, ActiveMonster } from '../types';
 import { MOVEMENT_SPEEDS, REALM_NAMES, ELEMENT_COLORS, ELEMENT_NAMES } from '../constants';
 import clsx from 'clsx';
 import { Modal } from '../components/Modal';
@@ -990,6 +990,180 @@ export const Adventure: React.FC<AdventureProps> = ({
     });
   };
 
+  const executePlayerWorldStrike = ({
+    strike,
+    chosenSkill,
+    targetedMonster,
+    activeMonsters,
+    mapEnemies,
+  }: {
+    strike: ReturnType<typeof resolvePlayerWorldStrike>;
+    chosenSkill?: typeof primaryActiveSkill;
+    targetedMonster: {
+      instanceId: string;
+      templateId: string;
+      name: string;
+      x: number;
+      y: number;
+      currentHp: number;
+    };
+    activeMonsters: ActiveMonster[];
+    mapEnemies: MapData["enemies"] | undefined;
+  }) => {
+    const impactedMonsters = getWorldSkillAreaTargets({
+      origin: playerPosition,
+      primaryTarget: { x: targetedMonster.x, y: targetedMonster.y },
+      monsters: activeMonsters,
+      primaryTargetId: targetedMonster.instanceId,
+      areaShape: strike.areaShape,
+      areaRadius: strike.areaRadius,
+      maxTargets: strike.maxTargets,
+    });
+
+    impactedMonsters.forEach((monster, index) => {
+      if (strike.damage <= 0) return;
+
+      dispatch(applyWorldDamageToMonster({
+        monsterInstanceId: monster.instanceId,
+        damage: strike.damage,
+      }));
+
+      applyWorldStrikeImpactBundle({
+        color: '#f59e0b',
+        colorInt: chosenSkill?.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
+        targetX: monster.x,
+        targetY: monster.y,
+        radius: strike.areaShape && strike.areaShape !== 'single' ? 0.8 : 0.45,
+        damageText: `${index === 0 && strike.isCrit ? '暴擊 ' : ''}${strike.damage}`,
+        damageTextColor: index === 0 && strike.isCrit ? '#facc15' : '#ffffff',
+        damageTextColorInt: index === 0 && strike.isCrit ? 0xfacc15 : 0xffffff,
+      });
+    });
+
+    if (strike.isProjectile) {
+      dispatchWorldStrikeProjectileEffect({
+        color: '#f59e0b',
+        colorInt: chosenSkill?.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
+        sourceX: playerPosition.x,
+        sourceY: playerPosition.y,
+        targetX: targetedMonster.x,
+        targetY: targetedMonster.y,
+        durationMs: Math.max(240, strike.executionTimeMs || 360),
+      });
+    }
+
+    if (strike.areaShape && strike.areaShape !== 'single' && strike.areaShape !== 'self') {
+      dispatchWorldStrikeAreaEffect({
+        color: '#f59e0b',
+        colorInt: chosenSkill?.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
+        targetX: targetedMonster.x,
+        targetY: targetedMonster.y,
+        radius: Math.max(0.8, strike.areaRadius ?? 1),
+        durationMs: 420,
+      });
+    }
+
+    setWorldLastCombatMessage(
+      getPlayerWorldStrikeResolutionMessage({
+        chosenSkill,
+        targetName: targetedMonster.name,
+        damage: strike.damage,
+        impactedTargetCount: impactedMonsters.length,
+      })
+    );
+
+    let primaryDefeated = false;
+    impactedMonsters.forEach((monster) => {
+      const remainingHp = Math.max(0, monster.currentHp - strike.damage);
+      if (remainingHp > 0) return;
+
+      const monsterTemplate = mapEnemies?.find((enemy) => enemy.id === monster.templateId);
+      if (!monsterTemplate) return;
+
+      grantMonsterRewards(monsterTemplate);
+      recoverAfterWorldKill();
+      dispatch(addLog({
+        message: `你擊敗了 ${monster.name}。`,
+        type: 'success',
+      }));
+      if (monster.instanceId === targetedMonster.instanceId) {
+        primaryDefeated = true;
+      }
+    });
+
+    if (primaryDefeated) {
+      setTargetMonsterId(null);
+      clearWorldEncounterState();
+    }
+  };
+
+  const executeEnemyWorldStrike = ({
+    strike,
+    enemyTemplate,
+  }: {
+    strike: ReturnType<typeof resolveEnemyWorldStrike>;
+    enemyTemplate: NonNullable<typeof targetedMonsterTemplate>;
+  }) => {
+    const shieldResolution = resolveWorldShieldedDamage({
+      incomingDamage: strike.damage,
+      currentShield: worldPlayerShield,
+    });
+    const incomingDamage = shieldResolution.damageTaken;
+    const absorbed = shieldResolution.absorbed;
+    if (absorbed > 0) {
+      setWorldPlayerShield(shieldResolution.remainingShield);
+    }
+
+    const nextHp = Math.max(0, worldPlayerHp - incomingDamage);
+    setWorldPlayerHp(nextHp);
+    setWorldCombatPlayerStatuses((prev) =>
+      Array.from(new Set([...prev, ...strike.statusNames]))
+    );
+    setWorldLastCombatMessage(
+      getEnemyWorldStrikeResolutionMessage({
+        enemyName: enemyTemplate.name,
+        skillName: strike.skillName,
+        damage: incomingDamage,
+      })
+    );
+
+    if (strike.isProjectile) {
+      dispatchWorldStrikeProjectileEffect({
+        color: '#f87171',
+        colorInt: 0xf87171,
+        sourceX: targetedMonster?.x ?? enemyTemplate.attackRange ?? 0,
+        sourceY: targetedMonster?.y ?? playerPosition.y,
+        targetX: playerPosition.x,
+        targetY: playerPosition.y,
+        durationMs: Math.max(240, strike.executionTimeMs || 320),
+      });
+    }
+    if (strike.areaShape && strike.areaShape !== 'single' && strike.areaShape !== 'self') {
+      dispatchWorldStrikeAreaEffect({
+        color: '#f87171',
+        colorInt: 0xf87171,
+        targetX: playerPosition.x,
+        targetY: playerPosition.y,
+        radius: Math.max(0.8, strike.areaRadius ?? 1),
+        durationMs: 360,
+      });
+    }
+    applyWorldStrikeImpactBundle({
+      color: '#f87171',
+      colorInt: 0xf87171,
+      targetX: playerPosition.x,
+      targetY: playerPosition.y,
+      radius: 0.45,
+      damageText: absorbed > 0 ? `-${incomingDamage} / 格擋 ${absorbed}` : `-${incomingDamage}`,
+      damageTextColor: absorbed > 0 ? '#67e8f9' : '#fca5a5',
+      damageTextColorInt: absorbed > 0 ? 0x67e8f9 : 0xfca5a5,
+    });
+
+    if (nextHp <= 0) {
+      handleWorldPlayerDefeat();
+    }
+  };
+
   const applyPlayerWorldStrikePreview = ({
     now,
     strike,
@@ -1139,94 +1313,6 @@ export const Adventure: React.FC<AdventureProps> = ({
       });
     }
 
-    const executeStrike = () => {
-      const impactedMonsters = getWorldSkillAreaTargets({
-        origin: playerPosition,
-        primaryTarget: { x: targetedMonster.x, y: targetedMonster.y },
-        monsters: activeMonsters,
-        primaryTargetId: targetedMonster.instanceId,
-        areaShape: strike.areaShape,
-        areaRadius: strike.areaRadius,
-        maxTargets: strike.maxTargets,
-      });
-
-      impactedMonsters.forEach((monster, index) => {
-        if (strike.damage <= 0) return;
-
-        dispatch(applyWorldDamageToMonster({
-          monsterInstanceId: monster.instanceId,
-          damage: strike.damage,
-        }));
-
-        applyWorldStrikeImpactBundle({
-          color: '#f59e0b',
-          colorInt: chosenSkill?.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
-          targetX: monster.x,
-          targetY: monster.y,
-          radius: strike.areaShape && strike.areaShape !== 'single' ? 0.8 : 0.45,
-          damageText: `${index === 0 && strike.isCrit ? '暴擊 ' : ''}${strike.damage}`,
-          damageTextColor: index === 0 && strike.isCrit ? '#facc15' : '#ffffff',
-          damageTextColorInt: index === 0 && strike.isCrit ? 0xfacc15 : 0xffffff,
-        });
-      });
-
-      if (strike.isProjectile) {
-        dispatchWorldStrikeProjectileEffect({
-          color: '#f59e0b',
-          colorInt: chosenSkill?.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
-          sourceX: playerPosition.x,
-          sourceY: playerPosition.y,
-          targetX: targetedMonster.x,
-          targetY: targetedMonster.y,
-          durationMs: Math.max(240, strike.executionTimeMs || 360),
-        });
-      }
-
-      if (strike.areaShape && strike.areaShape !== 'single' && strike.areaShape !== 'self') {
-        dispatchWorldStrikeAreaEffect({
-          color: '#f59e0b',
-          colorInt: chosenSkill?.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
-          targetX: targetedMonster.x,
-          targetY: targetedMonster.y,
-          radius: Math.max(0.8, strike.areaRadius ?? 1),
-          durationMs: 420,
-        });
-      }
-
-      setWorldLastCombatMessage(
-        getPlayerWorldStrikeResolutionMessage({
-          chosenSkill,
-          targetName: targetedMonster.name,
-          damage: strike.damage,
-          impactedTargetCount: impactedMonsters.length,
-        })
-      );
-
-      let primaryDefeated = false;
-      impactedMonsters.forEach((monster) => {
-        const remainingHp = Math.max(0, monster.currentHp - strike.damage);
-        if (remainingHp > 0) return;
-
-        const monsterTemplate = mapData?.enemies.find((enemy) => enemy.id === monster.templateId);
-        if (!monsterTemplate) return;
-
-        grantMonsterRewards(monsterTemplate);
-        recoverAfterWorldKill();
-        dispatch(addLog({
-          message: `你擊敗了 ${monster.name}。`,
-          type: 'success',
-        }));
-        if (monster.instanceId === targetedMonster.instanceId) {
-          primaryDefeated = true;
-        }
-      });
-
-      if (primaryDefeated) {
-        setTargetMonsterId(null);
-        clearWorldEncounterState();
-      }
-    };
-
     queueWorldStrikeExecution({
       delayMs: strike.executionTimeMs,
       applyPreview: () => {
@@ -1238,7 +1324,14 @@ export const Adventure: React.FC<AdventureProps> = ({
           targetName: targetedMonster.name,
         });
       },
-      execute: executeStrike,
+      execute: () =>
+        executePlayerWorldStrike({
+          strike,
+          chosenSkill,
+          targetedMonster,
+          activeMonsters,
+          mapEnemies: mapData?.enemies,
+        }),
     });
 
     return true;
@@ -1262,67 +1355,6 @@ export const Adventure: React.FC<AdventureProps> = ({
       });
     }
 
-    const executeStrike = () => {
-      const shieldResolution = resolveWorldShieldedDamage({
-        incomingDamage: strike.damage,
-        currentShield: worldPlayerShield,
-      });
-      const incomingDamage = shieldResolution.damageTaken;
-      const absorbed = shieldResolution.absorbed;
-      if (absorbed > 0) {
-        setWorldPlayerShield(shieldResolution.remainingShield);
-      }
-
-      const nextHp = Math.max(0, worldPlayerHp - incomingDamage);
-      setWorldPlayerHp(nextHp);
-      setWorldCombatPlayerStatuses((prev) =>
-        Array.from(new Set([...prev, ...strike.statusNames]))
-      );
-      setWorldLastCombatMessage(
-        getEnemyWorldStrikeResolutionMessage({
-          enemyName: enemyTemplate.name,
-          skillName: strike.skillName,
-          damage: incomingDamage,
-        })
-      );
-
-      if (strike.isProjectile) {
-        dispatchWorldStrikeProjectileEffect({
-          color: '#f87171',
-          colorInt: 0xf87171,
-          sourceX: targetedMonster?.x ?? enemyTemplate.attackRange ?? 0,
-          sourceY: targetedMonster?.y ?? playerPosition.y,
-          targetX: playerPosition.x,
-          targetY: playerPosition.y,
-          durationMs: Math.max(240, strike.executionTimeMs || 320),
-        });
-      }
-      if (strike.areaShape && strike.areaShape !== 'single' && strike.areaShape !== 'self') {
-        dispatchWorldStrikeAreaEffect({
-          color: '#f87171',
-          colorInt: 0xf87171,
-          targetX: playerPosition.x,
-          targetY: playerPosition.y,
-          radius: Math.max(0.8, strike.areaRadius ?? 1),
-          durationMs: 360,
-        });
-      }
-      applyWorldStrikeImpactBundle({
-        color: '#f87171',
-        colorInt: 0xf87171,
-        targetX: playerPosition.x,
-        targetY: playerPosition.y,
-        radius: 0.45,
-        damageText: absorbed > 0 ? `-${incomingDamage} / 格擋 ${absorbed}` : `-${incomingDamage}`,
-        damageTextColor: absorbed > 0 ? '#67e8f9' : '#fca5a5',
-        damageTextColorInt: absorbed > 0 ? 0x67e8f9 : 0xfca5a5,
-      });
-
-      if (nextHp <= 0) {
-        handleWorldPlayerDefeat();
-      }
-    };
-
     queueWorldStrikeExecution({
       delayMs: strike.executionTimeMs,
       applyPreview: () =>
@@ -1333,7 +1365,7 @@ export const Adventure: React.FC<AdventureProps> = ({
           strike,
           canUseSpecial,
         }),
-      execute: executeStrike,
+      execute: () => executeEnemyWorldStrike({ strike, enemyTemplate }),
     });
   };
 
