@@ -81,14 +81,11 @@ describe("skill book coverage", () => {
       });
   });
 
-  it("keeps all passive skills on explicit effect wiring without generic passive tags", () => {
+  it("keeps all passive skills on explicit effect wiring without legacy passive tag fields", () => {
     Object.values(SKILLS)
       .filter((skill) => skill.type === "Passive")
       .forEach((skill) => {
-        expect(
-          skill.passiveEffectTags,
-          `${skill.id} 已全面改成逐招專屬效果，不應再保留 generic passiveEffectTags`
-        ).toBeUndefined();
+        expect("passiveEffectTags" in skill, `${skill.id} 不應再保留 passiveEffectTags 欄位`).toBe(false);
       });
   });
 

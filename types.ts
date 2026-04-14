@@ -190,24 +190,6 @@ export interface Skill {
     value?: number; // e.g. Poison damage %
   };
   cost?: number; // MP cost usually, or special resource
-  passiveEffectTags?: Array<
-    | "offense"
-    | "durability"
-    | "spellpower"
-    | "crit"
-    | "damage_reduction"
-    | "reflect"
-    | "shield"
-    | "cooldown_reduction"
-    | "regen"
-    | "mana_flow"
-    | "evasion"
-    | "armor_break"
-    | "execution"
-    | "cleanse"
-    | "death_prevention"
-    | "control_immunity"
-  >;
   replacementSkillId?: string;
   poolStatus?: "core" | "transition" | "legacy";
   formalRole?: "guaranteed" | "utility" | "burst" | "passive";

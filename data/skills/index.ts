@@ -117,7 +117,6 @@ const normalizeSkill = (skill: Skill): Skill => {
     areaShape: skill.areaShape ?? realtime.areaShape,
     areaRadius: skill.areaRadius ?? realtime.areaRadius,
     maxTargets: skill.maxTargets ?? realtime.maxTargets,
-    passiveEffectTags: skill.passiveEffectTags,
     poolStatus: skill.poolStatus ?? poolEntry?.poolStatus,
     formalRole: skill.formalRole ?? poolEntry?.formalRole,
     formalSourceTier: skill.formalSourceTier ?? poolEntry?.formalSourceTier,

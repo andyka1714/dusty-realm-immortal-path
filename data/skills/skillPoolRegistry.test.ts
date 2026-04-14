@@ -482,15 +482,15 @@ describe("skill pool registry", () => {
     expect(fusionMage?.projectileSpeed).toBe(12);
   });
 
-  it("removes generic passive tags from all passive skills and retired passive aliases", () => {
+  it("removes legacy passive tag fields from all passive skills and retired passive aliases", () => {
     Object.values(SKILLS)
       .filter((skill) => skill.type === "Passive")
       .forEach((skill) => {
-        expect(SKILLS[skill.id]?.passiveEffectTags).toBeUndefined();
+        expect("passiveEffectTags" in SKILLS[skill.id]).toBe(false);
       });
 
     BATTLE_ABSORBED_RETIRED_PASSIVE_ALIAS_VIEWS.forEach((skill) => {
-      expect(SKILLS[skill.id]?.passiveEffectTags).toBeUndefined();
+      expect("passiveEffectTags" in SKILLS[skill.id]).toBe(false);
     });
   });
 });

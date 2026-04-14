@@ -774,6 +774,51 @@ export const Adventure: React.FC<AdventureProps> = ({
       ? `${enemyName} 正在施展【${strike.skillName}】。`
       : `${enemyName} 朝你撲殺而來。`;
 
+  const getPlayerWorldStrikeResolutionMessage = ({
+    chosenSkill,
+    targetName,
+    damage,
+    impactedTargetCount,
+  }: {
+    chosenSkill?: typeof primaryActiveSkill;
+    targetName: string;
+    damage: number;
+    impactedTargetCount: number;
+  }) =>
+    chosenSkill
+      ? `你施展【${chosenSkill.name}】造成 ${damage} 點傷害${
+          impactedTargetCount > 1 ? `，波及 ${impactedTargetCount} 個目標` : ""
+        }。`
+      : `你對 ${targetName} 造成 ${damage} 點傷害。`;
+
+  const getEnemyWorldStrikeResolutionMessage = ({
+    enemyName,
+    skillName,
+    damage,
+  }: {
+    enemyName: string;
+    skillName?: string;
+    damage: number;
+  }) =>
+    skillName
+      ? `${enemyName} 施展【${skillName}】對你造成 ${damage} 點傷害。`
+      : `${enemyName} 對你造成 ${damage} 點傷害。`;
+
+  const resolveWorldShieldedDamage = ({
+    incomingDamage,
+    currentShield,
+  }: {
+    incomingDamage: number;
+    currentShield: number;
+  }) => {
+    const absorbed = Math.min(currentShield, incomingDamage);
+    return {
+      absorbed,
+      damageTaken: incomingDamage - absorbed,
+      remainingShield: Math.max(0, currentShield - absorbed),
+    };
+  };
+
   const applyPlayerWorldStrikePreview = ({
     now,
     strike,
@@ -994,9 +1039,12 @@ export const Adventure: React.FC<AdventureProps> = ({
       }
 
       setWorldLastCombatMessage(
-        chosenSkill
-          ? `你施展【${chosenSkill.name}】造成 ${strike.damage} 點傷害${impactedMonsters.length > 1 ? `，波及 ${impactedMonsters.length} 個目標` : ''}。`
-          : `你對 ${targetedMonster.name} 造成 ${strike.damage} 點傷害。`
+        getPlayerWorldStrikeResolutionMessage({
+          chosenSkill,
+          targetName: targetedMonster.name,
+          damage: strike.damage,
+          impactedTargetCount: impactedMonsters.length,
+        })
       );
 
       let primaryDefeated = false;
@@ -1063,12 +1111,14 @@ export const Adventure: React.FC<AdventureProps> = ({
     }
 
     const executeStrike = () => {
-      let incomingDamage = strike.damage;
-      let absorbed = 0;
-      if (worldPlayerShield > 0) {
-        absorbed = Math.min(worldPlayerShield, incomingDamage);
-        incomingDamage -= absorbed;
-        setWorldPlayerShield((prev) => Math.max(0, prev - absorbed));
+      const shieldResolution = resolveWorldShieldedDamage({
+        incomingDamage: strike.damage,
+        currentShield: worldPlayerShield,
+      });
+      const incomingDamage = shieldResolution.damageTaken;
+      const absorbed = shieldResolution.absorbed;
+      if (absorbed > 0) {
+        setWorldPlayerShield(shieldResolution.remainingShield);
       }
 
       const nextHp = Math.max(0, worldPlayerHp - incomingDamage);
@@ -1077,9 +1127,11 @@ export const Adventure: React.FC<AdventureProps> = ({
         Array.from(new Set([...prev, ...strike.statusNames]))
       );
       setWorldLastCombatMessage(
-        strike.skillName
-          ? `${enemyTemplate.name} 施展【${strike.skillName}】對你造成 ${incomingDamage} 點傷害。`
-          : `${enemyTemplate.name} 對你造成 ${incomingDamage} 點傷害。`
+        getEnemyWorldStrikeResolutionMessage({
+          enemyName: enemyTemplate.name,
+          skillName: strike.skillName,
+          damage: incomingDamage,
+        })
       );
 
       if (strike.isProjectile) {
