@@ -463,6 +463,7 @@
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，也已開始共用 `scheduleTimedCombatAction(...)`，不再各自維護一套 `setTimeout` orchestration
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的 timed plan，也已開始共用 `queueTimedCombatPlan(...)` 的 onQueue/execute 模型，battle timer orchestration 不再維持兩種樣板
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的 timed plan，現在也已共用同一個 `TimedCombatQueuePlan` 形狀，battle timer orchestration 不再拆成 world / replay 兩種資料結構
+- [x] `Adventure` 內 world strike 與舊戰報 replay 的 timed plan 建構，現在也已進一步共用 `createTimedCombatPlan(...)`，queue payload 不再在兩條路徑各自手組
 - [x] `Adventure` 內 world strike 的 queue plan 現在也已直接使用 `createWorldStrikeQueuePlan(...)`，player / enemy 分支不再保留額外的 resolved plan wrapper
 - [x] 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再額外維護第二套 effect dispatch
 - [x] 舊戰報 replay 的逐步播片流程，也已開始抽成 `processBattleReplayStep(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...)`，log、snapshot 與特效派發不再直接塞在 replay effect 的定時器分支內
@@ -472,6 +473,7 @@
 - [x] `Adventure` 內 player / enemy world strike 的實際執行鏈也已開始抽成 `executePlayerWorldStrike(...) / executeEnemyWorldStrike(...)`，命中後流程不再各自攤開
 - [x] `FINAL_CULL_SKILL_GROUPS_BY_PROFESSION / FINAL_CULL_SKILLS_BY_PROFESSION / FINAL_CULL_SKILL_MAP_BY_PROFESSION` 也已正式存在，最後一批 `transition / legacy` 技能刪整可以直接按職業切進 merge-ready 視圖
 - [x] `FINAL_CULL_SKILLS_BY_PROFESSION_AND_REPLACEMENT` 也已正式存在，現在最後一批技能本體刪整可以直接按「職業 × replacement」切進 final cull 視圖
+- [x] `FINAL_CULL_SKILL_MAP_BY_PROFESSION_AND_REPLACEMENT / FINAL_CULL_SKILL_IDS_BY_PROFESSION` 也已補齊，最後一批 `transition / legacy` 技能刪整現在已有可直接批次操作的 id/map 視圖
 - [x] 被動技能改成逐招專屬效果，而不是通用屬性加成
 
 ---

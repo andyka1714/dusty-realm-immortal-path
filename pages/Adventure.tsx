@@ -773,6 +773,18 @@ export const Adventure: React.FC<AdventureProps> = ({
     });
   };
 
+  const createTimedCombatPlan = ({
+    delayMs,
+    timerSet,
+    onQueue,
+    execute,
+  }: TimedCombatQueuePlan): TimedCombatQueuePlan => ({
+    delayMs,
+    timerSet,
+    onQueue,
+    execute,
+  });
+
   const createWorldStrikeQueuePlan = ({
     delayMs,
     applyCastEffect,
@@ -783,7 +795,8 @@ export const Adventure: React.FC<AdventureProps> = ({
     applyCastEffect?: () => void;
     applyPreview: () => void;
     execute: () => void;
-  }): TimedCombatQueuePlan => ({
+  }): TimedCombatQueuePlan =>
+    createTimedCombatPlan({
       delayMs,
       timerSet: worldActionTimersRef.current,
       onQueue: () => {
@@ -1293,13 +1306,13 @@ export const Adventure: React.FC<AdventureProps> = ({
     const replayDelay = Math.max(180, Math.min(900, nextTime - previousTime || 250));
     const replayContext = createBattleReplayContext(nextLog);
 
-    return {
+    return createTimedCombatPlan({
       delayMs: replayDelay,
       timerSet: battleReplayTimersRef.current,
       execute: () => {
         processBattleReplayStep(replayContext);
       },
-    };
+    });
   };
 
   const executePlayerWorldStrike = ({

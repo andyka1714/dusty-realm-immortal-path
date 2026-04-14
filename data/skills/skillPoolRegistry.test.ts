@@ -27,6 +27,8 @@ import {
   FORMAL_CORE_SKILLS_BY_REALM,
   FORMAL_CORE_SKILLS_SORTED,
   FINAL_CULL_SKILL_GROUPS_BY_PROFESSION,
+  FINAL_CULL_SKILL_IDS_BY_PROFESSION,
+  FINAL_CULL_SKILL_MAP_BY_PROFESSION_AND_REPLACEMENT,
   FINAL_CULL_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
   FINAL_CULL_SKILL_MAP_BY_PROFESSION,
   FINAL_CULL_SKILLS_BY_PROFESSION,
@@ -343,6 +345,9 @@ describe("skill pool registry", () => {
       "legacy"
     );
     expect(
+      FINAL_CULL_SKILL_IDS_BY_PROFESSION[ProfessionType.Sword]
+    ).toEqual(FINAL_CULL_SKILLS_BY_PROFESSION[ProfessionType.Sword].map((skill) => skill.id));
+    expect(
       FINAL_CULL_SKILLS_BY_PROFESSION_AND_REPLACEMENT[ProfessionType.Body].b_sf_passive
         .map((skill) => skill.id)
         .sort()
@@ -351,6 +356,10 @@ describe("skill pool registry", () => {
         .map((skill) => skill.id)
         .sort()
     );
+    expect(
+      FINAL_CULL_SKILL_MAP_BY_PROFESSION_AND_REPLACEMENT[ProfessionType.Body].b_sf_passive
+        .b_ie_passive?.replacementSkillId
+    ).toBe("b_sf_passive");
   });
 
   it("ensures prerequisite chains only point to skills of the same profession", () => {

@@ -433,6 +433,25 @@ export const FINAL_CULL_SKILL_MAP_BY_PROFESSION = buildSkillMapByProfession(
   FINAL_CULL_SKILLS_BY_PROFESSION
 );
 
+export const FINAL_CULL_SKILL_MAP_BY_PROFESSION_AND_REPLACEMENT = Object.fromEntries(
+  Object.entries(FINAL_CULL_SKILLS_BY_PROFESSION_AND_REPLACEMENT).map(([profession, groups]) => [
+    profession,
+    Object.fromEntries(
+      Object.entries(groups).map(([replacementSkillId, skills]) => [
+        replacementSkillId,
+        buildSkillMap(skills),
+      ])
+    ),
+  ])
+) as Record<ProfessionType, Record<string, Record<string, Skill>>>;
+
+export const FINAL_CULL_SKILL_IDS_BY_PROFESSION = Object.fromEntries(
+  Object.entries(FINAL_CULL_SKILLS_BY_PROFESSION).map(([profession, skills]) => [
+    profession,
+    skills.map((skill) => skill.id),
+  ])
+) as Record<ProfessionType, string[]>;
+
 export const SKILLS_BY_REALM: Record<MajorRealm, Skill[]> = Object.fromEntries(
   Object.entries(CORE_SKILL_SETS_BY_REALM).map(([realm, skills]) => [
     Number(realm),
