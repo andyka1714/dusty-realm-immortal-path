@@ -769,7 +769,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     });
   };
 
-  const queueResolvedWorldStrike = ({
+  const queueWorldStrikePlan = ({
     delayMs,
     applyCastEffect,
     applyPreview,
@@ -892,7 +892,7 @@ export const Adventure: React.FC<AdventureProps> = ({
       execute: (now) => {
         const resolved = resolveStrike(now);
         if (!resolved) return;
-        queueResolvedWorldStrike(createPlan(now, resolved));
+        queueWorldStrikePlan(createPlan(now, resolved));
       },
     });
 

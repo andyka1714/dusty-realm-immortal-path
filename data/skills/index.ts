@@ -165,12 +165,32 @@ export const RETIRED_SKILLS = Object.values(SKILLS).filter(
   (skill) => skill.poolStatus !== "core"
 );
 
+export const TRANSITION_SKILLS = Object.values(TRANSITION_SKILL_POOL_REGISTRY)
+  .map((entry) => SKILLS[entry.skillId])
+  .filter((skill): skill is Skill => Boolean(skill))
+  .sort(compareSkills);
+
+export const LEGACY_SKILLS = Object.values(LEGACY_SKILL_POOL_REGISTRY)
+  .map((entry) => SKILLS[entry.skillId])
+  .filter((skill): skill is Skill => Boolean(skill))
+  .sort(compareSkills);
+
+export const NON_CORE_SKILLS_SORTED = [...TRANSITION_SKILLS, ...LEGACY_SKILLS].sort(compareSkills);
+
 export const FORMAL_CORE_SKILL_MAP: Record<string, Skill> = Object.fromEntries(
   FORMAL_CORE_SKILLS_SORTED.map((skill) => [skill.id, skill])
 ) as Record<string, Skill>;
 
 export const RETIRED_SKILL_MAP: Record<string, Skill> = Object.fromEntries(
   RETIRED_SKILLS.map((skill) => [skill.id, skill])
+) as Record<string, Skill>;
+
+export const TRANSITION_SKILL_MAP: Record<string, Skill> = Object.fromEntries(
+  TRANSITION_SKILLS.map((skill) => [skill.id, skill])
+) as Record<string, Skill>;
+
+export const LEGACY_SKILL_MAP: Record<string, Skill> = Object.fromEntries(
+  LEGACY_SKILLS.map((skill) => [skill.id, skill])
 ) as Record<string, Skill>;
 
 export const FORMAL_CORE_SKILLS_BY_SOURCE_TIER: Record<
@@ -205,6 +225,32 @@ export const FORMAL_CORE_SKILLS_BY_PROFESSION: Record<
     (skill) => skill.profession === ProfessionType.Body
   ).sort(compareSkills),
   [ProfessionType.Mage]: FORMAL_CORE_SKILLS.filter(
+    (skill) => skill.profession === ProfessionType.Mage
+  ).sort(compareSkills),
+};
+
+export const TRANSITION_SKILLS_BY_PROFESSION: Record<ProfessionType, Skill[]> = {
+  [ProfessionType.None]: [],
+  [ProfessionType.Sword]: TRANSITION_SKILLS.filter(
+    (skill) => skill.profession === ProfessionType.Sword
+  ).sort(compareSkills),
+  [ProfessionType.Body]: TRANSITION_SKILLS.filter(
+    (skill) => skill.profession === ProfessionType.Body
+  ).sort(compareSkills),
+  [ProfessionType.Mage]: TRANSITION_SKILLS.filter(
+    (skill) => skill.profession === ProfessionType.Mage
+  ).sort(compareSkills),
+};
+
+export const LEGACY_SKILLS_BY_PROFESSION: Record<ProfessionType, Skill[]> = {
+  [ProfessionType.None]: [],
+  [ProfessionType.Sword]: LEGACY_SKILLS.filter(
+    (skill) => skill.profession === ProfessionType.Sword
+  ).sort(compareSkills),
+  [ProfessionType.Body]: LEGACY_SKILLS.filter(
+    (skill) => skill.profession === ProfessionType.Body
+  ).sort(compareSkills),
+  [ProfessionType.Mage]: LEGACY_SKILLS.filter(
     (skill) => skill.profession === ProfessionType.Mage
   ).sort(compareSkills),
 };

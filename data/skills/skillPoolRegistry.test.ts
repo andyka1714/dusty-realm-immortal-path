@@ -31,7 +31,9 @@ import {
   getFormalCoreSkillsByRealm,
   getFormalCoreSkills,
   getSkill,
+  LEGACY_SKILL_MAP,
   NON_CORE_SKILL_PROFESSION_POOLS,
+  NON_CORE_SKILLS_SORTED,
   getFormalSkill,
   getFormalSkillByNameExact,
   getFormalSkillId,
@@ -48,6 +50,7 @@ import {
   SKILL_POOL_REGISTRY,
   SKILL_PROFESSION_POOL_GROUPS,
   SKILL_PROFESSION_POOLS,
+  TRANSITION_SKILL_MAP,
   TRANSITION_SKILL_POOL_REGISTRY,
   TRANSITION_SKILL_PROFESSION_POOLS,
 } from ".";
@@ -151,6 +154,22 @@ describe("skill pool registry", () => {
 
     expect(Object.values(TRANSITION_SKILL_POOL_REGISTRY).every((entry) => entry.poolStatus === "transition")).toBe(true);
     expect(Object.values(LEGACY_SKILL_POOL_REGISTRY).every((entry) => entry.poolStatus === "legacy")).toBe(true);
+  });
+
+  it("builds sorted transition and legacy skill views for final cull work", () => {
+    expect(NON_CORE_SKILLS_SORTED.map((skill) => skill.id).sort((left, right) =>
+      left.localeCompare(right, "zh-Hant")
+    )).toEqual(
+      [...Object.keys(TRANSITION_SKILL_MAP), ...Object.keys(LEGACY_SKILL_MAP)].sort((left, right) =>
+        left.localeCompare(right, "zh-Hant")
+      )
+    );
+    expect(Object.values(TRANSITION_SKILL_MAP).every((skill) => skill.poolStatus === "transition")).toBe(
+      true
+    );
+    expect(Object.values(LEGACY_SKILL_MAP).every((skill) => skill.poolStatus === "legacy")).toBe(
+      true
+    );
   });
 
   it("ensures prerequisite chains only point to skills of the same profession", () => {
