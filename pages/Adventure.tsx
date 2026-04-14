@@ -1116,6 +1116,86 @@ export const Adventure: React.FC<AdventureProps> = ({
     });
   };
 
+  const dispatchBattleReplayAttackVisuals = ({
+    nextLog,
+    targetMonster,
+    normalizedUsedSkill,
+  }: {
+    nextLog: NonNullable<typeof replayQueue>[number];
+    targetMonster: ActiveMonster | null;
+    normalizedUsedSkill?: ReturnType<typeof getFormalSkillByName>;
+  }) => {
+    if (normalizedUsedSkill && nextLog.isPlayer && targetMonster) {
+      if ((normalizedUsedSkill.castRange ?? 1) > 1) {
+        dispatchWorldStrikeProjectileEffect({
+          color: '#60a5fa',
+          colorInt: 0x60a5fa,
+          sourceX: playerPosition.x,
+          sourceY: playerPosition.y,
+          targetX: targetMonster.x,
+          targetY: targetMonster.y,
+          durationMs: Math.max(220, normalizedUsedSkill.castTimeMs ?? 280),
+        });
+      }
+
+      if (
+        normalizedUsedSkill.areaShape &&
+        normalizedUsedSkill.areaShape !== 'single' &&
+        normalizedUsedSkill.areaShape !== 'self' &&
+        (normalizedUsedSkill.areaRadius ?? 0) > 0
+      ) {
+        dispatchWorldStrikeAreaEffect({
+          color: '#a78bfa',
+          colorInt: 0xa78bfa,
+          targetX: targetMonster.x,
+          targetY: targetMonster.y,
+          radius: normalizedUsedSkill.areaRadius,
+          durationMs: 520,
+        });
+      }
+
+      return;
+    }
+
+    if (!nextLog.isPlayer && (currentEnemy?.attackRange ?? 1) > 1 && targetMonster) {
+      dispatchWorldStrikeProjectileEffect({
+        color: '#fb7185',
+        colorInt: 0xfb7185,
+        sourceX: targetMonster.x,
+        sourceY: targetMonster.y,
+        targetX: playerPosition.x,
+        targetY: playerPosition.y,
+        durationMs: 260,
+      });
+    }
+  };
+
+  const dispatchBattleReplayDamageVisuals = ({
+    nextLog,
+    targetMonster,
+  }: {
+    nextLog: NonNullable<typeof replayQueue>[number];
+    targetMonster: ActiveMonster | null;
+  }) => {
+    if (!nextLog.damage || nextLog.damage <= 0) {
+      return;
+    }
+
+    const impactX = nextLog.isPlayer ? targetMonster?.x : playerPosition.x;
+    const impactY = nextLog.isPlayer ? targetMonster?.y : playerPosition.y;
+
+    applyWorldStrikeImpactBundle({
+      color: nextLog.isPlayer ? '#fde68a' : '#fca5a5',
+      colorInt: nextLog.isPlayer ? 0xfde68a : 0xfca5a5,
+      targetX: impactX,
+      targetY: impactY,
+      radius: 0.55,
+      damageText: `${nextLog.damage}`,
+      damageTextColor: nextLog.isPlayer ? '#fbbf24' : '#fb7185',
+      damageTextColorInt: nextLog.isPlayer ? 0xfbbf24 : 0xfb7185,
+    });
+  };
+
   const executePlayerWorldStrike = ({
     strike,
     chosenSkill,
@@ -1893,76 +1973,15 @@ export const Adventure: React.FC<AdventureProps> = ({
           ? getFormalSkillByName(skillMatch[1])
           : undefined;
 
-        if (normalizedUsedSkill && nextLog.isPlayer && targetMonster) {
-            if ((normalizedUsedSkill.castRange ?? 1) > 1) {
-                dispatch(addVisualEffect({
-                    type: 'projectile',
-                    text: '',
-                    color: '#60a5fa',
-                    colorInt: 0x60a5fa,
-                    x: playerPosition.x,
-                    y: playerPosition.y,
-                    targetX: targetMonster.x,
-                    targetY: targetMonster.y,
-                    durationMs: Math.max(220, normalizedUsedSkill.castTimeMs ?? 280),
-                }));
-            }
-
-            if (
-              normalizedUsedSkill.areaShape &&
-              normalizedUsedSkill.areaShape !== 'single' &&
-              normalizedUsedSkill.areaShape !== 'self' &&
-              (normalizedUsedSkill.areaRadius ?? 0) > 0
-            ) {
-                dispatch(addVisualEffect({
-                    type: 'area',
-                    text: '',
-                    color: '#a78bfa',
-                    colorInt: 0xa78bfa,
-                    targetX: targetMonster.x,
-                    targetY: targetMonster.y,
-                    radius: normalizedUsedSkill.areaRadius,
-                    durationMs: 520,
-                }));
-            }
-        } else if (!nextLog.isPlayer && (currentEnemy?.attackRange ?? 1) > 1 && targetMonster) {
-            dispatch(addVisualEffect({
-                type: 'projectile',
-                text: '',
-                color: '#fb7185',
-                colorInt: 0xfb7185,
-                x: targetMonster.x,
-                y: targetMonster.y,
-                targetX: playerPosition.x,
-                targetY: playerPosition.y,
-                durationMs: 260,
-            }));
-        }
-
-        if (nextLog.damage && nextLog.damage > 0) {
-            const impactX = nextLog.isPlayer ? targetMonster?.x : playerPosition.x;
-            const impactY = nextLog.isPlayer ? targetMonster?.y : playerPosition.y;
-
-            dispatch(addVisualEffect({
-                type: 'impact',
-                text: '',
-                color: nextLog.isPlayer ? '#fde68a' : '#fca5a5',
-                colorInt: nextLog.isPlayer ? 0xfde68a : 0xfca5a5,
-                targetX: impactX,
-                targetY: impactY,
-                radius: 0.55,
-                durationMs: 240,
-            }));
-
-            dispatch(addVisualEffect({
-                type: 'text',
-                text: `${nextLog.damage}`,
-                color: nextLog.isPlayer ? '#fbbf24' : '#fb7185',
-                colorInt: nextLog.isPlayer ? 0xfbbf24 : 0xfb7185,
-                x: impactX,
-                y: impactY,
-            }));
-        }
+        dispatchBattleReplayAttackVisuals({
+          nextLog,
+          targetMonster: targetMonster ?? null,
+          normalizedUsedSkill,
+        });
+        dispatchBattleReplayDamageVisuals({
+          nextLog,
+          targetMonster: targetMonster ?? null,
+        });
 
     }, replayDelay);
 
