@@ -34,6 +34,8 @@ import {
   LEGACY_SKILL_MAP,
   LEGACY_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
   LEGACY_SKILLS_BY_REPLACEMENT,
+  MERGE_READY_NON_CORE_SKILL_GROUPS,
+  MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION,
   NON_CORE_SKILL_PROFESSION_POOLS,
   NON_CORE_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
   NON_CORE_SKILLS_BY_REPLACEMENT,
@@ -223,6 +225,24 @@ describe("skill pool registry", () => {
         "m_im_passive",
         "m_ie_passive",
       ].sort()
+    );
+  });
+
+  it("keeps merge-ready non-core skill groups scoped to actual duplicate replacement clusters", () => {
+    expect(Object.keys(MERGE_READY_NON_CORE_SKILL_GROUPS)).toContain("s_tr_active");
+    expect(Object.keys(MERGE_READY_NON_CORE_SKILL_GROUPS)).toContain("b_sf_passive");
+    expect(Object.keys(MERGE_READY_NON_CORE_SKILL_GROUPS)).not.toContain("s_ma_passive");
+    expect(
+      MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Sword].s_tr_active
+        .map((skill) => skill.id)
+        .sort()
+    ).toEqual(["s_bi_active", "s_im_active", "s_ie_active"].sort());
+    expect(
+      MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION[ProfessionType.Body].b_sf_passive
+        .map((skill) => skill.id)
+        .sort()
+    ).toEqual(
+      ["b_vr_passive", "b_bi_passive", "b_ma_passive", "b_tr_passive", "b_im_passive", "b_ie_passive"].sort()
     );
   });
 

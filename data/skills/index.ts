@@ -59,6 +59,21 @@ const buildSkillGroupsByProfessionAndReplacement = (
     ])
   ) as Record<ProfessionType, Record<string, Skill[]>>;
 
+const buildMergeReadySkillGroups = (groups: Record<string, Skill[]>) =>
+  Object.fromEntries(
+    Object.entries(groups).filter(([, groupedSkills]) => groupedSkills.length > 1)
+  ) as Record<string, Skill[]>;
+
+const buildMergeReadySkillGroupsByProfession = (
+  groupsByProfession: Record<ProfessionType, Record<string, Skill[]>>
+) =>
+  Object.fromEntries(
+    Object.entries(groupsByProfession).map(([profession, groups]) => [
+      profession,
+      buildMergeReadySkillGroups(groups),
+    ])
+  ) as Record<ProfessionType, Record<string, Skill[]>>;
+
 const getDefaultRealtimeShape = (
   skill: Skill
 ): Pick<
@@ -301,6 +316,13 @@ export const NON_CORE_SKILLS_BY_PROFESSION_AND_REPLACEMENT =
       ...LEGACY_SKILLS_BY_PROFESSION[ProfessionType.Mage],
     ].sort(compareSkills),
   });
+
+export const MERGE_READY_NON_CORE_SKILL_GROUPS = buildMergeReadySkillGroups(
+  NON_CORE_SKILLS_BY_REPLACEMENT
+);
+
+export const MERGE_READY_NON_CORE_SKILL_GROUPS_BY_PROFESSION =
+  buildMergeReadySkillGroupsByProfession(NON_CORE_SKILLS_BY_PROFESSION_AND_REPLACEMENT);
 
 export const SKILLS_BY_REALM: Record<MajorRealm, Skill[]> = Object.fromEntries(
   Object.entries(CORE_SKILL_SETS_BY_REALM).map(([realm, skills]) => [
