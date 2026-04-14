@@ -31,8 +31,5 @@ export const ALL_RETIRED_ALIASES: Record<string, Skill> = {
   ...ALL_RETIRED_PASSIVE_ALIASES,
 };
 
-export const getRetiredAliasesForRealm = (realm: MajorRealm) =>
-  RETIRED_ALIASES_BY_REALM[realm] ?? {};
-
 export const stripRetiredAliasesForRealmView = (skills: Record<string, Skill>) =>
   stripBattleAbsorbedPassiveAliases(stripRetirementReadyActiveAliases(skills));

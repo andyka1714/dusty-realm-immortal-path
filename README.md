@@ -18,7 +18,7 @@
 - 靈化期核心被動 `劍意化形 / 肉身成聖 / 道法自然` 也已補進 timeline combat 開場待命訊息；其中 `道法自然` 也已開始在 player world strike 顯式回報。
 - 技能改為透過技能書學習，不再隨職業 / 突破自動送；技能池也已切成 `formal core / retired` 視角，retired 進一步收斂為 `battle-absorbed / retirement-ready`。
 - 正式 realm 技能視圖目前也已鎖定為 `core only`，retired skill 只保留中央 alias / 相容查詢層。
-- formal realm dataset 已透過單一 retired-alias 剝離 helper 統一移除 `retirement-ready active + battle-absorbed passive`，更接近正式技能池視角。
+- realm dataset 現在不再注入 retired alias 後再剝離，而是直接以正式 core skill set 組裝，retired alias 僅保留在 alias-layer 與中央 lookup。
 - formal core 被動的基礎屬性收益，現在也已改成逐招明確對照表；absorbed retired passive 會透過同一份 formal 對照承接，不再靠職業 / 境界通用公式補值。
 - retired passive alias 現在也已跟著 explicit passive 視角退出 generic `passiveEffectTags` fallback，資料層不再把舊被動誤導成仍主要依賴通用模板。
 - 多個高境界被動已補齊 world strike / enemy world strike / enemy special world strike 對齊，避免只有時間軸戰鬥才看得到實際效果。

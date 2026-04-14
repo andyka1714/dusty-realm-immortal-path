@@ -226,7 +226,7 @@
 - world strike 的結果運算本體，也已開始拆成 `resolvePlayerWorldStrikeOutcome(...) / resolveEnemyWorldStrikeOutcome(...)`，world 視角的傷害、stance 與狀態套用不再全部擠在入口函式內
 - world strike 的狀態名組裝，也已開始拆成 `buildPlayerWorldStrikeStatusNames(...) / buildEnemyWorldStrikeStatusNames(...)`，player-side 與 enemy-side 的 stance / incoming status 不再在結果組裝裡直接攤平
 - world strike 的被動狀態整理也已拆層：enemy 端改成 `defensive / survival` 兩段 helper，player 端改成 `sword / body / mage` 三段 helper，降低單一函式持續膨脹的風險
-- `Adventure` 的 world strike 預覽與延遲執行排程，也已開始抽成 `scheduleWorldActionExecution(...) / applyPlayerWorldStrikePreview(...) / applyEnemyWorldStrikePreview(...)`，玩家與怪物分支不再各自維護 readyAt / 狀態 / 戰鬥訊息的重複流程
+- `Adventure` 的 world strike 預覽與延遲執行排程，也已開始抽成 `scheduleWorldActionExecution(...) / queueWorldStrikeExecution(...) / applyPlayerWorldStrikePreview(...) / applyEnemyWorldStrikePreview(...)`，玩家與怪物分支不再各自維護 readyAt / 狀態 / 戰鬥訊息的重複流程
 - world strike 的預覽文案也已開始收斂到共用 helper，玩家與怪物分支不再各自手寫 preview message
 - `enemy special` 的 incoming status 過濾與控制縮短，也已開始抽成 world / timeline 共用 resolver，不再只在 `runAutoBattle()` 內手寫 `filteredEnemyStatuses / normalizedIncomingStatuses`
 - Boss 破綻觸發與戰鬥事件，也已開始整併到 `rollBossBreakOpportunity(...)`，主循環不再直接散寫同一段爆發窗口判定

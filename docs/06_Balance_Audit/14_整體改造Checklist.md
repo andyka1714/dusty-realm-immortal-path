@@ -400,7 +400,8 @@
 - [x] retired active / passive alias 也已補上 alias-layer 聚合表，正式 realm dataset 現在可直接由 alias-layer 組裝，不再在 `data/skills/index.ts` 手動攤開多份 alias 清單
 - [x] `battle-absorbed / retirement-ready` 的 active / passive alias record，也已開始直接由 alias-layer 聚合表和 skill ID 名單組裝，不再在 alias 檔裡平鋪手寫同一份 retired alias map
 - [x] formal realm dataset 的組裝也已開始走單一 `buildRealmSkillSet(...)` helper，各境界不再重複拼接 retired alias
-- [x] retired alias 在 realm 視圖中的拼接，也已開始收斂到 `getRetiredAliasesForRealm(...)`，formal realm dataset 不再各境界重複攤開 active / passive alias 組裝
+- [x] retired alias 的 realm 聚合已回收到 alias-layer，formal realm dataset 不再注入 retired alias 後再剝離
+- [x] formal realm dataset 現在已直接以 core skill set 組裝，不再先注入 retired alias 再交給 skill index 剝離
 - [x] retirement-ready passive 視圖也已改成直接由 alias-layer 聚合表組裝，skill index 不再額外以 ID 清單重建同一份資料
 - [x] battle-absorbed passive 視圖也已改成直接由 alias-layer 聚合表組裝，skill index 不再額外以 ID 清單重建同一份資料
 - [x] `StatsPanel / ShopPanel` 的主要資訊浮層已進一步對齊 `GameTooltip` 的標題 / 註腳結構

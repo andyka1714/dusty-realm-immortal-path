@@ -745,6 +745,19 @@ export const Adventure: React.FC<AdventureProps> = ({
     execute();
   };
 
+  const queueWorldStrikeExecution = ({
+    delayMs,
+    applyPreview,
+    execute,
+  }: {
+    delayMs: number | undefined;
+    applyPreview: () => void;
+    execute: () => void;
+  }) => {
+    applyPreview();
+    scheduleWorldActionExecution(delayMs, execute);
+  };
+
   const getPlayerWorldStrikePreviewMessage = (
     targetName: string,
     chosenSkill?: typeof primaryActiveSkill
@@ -913,14 +926,6 @@ export const Adventure: React.FC<AdventureProps> = ({
       }));
     }
 
-    setWorldCombatTargetId(targetedMonster.instanceId);
-    applyPlayerWorldStrikePreview({
-      now,
-      strike,
-      chosenSkill,
-      targetName: targetedMonster.name,
-    });
-
     const executeStrike = () => {
       const impactedMonsters = getWorldSkillAreaTargets({
         origin: playerPosition,
@@ -1019,7 +1024,19 @@ export const Adventure: React.FC<AdventureProps> = ({
       }
     };
 
-    scheduleWorldActionExecution(strike.executionTimeMs, executeStrike);
+    queueWorldStrikeExecution({
+      delayMs: strike.executionTimeMs,
+      applyPreview: () => {
+        setWorldCombatTargetId(targetedMonster.instanceId);
+        applyPlayerWorldStrikePreview({
+          now,
+          strike,
+          chosenSkill,
+          targetName: targetedMonster.name,
+        });
+      },
+      execute: executeStrike,
+    });
 
     return true;
   };
@@ -1044,14 +1061,6 @@ export const Adventure: React.FC<AdventureProps> = ({
         durationMs: 220,
       }));
     }
-
-    applyEnemyWorldStrikePreview({
-      now,
-      enemyInstanceId,
-      enemyName: enemyTemplate.name,
-      strike,
-      canUseSpecial,
-    });
 
     const executeStrike = () => {
       let incomingDamage = strike.damage;
@@ -1123,7 +1132,18 @@ export const Adventure: React.FC<AdventureProps> = ({
       }
     };
 
-    scheduleWorldActionExecution(strike.executionTimeMs, executeStrike);
+    queueWorldStrikeExecution({
+      delayMs: strike.executionTimeMs,
+      applyPreview: () =>
+        applyEnemyWorldStrikePreview({
+          now,
+          enemyInstanceId,
+          enemyName: enemyTemplate.name,
+          strike,
+          canUseSpecial,
+        }),
+      execute: executeStrike,
+    });
   };
 
   // Stop auto-move if battle starts or map changes

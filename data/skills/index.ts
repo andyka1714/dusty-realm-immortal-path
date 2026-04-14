@@ -24,7 +24,6 @@ import {
 } from "./retired_passive_aliases";
 import {
   ALL_RETIRED_ALIASES,
-  getRetiredAliasesForRealm,
   stripRetiredAliasesForRealmView,
 } from "./retired_aliases";
 import {
@@ -144,27 +143,22 @@ const RAW_SKILLS: Record<string, Skill> = {
 };
 
 const buildRealmSkillSet = (
-  realm: MajorRealm,
   baseSkills: Record<string, Skill>
-) =>
-  stripRetiredAliasesForRealmView({
-    ...baseSkills,
-    ...getRetiredAliasesForRealm(realm),
-  });
+) => stripRetiredAliasesForRealmView(baseSkills);
 
 const RAW_SKILL_SETS_BY_REALM: Record<MajorRealm, Record<string, Skill>> = {
   [MajorRealm.Mortal]: {},
   [MajorRealm.QiRefining]: QI_REFINING_SKILLS,
-  [MajorRealm.Foundation]: buildRealmSkillSet(MajorRealm.Foundation, FOUNDATION_SKILLS),
+  [MajorRealm.Foundation]: buildRealmSkillSet(FOUNDATION_SKILLS),
   [MajorRealm.GoldenCore]: GOLDEN_CORE_SKILLS,
   [MajorRealm.NascentSoul]: NASCENT_SOUL_SKILLS,
   [MajorRealm.SpiritSevering]: SPIRIT_SEVERING_SKILLS,
-  [MajorRealm.VoidRefining]: buildRealmSkillSet(MajorRealm.VoidRefining, VOID_REFINING_SKILLS),
-  [MajorRealm.Fusion]: buildRealmSkillSet(MajorRealm.Fusion, FUSION_SKILLS),
-  [MajorRealm.Mahayana]: buildRealmSkillSet(MajorRealm.Mahayana, MAHAYANA_SKILLS),
-  [MajorRealm.Tribulation]: buildRealmSkillSet(MajorRealm.Tribulation, TRIBULATION_SKILLS),
-  [MajorRealm.Immortal]: buildRealmSkillSet(MajorRealm.Immortal, IMMORTAL_SKILLS),
-  [MajorRealm.ImmortalEmperor]: buildRealmSkillSet(MajorRealm.ImmortalEmperor, IMMORTAL_EMPEROR_SKILLS),
+  [MajorRealm.VoidRefining]: buildRealmSkillSet(VOID_REFINING_SKILLS),
+  [MajorRealm.Fusion]: buildRealmSkillSet(FUSION_SKILLS),
+  [MajorRealm.Mahayana]: buildRealmSkillSet(MAHAYANA_SKILLS),
+  [MajorRealm.Tribulation]: buildRealmSkillSet(TRIBULATION_SKILLS),
+  [MajorRealm.Immortal]: buildRealmSkillSet(IMMORTAL_SKILLS),
+  [MajorRealm.ImmortalEmperor]: buildRealmSkillSet(IMMORTAL_EMPEROR_SKILLS),
 };
 
 export const SKILLS: Record<string, Skill> = Object.fromEntries(

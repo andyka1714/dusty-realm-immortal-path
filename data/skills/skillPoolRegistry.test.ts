@@ -19,7 +19,6 @@ import {
 } from "./retired_passive_aliases";
 import {
   ALL_RETIRED_ALIASES,
-  getRetiredAliasesForRealm as getRetiredAliasesForRealmForTest,
   RETIRED_ALIASES_BY_REALM,
   stripRetiredAliasesForRealmView as stripRetiredAliasesForRealmViewForTest,
 } from "./retired_aliases";
@@ -447,7 +446,7 @@ describe("skill pool registry", () => {
       });
   });
 
-  it("exposes combined retired alias realm helpers before skill index composes realm views", () => {
+  it("keeps combined retired alias realm helpers only in the alias layer", () => {
     expect(Object.keys(ALL_RETIRED_ALIASES)).toContain("s_bi_active");
     expect(Object.keys(ALL_RETIRED_ALIASES)).toContain("b_ie_passive");
     expect(RETIRED_ALIASES_BY_REALM[MajorRealm.Immortal]?.s_im_active?.id).toBe("s_im_active");
@@ -455,16 +454,15 @@ describe("skill pool registry", () => {
       "s_im_passive"
     );
 
-    const immortalAliases = getRetiredAliasesForRealmForTest(MajorRealm.Immortal);
-    expect(immortalAliases.s_im_active?.replacementSkillId).toBe("s_tr_active");
-    expect(immortalAliases.b_im_passive?.replacementSkillId).toBe("b_sf_passive");
-
     const strippedRealmView = stripRetiredAliasesForRealmViewForTest({
-      ...immortalAliases,
+      ...RETIRED_ALIASES_BY_REALM[MajorRealm.Immortal],
       s_tr_active: SKILLS.s_tr_active,
       s_tr_passive: SKILLS.s_tr_passive,
     });
     expect(Object.keys(strippedRealmView)).toEqual(["s_tr_active", "s_tr_passive"]);
+    expect(getSkillsByRealm(MajorRealm.Immortal).map((skill) => skill.id)).not.toContain(
+      "s_im_active"
+    );
   });
 
   it("gives high-realm retired active aliases explicit realtime combat metadata", () => {
