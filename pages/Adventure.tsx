@@ -26,8 +26,9 @@ import {
   resolveEnemyWorldStrike,
   selectNearestWorldCombatTarget,
   getResolvedSkillCooldownSeconds,
+  runEnemyWorldStrikeAction,
   runAutoBattleReplayStep,
-  runResolvedWorldStrikeAction,
+  runPlayerWorldStrikeAction,
 } from '../utils/battleSystem';
 import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
@@ -1545,85 +1546,58 @@ export const Adventure: React.FC<AdventureProps> = ({
   };
 
   const performWorldPlayerAction = (useSkill: boolean) =>
-    runResolvedWorldStrikeAction({
+    runPlayerWorldStrikeAction({
       readyAt: playerActionReadyAt,
       canExecute: () => Boolean(targetedMonster && targetedMonsterTemplate && canEngageTarget),
-      resolve: (now) => {
-        if (!targetedMonster) return undefined;
-
-        const chosenSkill = useSkill && primaryActiveSkill && now >= playerSkillReadyAt
+      resolveTarget: () => targetedMonster ?? undefined,
+      selectSkill: (now) =>
+        useSkill && primaryActiveSkill && now >= playerSkillReadyAt
           ? primaryActiveSkill
-          : undefined;
-        return {
+          : undefined,
+      resolveStrike: (chosenSkill) =>
+        resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill),
+      timerSet: combatTimersRef.current.world,
+      applyCastEffect: ({ chosenSkill, strike }) =>
+        dispatchPlayerWorldStrikeCastEffect({ chosenSkill, strike }),
+      applyPreview: ({ now, chosenSkill, target, strike }) => {
+        setWorldCombatTargetId(target.instanceId);
+        applyPlayerWorldStrikePreview({
           now,
-          chosenSkill,
-          targetedMonster,
-          strike: resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill),
-        };
-      },
-      buildPlan: (resolved) => {
-        if (!resolved) return undefined;
-
-        const { now, chosenSkill, targetedMonster, strike } = resolved;
-        return {
           strike,
-          timerSet: combatTimersRef.current.world,
-          delayMs: (
-            resolvedStrike: ReturnType<typeof resolvePlayerWorldStrike>
-          ) => resolvedStrike.executionTimeMs,
-          applyCastEffect: () => dispatchPlayerWorldStrikeCastEffect({ chosenSkill, strike }),
-          applyPreview: () => {
-            setWorldCombatTargetId(targetedMonster.instanceId);
-            applyPlayerWorldStrikePreview({
-              now,
-              strike,
-              chosenSkill,
-              targetName: targetedMonster.name,
-            });
-          },
-          execute: () =>
-            executePlayerWorldStrike({
-              strike,
-              chosenSkill,
-              targetedMonster,
-              activeMonsters,
-              mapEnemies: mapData?.enemies,
-            }),
-        };
+          chosenSkill,
+          targetName: target.name,
+        });
       },
+      execute: ({ chosenSkill, target, strike }) =>
+        executePlayerWorldStrike({
+          strike,
+          chosenSkill,
+          targetedMonster: target,
+          activeMonsters,
+          mapEnemies: mapData?.enemies,
+        }),
     });
 
   const performWorldEnemyAction = (
     enemyInstanceId: string,
     enemyTemplate: NonNullable<typeof targetedMonsterTemplate>
   ) =>
-    runResolvedWorldStrikeAction({
-      resolve: (now) => {
-        const canUseSpecial = now >= (enemySpecialReadyAtById[enemyInstanceId] ?? 0);
-        return {
+    runEnemyWorldStrikeAction({
+      resolveCanUseSpecial: (now) =>
+        now >= (enemySpecialReadyAtById[enemyInstanceId] ?? 0),
+      resolveStrike: (canUseSpecial) =>
+        resolveEnemyWorldStrike(enemyTemplate, playerStats, canUseSpecial),
+      timerSet: combatTimersRef.current.world,
+      applyCastEffect: ({ strike }) => dispatchEnemyWorldStrikeCastEffect({ strike }),
+      applyPreview: ({ now, canUseSpecial, strike }) =>
+        applyEnemyWorldStrikePreview({
           now,
-          canUseSpecial,
-          strike: resolveEnemyWorldStrike(enemyTemplate, playerStats, canUseSpecial),
-        };
-      },
-      buildPlan: ({ now, canUseSpecial, strike }) =>
-        ({
+          enemyInstanceId,
+          enemyName: enemyTemplate.name,
           strike,
-          timerSet: combatTimersRef.current.world,
-          delayMs: (
-            resolvedStrike: ReturnType<typeof resolveEnemyWorldStrike>
-          ) => resolvedStrike.executionTimeMs,
-          applyCastEffect: () => dispatchEnemyWorldStrikeCastEffect({ strike }),
-          applyPreview: () =>
-            applyEnemyWorldStrikePreview({
-              now,
-              enemyInstanceId,
-              enemyName: enemyTemplate.name,
-              strike,
-              canUseSpecial,
-            }),
-          execute: () => executeEnemyWorldStrike({ strike, enemyTemplate }),
+          canUseSpecial,
         }),
+      execute: ({ strike }) => executeEnemyWorldStrike({ strike, enemyTemplate }),
     });
  
   // Stop auto-move if battle starts or map changes

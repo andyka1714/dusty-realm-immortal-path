@@ -100,7 +100,7 @@
 - 所有被動技能目前都已改成逐招專屬效果，資料層不再保留 generic `passiveEffectTags` fallback，`passiveEffectTags` 欄位本身也已移除
 - `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，現在也已開始共用 queue / preview / resolution helper，不再各自維護兩套 readyAt 與傷害文案流程
 - `Adventure` 內 world strike 與舊戰報 replay 的 timed plan primitive、queue builder 與 replay step runner，現在已正式回收到 `battleSystem.ts` 的 `createTimedCombatPlan(...) / createWorldStrikeQueuePlan(...) / createResolvedWorldStrikeActionPlan(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / runResolvedTimedCombatPlan(...) / runResolvedWorldStrikeAction(...) / runAutoBattleReplayStep(...)`，頁面不再自己維護這組 battle-side queue 原語
-- `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在直接走 `runResolvedWorldStrikeAction(...)`，分支本身只保留 strike resolve、preview 與 execute 所需的最少資訊
+- `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在已回收到 `battleSystem.ts` 的 `runPlayerWorldStrikeAction(...) / runEnemyWorldStrikeAction(...)`，頁面不再自己維護 player / enemy 的 resolved strike plan 樣板
 - `Adventure` 內 player / enemy world strike 的 action plan，也已正式直接回到 `createWorldStrikeQueuePlan(...)`，不再保留只負責轉手的 resolved wrapper
 - `Adventure` 內 auto-target 與 live world action window 的主控判定，現在也已開始共用 `selectNearestWorldCombatTarget(...) / resolveWorldCombatActionWindow(...)`，頁面不再自己決定最近怪與雙方出手窗口
 - `Adventure` 內 `runAutoBattle() -> replay` 的橋接，現在也已開始共用 `battleSystem.ts` 提供的 `createAutoBattleReplaySession(...) / advanceAutoBattleReplaySession(...)`，world 頁面不再自己重建 first log / snapshot / replayQueue，也不再自己手動 append log、slice queue、patch snapshot
@@ -247,7 +247,7 @@
 - `Adventure` 的 world strike 預覽與延遲執行排程，也已開始抽成 `queueTimedCombatPlan(...) / queueWorldStrikePlan(...) / applyPlayerWorldStrikePreview(...) / applyEnemyWorldStrikePreview(...)`，玩家與怪物分支不再各自維護 readyAt / 狀態 / 戰鬥訊息的重複流程
 - world strike 的預覽文案也已開始收斂到共用 helper，玩家與怪物分支不再各自手寫 preview message
 - `Adventure` 的 world strike queue orchestration，也已開始收斂到 `createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)`，cast、preview 與 execute 不再在 player / enemy 分支重複拼接
-- `Adventure` 的 live world action 出手鏈，現在直接走 `runResolvedWorldStrikeAction(...)`
+- `Adventure` 的 live world action 出手鏈，現在直接走 `runPlayerWorldStrikeAction(...) / runEnemyWorldStrikeAction(...)`
 - `queueResolvedWorldStrike(...)` 也已改成更單純的 `queueWorldStrikePlan(...)`，live world action 現在只保留 timed 判定、strike resolve 與 plan 執行三段
 - `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，也已開始共用 `scheduleTimedCombatAction(...)`，queue 與 replay step 不再各自維護一套 `setTimeout` orchestration
 - `Adventure` 內 world strike 與舊戰報 replay 的定時排程，也已開始共用 `queueTimedCombatPlan(...)` 的 onQueue/execute 模型，battle timer orchestration 不再分成兩種樣板

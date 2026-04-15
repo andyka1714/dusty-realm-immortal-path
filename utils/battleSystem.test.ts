@@ -36,6 +36,8 @@ import {
   resolvePlayerWorldStrike,
   selectNearestWorldCombatTarget,
   runAutoBattleReplayStep,
+  runEnemyWorldStrikeAction,
+  runPlayerWorldStrikeAction,
   runResolvedBattleReplayStep,
   runResolvedTimedCombatPlan,
   runResolvedWorldStrikeAction,
@@ -479,6 +481,49 @@ describe("battle system balance", () => {
         usePlayerSkill: false,
         shouldEnemyAct: false,
       });
+
+      const playerActionTimer = runPlayerWorldStrikeAction({
+        readyAt: 0,
+        canExecute: () => true,
+        resolveTarget: () => ({ instanceId: "enemy-1", name: "木人" }),
+        selectSkill: () => ({ id: "skill-1" }),
+        resolveStrike: (chosenSkill) => ({
+          executionTimeMs: 0,
+          skillId: chosenSkill?.id ?? "basic",
+        }),
+        applyCastEffect: ({ chosenSkill, strike }) =>
+          calls.push(`player:cast:${chosenSkill?.id ?? "none"}:${strike.skillId}`),
+        applyPreview: ({ target, strike }) =>
+          calls.push(`player:preview:${target.instanceId}:${strike.skillId}`),
+        execute: ({ strike }) => calls.push(`player:execute:${strike.skillId}`),
+      });
+
+      expect(playerActionTimer).toBeUndefined();
+      expect(calls.slice(-3)).toEqual([
+        "player:cast:skill-1:skill-1",
+        "player:preview:enemy-1:skill-1",
+        "player:execute:skill-1",
+      ]);
+
+      const enemyActionTimer = runEnemyWorldStrikeAction({
+        canExecute: () => true,
+        resolveCanUseSpecial: () => true,
+        resolveStrike: (canUseSpecial) => ({
+          executionTimeMs: 0,
+          mode: canUseSpecial ? "special" : "basic",
+        }),
+        applyCastEffect: ({ strike }) => calls.push(`enemy:cast:${strike.mode}`),
+        applyPreview: ({ canUseSpecial, strike }) =>
+          calls.push(`enemy:preview:${canUseSpecial}:${strike.mode}`),
+        execute: ({ strike }) => calls.push(`enemy:execute:${strike.mode}`),
+      });
+
+      expect(enemyActionTimer).toBeUndefined();
+      expect(calls.slice(-3)).toEqual([
+        "enemy:cast:special",
+        "enemy:preview:true:special",
+        "enemy:execute:special",
+      ]);
 
       const blockedReadyAt = Date.now() + 500;
       const blockedTimer = runResolvedTimedCombatPlan({

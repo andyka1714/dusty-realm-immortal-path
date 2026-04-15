@@ -455,11 +455,11 @@
 - [x] `Workshop` 的聚靈陣 / 煉丹 / 煉器卡片，也已開始改走 `GameSection`，洞府百業不再維持獨立 card chrome
 - [x] `Adventure` 的底部戰鬥快捷列也已開始改走 `GameSection`，地圖即時戰鬥操作面已接上同一套 section chrome
 - [x] `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，也已開始共用 queue / preview / resolution helper，地圖即時戰鬥分支不再各自維護兩套 readyAt / 傷害文案流程
-- [x] `Adventure` 內 player / enemy world strike 與舊戰報 replay 的 resolved timed plan enqueue，現在已開始共用 `runResolvedWorldStrikeAction(...) / runAutoBattleReplayStep(...)` 的 resolved-step 路徑，live / replay 不再各自維護單用途 resolve / queue wrapper
-- [x] `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在直接走 `runResolvedWorldStrikeAction(...)`，分支本身只保留 strike resolve、preview 與 execute 所需的最少資訊
+- [x] `Adventure` 內 player / enemy world strike 與舊戰報 replay 的 resolved timed plan enqueue，現在已開始共用 `runPlayerWorldStrikeAction(...) / runEnemyWorldStrikeAction(...) / runAutoBattleReplayStep(...)` 的 resolved-step 路徑，live / replay 不再各自維護單用途 resolve / queue wrapper
+- [x] `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在已回收到 `battleSystem.ts` 的 `runPlayerWorldStrikeAction(...) / runEnemyWorldStrikeAction(...)`，頁面不再自己維護 player / enemy 的 resolved strike plan 樣板
 - [x] `Adventure` 內 player / enemy world strike 的 action plan 也已正式直接回到 `createWorldStrikeQueuePlan(...)`，queue helper 不再各自臨時拼接 cast、preview 與 execute 閉包
-- [x] `Adventure` 內 player / enemy world strike 的出手入口，現在也已回到 `runResolvedWorldStrikeAction(...)` 這個 generic 路徑，live 分支不再各自維護 `Date.now()` 與 readyAt 判定樣板
-- [x] `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在直接走 `runResolvedWorldStrikeAction(...)`，分支本身只保留 strike resolve、preview 與 execute 所需的最少資訊
+- [x] `Adventure` 內 player / enemy world strike 的出手入口，現在也已回收到 `runPlayerWorldStrikeAction(...) / runEnemyWorldStrikeAction(...)`，live 分支不再各自維護 `Date.now()`、readyAt 與 resolved strike plan 樣板
+- [x] `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在直接走 `runPlayerWorldStrikeAction(...) / runEnemyWorldStrikeAction(...)`
 - [x] `Adventure` 內 auto-target 與 live world action window 的判定，現在也已開始共用 `selectNearestWorldCombatTarget(...) / resolveWorldCombatActionWindow(...)`，頁面不再自己維護最近怪與雙方出手條件邏輯
 - [x] `queueResolvedWorldStrike(...)` 也已改成更單純的 `queueWorldStrikePlan(...)`，live world action 現在只保留 timed 判定、strike resolve 與 plan 執行三段
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，也已開始共用 `scheduleTimedCombatAction(...)`，不再各自維護一套 `setTimeout` orchestration
