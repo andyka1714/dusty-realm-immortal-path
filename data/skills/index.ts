@@ -179,6 +179,25 @@ const buildSkillViewsByProfessionAndReplacementFromIds = (
     ])
   ) as Record<ProfessionType, Record<string, Skill[]>>;
 
+const buildRemovalSkillArtifacts = ({
+  idsByProfession,
+  idsByProfessionAndReplacement,
+}: {
+  idsByProfession: Record<ProfessionType, string[]>;
+  idsByProfessionAndReplacement: Record<ProfessionType, Record<string, string[]>>;
+}) => {
+  const skillsByProfessionAndReplacement = buildSkillViewsByProfessionAndReplacementFromIds(
+    idsByProfessionAndReplacement
+  );
+  const skillsByProfession = buildSkillViewsByProfessionFromIds(idsByProfession);
+
+  return {
+    skillsByProfessionAndReplacement,
+    skillsByProfession,
+    skillMapByProfession: buildSkillMapByProfession(skillsByProfession),
+  };
+};
+
 const mergeSkillGroupsByProfession = (
   left: Record<ProfessionType, Record<string, Skill[]>>,
   right: Record<ProfessionType, Record<string, Skill[]>>
@@ -545,38 +564,47 @@ export const FINAL_CULL_REPLACEMENT_TARGET_SKILLS_BY_PROFESSION =
 export const FINAL_CULL_REPLACEMENT_TARGET_SKILL_MAP_BY_PROFESSION =
   buildSkillMapByProfession(FINAL_CULL_REPLACEMENT_TARGET_SKILLS_BY_PROFESSION);
 
+const FINAL_CULL_REMOVAL_SKILL_ARTIFACTS = buildRemovalSkillArtifacts({
+  idsByProfession: FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION,
+  idsByProfessionAndReplacement: FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT,
+});
+
 export const FINAL_CULL_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT =
-  buildSkillViewsByProfessionAndReplacementFromIds(
-    FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT
-  );
+  FINAL_CULL_REMOVAL_SKILL_ARTIFACTS.skillsByProfessionAndReplacement;
 
 export const FINAL_CULL_REMOVAL_SKILLS_BY_PROFESSION =
-  buildSkillViewsByProfessionFromIds(FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION);
+  FINAL_CULL_REMOVAL_SKILL_ARTIFACTS.skillsByProfession;
 
 export const FINAL_CULL_REMOVAL_SKILL_MAP_BY_PROFESSION =
-  buildSkillMapByProfession(FINAL_CULL_REMOVAL_SKILLS_BY_PROFESSION);
+  FINAL_CULL_REMOVAL_SKILL_ARTIFACTS.skillMapByProfession;
+
+const FINAL_CULL_TRANSITION_REMOVAL_SKILL_ARTIFACTS = buildRemovalSkillArtifacts({
+  idsByProfession: FINAL_CULL_TRANSITION_REMOVAL_POOL_IDS_BY_PROFESSION,
+  idsByProfessionAndReplacement: FINAL_CULL_TRANSITION_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT,
+});
 
 export const FINAL_CULL_TRANSITION_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT =
-  buildSkillViewsByProfessionAndReplacementFromIds(
-    FINAL_CULL_TRANSITION_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT
-  );
-
-export const FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT =
-  buildSkillViewsByProfessionAndReplacementFromIds(
-    FINAL_CULL_LEGACY_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT
-  );
+  FINAL_CULL_TRANSITION_REMOVAL_SKILL_ARTIFACTS.skillsByProfessionAndReplacement;
 
 export const FINAL_CULL_TRANSITION_REMOVAL_SKILLS_BY_PROFESSION =
-  buildSkillViewsByProfessionFromIds(FINAL_CULL_TRANSITION_REMOVAL_POOL_IDS_BY_PROFESSION);
-
-export const FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION =
-  buildSkillViewsByProfessionFromIds(FINAL_CULL_LEGACY_REMOVAL_POOL_IDS_BY_PROFESSION);
+  FINAL_CULL_TRANSITION_REMOVAL_SKILL_ARTIFACTS.skillsByProfession;
 
 export const FINAL_CULL_TRANSITION_REMOVAL_SKILL_MAP_BY_PROFESSION =
-  buildSkillMapByProfession(FINAL_CULL_TRANSITION_REMOVAL_SKILLS_BY_PROFESSION);
+  FINAL_CULL_TRANSITION_REMOVAL_SKILL_ARTIFACTS.skillMapByProfession;
+
+const FINAL_CULL_LEGACY_REMOVAL_SKILL_ARTIFACTS = buildRemovalSkillArtifacts({
+  idsByProfession: FINAL_CULL_LEGACY_REMOVAL_POOL_IDS_BY_PROFESSION,
+  idsByProfessionAndReplacement: FINAL_CULL_LEGACY_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT,
+});
+
+export const FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT =
+  FINAL_CULL_LEGACY_REMOVAL_SKILL_ARTIFACTS.skillsByProfessionAndReplacement;
+
+export const FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION =
+  FINAL_CULL_LEGACY_REMOVAL_SKILL_ARTIFACTS.skillsByProfession;
 
 export const FINAL_CULL_LEGACY_REMOVAL_SKILL_MAP_BY_PROFESSION =
-  buildSkillMapByProfession(FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION);
+  FINAL_CULL_LEGACY_REMOVAL_SKILL_ARTIFACTS.skillMapByProfession;
 
 export const SKILLS_BY_REALM: Record<MajorRealm, Skill[]> = Object.fromEntries(
   Object.entries(CORE_SKILL_SETS_BY_REALM).map(([realm, skills]) => [

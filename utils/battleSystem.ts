@@ -64,6 +64,23 @@ export interface PlayerCombatStats {
   learnedSkills: Skill[];
 }
 
+export interface AutoBattleReplaySession {
+  displayedLogs: CombatLog[];
+  replayQueue: CombatLog[];
+  battleSnapshot: {
+    playerHp: number;
+    playerMaxHp: number;
+    enemyHp: number;
+    enemyMaxHp: number;
+    won: boolean;
+    rewards?: {
+      spiritStones: number;
+      exp: number;
+      drops: { itemId: string; count: number; instance?: ItemInstance }[];
+    };
+  };
+}
+
 type AttackMode = "physical" | "magical" | "hybrid";
 
 interface AttackContext {
@@ -8150,4 +8167,35 @@ export const runAutoBattle = (
     logs,
     prepared: prepareAutoBattleExecution(player, enemy, logs),
   });
+};
+
+export const createAutoBattleReplaySession = (
+  player: PlayerCombatStats,
+  enemy: Enemy
+): AutoBattleReplaySession => {
+  const { won, logs, rewards } = runAutoBattle(player, enemy);
+  const firstLog =
+    logs[0] ??
+    ({
+      turn: 1,
+      message: `你與 ${enemy.name} 展開交戰。`,
+      isPlayer: true,
+      playerHp: player.hp,
+      playerMaxHp: player.maxHp,
+      enemyHp: enemy.hp,
+      enemyMaxHp: enemy.hp,
+    } satisfies CombatLog);
+
+  return {
+    displayedLogs: [firstLog],
+    replayQueue: logs.slice(1),
+    battleSnapshot: {
+      playerHp: firstLog.playerHp ?? player.hp,
+      playerMaxHp: firstLog.playerMaxHp ?? player.maxHp,
+      enemyHp: firstLog.enemyHp ?? enemy.hp,
+      enemyMaxHp: firstLog.enemyMaxHp ?? enemy.hp,
+      won,
+      rewards,
+    },
+  };
 };

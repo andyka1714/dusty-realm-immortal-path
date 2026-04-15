@@ -486,6 +486,7 @@
 - [x] `FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION / FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION / FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT` 也已補齊，最後一批刪整現在已有直接可執行的保留 / 刪除 manifest
 - [x] `FINAL_CULL_REPLACEMENT_TARGET_SKILLS_BY_PROFESSION / FINAL_CULL_REPLACEMENT_TARGET_SKILL_MAP_BY_PROFESSION / FINAL_CULL_REMOVAL_SKILLS_BY_PROFESSION / FINAL_CULL_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT` 也已補齊，最後一批刪整除了 pool entry manifest 之外，也已有直接可操作的 skill-level 保留 / 刪除名單
 - [x] `FINAL_CULL_TRANSITION_REMOVAL_POOL_IDS_BY_PROFESSION / FINAL_CULL_LEGACY_REMOVAL_POOL_IDS_BY_PROFESSION` 與對應 skill-level removal views 也已補齊，最後一批刪整現在可直接分成 transition pass 與 legacy pass 執行
+- [x] `FINAL_CULL_TRANSITION_REMOVAL_SKILLS_BY_PROFESSION / FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION` 與對應 replacement 視圖，現在也已開始共用 `buildRemovalSkillArtifacts(...)` 集中組裝
 - [x] 這批 `FINAL_CULL` 的 skill / pool / target / removal manifests，現在也已開始由共用 builder 集中組裝，不再在 `index.ts / pool.ts` 各自手拼多段近似的 `map / ids / counts` 樣板
 - [x] 被動技能改成逐招專屬效果，而不是通用屬性加成
 

@@ -10,6 +10,7 @@ import {
 } from "../types";
 import {
   calculatePlayerStats,
+  createAutoBattleReplaySession,
   getResolvedEnemySpecialCooldownSeconds,
   getResolvedSkillCooldownSeconds,
   getEnemySpecialTimelineProfile,
@@ -826,6 +827,42 @@ describe("battle system balance", () => {
 
     const result = runAutoBattle(player, COMMON_ENEMIES.m30_c1);
     expect(result.logs.some((log) => log.message.includes("燃燒"))).toBe(true);
+  });
+
+  it("builds replay sessions from the auto-battle timeline in a single helper", () => {
+    fixedRandom.mockReturnValue(0.5);
+
+    const player = calculatePlayerStats(
+      {
+        physique: 64,
+        rootBone: 64,
+        insight: 72,
+        comprehension: 24,
+        fortune: 14,
+        charm: 10,
+      },
+      MajorRealm.SpiritSevering,
+      SpiritRootId.TRUE_WATER_WOOD,
+      {
+        magic: 620,
+        insight: 50,
+        mp: 2600,
+        defense: 120,
+        res: 80,
+        speed: 10,
+      },
+      "炎法真人",
+      ProfessionType.Mage,
+      ["m_sf_active", "m_sf_passive"]
+    );
+
+    const session = createAutoBattleReplaySession(player, COMMON_ENEMIES.m30_c1);
+
+    expect(session.displayedLogs).toHaveLength(1);
+    expect(session.displayedLogs[0].message.length).toBeGreaterThan(0);
+    expect(session.battleSnapshot.playerMaxHp).toBe(player.maxHp);
+    expect(session.battleSnapshot.enemyMaxHp).toBe(COMMON_ENEMIES.m30_c1.hp);
+    expect(session.replayQueue.length).toBeGreaterThanOrEqual(0);
   });
 
   it("supports bleed and poison status applications on later-realm skills", () => {
