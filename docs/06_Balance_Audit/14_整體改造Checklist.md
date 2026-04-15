@@ -183,7 +183,7 @@
 - [x] `s_vr_passive` 已正式承接進 formal core 劍修被動分支，從 pending-retirement 推進到 battle-absorbed
 - [x] `s_bi_active` 已正式承接進 formal core 劍修 burst 分支，從 pending-retirement 推進到 battle-absorbed
 - [x] `s_f_passive` 已正式承接進 formal core 劍修被動分支，從 pending-retirement 推進到 battle-absorbed
-- [ ] 刪除或合併重複功能技能
+- [x] 刪除或合併重複功能技能（正式技能池、正式 realm 視圖與公開 registry 都已完成 `core only` cutover；重複功能技能現在只保留中央 alias 相容與 final cull manifests）
 - [x] 補齊每職業保底技能、功能技能、爆發技能、被動技能的最終名單
 - [x] 補齊每個技能的最終來源層級
 - [x] 補齊每個技能的最終前置條件
@@ -560,7 +560,8 @@
 
 這些是目前最重要、但還沒真正落地完成的部分：
 
-- [ ] 三職業正式技能池最終裁剪（目前已完成 registry，尚未實際刪除 / 合併重複技能）
+- [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎（`Adventure` 的 live world / replay orchestration 與 `runAutoBattle()` 的 timeline loop 仍是兩條主控路徑）
+- [x] 三職業正式技能池最終裁剪（正式職業池、正式 realm 視圖與公開 registry 都已鎖定為 `core only`；`transition / legacy` 現在只保留中央 alias 相容與 final cull manifests）
 - [x] 高境界技能欄位與效果補完
 - [x] 高境界怪物 / 精英 / Boss 內容密度補完（密度、主題化、裝備 / 節奏驗證已補完）
 - [x] 地圖內真正即時戰鬥，不再依賴戰報 modal

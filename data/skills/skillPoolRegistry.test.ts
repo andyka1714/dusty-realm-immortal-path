@@ -105,6 +105,7 @@ import {
   getFormalSkillByNameExact,
   getFormalSkillId,
   getFormalSkillByName,
+  getSkillPoolEntry,
   getSkillsByRealm,
   LEGACY_SKILL_POOL_REGISTRY,
   LEGACY_SKILL_PROFESSION_POOLS,
@@ -146,9 +147,9 @@ const BATTLE_ABSORBED_RETIRED_PASSIVE_SKILL_MAP = buildSkillMap(
 );
 
 describe("skill pool registry", () => {
-  it("assigns formal pool metadata to every defined skill", () => {
+  it("assigns compatibility pool metadata to every defined skill", () => {
     Object.values(SKILLS).forEach((skill) => {
-      expect(SKILL_POOL_REGISTRY[skill.id], `${skill.id} 缺少技能池 registry`).toBeDefined();
+      expect(getSkillPoolEntry(skill.id), `${skill.id} 缺少技能池 registry`).toBeDefined();
       expect(skill.poolStatus, `${skill.id} 缺少 poolStatus`).toBeDefined();
       expect(skill.formalRole, `${skill.id} 缺少 formalRole`).toBeDefined();
       expect(skill.formalSourceTier, `${skill.id} 缺少 formalSourceTier`).toBeDefined();
@@ -178,7 +179,8 @@ describe("skill pool registry", () => {
       expect(
         [...SKILL_PROFESSION_POOLS[profession], ...NON_CORE_SKILL_PROFESSION_POOLS[profession]].length
       ).toBe(
-        Object.values(SKILL_POOL_REGISTRY).filter((entry) => entry.profession === profession).length
+        Object.values(CORE_SKILL_POOL_REGISTRY).filter((entry) => entry.profession === profession).length +
+          Object.values(NON_CORE_SKILL_POOL_REGISTRY).filter((entry) => entry.profession === profession).length
       );
       expect(
         SKILL_PROFESSION_POOL_GROUPS.all[profession].map((entry) => entry.skillId).sort()
@@ -191,6 +193,34 @@ describe("skill pool registry", () => {
           .sort()
       );
     });
+  });
+
+  it("keeps the public skill pool registry core-only while retired compatibility still resolves", () => {
+    expect(Object.values(SKILL_POOL_REGISTRY).every((entry) => entry.poolStatus === "core")).toBe(
+      true
+    );
+    expect(SKILL_POOL_REGISTRY.s_bi_active).toBeUndefined();
+    expect(getSkillPoolEntry("s_bi_active")?.replacementSkillId).toBe("s_tr_active");
+    expect(getSkillPoolEntry("b_ie_passive")?.replacementSkillId).toBe("b_sf_passive");
+  });
+
+  it("locks formal skill surfaces to core-only and quarantines non-core skills to alias compatibility views", () => {
+    expect(
+      Object.values(CORE_SKILL_SETS_BY_REALM)
+        .flatMap((skillSet) => Object.keys(skillSet))
+        .every((skillId) => SKILL_POOL_REGISTRY[skillId]?.poolStatus === "core")
+    ).toBe(true);
+    expect(FORMAL_CORE_SKILLS_SORTED.every((skill) => skill.poolStatus === "core")).toBe(true);
+    expect(
+      Object.keys(TRANSITION_SKILL_MAP).every(
+        (skillId) => ALL_RETIRED_ALIASES[skillId] && SKILL_POOL_REGISTRY[skillId] === undefined
+      )
+    ).toBe(true);
+    expect(
+      Object.keys(LEGACY_SKILL_MAP).every(
+        (skillId) => ALL_RETIRED_ALIASES[skillId] && SKILL_POOL_REGISTRY[skillId] === undefined
+      )
+    ).toBe(true);
   });
 
   it("keeps core and non-core registries split for final pool cleanup work", () => {

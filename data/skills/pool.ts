@@ -290,7 +290,7 @@ const buildReplacementTargetEntriesByProfession = (
     Object.entries(groupsByProfession).map(([profession, groups]) => [
       profession,
       Object.keys(groups)
-        .map((replacementSkillId) => SKILL_POOL_REGISTRY[replacementSkillId])
+        .map((replacementSkillId) => CORE_SKILL_POOL_REGISTRY[replacementSkillId])
         .filter((entry): entry is SkillPoolEntry => Boolean(entry)),
     ])
   ) as Record<ProfessionType, SkillPoolEntry[]>;
@@ -305,7 +305,7 @@ const buildReplacementPlanByProfession = (
         Object.entries(groups).map(([replacementSkillId, entries]) => [
           replacementSkillId,
           {
-            keep: SKILL_POOL_REGISTRY[replacementSkillId],
+            keep: CORE_SKILL_POOL_REGISTRY[replacementSkillId],
             remove: entries.filter((entry) => entry.skillId !== replacementSkillId),
           },
         ])
@@ -355,7 +355,7 @@ const filterEntryIdsByProfession = (
     Object.entries(idsByProfession).map(([profession, skillIds]) => [
       profession,
       skillIds.filter((skillId) => {
-        const entry = SKILL_POOL_REGISTRY[skillId];
+        const entry = ALL_SKILL_POOL_REGISTRY[skillId];
         return entry ? predicate(entry) : false;
       }),
     ])
@@ -373,7 +373,7 @@ const filterEntryIdsByProfessionAndReplacement = (
           .map(([replacementSkillId, skillIds]) => [
             replacementSkillId,
             skillIds.filter((skillId) => {
-              const entry = SKILL_POOL_REGISTRY[skillId];
+              const entry = ALL_SKILL_POOL_REGISTRY[skillId];
               return entry ? predicate(entry) : false;
             }),
           ])
@@ -447,7 +447,7 @@ const buildFinalCullPoolArtifacts = (
   };
 };
 
-export const SKILL_POOL_REGISTRY: Record<string, SkillPoolEntry> =
+const ALL_SKILL_POOL_REGISTRY: Record<string, SkillPoolEntry> =
   buildSkillPoolRegistry(SKILL_POOL_ENTRIES_BY_PROFESSION);
 
 export const SKILL_PROFESSION_POOL_GROUPS = {
@@ -473,6 +473,8 @@ export const SKILL_PROFESSION_POOL_GROUPS = {
 export const CORE_SKILL_POOL_REGISTRY = buildSkillPoolRegistry(
   SKILL_PROFESSION_POOL_GROUPS.core
 );
+
+export const SKILL_POOL_REGISTRY = CORE_SKILL_POOL_REGISTRY;
 
 export const NON_CORE_SKILL_POOL_REGISTRY = buildSkillPoolRegistry(
   SKILL_PROFESSION_POOL_GROUPS.nonCore
@@ -612,7 +614,7 @@ export const FINAL_CULL_LEGACY_POOL_PASS_MANIFESTS_BY_PROFESSION =
 export const FINAL_CULL_LEGACY_POOL_PASS_MANIFEST_COUNTS_BY_PROFESSION =
   buildFinalCullPoolPassManifestCounts(FINAL_CULL_LEGACY_POOL_PASS_MANIFESTS_BY_PROFESSION);
 
-export const getSkillPoolEntry = (skillId: string) => SKILL_POOL_REGISTRY[skillId];
+export const getSkillPoolEntry = (skillId: string) => ALL_SKILL_POOL_REGISTRY[skillId];
 
 export const getMissingPrerequisiteSkillIds = (
   learnedSkillIds: string[],
