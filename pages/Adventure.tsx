@@ -1469,8 +1469,23 @@ export const Adventure: React.FC<AdventureProps> = ({
     }));
   };
 
-  const grantMonsterRewards = (enemy: NonNullable<typeof targetedMonsterTemplate>) => {
-    const expAmount = enemy.exp;
+  const getBattleRespawnMapId = () =>
+    completedQuests.includes('sect_sword_join')
+      ? '4'
+      : completedQuests.includes('sect_beast_join')
+        ? '14'
+        : completedQuests.includes('sect_mystic_join')
+          ? '23'
+          : '0';
+
+  const applyBattleRewards = ({
+    enemy,
+    rewards,
+  }: {
+    enemy: Enemy;
+    rewards?: NonNullable<ReturnType<typeof createAutoBattleReplaySession>['battleSnapshot']['rewards']>;
+  }) => {
+    const expAmount = rewards?.exp && rewards.exp > 0 ? rewards.exp : enemy.exp;
     if (expAmount > 0) {
       dispatch(gainExperience(expAmount));
       dispatch(addLog({
@@ -1479,8 +1494,8 @@ export const Adventure: React.FC<AdventureProps> = ({
       }));
     }
 
-    const { spiritStones } = getDropRewards(enemy);
-    const drops = generateDrops(enemy);
+    const spiritStones = rewards?.spiritStones ?? getDropRewards(enemy).spiritStones;
+    const drops = rewards?.drops ?? generateDrops(enemy);
     const lootParts: string[] = [];
 
     if (spiritStones > 0) {
@@ -1519,14 +1534,12 @@ export const Adventure: React.FC<AdventureProps> = ({
     }
   };
 
+  const grantMonsterRewards = (enemy: NonNullable<typeof targetedMonsterTemplate>) => {
+    applyBattleRewards({ enemy });
+  };
+
   const handleWorldPlayerDefeat = () => {
-    const respawnMapId = completedQuests.includes('sect_sword_join')
-      ? '4'
-      : completedQuests.includes('sect_beast_join')
-        ? '14'
-        : completedQuests.includes('sect_mystic_join')
-          ? '23'
-          : '0';
+    const respawnMapId = getBattleRespawnMapId();
     dispatch(addLog({
       message: '你在野外遭受重創，被傳送回安全地帶調息。',
       type: 'danger',
@@ -1931,99 +1944,15 @@ export const Adventure: React.FC<AdventureProps> = ({
                  }));
              }
 
-             // Calculate Respawn ID based on Profession if lost
-             let respawnMapId: string | undefined;
-             if (!battleSnapshot.won) {
-                 if (profession === ProfessionType.Sword) respawnMapId = '4'; // 凌霄劍宗
-                 else if (profession === ProfessionType.Mage) respawnMapId = '23'; // 縹緲仙宮
-                 else if (profession === ProfessionType.Body) respawnMapId = '14'; // 萬獸山莊 (Base)
-                 else respawnMapId = '0'; // 仙緣鎮
-             }
+             const respawnMapId = battleSnapshot.won ? undefined : getBattleRespawnMapId();
 
              dispatch(resolveBattle({ won: battleSnapshot.won, logs: displayedLogs, respawnMapId })); // Use displayed logs as final source of truth for Redux if needed (or just use original)
              
              // Process Rewards
               if (battleSnapshot.won && battleSnapshot.rewards) {
-                   const { rewards } = battleSnapshot;
-                  // 1. EXP Log
                   if (currentEnemy) {
-                      const expAmount = rewards.exp > 0 ? rewards.exp : currentEnemy.exp; // Fallback
-                      if (expAmount > 0) {
-                          dispatch(gainExperience(expAmount));
-                          dispatch(addLog({ 
-                              message: `擊敗 <enemy rank="${currentEnemy.rank}">${currentEnemy.name}</enemy>，獲得 <exp>${expAmount} 修為</exp>`, 
-                              type: 'gain' 
-                          }));
-                      }
+                      applyBattleRewards({ enemy: currentEnemy, rewards: battleSnapshot.rewards });
                   }
-
-                  // 2. Loot Log (Combine Stones + Items)
-
-                   let spiritStones = rewards.spiritStones || 0;
-                   const drops = rewards.drops || [];
-                   const finalDrops: any[] = [];
-                   let stonesFromDrops = 0;
-
-                   drops.forEach((d: any) => {
-                       if (d.itemId === 'spirit_stone') {
-                           stonesFromDrops += d.count;
-                       } else {
-                           finalDrops.push(d);
-                       }
-                   });
-                   
-                   const totalStones = spiritStones + stonesFromDrops;
-
-                   if (totalStones > 0 || finalDrops.length > 0) {
-                       const lootParts: string[] = [];
-
-                       if (totalStones > 0) {
-                           const high = Math.floor(totalStones / 1000000);
-                           const medium = Math.floor((totalStones % 1000000) / 1000);
-                           const low = totalStones % 1000;
-                           
-                           if (high > 0) lootParts.push(`<stones q="2">${high} 上品 靈石</stones>`);
-                           if (medium > 0) lootParts.push(`<stones q="1">${medium} 中品 靈石</stones>`);
-                           if (low > 0) lootParts.push(`<stones q="0">${low} 下品 靈石</stones>`);
-                       }
-
-                       finalDrops.forEach((drop: any) => {
-                           dispatch(addItem({ itemId: drop.itemId, count: drop.count, instance: drop.instance }));
-                           
-                           const item = ITEMS[drop.itemId];
-                           if (item) {
-                               let itemStr = item.name;
-                               let qVal = 0;
-                               
-                               if (drop.instance) {
-                                   qVal = drop.instance.quality;
-                               } else {
-                                   qVal = item ? (item.quality || 0) : 0;
-                               }
-                               
-                                if (qVal === 0) itemStr += '(下品)';
-                                if (qVal === 1) itemStr += '(中品)';
-                                if (qVal === 2) itemStr += '(上品)';
-                                if (qVal === 3) itemStr += '(仙品)';
-                               
-                               let finalStr = `<item q="${qVal}">${itemStr}</item>`;
-                               if (drop.count > 1) {
-                                   finalStr += ` x${drop.count}`;
-                               }
-                               lootParts.push(finalStr);
-                           }
-                       });
-                       
-                       dispatch(addLog({
-                           message: `獲得戰利品：${lootParts.join('，')}`,
-                           type: 'gold' 
-                       }));
-                       
-                       // Dispatch Currency Updates
-                       if (spiritStones > 0) dispatch(addSpiritStones({ amount: spiritStones, source: 'battle' }));
-                       if (stonesFromDrops > 0) dispatch(addSpiritStones({ amount: stonesFromDrops, source: 'battle' }));
-                   }
-
               } else if (!battleSnapshot.won && currentEnemy) {
                   dispatch(addLog({ message: `不敵 ${currentEnemy.name}，狼狽逃回。`, type: 'danger' }));
               }
