@@ -12,7 +12,7 @@ import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move, Swords, Flame, Droplets, Shield, ShieldOff, Zap, Snowflake, Sparkles } from 'lucide-react';
 import { parseBattleLog } from '../utils/logParser';
-import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory, NPC, NPCType, ProfessionType, ActiveMonster } from '../types';
+import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory, NPC, NPCType, ProfessionType, ActiveMonster, Enemy } from '../types';
 import { MOVEMENT_SPEEDS, REALM_NAMES, ELEMENT_COLORS, ELEMENT_NAMES } from '../constants';
 import clsx from 'clsx';
 import { Modal } from '../components/Modal';
@@ -1348,6 +1348,14 @@ export const Adventure: React.FC<AdventureProps> = ({
     setIsReplayingBattle(true);
   };
 
+  const beginAutoBattleReplaySession = ({
+    playerStats,
+    enemy,
+  }: {
+    playerStats: ReturnType<typeof calculatePlayerStats>;
+    enemy: Enemy;
+  }) => startBattleReplaySession(createAutoBattleReplaySession(playerStats, enemy));
+
   const processBattleReplayStep = ({
     nextLog,
     targetMonster,
@@ -2244,9 +2252,7 @@ export const Adventure: React.FC<AdventureProps> = ({
             profession,
             character.skills
           );
-          startBattleReplaySession(
-            createAutoBattleReplaySession(playerStats, currentEnemy)
-          );
+          beginAutoBattleReplaySession({ playerStats, enemy: currentEnemy });
       }
   }, [isBattling, currentEnemy, lastBattleResult, character, dispatch]);
 

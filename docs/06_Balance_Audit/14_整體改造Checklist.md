@@ -488,6 +488,7 @@
 - [x] 這批 `FINAL_CULL` 的 skill / pool / target / removal manifests，現在也已開始由共用 builder 集中組裝，不再在 `index.ts / pool.ts` 各自手拼多段近似的 `map / ids / counts` 樣板
 - [x] `FINAL_CULL_REPLACEMENT_MANIFESTS_BY_PROFESSION` 與對應 `transition / legacy` manifests 也已補齊，現在每個 replacement cluster 都可直接看到 `keepSkill / keepPool / removeSkills / removePools`
 - [x] `FINAL_CULL_PASS_MANIFESTS_BY_PROFESSION` 與對應 `transition / legacy` pass manifests 也已補齊，最後一批技能本體刪整現在可以直接按 profession 跑 pass，而不必再從 replacement manifest 二次展平
+- [x] `FINAL_CULL_POOL_PASS_MANIFESTS_BY_PROFESSION` 與對應 `transition / legacy` pool pass manifests 也已補齊，最後一批技能本體刪整現在連 pool entry 刪除 pass 都可直接按 profession 執行
 - [x] 被動技能改成逐招專屬效果，而不是通用屬性加成
 
 ---

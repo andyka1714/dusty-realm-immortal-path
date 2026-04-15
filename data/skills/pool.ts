@@ -10,6 +10,12 @@ export interface SkillPoolEntry {
   replacementSkillId?: string;
 }
 
+export interface FinalCullPoolPassManifest {
+  replacementSkillId: string;
+  keepPool?: SkillPoolEntry;
+  removePools: SkillPoolEntry[];
+}
+
 const defineSkill = (
   profession: ProfessionType,
   skillId: string,
@@ -376,6 +382,39 @@ const filterEntryIdsByProfessionAndReplacement = (
     ])
   ) as Record<ProfessionType, Record<string, string[]>>;
 
+const buildFinalCullPoolPassManifests = (
+  plansByProfession: Record<
+    ProfessionType,
+    Record<string, { keep?: SkillPoolEntry; remove: SkillPoolEntry[] }>
+  >,
+  predicate: (entry: SkillPoolEntry) => boolean = () => true
+) =>
+  Object.fromEntries(
+    Object.entries(plansByProfession).map(([profession, plans]) => [
+      profession,
+      Object.entries(plans)
+        .map(([replacementSkillId, plan]) => ({
+          replacementSkillId,
+          keepPool: plan.keep,
+          removePools: plan.remove.filter(predicate),
+        }))
+        .filter((manifest) => manifest.removePools.length > 0)
+        .sort((left, right) =>
+          left.replacementSkillId.localeCompare(right.replacementSkillId, "zh-Hant")
+        ),
+    ])
+  ) as Record<ProfessionType, FinalCullPoolPassManifest[]>;
+
+const buildFinalCullPoolPassManifestCounts = (
+  manifestsByProfession: Record<ProfessionType, FinalCullPoolPassManifest[]>
+) =>
+  Object.fromEntries(
+    Object.entries(manifestsByProfession).map(([profession, manifests]) => [
+      profession,
+      manifests.length,
+    ])
+  ) as Record<ProfessionType, number>;
+
 const buildFinalCullPoolArtifacts = (
   groupsByProfession: Record<ProfessionType, Record<string, SkillPoolEntry[]>>
 ) => {
@@ -545,6 +584,33 @@ export const FINAL_CULL_LEGACY_REMOVAL_POOL_IDS_BY_PROFESSION =
   filterEntryIdsByProfession(FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION, (entry) =>
     entry.poolStatus === "legacy"
   );
+
+export const FINAL_CULL_POOL_PASS_MANIFESTS_BY_PROFESSION = buildFinalCullPoolPassManifests(
+  FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION
+);
+
+export const FINAL_CULL_POOL_PASS_MANIFEST_COUNTS_BY_PROFESSION =
+  buildFinalCullPoolPassManifestCounts(FINAL_CULL_POOL_PASS_MANIFESTS_BY_PROFESSION);
+
+export const FINAL_CULL_TRANSITION_POOL_PASS_MANIFESTS_BY_PROFESSION =
+  buildFinalCullPoolPassManifests(
+    FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION,
+    (entry) => entry.poolStatus === "transition"
+  );
+
+export const FINAL_CULL_TRANSITION_POOL_PASS_MANIFEST_COUNTS_BY_PROFESSION =
+  buildFinalCullPoolPassManifestCounts(
+    FINAL_CULL_TRANSITION_POOL_PASS_MANIFESTS_BY_PROFESSION
+  );
+
+export const FINAL_CULL_LEGACY_POOL_PASS_MANIFESTS_BY_PROFESSION =
+  buildFinalCullPoolPassManifests(
+    FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION,
+    (entry) => entry.poolStatus === "legacy"
+  );
+
+export const FINAL_CULL_LEGACY_POOL_PASS_MANIFEST_COUNTS_BY_PROFESSION =
+  buildFinalCullPoolPassManifestCounts(FINAL_CULL_LEGACY_POOL_PASS_MANIFESTS_BY_PROFESSION);
 
 export const getSkillPoolEntry = (skillId: string) => SKILL_POOL_REGISTRY[skillId];
 

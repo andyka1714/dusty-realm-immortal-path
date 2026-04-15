@@ -104,6 +104,7 @@
 - `Adventure` 內 player / enemy world strike 的 action plan，也已正式直接回到 `createWorldStrikeQueuePlan(...)`，不再保留只負責轉手的 resolved wrapper
 - `Adventure` 內 `runAutoBattle() -> replay` 的橋接，也已開始收斂到 `createBattleReplaySession(...) / startBattleReplaySession(...)`，首筆 log、snapshot 與 replayQueue 不再直接在 effect 內現場拼裝
 - `Adventure` 內 `runAutoBattle() -> replay` 的橋接，現在也已開始共用 `battleSystem.ts` 提供的 `createAutoBattleReplaySession(...)`，world 頁面不再自己重建 first log / snapshot / replayQueue
+- `Adventure` 內 `runAutoBattle() -> replay` 的啟動入口，現在也已開始收斂到 `beginAutoBattleReplaySession(...)`，頁面 effect 不再直接拼接 battle session bridge 與本地 replay 啟動
 - `Adventure` 內 player / enemy world strike 與 replay step 的 visual payload，也已開始共用 `WorldStrikeVisualPlan` 路徑；live / replay 不再各自手拼 projectile、area 與 impact payload
 - 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再另外維護一套 effect dispatch
 - `Adventure` 內 player / enemy world strike 的投射物、範圍、命中特效與傷害浮字，也已開始共用 visual helper，地圖即時戰鬥不再各自維護兩套 effect dispatch 流程
