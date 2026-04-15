@@ -218,6 +218,21 @@ const buildEntryIdsByProfessionAndReplacement = (
     ])
   ) as Record<ProfessionType, Record<string, string[]>>;
 
+const buildEntryCountsByProfessionAndReplacement = (
+  groupsByProfession: Record<ProfessionType, Record<string, SkillPoolEntry[]>>
+) =>
+  Object.fromEntries(
+    Object.entries(groupsByProfession).map(([profession, groups]) => [
+      profession,
+      Object.fromEntries(
+        Object.entries(groups).map(([replacementSkillId, entries]) => [
+          replacementSkillId,
+          entries.length,
+        ])
+      ),
+    ])
+  ) as Record<ProfessionType, Record<string, number>>;
+
 const buildReplacementTargetEntriesByProfession = (
   groupsByProfession: Record<ProfessionType, Record<string, SkillPoolEntry[]>>
 ) =>
@@ -341,6 +356,16 @@ export const FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION_AND_REPLACEMENT = Object.fr
 export const FINAL_CULL_SKILL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT =
   buildEntryIdsByProfessionAndReplacement(FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT);
 
+export const FINAL_CULL_SKILL_POOL_COUNTS_BY_PROFESSION_AND_REPLACEMENT =
+  buildEntryCountsByProfessionAndReplacement(FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT);
+
+export const FINAL_CULL_SKILL_POOL_COUNTS_BY_PROFESSION = Object.fromEntries(
+  Object.entries(FINAL_CULL_SKILL_PROFESSION_POOLS).map(([profession, entries]) => [
+    profession,
+    entries.length,
+  ])
+) as Record<ProfessionType, number>;
+
 export const FINAL_CULL_REPLACEMENT_TARGET_POOLS_BY_PROFESSION =
   buildReplacementTargetEntriesByProfession(FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT);
 
@@ -364,8 +389,10 @@ export const getMissingPrerequisiteSkillIds = (
   const entry = getSkillPoolEntry(skillId);
   if (!entry) return [];
 
-  return entry.prerequisiteSkillIds.filter(
-    (prerequisiteSkillId) => !learnedSkillIds.includes(prerequisiteSkillId)
+  const normalizedLearnedSkillIds = new Set(learnedSkillIds.map(resolveReplacementSkillId));
+
+  return Array.from(new Set(entry.prerequisiteSkillIds.map(resolveReplacementSkillId))).filter(
+    (prerequisiteSkillId) => !normalizedLearnedSkillIds.has(prerequisiteSkillId)
   );
 };
 

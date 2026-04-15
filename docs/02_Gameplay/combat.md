@@ -102,6 +102,7 @@
 - `Adventure` 內 player / enemy world strike 的完整 queue orchestration，現在也已進一步回收到 `performQueuedWorldStrikeAction(...) + createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)` 這層，分支本身只保留 strike resolve 與最少的條件判斷
 - `Adventure` 內 player / enemy world strike 的 strike resolve 與 queue plan 組裝，也已開始共用 `resolveWorldStrikeQueuePlan(...)`，live 分支不再各自手拼 `resolveStrike + buildPlan` 樣板
 - `Adventure` 內 world strike 與舊戰報 replay 的 queued plan，現在也已開始共用 `queueResolvedCombatPlan(...)`，timer plan 建好後的實際 enqueue 不再分成 live / replay 兩套路徑
+- 舊戰報 replay 的 step enqueue 也已正式抽成 `queueBattleReplayStep(...)`，回放分支不再直接在 effect 內呼叫 queue helper
 - `Adventure` 內 player / enemy world strike 的 action plan，也已正式直接回到 `createWorldStrikeQueuePlan(...)`，不再保留只負責轉手的 resolved wrapper
 - `Adventure` 內 player / enemy world strike 與 replay step 的 visual payload，也已開始共用 `WorldStrikeVisualPlan` 路徑；live / replay 不再各自手拼 projectile、area 與 impact payload
 - 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再另外維護一套 effect dispatch

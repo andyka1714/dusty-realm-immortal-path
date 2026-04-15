@@ -21,6 +21,8 @@ import {
   CORE_SKILL_POOL_REGISTRY,
   CORE_SKILL_SETS_BY_REALM,
   FINAL_CULL_SKILL_POOL_GROUPS_BY_PROFESSION,
+  FINAL_CULL_SKILL_POOL_COUNTS_BY_PROFESSION,
+  FINAL_CULL_SKILL_POOL_COUNTS_BY_PROFESSION_AND_REPLACEMENT,
   FINAL_CULL_SKILL_POOL_IDS_BY_PROFESSION,
   FINAL_CULL_SKILL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT,
   FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION,
@@ -423,6 +425,14 @@ describe("skill pool registry", () => {
       FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT[ProfessionType.Body].b_sf_passive
         .map((entry) => entry.skillId)
         .sort()
+    );
+    expect(FINAL_CULL_SKILL_POOL_COUNTS_BY_PROFESSION[ProfessionType.Sword]).toBe(
+      FINAL_CULL_SKILL_PROFESSION_POOLS[ProfessionType.Sword].length
+    );
+    expect(
+      FINAL_CULL_SKILL_POOL_COUNTS_BY_PROFESSION_AND_REPLACEMENT[ProfessionType.Body].b_sf_passive
+    ).toBe(
+      FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT[ProfessionType.Body].b_sf_passive.length
     );
     expect(FINAL_CULL_REPLACEMENT_TARGET_IDS_BY_PROFESSION[ProfessionType.Sword].sort()).toEqual(
       ["s_tr_active", "s_tr_passive"].sort()

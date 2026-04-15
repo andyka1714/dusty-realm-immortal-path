@@ -1331,6 +1331,10 @@ export const Adventure: React.FC<AdventureProps> = ({
     });
   };
 
+  const queueBattleReplayStep = (
+    nextLog: NonNullable<typeof replayQueue>[number]
+  ) => queueResolvedCombatPlan(() => createBattleReplayStepPlan(nextLog));
+
   const executePlayerWorldStrike = ({
     strike,
     chosenSkill,
@@ -2156,7 +2160,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     }
 
     const nextLog = replayQueue[0];
-    const timer = queueResolvedCombatPlan(() => createBattleReplayStepPlan(nextLog));
+    const timer = queueBattleReplayStep(nextLog);
 
     return () => clearTimeout(timer);
   }, [isReplayingBattle, replayQueue, battleSnapshot, displayedLogs, currentEnemyInstanceId, activeMonsters, playerPosition, dispatch]);

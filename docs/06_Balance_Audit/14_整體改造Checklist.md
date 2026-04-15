@@ -296,7 +296,7 @@
 - [x] `s_f_passive` / `b_bi_passive` / `m_im_passive` 也已補齊 timeline combat 開場待命訊息，正式標出 `養劍術` / `金剛法相` / `五氣朝元`
 - [x] 戰利品字串組裝也已開始整併到 `buildVictoryLootMessage(...)`，勝利結算函式不再直接攤開品質字樣與掉落名稱拼裝
 - [x] 舊戰報 replay 的 context、step delay 與 visual payload 組裝，也已開始收斂到 `createBattleReplayContext(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / createBattleReplayVisualPlan(...)`
-- [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
+- [x] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
 
 ---
 
@@ -458,6 +458,7 @@
 - [x] `Adventure` 內 player / enemy world strike 的 queue orchestration，也已開始回收到 `performQueuedWorldStrikeAction(...) + createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)`，player / enemy 分支不再各自串接 cast / preview / execute 流程
 - [x] `Adventure` 內 player / enemy world strike 的 strike resolve 與 queue plan 組裝，也已開始共用 `resolveWorldStrikeQueuePlan(...)`，live 分支不再各自手拼 `resolveStrike + buildPlan` 樣板
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的 queued plan，現在也已開始共用 `queueResolvedCombatPlan(...)`，timer plan 建好後的 enqueue 不再維持兩套路徑
+- [x] 舊戰報 replay 的 step enqueue 也已正式抽成 `queueBattleReplayStep(...)`，回放分支不再直接在 effect 內呼叫 queue helper
 - [x] `Adventure` 內 player / enemy world strike 的 action plan 也已正式直接回到 `createWorldStrikeQueuePlan(...)`，queue helper 不再各自臨時拼接 cast、preview 與 execute 閉包
 - [x] `Adventure` 內 player / enemy world strike 的出手入口，也已開始共用 `performTimedWorldAction(...)`，live 分支不再各自維護 `Date.now()` 與 readyAt 判定樣板
 - [x] `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在直接走 `performQueuedWorldStrikeAction(...) + createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)`，分支本身只保留 strike resolve 與 plan 組裝
@@ -480,6 +481,7 @@
 - [x] `FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION / FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION_AND_REPLACEMENT / FINAL_CULL_SKILL_POOL_IDS_BY_PROFESSION` 也已補齊，最後一批刪整現在已有可直接操作的 pool entry profession / replacement / id 視圖
 - [x] `FINAL_CULL_REPLACEMENT_TARGET_POOLS_BY_PROFESSION / FINAL_CULL_REPLACEMENT_TARGET_POOL_MAP_BY_PROFESSION / FINAL_CULL_REPLACEMENT_TARGET_IDS_BY_PROFESSION` 也已補齊，最後一批刪整現在連保留目標的 core pool 視角都可直接批次核對
 - [x] `FINAL_CULL_SKILL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT` 也已補齊，最後一批刪整現在已有 profession × replacement 的 pool entry id 名單可直接操作
+- [x] `FINAL_CULL_SKILL_POOL_COUNTS_BY_PROFESSION / FINAL_CULL_SKILL_POOL_COUNTS_BY_PROFESSION_AND_REPLACEMENT` 也已補齊，最後一批刪整現在可直接看各 profession / replacement cluster 還剩多少 entry
 - [x] 被動技能改成逐招專屬效果，而不是通用屬性加成
 
 ---
