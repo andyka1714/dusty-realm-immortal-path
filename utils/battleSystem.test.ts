@@ -14,6 +14,7 @@ import {
   clearAllCombatTimers,
   clearCombatTimerBucket,
   createCombatTimerBuckets,
+  createAutoBattleReplayFinishPlan,
   createBattleReplayStepPlan,
   calculatePlayerStats,
   createResolvedWorldStrikeActionPlan,
@@ -837,6 +838,25 @@ describe("battle system balance", () => {
     expect(replayWinOutcome.rewards?.exp).toBe(120);
     expect(replayWinOutcome.defeatLogMessage).toBeUndefined();
 
+    expect(
+      createAutoBattleReplayFinishPlan({
+        replayOutcome: replayWinOutcome,
+      })
+    ).toEqual({
+      shouldStopReplay: true,
+      battleResult: {
+        won: true,
+        logs: replayWinOutcome.logs,
+        respawnMapId: undefined,
+      },
+      victoryTarget: {
+        x: 3,
+        y: 4,
+      },
+      rewards: replayWinOutcome.rewards,
+      defeatLogMessage: undefined,
+    });
+
     const replayDefeatOutcome = resolveAutoBattleReplayOutcome({
       battleSnapshot: {
         playerHp: 0,
@@ -867,6 +887,22 @@ describe("battle system balance", () => {
     expect(replayDefeatOutcome.defeatedMonster).toBeNull();
     expect(replayDefeatOutcome.rewards).toBeUndefined();
     expect(replayDefeatOutcome.defeatLogMessage).toContain(COMMON_ENEMIES.m1_c1.name);
+
+    expect(
+      createAutoBattleReplayFinishPlan({
+        replayOutcome: replayDefeatOutcome,
+      })
+    ).toEqual({
+      shouldStopReplay: true,
+      battleResult: {
+        won: false,
+        logs: replayDefeatOutcome.logs,
+        respawnMapId: "14",
+      },
+      victoryTarget: undefined,
+      rewards: undefined,
+      defeatLogMessage: replayDefeatOutcome.defeatLogMessage,
+    });
   });
 
   it("shares enemy special timeline metadata between world strikes and timeline combat", () => {

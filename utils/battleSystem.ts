@@ -96,6 +96,18 @@ export interface AutoBattleReplayOutcome {
   defeatLogMessage?: string;
 }
 
+export interface AutoBattleReplayFinishPlan {
+  shouldStopReplay: true;
+  battleResult: {
+    won: boolean;
+    logs: CombatLog[];
+    respawnMapId?: string;
+  };
+  victoryTarget?: Pick<ActiveMonster, "x" | "y">;
+  rewards?: AutoBattleReplaySession["battleSnapshot"]["rewards"];
+  defeatLogMessage?: string;
+}
+
 export interface WorldPlayerDefeatOutcome {
   respawnMapId: string;
   startX: number;
@@ -9127,3 +9139,26 @@ export const runAutoBattleReplayFrame = <TSkill>({
     }),
   };
 };
+
+export const createAutoBattleReplayFinishPlan = ({
+  replayOutcome,
+}: {
+  replayOutcome: AutoBattleReplayOutcome;
+}): AutoBattleReplayFinishPlan => ({
+  shouldStopReplay: true,
+  battleResult: {
+    won: replayOutcome.won,
+    logs: replayOutcome.logs,
+    respawnMapId: replayOutcome.respawnMapId,
+  },
+  victoryTarget: replayOutcome.won
+    ? replayOutcome.defeatedMonster
+      ? {
+          x: replayOutcome.defeatedMonster.x,
+          y: replayOutcome.defeatedMonster.y,
+        }
+      : undefined
+    : undefined,
+  rewards: replayOutcome.won ? replayOutcome.rewards : undefined,
+  defeatLogMessage: replayOutcome.won ? undefined : replayOutcome.defeatLogMessage,
+});

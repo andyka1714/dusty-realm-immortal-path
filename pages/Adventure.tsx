@@ -12,6 +12,7 @@ import {
   clearCombatTimerBucket,
   createCombatTimerBuckets,
   createAutoBattleReplaySession,
+  createAutoBattleReplayFinishPlan,
   createWorldStrikeQueuePlan,
   calculatePlayerStats,
   getBattleReportAutoCloseDelayMs,
@@ -1890,17 +1891,21 @@ export const Adventure: React.FC<AdventureProps> = ({
     });
 
     if (replayFrame.kind === 'finish') {
-      setIsReplayingBattle(false);
-      const replayOutcome = replayFrame.replayOutcome;
+      const finishPlan = createAutoBattleReplayFinishPlan({
+        replayOutcome: replayFrame.replayOutcome,
+      });
+      if (finishPlan.shouldStopReplay) {
+        setIsReplayingBattle(false);
+      }
 
-      if (replayOutcome.won && replayOutcome.defeatedMonster) {
+      if (finishPlan.victoryTarget) {
         dispatch(addVisualEffect({
           type: 'area',
           text: '',
           color: '#fca5a5',
           colorInt: 0xfca5a5,
-          targetX: replayOutcome.defeatedMonster.x,
-          targetY: replayOutcome.defeatedMonster.y,
+          targetX: finishPlan.victoryTarget.x,
+          targetY: finishPlan.victoryTarget.y,
           radius: 0.9,
           durationMs: 420,
         }));
@@ -1909,25 +1914,21 @@ export const Adventure: React.FC<AdventureProps> = ({
           text: '',
           color: '#ffffff',
           colorInt: 0xffffff,
-          targetX: replayOutcome.defeatedMonster.x,
-          targetY: replayOutcome.defeatedMonster.y,
+          targetX: finishPlan.victoryTarget.x,
+          targetY: finishPlan.victoryTarget.y,
           radius: 0.85,
           durationMs: 320,
         }));
       }
 
-      dispatch(resolveBattle({
-        won: replayOutcome.won,
-        logs: replayOutcome.logs,
-        respawnMapId: replayOutcome.respawnMapId,
-      }));
+      dispatch(resolveBattle(finishPlan.battleResult));
 
-      if (replayOutcome.won && replayOutcome.rewards) {
+      if (finishPlan.rewards) {
         if (currentEnemy) {
-          applyBattleRewards({ enemy: currentEnemy, rewards: replayOutcome.rewards });
+          applyBattleRewards({ enemy: currentEnemy, rewards: finishPlan.rewards });
         }
-      } else if (replayOutcome.defeatLogMessage) {
-        dispatch(addLog({ message: replayOutcome.defeatLogMessage, type: 'danger' }));
+      } else if (finishPlan.defeatLogMessage) {
+        dispatch(addLog({ message: finishPlan.defeatLogMessage, type: 'danger' }));
       }
 
       return;
