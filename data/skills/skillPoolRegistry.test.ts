@@ -32,8 +32,13 @@ import {
   FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT,
   FINAL_CULL_REPLACEMENT_TARGET_IDS_BY_PROFESSION,
   FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION,
+  FINAL_CULL_REPLACEMENT_TARGET_SKILL_MAP_BY_PROFESSION,
+  FINAL_CULL_REPLACEMENT_TARGET_SKILLS_BY_PROFESSION,
   FINAL_CULL_REPLACEMENT_TARGET_POOL_MAP_BY_PROFESSION,
   FINAL_CULL_REPLACEMENT_TARGET_POOLS_BY_PROFESSION,
+  FINAL_CULL_REMOVAL_SKILL_MAP_BY_PROFESSION,
+  FINAL_CULL_REMOVAL_SKILLS_BY_PROFESSION,
+  FINAL_CULL_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
   FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION,
   FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT,
   FORMAL_CORE_ACTIVE_SKILLS,
@@ -484,6 +489,33 @@ describe("skill pool registry", () => {
         (entry) => entry.skillId
       )
     ).toContain("m_sf_passive");
+    expect(
+      FINAL_CULL_REPLACEMENT_TARGET_SKILLS_BY_PROFESSION[ProfessionType.Body].map(
+        (skill) => skill.id
+      )
+    ).toContain("b_sf_passive");
+    expect(
+      FINAL_CULL_REPLACEMENT_TARGET_SKILL_MAP_BY_PROFESSION[ProfessionType.Sword].s_tr_active
+        ?.poolStatus
+    ).toBe("core");
+    expect(
+      FINAL_CULL_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT[ProfessionType.Body].b_sf_passive
+        .map((skill) => skill.id)
+        .sort()
+    ).toEqual(
+      FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT[ProfessionType.Body].b_sf_passive
+        .slice()
+        .sort()
+    );
+    expect(
+      FINAL_CULL_REMOVAL_SKILLS_BY_PROFESSION[ProfessionType.Mage].map((skill) => skill.id).sort()
+    ).toEqual(
+      FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION[ProfessionType.Mage].slice().sort()
+    );
+    expect(
+      FINAL_CULL_REMOVAL_SKILL_MAP_BY_PROFESSION[ProfessionType.Sword].s_ie_active
+        ?.replacementSkillId
+    ).toBe("s_tr_active");
   });
 
   it("ensures prerequisite chains only point to skills of the same profession", () => {

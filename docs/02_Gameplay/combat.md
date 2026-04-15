@@ -101,7 +101,7 @@
 - `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，現在也已開始共用 queue / preview / resolution helper，不再各自維護兩套 readyAt 與傷害文案流程
 - `Adventure` 內 player / enemy world strike 的完整 queue orchestration，現在也已進一步回收到 `performQueuedWorldStrikeAction(...) + createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)` 這層，分支本身只保留 strike resolve 與最少的條件判斷
 - `Adventure` 內 player / enemy world strike 的 strike resolve 與 queue plan 組裝，也已開始共用 `createResolvedTimedCombatPlan(...)`，live 分支不再各自手拼 `resolveStrike + buildPlan` 樣板
-- `Adventure` 內 player / enemy world strike 的 resolved plan 建構，現在已開始共用 `createResolvedTimedCombatPlan(...)`，live 分支不再各自手拼 `delayMs / cast / preview / execute` 的 queue payload
+- `Adventure` 內 player / enemy world strike 的 resolved plan 建構，現在已開始共用 `createResolvedTimedCombatPlan(...)` 與 `createResolvedWorldStrikeActionPlan(...)`，live 分支不再各自手拼 `delayMs / cast / preview / execute` 的 queue payload
 - `Adventure` 內 world strike 與舊戰報 replay 的 queued plan，現在也已開始共用 `queueResolvedTimedCombatPlan(...)`，timer plan 建好後的實際 enqueue 不再分成 live / replay 兩套路徑
 - 舊戰報 replay 的 step enqueue，現在也已正式回到 `queueResolvedTimedCombatPlan(...)` 路徑，不再額外保留單用途 replay queue wrapper
 - `Adventure` 內 player / enemy world strike 的 action plan，也已正式直接回到 `createWorldStrikeQueuePlan(...)`，不再保留只負責轉手的 resolved wrapper
