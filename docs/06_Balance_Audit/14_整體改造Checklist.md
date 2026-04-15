@@ -455,14 +455,11 @@
 - [x] `Workshop` 的聚靈陣 / 煉丹 / 煉器卡片，也已開始改走 `GameSection`，洞府百業不再維持獨立 card chrome
 - [x] `Adventure` 的底部戰鬥快捷列也已開始改走 `GameSection`，地圖即時戰鬥操作面已接上同一套 section chrome
 - [x] `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，也已開始共用 queue / preview / resolution helper，地圖即時戰鬥分支不再各自維護兩套 readyAt / 傷害文案流程
-- [x] `Adventure` 內 player / enemy world strike 的 queue orchestration，也已開始回收到 `performQueuedWorldStrikeAction(...) + createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)`，player / enemy 分支不再各自串接 cast / preview / execute 流程
-- [x] `Adventure` 內 player / enemy world strike 的 strike resolve 與 queue plan 組裝，也已開始共用 `createResolvedTimedCombatPlan(...)`，live 分支不再各自手拼 `resolveStrike + buildPlan` 樣板
-- [x] `Adventure` 內 player / enemy world strike 的 resolved plan 建構，現在已開始共用 `createResolvedTimedCombatPlan(...)`，live 分支不再各自手拼 `delayMs / cast / preview / execute` 的 queue payload
-- [x] `Adventure` 內 world strike 與舊戰報 replay 的 queued plan，現在也已開始共用 `queueResolvedTimedCombatPlan(...)`，timer plan 建好後的 enqueue 不再維持兩套路徑
-- [x] 舊戰報 replay 的 step enqueue 現在也直接走 `queueResolvedTimedCombatPlan(...)`，回放分支不再額外保留單用途 replay queue wrapper
+- [x] `Adventure` 內 player / enemy world strike 與舊戰報 replay 的 resolved timed plan enqueue，現在已開始共用 `runResolvedTimedCombatPlan(...) + queueResolvedTimedCombatPlan(...)` 路徑，live / replay 不再各自維護單用途 resolve / queue wrapper
+- [x] `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在直接走 `runResolvedTimedCombatPlan(...) + createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)`，分支本身只保留 strike resolve、preview 與 execute 所需的最少資訊
 - [x] `Adventure` 內 player / enemy world strike 的 action plan 也已正式直接回到 `createWorldStrikeQueuePlan(...)`，queue helper 不再各自臨時拼接 cast、preview 與 execute 閉包
-- [x] `Adventure` 內 player / enemy world strike 的出手入口，也已開始共用 `performTimedWorldAction(...)`，live 分支不再各自維護 `Date.now()` 與 readyAt 判定樣板
-- [x] `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在直接走 `performQueuedWorldStrikeAction(...) + createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)`，分支本身只保留 strike resolve 與 plan 組裝
+- [x] `Adventure` 內 player / enemy world strike 的出手入口，現在也已回到 `runResolvedTimedCombatPlan(...)` 這個 generic 路徑，live 分支不再各自維護 `Date.now()` 與 readyAt 判定樣板
+- [x] `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在直接走 `runResolvedTimedCombatPlan(...) + createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)`，分支本身只保留 strike resolve、preview 與 execute 所需的最少資訊
 - [x] `queueResolvedWorldStrike(...)` 也已改成更單純的 `queueWorldStrikePlan(...)`，live world action 現在只保留 timed 判定、strike resolve 與 plan 執行三段
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，也已開始共用 `scheduleTimedCombatAction(...)`，不再各自維護一套 `setTimeout` orchestration
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的 timed plan，也已開始共用 `queueTimedCombatPlan(...)` 的 onQueue/execute 模型，battle timer orchestration 不再維持兩種樣板
@@ -490,6 +487,7 @@
 - [x] `FINAL_CULL_TRANSITION_REMOVAL_SKILLS_BY_PROFESSION / FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION` 與對應 replacement 視圖，現在也已開始共用 `buildRemovalSkillArtifacts(...)` 集中組裝
 - [x] 這批 `FINAL_CULL` 的 skill / pool / target / removal manifests，現在也已開始由共用 builder 集中組裝，不再在 `index.ts / pool.ts` 各自手拼多段近似的 `map / ids / counts` 樣板
 - [x] `FINAL_CULL_REPLACEMENT_MANIFESTS_BY_PROFESSION` 與對應 `transition / legacy` manifests 也已補齊，現在每個 replacement cluster 都可直接看到 `keepSkill / keepPool / removeSkills / removePools`
+- [x] `FINAL_CULL_PASS_MANIFESTS_BY_PROFESSION` 與對應 `transition / legacy` pass manifests 也已補齊，最後一批技能本體刪整現在可以直接按 profession 跑 pass，而不必再從 replacement manifest 二次展平
 - [x] 被動技能改成逐招專屬效果，而不是通用屬性加成
 
 ---

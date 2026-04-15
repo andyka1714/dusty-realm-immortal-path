@@ -35,11 +35,17 @@ import {
   FINAL_CULL_REPLACEMENT_TARGET_SKILL_MAP_BY_PROFESSION,
   FINAL_CULL_REPLACEMENT_TARGET_SKILLS_BY_PROFESSION,
   FINAL_CULL_REPLACEMENT_MANIFESTS_BY_PROFESSION,
+  FINAL_CULL_PASS_MANIFESTS_BY_PROFESSION,
+  FINAL_CULL_PASS_MANIFEST_COUNTS_BY_PROFESSION,
   FINAL_CULL_TRANSITION_REPLACEMENT_MANIFESTS_BY_PROFESSION,
+  FINAL_CULL_TRANSITION_PASS_MANIFESTS_BY_PROFESSION,
+  FINAL_CULL_TRANSITION_PASS_MANIFEST_COUNTS_BY_PROFESSION,
   FINAL_CULL_TRANSITION_REMOVAL_SKILL_MAP_BY_PROFESSION,
   FINAL_CULL_TRANSITION_REMOVAL_SKILLS_BY_PROFESSION,
   FINAL_CULL_TRANSITION_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
   FINAL_CULL_LEGACY_REPLACEMENT_MANIFESTS_BY_PROFESSION,
+  FINAL_CULL_LEGACY_PASS_MANIFESTS_BY_PROFESSION,
+  FINAL_CULL_LEGACY_PASS_MANIFEST_COUNTS_BY_PROFESSION,
   FINAL_CULL_LEGACY_REMOVAL_SKILL_MAP_BY_PROFESSION,
   FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION,
   FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
@@ -601,6 +607,35 @@ describe("skill pool registry", () => {
         .map((entry) => entry.skillId)
         .sort()
     ).toEqual(["b_bi_passive", "b_tr_passive", "b_im_passive", "b_ie_passive"].sort());
+    expect(
+      FINAL_CULL_PASS_MANIFESTS_BY_PROFESSION[ProfessionType.Sword].map(
+        (manifest) => manifest.replacementSkillId
+      )
+    ).toContain("s_tr_active");
+    expect(FINAL_CULL_PASS_MANIFEST_COUNTS_BY_PROFESSION[ProfessionType.Sword]).toBe(
+      FINAL_CULL_PASS_MANIFESTS_BY_PROFESSION[ProfessionType.Sword].length
+    );
+    expect(
+      FINAL_CULL_TRANSITION_PASS_MANIFESTS_BY_PROFESSION[ProfessionType.Sword].map(
+        (manifest) => manifest.replacementSkillId
+      )
+    ).toContain("s_tr_active");
+    expect(
+      FINAL_CULL_TRANSITION_PASS_MANIFESTS_BY_PROFESSION[ProfessionType.Sword].find(
+        (manifest) => manifest.replacementSkillId === "s_tr_active"
+      )?.removeSkills.map((skill) => skill.id).sort()
+    ).toEqual(["s_bi_active", "s_im_active"].sort());
+    expect(
+      FINAL_CULL_TRANSITION_PASS_MANIFEST_COUNTS_BY_PROFESSION[ProfessionType.Sword]
+    ).toBe(FINAL_CULL_TRANSITION_PASS_MANIFESTS_BY_PROFESSION[ProfessionType.Sword].length);
+    expect(
+      FINAL_CULL_LEGACY_PASS_MANIFESTS_BY_PROFESSION[ProfessionType.Body].find(
+        (manifest) => manifest.replacementSkillId === "b_sf_passive"
+      )?.removePools.map((entry) => entry.skillId).sort()
+    ).toEqual(["b_bi_passive", "b_tr_passive", "b_im_passive", "b_ie_passive"].sort());
+    expect(
+      FINAL_CULL_LEGACY_PASS_MANIFEST_COUNTS_BY_PROFESSION[ProfessionType.Body]
+    ).toBe(FINAL_CULL_LEGACY_PASS_MANIFESTS_BY_PROFESSION[ProfessionType.Body].length);
   });
 
   it("ensures prerequisite chains only point to skills of the same profession", () => {

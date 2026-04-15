@@ -812,6 +812,28 @@ export const Adventure: React.FC<AdventureProps> = ({
     return queueTimedCombatPlan(plan);
   };
 
+  const runResolvedTimedCombatPlan = <TResolved,>({
+    readyAt,
+    canExecute = () => true,
+    resolve,
+    buildPlan,
+  }: {
+    readyAt?: number;
+    canExecute?: () => boolean;
+    resolve: (now: number) => TResolved;
+    buildPlan: (resolved: TResolved) => TimedCombatQueuePlan | undefined;
+  }) => {
+    if (!canExecute()) return undefined;
+
+    const now = Date.now();
+    if (readyAt !== undefined && now < readyAt) return undefined;
+
+    return queueResolvedTimedCombatPlan({
+      resolve: () => resolve(now),
+      buildPlan,
+    });
+  };
+
   const createWorldStrikeQueuePlan = ({
     delayMs,
     applyCastEffect,
@@ -1695,48 +1717,8 @@ export const Adventure: React.FC<AdventureProps> = ({
     resetWorldCombatState();
   };
 
-  const performTimedWorldAction = ({
-    readyAt,
-    canExecute = () => true,
-    execute,
-  }: {
-    readyAt?: number;
-    canExecute?: () => boolean;
-    execute: (now: number) => void;
-  }) => {
-    if (!canExecute()) return false;
-
-    const now = Date.now();
-    if (readyAt !== undefined && now < readyAt) return false;
-
-    execute(now);
-    return true;
-  };
-
-  const performQueuedWorldStrikeAction = <TResolved,>({
-    readyAt,
-    canExecute,
-    resolve,
-    buildPlan,
-  }: {
-    readyAt?: number;
-    canExecute?: () => boolean;
-    resolve: (now: number) => TResolved;
-    buildPlan: (resolved: TResolved) => TimedCombatQueuePlan | undefined;
-  }) =>
-    performTimedWorldAction({
-      readyAt,
-      canExecute,
-      execute: (now) => {
-        queueResolvedTimedCombatPlan({
-          resolve: () => resolve(now),
-          buildPlan,
-        });
-      },
-    });
-
   const performWorldPlayerAction = (useSkill: boolean) =>
-    performQueuedWorldStrikeAction({
+    runResolvedTimedCombatPlan({
       readyAt: playerActionReadyAt,
       canExecute: () => Boolean(targetedMonster && targetedMonsterTemplate && canEngageTarget),
       resolve: (now) => {
@@ -1785,7 +1767,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     enemyInstanceId: string,
     enemyTemplate: NonNullable<typeof targetedMonsterTemplate>
   ) =>
-    performQueuedWorldStrikeAction({
+    runResolvedTimedCombatPlan({
       resolve: (now) => {
         const canUseSpecial = now >= (enemySpecialReadyAtById[enemyInstanceId] ?? 0);
         return {
@@ -2223,7 +2205,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     }
 
     const nextLog = replayQueue[0];
-    const timer = queueResolvedTimedCombatPlan({
+    const timer = runResolvedTimedCombatPlan({
       resolve: () => createBattleReplayContext(nextLog),
       buildPlan: (replayContext) => createBattleReplayStepPlan(replayContext),
     });

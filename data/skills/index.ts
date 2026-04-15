@@ -206,6 +206,10 @@ export interface FinalCullReplacementManifest {
   removePools: SkillPoolEntry[];
 }
 
+export interface FinalCullPassManifest extends FinalCullReplacementManifest {
+  replacementSkillId: string;
+}
+
 const buildFinalCullReplacementManifests = ({
   replacementPlansByProfession,
   replacementTargetSkillMapByProfession,
@@ -246,6 +250,33 @@ const buildFinalCullReplacementManifests = ({
       ),
     ])
   ) as Record<ProfessionType, Record<string, FinalCullReplacementManifest>>;
+
+const buildFinalCullPassManifests = (
+  manifestsByProfession: Record<ProfessionType, Record<string, FinalCullReplacementManifest>>
+) =>
+  Object.fromEntries(
+    Object.entries(manifestsByProfession).map(([profession, manifests]) => [
+      profession,
+      Object.entries(manifests)
+        .map(([replacementSkillId, manifest]) => ({
+          replacementSkillId,
+          ...manifest,
+        }))
+        .sort((left, right) =>
+          left.replacementSkillId.localeCompare(right.replacementSkillId, "zh-Hant")
+        ),
+    ])
+  ) as Record<ProfessionType, FinalCullPassManifest[]>;
+
+const buildFinalCullPassManifestCounts = (
+  manifestsByProfession: Record<ProfessionType, FinalCullPassManifest[]>
+) =>
+  Object.fromEntries(
+    Object.entries(manifestsByProfession).map(([profession, manifests]) => [
+      profession,
+      manifests.length,
+    ])
+  ) as Record<ProfessionType, number>;
 
 const mergeSkillGroupsByProfession = (
   left: Record<ProfessionType, Record<string, Skill[]>>,
@@ -681,6 +712,27 @@ export const FINAL_CULL_LEGACY_REPLACEMENT_MANIFESTS_BY_PROFESSION =
       FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
     removalPoolPredicate: (entry) => entry.poolStatus === "legacy",
   });
+
+export const FINAL_CULL_PASS_MANIFESTS_BY_PROFESSION = buildFinalCullPassManifests(
+  FINAL_CULL_REPLACEMENT_MANIFESTS_BY_PROFESSION
+);
+
+export const FINAL_CULL_PASS_MANIFEST_COUNTS_BY_PROFESSION =
+  buildFinalCullPassManifestCounts(FINAL_CULL_PASS_MANIFESTS_BY_PROFESSION);
+
+export const FINAL_CULL_TRANSITION_PASS_MANIFESTS_BY_PROFESSION = buildFinalCullPassManifests(
+  FINAL_CULL_TRANSITION_REPLACEMENT_MANIFESTS_BY_PROFESSION
+);
+
+export const FINAL_CULL_TRANSITION_PASS_MANIFEST_COUNTS_BY_PROFESSION =
+  buildFinalCullPassManifestCounts(FINAL_CULL_TRANSITION_PASS_MANIFESTS_BY_PROFESSION);
+
+export const FINAL_CULL_LEGACY_PASS_MANIFESTS_BY_PROFESSION = buildFinalCullPassManifests(
+  FINAL_CULL_LEGACY_REPLACEMENT_MANIFESTS_BY_PROFESSION
+);
+
+export const FINAL_CULL_LEGACY_PASS_MANIFEST_COUNTS_BY_PROFESSION =
+  buildFinalCullPassManifestCounts(FINAL_CULL_LEGACY_PASS_MANIFESTS_BY_PROFESSION);
 
 export const SKILLS_BY_REALM: Record<MajorRealm, Skill[]> = Object.fromEntries(
   Object.entries(CORE_SKILL_SETS_BY_REALM).map(([realm, skills]) => [
