@@ -468,6 +468,7 @@
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的 timed plan，也已開始共用 `queueTimedCombatPlan(...)` 的 onQueue/execute 模型，battle timer orchestration 不再維持兩種樣板
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的 timed plan，現在也已共用同一個 `TimedCombatQueuePlan` 形狀，battle timer orchestration 不再拆成 world / replay 兩種資料結構
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的 timed plan 建構，現在也已進一步共用 `createTimedCombatPlan(...)`，queue payload 不再在兩條路徑各自手組
+- [x] `Adventure` 內 world strike 與舊戰報 replay 的 timer 清理，現在也已回到同一個 combat timer manager，world / replay 不再各自散寫 timer set 的清空邏輯
 - [x] `Adventure` 內 world strike 的 queue plan 現在也已直接使用 `createWorldStrikeQueuePlan(...)`，player / enemy 分支不再保留額外的 resolved plan wrapper
 - [x] 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再額外維護第二套 effect dispatch
 - [x] 舊戰報 replay 的逐步播片流程，也已開始抽成 `processBattleReplayStep(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...)`，log、snapshot 與特效派發不再直接塞在 replay effect 的定時器分支內
@@ -488,6 +489,7 @@
 - [x] `FINAL_CULL_TRANSITION_REMOVAL_POOL_IDS_BY_PROFESSION / FINAL_CULL_LEGACY_REMOVAL_POOL_IDS_BY_PROFESSION` 與對應 skill-level removal views 也已補齊，最後一批刪整現在可直接分成 transition pass 與 legacy pass 執行
 - [x] `FINAL_CULL_TRANSITION_REMOVAL_SKILLS_BY_PROFESSION / FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION` 與對應 replacement 視圖，現在也已開始共用 `buildRemovalSkillArtifacts(...)` 集中組裝
 - [x] 這批 `FINAL_CULL` 的 skill / pool / target / removal manifests，現在也已開始由共用 builder 集中組裝，不再在 `index.ts / pool.ts` 各自手拼多段近似的 `map / ids / counts` 樣板
+- [x] `FINAL_CULL_REPLACEMENT_MANIFESTS_BY_PROFESSION` 與對應 `transition / legacy` manifests 也已補齊，現在每個 replacement cluster 都可直接看到 `keepSkill / keepPool / removeSkills / removePools`
 - [x] 被動技能改成逐招專屬效果，而不是通用屬性加成
 
 ---

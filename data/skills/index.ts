@@ -51,6 +51,7 @@ import {
   TRANSITION_SKILL_POOL_REGISTRY,
   TRANSITION_SKILL_PROFESSION_POOLS,
   TRANSITION_SKILL_PROFESSION_POOLS_BY_REPLACEMENT,
+  type SkillPoolEntry,
 } from "./pool";
 
 const compareSkills = (left: Skill, right: Skill) => {
@@ -197,6 +198,54 @@ const buildRemovalSkillArtifacts = ({
     skillMapByProfession: buildSkillMapByProfession(skillsByProfession),
   };
 };
+
+export interface FinalCullReplacementManifest {
+  keepSkill?: Skill;
+  keepPool?: SkillPoolEntry;
+  removeSkills: Skill[];
+  removePools: SkillPoolEntry[];
+}
+
+const buildFinalCullReplacementManifests = ({
+  replacementPlansByProfession,
+  replacementTargetSkillMapByProfession,
+  removalSkillsByProfessionAndReplacement,
+  removalPoolPredicate,
+}: {
+  replacementPlansByProfession: Record<
+    ProfessionType,
+    Record<string, { keep?: SkillPoolEntry; remove: SkillPoolEntry[] }>
+  >;
+  replacementTargetSkillMapByProfession: Record<ProfessionType, Record<string, Skill>>;
+  removalSkillsByProfessionAndReplacement: Record<ProfessionType, Record<string, Skill[]>>;
+  removalPoolPredicate: (entry: SkillPoolEntry) => boolean;
+}) =>
+  Object.fromEntries(
+    Object.entries(replacementPlansByProfession).map(([profession, plans]) => [
+      profession,
+      Object.entries(plans).reduce<Record<string, FinalCullReplacementManifest>>(
+        (manifests, [replacementSkillId, plan]) => {
+          const typedProfession = profession as ProfessionType;
+          const removePools = plan.remove.filter(removalPoolPredicate);
+          const removeSkills =
+            removalSkillsByProfessionAndReplacement[typedProfession][replacementSkillId] ?? [];
+
+          if (removePools.length === 0 && removeSkills.length === 0) {
+            return manifests;
+          }
+
+          manifests[replacementSkillId] = {
+            keepSkill: replacementTargetSkillMapByProfession[typedProfession][replacementSkillId],
+            keepPool: plan.keep,
+            removeSkills,
+            removePools,
+          };
+          return manifests;
+        },
+        {}
+      ),
+    ])
+  ) as Record<ProfessionType, Record<string, FinalCullReplacementManifest>>;
 
 const mergeSkillGroupsByProfession = (
   left: Record<ProfessionType, Record<string, Skill[]>>,
@@ -605,6 +654,33 @@ export const FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION =
 
 export const FINAL_CULL_LEGACY_REMOVAL_SKILL_MAP_BY_PROFESSION =
   FINAL_CULL_LEGACY_REMOVAL_SKILL_ARTIFACTS.skillMapByProfession;
+
+export const FINAL_CULL_REPLACEMENT_MANIFESTS_BY_PROFESSION =
+  buildFinalCullReplacementManifests({
+    replacementPlansByProfession: FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION,
+    replacementTargetSkillMapByProfession: FINAL_CULL_REPLACEMENT_TARGET_SKILL_MAP_BY_PROFESSION,
+    removalSkillsByProfessionAndReplacement:
+      FINAL_CULL_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
+    removalPoolPredicate: () => true,
+  });
+
+export const FINAL_CULL_TRANSITION_REPLACEMENT_MANIFESTS_BY_PROFESSION =
+  buildFinalCullReplacementManifests({
+    replacementPlansByProfession: FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION,
+    replacementTargetSkillMapByProfession: FINAL_CULL_REPLACEMENT_TARGET_SKILL_MAP_BY_PROFESSION,
+    removalSkillsByProfessionAndReplacement:
+      FINAL_CULL_TRANSITION_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
+    removalPoolPredicate: (entry) => entry.poolStatus === "transition",
+  });
+
+export const FINAL_CULL_LEGACY_REPLACEMENT_MANIFESTS_BY_PROFESSION =
+  buildFinalCullReplacementManifests({
+    replacementPlansByProfession: FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION,
+    replacementTargetSkillMapByProfession: FINAL_CULL_REPLACEMENT_TARGET_SKILL_MAP_BY_PROFESSION,
+    removalSkillsByProfessionAndReplacement:
+      FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
+    removalPoolPredicate: (entry) => entry.poolStatus === "legacy",
+  });
 
 export const SKILLS_BY_REALM: Record<MajorRealm, Skill[]> = Object.fromEntries(
   Object.entries(CORE_SKILL_SETS_BY_REALM).map(([realm, skills]) => [

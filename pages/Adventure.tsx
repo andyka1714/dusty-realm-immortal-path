@@ -496,10 +496,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   // Cancel Battle on Unmount (Tab Switch)
   useEffect(() => {
     return () => {
-        worldActionTimersRef.current.forEach((timer) => clearTimeout(timer));
-        worldActionTimersRef.current.clear();
-        battleReplayTimersRef.current.forEach((timer) => clearTimeout(timer));
-        battleReplayTimersRef.current.clear();
+        clearAllCombatTimers();
         dispatch(cancelBattle());
     };
   }, [dispatch]);
@@ -532,13 +529,26 @@ export const Adventure: React.FC<AdventureProps> = ({
   const [playerSkillReadyAt, setPlayerSkillReadyAt] = useState(0);
   const [enemyActionReadyAtById, setEnemyActionReadyAtById] = useState<Record<string, number>>({});
   const [enemySpecialReadyAtById, setEnemySpecialReadyAtById] = useState<Record<string, number>>({});
-  const worldActionTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
-  const battleReplayTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+  type CombatTimerBucket = 'world' | 'replay';
+  const combatTimersRef = useRef<Record<CombatTimerBucket, Set<ReturnType<typeof setTimeout>>>>({
+    world: new Set(),
+    replay: new Set(),
+  });
   type TimedCombatQueuePlan = {
     delayMs: number | undefined;
     timerSet?: Set<ReturnType<typeof setTimeout>>;
     onQueue?: () => void;
     execute: () => void;
+  };
+
+  const clearCombatTimerBucket = (bucket: CombatTimerBucket) => {
+    combatTimersRef.current[bucket].forEach((timer) => clearTimeout(timer));
+    combatTimersRef.current[bucket].clear();
+  };
+
+  const clearAllCombatTimers = () => {
+    clearCombatTimerBucket('world');
+    clearCombatTimerBucket('replay');
   };
   
   // NPC Interaction State
@@ -702,8 +712,7 @@ export const Adventure: React.FC<AdventureProps> = ({
 
   useEffect(() => {
     if (worldCombatTargetId && !activeMonsters.some((monster) => monster.instanceId === worldCombatTargetId)) {
-      worldActionTimersRef.current.forEach((timer) => clearTimeout(timer));
-      worldActionTimersRef.current.clear();
+      clearCombatTimerBucket('world');
       setWorldCombatTargetId(null);
       setWorldCombatTargetStatuses([]);
       setWorldCombatPlayerStatuses([]);
@@ -714,8 +723,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   }, [activeMonsters, worldCombatTargetId]);
 
   const resetWorldCombatState = () => {
-    worldActionTimersRef.current.forEach((timer) => clearTimeout(timer));
-    worldActionTimersRef.current.clear();
+    clearCombatTimerBucket('world');
     setWorldCombatTargetId(null);
     setWorldCombatTargetStatuses([]);
     setWorldCombatPlayerStatuses([]);
@@ -728,8 +736,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   };
 
   const clearWorldEncounterState = () => {
-    worldActionTimersRef.current.forEach((timer) => clearTimeout(timer));
-    worldActionTimersRef.current.clear();
+    clearCombatTimerBucket('world');
     setWorldCombatTargetId(null);
     setWorldCombatTargetStatuses([]);
     setWorldCombatPlayerStatuses([]);
@@ -818,7 +825,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   }): TimedCombatQueuePlan =>
     createTimedCombatPlan({
       delayMs,
-      timerSet: worldActionTimersRef.current,
+      timerSet: combatTimersRef.current.world,
       onQueue: () => {
         applyCastEffect?.();
         applyPreview();
@@ -1364,7 +1371,7 @@ export const Adventure: React.FC<AdventureProps> = ({
 
     return createTimedCombatPlan({
       delayMs: replayDelay,
-      timerSet: battleReplayTimersRef.current,
+      timerSet: combatTimersRef.current.replay,
       execute: () => {
         processBattleReplayStep({
           nextLog,
@@ -2235,8 +2242,7 @@ export const Adventure: React.FC<AdventureProps> = ({
       // Reset ref when battle ends
       if (!isBattling) {
           battleProcessedRef.current = false;
-          battleReplayTimersRef.current.forEach((timer) => clearTimeout(timer));
-          battleReplayTimersRef.current.clear();
+          clearCombatTimerBucket('replay');
           setDisplayedLogs([]);
           setReplayQueue([]);
           setIsReplayingBattle(false);
