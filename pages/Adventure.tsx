@@ -18,7 +18,7 @@ import {
   getBattleRespawnMapId,
   queueTimedCombatPlan,
   resolveWorldPlayerDefeatOutcome,
-  resolveAutoBattleReplayLifecycle,
+  resolveAutoBattleReplayTransition,
   resolveWorldCombatAutoTarget,
   resolveWorldBattleResultCleanup,
   resolvePlayerWorldStrike,
@@ -1213,14 +1213,6 @@ export const Adventure: React.FC<AdventureProps> = ({
     setIsReplayingBattle(true);
   };
 
-  const beginAutoBattleReplaySession = ({
-    playerStats,
-    enemy,
-  }: {
-    playerStats: ReturnType<typeof calculatePlayerStats>;
-    enemy: Enemy;
-  }) => startBattleReplaySession(createAutoBattleReplaySession(playerStats, enemy));
-
   const executePlayerWorldStrike = ({
     strike,
     chosenSkill,
@@ -1956,16 +1948,30 @@ export const Adventure: React.FC<AdventureProps> = ({
   }, [displayedLogs, isReplayingBattle, lastBattleResult]);
 
   useEffect(() => {
-      const replayLifecycle = resolveAutoBattleReplayLifecycle({
+      const replayTransition = resolveAutoBattleReplayTransition({
           isBattling,
           hasCurrentEnemy: Boolean(currentEnemy),
           lastBattleResult,
           replayProcessed: battleProcessedRef.current,
+          createReplaySession: currentEnemy
+            ? () => {
+                const playerStats = calculatePlayerStats(
+                  attributes,
+                  majorRealm,
+                  spiritRootId,
+                  equipmentStats,
+                  character.name,
+                  profession,
+                  character.skills
+                );
+                return createAutoBattleReplaySession(playerStats, currentEnemy);
+              }
+            : undefined,
       });
 
-      battleProcessedRef.current = replayLifecycle.nextProcessed;
+      battleProcessedRef.current = replayTransition.nextProcessed;
 
-      if (replayLifecycle.shouldResetReplay) {
+      if (replayTransition.kind === 'reset') {
           battleProcessedRef.current = false;
           clearCombatTimerBucket(combatTimersRef.current, 'replay');
           setDisplayedLogs([]);
@@ -1975,18 +1981,8 @@ export const Adventure: React.FC<AdventureProps> = ({
           return;
       }
 
-      if (replayLifecycle.shouldStartReplay && currentEnemy) {
-          // Calculate Stats
-          const playerStats = calculatePlayerStats(
-            attributes,
-            majorRealm,
-            spiritRootId,
-            equipmentStats,
-            character.name,
-            profession,
-            character.skills
-          );
-          beginAutoBattleReplaySession({ playerStats, enemy: currentEnemy });
+      if (replayTransition.kind === 'start') {
+          startBattleReplaySession(replayTransition.session);
       }
   }, [isBattling, currentEnemy, lastBattleResult, character, dispatch]);
 

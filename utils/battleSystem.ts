@@ -151,6 +151,21 @@ export interface AutoBattleReplayLifecycle {
   nextProcessed: boolean;
 }
 
+export type AutoBattleReplayTransition<TSession> =
+  | {
+      kind: "idle";
+      nextProcessed: boolean;
+    }
+  | {
+      kind: "reset";
+      nextProcessed: false;
+    }
+  | {
+      kind: "start";
+      nextProcessed: true;
+      session: TSession;
+    };
+
 export interface WorldBattleResultCleanup {
   shouldClearTargetMonster: boolean;
   shouldClearAutoMovePath: boolean;
@@ -206,6 +221,50 @@ export const resolveAutoBattleReplayLifecycle = ({
     shouldResetReplay: false,
     shouldStartReplay: false,
     nextProcessed: replayProcessed,
+  };
+};
+
+export const resolveAutoBattleReplayTransition = <TSession>({
+  isBattling,
+  hasCurrentEnemy,
+  lastBattleResult,
+  replayProcessed,
+  createReplaySession,
+}: {
+  isBattling: boolean;
+  hasCurrentEnemy: boolean;
+  lastBattleResult: string | null;
+  replayProcessed: boolean;
+  createReplaySession?: () => TSession | undefined;
+}): AutoBattleReplayTransition<TSession> => {
+  const replayLifecycle = resolveAutoBattleReplayLifecycle({
+    isBattling,
+    hasCurrentEnemy,
+    lastBattleResult,
+    replayProcessed,
+  });
+
+  if (replayLifecycle.shouldResetReplay) {
+    return {
+      kind: "reset",
+      nextProcessed: false,
+    };
+  }
+
+  if (replayLifecycle.shouldStartReplay) {
+    const session = createReplaySession?.();
+    if (session) {
+      return {
+        kind: "start",
+        nextProcessed: true,
+        session,
+      };
+    }
+  }
+
+  return {
+    kind: "idle",
+    nextProcessed: replayLifecycle.nextProcessed,
   };
 };
 

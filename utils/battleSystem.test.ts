@@ -29,6 +29,7 @@ import {
   queueTimedCombatPlan,
   resolveAutoBattleReplayOutcome,
   resolveAutoBattleReplayLifecycle,
+  resolveAutoBattleReplayTransition,
   resolveWorldBattleResultCleanup,
   resolveWorldPlayerDefeatOutcome,
   resolveWorldCombatAutoTarget,
@@ -700,6 +701,32 @@ describe("battle system balance", () => {
         shouldResetReplay: false,
         shouldStartReplay: true,
         nextProcessed: true,
+      });
+
+      expect(
+        resolveAutoBattleReplayTransition({
+          isBattling: true,
+          hasCurrentEnemy: true,
+          lastBattleResult: null,
+          replayProcessed: false,
+          createReplaySession: () => ({ session: "ready" }),
+        })
+      ).toEqual({
+        kind: "start",
+        nextProcessed: true,
+        session: { session: "ready" },
+      });
+
+      expect(
+        resolveAutoBattleReplayTransition({
+          isBattling: false,
+          hasCurrentEnemy: false,
+          lastBattleResult: null,
+          replayProcessed: true,
+        })
+      ).toEqual({
+        kind: "reset",
+        nextProcessed: false,
       });
 
       expect(
