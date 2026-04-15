@@ -108,6 +108,7 @@
 - battle timer bucket 與 replay 啟動 / 重置判定，現在也已開始共用 `createCombatTimerBuckets(...) / clearCombatTimerBucket(...) / clearAllCombatTimers(...) / resolveAutoBattleReplayLifecycle(...)`，頁面不再自己維護 world / replay timer manager 與 replay start/reset 條件
 - live world defeat 的回城地點、重生座標與提示文案，現在也已開始共用 `resolveWorldPlayerDefeatOutcome(...)`，頁面不再自己手寫敗北 outcome
 - replay 完成時的勝敗、擊殺目標與回城規則，現在也已開始共用 `resolveAutoBattleReplayOutcome(...) / getBattleRespawnMapId(...)`，頁面不再自己重算 defeated monster 與 replay defeat respawn 判定
+- 戰報自動收起延遲與戰後 world state cleanup，現在也已開始共用 `getBattleReportAutoCloseDelayMs(...) / resolveWorldBattleResultCleanup(...)`，頁面不再自己散寫 auto-close 與清 target/path/auto-battle 條件
 - `Adventure` 內 live world kill 與 replay finish 的獎勵套用，現在也已開始共用 `applyBattleRewards(...)`，即時戰鬥與時間軸回放不再各自維護兩套發獎字串與掉落派發流程
 - replay 敗北回城的復活點判定，也已對齊 live world defeat 的 `getBattleRespawnMapId()` 規則，不再出現同一場景 live / replay 回城地點不一致
 - `Adventure` 內 player / enemy world strike 與 replay step 的 visual payload，也已開始共用 `WorldStrikeVisualPlan` 路徑；live / replay 不再各自手拼 projectile、area 與 impact payload

@@ -20,6 +20,7 @@ import {
   createTimedCombatPlan,
   createAutoBattleReplaySession,
   createWorldStrikeQueuePlan,
+  getBattleReportAutoCloseDelayMs,
   getBattleRespawnMapId,
   getResolvedEnemySpecialCooldownSeconds,
   getResolvedSkillCooldownSeconds,
@@ -28,6 +29,7 @@ import {
   queueTimedCombatPlan,
   resolveAutoBattleReplayOutcome,
   resolveAutoBattleReplayLifecycle,
+  resolveWorldBattleResultCleanup,
   resolveWorldPlayerDefeatOutcome,
   resolveWorldCombatActionWindow,
   resolveEnemyWorldStrike,
@@ -531,6 +533,46 @@ describe("battle system balance", () => {
         shouldResetReplay: false,
         shouldStartReplay: true,
         nextProcessed: true,
+      });
+
+      expect(
+        getBattleReportAutoCloseDelayMs({
+          lastBattleResult: "won",
+          isReplayingBattle: false,
+          isAutoBattling: true,
+        })
+      ).toBe(1500);
+
+      expect(
+        getBattleReportAutoCloseDelayMs({
+          lastBattleResult: "lost",
+          isReplayingBattle: false,
+          isAutoBattling: false,
+        })
+      ).toBe(2200);
+
+      expect(
+        getBattleReportAutoCloseDelayMs({
+          lastBattleResult: "won",
+          isReplayingBattle: true,
+          isAutoBattling: true,
+        })
+      ).toBeNull();
+
+      expect(
+        resolveWorldBattleResultCleanup({ lastBattleResult: "lost" })
+      ).toEqual({
+        shouldClearTargetMonster: true,
+        shouldClearAutoMovePath: true,
+        shouldStopAutoBattle: true,
+      });
+
+      expect(
+        resolveWorldBattleResultCleanup({ lastBattleResult: "won" })
+      ).toEqual({
+        shouldClearTargetMonster: false,
+        shouldClearAutoMovePath: true,
+        shouldStopAutoBattle: false,
       });
     } finally {
       vi.useRealTimers();

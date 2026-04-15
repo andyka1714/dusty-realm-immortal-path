@@ -40,6 +40,7 @@
 - battle timer bucket 與 replay 啟動 / 重置判定，現在也已開始共用 `createCombatTimerBuckets(...) / clearCombatTimerBucket(...) / clearAllCombatTimers(...) / resolveAutoBattleReplayLifecycle(...)`，頁面不再自己維護 world / replay timer manager 與 replay lifecycle gate
 - live world defeat 的回城地點、重生座標與提示文案，現在也已開始共用 `resolveWorldPlayerDefeatOutcome(...)`，頁面不再自己手寫敗北 outcome
 - replay 完成時的勝敗、擊殺目標與回城規則，現在也已開始共用 `resolveAutoBattleReplayOutcome(...) / getBattleRespawnMapId(...)`，頁面不再自己重算 replay defeat respawn 與 defeated monster
+- 戰報自動收起延遲與戰後 world state cleanup，現在也已開始共用 `getBattleReportAutoCloseDelayMs(...) / resolveWorldBattleResultCleanup(...)`，頁面不再自己散寫 auto-close 與清 target/path/auto-battle 條件
 - `Adventure` 內舊戰報 replay 的 visual payload 也已開始共用 `createBattleReplayVisualPlan(...)`，attack / damage visual dispatch 不再在 replay step 內直接拼裝輸入
 - `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，現在也已開始共用 `queueTimedCombatPlan(...)`，不再各自維護一套 `setTimeout` 流程
 - `Adventure` 內 player / enemy world strike 的 resolve + queue 串接，現在也已開始共用 `runResolvedWorldStrikeAction(...)`，live 分支不再同時維護 resolve 與 queue 細節

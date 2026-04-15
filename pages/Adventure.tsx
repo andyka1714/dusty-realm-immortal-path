@@ -14,11 +14,13 @@ import {
   createAutoBattleReplaySession,
   createWorldStrikeQueuePlan,
   calculatePlayerStats,
+  getBattleReportAutoCloseDelayMs,
   getBattleRespawnMapId,
   queueTimedCombatPlan,
   resolveWorldPlayerDefeatOutcome,
   resolveAutoBattleReplayOutcome,
   resolveAutoBattleReplayLifecycle,
+  resolveWorldBattleResultCleanup,
   resolveWorldCombatActionWindow,
   resolvePlayerWorldStrike,
   resolveEnemyWorldStrike,
@@ -1769,35 +1771,26 @@ export const Adventure: React.FC<AdventureProps> = ({
       }
   }, [isAutoBattling, isBattling, targetMonsterId, activeMonsters, playerPosition, showIntro]);
 
-  // 2. Auto-Close Battle Report
   useEffect(() => {
-      if (isAutoBattling && lastBattleResult) {
-          const timer = setTimeout(() => {
-              dispatch(closeBattleReport());
-          }, 1500); // 1.5s delay to see loot
-          return () => clearTimeout(timer);
-      }
-  }, [isAutoBattling, lastBattleResult, dispatch]);
-
-  useEffect(() => {
-      if (!lastBattleResult || isReplayingBattle) return;
+      const autoCloseDelayMs = getBattleReportAutoCloseDelayMs({
+          lastBattleResult,
+          isReplayingBattle,
+          isAutoBattling,
+      });
+      if (autoCloseDelayMs === null) return;
 
       const timer = setTimeout(() => {
           dispatch(closeBattleReport());
-      }, isAutoBattling ? 1500 : 2200);
+      }, autoCloseDelayMs);
 
       return () => clearTimeout(timer);
   }, [lastBattleResult, isReplayingBattle, isAutoBattling, dispatch]);
 
-  // 3. Handle Battle Result (Clear State on Loss)
   useEffect(() => {
-      if (lastBattleResult === 'lost') {
-          setTargetMonsterId(null);
-          setAutoMovePath([]);
-          setIsAutoBattling(false);
-      } else if (lastBattleResult === 'won') {
-         setAutoMovePath([]); 
-      }
+      const cleanup = resolveWorldBattleResultCleanup({ lastBattleResult });
+      if (cleanup.shouldClearTargetMonster) setTargetMonsterId(null);
+      if (cleanup.shouldClearAutoMovePath) setAutoMovePath([]);
+      if (cleanup.shouldStopAutoBattle) setIsAutoBattling(false);
   }, [lastBattleResult]);
 
   // Keyboard Controls
