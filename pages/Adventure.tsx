@@ -8,6 +8,9 @@ import { ITEMS } from '../data/items';
 import { QUESTS } from '../data/quests';
 import { enterMap, movePlayer, tickMonsters, applyWorldDamageToMonster, resolveBattle, closeBattleReport, cancelBattle, markMapVisited, addVisualEffect } from '../store/slices/adventureSlice';
 import {
+  clearAllCombatTimers,
+  clearCombatTimerBucket,
+  createCombatTimerBuckets,
   createAutoBattleReplaySession,
   createWorldStrikeQueuePlan,
   calculatePlayerStats,
@@ -15,6 +18,7 @@ import {
   queueTimedCombatPlan,
   resolveWorldPlayerDefeatOutcome,
   resolveAutoBattleReplayOutcome,
+  resolveAutoBattleReplayLifecycle,
   resolveWorldCombatActionWindow,
   resolvePlayerWorldStrike,
   resolveEnemyWorldStrike,
@@ -511,7 +515,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   // Cancel Battle on Unmount (Tab Switch)
   useEffect(() => {
     return () => {
-        clearAllCombatTimers();
+        clearAllCombatTimers(combatTimersRef.current);
         dispatch(cancelBattle());
     };
   }, [dispatch]);
@@ -544,21 +548,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   const [playerSkillReadyAt, setPlayerSkillReadyAt] = useState(0);
   const [enemyActionReadyAtById, setEnemyActionReadyAtById] = useState<Record<string, number>>({});
   const [enemySpecialReadyAtById, setEnemySpecialReadyAtById] = useState<Record<string, number>>({});
-  type CombatTimerBucket = 'world' | 'replay';
-  const combatTimersRef = useRef<Record<CombatTimerBucket, Set<ReturnType<typeof setTimeout>>>>({
-    world: new Set(),
-    replay: new Set(),
-  });
-
-  const clearCombatTimerBucket = (bucket: CombatTimerBucket) => {
-    combatTimersRef.current[bucket].forEach((timer) => clearTimeout(timer));
-    combatTimersRef.current[bucket].clear();
-  };
-
-  const clearAllCombatTimers = () => {
-    clearCombatTimerBucket('world');
-    clearCombatTimerBucket('replay');
-  };
+  const combatTimersRef = useRef(createCombatTimerBuckets());
   
   // NPC Interaction State
   const [interactingNPC, setInteractingNPC] = useState<NPC | null>(null);
@@ -721,7 +711,7 @@ export const Adventure: React.FC<AdventureProps> = ({
 
   useEffect(() => {
     if (worldCombatTargetId && !activeMonsters.some((monster) => monster.instanceId === worldCombatTargetId)) {
-      clearCombatTimerBucket('world');
+      clearCombatTimerBucket(combatTimersRef.current, 'world');
       setWorldCombatTargetId(null);
       setWorldCombatTargetStatuses([]);
       setWorldCombatPlayerStatuses([]);
@@ -732,7 +722,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   }, [activeMonsters, worldCombatTargetId]);
 
   const resetWorldCombatState = () => {
-    clearCombatTimerBucket('world');
+    clearCombatTimerBucket(combatTimersRef.current, 'world');
     setWorldCombatTargetId(null);
     setWorldCombatTargetStatuses([]);
     setWorldCombatPlayerStatuses([]);
@@ -745,7 +735,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   };
 
   const clearWorldEncounterState = () => {
-    clearCombatTimerBucket('world');
+    clearCombatTimerBucket(combatTimersRef.current, 'world');
     setWorldCombatTargetId(null);
     setWorldCombatTargetStatuses([]);
     setWorldCombatPlayerStatuses([]);
@@ -2006,10 +1996,18 @@ export const Adventure: React.FC<AdventureProps> = ({
   }, [displayedLogs, isReplayingBattle, lastBattleResult]);
 
   useEffect(() => {
-      // Reset ref when battle ends
-      if (!isBattling) {
+      const replayLifecycle = resolveAutoBattleReplayLifecycle({
+          isBattling,
+          hasCurrentEnemy: Boolean(currentEnemy),
+          lastBattleResult,
+          replayProcessed: battleProcessedRef.current,
+      });
+
+      battleProcessedRef.current = replayLifecycle.nextProcessed;
+
+      if (replayLifecycle.shouldResetReplay) {
           battleProcessedRef.current = false;
-          clearCombatTimerBucket('replay');
+          clearCombatTimerBucket(combatTimersRef.current, 'replay');
           setDisplayedLogs([]);
           setReplayQueue([]);
           setIsReplayingBattle(false);
@@ -2017,8 +2015,7 @@ export const Adventure: React.FC<AdventureProps> = ({
           return;
       }
 
-      if (isBattling && currentEnemy && !lastBattleResult && !battleProcessedRef.current) {
-          battleProcessedRef.current = true;
+      if (replayLifecycle.shouldStartReplay && currentEnemy) {
           // Calculate Stats
           const playerStats = calculatePlayerStats(
             attributes,

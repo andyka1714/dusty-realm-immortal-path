@@ -11,6 +11,9 @@ import {
 } from "../types";
 import {
   advanceAutoBattleReplaySession,
+  clearAllCombatTimers,
+  clearCombatTimerBucket,
+  createCombatTimerBuckets,
   createBattleReplayStepPlan,
   calculatePlayerStats,
   createResolvedWorldStrikeActionPlan,
@@ -24,6 +27,7 @@ import {
   getSkillTimelineProfile,
   queueTimedCombatPlan,
   resolveAutoBattleReplayOutcome,
+  resolveAutoBattleReplayLifecycle,
   resolveWorldPlayerDefeatOutcome,
   resolveWorldCombatActionWindow,
   resolveEnemyWorldStrike,
@@ -486,6 +490,48 @@ describe("battle system balance", () => {
 
       expect(blockedTimer).toBeUndefined();
       expect(calls).not.toContain("resolve:blocked");
+
+      const timerBuckets = createCombatTimerBuckets();
+      const timerA = setTimeout(() => calls.push("timer:world"), 10);
+      const timerB = setTimeout(() => calls.push("timer:replay"), 10);
+      timerBuckets.world.add(timerA);
+      timerBuckets.replay.add(timerB);
+      expect(timerBuckets.world.size).toBe(1);
+      expect(timerBuckets.replay.size).toBe(1);
+
+      clearCombatTimerBucket(timerBuckets, "world");
+      expect(timerBuckets.world.size).toBe(0);
+      expect(timerBuckets.replay.size).toBe(1);
+
+      clearAllCombatTimers(timerBuckets);
+      expect(timerBuckets.world.size).toBe(0);
+      expect(timerBuckets.replay.size).toBe(0);
+
+      expect(
+        resolveAutoBattleReplayLifecycle({
+          isBattling: false,
+          hasCurrentEnemy: false,
+          lastBattleResult: null,
+          replayProcessed: true,
+        })
+      ).toEqual({
+        shouldResetReplay: true,
+        shouldStartReplay: false,
+        nextProcessed: false,
+      });
+
+      expect(
+        resolveAutoBattleReplayLifecycle({
+          isBattling: true,
+          hasCurrentEnemy: true,
+          lastBattleResult: null,
+          replayProcessed: false,
+        })
+      ).toEqual({
+        shouldResetReplay: false,
+        shouldStartReplay: true,
+        nextProcessed: true,
+      });
     } finally {
       vi.useRealTimers();
     }

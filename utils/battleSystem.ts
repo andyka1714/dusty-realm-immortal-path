@@ -124,6 +124,70 @@ export interface WorldCombatActionWindow {
   shouldEnemyAct: boolean;
 }
 
+export type CombatTimerBucket = "world" | "replay";
+export type CombatTimerBuckets = Record<
+  CombatTimerBucket,
+  Set<ReturnType<typeof setTimeout>>
+>;
+
+export interface AutoBattleReplayLifecycle {
+  shouldResetReplay: boolean;
+  shouldStartReplay: boolean;
+  nextProcessed: boolean;
+}
+
+export const createCombatTimerBuckets = (): CombatTimerBuckets => ({
+  world: new Set(),
+  replay: new Set(),
+});
+
+export const clearCombatTimerBucket = (
+  timerBuckets: CombatTimerBuckets,
+  bucket: CombatTimerBucket
+) => {
+  timerBuckets[bucket].forEach((timer) => clearTimeout(timer));
+  timerBuckets[bucket].clear();
+};
+
+export const clearAllCombatTimers = (timerBuckets: CombatTimerBuckets) => {
+  clearCombatTimerBucket(timerBuckets, "world");
+  clearCombatTimerBucket(timerBuckets, "replay");
+};
+
+export const resolveAutoBattleReplayLifecycle = ({
+  isBattling,
+  hasCurrentEnemy,
+  lastBattleResult,
+  replayProcessed,
+}: {
+  isBattling: boolean;
+  hasCurrentEnemy: boolean;
+  lastBattleResult: string | null;
+  replayProcessed: boolean;
+}): AutoBattleReplayLifecycle => {
+  if (!isBattling) {
+    return {
+      shouldResetReplay: true,
+      shouldStartReplay: false,
+      nextProcessed: false,
+    };
+  }
+
+  if (hasCurrentEnemy && !lastBattleResult && !replayProcessed) {
+    return {
+      shouldResetReplay: false,
+      shouldStartReplay: true,
+      nextProcessed: true,
+    };
+  }
+
+  return {
+    shouldResetReplay: false,
+    shouldStartReplay: false,
+    nextProcessed: replayProcessed,
+  };
+};
+
 export const scheduleTimedCombatAction = ({
   delayMs,
   execute,
