@@ -26,8 +26,11 @@ import {
   FINAL_CULL_SKILL_PROFESSION_POOLS,
   FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT,
   FINAL_CULL_REPLACEMENT_TARGET_IDS_BY_PROFESSION,
+  FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION,
   FINAL_CULL_REPLACEMENT_TARGET_POOL_MAP_BY_PROFESSION,
   FINAL_CULL_REPLACEMENT_TARGET_POOLS_BY_PROFESSION,
+  FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION,
+  FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT,
   getSkillPoolEntry,
   LEGACY_SKILL_POOL_REGISTRY,
   LEGACY_SKILL_PROFESSION_POOLS,
@@ -122,21 +125,27 @@ const mergeSkillGroupsByProfession = (
   left: Record<ProfessionType, Record<string, Skill[]>>,
   right: Record<ProfessionType, Record<string, Skill[]>>
 ) =>
-  ({
-    [ProfessionType.None]: {},
-    [ProfessionType.Sword]: {
-      ...left[ProfessionType.Sword],
-      ...right[ProfessionType.Sword],
-    },
-    [ProfessionType.Body]: {
-      ...left[ProfessionType.Body],
-      ...right[ProfessionType.Body],
-    },
-    [ProfessionType.Mage]: {
-      ...left[ProfessionType.Mage],
-      ...right[ProfessionType.Mage],
-    },
-  }) as Record<ProfessionType, Record<string, Skill[]>>;
+  Object.fromEntries(
+    [ProfessionType.None, ProfessionType.Sword, ProfessionType.Body, ProfessionType.Mage].map(
+      (profession) => [
+        profession,
+        Object.fromEntries(
+          Array.from(
+            new Set([
+              ...Object.keys(left[profession] ?? {}),
+              ...Object.keys(right[profession] ?? {}),
+            ])
+          ).map((replacementSkillId) => [
+            replacementSkillId,
+            [
+              ...(left[profession]?.[replacementSkillId] ?? []),
+              ...(right[profession]?.[replacementSkillId] ?? []),
+            ],
+          ])
+        ),
+      ]
+    )
+  ) as Record<ProfessionType, Record<string, Skill[]>>;
 
 const getDefaultRealtimeShape = (
   skill: Skill
@@ -433,14 +442,14 @@ export const MERGE_READY_LEGACY_SKILLS_BY_PROFESSION =
   buildFlattenedSkillViewsByProfession(MERGE_READY_LEGACY_SKILL_GROUPS_BY_PROFESSION);
 
 export const FINAL_CULL_SKILL_GROUPS_BY_PROFESSION = {
-  transition: MERGE_READY_TRANSITION_SKILL_GROUPS_BY_PROFESSION,
-  legacy: MERGE_READY_LEGACY_SKILL_GROUPS_BY_PROFESSION,
+  transition: TRANSITION_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
+  legacy: LEGACY_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
 } as const;
 
 export const FINAL_CULL_SKILLS_BY_PROFESSION_AND_REPLACEMENT =
   mergeSkillGroupsByProfession(
-    MERGE_READY_TRANSITION_SKILL_GROUPS_BY_PROFESSION,
-    MERGE_READY_LEGACY_SKILL_GROUPS_BY_PROFESSION
+    TRANSITION_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
+    LEGACY_SKILLS_BY_PROFESSION_AND_REPLACEMENT
   );
 
 export const FINAL_CULL_SKILLS_BY_PROFESSION =
@@ -562,8 +571,11 @@ export {
   FINAL_CULL_SKILL_PROFESSION_POOLS,
   FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT,
   FINAL_CULL_REPLACEMENT_TARGET_IDS_BY_PROFESSION,
+  FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION,
   FINAL_CULL_REPLACEMENT_TARGET_POOL_MAP_BY_PROFESSION,
   FINAL_CULL_REPLACEMENT_TARGET_POOLS_BY_PROFESSION,
+  FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION,
+  FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT,
   LEGACY_SKILL_POOL_REGISTRY,
   LEGACY_SKILL_PROFESSION_POOLS,
   LEGACY_SKILL_PROFESSION_POOLS_BY_REPLACEMENT,

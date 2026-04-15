@@ -164,21 +164,27 @@ const mergeEntryGroupsByProfession = (
   left: Record<ProfessionType, Record<string, SkillPoolEntry[]>>,
   right: Record<ProfessionType, Record<string, SkillPoolEntry[]>>
 ) =>
-  ({
-    [ProfessionType.None]: {},
-    [ProfessionType.Sword]: {
-      ...left[ProfessionType.Sword],
-      ...right[ProfessionType.Sword],
-    },
-    [ProfessionType.Body]: {
-      ...left[ProfessionType.Body],
-      ...right[ProfessionType.Body],
-    },
-    [ProfessionType.Mage]: {
-      ...left[ProfessionType.Mage],
-      ...right[ProfessionType.Mage],
-    },
-  }) as Record<ProfessionType, Record<string, SkillPoolEntry[]>>;
+  Object.fromEntries(
+    [ProfessionType.None, ProfessionType.Sword, ProfessionType.Body, ProfessionType.Mage].map(
+      (profession) => [
+        profession,
+        Object.fromEntries(
+          Array.from(
+            new Set([
+              ...Object.keys(left[profession] ?? {}),
+              ...Object.keys(right[profession] ?? {}),
+            ])
+          ).map((replacementSkillId) => [
+            replacementSkillId,
+            [
+              ...(left[profession]?.[replacementSkillId] ?? []),
+              ...(right[profession]?.[replacementSkillId] ?? []),
+            ],
+          ])
+        ),
+      ]
+    )
+  ) as Record<ProfessionType, Record<string, SkillPoolEntry[]>>;
 
 const buildFlattenedEntryViewsByProfession = (
   groupsByProfession: Record<ProfessionType, Record<string, SkillPoolEntry[]>>
@@ -245,6 +251,27 @@ const buildReplacementTargetEntriesByProfession = (
     ])
   ) as Record<ProfessionType, SkillPoolEntry[]>;
 
+const buildReplacementPlanByProfession = (
+  groupsByProfession: Record<ProfessionType, Record<string, SkillPoolEntry[]>>
+) =>
+  Object.fromEntries(
+    Object.entries(groupsByProfession).map(([profession, groups]) => [
+      profession,
+      Object.fromEntries(
+        Object.entries(groups).map(([replacementSkillId, entries]) => [
+          replacementSkillId,
+          {
+            keep: SKILL_POOL_REGISTRY[replacementSkillId],
+            remove: entries.filter((entry) => entry.skillId !== replacementSkillId),
+          },
+        ])
+      ),
+    ])
+  ) as Record<
+    ProfessionType,
+    Record<string, { keep?: SkillPoolEntry; remove: SkillPoolEntry[] }>
+  >;
+
 export const SKILL_POOL_REGISTRY: Record<string, SkillPoolEntry> =
   buildSkillPoolRegistry(SKILL_POOL_ENTRIES_BY_PROFESSION);
 
@@ -309,13 +336,13 @@ export const MERGE_READY_LEGACY_SKILL_POOL_GROUPS_BY_PROFESSION =
   buildMergeReadyEntryGroupsByProfession(LEGACY_SKILL_PROFESSION_POOLS_BY_REPLACEMENT);
 
 export const FINAL_CULL_SKILL_POOL_GROUPS_BY_PROFESSION = {
-  transition: MERGE_READY_TRANSITION_SKILL_POOL_GROUPS_BY_PROFESSION,
-  legacy: MERGE_READY_LEGACY_SKILL_POOL_GROUPS_BY_PROFESSION,
+  transition: TRANSITION_SKILL_PROFESSION_POOLS_BY_REPLACEMENT,
+  legacy: LEGACY_SKILL_PROFESSION_POOLS_BY_REPLACEMENT,
 } as const;
 
 export const FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT = mergeEntryGroupsByProfession(
-  MERGE_READY_TRANSITION_SKILL_POOL_GROUPS_BY_PROFESSION,
-  MERGE_READY_LEGACY_SKILL_POOL_GROUPS_BY_PROFESSION
+  TRANSITION_SKILL_PROFESSION_POOLS_BY_REPLACEMENT,
+  LEGACY_SKILL_PROFESSION_POOLS_BY_REPLACEMENT
 );
 
 export const FINAL_CULL_SKILL_PROFESSION_POOLS =
@@ -377,6 +404,29 @@ export const FINAL_CULL_REPLACEMENT_TARGET_IDS_BY_PROFESSION = Object.fromEntrie
   Object.entries(FINAL_CULL_REPLACEMENT_TARGET_POOLS_BY_PROFESSION).map(([profession, entries]) => [
     profession,
     entries.map((entry) => entry.skillId),
+  ])
+) as Record<ProfessionType, string[]>;
+
+export const FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION = buildReplacementPlanByProfession(
+  FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT
+);
+
+export const FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT = Object.fromEntries(
+  Object.entries(FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION).map(([profession, plans]) => [
+    profession,
+    Object.fromEntries(
+      Object.entries(plans).map(([replacementSkillId, plan]) => [
+        replacementSkillId,
+        plan.remove.map((entry) => entry.skillId),
+      ])
+    ),
+  ])
+) as Record<ProfessionType, Record<string, string[]>>;
+
+export const FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION = Object.fromEntries(
+  Object.entries(FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION).map(([profession, plans]) => [
+    profession,
+    Object.values(plans).flatMap((plan) => plan.remove.map((entry) => entry.skillId)),
   ])
 ) as Record<ProfessionType, string[]>;
 

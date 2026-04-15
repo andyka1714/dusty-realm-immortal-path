@@ -814,6 +814,30 @@ export const Adventure: React.FC<AdventureProps> = ({
     buildPlan: (strike: TStrike) => TimedCombatQueuePlan;
   }) => buildPlan(resolveStrike());
 
+  const createResolvedWorldStrikeQueuePlan = <TStrike,>({
+    resolveStrike,
+    delayMs,
+    applyCastEffect,
+    applyPreview,
+    execute,
+  }: {
+    resolveStrike: () => TStrike;
+    delayMs: (strike: TStrike) => number | undefined;
+    applyCastEffect?: (strike: TStrike) => void;
+    applyPreview: (strike: TStrike) => void;
+    execute: (strike: TStrike) => void;
+  }) =>
+    resolveWorldStrikeQueuePlan({
+      resolveStrike,
+      buildPlan: (strike) =>
+        createWorldStrikeQueuePlan({
+          delayMs: delayMs(strike),
+          applyCastEffect: applyCastEffect ? () => applyCastEffect(strike) : undefined,
+          applyPreview: () => applyPreview(strike),
+          execute: () => execute(strike),
+        }),
+    });
+
   const queueResolvedCombatPlan = (
     resolvePlan: () => TimedCombatQueuePlan | undefined
   ) => {
@@ -1693,29 +1717,26 @@ export const Adventure: React.FC<AdventureProps> = ({
         const chosenSkill = useSkill && primaryActiveSkill && now >= playerSkillReadyAt
           ? primaryActiveSkill
           : undefined;
-        return resolveWorldStrikeQueuePlan({
+        return createResolvedWorldStrikeQueuePlan({
           resolveStrike: () => resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill),
-          buildPlan: (strike) =>
-            createWorldStrikeQueuePlan({
-              delayMs: strike.executionTimeMs,
-              applyCastEffect: () => dispatchPlayerWorldStrikeCastEffect({ chosenSkill, strike }),
-              applyPreview: () => {
-                setWorldCombatTargetId(targetedMonster.instanceId);
-                applyPlayerWorldStrikePreview({
-                  now,
-                  strike,
-                  chosenSkill,
-                  targetName: targetedMonster.name,
-                });
-              },
-              execute: () =>
-                executePlayerWorldStrike({
-                  strike,
-                  chosenSkill,
-                  targetedMonster,
-                  activeMonsters,
-                  mapEnemies: mapData?.enemies,
-                }),
+          delayMs: (strike) => strike.executionTimeMs,
+          applyCastEffect: (strike) => dispatchPlayerWorldStrikeCastEffect({ chosenSkill, strike }),
+          applyPreview: (strike) => {
+            setWorldCombatTargetId(targetedMonster.instanceId);
+            applyPlayerWorldStrikePreview({
+              now,
+              strike,
+              chosenSkill,
+              targetName: targetedMonster.name,
+            });
+          },
+          execute: (strike) =>
+            executePlayerWorldStrike({
+              strike,
+              chosenSkill,
+              targetedMonster,
+              activeMonsters,
+              mapEnemies: mapData?.enemies,
             }),
         });
       },
@@ -1728,22 +1749,19 @@ export const Adventure: React.FC<AdventureProps> = ({
     performQueuedWorldStrikeAction({
       resolvePlan: (now) => {
         const canUseSpecial = now >= (enemySpecialReadyAtById[enemyInstanceId] ?? 0);
-        return resolveWorldStrikeQueuePlan({
+        return createResolvedWorldStrikeQueuePlan({
           resolveStrike: () => resolveEnemyWorldStrike(enemyTemplate, playerStats, canUseSpecial),
-          buildPlan: (strike) =>
-            createWorldStrikeQueuePlan({
-              delayMs: strike.executionTimeMs,
-              applyCastEffect: () => dispatchEnemyWorldStrikeCastEffect({ strike }),
-              applyPreview: () =>
-                applyEnemyWorldStrikePreview({
-                  now,
-                  enemyInstanceId,
-                  enemyName: enemyTemplate.name,
-                  strike,
-                  canUseSpecial,
-                }),
-              execute: () => executeEnemyWorldStrike({ strike, enemyTemplate }),
+          delayMs: (strike) => strike.executionTimeMs,
+          applyCastEffect: (strike) => dispatchEnemyWorldStrikeCastEffect({ strike }),
+          applyPreview: (strike) =>
+            applyEnemyWorldStrikePreview({
+              now,
+              enemyInstanceId,
+              enemyName: enemyTemplate.name,
+              strike,
+              canUseSpecial,
             }),
+          execute: (strike) => executeEnemyWorldStrike({ strike, enemyTemplate }),
         });
       },
     });
