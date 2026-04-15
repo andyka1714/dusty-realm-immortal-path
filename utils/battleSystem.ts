@@ -136,6 +136,83 @@ export const createTimedCombatPlan = ({
   execute,
 });
 
+export const createWorldStrikeQueuePlan = ({
+  delayMs,
+  timerSet,
+  applyCastEffect,
+  applyPreview,
+  execute,
+}: {
+  delayMs: number | undefined;
+  timerSet?: Set<ReturnType<typeof setTimeout>>;
+  applyCastEffect?: () => void;
+  applyPreview: () => void;
+  execute: () => void;
+}): TimedCombatQueuePlan =>
+  createTimedCombatPlan({
+    delayMs,
+    timerSet,
+    onQueue: () => {
+      applyCastEffect?.();
+      applyPreview();
+    },
+    execute,
+  });
+
+export const createResolvedWorldStrikeActionPlan = <TStrike,>({
+  strike,
+  timerSet,
+  delayMs,
+  applyCastEffect,
+  applyPreview,
+  execute,
+}: {
+  strike: TStrike;
+  timerSet?: Set<ReturnType<typeof setTimeout>>;
+  delayMs: (strike: TStrike) => number | undefined;
+  applyCastEffect?: (strike: TStrike) => void;
+  applyPreview: (strike: TStrike) => void;
+  execute: (strike: TStrike) => void;
+}) =>
+  createWorldStrikeQueuePlan({
+    delayMs: delayMs(strike),
+    timerSet,
+    applyCastEffect: applyCastEffect ? () => applyCastEffect(strike) : undefined,
+    applyPreview: () => applyPreview(strike),
+    execute: () => execute(strike),
+  });
+
+export const getBattleReplayStepDelayMs = ({
+  previousTimeMs = 0,
+  nextTimeMs,
+}: {
+  previousTimeMs?: number;
+  nextTimeMs?: number;
+}) => {
+  const resolvedNextTime = nextTimeMs ?? previousTimeMs + 500;
+  return Math.max(180, Math.min(900, resolvedNextTime - previousTimeMs || 250));
+};
+
+export const createBattleReplayStepPlan = ({
+  previousTimeMs = 0,
+  nextTimeMs,
+  timerSet,
+  execute,
+}: {
+  previousTimeMs?: number;
+  nextTimeMs?: number;
+  timerSet?: Set<ReturnType<typeof setTimeout>>;
+  execute: () => void;
+}): TimedCombatQueuePlan =>
+  createTimedCombatPlan({
+    delayMs: getBattleReplayStepDelayMs({
+      previousTimeMs,
+      nextTimeMs,
+    }),
+    timerSet,
+    execute,
+  });
+
 export const createResolvedTimedCombatPlan = <TResolved,>({
   resolve,
   buildPlan,

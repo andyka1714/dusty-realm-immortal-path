@@ -9,9 +9,12 @@ import {
   ElementType,
 } from "../types";
 import {
+  createBattleReplayStepPlan,
   calculatePlayerStats,
+  createResolvedWorldStrikeActionPlan,
   createTimedCombatPlan,
   createAutoBattleReplaySession,
+  createWorldStrikeQueuePlan,
   getResolvedEnemySpecialCooldownSeconds,
   getResolvedSkillCooldownSeconds,
   getEnemySpecialTimelineProfile,
@@ -176,7 +179,7 @@ afterEach(() => {
 });
 
 describe("battle system balance", () => {
-  it("shares timed combat plan primitives between live world actions and replay scheduling", () => {
+  it("shares timed combat plan and queue builders between live world actions and replay scheduling", () => {
     vi.useFakeTimers();
     try {
       vi.setSystemTime(1200);
@@ -194,6 +197,59 @@ describe("battle system balance", () => {
       queueTimedCombatPlan(immediatePlan);
       expect(calls).toEqual(["queue:immediate", "execute:immediate"]);
 
+      queueTimedCombatPlan(
+        createWorldStrikeQueuePlan({
+          delayMs: 0,
+          timerSet,
+          applyCastEffect: () => calls.push("cast:world"),
+          applyPreview: () => calls.push("preview:world"),
+          execute: () => calls.push("execute:world"),
+        })
+      );
+      expect(calls).toEqual([
+        "queue:immediate",
+        "execute:immediate",
+        "cast:world",
+        "preview:world",
+        "execute:world",
+      ]);
+
+      queueTimedCombatPlan(
+        createResolvedWorldStrikeActionPlan({
+          strike: { executionTimeMs: 90, label: "strike" },
+          timerSet,
+          delayMs: (strike) => strike.executionTimeMs,
+          applyCastEffect: (strike) => calls.push(`cast:${strike.label}`),
+          applyPreview: (strike) => calls.push(`preview:${strike.label}`),
+          execute: (strike) => calls.push(`execute:${strike.label}`),
+        })
+      );
+
+      expect(timerSet.size).toBe(1);
+      expect(calls).toEqual([
+        "queue:immediate",
+        "execute:immediate",
+        "cast:world",
+        "preview:world",
+        "execute:world",
+        "cast:strike",
+        "preview:strike",
+      ]);
+
+      vi.advanceTimersByTime(90);
+      expect(timerSet.size).toBe(0);
+      expect(calls).toEqual([
+        "queue:immediate",
+        "execute:immediate",
+        "cast:world",
+        "preview:world",
+        "execute:world",
+        "cast:strike",
+        "preview:strike",
+        "execute:strike",
+      ]);
+
+      const delayedNow = Date.now();
       const delayedTimer = runResolvedTimedCombatPlan({
         readyAt: 1200,
         resolve: (now) => {
@@ -214,8 +270,14 @@ describe("battle system balance", () => {
       expect(calls).toEqual([
         "queue:immediate",
         "execute:immediate",
-        "resolve:1200",
-        "queue:1200",
+        "cast:world",
+        "preview:world",
+        "execute:world",
+        "cast:strike",
+        "preview:strike",
+        "execute:strike",
+        `resolve:${delayedNow}`,
+        `queue:${delayedNow}`,
       ]);
 
       vi.advanceTimersByTime(150);
@@ -223,13 +285,34 @@ describe("battle system balance", () => {
       expect(calls).toEqual([
         "queue:immediate",
         "execute:immediate",
-        "resolve:1200",
-        "queue:1200",
+        "cast:world",
+        "preview:world",
+        "execute:world",
+        "cast:strike",
+        "preview:strike",
+        "execute:strike",
+        `resolve:${delayedNow}`,
+        `queue:${delayedNow}`,
         "execute:delayed",
       ]);
 
+      queueTimedCombatPlan(
+        createBattleReplayStepPlan({
+          previousTimeMs: 300,
+          nextTimeMs: 900,
+          timerSet,
+          execute: () => calls.push("execute:replay"),
+        })
+      );
+
+      expect(timerSet.size).toBe(1);
+      vi.advanceTimersByTime(600);
+      expect(timerSet.size).toBe(0);
+      expect(calls.at(-1)).toBe("execute:replay");
+
+      const blockedReadyAt = Date.now() + 500;
       const blockedTimer = runResolvedTimedCombatPlan({
-        readyAt: 2000,
+        readyAt: blockedReadyAt,
         resolve: () => {
           calls.push("resolve:blocked");
           return 0;

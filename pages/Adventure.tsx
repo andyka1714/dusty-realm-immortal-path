@@ -9,14 +9,15 @@ import { QUESTS } from '../data/quests';
 import { enterMap, movePlayer, tickMonsters, applyWorldDamageToMonster, resolveBattle, closeBattleReport, cancelBattle, markMapVisited, addVisualEffect } from '../store/slices/adventureSlice';
 import {
   createAutoBattleReplaySession,
-  createTimedCombatPlan,
+  createBattleReplayStepPlan,
+  createResolvedWorldStrikeActionPlan,
+  createWorldStrikeQueuePlan,
   calculatePlayerStats,
   queueTimedCombatPlan,
   resolvePlayerWorldStrike,
   resolveEnemyWorldStrike,
   getResolvedSkillCooldownSeconds,
   runResolvedTimedCombatPlan,
-  type TimedCombatQueuePlan,
 } from '../utils/battleSystem';
 import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
@@ -749,47 +750,6 @@ export const Adventure: React.FC<AdventureProps> = ({
     setEnemySpecialReadyAtById({});
   };
 
-  const createWorldStrikeQueuePlan = ({
-    delayMs,
-    applyCastEffect,
-    applyPreview,
-    execute,
-  }: {
-    delayMs: number | undefined;
-    applyCastEffect?: () => void;
-    applyPreview: () => void;
-    execute: () => void;
-  }): TimedCombatQueuePlan =>
-    createTimedCombatPlan({
-      delayMs,
-      timerSet: combatTimersRef.current.world,
-      onQueue: () => {
-        applyCastEffect?.();
-        applyPreview();
-      },
-      execute,
-    });
-
-  const createResolvedWorldStrikeActionPlan = <TStrike,>({
-    strike,
-    delayMs,
-    applyCastEffect,
-    applyPreview,
-    execute,
-  }: {
-    strike: TStrike;
-    delayMs: (strike: TStrike) => number | undefined;
-    applyCastEffect?: (strike: TStrike) => void;
-    applyPreview: (strike: TStrike) => void;
-    execute: (strike: TStrike) => void;
-  }) =>
-    createWorldStrikeQueuePlan({
-      delayMs: delayMs(strike),
-      applyCastEffect: applyCastEffect ? () => applyCastEffect(strike) : undefined,
-      applyPreview: () => applyPreview(strike),
-      execute: () => execute(strike),
-    });
-
   const getPlayerWorldStrikePreviewMessage = (
     targetName: string,
     chosenSkill?: typeof primaryActiveSkill
@@ -1301,32 +1261,6 @@ export const Adventure: React.FC<AdventureProps> = ({
     );
   };
 
-  const createBattleReplayStepPlan = ({
-    nextLog,
-    targetMonster,
-    normalizedUsedSkill,
-  }: {
-    nextLog: NonNullable<typeof replayQueue>[number];
-    targetMonster: ActiveMonster | null;
-    normalizedUsedSkill?: ReturnType<typeof getFormalSkillByName>;
-  }): TimedCombatQueuePlan => {
-    const previousTime = displayedLogs[displayedLogs.length - 1]?.timeMs ?? 0;
-    const nextTime = nextLog.timeMs ?? previousTime + 500;
-    const replayDelay = Math.max(180, Math.min(900, nextTime - previousTime || 250));
-
-    return createTimedCombatPlan({
-      delayMs: replayDelay,
-      timerSet: combatTimersRef.current.replay,
-      execute: () => {
-        processBattleReplayStep({
-          nextLog,
-          targetMonster,
-          normalizedUsedSkill,
-        });
-      },
-    });
-  };
-
   const executePlayerWorldStrike = ({
     strike,
     chosenSkill,
@@ -1663,6 +1597,7 @@ export const Adventure: React.FC<AdventureProps> = ({
         const { now, chosenSkill, targetedMonster, strike } = resolved;
         return createResolvedWorldStrikeActionPlan({
           strike,
+          timerSet: combatTimersRef.current.world,
           delayMs: (resolvedStrike) => resolvedStrike.executionTimeMs,
           applyCastEffect: () => dispatchPlayerWorldStrikeCastEffect({ chosenSkill, strike }),
           applyPreview: () => {
@@ -1702,6 +1637,7 @@ export const Adventure: React.FC<AdventureProps> = ({
       buildPlan: ({ now, canUseSpecial, strike }) =>
         createResolvedWorldStrikeActionPlan({
           strike,
+          timerSet: combatTimersRef.current.world,
           delayMs: (resolvedStrike) => resolvedStrike.executionTimeMs,
           applyCastEffect: () => dispatchEnemyWorldStrikeCastEffect({ strike }),
           applyPreview: () =>
@@ -2130,7 +2066,15 @@ export const Adventure: React.FC<AdventureProps> = ({
     const nextLog = replayQueue[0];
     const timer = runResolvedTimedCombatPlan({
       resolve: () => createBattleReplayContext(nextLog),
-      buildPlan: (replayContext) => createBattleReplayStepPlan(replayContext),
+      buildPlan: (replayContext) =>
+        createBattleReplayStepPlan({
+          previousTimeMs: displayedLogs[displayedLogs.length - 1]?.timeMs ?? 0,
+          nextTimeMs: replayContext.nextLog.timeMs,
+          timerSet: combatTimersRef.current.replay,
+          execute: () => {
+            processBattleReplayStep(replayContext);
+          },
+        }),
     });
 
     return () => clearTimeout(timer);

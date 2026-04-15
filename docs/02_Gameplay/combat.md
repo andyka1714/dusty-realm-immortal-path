@@ -99,8 +99,8 @@
 - 舊的中央戰報窗已退場，戰鬥結果改為右下角 HUD 短暫顯示後自動收起
 - 所有被動技能目前都已改成逐招專屬效果，資料層不再保留 generic `passiveEffectTags` fallback，`passiveEffectTags` 欄位本身也已移除
 - `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，現在也已開始共用 queue / preview / resolution helper，不再各自維護兩套 readyAt 與傷害文案流程
-- `Adventure` 內 world strike 與舊戰報 replay 的 timed plan primitive，現在已正式回收到 `battleSystem.ts` 的 `createTimedCombatPlan(...) / queueTimedCombatPlan(...) / runResolvedTimedCombatPlan(...)`，頁面不再自己維護這組 battle-side queue 原語
-- `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在直接走 `runResolvedTimedCombatPlan(...) + createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)`，分支本身只保留 strike resolve、preview 與 execute 所需的最少資訊
+- `Adventure` 內 world strike 與舊戰報 replay 的 timed plan primitive 與 queue builder，現在已正式回收到 `battleSystem.ts` 的 `createTimedCombatPlan(...) / createWorldStrikeQueuePlan(...) / createResolvedWorldStrikeActionPlan(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / runResolvedTimedCombatPlan(...)`，頁面不再自己維護這組 battle-side queue 原語
+- `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在直接走 `runResolvedTimedCombatPlan(...) + createResolvedWorldStrikeActionPlan(...) + queueTimedCombatPlan(...)`，分支本身只保留 strike resolve、preview 與 execute 所需的最少資訊
 - `Adventure` 內 player / enemy world strike 的 action plan，也已正式直接回到 `createWorldStrikeQueuePlan(...)`，不再保留只負責轉手的 resolved wrapper
 - `Adventure` 內 `runAutoBattle() -> replay` 的橋接，也已開始收斂到 `createBattleReplaySession(...) / startBattleReplaySession(...)`，首筆 log、snapshot 與 replayQueue 不再直接在 effect 內現場拼裝
 - `Adventure` 內 `runAutoBattle() -> replay` 的橋接，現在也已開始共用 `battleSystem.ts` 提供的 `createAutoBattleReplaySession(...)`，world 頁面不再自己重建 first log / snapshot / replayQueue
