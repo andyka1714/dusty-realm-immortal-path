@@ -11,6 +11,7 @@ import {
   ItemQuality,
   ProfessionType,
   Skill,
+  VisualEffect,
 } from "../types";
 import {
   REALM_BASE_STATS,
@@ -113,6 +114,18 @@ export interface AutoBattleReplayFinishPlan {
   victoryTarget?: Pick<ActiveMonster, "x" | "y">;
   rewards?: AutoBattleReplaySession["battleSnapshot"]["rewards"];
   defeatLogMessage?: string;
+}
+
+export interface WorldCombatEncounterState {
+  worldCombatTargetId: string | null;
+  worldCombatTargetStatuses: string[];
+  worldCombatPlayerStatuses: string[];
+  worldLastCombatMessage: string | null;
+  worldPlayerShield: number;
+  playerActionReadyAt: number;
+  playerSkillReadyAt: number;
+  enemyActionReadyAtById: Record<string, number>;
+  enemySpecialReadyAtById: Record<string, number>;
 }
 
 export interface WorldPlayerDefeatOutcome {
@@ -9001,6 +9014,36 @@ export const createIdleAutoBattleReplayState =
     isReplayingBattle: false,
   });
 
+export const createClearWorldCombatEncounterState =
+  ({
+    worldPlayerShield,
+    playerActionReadyAt,
+    playerSkillReadyAt,
+  }: {
+    worldPlayerShield: number;
+    playerActionReadyAt: number;
+    playerSkillReadyAt: number;
+  }): WorldCombatEncounterState => ({
+    worldCombatTargetId: null,
+    worldCombatTargetStatuses: [],
+    worldCombatPlayerStatuses: [],
+    worldLastCombatMessage: null,
+    worldPlayerShield,
+    playerActionReadyAt,
+    playerSkillReadyAt,
+    enemyActionReadyAtById: {},
+    enemySpecialReadyAtById: {},
+  });
+
+export const createResetWorldCombatEncounterState =
+  (): WorldCombatEncounterState => ({
+    ...createClearWorldCombatEncounterState({
+      worldPlayerShield: 0,
+      playerActionReadyAt: 0,
+      playerSkillReadyAt: 0,
+    }),
+  });
+
 export const advanceAutoBattleReplaySession = (
   session: AutoBattleReplaySession
 ): AdvancedAutoBattleReplaySession => {
@@ -9190,3 +9233,36 @@ export const createAutoBattleReplayFinishPlan = ({
   rewards: replayOutcome.won ? replayOutcome.rewards : undefined,
   defeatLogMessage: replayOutcome.won ? undefined : replayOutcome.defeatLogMessage,
 });
+
+export const createAutoBattleReplayFinishEffects = ({
+  finishPlan,
+}: {
+  finishPlan: AutoBattleReplayFinishPlan;
+}): Array<Omit<VisualEffect, "id">> => {
+  if (!finishPlan.victoryTarget) {
+    return [];
+  }
+
+  return [
+    {
+      type: "area",
+      text: "",
+      color: "#fca5a5",
+      colorInt: 0xfca5a5,
+      targetX: finishPlan.victoryTarget.x,
+      targetY: finishPlan.victoryTarget.y,
+      radius: 0.9,
+      durationMs: 420,
+    },
+    {
+      type: "impact",
+      text: "",
+      color: "#ffffff",
+      colorInt: 0xffffff,
+      targetX: finishPlan.victoryTarget.x,
+      targetY: finishPlan.victoryTarget.y,
+      radius: 0.85,
+      durationMs: 320,
+    },
+  ];
+};

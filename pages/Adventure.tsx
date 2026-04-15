@@ -11,10 +11,13 @@ import {
   clearAllCombatTimers,
   clearCombatTimerBucket,
   createCombatTimerBuckets,
+  createAutoBattleReplayFinishEffects,
   createAutoBattleReplaySession,
   createAutoBattleReplayFinishPlan,
   createAutoBattleReplayState,
+  createClearWorldCombatEncounterState,
   createIdleAutoBattleReplayState,
+  createResetWorldCombatEncounterState,
   createWorldStrikeQueuePlan,
   calculatePlayerStats,
   getBattleReportAutoCloseDelayMs,
@@ -697,15 +700,7 @@ export const Adventure: React.FC<AdventureProps> = ({
 
   useEffect(() => {
     setWorldPlayerHp(playerStats.maxHp);
-    setWorldPlayerShield(0);
-    setWorldCombatTargetId(null);
-    setWorldCombatTargetStatuses([]);
-    setWorldCombatPlayerStatuses([]);
-    setWorldLastCombatMessage(null);
-    setPlayerActionReadyAt(0);
-    setPlayerSkillReadyAt(0);
-    setEnemyActionReadyAtById({});
-    setEnemySpecialReadyAtById({});
+    applyWorldCombatEncounterState(createResetWorldCombatEncounterState());
   }, [currentMapId, playerStats.maxHp]);
 
   useEffect(() => {
@@ -717,36 +712,30 @@ export const Adventure: React.FC<AdventureProps> = ({
   useEffect(() => {
     if (worldCombatTargetId && !activeMonsters.some((monster) => monster.instanceId === worldCombatTargetId)) {
       clearCombatTimerBucket(combatTimersRef.current, 'world');
-      setWorldCombatTargetId(null);
-      setWorldCombatTargetStatuses([]);
-      setWorldCombatPlayerStatuses([]);
-      setWorldLastCombatMessage(null);
-      setEnemyActionReadyAtById({});
-      setEnemySpecialReadyAtById({});
+      applyWorldCombatEncounterState(
+        createClearWorldCombatEncounterState({
+          worldPlayerShield,
+          playerActionReadyAt,
+          playerSkillReadyAt,
+        })
+      );
     }
-  }, [activeMonsters, worldCombatTargetId]);
+  }, [activeMonsters, worldCombatTargetId, worldPlayerShield, playerActionReadyAt, playerSkillReadyAt]);
 
   const resetWorldCombatState = () => {
     clearCombatTimerBucket(combatTimersRef.current, 'world');
-    setWorldCombatTargetId(null);
-    setWorldCombatTargetStatuses([]);
-    setWorldCombatPlayerStatuses([]);
-    setWorldLastCombatMessage(null);
-    setWorldPlayerShield(0);
-    setPlayerActionReadyAt(0);
-    setPlayerSkillReadyAt(0);
-    setEnemyActionReadyAtById({});
-    setEnemySpecialReadyAtById({});
+    applyWorldCombatEncounterState(createResetWorldCombatEncounterState());
   };
 
   const clearWorldEncounterState = () => {
     clearCombatTimerBucket(combatTimersRef.current, 'world');
-    setWorldCombatTargetId(null);
-    setWorldCombatTargetStatuses([]);
-    setWorldCombatPlayerStatuses([]);
-    setWorldLastCombatMessage(null);
-    setEnemyActionReadyAtById({});
-    setEnemySpecialReadyAtById({});
+    applyWorldCombatEncounterState(
+      createClearWorldCombatEncounterState({
+        worldPlayerShield,
+        playerActionReadyAt,
+        playerSkillReadyAt,
+      })
+    );
   };
 
   const getPlayerWorldStrikePreviewMessage = (
@@ -1203,6 +1192,28 @@ export const Adventure: React.FC<AdventureProps> = ({
     setReplayQueue(replayQueue);
     setBattleSnapshot(battleSnapshot);
     setIsReplayingBattle(isReplayingBattle);
+  };
+
+  const applyWorldCombatEncounterState = ({
+    worldCombatTargetId,
+    worldCombatTargetStatuses,
+    worldCombatPlayerStatuses,
+    worldLastCombatMessage,
+    worldPlayerShield,
+    playerActionReadyAt,
+    playerSkillReadyAt,
+    enemyActionReadyAtById,
+    enemySpecialReadyAtById,
+  }: ReturnType<typeof createResetWorldCombatEncounterState>) => {
+    setWorldCombatTargetId(worldCombatTargetId);
+    setWorldCombatTargetStatuses(worldCombatTargetStatuses);
+    setWorldCombatPlayerStatuses(worldCombatPlayerStatuses);
+    setWorldLastCombatMessage(worldLastCombatMessage);
+    setWorldPlayerShield(worldPlayerShield);
+    setPlayerActionReadyAt(playerActionReadyAt);
+    setPlayerSkillReadyAt(playerSkillReadyAt);
+    setEnemyActionReadyAtById(enemyActionReadyAtById);
+    setEnemySpecialReadyAtById(enemySpecialReadyAtById);
   };
 
   const executePlayerWorldStrike = ({
@@ -1893,28 +1904,9 @@ export const Adventure: React.FC<AdventureProps> = ({
         setIsReplayingBattle(false);
       }
 
-      if (finishPlan.victoryTarget) {
-        dispatch(addVisualEffect({
-          type: 'area',
-          text: '',
-          color: '#fca5a5',
-          colorInt: 0xfca5a5,
-          targetX: finishPlan.victoryTarget.x,
-          targetY: finishPlan.victoryTarget.y,
-          radius: 0.9,
-          durationMs: 420,
-        }));
-        dispatch(addVisualEffect({
-          type: 'impact',
-          text: '',
-          color: '#ffffff',
-          colorInt: 0xffffff,
-          targetX: finishPlan.victoryTarget.x,
-          targetY: finishPlan.victoryTarget.y,
-          radius: 0.85,
-          durationMs: 320,
-        }));
-      }
+      createAutoBattleReplayFinishEffects({ finishPlan }).forEach((effect) =>
+        dispatch(addVisualEffect(effect))
+      );
 
       dispatch(resolveBattle(finishPlan.battleResult));
 

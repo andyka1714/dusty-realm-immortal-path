@@ -14,6 +14,7 @@ import {
   clearAllCombatTimers,
   clearCombatTimerBucket,
   createCombatTimerBuckets,
+  createAutoBattleReplayFinishEffects,
   createAutoBattleReplayFinishPlan,
   createAutoBattleReplayState,
   createBattleReplayStepPlan,
@@ -21,7 +22,9 @@ import {
   createResolvedWorldStrikeActionPlan,
   createTimedCombatPlan,
   createAutoBattleReplaySession,
+  createClearWorldCombatEncounterState,
   createIdleAutoBattleReplayState,
+  createResetWorldCombatEncounterState,
   createWorldStrikeQueuePlan,
   getBattleReportAutoCloseDelayMs,
   getBattleRespawnMapId,
@@ -858,6 +861,34 @@ describe("battle system balance", () => {
       rewards: replayWinOutcome.rewards,
       defeatLogMessage: undefined,
     });
+    expect(
+      createAutoBattleReplayFinishEffects({
+        finishPlan: createAutoBattleReplayFinishPlan({
+          replayOutcome: replayWinOutcome,
+        }),
+      })
+    ).toEqual([
+      {
+        type: "area",
+        text: "",
+        color: "#fca5a5",
+        colorInt: 0xfca5a5,
+        targetX: 3,
+        targetY: 4,
+        radius: 0.9,
+        durationMs: 420,
+      },
+      {
+        type: "impact",
+        text: "",
+        color: "#ffffff",
+        colorInt: 0xffffff,
+        targetX: 3,
+        targetY: 4,
+        radius: 0.85,
+        durationMs: 320,
+      },
+    ]);
 
     const replayDefeatOutcome = resolveAutoBattleReplayOutcome({
       battleSnapshot: {
@@ -905,6 +936,13 @@ describe("battle system balance", () => {
       rewards: undefined,
       defeatLogMessage: replayDefeatOutcome.defeatLogMessage,
     });
+    expect(
+      createAutoBattleReplayFinishEffects({
+        finishPlan: createAutoBattleReplayFinishPlan({
+          replayOutcome: replayDefeatOutcome,
+        }),
+      })
+    ).toEqual([]);
   });
 
   it("shares enemy special timeline metadata between world strikes and timeline combat", () => {
@@ -1601,6 +1639,34 @@ describe("battle system balance", () => {
       replayQueue: [],
       battleSnapshot: null,
       isReplayingBattle: false,
+    });
+    expect(
+      createClearWorldCombatEncounterState({
+        worldPlayerShield: 120,
+        playerActionReadyAt: 800,
+        playerSkillReadyAt: 1400,
+      })
+    ).toEqual({
+      worldCombatTargetId: null,
+      worldCombatTargetStatuses: [],
+      worldCombatPlayerStatuses: [],
+      worldLastCombatMessage: null,
+      worldPlayerShield: 120,
+      playerActionReadyAt: 800,
+      playerSkillReadyAt: 1400,
+      enemyActionReadyAtById: {},
+      enemySpecialReadyAtById: {},
+    });
+    expect(createResetWorldCombatEncounterState()).toEqual({
+      worldCombatTargetId: null,
+      worldCombatTargetStatuses: [],
+      worldCombatPlayerStatuses: [],
+      worldLastCombatMessage: null,
+      worldPlayerShield: 0,
+      playerActionReadyAt: 0,
+      playerSkillReadyAt: 0,
+      enemyActionReadyAtById: {},
+      enemySpecialReadyAtById: {},
     });
 
     const advancedSession = advanceAutoBattleReplaySession(session);

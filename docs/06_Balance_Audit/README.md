@@ -39,9 +39,11 @@
 - `Adventure` 內 `runAutoBattle() -> replay` 的橋接與 replay step state transition，現在也已開始共用 `createAutoBattleReplaySession(...) / advanceAutoBattleReplaySession(...)`，頁面不再自己重建 first log / snapshot / replayQueue，也不再自己手動 append log、slice queue、patch snapshot
 - battle timer bucket 與 replay 啟動 / 重置判定，現在也已開始共用 `createCombatTimerBuckets(...) / clearCombatTimerBucket(...) / clearAllCombatTimers(...) / resolveAutoBattleReplayTransition(...)`，頁面不再自己維護 world / replay timer manager 與 replay lifecycle gate
 - replay 啟動 / step / reset 的 state shape，現在也已開始共用 `createAutoBattleReplayState(...) / createIdleAutoBattleReplayState(...)`，頁面不再自己手拼 replay session state 的欄位形狀
+- replay finish 的 victory effect payload，現在也已開始共用 `createAutoBattleReplayFinishEffects(...)`，頁面不再自己手拼 replay 勝利特效
 - live world defeat 的回城地點、重生座標與提示文案，現在也已開始共用 `resolveWorldPlayerDefeatOutcome(...)`，頁面不再自己手寫敗北 outcome
 - replay 完成時的勝敗、擊殺目標與回城規則，現在也已開始共用 `resolveAutoBattleReplayOutcome(...) / getBattleRespawnMapId(...)`，頁面不再自己重算 replay defeat respawn 與 defeated monster
 - replay 完成時的 battle result、victory target、rewards 與 defeat log，也已開始共用 `createAutoBattleReplayFinishPlan(...)`，頁面不再自己從 replay outcome 手拆這批結算欄位
+- world encounter 的 clear/reset state shape，現在也已開始共用 `createClearWorldCombatEncounterState(...) / createResetWorldCombatEncounterState(...)`，頁面不再自己手拼 target/status/cooldown/shield 清理欄位
 - 戰報自動收起延遲與戰後 world state cleanup，現在也已開始共用 `getBattleReportAutoCloseDelayMs(...) / resolveWorldBattleResultCleanup(...)`，頁面不再自己散寫 auto-close 與清 target/path/auto-battle 條件
 - `Adventure` 內舊戰報 replay 的 visual payload 也已開始共用 `createBattleReplayVisualPlan(...)`，attack / damage visual dispatch 不再在 replay step 內直接拼裝輸入
 - `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，現在也已開始共用 `queueTimedCombatPlan(...)`，不再各自維護一套 `setTimeout` 流程
