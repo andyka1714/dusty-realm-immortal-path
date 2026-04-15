@@ -460,7 +460,7 @@
 - [x] `Adventure` 內 player / enemy world strike 的 action plan 也已正式直接回到 `createWorldStrikeQueuePlan(...)`，queue helper 不再各自臨時拼接 cast、preview 與 execute 閉包
 - [x] `Adventure` 內 player / enemy world strike 的出手入口，現在也已回收到 `runPlayerWorldStrikeAction(...) / runEnemyWorldStrikeAction(...)`，live 分支不再各自維護 `Date.now()`、readyAt 與 resolved strike plan 樣板
 - [x] `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在直接走 `runPlayerWorldStrikeAction(...) / runEnemyWorldStrikeAction(...)`
-- [x] `Adventure` 內 auto-target 與 live world action window 的判定，現在也已開始共用 `resolveWorldCombatAutoTarget(...) / resolveWorldCombatActionWindow(...) / runWorldCombatActionWindowStep(...)`，頁面不再自己維護最近怪與雙方出手條件邏輯
+- [x] `Adventure` 內 auto-target 與 live world action window 的判定，現在也已開始共用 `resolveWorldCombatAutoTarget(...) / runWorldCombatStep(...)`，頁面不再自己維護最近怪與雙方出手條件邏輯
 - [x] `queueResolvedWorldStrike(...)` 也已改成更單純的 `queueWorldStrikePlan(...)`，live world action 現在只保留 timed 判定、strike resolve 與 plan 執行三段
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，也已開始共用 `scheduleTimedCombatAction(...)`，不再各自維護一套 `setTimeout` orchestration
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的 timed plan，也已開始共用 `queueTimedCombatPlan(...)` 的 onQueue/execute 模型，battle timer orchestration 不再維持兩種樣板

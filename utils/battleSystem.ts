@@ -110,6 +110,11 @@ export interface ResolvedAutoBattleReplayStep<TMonster, TSkill> {
   normalizedUsedSkill?: TSkill;
 }
 
+export type AutoBattleReplayFrameResult =
+  | { kind: "idle" }
+  | { kind: "finish"; replayOutcome: AutoBattleReplayOutcome }
+  | { kind: "step"; timer: ReturnType<typeof setTimeout> | undefined };
+
 export interface TimedCombatQueuePlan {
   delayMs: number | undefined;
   timerSet?: Set<ReturnType<typeof setTimeout>>;
@@ -423,6 +428,58 @@ export const runWorldCombatActionWindowStep = ({
   if (actionWindow.shouldEnemyAct) {
     runEnemyAction();
   }
+
+  return actionWindow;
+};
+
+export const runWorldCombatStep = ({
+  now = Date.now(),
+  distance,
+  playerEngagementRange,
+  playerActionReadyAt,
+  playerSkillReadyAt,
+  hasPrimaryActiveSkill,
+  isAutoBattling,
+  worldCombatTargetId,
+  targetedMonsterInstanceId,
+  enemyEngagementRange,
+  enemyActionReadyAt,
+  runPlayerAction,
+  runEnemyAction,
+}: {
+  now?: number;
+  distance: number;
+  playerEngagementRange: number;
+  playerActionReadyAt: number;
+  playerSkillReadyAt: number;
+  hasPrimaryActiveSkill: boolean;
+  isAutoBattling: boolean;
+  worldCombatTargetId: string | null;
+  targetedMonsterInstanceId: string;
+  enemyEngagementRange: number;
+  enemyActionReadyAt: number;
+  runPlayerAction: (usePlayerSkill: boolean) => void;
+  runEnemyAction: () => void;
+}) => {
+  const actionWindow = resolveWorldCombatActionWindow({
+    now,
+    distance,
+    playerEngagementRange,
+    playerActionReadyAt,
+    playerSkillReadyAt,
+    hasPrimaryActiveSkill,
+    isAutoBattling,
+    worldCombatTargetId,
+    targetedMonsterInstanceId,
+    enemyEngagementRange,
+    enemyActionReadyAt,
+  });
+
+  runWorldCombatActionWindowStep({
+    actionWindow,
+    runPlayerAction,
+    runEnemyAction,
+  });
 
   return actionWindow;
 };
@@ -8956,3 +9013,58 @@ export const runAutoBattleReplayStep = <TMonster, TSkill>({
       };
     },
   });
+
+export const runAutoBattleReplayFrame = <TSkill>({
+  isReplayingBattle,
+  replaySession,
+  currentEnemy,
+  currentEnemyInstanceId,
+  activeMonsters,
+  respawnMapId,
+  resolveSkillByName,
+  timerSet,
+  executeStep,
+}: {
+  isReplayingBattle: boolean;
+  replaySession: AutoBattleReplaySession | null;
+  currentEnemy?: Enemy | null;
+  currentEnemyInstanceId: string | null;
+  activeMonsters: ActiveMonster[];
+  respawnMapId?: string;
+  resolveSkillByName?: (skillName: string) => TSkill | undefined;
+  timerSet?: Set<ReturnType<typeof setTimeout>>;
+  executeStep: (
+    resolvedStep: ResolvedAutoBattleReplayStep<ActiveMonster, TSkill>
+  ) => void;
+}): AutoBattleReplayFrameResult => {
+  if (!isReplayingBattle || !replaySession) {
+    return { kind: "idle" };
+  }
+
+  if (replaySession.replayQueue.length === 0) {
+    return {
+      kind: "finish",
+      replayOutcome: resolveAutoBattleReplayOutcome({
+        battleSnapshot: replaySession.battleSnapshot,
+        displayedLogs: replaySession.displayedLogs,
+        currentEnemy,
+        currentEnemyInstanceId,
+        activeMonsters,
+        respawnMapId,
+      }),
+    };
+  }
+
+  return {
+    kind: "step",
+    timer: runAutoBattleReplayStep({
+      replaySession,
+      currentEnemyInstanceId,
+      activeMonsters,
+      getMonsterInstanceId: (monster) => monster.instanceId,
+      resolveSkillByName,
+      timerSet,
+      execute: executeStep,
+    }),
+  };
+};

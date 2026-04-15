@@ -35,7 +35,9 @@ import {
   resolveWorldCombatActionWindow,
   resolveEnemyWorldStrike,
   resolvePlayerWorldStrike,
+  runAutoBattleReplayFrame,
   runWorldCombatActionWindowStep,
+  runWorldCombatStep,
   selectNearestWorldCombatTarget,
   runAutoBattleReplayStep,
   runEnemyWorldStrikeAction,
@@ -430,6 +432,20 @@ describe("battle system balance", () => {
       expect(timerSet.size).toBe(0);
       expect(calls.at(-1)).toBe("execute:auto-replay:你施展【火球術】:2:target:火球術");
 
+      const replayFrameStep = runAutoBattleReplayFrame({
+        isReplayingBattle: true,
+        replaySession: replayRunnerSession,
+        currentEnemy: COMMON_ENEMIES.m1_c1,
+        currentEnemyInstanceId: "enemy-1",
+        activeMonsters: [{ instanceId: "enemy-1", x: 3, y: 4 } as ActiveMonster],
+        respawnMapId: "4",
+        resolveSkillByName: (skillName) => ({ skillName }),
+        timerSet,
+        executeStep: ({ nextLog }) => calls.push(`frame:step:${nextLog.message}`),
+      });
+
+      expect(replayFrameStep.kind).toBe("step");
+
       expect(
         selectNearestWorldCombatTarget({
           targets: [
@@ -528,6 +544,34 @@ describe("battle system balance", () => {
         "window:enemy",
       ]);
 
+      const steppedActionWindow = runWorldCombatStep({
+        now: 1500,
+        distance: 1,
+        playerEngagementRange: 2,
+        playerActionReadyAt: 1200,
+        playerSkillReadyAt: 1400,
+        hasPrimaryActiveSkill: true,
+        isAutoBattling: true,
+        worldCombatTargetId: null,
+        targetedMonsterInstanceId: "enemy-1",
+        enemyEngagementRange: 1,
+        enemyActionReadyAt: 1300,
+        runPlayerAction: (usePlayerSkill) =>
+          calls.push(`step:player:${usePlayerSkill}`),
+        runEnemyAction: () => calls.push("step:enemy"),
+      });
+
+      expect(steppedActionWindow).toEqual({
+        engagedTargetId: "enemy-1",
+        shouldPlayerAct: true,
+        usePlayerSkill: true,
+        shouldEnemyAct: true,
+      });
+      expect(calls.slice(-2)).toEqual([
+        "step:player:true",
+        "step:enemy",
+      ]);
+
       const playerActionTimer = runPlayerWorldStrikeAction({
         readyAt: 0,
         canExecute: () => true,
@@ -570,6 +614,38 @@ describe("battle system balance", () => {
         "enemy:preview:true:special",
         "enemy:execute:special",
       ]);
+
+      const replayFrameFinish = runAutoBattleReplayFrame({
+        isReplayingBattle: true,
+        replaySession: {
+          displayedLogs: replayRunnerSession.displayedLogs,
+          replayQueue: [],
+          battleSnapshot: {
+            playerHp: 320,
+            playerMaxHp: 500,
+            enemyHp: 0,
+            enemyMaxHp: 400,
+            won: true,
+            rewards: {
+              exp: 100,
+              spiritStones: 50,
+              drops: [],
+            },
+          },
+        },
+        currentEnemy: COMMON_ENEMIES.m1_c1,
+        currentEnemyInstanceId: "enemy-1",
+        activeMonsters: [{ instanceId: "enemy-1", x: 3, y: 4 } as ActiveMonster],
+        respawnMapId: "4",
+        timerSet,
+        executeStep: () => calls.push("frame:unexpected"),
+      });
+
+      expect(replayFrameFinish.kind).toBe("finish");
+      if (replayFrameFinish.kind === "finish") {
+        expect(replayFrameFinish.replayOutcome.won).toBe(true);
+        expect(replayFrameFinish.replayOutcome.defeatedMonster?.instanceId).toBe("enemy-1");
+      }
 
       const blockedReadyAt = Date.now() + 500;
       const blockedTimer = runResolvedTimedCombatPlan({

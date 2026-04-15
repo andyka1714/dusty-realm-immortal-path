@@ -18,17 +18,15 @@ import {
   getBattleRespawnMapId,
   queueTimedCombatPlan,
   resolveWorldPlayerDefeatOutcome,
-  resolveAutoBattleReplayOutcome,
   resolveAutoBattleReplayLifecycle,
   resolveWorldCombatAutoTarget,
   resolveWorldBattleResultCleanup,
-  resolveWorldCombatActionWindow,
   resolvePlayerWorldStrike,
   resolveEnemyWorldStrike,
-  runWorldCombatActionWindowStep,
+  runAutoBattleReplayFrame,
+  runWorldCombatStep,
   getResolvedSkillCooldownSeconds,
   runEnemyWorldStrikeAction,
-  runAutoBattleReplayStep,
   runPlayerWorldStrikeAction,
 } from '../utils/battleSystem';
 import { addItem } from '../store/slices/inventorySlice';
@@ -1687,10 +1685,8 @@ export const Adventure: React.FC<AdventureProps> = ({
       if (showIntro || isBattling || !targetedMonster || !targetedMonsterTemplate) return;
 
       const interval = setInterval(() => {
-          const now = Date.now();
           const distance = getGridDistance(playerPosition, targetedMonster);
-          const actionWindow = resolveWorldCombatActionWindow({
-            now,
+          runWorldCombatStep({
             distance,
             playerEngagementRange,
             playerActionReadyAt,
@@ -1701,10 +1697,6 @@ export const Adventure: React.FC<AdventureProps> = ({
             targetedMonsterInstanceId: targetedMonster.instanceId,
             enemyEngagementRange: getEnemyEngagementRange(targetedMonsterTemplate),
             enemyActionReadyAt: enemyActionReadyAtById[targetedMonster.instanceId] ?? 0,
-          });
-
-          runWorldCombatActionWindowStep({
-            actionWindow,
             runPlayerAction: (usePlayerSkill) => performWorldPlayerAction(usePlayerSkill),
             runEnemyAction: () =>
               performWorldEnemyAction(targetedMonster.instanceId, targetedMonsterTemplate),
@@ -1873,73 +1865,23 @@ export const Adventure: React.FC<AdventureProps> = ({
 
   // Replay Effect
   useEffect(() => {
-    if (!isReplayingBattle || replayQueue.length === 0) {
-        if (isReplayingBattle && replayQueue.length === 0 && battleSnapshot) {
-             // Replay Finished -> Apply Final Results
-             setIsReplayingBattle(false);
-             const replayOutcome = resolveAutoBattleReplayOutcome({
-                 battleSnapshot,
-                 displayedLogs,
-                 currentEnemy,
-                 currentEnemyInstanceId,
-                 activeMonsters,
-                 respawnMapId: getBattleRespawnMapId(completedQuests),
-             });
-
-             if (replayOutcome.won && replayOutcome.defeatedMonster) {
-                 dispatch(addVisualEffect({
-                     type: 'area',
-                     text: '',
-                     color: '#fca5a5',
-                     colorInt: 0xfca5a5,
-                     targetX: replayOutcome.defeatedMonster.x,
-                     targetY: replayOutcome.defeatedMonster.y,
-                     radius: 0.9,
-                     durationMs: 420,
-                 }));
-                 dispatch(addVisualEffect({
-                     type: 'impact',
-                     text: '',
-                     color: '#ffffff',
-                     colorInt: 0xffffff,
-                     targetX: replayOutcome.defeatedMonster.x,
-                     targetY: replayOutcome.defeatedMonster.y,
-                     radius: 0.85,
-                     durationMs: 320,
-                 }));
-             }
-
-             dispatch(resolveBattle({
-                 won: replayOutcome.won,
-                 logs: replayOutcome.logs,
-                 respawnMapId: replayOutcome.respawnMapId,
-             }));
-
-             if (replayOutcome.won && replayOutcome.rewards) {
-                 if (currentEnemy) {
-                     applyBattleRewards({ enemy: currentEnemy, rewards: replayOutcome.rewards });
-                 }
-             } else if (replayOutcome.defeatLogMessage) {
-                 dispatch(addLog({ message: replayOutcome.defeatLogMessage, type: 'danger' }));
-             }
+    const replaySession = battleSnapshot
+      ? {
+          displayedLogs,
+          replayQueue,
+          battleSnapshot,
         }
-        return;
-    }
-
-    const nextLog = replayQueue[0];
-    const replaySession = {
-      displayedLogs,
-      replayQueue,
-      battleSnapshot,
-    };
-    const timer = runAutoBattleReplayStep({
+      : null;
+    const replayFrame = runAutoBattleReplayFrame({
+      isReplayingBattle,
       replaySession,
+      currentEnemy,
       currentEnemyInstanceId,
       activeMonsters,
-      getMonsterInstanceId: (monster) => monster.instanceId,
+      respawnMapId: getBattleRespawnMapId(completedQuests),
       resolveSkillByName: getFormalSkillByName,
       timerSet: combatTimersRef.current.replay,
-      execute: ({ nextLog, nextSession, targetMonster, normalizedUsedSkill }) => {
+      executeStep: ({ nextLog, nextSession, targetMonster, normalizedUsedSkill }) => {
         applyBattleReplaySessionState(nextSession);
 
         const logContainer = document.getElementById('battle-log-container');
@@ -1955,8 +1897,56 @@ export const Adventure: React.FC<AdventureProps> = ({
       },
     });
 
-    return () => clearTimeout(timer);
-  }, [isReplayingBattle, replayQueue, battleSnapshot, displayedLogs, currentEnemyInstanceId, activeMonsters, playerPosition, dispatch]);
+    if (replayFrame.kind === 'finish') {
+      setIsReplayingBattle(false);
+      const replayOutcome = replayFrame.replayOutcome;
+
+      if (replayOutcome.won && replayOutcome.defeatedMonster) {
+        dispatch(addVisualEffect({
+          type: 'area',
+          text: '',
+          color: '#fca5a5',
+          colorInt: 0xfca5a5,
+          targetX: replayOutcome.defeatedMonster.x,
+          targetY: replayOutcome.defeatedMonster.y,
+          radius: 0.9,
+          durationMs: 420,
+        }));
+        dispatch(addVisualEffect({
+          type: 'impact',
+          text: '',
+          color: '#ffffff',
+          colorInt: 0xffffff,
+          targetX: replayOutcome.defeatedMonster.x,
+          targetY: replayOutcome.defeatedMonster.y,
+          radius: 0.85,
+          durationMs: 320,
+        }));
+      }
+
+      dispatch(resolveBattle({
+        won: replayOutcome.won,
+        logs: replayOutcome.logs,
+        respawnMapId: replayOutcome.respawnMapId,
+      }));
+
+      if (replayOutcome.won && replayOutcome.rewards) {
+        if (currentEnemy) {
+          applyBattleRewards({ enemy: currentEnemy, rewards: replayOutcome.rewards });
+        }
+      } else if (replayOutcome.defeatLogMessage) {
+        dispatch(addLog({ message: replayOutcome.defeatLogMessage, type: 'danger' }));
+      }
+
+      return;
+    }
+
+    if (replayFrame.kind !== 'step') {
+      return;
+    }
+
+    return () => clearTimeout(replayFrame.timer);
+  }, [isReplayingBattle, replayQueue, battleSnapshot, displayedLogs, currentEnemy, currentEnemyInstanceId, activeMonsters, completedQuests, dispatch]);
 
   // Auto-Scroll Battle Logs
   useEffect(() => {
