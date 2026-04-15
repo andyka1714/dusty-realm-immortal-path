@@ -81,6 +81,11 @@ export interface AutoBattleReplaySession {
   };
 }
 
+export interface AdvancedAutoBattleReplaySession {
+  nextLog?: CombatLog;
+  nextSession: AutoBattleReplaySession;
+}
+
 export interface TimedCombatQueuePlan {
   delayMs: number | undefined;
   timerSet?: Set<ReturnType<typeof setTimeout>>;
@@ -8370,6 +8375,32 @@ export const createAutoBattleReplaySession = (
       enemyMaxHp: firstLog.enemyMaxHp ?? enemy.hp,
       won,
       rewards,
+    },
+  };
+};
+
+export const advanceAutoBattleReplaySession = (
+  session: AutoBattleReplaySession
+): AdvancedAutoBattleReplaySession => {
+  const [nextLog, ...remainingReplayQueue] = session.replayQueue;
+  if (!nextLog) {
+    return { nextSession: session };
+  }
+
+  return {
+    nextLog,
+    nextSession: {
+      ...session,
+      displayedLogs: [...session.displayedLogs, nextLog],
+      replayQueue: remainingReplayQueue,
+      battleSnapshot:
+        nextLog.playerHp !== undefined
+          ? {
+              ...session.battleSnapshot,
+              playerHp: nextLog.playerHp,
+              enemyHp: nextLog.enemyHp,
+            }
+          : session.battleSnapshot,
     },
   };
 };

@@ -8,6 +8,7 @@ import { ITEMS } from '../data/items';
 import { QUESTS } from '../data/quests';
 import { enterMap, movePlayer, tickMonsters, applyWorldDamageToMonster, resolveBattle, closeBattleReport, cancelBattle, markMapVisited, addVisualEffect } from '../store/slices/adventureSlice';
 import {
+  advanceAutoBattleReplaySession,
   createAutoBattleReplaySession,
   createBattleReplayStepPlan,
   createResolvedWorldStrikeActionPlan,
@@ -1232,22 +1233,20 @@ export const Adventure: React.FC<AdventureProps> = ({
   }) => startBattleReplaySession(createAutoBattleReplaySession(playerStats, enemy));
 
   const processBattleReplayStep = ({
-    nextLog,
+    replaySession,
     targetMonster,
     normalizedUsedSkill,
   }: {
-    nextLog: NonNullable<typeof replayQueue>[number];
+    replaySession: ReturnType<typeof createAutoBattleReplaySession>;
     targetMonster: ActiveMonster | null;
     normalizedUsedSkill?: ReturnType<typeof getFormalSkillByName>;
   }) => {
-    setDisplayedLogs((prev) => [...prev, nextLog]);
-    setReplayQueue((prev) => prev.slice(1));
+    const { nextLog, nextSession } = advanceAutoBattleReplaySession(replaySession);
+    if (!nextLog) return;
 
-    if (nextLog.playerHp !== undefined) {
-      setBattleSnapshot((prev) =>
-        prev ? { ...prev, playerHp: nextLog.playerHp, enemyHp: nextLog.enemyHp } : null
-      );
-    }
+    setDisplayedLogs(nextSession.displayedLogs);
+    setReplayQueue(nextSession.replayQueue);
+    setBattleSnapshot(nextSession.battleSnapshot);
 
     const logContainer = document.getElementById('battle-log-container');
     if (logContainer) logContainer.scrollTop = logContainer.scrollHeight;
@@ -2064,6 +2063,11 @@ export const Adventure: React.FC<AdventureProps> = ({
     }
 
     const nextLog = replayQueue[0];
+    const replaySession = {
+      displayedLogs,
+      replayQueue,
+      battleSnapshot,
+    };
     const timer = runResolvedTimedCombatPlan({
       resolve: () => createBattleReplayContext(nextLog),
       buildPlan: (replayContext) =>
@@ -2072,7 +2076,11 @@ export const Adventure: React.FC<AdventureProps> = ({
           nextTimeMs: replayContext.nextLog.timeMs,
           timerSet: combatTimersRef.current.replay,
           execute: () => {
-            processBattleReplayStep(replayContext);
+            processBattleReplayStep({
+              replaySession,
+              targetMonster: replayContext.targetMonster,
+              normalizedUsedSkill: replayContext.normalizedUsedSkill,
+            });
           },
         }),
     });

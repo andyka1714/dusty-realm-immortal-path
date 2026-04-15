@@ -36,6 +36,7 @@
 - `Adventure` 內 world strike 與舊戰報 replay 的 timed plan primitive 與 queue builder，現在也已回收到 `battleSystem.ts` 的 `createTimedCombatPlan(...) / createWorldStrikeQueuePlan(...) / createResolvedWorldStrikeActionPlan(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / runResolvedTimedCombatPlan(...)`，頁面不再自己維護 battle-side queue 原語
 - `Adventure` 內 world strike 與 replay step 的 visual payload，現在也已開始共用 `WorldStrikeVisualPlan` 路徑；live / replay 的 effect dispatch 不再各自維護 payload 組裝
 - `Adventure` 內舊戰報 replay 的 delay 與 context 組裝，現在也已開始共用 `createBattleReplayStepPlan(...) + queueTimedCombatPlan(...)`，回放 effect 不再每次重算 step delay 與 target / skill context
+- `Adventure` 內 `runAutoBattle() -> replay` 的橋接與 replay step state transition，現在也已開始共用 `createAutoBattleReplaySession(...) / advanceAutoBattleReplaySession(...)`，頁面不再自己重建 first log / snapshot / replayQueue，也不再自己手動 append log、slice queue、patch snapshot
 - `Adventure` 內舊戰報 replay 的 visual payload 也已開始共用 `createBattleReplayVisualPlan(...)`，attack / damage visual dispatch 不再在 replay step 內直接拼裝輸入
 - `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，現在也已開始共用 `queueTimedCombatPlan(...)`，不再各自維護一套 `setTimeout` 流程
 - `Adventure` 內 player / enemy world strike 的 resolve + queue 串接，現在也已開始共用 `createResolvedTimedCombatPlan(...) + createResolvedWorldStrikeActionPlan(...) + queueTimedCombatPlan(...)`，live 分支不再同時維護 resolve 與 queue 細節

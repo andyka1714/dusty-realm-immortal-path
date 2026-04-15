@@ -9,6 +9,7 @@ import {
   ElementType,
 } from "../types";
 import {
+  advanceAutoBattleReplaySession,
   createBattleReplayStepPlan,
   calculatePlayerStats,
   createResolvedWorldStrikeActionPlan,
@@ -1017,6 +1018,18 @@ describe("battle system balance", () => {
     expect(session.battleSnapshot.playerMaxHp).toBe(player.maxHp);
     expect(session.battleSnapshot.enemyMaxHp).toBe(COMMON_ENEMIES.m30_c1.hp);
     expect(session.replayQueue.length).toBeGreaterThanOrEqual(0);
+
+    const advancedSession = advanceAutoBattleReplaySession(session);
+    if (advancedSession.nextLog) {
+      expect(advancedSession.nextSession.displayedLogs.at(-1)).toEqual(
+        advancedSession.nextLog
+      );
+      expect(advancedSession.nextSession.replayQueue.length).toBe(
+        Math.max(0, session.replayQueue.length - 1)
+      );
+    } else {
+      expect(advancedSession.nextSession).toEqual(session);
+    }
   });
 
   it("supports bleed and poison status applications on later-realm skills", () => {
