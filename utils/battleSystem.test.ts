@@ -24,6 +24,7 @@ import {
   getSkillTimelineProfile,
   queueTimedCombatPlan,
   resolveAutoBattleReplayOutcome,
+  resolveWorldPlayerDefeatOutcome,
   resolveWorldCombatActionWindow,
   resolveEnemyWorldStrike,
   resolvePlayerWorldStrike,
@@ -506,6 +507,17 @@ describe("battle system balance", () => {
     expect(getBattleRespawnMapId(["sect_beast_join"])).toBe("14");
     expect(getBattleRespawnMapId(["sect_mystic_join"])).toBe("23");
     expect(getBattleRespawnMapId([])).toBe("0");
+
+    expect(
+      resolveWorldPlayerDefeatOutcome({
+        completedQuestIds: ["sect_beast_join"],
+      })
+    ).toEqual({
+      respawnMapId: "14",
+      startX: 20,
+      startY: 20,
+      logMessage: "你在野外遭受重創，被傳送回安全地帶調息。",
+    });
 
     const replayWinOutcome = resolveAutoBattleReplayOutcome({
       battleSnapshot: {

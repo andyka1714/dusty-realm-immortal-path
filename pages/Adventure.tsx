@@ -13,6 +13,7 @@ import {
   calculatePlayerStats,
   getBattleRespawnMapId,
   queueTimedCombatPlan,
+  resolveWorldPlayerDefeatOutcome,
   resolveAutoBattleReplayOutcome,
   resolveWorldCombatActionWindow,
   resolvePlayerWorldStrike,
@@ -1532,12 +1533,18 @@ export const Adventure: React.FC<AdventureProps> = ({
   };
 
   const handleWorldPlayerDefeat = () => {
-    const respawnMapId = getBattleRespawnMapId(completedQuests);
+    const defeatOutcome = resolveWorldPlayerDefeatOutcome({
+      completedQuestIds: completedQuests,
+    });
     dispatch(addLog({
-      message: '你在野外遭受重創，被傳送回安全地帶調息。',
+      message: defeatOutcome.logMessage,
       type: 'danger',
     }));
-    dispatch(enterMap({ mapId: respawnMapId, startX: 20, startY: 20 }));
+    dispatch(enterMap({
+      mapId: defeatOutcome.respawnMapId,
+      startX: defeatOutcome.startX,
+      startY: defeatOutcome.startY,
+    }));
     setTargetMonsterId(null);
     setAutoMovePath([]);
     setIsAutoBattling(false);

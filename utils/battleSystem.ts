@@ -96,6 +96,13 @@ export interface AutoBattleReplayOutcome {
   defeatLogMessage?: string;
 }
 
+export interface WorldPlayerDefeatOutcome {
+  respawnMapId: string;
+  startX: number;
+  startY: number;
+  logMessage: string;
+}
+
 export interface ResolvedAutoBattleReplayStep<TMonster, TSkill> {
   nextLog: CombatLog;
   nextSession: AutoBattleReplaySession;
@@ -173,6 +180,17 @@ export const getBattleRespawnMapId = (completedQuestIds: string[]) =>
       : completedQuestIds.includes("sect_mystic_join")
         ? "23"
         : "0";
+
+export const resolveWorldPlayerDefeatOutcome = ({
+  completedQuestIds,
+}: {
+  completedQuestIds: string[];
+}): WorldPlayerDefeatOutcome => ({
+  respawnMapId: getBattleRespawnMapId(completedQuestIds),
+  startX: 20,
+  startY: 20,
+  logMessage: "你在野外遭受重創，被傳送回安全地帶調息。",
+});
 
 export const selectNearestWorldCombatTarget = <TTarget,>({
   targets,

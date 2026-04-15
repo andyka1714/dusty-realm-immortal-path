@@ -105,6 +105,7 @@
 - `Adventure` 內 auto-target 與 live world action window 的主控判定，現在也已開始共用 `selectNearestWorldCombatTarget(...) / resolveWorldCombatActionWindow(...)`，頁面不再自己決定最近怪與雙方出手窗口
 - `Adventure` 內 `runAutoBattle() -> replay` 的橋接，現在也已開始共用 `battleSystem.ts` 提供的 `createAutoBattleReplaySession(...) / advanceAutoBattleReplaySession(...)`，world 頁面不再自己重建 first log / snapshot / replayQueue，也不再自己手動 append log、slice queue、patch snapshot
 - `Adventure` 內 `runAutoBattle() -> replay` 的啟動入口，現在也已開始收斂到 `beginAutoBattleReplaySession(...)`，頁面 effect 不再直接拼接 battle session bridge 與本地 replay 啟動
+- live world defeat 的回城地點、重生座標與提示文案，現在也已開始共用 `resolveWorldPlayerDefeatOutcome(...)`，頁面不再自己手寫敗北 outcome
 - replay 完成時的勝敗、擊殺目標與回城規則，現在也已開始共用 `resolveAutoBattleReplayOutcome(...) / getBattleRespawnMapId(...)`，頁面不再自己重算 defeated monster 與 replay defeat respawn 判定
 - `Adventure` 內 live world kill 與 replay finish 的獎勵套用，現在也已開始共用 `applyBattleRewards(...)`，即時戰鬥與時間軸回放不再各自維護兩套發獎字串與掉落派發流程
 - replay 敗北回城的復活點判定，也已對齊 live world defeat 的 `getBattleRespawnMapId()` 規則，不再出現同一場景 live / replay 回城地點不一致
