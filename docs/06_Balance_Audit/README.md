@@ -37,6 +37,7 @@
 - `Adventure` 內 world strike 與 replay step 的 visual payload，現在也已開始共用 `WorldStrikeVisualPlan` 路徑；live / replay 的 effect dispatch 不再各自維護 payload 組裝
 - `Adventure` 內舊戰報 replay 的 delay 與 context 組裝，現在也已開始共用 `createBattleReplayStepPlan(...) + queueTimedCombatPlan(...)`，回放 effect 不再每次重算 step delay 與 target / skill context
 - `Adventure` 內 `runAutoBattle() -> replay` 的橋接與 replay step state transition，現在也已開始共用 `createAutoBattleReplaySession(...) / advanceAutoBattleReplaySession(...)`，頁面不再自己重建 first log / snapshot / replayQueue，也不再自己手動 append log、slice queue、patch snapshot
+- replay 完成時的勝敗、擊殺目標與回城規則，現在也已開始共用 `resolveAutoBattleReplayOutcome(...) / getBattleRespawnMapId(...)`，頁面不再自己重算 replay defeat respawn 與 defeated monster
 - `Adventure` 內舊戰報 replay 的 visual payload 也已開始共用 `createBattleReplayVisualPlan(...)`，attack / damage visual dispatch 不再在 replay step 內直接拼裝輸入
 - `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，現在也已開始共用 `queueTimedCombatPlan(...)`，不再各自維護一套 `setTimeout` 流程
 - `Adventure` 內 player / enemy world strike 的 resolve + queue 串接，現在也已開始共用 `runResolvedWorldStrikeAction(...)`，live 分支不再同時維護 resolve 與 queue 細節

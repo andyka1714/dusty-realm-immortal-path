@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  ActiveMonster,
   Gender,
   EquipmentStats,
   ItemQuality,
@@ -16,11 +17,13 @@ import {
   createTimedCombatPlan,
   createAutoBattleReplaySession,
   createWorldStrikeQueuePlan,
+  getBattleRespawnMapId,
   getResolvedEnemySpecialCooldownSeconds,
   getResolvedSkillCooldownSeconds,
   getEnemySpecialTimelineProfile,
   getSkillTimelineProfile,
   queueTimedCombatPlan,
+  resolveAutoBattleReplayOutcome,
   resolveWorldCombatActionWindow,
   resolveEnemyWorldStrike,
   resolvePlayerWorldStrike,
@@ -496,6 +499,80 @@ describe("battle system balance", () => {
     expect(profile.areaShape).toBe("circle");
     expect(profile.maxTargets).toBeGreaterThan(1);
     expect(profile.areaDamageModifier).toBeGreaterThan(0);
+  });
+
+  it("shares replay outcome resolution and respawn map rules with world battle", () => {
+    expect(getBattleRespawnMapId(["sect_sword_join"])).toBe("4");
+    expect(getBattleRespawnMapId(["sect_beast_join"])).toBe("14");
+    expect(getBattleRespawnMapId(["sect_mystic_join"])).toBe("23");
+    expect(getBattleRespawnMapId([])).toBe("0");
+
+    const replayWinOutcome = resolveAutoBattleReplayOutcome({
+      battleSnapshot: {
+        playerHp: 420,
+        playerMaxHp: 500,
+        enemyHp: 0,
+        enemyMaxHp: 400,
+        won: true,
+        rewards: {
+          exp: 120,
+          spiritStones: 60,
+          drops: [],
+        },
+      },
+      displayedLogs: [
+        {
+          turn: 1,
+          message: "勝利",
+          isPlayer: true,
+          playerHp: 420,
+          playerMaxHp: 500,
+          enemyHp: 0,
+          enemyMaxHp: 400,
+        },
+      ],
+      currentEnemy: COMMON_ENEMIES.m1_c1,
+      currentEnemyInstanceId: "enemy-1",
+      activeMonsters: [{ instanceId: "enemy-1", x: 3, y: 4 } as ActiveMonster],
+      respawnMapId: "4",
+    });
+
+    expect(replayWinOutcome.won).toBe(true);
+    expect(replayWinOutcome.respawnMapId).toBeUndefined();
+    expect(replayWinOutcome.defeatedMonster?.instanceId).toBe("enemy-1");
+    expect(replayWinOutcome.rewards?.exp).toBe(120);
+    expect(replayWinOutcome.defeatLogMessage).toBeUndefined();
+
+    const replayDefeatOutcome = resolveAutoBattleReplayOutcome({
+      battleSnapshot: {
+        playerHp: 0,
+        playerMaxHp: 500,
+        enemyHp: 120,
+        enemyMaxHp: 400,
+        won: false,
+      },
+      displayedLogs: [
+        {
+          turn: 1,
+          message: "敗北",
+          isPlayer: false,
+          playerHp: 0,
+          playerMaxHp: 500,
+          enemyHp: 120,
+          enemyMaxHp: 400,
+        },
+      ],
+      currentEnemy: COMMON_ENEMIES.m1_c1,
+      currentEnemyInstanceId: "enemy-1",
+      activeMonsters: [{ instanceId: "enemy-1", x: 3, y: 4 } as ActiveMonster],
+      respawnMapId: "14",
+    });
+
+    expect(replayDefeatOutcome.won).toBe(false);
+    expect(replayDefeatOutcome.respawnMapId).toBe("14");
+    expect(replayDefeatOutcome.defeatedMonster).toBeNull();
+    expect(replayDefeatOutcome.rewards).toBeUndefined();
+    expect(replayDefeatOutcome.defeatLogMessage).toContain(COMMON_ENEMIES.m1_c1.name);
   });
 
   it("shares enemy special timeline metadata between world strikes and timeline combat", () => {

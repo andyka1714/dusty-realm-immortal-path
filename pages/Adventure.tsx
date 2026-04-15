@@ -11,7 +11,9 @@ import {
   createAutoBattleReplaySession,
   createWorldStrikeQueuePlan,
   calculatePlayerStats,
+  getBattleRespawnMapId,
   queueTimedCombatPlan,
+  resolveAutoBattleReplayOutcome,
   resolveWorldCombatActionWindow,
   resolvePlayerWorldStrike,
   resolveEnemyWorldStrike,
@@ -1469,15 +1471,6 @@ export const Adventure: React.FC<AdventureProps> = ({
     }));
   };
 
-  const getBattleRespawnMapId = () =>
-    completedQuests.includes('sect_sword_join')
-      ? '4'
-      : completedQuests.includes('sect_beast_join')
-        ? '14'
-        : completedQuests.includes('sect_mystic_join')
-          ? '23'
-          : '0';
-
   const applyBattleRewards = ({
     enemy,
     rewards,
@@ -1539,7 +1532,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   };
 
   const handleWorldPlayerDefeat = () => {
-    const respawnMapId = getBattleRespawnMapId();
+    const respawnMapId = getBattleRespawnMapId(completedQuests);
     dispatch(addLog({
       message: '你在野外遭受重創，被傳送回安全地帶調息。',
       type: 'danger',
@@ -1917,18 +1910,23 @@ export const Adventure: React.FC<AdventureProps> = ({
         if (isReplayingBattle && replayQueue.length === 0 && battleSnapshot) {
              // Replay Finished -> Apply Final Results
              setIsReplayingBattle(false);
-             const defeatedMonster = currentEnemyInstanceId
-               ? activeMonsters.find((monster) => monster.instanceId === currentEnemyInstanceId)
-               : null;
+             const replayOutcome = resolveAutoBattleReplayOutcome({
+                 battleSnapshot,
+                 displayedLogs,
+                 currentEnemy,
+                 currentEnemyInstanceId,
+                 activeMonsters,
+                 respawnMapId: getBattleRespawnMapId(completedQuests),
+             });
 
-             if (battleSnapshot.won && defeatedMonster) {
+             if (replayOutcome.won && replayOutcome.defeatedMonster) {
                  dispatch(addVisualEffect({
                      type: 'area',
                      text: '',
                      color: '#fca5a5',
                      colorInt: 0xfca5a5,
-                     targetX: defeatedMonster.x,
-                     targetY: defeatedMonster.y,
+                     targetX: replayOutcome.defeatedMonster.x,
+                     targetY: replayOutcome.defeatedMonster.y,
                      radius: 0.9,
                      durationMs: 420,
                  }));
@@ -1937,25 +1935,26 @@ export const Adventure: React.FC<AdventureProps> = ({
                      text: '',
                      color: '#ffffff',
                      colorInt: 0xffffff,
-                     targetX: defeatedMonster.x,
-                     targetY: defeatedMonster.y,
+                     targetX: replayOutcome.defeatedMonster.x,
+                     targetY: replayOutcome.defeatedMonster.y,
                      radius: 0.85,
                      durationMs: 320,
                  }));
              }
 
-             const respawnMapId = battleSnapshot.won ? undefined : getBattleRespawnMapId();
+             dispatch(resolveBattle({
+                 won: replayOutcome.won,
+                 logs: replayOutcome.logs,
+                 respawnMapId: replayOutcome.respawnMapId,
+             }));
 
-             dispatch(resolveBattle({ won: battleSnapshot.won, logs: displayedLogs, respawnMapId })); // Use displayed logs as final source of truth for Redux if needed (or just use original)
-             
-             // Process Rewards
-              if (battleSnapshot.won && battleSnapshot.rewards) {
-                  if (currentEnemy) {
-                      applyBattleRewards({ enemy: currentEnemy, rewards: battleSnapshot.rewards });
-                  }
-              } else if (!battleSnapshot.won && currentEnemy) {
-                  dispatch(addLog({ message: `不敵 ${currentEnemy.name}，狼狽逃回。`, type: 'danger' }));
-              }
+             if (replayOutcome.won && replayOutcome.rewards) {
+                 if (currentEnemy) {
+                     applyBattleRewards({ enemy: currentEnemy, rewards: replayOutcome.rewards });
+                 }
+             } else if (replayOutcome.defeatLogMessage) {
+                 dispatch(addLog({ message: replayOutcome.defeatLogMessage, type: 'danger' }));
+             }
         }
         return;
     }

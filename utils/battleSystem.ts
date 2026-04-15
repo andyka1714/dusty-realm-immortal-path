@@ -1,4 +1,5 @@
 import {
+  ActiveMonster,
   BaseAttributes,
   Enemy,
   CombatLog,
@@ -86,6 +87,15 @@ export interface AdvancedAutoBattleReplaySession {
   nextSession: AutoBattleReplaySession;
 }
 
+export interface AutoBattleReplayOutcome {
+  won: boolean;
+  logs: CombatLog[];
+  respawnMapId?: string;
+  defeatedMonster: ActiveMonster | null;
+  rewards?: AutoBattleReplaySession["battleSnapshot"]["rewards"];
+  defeatLogMessage?: string;
+}
+
 export interface ResolvedAutoBattleReplayStep<TMonster, TSkill> {
   nextLog: CombatLog;
   nextSession: AutoBattleReplaySession;
@@ -154,6 +164,15 @@ export const createTimedCombatPlan = ({
   onQueue,
   execute,
 });
+
+export const getBattleRespawnMapId = (completedQuestIds: string[]) =>
+  completedQuestIds.includes("sect_sword_join")
+    ? "4"
+    : completedQuestIds.includes("sect_beast_join")
+      ? "14"
+      : completedQuestIds.includes("sect_mystic_join")
+        ? "23"
+        : "0";
 
 export const selectNearestWorldCombatTarget = <TTarget,>({
   targets,
@@ -8542,6 +8561,41 @@ export const advanceAutoBattleReplaySession = (
             }
           : session.battleSnapshot,
     },
+  };
+};
+
+export const resolveAutoBattleReplayOutcome = ({
+  battleSnapshot,
+  displayedLogs,
+  currentEnemy,
+  currentEnemyInstanceId,
+  activeMonsters,
+  respawnMapId,
+}: {
+  battleSnapshot: AutoBattleReplaySession["battleSnapshot"];
+  displayedLogs: CombatLog[];
+  currentEnemy?: Enemy | null;
+  currentEnemyInstanceId?: string | null;
+  activeMonsters: ActiveMonster[];
+  respawnMapId?: string;
+}): AutoBattleReplayOutcome => {
+  const defeatedMonster =
+    battleSnapshot.won && currentEnemyInstanceId
+      ? activeMonsters.find(
+          (monster) => monster.instanceId === currentEnemyInstanceId
+        ) ?? null
+      : null;
+
+  return {
+    won: battleSnapshot.won,
+    logs: displayedLogs,
+    respawnMapId: battleSnapshot.won ? undefined : respawnMapId,
+    defeatedMonster,
+    rewards: battleSnapshot.won ? battleSnapshot.rewards : undefined,
+    defeatLogMessage:
+      !battleSnapshot.won && currentEnemy
+        ? `不敵 ${currentEnemy.name}，狼狽逃回。`
+        : undefined,
   };
 };
 
