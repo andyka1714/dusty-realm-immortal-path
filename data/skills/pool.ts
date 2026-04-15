@@ -341,6 +341,41 @@ const buildRemovalPoolIdsByProfession = (
     ])
   ) as Record<ProfessionType, string[]>;
 
+const filterEntryIdsByProfession = (
+  idsByProfession: Record<ProfessionType, string[]>,
+  predicate: (entry: SkillPoolEntry) => boolean
+) =>
+  Object.fromEntries(
+    Object.entries(idsByProfession).map(([profession, skillIds]) => [
+      profession,
+      skillIds.filter((skillId) => {
+        const entry = SKILL_POOL_REGISTRY[skillId];
+        return entry ? predicate(entry) : false;
+      }),
+    ])
+  ) as Record<ProfessionType, string[]>;
+
+const filterEntryIdsByProfessionAndReplacement = (
+  idsByProfessionAndReplacement: Record<ProfessionType, Record<string, string[]>>,
+  predicate: (entry: SkillPoolEntry) => boolean
+) =>
+  Object.fromEntries(
+    Object.entries(idsByProfessionAndReplacement).map(([profession, groups]) => [
+      profession,
+      Object.fromEntries(
+        Object.entries(groups)
+          .map(([replacementSkillId, skillIds]) => [
+            replacementSkillId,
+            skillIds.filter((skillId) => {
+              const entry = SKILL_POOL_REGISTRY[skillId];
+              return entry ? predicate(entry) : false;
+            }),
+          ])
+          .filter(([, skillIds]) => skillIds.length > 0)
+      ),
+    ])
+  ) as Record<ProfessionType, Record<string, string[]>>;
+
 const buildFinalCullPoolArtifacts = (
   groupsByProfession: Record<ProfessionType, Record<string, SkillPoolEntry[]>>
 ) => {
@@ -488,6 +523,28 @@ export const FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT =
 
 export const FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION =
   FINAL_CULL_POOL_ARTIFACTS.removalPoolIdsByProfession;
+
+export const FINAL_CULL_TRANSITION_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT =
+  filterEntryIdsByProfessionAndReplacement(
+    FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT,
+    (entry) => entry.poolStatus === "transition"
+  );
+
+export const FINAL_CULL_LEGACY_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT =
+  filterEntryIdsByProfessionAndReplacement(
+    FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT,
+    (entry) => entry.poolStatus === "legacy"
+  );
+
+export const FINAL_CULL_TRANSITION_REMOVAL_POOL_IDS_BY_PROFESSION =
+  filterEntryIdsByProfession(FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION, (entry) =>
+    entry.poolStatus === "transition"
+  );
+
+export const FINAL_CULL_LEGACY_REMOVAL_POOL_IDS_BY_PROFESSION =
+  filterEntryIdsByProfession(FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION, (entry) =>
+    entry.poolStatus === "legacy"
+  );
 
 export const getSkillPoolEntry = (skillId: string) => SKILL_POOL_REGISTRY[skillId];
 

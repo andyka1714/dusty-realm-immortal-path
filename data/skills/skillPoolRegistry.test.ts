@@ -34,6 +34,12 @@ import {
   FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION,
   FINAL_CULL_REPLACEMENT_TARGET_SKILL_MAP_BY_PROFESSION,
   FINAL_CULL_REPLACEMENT_TARGET_SKILLS_BY_PROFESSION,
+  FINAL_CULL_TRANSITION_REMOVAL_SKILL_MAP_BY_PROFESSION,
+  FINAL_CULL_TRANSITION_REMOVAL_SKILLS_BY_PROFESSION,
+  FINAL_CULL_TRANSITION_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
+  FINAL_CULL_LEGACY_REMOVAL_SKILL_MAP_BY_PROFESSION,
+  FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION,
+  FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
   FINAL_CULL_REPLACEMENT_TARGET_POOL_MAP_BY_PROFESSION,
   FINAL_CULL_REPLACEMENT_TARGET_POOLS_BY_PROFESSION,
   FINAL_CULL_REMOVAL_SKILL_MAP_BY_PROFESSION,
@@ -516,6 +522,40 @@ describe("skill pool registry", () => {
       FINAL_CULL_REMOVAL_SKILL_MAP_BY_PROFESSION[ProfessionType.Sword].s_ie_active
         ?.replacementSkillId
     ).toBe("s_tr_active");
+    expect(
+      FINAL_CULL_TRANSITION_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT[
+        ProfessionType.Sword
+      ].s_tr_active
+        .map((skill) => skill.id)
+        .sort()
+    ).toEqual(["s_bi_active", "s_im_active"].sort());
+    expect(
+      FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION_AND_REPLACEMENT[
+        ProfessionType.Body
+      ].b_sf_passive
+        .map((skill) => skill.id)
+        .sort()
+    ).toEqual(["b_bi_passive", "b_tr_passive", "b_im_passive", "b_ie_passive"].sort());
+    expect(
+      FINAL_CULL_TRANSITION_REMOVAL_SKILLS_BY_PROFESSION[ProfessionType.Mage]
+        .map((skill) => skill.id)
+        .sort()
+    ).toEqual(
+      ["m_vr_passive", "m_tr_passive", "m_im_passive", "m_bi_active", "m_ma_active", "m_im_active"].sort()
+    );
+    expect(
+      FINAL_CULL_LEGACY_REMOVAL_SKILLS_BY_PROFESSION[ProfessionType.Sword]
+        .map((skill) => skill.id)
+        .sort()
+    ).toEqual(["s_bi_passive", "s_im_passive", "s_ie_active", "s_ie_passive"].sort());
+    expect(
+      FINAL_CULL_TRANSITION_REMOVAL_SKILL_MAP_BY_PROFESSION[ProfessionType.Body].b_ma_passive
+        ?.replacementSkillId
+    ).toBe("b_sf_passive");
+    expect(
+      FINAL_CULL_LEGACY_REMOVAL_SKILL_MAP_BY_PROFESSION[ProfessionType.Mage].m_ma_passive
+        ?.replacementSkillId
+    ).toBe("m_sf_passive");
   });
 
   it("ensures prerequisite chains only point to skills of the same profession", () => {

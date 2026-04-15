@@ -12,7 +12,7 @@ import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move, Swords, Flame, Droplets, Shield, ShieldOff, Zap, Snowflake, Sparkles } from 'lucide-react';
 import { parseBattleLog } from '../utils/logParser';
-import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory, NPC, NPCType, ProfessionType, ActiveMonster } from '../types';
+import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory, NPC, NPCType, ProfessionType, ActiveMonster, CombatLog } from '../types';
 import { MOVEMENT_SPEEDS, REALM_NAMES, ELEMENT_COLORS, ELEMENT_NAMES } from '../constants';
 import clsx from 'clsx';
 import { Modal } from '../components/Modal';
@@ -1308,6 +1308,51 @@ export const Adventure: React.FC<AdventureProps> = ({
     };
   };
 
+  const createBattleReplaySession = ({
+    enemy,
+    playerStats,
+  }: {
+    enemy: NonNullable<typeof currentEnemy>;
+    playerStats: ReturnType<typeof calculatePlayerStats>;
+  }) => {
+    const { won, logs, rewards } = runAutoBattle(playerStats, enemy);
+    const firstLog =
+      logs[0] ??
+      ({
+        turn: 1,
+        message: `你與 ${enemy.name} 展開交戰。`,
+        isPlayer: true,
+        playerHp: playerStats.hp,
+        playerMaxHp: playerStats.maxHp,
+        enemyHp: enemy.hp,
+        enemyMaxHp: enemy.hp,
+      } satisfies CombatLog);
+
+    return {
+      displayedLogs: [firstLog],
+      replayQueue: logs.slice(1),
+      battleSnapshot: {
+        playerHp: firstLog.playerHp ?? playerStats.hp,
+        playerMaxHp: firstLog.playerMaxHp ?? playerStats.maxHp,
+        enemyHp: firstLog.enemyHp ?? enemy.hp,
+        enemyMaxHp: firstLog.enemyMaxHp ?? enemy.hp,
+        won,
+        rewards,
+      },
+    };
+  };
+
+  const startBattleReplaySession = ({
+    displayedLogs,
+    replayQueue,
+    battleSnapshot,
+  }: ReturnType<typeof createBattleReplaySession>) => {
+    setDisplayedLogs(displayedLogs);
+    setReplayQueue(replayQueue);
+    setBattleSnapshot(battleSnapshot);
+    setIsReplayingBattle(true);
+  };
+
   const processBattleReplayStep = ({
     nextLog,
     targetMonster,
@@ -2245,25 +2290,12 @@ export const Adventure: React.FC<AdventureProps> = ({
             profession,
             character.skills
           );
-          const { won, logs, rewards } = runAutoBattle(playerStats, currentEnemy);
-          
-          // Start Replay
-          // Pre-fill first log immediately so screen isn't empty
-          const firstLog = logs[0];
-          const remainingLogs = logs.slice(1);
-
-          setDisplayedLogs([firstLog]);
-          setReplayQueue(remainingLogs);
-          
-          setBattleSnapshot({
-              playerHp: firstLog.playerHp ?? playerStats.hp,
-              playerMaxHp: firstLog.playerMaxHp ?? playerStats.maxHp,
-              enemyHp: firstLog.enemyHp ?? currentEnemy.hp,
-              enemyMaxHp: firstLog.enemyMaxHp ?? currentEnemy.maxHp,
-              won,
-              rewards
-          });
-          setIsReplayingBattle(true);
+          startBattleReplaySession(
+            createBattleReplaySession({
+              enemy: currentEnemy,
+              playerStats,
+            })
+          );
       }
   }, [isBattling, currentEnemy, lastBattleResult, character, dispatch]);
 
