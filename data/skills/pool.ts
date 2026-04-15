@@ -209,6 +209,34 @@ const buildEntryMapByProfession = (entriesByProfession: Record<ProfessionType, S
     ])
   ) as Record<ProfessionType, Record<string, SkillPoolEntry>>;
 
+const buildEntryMapByProfessionAndReplacement = (
+  groupsByProfession: Record<ProfessionType, Record<string, SkillPoolEntry[]>>
+) =>
+  Object.fromEntries(
+    Object.entries(groupsByProfession).map(([profession, groups]) => [
+      profession,
+      Object.fromEntries(
+        Object.entries(groups).map(([replacementSkillId, entries]) => [
+          replacementSkillId,
+          buildSkillPoolRegistry({
+            [ProfessionType.None]: [],
+            [ProfessionType.Sword]: profession === ProfessionType.Sword ? entries : [],
+            [ProfessionType.Body]: profession === ProfessionType.Body ? entries : [],
+            [ProfessionType.Mage]: profession === ProfessionType.Mage ? entries : [],
+          } as Record<ProfessionType, SkillPoolEntry[]>),
+        ])
+      ),
+    ])
+  ) as Record<ProfessionType, Record<string, Record<string, SkillPoolEntry>>>;
+
+const buildEntryIdsByProfession = (entriesByProfession: Record<ProfessionType, SkillPoolEntry[]>) =>
+  Object.fromEntries(
+    Object.entries(entriesByProfession).map(([profession, entries]) => [
+      profession,
+      entries.map((entry) => entry.skillId),
+    ])
+  ) as Record<ProfessionType, string[]>;
+
 const buildEntryIdsByProfessionAndReplacement = (
   groupsByProfession: Record<ProfessionType, Record<string, SkillPoolEntry[]>>
 ) =>
@@ -223,6 +251,16 @@ const buildEntryIdsByProfessionAndReplacement = (
       ),
     ])
   ) as Record<ProfessionType, Record<string, string[]>>;
+
+const buildEntryCountsByProfession = (
+  entriesByProfession: Record<ProfessionType, SkillPoolEntry[]>
+) =>
+  Object.fromEntries(
+    Object.entries(entriesByProfession).map(([profession, entries]) => [
+      profession,
+      entries.length,
+    ])
+  ) as Record<ProfessionType, number>;
 
 const buildEntryCountsByProfessionAndReplacement = (
   groupsByProfession: Record<ProfessionType, Record<string, SkillPoolEntry[]>>
@@ -271,6 +309,69 @@ const buildReplacementPlanByProfession = (
     ProfessionType,
     Record<string, { keep?: SkillPoolEntry; remove: SkillPoolEntry[] }>
   >;
+
+const buildRemovalPoolIdsByProfessionAndReplacement = (
+  plansByProfession: Record<
+    ProfessionType,
+    Record<string, { keep?: SkillPoolEntry; remove: SkillPoolEntry[] }>
+  >
+) =>
+  Object.fromEntries(
+    Object.entries(plansByProfession).map(([profession, plans]) => [
+      profession,
+      Object.fromEntries(
+        Object.entries(plans).map(([replacementSkillId, plan]) => [
+          replacementSkillId,
+          plan.remove.map((entry) => entry.skillId),
+        ])
+      ),
+    ])
+  ) as Record<ProfessionType, Record<string, string[]>>;
+
+const buildRemovalPoolIdsByProfession = (
+  plansByProfession: Record<
+    ProfessionType,
+    Record<string, { keep?: SkillPoolEntry; remove: SkillPoolEntry[] }>
+  >
+) =>
+  Object.fromEntries(
+    Object.entries(plansByProfession).map(([profession, plans]) => [
+      profession,
+      Object.values(plans).flatMap((plan) => plan.remove.map((entry) => entry.skillId)),
+    ])
+  ) as Record<ProfessionType, string[]>;
+
+const buildFinalCullPoolArtifacts = (
+  groupsByProfession: Record<ProfessionType, Record<string, SkillPoolEntry[]>>
+) => {
+  const professionPools = buildFlattenedEntryViewsByProfession(groupsByProfession);
+  const replacementTargetPoolsByProfession =
+    buildReplacementTargetEntriesByProfession(groupsByProfession);
+  const replacementPlansByProfession = buildReplacementPlanByProfession(groupsByProfession);
+
+  return {
+    professionPools,
+    registry: buildSkillPoolRegistry(professionPools),
+    mapByProfession: buildEntryMapByProfession(professionPools),
+    idsByProfession: buildEntryIdsByProfession(professionPools),
+    mapByProfessionAndReplacement: buildEntryMapByProfessionAndReplacement(groupsByProfession),
+    idsByProfessionAndReplacement: buildEntryIdsByProfessionAndReplacement(groupsByProfession),
+    countsByProfession: buildEntryCountsByProfession(professionPools),
+    countsByProfessionAndReplacement:
+      buildEntryCountsByProfessionAndReplacement(groupsByProfession),
+    replacementTargetPoolsByProfession,
+    replacementTargetPoolMapByProfession: buildEntryMapByProfession(
+      replacementTargetPoolsByProfession
+    ),
+    replacementTargetIdsByProfession: buildEntryIdsByProfession(
+      replacementTargetPoolsByProfession
+    ),
+    replacementPlansByProfession,
+    removalPoolIdsByProfessionAndReplacement:
+      buildRemovalPoolIdsByProfessionAndReplacement(replacementPlansByProfession),
+    removalPoolIdsByProfession: buildRemovalPoolIdsByProfession(replacementPlansByProfession),
+  };
+};
 
 export const SKILL_POOL_REGISTRY: Record<string, SkillPoolEntry> =
   buildSkillPoolRegistry(SKILL_POOL_ENTRIES_BY_PROFESSION);
@@ -345,90 +446,48 @@ export const FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT = mergeEntryGroups
   LEGACY_SKILL_PROFESSION_POOLS_BY_REPLACEMENT
 );
 
-export const FINAL_CULL_SKILL_PROFESSION_POOLS =
-  buildFlattenedEntryViewsByProfession(FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT);
-
-export const FINAL_CULL_SKILL_POOL_REGISTRY = buildSkillPoolRegistry(
-  FINAL_CULL_SKILL_PROFESSION_POOLS
-);
-
-export const FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION = buildEntryMapByProfession(
-  FINAL_CULL_SKILL_PROFESSION_POOLS
-);
-
-export const FINAL_CULL_SKILL_POOL_IDS_BY_PROFESSION = Object.fromEntries(
-  Object.entries(FINAL_CULL_SKILL_PROFESSION_POOLS).map(([profession, entries]) => [
-    profession,
-    entries.map((entry) => entry.skillId),
-  ])
-) as Record<ProfessionType, string[]>;
-
-export const FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION_AND_REPLACEMENT = Object.fromEntries(
-  Object.entries(FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT).map(([profession, groups]) => [
-    profession,
-    Object.fromEntries(
-      Object.entries(groups).map(([replacementSkillId, entries]) => [
-        replacementSkillId,
-        buildSkillPoolRegistry({
-          [ProfessionType.None]: [],
-          [ProfessionType.Sword]: profession === ProfessionType.Sword ? entries : [],
-          [ProfessionType.Body]: profession === ProfessionType.Body ? entries : [],
-          [ProfessionType.Mage]: profession === ProfessionType.Mage ? entries : [],
-        } as Record<ProfessionType, SkillPoolEntry[]>),
-      ])
-    ),
-  ])
-) as Record<ProfessionType, Record<string, Record<string, SkillPoolEntry>>>;
-
-export const FINAL_CULL_SKILL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT =
-  buildEntryIdsByProfessionAndReplacement(FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT);
-
-export const FINAL_CULL_SKILL_POOL_COUNTS_BY_PROFESSION_AND_REPLACEMENT =
-  buildEntryCountsByProfessionAndReplacement(FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT);
-
-export const FINAL_CULL_SKILL_POOL_COUNTS_BY_PROFESSION = Object.fromEntries(
-  Object.entries(FINAL_CULL_SKILL_PROFESSION_POOLS).map(([profession, entries]) => [
-    profession,
-    entries.length,
-  ])
-) as Record<ProfessionType, number>;
-
-export const FINAL_CULL_REPLACEMENT_TARGET_POOLS_BY_PROFESSION =
-  buildReplacementTargetEntriesByProfession(FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT);
-
-export const FINAL_CULL_REPLACEMENT_TARGET_POOL_MAP_BY_PROFESSION = buildEntryMapByProfession(
-  FINAL_CULL_REPLACEMENT_TARGET_POOLS_BY_PROFESSION
-);
-
-export const FINAL_CULL_REPLACEMENT_TARGET_IDS_BY_PROFESSION = Object.fromEntries(
-  Object.entries(FINAL_CULL_REPLACEMENT_TARGET_POOLS_BY_PROFESSION).map(([profession, entries]) => [
-    profession,
-    entries.map((entry) => entry.skillId),
-  ])
-) as Record<ProfessionType, string[]>;
-
-export const FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION = buildReplacementPlanByProfession(
+const FINAL_CULL_POOL_ARTIFACTS = buildFinalCullPoolArtifacts(
   FINAL_CULL_SKILL_PROFESSION_POOLS_BY_REPLACEMENT
 );
 
-export const FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT = Object.fromEntries(
-  Object.entries(FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION).map(([profession, plans]) => [
-    profession,
-    Object.fromEntries(
-      Object.entries(plans).map(([replacementSkillId, plan]) => [
-        replacementSkillId,
-        plan.remove.map((entry) => entry.skillId),
-      ])
-    ),
-  ])
-) as Record<ProfessionType, Record<string, string[]>>;
+export const FINAL_CULL_SKILL_PROFESSION_POOLS = FINAL_CULL_POOL_ARTIFACTS.professionPools;
 
-export const FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION = Object.fromEntries(
-  Object.entries(FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION).map(([profession, plans]) => [
-    profession,
-    Object.values(plans).flatMap((plan) => plan.remove.map((entry) => entry.skillId)),
-  ])
-) as Record<ProfessionType, string[]>;
+export const FINAL_CULL_SKILL_POOL_REGISTRY = FINAL_CULL_POOL_ARTIFACTS.registry;
+
+export const FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION =
+  FINAL_CULL_POOL_ARTIFACTS.mapByProfession;
+
+export const FINAL_CULL_SKILL_POOL_IDS_BY_PROFESSION = FINAL_CULL_POOL_ARTIFACTS.idsByProfession;
+
+export const FINAL_CULL_SKILL_POOL_MAP_BY_PROFESSION_AND_REPLACEMENT =
+  FINAL_CULL_POOL_ARTIFACTS.mapByProfessionAndReplacement;
+
+export const FINAL_CULL_SKILL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT =
+  FINAL_CULL_POOL_ARTIFACTS.idsByProfessionAndReplacement;
+
+export const FINAL_CULL_SKILL_POOL_COUNTS_BY_PROFESSION_AND_REPLACEMENT =
+  FINAL_CULL_POOL_ARTIFACTS.countsByProfessionAndReplacement;
+
+export const FINAL_CULL_SKILL_POOL_COUNTS_BY_PROFESSION =
+  FINAL_CULL_POOL_ARTIFACTS.countsByProfession;
+
+export const FINAL_CULL_REPLACEMENT_TARGET_POOLS_BY_PROFESSION =
+  FINAL_CULL_POOL_ARTIFACTS.replacementTargetPoolsByProfession;
+
+export const FINAL_CULL_REPLACEMENT_TARGET_POOL_MAP_BY_PROFESSION =
+  FINAL_CULL_POOL_ARTIFACTS.replacementTargetPoolMapByProfession;
+
+export const FINAL_CULL_REPLACEMENT_TARGET_IDS_BY_PROFESSION =
+  FINAL_CULL_POOL_ARTIFACTS.replacementTargetIdsByProfession;
+
+export const FINAL_CULL_REPLACEMENT_PLANS_BY_PROFESSION =
+  FINAL_CULL_POOL_ARTIFACTS.replacementPlansByProfession;
+
+export const FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION_AND_REPLACEMENT =
+  FINAL_CULL_POOL_ARTIFACTS.removalPoolIdsByProfessionAndReplacement;
+
+export const FINAL_CULL_REMOVAL_POOL_IDS_BY_PROFESSION =
+  FINAL_CULL_POOL_ARTIFACTS.removalPoolIdsByProfession;
 
 export const getSkillPoolEntry = (skillId: string) => SKILL_POOL_REGISTRY[skillId];
 
