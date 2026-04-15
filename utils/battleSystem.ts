@@ -81,6 +81,103 @@ export interface AutoBattleReplaySession {
   };
 }
 
+export interface TimedCombatQueuePlan {
+  delayMs: number | undefined;
+  timerSet?: Set<ReturnType<typeof setTimeout>>;
+  onQueue?: () => void;
+  execute: () => void;
+}
+
+export const scheduleTimedCombatAction = ({
+  delayMs,
+  execute,
+  timerSet,
+}: {
+  delayMs: number | undefined;
+  execute: () => void;
+  timerSet?: Set<ReturnType<typeof setTimeout>>;
+}) => {
+  if ((delayMs ?? 0) > 0) {
+    const timer = setTimeout(() => {
+      timerSet?.delete(timer);
+      execute();
+    }, delayMs);
+    timerSet?.add(timer);
+    return timer;
+  }
+
+  execute();
+  return undefined;
+};
+
+export const queueTimedCombatPlan = ({
+  delayMs,
+  timerSet,
+  onQueue,
+  execute,
+}: TimedCombatQueuePlan) => {
+  onQueue?.();
+  return scheduleTimedCombatAction({
+    delayMs,
+    execute,
+    timerSet,
+  });
+};
+
+export const createTimedCombatPlan = ({
+  delayMs,
+  timerSet,
+  onQueue,
+  execute,
+}: TimedCombatQueuePlan): TimedCombatQueuePlan => ({
+  delayMs,
+  timerSet,
+  onQueue,
+  execute,
+});
+
+export const createResolvedTimedCombatPlan = <TResolved,>({
+  resolve,
+  buildPlan,
+}: {
+  resolve: () => TResolved;
+  buildPlan: (resolved: TResolved) => TimedCombatQueuePlan | undefined;
+}) => buildPlan(resolve());
+
+export const queueResolvedTimedCombatPlan = <TResolved,>({
+  resolve,
+  buildPlan,
+}: {
+  resolve: () => TResolved;
+  buildPlan: (resolved: TResolved) => TimedCombatQueuePlan | undefined;
+}) => {
+  const plan = createResolvedTimedCombatPlan({ resolve, buildPlan });
+  if (!plan) return undefined;
+  return queueTimedCombatPlan(plan);
+};
+
+export const runResolvedTimedCombatPlan = <TResolved,>({
+  readyAt,
+  canExecute = () => true,
+  resolve,
+  buildPlan,
+}: {
+  readyAt?: number;
+  canExecute?: () => boolean;
+  resolve: (now: number) => TResolved;
+  buildPlan: (resolved: TResolved) => TimedCombatQueuePlan | undefined;
+}) => {
+  if (!canExecute()) return undefined;
+
+  const now = Date.now();
+  if (readyAt !== undefined && now < readyAt) return undefined;
+
+  return queueResolvedTimedCombatPlan({
+    resolve: () => resolve(now),
+    buildPlan,
+  });
+};
+
 type AttackMode = "physical" | "magical" | "hybrid";
 
 interface AttackContext {

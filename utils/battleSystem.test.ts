@@ -10,13 +10,16 @@ import {
 } from "../types";
 import {
   calculatePlayerStats,
+  createTimedCombatPlan,
   createAutoBattleReplaySession,
   getResolvedEnemySpecialCooldownSeconds,
   getResolvedSkillCooldownSeconds,
   getEnemySpecialTimelineProfile,
   getSkillTimelineProfile,
+  queueTimedCombatPlan,
   resolveEnemyWorldStrike,
   resolvePlayerWorldStrike,
+  runResolvedTimedCombatPlan,
   runAutoBattle,
 } from "./battleSystem";
 import { COMMON_ENEMIES } from "../data/enemies/common";
@@ -173,6 +176,74 @@ afterEach(() => {
 });
 
 describe("battle system balance", () => {
+  it("shares timed combat plan primitives between live world actions and replay scheduling", () => {
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(1200);
+
+      const timerSet = new Set<ReturnType<typeof setTimeout>>();
+      const calls: string[] = [];
+
+      const immediatePlan = createTimedCombatPlan({
+        delayMs: 0,
+        timerSet,
+        onQueue: () => calls.push("queue:immediate"),
+        execute: () => calls.push("execute:immediate"),
+      });
+
+      queueTimedCombatPlan(immediatePlan);
+      expect(calls).toEqual(["queue:immediate", "execute:immediate"]);
+
+      const delayedTimer = runResolvedTimedCombatPlan({
+        readyAt: 1200,
+        resolve: (now) => {
+          calls.push(`resolve:${now}`);
+          return now;
+        },
+        buildPlan: (resolved) =>
+          createTimedCombatPlan({
+            delayMs: 150,
+            timerSet,
+            onQueue: () => calls.push(`queue:${resolved}`),
+            execute: () => calls.push("execute:delayed"),
+          }),
+      });
+
+      expect(delayedTimer).toBeDefined();
+      expect(timerSet.size).toBe(1);
+      expect(calls).toEqual([
+        "queue:immediate",
+        "execute:immediate",
+        "resolve:1200",
+        "queue:1200",
+      ]);
+
+      vi.advanceTimersByTime(150);
+      expect(timerSet.size).toBe(0);
+      expect(calls).toEqual([
+        "queue:immediate",
+        "execute:immediate",
+        "resolve:1200",
+        "queue:1200",
+        "execute:delayed",
+      ]);
+
+      const blockedTimer = runResolvedTimedCombatPlan({
+        readyAt: 2000,
+        resolve: () => {
+          calls.push("resolve:blocked");
+          return 0;
+        },
+        buildPlan: () => immediatePlan,
+      });
+
+      expect(blockedTimer).toBeUndefined();
+      expect(calls).not.toContain("resolve:blocked");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("shares the same timeline profile metadata for formal skills used by world and auto battle", () => {
     const profile = getSkillTimelineProfile(getSkill("m_tr_active"));
 

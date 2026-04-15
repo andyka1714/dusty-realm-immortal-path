@@ -7,7 +7,17 @@ import { MAPS } from '../data/maps';
 import { ITEMS } from '../data/items';
 import { QUESTS } from '../data/quests';
 import { enterMap, movePlayer, tickMonsters, applyWorldDamageToMonster, resolveBattle, closeBattleReport, cancelBattle, markMapVisited, addVisualEffect } from '../store/slices/adventureSlice';
-import { createAutoBattleReplaySession, calculatePlayerStats, resolvePlayerWorldStrike, resolveEnemyWorldStrike, getResolvedSkillCooldownSeconds } from '../utils/battleSystem';
+import {
+  createAutoBattleReplaySession,
+  createTimedCombatPlan,
+  calculatePlayerStats,
+  queueTimedCombatPlan,
+  resolvePlayerWorldStrike,
+  resolveEnemyWorldStrike,
+  getResolvedSkillCooldownSeconds,
+  runResolvedTimedCombatPlan,
+  type TimedCombatQueuePlan,
+} from '../utils/battleSystem';
 import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move, Swords, Flame, Droplets, Shield, ShieldOff, Zap, Snowflake, Sparkles } from 'lucide-react';
@@ -534,12 +544,6 @@ export const Adventure: React.FC<AdventureProps> = ({
     world: new Set(),
     replay: new Set(),
   });
-  type TimedCombatQueuePlan = {
-    delayMs: number | undefined;
-    timerSet?: Set<ReturnType<typeof setTimeout>>;
-    onQueue?: () => void;
-    execute: () => void;
-  };
 
   const clearCombatTimerBucket = (bucket: CombatTimerBucket) => {
     combatTimersRef.current[bucket].forEach((timer) => clearTimeout(timer));
@@ -743,95 +747,6 @@ export const Adventure: React.FC<AdventureProps> = ({
     setWorldLastCombatMessage(null);
     setEnemyActionReadyAtById({});
     setEnemySpecialReadyAtById({});
-  };
-
-  const scheduleTimedCombatAction = ({
-    delayMs,
-    execute,
-    timerSet,
-  }: {
-    delayMs: number | undefined;
-    execute: () => void;
-    timerSet?: Set<ReturnType<typeof setTimeout>>;
-  }) => {
-    if ((delayMs ?? 0) > 0) {
-      const timer = setTimeout(() => {
-        timerSet?.delete(timer);
-        execute();
-      }, delayMs);
-      timerSet?.add(timer);
-      return timer;
-    }
-
-    execute();
-  };
-
-  const queueTimedCombatPlan = ({
-    delayMs,
-    timerSet,
-    onQueue,
-    execute,
-  }: TimedCombatQueuePlan) => {
-    onQueue?.();
-    return scheduleTimedCombatAction({
-      delayMs,
-      execute,
-      timerSet,
-    });
-  };
-
-  const createTimedCombatPlan = ({
-    delayMs,
-    timerSet,
-    onQueue,
-    execute,
-  }: TimedCombatQueuePlan): TimedCombatQueuePlan => ({
-    delayMs,
-    timerSet,
-    onQueue,
-    execute,
-  });
-
-  const createResolvedTimedCombatPlan = <TResolved,>({
-    resolve,
-    buildPlan,
-  }: {
-    resolve: () => TResolved;
-    buildPlan: (resolved: TResolved) => TimedCombatQueuePlan | undefined;
-  }) => buildPlan(resolve());
-
-  const queueResolvedTimedCombatPlan = <TResolved,>({
-    resolve,
-    buildPlan,
-  }: {
-    resolve: () => TResolved;
-    buildPlan: (resolved: TResolved) => TimedCombatQueuePlan | undefined;
-  }) => {
-    const plan = createResolvedTimedCombatPlan({ resolve, buildPlan });
-    if (!plan) return undefined;
-    return queueTimedCombatPlan(plan);
-  };
-
-  const runResolvedTimedCombatPlan = <TResolved,>({
-    readyAt,
-    canExecute = () => true,
-    resolve,
-    buildPlan,
-  }: {
-    readyAt?: number;
-    canExecute?: () => boolean;
-    resolve: (now: number) => TResolved;
-    buildPlan: (resolved: TResolved) => TimedCombatQueuePlan | undefined;
-  }) => {
-    if (!canExecute()) return undefined;
-
-    const now = Date.now();
-    if (readyAt !== undefined && now < readyAt) return undefined;
-
-    return queueResolvedTimedCombatPlan({
-      resolve: () => resolve(now),
-      buildPlan,
-    });
   };
 
   const createWorldStrikeQueuePlan = ({
