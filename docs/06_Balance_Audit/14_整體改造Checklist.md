@@ -296,7 +296,7 @@
 - [x] `s_f_passive` / `b_bi_passive` / `m_im_passive` 也已補齊 timeline combat 開場待命訊息，正式標出 `養劍術` / `金剛法相` / `五氣朝元`
 - [x] 戰利品字串組裝也已開始整併到 `buildVictoryLootMessage(...)`，勝利結算函式不再直接攤開品質字樣與掉落名稱拼裝
 - [x] 舊戰報 replay 的 context、step delay 與 visual payload 組裝，也已開始收斂到 `createBattleReplayContext(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / createBattleReplayVisualPlan(...)`
-- [x] 地圖內戰鬥與時間軸內核整合為同一套即時引擎
+- [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎（目前僅完成 shared helper 收斂；`Adventure` 的 live world / replay orchestration 與 `runAutoBattle()` 的 timeline loop 仍是兩條主控路徑）
 
 ---
 
