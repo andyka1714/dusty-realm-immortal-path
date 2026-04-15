@@ -96,6 +96,13 @@ export interface AutoBattleReplayOutcome {
   defeatLogMessage?: string;
 }
 
+export interface AutoBattleReplayState {
+  displayedLogs: CombatLog[];
+  replayQueue: CombatLog[];
+  battleSnapshot: AutoBattleReplaySession["battleSnapshot"] | null;
+  isReplayingBattle: boolean;
+}
+
 export interface AutoBattleReplayFinishPlan {
   shouldStopReplay: true;
   battleResult: {
@@ -8972,6 +8979,27 @@ export const createAutoBattleReplaySession = (
     },
   };
 };
+
+export const createAutoBattleReplayState = ({
+  session,
+  isReplayingBattle = true,
+}: {
+  session: AutoBattleReplaySession;
+  isReplayingBattle?: boolean;
+}): AutoBattleReplayState => ({
+  displayedLogs: session.displayedLogs,
+  replayQueue: session.replayQueue,
+  battleSnapshot: session.battleSnapshot,
+  isReplayingBattle,
+});
+
+export const createIdleAutoBattleReplayState =
+  (): AutoBattleReplayState => ({
+    displayedLogs: [],
+    replayQueue: [],
+    battleSnapshot: null,
+    isReplayingBattle: false,
+  });
 
 export const advanceAutoBattleReplaySession = (
   session: AutoBattleReplaySession

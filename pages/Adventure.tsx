@@ -13,6 +13,8 @@ import {
   createCombatTimerBuckets,
   createAutoBattleReplaySession,
   createAutoBattleReplayFinishPlan,
+  createAutoBattleReplayState,
+  createIdleAutoBattleReplayState,
   createWorldStrikeQueuePlan,
   calculatePlayerStats,
   getBattleReportAutoCloseDelayMs,
@@ -1191,27 +1193,16 @@ export const Adventure: React.FC<AdventureProps> = ({
     normalizedUsedSkill,
   });
 
-  const applyBattleReplaySessionState = ({
+  const applyBattleReplayState = ({
     displayedLogs,
     replayQueue,
     battleSnapshot,
-  }: ReturnType<typeof createAutoBattleReplaySession>) => {
+    isReplayingBattle,
+  }: ReturnType<typeof createAutoBattleReplayState>) => {
     setDisplayedLogs(displayedLogs);
     setReplayQueue(replayQueue);
     setBattleSnapshot(battleSnapshot);
-  };
-
-  const startBattleReplaySession = ({
-    displayedLogs,
-    replayQueue,
-    battleSnapshot,
-  }: ReturnType<typeof createAutoBattleReplaySession>) => {
-    applyBattleReplaySessionState({
-      displayedLogs,
-      replayQueue,
-      battleSnapshot,
-    });
-    setIsReplayingBattle(true);
+    setIsReplayingBattle(isReplayingBattle);
   };
 
   const executePlayerWorldStrike = ({
@@ -1875,7 +1866,11 @@ export const Adventure: React.FC<AdventureProps> = ({
       resolveSkillByName: getFormalSkillByName,
       timerSet: combatTimersRef.current.replay,
       executeStep: ({ nextLog, nextSession, targetMonster, normalizedUsedSkill }) => {
-        applyBattleReplaySessionState(nextSession);
+        applyBattleReplayState(
+          createAutoBattleReplayState({
+            session: nextSession,
+          })
+        );
 
         const logContainer = document.getElementById('battle-log-container');
         if (logContainer) logContainer.scrollTop = logContainer.scrollHeight;
@@ -1975,15 +1970,16 @@ export const Adventure: React.FC<AdventureProps> = ({
       if (replayTransition.kind === 'reset') {
           battleProcessedRef.current = false;
           clearCombatTimerBucket(combatTimersRef.current, 'replay');
-          setDisplayedLogs([]);
-          setReplayQueue([]);
-          setIsReplayingBattle(false);
-          setBattleSnapshot(null);
+          applyBattleReplayState(createIdleAutoBattleReplayState());
           return;
       }
 
       if (replayTransition.kind === 'start') {
-          startBattleReplaySession(replayTransition.session);
+          applyBattleReplayState(
+            createAutoBattleReplayState({
+              session: replayTransition.session,
+            })
+          );
       }
   }, [isBattling, currentEnemy, lastBattleResult, character, dispatch]);
 

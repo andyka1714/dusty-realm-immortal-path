@@ -15,11 +15,13 @@ import {
   clearCombatTimerBucket,
   createCombatTimerBuckets,
   createAutoBattleReplayFinishPlan,
+  createAutoBattleReplayState,
   createBattleReplayStepPlan,
   calculatePlayerStats,
   createResolvedWorldStrikeActionPlan,
   createTimedCombatPlan,
   createAutoBattleReplaySession,
+  createIdleAutoBattleReplayState,
   createWorldStrikeQueuePlan,
   getBattleReportAutoCloseDelayMs,
   getBattleRespawnMapId,
@@ -1584,6 +1586,22 @@ describe("battle system balance", () => {
     expect(session.battleSnapshot.playerMaxHp).toBe(player.maxHp);
     expect(session.battleSnapshot.enemyMaxHp).toBe(COMMON_ENEMIES.m30_c1.hp);
     expect(session.replayQueue.length).toBeGreaterThanOrEqual(0);
+    expect(
+      createAutoBattleReplayState({
+        session,
+      })
+    ).toEqual({
+      displayedLogs: session.displayedLogs,
+      replayQueue: session.replayQueue,
+      battleSnapshot: session.battleSnapshot,
+      isReplayingBattle: true,
+    });
+    expect(createIdleAutoBattleReplayState()).toEqual({
+      displayedLogs: [],
+      replayQueue: [],
+      battleSnapshot: null,
+      isReplayingBattle: false,
+    });
 
     const advancedSession = advanceAutoBattleReplaySession(session);
     if (advancedSession.nextLog) {
