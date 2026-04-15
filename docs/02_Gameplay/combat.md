@@ -102,7 +102,7 @@
 - `Adventure` 內 world strike 與舊戰報 replay 的 timed plan primitive、queue builder 與 replay step runner，現在已正式回收到 `battleSystem.ts` 的 `createTimedCombatPlan(...) / createWorldStrikeQueuePlan(...) / createResolvedWorldStrikeActionPlan(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / runResolvedTimedCombatPlan(...) / runResolvedWorldStrikeAction(...) / runAutoBattleReplayStep(...)`，頁面不再自己維護這組 battle-side queue 原語
 - `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在已回收到 `battleSystem.ts` 的 `runPlayerWorldStrikeAction(...) / runEnemyWorldStrikeAction(...)`，頁面不再自己維護 player / enemy 的 resolved strike plan 樣板
 - `Adventure` 內 player / enemy world strike 的 action plan，也已正式直接回到 `createWorldStrikeQueuePlan(...)`，不再保留只負責轉手的 resolved wrapper
-- `Adventure` 內 auto-target 與 live world action window 的主控判定，現在也已開始共用 `selectNearestWorldCombatTarget(...) / resolveWorldCombatActionWindow(...)`，頁面不再自己決定最近怪與雙方出手窗口
+- `Adventure` 內 auto-target 與 live world action window 的主控判定，現在也已開始共用 `resolveWorldCombatAutoTarget(...) / resolveWorldCombatActionWindow(...) / runWorldCombatActionWindowStep(...)`，頁面不再自己決定最近怪與雙方出手窗口
 - `Adventure` 內 `runAutoBattle() -> replay` 的橋接，現在也已開始共用 `battleSystem.ts` 提供的 `createAutoBattleReplaySession(...) / advanceAutoBattleReplaySession(...)`，world 頁面不再自己重建 first log / snapshot / replayQueue，也不再自己手動 append log、slice queue、patch snapshot
 - `Adventure` 內 `runAutoBattle() -> replay` 的啟動入口，現在也已開始收斂到 `beginAutoBattleReplaySession(...)`，頁面 effect 不再直接拼接 battle session bridge 與本地 replay 啟動
 - battle timer bucket 與 replay 啟動 / 重置判定，現在也已開始共用 `createCombatTimerBuckets(...) / clearCombatTimerBucket(...) / clearAllCombatTimers(...) / resolveAutoBattleReplayLifecycle(...)`，頁面不再自己維護 world / replay timer manager 與 replay start/reset 條件
@@ -258,7 +258,7 @@
 - 舊戰報 replay 的逐步播片流程，也已開始抽成 `advanceAutoBattleReplaySession(...) / runAutoBattleReplayStep(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...)`，戰報回放的 log、snapshot 與特效派發不再把整段定時器流程直接攤在 `Adventure` 的 effect 內
 - 舊戰報 replay 的目標怪解析與技能名正規化，也已開始併入 `runAutoBattleReplayStep(...)`，replay orchestration 不再每次在 effect 內重做 target / skill 組裝
 - 舊戰報 replay 的 delay 與 context 組裝，也已開始抽成 `createBattleReplayStepPlan(...) + queueTimedCombatPlan(...)`，回放 step 不再在 effect 內現場計算 `previousTime / nextTime / replayDelay`
-- `Adventure` 內 auto-target 與 live world action window 的判定，現在也已開始改走 `selectNearestWorldCombatTarget(...) / resolveWorldCombatActionWindow(...)`，world interval effect 不再自己維護最近怪與出手條件邏輯
+- `Adventure` 內 auto-target 與 live world action window 的判定，現在也已開始改走 `resolveWorldCombatAutoTarget(...) / resolveWorldCombatActionWindow(...) / runWorldCombatActionWindowStep(...)`，world interval effect 不再自己維護最近怪與出手條件邏輯
 - `enemy special` 的 incoming status 過濾與控制縮短，也已開始抽成 world / timeline 共用 resolver，不再只在 `runAutoBattle()` 內手寫 `filteredEnemyStatuses / normalizedIncomingStatuses`
 - Boss 破綻觸發與戰鬥事件，也已開始整併到 `rollBossBreakOpportunity(...)`，主循環不再直接散寫同一段爆發窗口判定
 - `enemy special` 的狀態套用、戰鬥日誌與免疫觸發，已開始進一步收斂到同一層 helper，減少 timeline 內核殘留的散寫分支

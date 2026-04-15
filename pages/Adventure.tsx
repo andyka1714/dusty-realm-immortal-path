@@ -20,11 +20,12 @@ import {
   resolveWorldPlayerDefeatOutcome,
   resolveAutoBattleReplayOutcome,
   resolveAutoBattleReplayLifecycle,
+  resolveWorldCombatAutoTarget,
   resolveWorldBattleResultCleanup,
   resolveWorldCombatActionWindow,
   resolvePlayerWorldStrike,
   resolveEnemyWorldStrike,
-  selectNearestWorldCombatTarget,
+  runWorldCombatActionWindowStep,
   getResolvedSkillCooldownSeconds,
   runEnemyWorldStrikeAction,
   runAutoBattleReplayStep,
@@ -1702,13 +1703,12 @@ export const Adventure: React.FC<AdventureProps> = ({
             enemyActionReadyAt: enemyActionReadyAtById[targetedMonster.instanceId] ?? 0,
           });
 
-          if (actionWindow.shouldPlayerAct) {
-              performWorldPlayerAction(actionWindow.usePlayerSkill);
-          }
-
-          if (actionWindow.shouldEnemyAct) {
-              performWorldEnemyAction(targetedMonster.instanceId, targetedMonsterTemplate);
-          }
+          runWorldCombatActionWindowStep({
+            actionWindow,
+            runPlayerAction: (usePlayerSkill) => performWorldPlayerAction(usePlayerSkill),
+            runEnemyAction: () =>
+              performWorldEnemyAction(targetedMonster.instanceId, targetedMonsterTemplate),
+          });
       }, 120);
 
       return () => clearInterval(interval);
@@ -1733,8 +1733,11 @@ export const Adventure: React.FC<AdventureProps> = ({
   
   // 1. Auto-Target: Find nearest monster when idle
   useEffect(() => {
-      if (!isAutoBattling || isBattling || targetMonsterId || showIntro || activeMonsters.length === 0) return;
-      const nearestId = selectNearestWorldCombatTarget({
+      const nearestId = resolveWorldCombatAutoTarget({
+        isAutoBattling,
+        isBattling,
+        hasTargetMonster: Boolean(targetMonsterId),
+        showIntro,
         targets: activeMonsters,
         getId: (monster) => monster.instanceId,
         getDistance: (monster) => getGridDistance(playerPosition, monster),

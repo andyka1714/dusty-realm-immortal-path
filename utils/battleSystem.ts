@@ -124,6 +124,16 @@ export interface WorldCombatActionWindow {
   shouldEnemyAct: boolean;
 }
 
+export interface WorldCombatAutoTargetContext<TTarget> {
+  isAutoBattling: boolean;
+  isBattling: boolean;
+  hasTargetMonster: boolean;
+  showIntro: boolean;
+  targets: TTarget[];
+  getId: (target: TTarget) => string;
+  getDistance: (target: TTarget) => number;
+}
+
 export type CombatTimerBucket = "world" | "replay";
 export type CombatTimerBuckets = Record<
   CombatTimerBucket,
@@ -326,6 +336,32 @@ export const selectNearestWorldCombatTarget = <TTarget,>({
   return nearestId;
 };
 
+export const resolveWorldCombatAutoTarget = <TTarget,>({
+  isAutoBattling,
+  isBattling,
+  hasTargetMonster,
+  showIntro,
+  targets,
+  getId,
+  getDistance,
+}: WorldCombatAutoTargetContext<TTarget>) => {
+  if (
+    !isAutoBattling ||
+    isBattling ||
+    hasTargetMonster ||
+    showIntro ||
+    targets.length === 0
+  ) {
+    return null;
+  }
+
+  return selectNearestWorldCombatTarget({
+    targets,
+    getId,
+    getDistance,
+  });
+};
+
 export const resolveWorldCombatActionWindow = ({
   now,
   distance,
@@ -369,6 +405,26 @@ export const resolveWorldCombatActionWindow = ({
     usePlayerSkill,
     shouldEnemyAct,
   };
+};
+
+export const runWorldCombatActionWindowStep = ({
+  actionWindow,
+  runPlayerAction,
+  runEnemyAction,
+}: {
+  actionWindow: WorldCombatActionWindow;
+  runPlayerAction: (usePlayerSkill: boolean) => void;
+  runEnemyAction: () => void;
+}) => {
+  if (actionWindow.shouldPlayerAct) {
+    runPlayerAction(actionWindow.usePlayerSkill);
+  }
+
+  if (actionWindow.shouldEnemyAct) {
+    runEnemyAction();
+  }
+
+  return actionWindow;
 };
 
 export const createWorldStrikeQueuePlan = ({

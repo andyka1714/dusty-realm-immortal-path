@@ -31,9 +31,11 @@ import {
   resolveAutoBattleReplayLifecycle,
   resolveWorldBattleResultCleanup,
   resolveWorldPlayerDefeatOutcome,
+  resolveWorldCombatAutoTarget,
   resolveWorldCombatActionWindow,
   resolveEnemyWorldStrike,
   resolvePlayerWorldStrike,
+  runWorldCombatActionWindowStep,
   selectNearestWorldCombatTarget,
   runAutoBattleReplayStep,
   runEnemyWorldStrikeAction,
@@ -441,6 +443,33 @@ describe("battle system balance", () => {
       ).toBe("near");
 
       expect(
+        resolveWorldCombatAutoTarget({
+          isAutoBattling: true,
+          isBattling: false,
+          hasTargetMonster: false,
+          showIntro: false,
+          targets: [
+            { instanceId: "far", distance: 5 },
+            { instanceId: "near", distance: 2 },
+          ],
+          getId: (target) => target.instanceId,
+          getDistance: (target) => target.distance,
+        })
+      ).toBe("near");
+
+      expect(
+        resolveWorldCombatAutoTarget({
+          isAutoBattling: false,
+          isBattling: false,
+          hasTargetMonster: false,
+          showIntro: false,
+          targets: [{ instanceId: "near", distance: 2 }],
+          getId: (target) => target.instanceId,
+          getDistance: (target) => target.distance,
+        })
+      ).toBeNull();
+
+      expect(
         resolveWorldCombatActionWindow({
           now: 1500,
           distance: 1,
@@ -481,6 +510,23 @@ describe("battle system balance", () => {
         usePlayerSkill: false,
         shouldEnemyAct: false,
       });
+
+      runWorldCombatActionWindowStep({
+        actionWindow: {
+          engagedTargetId: "enemy-1",
+          shouldPlayerAct: true,
+          usePlayerSkill: true,
+          shouldEnemyAct: true,
+        },
+        runPlayerAction: (usePlayerSkill) =>
+          calls.push(`window:player:${usePlayerSkill}`),
+        runEnemyAction: () => calls.push("window:enemy"),
+      });
+
+      expect(calls.slice(-2)).toEqual([
+        "window:player:true",
+        "window:enemy",
+      ]);
 
       const playerActionTimer = runPlayerWorldStrikeAction({
         readyAt: 0,
