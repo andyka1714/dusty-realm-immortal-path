@@ -23,7 +23,10 @@ import {
   queueTimedCombatPlan,
   resolveEnemyWorldStrike,
   resolvePlayerWorldStrike,
+  runAutoBattleReplayStep,
+  runResolvedBattleReplayStep,
   runResolvedTimedCombatPlan,
+  runResolvedWorldStrikeAction,
   runAutoBattle,
 } from "./battleSystem";
 import { COMMON_ENEMIES } from "../data/enemies/common";
@@ -310,6 +313,106 @@ describe("battle system balance", () => {
       vi.advanceTimersByTime(600);
       expect(timerSet.size).toBe(0);
       expect(calls.at(-1)).toBe("execute:replay");
+
+      const worldActionTimer = runResolvedWorldStrikeAction({
+        readyAt: Date.now(),
+        resolve: (now) => ({
+          strike: { executionTimeMs: 80, label: "runner" },
+          now,
+        }),
+        buildPlan: ({ strike, now }) => ({
+          strike,
+          timerSet,
+          delayMs: (resolvedStrike: typeof strike) => resolvedStrike.executionTimeMs,
+          applyCastEffect: (resolvedStrike: typeof strike) =>
+            calls.push(`cast:${resolvedStrike.label}:${now}`),
+          applyPreview: (resolvedStrike: typeof strike) =>
+            calls.push(`preview:${resolvedStrike.label}:${now}`),
+          execute: (resolvedStrike: typeof strike) =>
+            calls.push(`execute:${resolvedStrike.label}:${now}`),
+        }),
+      });
+
+      expect(worldActionTimer).toBeDefined();
+      expect(timerSet.size).toBe(1);
+      vi.advanceTimersByTime(80);
+      expect(timerSet.size).toBe(0);
+      expect(calls.some((entry) => entry.startsWith("execute:runner:"))).toBe(true);
+
+      const replayStepTimer = runResolvedBattleReplayStep({
+        resolve: () => ({ previousTimeMs: 100, nextTimeMs: 520 }),
+        buildPlan: ({ previousTimeMs, nextTimeMs }) => ({
+          previousTimeMs,
+          nextTimeMs,
+          timerSet,
+          execute: () => calls.push("execute:replay-runner"),
+        }),
+      });
+
+      expect(replayStepTimer).toBeDefined();
+      expect(timerSet.size).toBe(1);
+      vi.advanceTimersByTime(420);
+      expect(timerSet.size).toBe(0);
+      expect(calls.at(-1)).toBe("execute:replay-runner");
+
+      const replayRunnerSession = {
+        displayedLogs: [
+          {
+            turn: 1,
+            timeMs: 100,
+            message: "開場",
+            isPlayer: true,
+            playerHp: 500,
+            playerMaxHp: 500,
+            enemyHp: 400,
+            enemyMaxHp: 400,
+          },
+        ],
+        replayQueue: [
+          {
+            turn: 1,
+            timeMs: 560,
+            message: "你施展【火球術】",
+            isPlayer: true,
+            playerHp: 500,
+            playerMaxHp: 500,
+            enemyHp: 320,
+            enemyMaxHp: 400,
+          },
+        ],
+        battleSnapshot: {
+          playerHp: 500,
+          playerMaxHp: 500,
+          enemyHp: 400,
+          enemyMaxHp: 400,
+          won: true,
+        },
+      };
+
+      const autoReplayTimer = runAutoBattleReplayStep({
+        replaySession: replayRunnerSession,
+        currentEnemyInstanceId: "enemy-1",
+        activeMonsters: [{ instanceId: "enemy-1", label: "target" }],
+        getMonsterInstanceId: (monster) => monster.instanceId,
+        resolveSkillByName: (skillName) => ({ skillName }),
+        timerSet,
+        execute: ({ nextLog, nextSession, targetMonster, normalizedUsedSkill }) =>
+          calls.push(
+            [
+              "execute:auto-replay",
+              nextLog.message,
+              `${nextSession.displayedLogs.length}`,
+              targetMonster?.label ?? "none",
+              normalizedUsedSkill?.skillName ?? "none",
+            ].join(":")
+          ),
+      });
+
+      expect(autoReplayTimer).toBeDefined();
+      expect(timerSet.size).toBe(1);
+      vi.advanceTimersByTime(460);
+      expect(timerSet.size).toBe(0);
+      expect(calls.at(-1)).toBe("execute:auto-replay:你施展【火球術】:2:target:火球術");
 
       const blockedReadyAt = Date.now() + 500;
       const blockedTimer = runResolvedTimedCombatPlan({

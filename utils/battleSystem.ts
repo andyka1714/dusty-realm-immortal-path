@@ -86,6 +86,13 @@ export interface AdvancedAutoBattleReplaySession {
   nextSession: AutoBattleReplaySession;
 }
 
+export interface ResolvedAutoBattleReplayStep<TMonster, TSkill> {
+  nextLog: CombatLog;
+  nextSession: AutoBattleReplaySession;
+  targetMonster: TMonster | null;
+  normalizedUsedSkill?: TSkill;
+}
+
 export interface TimedCombatQueuePlan {
   delayMs: number | undefined;
   timerSet?: Set<ReturnType<typeof setTimeout>>;
@@ -259,6 +266,64 @@ export const runResolvedTimedCombatPlan = <TResolved,>({
     buildPlan,
   });
 };
+
+export const runResolvedWorldStrikeAction = <TResolved, TStrike>({
+  readyAt,
+  canExecute,
+  resolve,
+  buildPlan,
+}: {
+  readyAt?: number;
+  canExecute?: () => boolean;
+  resolve: (now: number) => TResolved;
+  buildPlan: (
+    resolved: TResolved
+  ) =>
+    | {
+        strike: TStrike;
+        timerSet?: Set<ReturnType<typeof setTimeout>>;
+        delayMs: (strike: TStrike) => number | undefined;
+        applyCastEffect?: (strike: TStrike) => void;
+        applyPreview: (strike: TStrike) => void;
+        execute: (strike: TStrike) => void;
+      }
+    | undefined;
+}) =>
+  runResolvedTimedCombatPlan({
+    readyAt,
+    canExecute,
+    resolve,
+    buildPlan: (resolved) => {
+      const plan = buildPlan(resolved);
+      if (!plan) return undefined;
+      return createResolvedWorldStrikeActionPlan(plan);
+    },
+  });
+
+export const runResolvedBattleReplayStep = <TResolved,>({
+  resolve,
+  buildPlan,
+}: {
+  resolve: () => TResolved;
+  buildPlan: (
+    resolved: TResolved
+  ) =>
+    | {
+        previousTimeMs?: number;
+        nextTimeMs?: number;
+        timerSet?: Set<ReturnType<typeof setTimeout>>;
+        execute: () => void;
+      }
+    | undefined;
+}) =>
+  runResolvedTimedCombatPlan({
+    resolve: () => resolve(),
+    buildPlan: (resolved) => {
+      const plan = buildPlan(resolved);
+      if (!plan) return undefined;
+      return createBattleReplayStepPlan(plan);
+    },
+  });
 
 type AttackMode = "physical" | "magical" | "hybrid";
 
@@ -8404,3 +8469,54 @@ export const advanceAutoBattleReplaySession = (
     },
   };
 };
+
+export const runAutoBattleReplayStep = <TMonster, TSkill>({
+  replaySession,
+  currentEnemyInstanceId,
+  activeMonsters,
+  getMonsterInstanceId,
+  resolveSkillByName,
+  timerSet,
+  execute,
+}: {
+  replaySession: AutoBattleReplaySession;
+  currentEnemyInstanceId: string | null;
+  activeMonsters: TMonster[];
+  getMonsterInstanceId: (monster: TMonster) => string;
+  resolveSkillByName?: (skillName: string) => TSkill | undefined;
+  timerSet?: Set<ReturnType<typeof setTimeout>>;
+  execute: (resolvedStep: ResolvedAutoBattleReplayStep<TMonster, TSkill>) => void;
+}) =>
+  runResolvedBattleReplayStep({
+    resolve: () => {
+      const { nextLog, nextSession } = advanceAutoBattleReplaySession(replaySession);
+      if (!nextLog) return undefined;
+
+      const targetMonster = currentEnemyInstanceId
+        ? activeMonsters.find(
+            (monster) => getMonsterInstanceId(monster) === currentEnemyInstanceId
+          ) ?? null
+        : null;
+      const skillMatch = nextLog.message.match(/施展【([^】]+)】/);
+      const normalizedUsedSkill = skillMatch
+        ? resolveSkillByName?.(skillMatch[1])
+        : undefined;
+
+      return {
+        nextLog,
+        nextSession,
+        targetMonster,
+        normalizedUsedSkill,
+      };
+    },
+    buildPlan: (resolvedStep) => {
+      if (!resolvedStep) return undefined;
+
+      return {
+        previousTimeMs: replaySession.displayedLogs.at(-1)?.timeMs ?? 0,
+        nextTimeMs: resolvedStep.nextLog.timeMs,
+        timerSet,
+        execute: () => execute(resolvedStep),
+      };
+    },
+  });

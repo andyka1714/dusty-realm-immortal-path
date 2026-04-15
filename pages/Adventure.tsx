@@ -8,17 +8,15 @@ import { ITEMS } from '../data/items';
 import { QUESTS } from '../data/quests';
 import { enterMap, movePlayer, tickMonsters, applyWorldDamageToMonster, resolveBattle, closeBattleReport, cancelBattle, markMapVisited, addVisualEffect } from '../store/slices/adventureSlice';
 import {
-  advanceAutoBattleReplaySession,
   createAutoBattleReplaySession,
-  createBattleReplayStepPlan,
-  createResolvedWorldStrikeActionPlan,
   createWorldStrikeQueuePlan,
   calculatePlayerStats,
   queueTimedCombatPlan,
   resolvePlayerWorldStrike,
   resolveEnemyWorldStrike,
   getResolvedSkillCooldownSeconds,
-  runResolvedTimedCombatPlan,
+  runAutoBattleReplayStep,
+  runResolvedWorldStrikeAction,
 } from '../utils/battleSystem';
 import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
@@ -1195,25 +1193,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     normalizedUsedSkill,
   });
 
-  const createBattleReplayContext = (
-    nextLog: NonNullable<typeof replayQueue>[number]
-  ) => {
-    const targetMonster = currentEnemyInstanceId
-      ? activeMonsters.find((monster) => monster.instanceId === currentEnemyInstanceId)
-      : null;
-    const skillMatch = nextLog.message.match(/施展【([^】]+)】/);
-    const normalizedUsedSkill = skillMatch
-      ? getFormalSkillByName(skillMatch[1])
-      : undefined;
-
-    return {
-      nextLog,
-      targetMonster: targetMonster ?? null,
-      normalizedUsedSkill,
-    };
-  };
-
-  const startBattleReplaySession = ({
+  const applyBattleReplaySessionState = ({
     displayedLogs,
     replayQueue,
     battleSnapshot,
@@ -1221,6 +1201,18 @@ export const Adventure: React.FC<AdventureProps> = ({
     setDisplayedLogs(displayedLogs);
     setReplayQueue(replayQueue);
     setBattleSnapshot(battleSnapshot);
+  };
+
+  const startBattleReplaySession = ({
+    displayedLogs,
+    replayQueue,
+    battleSnapshot,
+  }: ReturnType<typeof createAutoBattleReplaySession>) => {
+    applyBattleReplaySessionState({
+      displayedLogs,
+      replayQueue,
+      battleSnapshot,
+    });
     setIsReplayingBattle(true);
   };
 
@@ -1231,34 +1223,6 @@ export const Adventure: React.FC<AdventureProps> = ({
     playerStats: ReturnType<typeof calculatePlayerStats>;
     enemy: Enemy;
   }) => startBattleReplaySession(createAutoBattleReplaySession(playerStats, enemy));
-
-  const processBattleReplayStep = ({
-    replaySession,
-    targetMonster,
-    normalizedUsedSkill,
-  }: {
-    replaySession: ReturnType<typeof createAutoBattleReplaySession>;
-    targetMonster: ActiveMonster | null;
-    normalizedUsedSkill?: ReturnType<typeof getFormalSkillByName>;
-  }) => {
-    const { nextLog, nextSession } = advanceAutoBattleReplaySession(replaySession);
-    if (!nextLog) return;
-
-    setDisplayedLogs(nextSession.displayedLogs);
-    setReplayQueue(nextSession.replayQueue);
-    setBattleSnapshot(nextSession.battleSnapshot);
-
-    const logContainer = document.getElementById('battle-log-container');
-    if (logContainer) logContainer.scrollTop = logContainer.scrollHeight;
-
-    dispatchBattleReplayVisuals(
-      createBattleReplayVisualPlan({
-        nextLog,
-        targetMonster,
-        normalizedUsedSkill,
-      })
-    );
-  };
 
   const executePlayerWorldStrike = ({
     strike,
@@ -1574,7 +1538,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   };
 
   const performWorldPlayerAction = (useSkill: boolean) =>
-    runResolvedTimedCombatPlan({
+    runResolvedWorldStrikeAction({
       readyAt: playerActionReadyAt,
       canExecute: () => Boolean(targetedMonster && targetedMonsterTemplate && canEngageTarget),
       resolve: (now) => {
@@ -1594,10 +1558,12 @@ export const Adventure: React.FC<AdventureProps> = ({
         if (!resolved) return undefined;
 
         const { now, chosenSkill, targetedMonster, strike } = resolved;
-        return createResolvedWorldStrikeActionPlan({
+        return {
           strike,
           timerSet: combatTimersRef.current.world,
-          delayMs: (resolvedStrike) => resolvedStrike.executionTimeMs,
+          delayMs: (
+            resolvedStrike: ReturnType<typeof resolvePlayerWorldStrike>
+          ) => resolvedStrike.executionTimeMs,
           applyCastEffect: () => dispatchPlayerWorldStrikeCastEffect({ chosenSkill, strike }),
           applyPreview: () => {
             setWorldCombatTargetId(targetedMonster.instanceId);
@@ -1616,7 +1582,7 @@ export const Adventure: React.FC<AdventureProps> = ({
               activeMonsters,
               mapEnemies: mapData?.enemies,
             }),
-        });
+        };
       },
     });
 
@@ -1624,7 +1590,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     enemyInstanceId: string,
     enemyTemplate: NonNullable<typeof targetedMonsterTemplate>
   ) =>
-    runResolvedTimedCombatPlan({
+    runResolvedWorldStrikeAction({
       resolve: (now) => {
         const canUseSpecial = now >= (enemySpecialReadyAtById[enemyInstanceId] ?? 0);
         return {
@@ -1634,10 +1600,12 @@ export const Adventure: React.FC<AdventureProps> = ({
         };
       },
       buildPlan: ({ now, canUseSpecial, strike }) =>
-        createResolvedWorldStrikeActionPlan({
+        ({
           strike,
           timerSet: combatTimersRef.current.world,
-          delayMs: (resolvedStrike) => resolvedStrike.executionTimeMs,
+          delayMs: (
+            resolvedStrike: ReturnType<typeof resolveEnemyWorldStrike>
+          ) => resolvedStrike.executionTimeMs,
           applyCastEffect: () => dispatchEnemyWorldStrikeCastEffect({ strike }),
           applyPreview: () =>
             applyEnemyWorldStrikePreview({
@@ -2068,21 +2036,27 @@ export const Adventure: React.FC<AdventureProps> = ({
       replayQueue,
       battleSnapshot,
     };
-    const timer = runResolvedTimedCombatPlan({
-      resolve: () => createBattleReplayContext(nextLog),
-      buildPlan: (replayContext) =>
-        createBattleReplayStepPlan({
-          previousTimeMs: displayedLogs[displayedLogs.length - 1]?.timeMs ?? 0,
-          nextTimeMs: replayContext.nextLog.timeMs,
-          timerSet: combatTimersRef.current.replay,
-          execute: () => {
-            processBattleReplayStep({
-              replaySession,
-              targetMonster: replayContext.targetMonster,
-              normalizedUsedSkill: replayContext.normalizedUsedSkill,
-            });
-          },
-        }),
+    const timer = runAutoBattleReplayStep({
+      replaySession,
+      currentEnemyInstanceId,
+      activeMonsters,
+      getMonsterInstanceId: (monster) => monster.instanceId,
+      resolveSkillByName: getFormalSkillByName,
+      timerSet: combatTimersRef.current.replay,
+      execute: ({ nextLog, nextSession, targetMonster, normalizedUsedSkill }) => {
+        applyBattleReplaySessionState(nextSession);
+
+        const logContainer = document.getElementById('battle-log-container');
+        if (logContainer) logContainer.scrollTop = logContainer.scrollHeight;
+
+        dispatchBattleReplayVisuals(
+          createBattleReplayVisualPlan({
+            nextLog,
+            targetMonster,
+            normalizedUsedSkill,
+          })
+        );
+      },
     });
 
     return () => clearTimeout(timer);

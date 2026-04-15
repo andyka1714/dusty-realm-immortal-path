@@ -53,7 +53,7 @@
 - [11_三職業核心技能池草案.md](06_Balance_Audit/11_三職業核心技能池草案.md): 劍修、體修、法修的核心技能池草案，以及 retired 技能收斂到 `battle-absorbed / retirement-ready` 的正式規則，並持續對齊 world strike / timeline combat。
   - 補充：formal realm view 現在已直接鎖定為 `core only`，realm dataset 不再保留 retired alias；所有 passive 也都已退出 generic `passiveEffectTags` fallback，舊技能則仍保留中央 alias / 相容查詢層，而 `passiveEffectTags` 欄位本身也已從技能資料層移除。
   - 補充：retired alias 的 realm 聚合、record 合併與 view 組裝現在也已收斂到 `retired_alias_utils.ts` 與 skill index 共用 util，不再在 alias entry 檔各自手寫 active / passive 樣板。
-  - 補充：舊戰報 replay 的 context、step delay 與 visual payload 組裝，現在也已開始抽成 `createBattleReplayContext(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / createBattleReplayVisualPlan(...)`，回放 effect 不再各自重算 target、skill、delay 與 visual payload。
+  - 補充：舊戰報 replay 的 session advance、context、step delay 與 visual payload 組裝，現在也已開始抽成 `advanceAutoBattleReplaySession(...) / runAutoBattleReplayStep(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / createBattleReplayVisualPlan(...)`，回放 effect 不再各自重算 target、skill、delay 與 visual payload。
 - [12_技能書實作收斂.md](06_Balance_Audit/12_技能書實作收斂.md): 技能書正式實作、來源規則、前置條件與與程式對齊結果。
 - [13_3D渲染與戰鬥呈現評估.md](06_Balance_Audit/13_3D渲染與戰鬥呈現評估.md): 3D、Three.js 與目前 Pixi 戰鬥呈現層的可行性評估。
 - [14_整體改造Checklist.md](06_Balance_Audit/14_整體改造Checklist.md): 本輪所有已完成 / 未完成細項的逐條追蹤表。
