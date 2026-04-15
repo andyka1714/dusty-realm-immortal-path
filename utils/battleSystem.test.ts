@@ -21,8 +21,10 @@ import {
   getEnemySpecialTimelineProfile,
   getSkillTimelineProfile,
   queueTimedCombatPlan,
+  resolveWorldCombatActionWindow,
   resolveEnemyWorldStrike,
   resolvePlayerWorldStrike,
+  selectNearestWorldCombatTarget,
   runAutoBattleReplayStep,
   runResolvedBattleReplayStep,
   runResolvedTimedCombatPlan,
@@ -413,6 +415,60 @@ describe("battle system balance", () => {
       vi.advanceTimersByTime(460);
       expect(timerSet.size).toBe(0);
       expect(calls.at(-1)).toBe("execute:auto-replay:你施展【火球術】:2:target:火球術");
+
+      expect(
+        selectNearestWorldCombatTarget({
+          targets: [
+            { instanceId: "far", distance: 5 },
+            { instanceId: "near", distance: 2 },
+            { instanceId: "mid", distance: 3 },
+          ],
+          getId: (target) => target.instanceId,
+          getDistance: (target) => target.distance,
+        })
+      ).toBe("near");
+
+      expect(
+        resolveWorldCombatActionWindow({
+          now: 1500,
+          distance: 1,
+          playerEngagementRange: 2,
+          playerActionReadyAt: 1200,
+          playerSkillReadyAt: 1400,
+          hasPrimaryActiveSkill: true,
+          isAutoBattling: true,
+          worldCombatTargetId: null,
+          targetedMonsterInstanceId: "enemy-1",
+          enemyEngagementRange: 1,
+          enemyActionReadyAt: 1300,
+        })
+      ).toEqual({
+        engagedTargetId: "enemy-1",
+        shouldPlayerAct: true,
+        usePlayerSkill: true,
+        shouldEnemyAct: true,
+      });
+
+      expect(
+        resolveWorldCombatActionWindow({
+          now: 1100,
+          distance: 3,
+          playerEngagementRange: 2,
+          playerActionReadyAt: 1200,
+          playerSkillReadyAt: 1400,
+          hasPrimaryActiveSkill: true,
+          isAutoBattling: false,
+          worldCombatTargetId: "enemy-2",
+          targetedMonsterInstanceId: "enemy-1",
+          enemyEngagementRange: 1,
+          enemyActionReadyAt: 1300,
+        })
+      ).toEqual({
+        engagedTargetId: "enemy-2",
+        shouldPlayerAct: false,
+        usePlayerSkill: false,
+        shouldEnemyAct: false,
+      });
 
       const blockedReadyAt = Date.now() + 500;
       const blockedTimer = runResolvedTimedCombatPlan({

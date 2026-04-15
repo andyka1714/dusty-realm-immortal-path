@@ -12,8 +12,10 @@ import {
   createWorldStrikeQueuePlan,
   calculatePlayerStats,
   queueTimedCombatPlan,
+  resolveWorldCombatActionWindow,
   resolvePlayerWorldStrike,
   resolveEnemyWorldStrike,
+  selectNearestWorldCombatTarget,
   getResolvedSkillCooldownSeconds,
   runAutoBattleReplayStep,
   runResolvedWorldStrikeAction,
@@ -1707,18 +1709,25 @@ export const Adventure: React.FC<AdventureProps> = ({
       const interval = setInterval(() => {
           const now = Date.now();
           const distance = getGridDistance(playerPosition, targetedMonster);
+          const actionWindow = resolveWorldCombatActionWindow({
+            now,
+            distance,
+            playerEngagementRange,
+            playerActionReadyAt,
+            playerSkillReadyAt,
+            hasPrimaryActiveSkill: Boolean(primaryActiveSkill),
+            isAutoBattling,
+            worldCombatTargetId,
+            targetedMonsterInstanceId: targetedMonster.instanceId,
+            enemyEngagementRange: getEnemyEngagementRange(targetedMonsterTemplate),
+            enemyActionReadyAt: enemyActionReadyAtById[targetedMonster.instanceId] ?? 0,
+          });
 
-          if (isAutoBattling && distance <= playerEngagementRange && now >= playerActionReadyAt) {
-              performWorldPlayerAction(Boolean(primaryActiveSkill && now >= playerSkillReadyAt));
+          if (actionWindow.shouldPlayerAct) {
+              performWorldPlayerAction(actionWindow.usePlayerSkill);
           }
 
-          const enemyRange = getEnemyEngagementRange(targetedMonsterTemplate);
-          const engagedTargetId = worldCombatTargetId ?? (isAutoBattling ? targetedMonster.instanceId : null);
-          if (
-            engagedTargetId === targetedMonster.instanceId &&
-            distance <= enemyRange &&
-            now >= (enemyActionReadyAtById[targetedMonster.instanceId] ?? 0)
-          ) {
+          if (actionWindow.shouldEnemyAct) {
               performWorldEnemyAction(targetedMonster.instanceId, targetedMonsterTemplate);
           }
       }, 120);
@@ -1746,18 +1755,10 @@ export const Adventure: React.FC<AdventureProps> = ({
   // 1. Auto-Target: Find nearest monster when idle
   useEffect(() => {
       if (!isAutoBattling || isBattling || targetMonsterId || showIntro || activeMonsters.length === 0) return;
-
-      // Find nearest
-      let nearestId: string | null = null;
-      let minDist = Infinity;
-
-      activeMonsters.forEach(m => {
-          // Verify path exists? For now just euclidean distance is enough approximation
-          const dist = getGridDistance(playerPosition, m);
-          if (dist < minDist) {
-              minDist = dist;
-              nearestId = m.instanceId;
-          }
+      const nearestId = selectNearestWorldCombatTarget({
+        targets: activeMonsters,
+        getId: (monster) => monster.instanceId,
+        getDistance: (monster) => getGridDistance(playerPosition, monster),
       });
 
       if (nearestId) {

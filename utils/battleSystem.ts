@@ -100,6 +100,13 @@ export interface TimedCombatQueuePlan {
   execute: () => void;
 }
 
+export interface WorldCombatActionWindow {
+  engagedTargetId: string | null;
+  shouldPlayerAct: boolean;
+  usePlayerSkill: boolean;
+  shouldEnemyAct: boolean;
+}
+
 export const scheduleTimedCombatAction = ({
   delayMs,
   execute,
@@ -147,6 +154,74 @@ export const createTimedCombatPlan = ({
   onQueue,
   execute,
 });
+
+export const selectNearestWorldCombatTarget = <TTarget,>({
+  targets,
+  getId,
+  getDistance,
+}: {
+  targets: TTarget[];
+  getId: (target: TTarget) => string;
+  getDistance: (target: TTarget) => number;
+}) => {
+  let nearestId: string | null = null;
+  let minDistance = Infinity;
+
+  targets.forEach((target) => {
+    const distance = getDistance(target);
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestId = getId(target);
+    }
+  });
+
+  return nearestId;
+};
+
+export const resolveWorldCombatActionWindow = ({
+  now,
+  distance,
+  playerEngagementRange,
+  playerActionReadyAt,
+  playerSkillReadyAt,
+  hasPrimaryActiveSkill,
+  isAutoBattling,
+  worldCombatTargetId,
+  targetedMonsterInstanceId,
+  enemyEngagementRange,
+  enemyActionReadyAt,
+}: {
+  now: number;
+  distance: number;
+  playerEngagementRange: number;
+  playerActionReadyAt: number;
+  playerSkillReadyAt: number;
+  hasPrimaryActiveSkill: boolean;
+  isAutoBattling: boolean;
+  worldCombatTargetId: string | null;
+  targetedMonsterInstanceId: string;
+  enemyEngagementRange: number;
+  enemyActionReadyAt: number;
+}): WorldCombatActionWindow => {
+  const engagedTargetId =
+    worldCombatTargetId ?? (isAutoBattling ? targetedMonsterInstanceId : null);
+  const shouldPlayerAct =
+    isAutoBattling &&
+    distance <= playerEngagementRange &&
+    now >= playerActionReadyAt;
+  const usePlayerSkill = hasPrimaryActiveSkill && now >= playerSkillReadyAt;
+  const shouldEnemyAct =
+    engagedTargetId === targetedMonsterInstanceId &&
+    distance <= enemyEngagementRange &&
+    now >= enemyActionReadyAt;
+
+  return {
+    engagedTargetId,
+    shouldPlayerAct,
+    usePlayerSkill,
+    shouldEnemyAct,
+  };
+};
 
 export const createWorldStrikeQueuePlan = ({
   delayMs,
