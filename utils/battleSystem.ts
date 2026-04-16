@@ -26,6 +26,57 @@ import { getFormalSkillId, getSkill } from "../data/skills";
 import { generateDrops } from "./dropSystem";
 import { formatSpiritStone } from "./currency";
 import { getWorldSkillAreaTargets } from "./worldCombat";
+import {
+  AutoBattleReplayFinishResultPlan,
+  AutoBattleReplayFrameResult,
+  AutoBattleReplayFrameStateResult,
+  AutoBattleReplayOutcome,
+  AutoBattleReplaySession,
+  AutoBattleReplayState,
+  AutoBattleReplayStepStatePlan,
+  ResolvedAutoBattleReplayStep,
+  advanceAutoBattleReplaySession,
+  createAutoBattleReplayFinishPlan,
+  createAutoBattleReplayFinishEffects,
+  createAutoBattleReplayState,
+  createAutoBattleReplayStepStatePlan,
+  createBattleReplayVisualPlan,
+  createIdleAutoBattleReplayState,
+  resolveAutoBattleReplayFinishResultPlan,
+  resolveAutoBattleReplayOutcome,
+} from "./battleReplay";
+import {
+  BattleLogEntryPlan,
+  BattleRewardApplicationPlan,
+  BattleRewardManifest,
+  createBattleRewardApplicationPlan,
+  createBattleRewardManifest,
+} from "./battleRewards";
+
+export type {
+  AdvancedAutoBattleReplaySession,
+  AutoBattleReplayFinishPlan,
+} from "./battleReplay";
+export {
+  advanceAutoBattleReplaySession,
+  createAutoBattleReplayFinishEffects,
+  createAutoBattleReplayFinishPlan,
+  createAutoBattleReplayState,
+  createAutoBattleReplayStepStatePlan,
+  createBattleReplayVisualPlan,
+  createIdleAutoBattleReplayState,
+  resolveAutoBattleReplayFinishResultPlan,
+  resolveAutoBattleReplayOutcome,
+} from "./battleReplay";
+export type {
+  BattleLogEntryPlan,
+  BattleRewardApplicationPlan,
+  BattleRewardManifest,
+} from "./battleRewards";
+export {
+  createBattleRewardApplicationPlan,
+  createBattleRewardManifest,
+} from "./battleRewards";
 
 const formatSpiritStones = (amount: number): string => {
   if (amount <= 0) return "";
@@ -67,70 +118,6 @@ export interface PlayerCombatStats {
   regenHp: number;
   profession: ProfessionType;
   learnedSkills: Skill[];
-}
-
-export interface AutoBattleReplaySession {
-  displayedLogs: CombatLog[];
-  replayQueue: CombatLog[];
-  battleSnapshot: {
-    playerHp: number;
-    playerMaxHp: number;
-    enemyHp: number;
-    enemyMaxHp: number;
-    won: boolean;
-    rewards?: {
-      spiritStones: number;
-      exp: number;
-      drops: { itemId: string; count: number; instance?: ItemInstance }[];
-    };
-  };
-}
-
-export interface AdvancedAutoBattleReplaySession {
-  nextLog?: CombatLog;
-  nextSession: AutoBattleReplaySession;
-}
-
-export interface AutoBattleReplayOutcome {
-  won: boolean;
-  logs: CombatLog[];
-  respawnMapId?: string;
-  defeatedMonster: ActiveMonster | null;
-  rewards?: AutoBattleReplaySession["battleSnapshot"]["rewards"];
-  defeatLogMessage?: string;
-}
-
-export interface AutoBattleReplayState {
-  displayedLogs: CombatLog[];
-  replayQueue: CombatLog[];
-  battleSnapshot: AutoBattleReplaySession["battleSnapshot"] | null;
-  isReplayingBattle: boolean;
-}
-
-export interface AutoBattleReplayStepStatePlan {
-  replayState: AutoBattleReplayState;
-  visualPlan: WorldStrikeVisualPlan;
-  shouldAutoScroll: true;
-}
-
-export interface AutoBattleReplayFinishPlan {
-  shouldStopReplay: true;
-  battleResult: {
-    won: boolean;
-    logs: CombatLog[];
-    respawnMapId?: string;
-  };
-  victoryTarget?: Pick<ActiveMonster, "x" | "y">;
-  rewards?: AutoBattleReplaySession["battleSnapshot"]["rewards"];
-  defeatLogMessage?: string;
-}
-
-export interface AutoBattleReplayFinishResultPlan {
-  shouldStopReplay: true;
-  battleResult: AutoBattleReplayFinishPlan["battleResult"];
-  finishEffects: Array<Omit<VisualEffect, "id">>;
-  rewardManifest?: BattleRewardManifest;
-  defeatLogMessage?: string;
 }
 
 export interface WorldCombatEncounterState {
@@ -177,46 +164,6 @@ export interface WorldPlayerDefeatStatePlan {
   shouldClearWorldCombatTimers: true;
 }
 
-export interface BattleRewardManifest {
-  expAmount: number;
-  spiritStoneAwards: number[];
-  inventoryRewards: {
-    itemId: string;
-    count: number;
-    instance?: ItemInstance;
-  }[];
-  expLogMessage?: string;
-  lootLogMessage?: string;
-}
-
-export interface BattleLogEntryPlan {
-  message: string;
-  type: LogEntry["type"];
-}
-
-export interface BattleRewardApplicationPlan {
-  expAmount: number;
-  spiritStoneAwards: number[];
-  inventoryRewards: BattleRewardManifest["inventoryRewards"];
-  logEntries: BattleLogEntryPlan[];
-}
-
-export interface ResolvedAutoBattleReplayStep<TMonster, TSkill> {
-  nextLog: CombatLog;
-  nextSession: AutoBattleReplaySession;
-  targetMonster: TMonster | null;
-  normalizedUsedSkill?: TSkill;
-}
-
-export type AutoBattleReplayFrameResult =
-  | { kind: "idle" }
-  | { kind: "finish"; replayOutcome: AutoBattleReplayOutcome }
-  | { kind: "step"; timer: ReturnType<typeof setTimeout> | undefined };
-
-export type AutoBattleReplayFrameStateResult =
-  | { kind: "idle" }
-  | { kind: "finish"; finishResultPlan: AutoBattleReplayFinishResultPlan }
-  | { kind: "step"; timer: ReturnType<typeof setTimeout> | undefined };
 
 export interface TimedCombatQueuePlan {
   delayMs: number | undefined;
@@ -638,97 +585,6 @@ export const createWorldPlayerDefeatStatePlan = ({
   shouldClearWorldCombatTimers: true,
 });
 
-export const createBattleRewardManifest = ({
-  enemy,
-  rewards,
-}: {
-  enemy: Enemy;
-  rewards?: AutoBattleReplaySession["battleSnapshot"]["rewards"];
-}): BattleRewardManifest => {
-  const expAmount = rewards?.exp && rewards.exp > 0 ? rewards.exp : enemy.exp;
-  const spiritStones = rewards?.spiritStones ?? getDropRewards(enemy).spiritStones;
-  const drops = rewards?.drops ?? generateDrops(enemy);
-  const spiritStoneAwards: number[] = [];
-  const inventoryRewards: BattleRewardManifest["inventoryRewards"] = [];
-  const lootParts: string[] = [];
-
-  if (spiritStones > 0) {
-    spiritStoneAwards.push(spiritStones);
-    lootParts.push(formatSpiritStone(spiritStones));
-  }
-
-  drops.forEach((drop) => {
-    if (drop.itemId === "spirit_stone") {
-      spiritStoneAwards.push(drop.count);
-      lootParts.push(formatSpiritStone(drop.count));
-      return;
-    }
-
-    inventoryRewards.push({
-      itemId: drop.itemId,
-      count: drop.count,
-      instance: drop.instance,
-    });
-
-    const item = getItem(drop.itemId);
-    if (!item) return;
-
-    const qualityValue = drop.instance?.quality ?? item.quality ?? 0;
-    let itemStr = item.name;
-    if (qualityValue === 0) itemStr += "(下品)";
-    if (qualityValue === 1) itemStr += "(中品)";
-    if (qualityValue === 2) itemStr += "(上品)";
-    if (qualityValue === 3) itemStr += "(仙品)";
-
-    lootParts.push(
-      drop.count > 1
-        ? `<item q="${qualityValue}">${itemStr}</item> x${drop.count}`
-        : `<item q="${qualityValue}">${itemStr}</item>`
-    );
-  });
-
-  return {
-    expAmount,
-    spiritStoneAwards,
-    inventoryRewards,
-    expLogMessage:
-      expAmount > 0
-        ? `擊敗 <enemy rank="${enemy.rank}">${enemy.name}</enemy>，獲得 <exp>${expAmount} 修為</exp>`
-        : undefined,
-    lootLogMessage:
-      lootParts.length > 0 ? `獲得戰利品：${lootParts.join("，")}` : undefined,
-  };
-};
-
-export const createBattleRewardApplicationPlan = ({
-  rewardManifest,
-}: {
-  rewardManifest: BattleRewardManifest;
-}): BattleRewardApplicationPlan => {
-  const logEntries: BattleLogEntryPlan[] = [];
-
-  if (rewardManifest.expLogMessage) {
-    logEntries.push({
-      message: rewardManifest.expLogMessage,
-      type: "gain",
-    });
-  }
-
-  if (rewardManifest.lootLogMessage) {
-    logEntries.push({
-      message: rewardManifest.lootLogMessage,
-      type: "gold",
-    });
-  }
-
-  return {
-    expAmount: rewardManifest.expAmount,
-    spiritStoneAwards: rewardManifest.spiritStoneAwards,
-    inventoryRewards: rewardManifest.inventoryRewards,
-    logEntries,
-  };
-};
-
 export const getPlayerWorldStrikePreviewMessage = ({
   targetName,
   skillName,
@@ -850,101 +706,6 @@ export const resolveWorldShieldedDamage = ({
     absorbed,
     damageTaken: incomingDamage - absorbed,
     remainingShield: Math.max(0, currentShield - absorbed),
-  };
-};
-
-export const createBattleReplayVisualPlan = <TSkill extends {
-  castRange?: number;
-  castTimeMs?: number;
-  areaShape?: Skill["areaShape"];
-  areaRadius?: number;
-}>({
-  nextLog,
-  targetMonster,
-  playerPosition,
-  enemyAttackRange,
-  normalizedUsedSkill,
-}: {
-  nextLog: CombatLog;
-  targetMonster: ActiveMonster | null;
-  playerPosition: Pick<ActiveMonster, "x" | "y">;
-  enemyAttackRange?: number;
-  normalizedUsedSkill?: TSkill;
-}): WorldStrikeVisualPlan => {
-  const projectilePlan =
-    normalizedUsedSkill && nextLog.isPlayer && targetMonster
-      ? (normalizedUsedSkill.castRange ?? 1) > 1
-        ? {
-            color: "#60a5fa",
-            colorInt: 0x60a5fa,
-            sourceX: playerPosition.x,
-            sourceY: playerPosition.y,
-            targetX: targetMonster.x,
-            targetY: targetMonster.y,
-            durationMs: Math.max(220, normalizedUsedSkill.castTimeMs ?? 280),
-          }
-        : undefined
-      : !nextLog.isPlayer && (enemyAttackRange ?? 1) > 1 && targetMonster
-        ? {
-            color: "#fb7185",
-            colorInt: 0xfb7185,
-            sourceX: targetMonster.x,
-            sourceY: targetMonster.y,
-            targetX: playerPosition.x,
-            targetY: playerPosition.y,
-            durationMs: 260,
-          }
-        : undefined;
-
-  const areaPlan =
-    normalizedUsedSkill &&
-    nextLog.isPlayer &&
-    targetMonster &&
-    normalizedUsedSkill.areaShape &&
-    normalizedUsedSkill.areaShape !== "single" &&
-    normalizedUsedSkill.areaShape !== "self" &&
-    (normalizedUsedSkill.areaRadius ?? 0) > 0
-      ? {
-          color: "#a78bfa",
-          colorInt: 0xa78bfa,
-          targetX: targetMonster.x,
-          targetY: targetMonster.y,
-          radius: normalizedUsedSkill.areaRadius,
-          durationMs: 520,
-        }
-      : undefined;
-
-  const impactPlan =
-    nextLog.damage && nextLog.damage > 0
-      ? nextLog.isPlayer
-        ? targetMonster
-          ? {
-              color: "#fde68a",
-              colorInt: 0xfde68a,
-              targetX: targetMonster.x,
-              targetY: targetMonster.y,
-              radius: 0.55,
-              damageText: `${nextLog.damage}`,
-              damageTextColor: "#fbbf24",
-              damageTextColorInt: 0xfbbf24,
-            }
-          : undefined
-        : {
-            color: "#fca5a5",
-            colorInt: 0xfca5a5,
-            targetX: playerPosition.x,
-            targetY: playerPosition.y,
-            radius: 0.55,
-            damageText: `${nextLog.damage}`,
-            damageTextColor: "#fb7185",
-            damageTextColorInt: 0xfb7185,
-          }
-      : undefined;
-
-  return {
-    projectile: projectilePlan,
-    area: areaPlan,
-    impact: impactPlan,
   };
 };
 
@@ -10665,27 +10426,6 @@ export const createAutoBattleReplaySession = (
   };
 };
 
-export const createAutoBattleReplayState = ({
-  session,
-  isReplayingBattle = true,
-}: {
-  session: AutoBattleReplaySession;
-  isReplayingBattle?: boolean;
-}): AutoBattleReplayState => ({
-  displayedLogs: session.displayedLogs,
-  replayQueue: session.replayQueue,
-  battleSnapshot: session.battleSnapshot,
-  isReplayingBattle,
-});
-
-export const createIdleAutoBattleReplayState =
-  (): AutoBattleReplayState => ({
-    displayedLogs: [],
-    replayQueue: [],
-    battleSnapshot: null,
-    isReplayingBattle: false,
-  });
-
 export const createClearWorldCombatEncounterState =
   ({
     worldPlayerShield,
@@ -10715,67 +10455,6 @@ export const createResetWorldCombatEncounterState =
       playerSkillReadyAt: 0,
     }),
   });
-
-export const advanceAutoBattleReplaySession = (
-  session: AutoBattleReplaySession
-): AdvancedAutoBattleReplaySession => {
-  const [nextLog, ...remainingReplayQueue] = session.replayQueue;
-  if (!nextLog) {
-    return { nextSession: session };
-  }
-
-  return {
-    nextLog,
-    nextSession: {
-      ...session,
-      displayedLogs: [...session.displayedLogs, nextLog],
-      replayQueue: remainingReplayQueue,
-      battleSnapshot:
-        nextLog.playerHp !== undefined
-          ? {
-              ...session.battleSnapshot,
-              playerHp: nextLog.playerHp,
-              enemyHp: nextLog.enemyHp,
-            }
-          : session.battleSnapshot,
-    },
-  };
-};
-
-export const resolveAutoBattleReplayOutcome = ({
-  battleSnapshot,
-  displayedLogs,
-  currentEnemy,
-  currentEnemyInstanceId,
-  activeMonsters,
-  respawnMapId,
-}: {
-  battleSnapshot: AutoBattleReplaySession["battleSnapshot"];
-  displayedLogs: CombatLog[];
-  currentEnemy?: Enemy | null;
-  currentEnemyInstanceId?: string | null;
-  activeMonsters: ActiveMonster[];
-  respawnMapId?: string;
-}): AutoBattleReplayOutcome => {
-  const defeatedMonster =
-    battleSnapshot.won && currentEnemyInstanceId
-      ? activeMonsters.find(
-          (monster) => monster.instanceId === currentEnemyInstanceId
-        ) ?? null
-      : null;
-
-  return {
-    won: battleSnapshot.won,
-    logs: displayedLogs,
-    respawnMapId: battleSnapshot.won ? undefined : respawnMapId,
-    defeatedMonster,
-    rewards: battleSnapshot.won ? battleSnapshot.rewards : undefined,
-    defeatLogMessage:
-      !battleSnapshot.won && currentEnemy
-        ? `不敵 ${currentEnemy.name}，狼狽逃回。`
-        : undefined,
-  };
-};
 
 export const runAutoBattleReplayStep = <TMonster, TSkill>({
   replaySession,
@@ -11029,111 +10708,5 @@ export const runAutoBattleReplayController = <TSkill>({
     kind: "idle",
     nextProcessed: replayTransitionStatePlan.nextProcessed,
     shouldClearReplayTimers: false,
-  };
-};
-
-export const createAutoBattleReplayStepStatePlan = <TSkill>({
-  nextLog,
-  nextSession,
-  targetMonster,
-  normalizedUsedSkill,
-  playerPosition,
-  enemyAttackRange,
-}: ResolvedAutoBattleReplayStep<ActiveMonster, TSkill> & {
-  playerPosition: Pick<ActiveMonster, "x" | "y">;
-  enemyAttackRange?: number;
-}): AutoBattleReplayStepStatePlan => ({
-  replayState: createAutoBattleReplayState({
-    session: nextSession,
-  }),
-  visualPlan: createBattleReplayVisualPlan({
-    nextLog,
-    targetMonster,
-    playerPosition,
-    enemyAttackRange,
-    normalizedUsedSkill,
-  }),
-  shouldAutoScroll: true,
-});
-
-export const createAutoBattleReplayFinishPlan = ({
-  replayOutcome,
-}: {
-  replayOutcome: AutoBattleReplayOutcome;
-}): AutoBattleReplayFinishPlan => ({
-  shouldStopReplay: true,
-  battleResult: {
-    won: replayOutcome.won,
-    logs: replayOutcome.logs,
-    respawnMapId: replayOutcome.respawnMapId,
-  },
-  victoryTarget: replayOutcome.won
-    ? replayOutcome.defeatedMonster
-      ? {
-          x: replayOutcome.defeatedMonster.x,
-          y: replayOutcome.defeatedMonster.y,
-        }
-      : undefined
-    : undefined,
-  rewards: replayOutcome.won ? replayOutcome.rewards : undefined,
-  defeatLogMessage: replayOutcome.won ? undefined : replayOutcome.defeatLogMessage,
-});
-
-export const createAutoBattleReplayFinishEffects = ({
-  finishPlan,
-}: {
-  finishPlan: AutoBattleReplayFinishPlan;
-}): Array<Omit<VisualEffect, "id">> => {
-  if (!finishPlan.victoryTarget) {
-    return [];
-  }
-
-  return [
-    {
-      type: "area",
-      text: "",
-      color: "#fca5a5",
-      colorInt: 0xfca5a5,
-      targetX: finishPlan.victoryTarget.x,
-      targetY: finishPlan.victoryTarget.y,
-      radius: 0.9,
-      durationMs: 420,
-    },
-    {
-      type: "impact",
-      text: "",
-      color: "#ffffff",
-      colorInt: 0xffffff,
-      targetX: finishPlan.victoryTarget.x,
-      targetY: finishPlan.victoryTarget.y,
-      radius: 0.85,
-      durationMs: 320,
-    },
-  ];
-};
-
-export const resolveAutoBattleReplayFinishResultPlan = ({
-  replayOutcome,
-  currentEnemy,
-}: {
-  replayOutcome: AutoBattleReplayOutcome;
-  currentEnemy?: Enemy | null;
-}): AutoBattleReplayFinishResultPlan => {
-  const finishPlan = createAutoBattleReplayFinishPlan({
-    replayOutcome,
-  });
-
-  return {
-    shouldStopReplay: true,
-    battleResult: finishPlan.battleResult,
-    finishEffects: createAutoBattleReplayFinishEffects({ finishPlan }),
-    rewardManifest:
-      finishPlan.rewards && currentEnemy
-        ? createBattleRewardManifest({
-            enemy: currentEnemy,
-            rewards: finishPlan.rewards,
-          })
-        : undefined,
-    defeatLogMessage: finishPlan.defeatLogMessage,
   };
 };
