@@ -119,7 +119,7 @@
 - 戰報自動收起延遲與戰後 world state cleanup，現在也已開始共用 `resolveWorldBattleResultLifecyclePlan(...)`，頁面不再自己散寫 auto-close 與清 target/path/auto-battle 條件
 - `Adventure` 內 live world kill 與 replay finish 的獎勵套用，現在也已開始共用 `applyBattleRewards(...)`，即時戰鬥與時間軸回放不再各自維護兩套發獎字串與掉落派發流程
 - replay 敗北回城的復活點判定，也已對齊 live world defeat 的 `getBattleRespawnMapId()` 規則，不再出現同一場景 live / replay 回城地點不一致
-- `Adventure` 目前已退回 battle UI bridge：live world / replay 的 battle 規則、controller、preview、outcome、reward、cleanup 與 lifecycle 均已集中到 `battleSystem.ts`，頁面只剩 state apply、visual dispatch 與 Redux/UI bridge
+- `Adventure` 目前已退回 battle UI bridge：live world / replay 的 battle 規則、controller、preview、outcome、reward、cleanup 與 lifecycle 均已集中到 `battleSystem.ts`，而頁面上的 React/Redux 套用也已開始收斂到 `createAdventureBattleUiBridge(...)`；頁面本體只剩 state apply、visual dispatch 與 Redux/UI bridge
 - `Adventure` 內 player / enemy world strike 與 replay step 的 visual payload，也已開始共用 `WorldStrikeVisualPlan` 路徑；live / replay 不再各自手拼 projectile、area 與 impact payload
 - 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再另外維護一套 effect dispatch
 - `Adventure` 內 player / enemy world strike 的投射物、範圍、命中特效與傷害浮字，也已開始共用 visual helper，地圖即時戰鬥不再各自維護兩套 effect dispatch 流程

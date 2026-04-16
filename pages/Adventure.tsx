@@ -48,6 +48,7 @@ import { SHOPS } from '../data/shops';
 import { getEnemyEngagementRange, getGridDistance, getPlayerEngagementRange } from '../utils/worldCombat';
 import { getLearnedSkillEngagementRange } from '../utils/skillRealtime';
 import { getFormalSkillByName, normalizeLearnedSkills } from '../data/skills';
+import { createAdventureBattleUiBridge } from '../utils/adventureBattleUiBridge';
 
 
 // --- VISUAL CONFIG ---
@@ -938,95 +939,36 @@ export const Adventure: React.FC<AdventureProps> = ({
     });
   };
 
-  const dispatchWorldStrikeVisualPlan = ({
-    projectile,
-    area,
-    impact,
-  }: WorldStrikeVisualPlan) => {
-    if (projectile) {
-      dispatchWorldStrikeProjectileEffect(projectile);
-    }
-
-    if (area) {
-      dispatchWorldStrikeAreaEffect(area);
-    }
-
-    if (impact) {
-      applyWorldStrikeImpactBundle(impact);
-    }
-  };
-
-  const applyBattleReplayState = ({
-    displayedLogs,
-    replayQueue,
-    battleSnapshot,
-    isReplayingBattle,
-  }: ReturnType<typeof createAutoBattleReplayState>) => {
-    setDisplayedLogs(displayedLogs);
-    setReplayQueue(replayQueue);
-    setBattleSnapshot(battleSnapshot);
-    setIsReplayingBattle(isReplayingBattle);
-  };
-
-  const applyWorldCombatEncounterState = ({
-    worldCombatTargetId,
-    worldCombatTargetStatuses,
-    worldCombatPlayerStatuses,
-    worldLastCombatMessage,
-    worldPlayerShield,
-    playerActionReadyAt,
-    playerSkillReadyAt,
-    enemyActionReadyAtById,
-    enemySpecialReadyAtById,
-  }: ReturnType<typeof createResetWorldCombatEncounterState>) => {
-    setWorldCombatTargetId(worldCombatTargetId);
-    setWorldCombatTargetStatuses(worldCombatTargetStatuses);
-    setWorldCombatPlayerStatuses(worldCombatPlayerStatuses);
-    setWorldLastCombatMessage(worldLastCombatMessage);
-    setWorldPlayerShield(worldPlayerShield);
-    setPlayerActionReadyAt(playerActionReadyAt);
-    setPlayerSkillReadyAt(playerSkillReadyAt);
-    setEnemyActionReadyAtById(enemyActionReadyAtById);
-    setEnemySpecialReadyAtById(enemySpecialReadyAtById);
-  };
-
-  const applyBattleRewardApplicationPlan = (
-    rewardApplicationPlan: ReturnType<typeof createBattleRewardApplicationPlan>
-  ) => {
-    if (rewardApplicationPlan.expAmount > 0) {
-      dispatch(gainExperience(rewardApplicationPlan.expAmount));
-    }
-    rewardApplicationPlan.spiritStoneAwards.forEach((amount) => {
-      dispatch(addSpiritStones({ amount, source: 'battle' }));
-    });
-    rewardApplicationPlan.inventoryRewards.forEach((drop) => {
-      dispatch(addItem({ itemId: drop.itemId, count: drop.count, instance: drop.instance }));
-    });
-    rewardApplicationPlan.logEntries.forEach((logEntry) => {
-      dispatch(addLog(logEntry));
-    });
-  };
-
-  const applyWorldPlayerDefeatStatePlan = (
-    defeatStatePlan: ReturnType<typeof createWorldPlayerDefeatStatePlan> | undefined
-  ) => {
-    if (!defeatStatePlan) return;
-
-    dispatch(addLog(defeatStatePlan.logEntry));
-    dispatch(enterMap({
-      mapId: defeatStatePlan.respawnMapId,
-      startX: defeatStatePlan.startX,
-      startY: defeatStatePlan.startY,
-    }));
-    if (defeatStatePlan.shouldClearTargetMonster) setTargetMonsterId(null);
-    if (defeatStatePlan.shouldClearAutoMovePath) setAutoMovePath([]);
-    if (defeatStatePlan.shouldStopAutoBattle) setIsAutoBattling(false);
-    setWorldPlayerHp(defeatStatePlan.nextWorldPlayerHp);
-    applyWorldCombatEncounterState(defeatStatePlan.encounterState);
-    if (defeatStatePlan.shouldClearWorldCombatTimers) {
-      clearCombatTimerBucket(combatTimersRef.current, 'world');
-    }
-  };
+  const {
+    dispatchWorldStrikeVisualPlan,
+    applyBattleReplayState,
+    applyWorldCombatEncounterState,
+    applyBattleRewardApplicationPlan,
+    applyWorldPlayerDefeatStatePlan,
+  } = createAdventureBattleUiBridge({
+    dispatch,
+    setDisplayedLogs,
+    setReplayQueue,
+    setBattleSnapshot,
+    setIsReplayingBattle,
+    setWorldCombatTargetId,
+    setWorldCombatTargetStatuses,
+    setWorldCombatPlayerStatuses,
+    setWorldLastCombatMessage,
+    setWorldPlayerShield,
+    setPlayerActionReadyAt,
+    setPlayerSkillReadyAt,
+    setEnemyActionReadyAtById,
+    setEnemySpecialReadyAtById,
+    setTargetMonsterId,
+    setAutoMovePath,
+    setIsAutoBattling,
+    setWorldPlayerHp,
+    clearWorldCombatTimers: () => clearCombatTimerBucket(combatTimersRef.current, 'world'),
+    dispatchWorldStrikeProjectileEffect,
+    dispatchWorldStrikeAreaEffect,
+    applyWorldStrikeImpactBundle,
+  });
 
   const runPlayerWorldAction = (useSkill: boolean) =>
     runPlayerWorldStrikePipeline({
