@@ -213,6 +213,11 @@ export type AutoBattleReplayFrameResult =
   | { kind: "finish"; replayOutcome: AutoBattleReplayOutcome }
   | { kind: "step"; timer: ReturnType<typeof setTimeout> | undefined };
 
+export type AutoBattleReplayFrameStateResult =
+  | { kind: "idle" }
+  | { kind: "finish"; finishResultPlan: AutoBattleReplayFinishResultPlan }
+  | { kind: "step"; timer: ReturnType<typeof setTimeout> | undefined };
+
 export interface TimedCombatQueuePlan {
   delayMs: number | undefined;
   timerSet?: Set<ReturnType<typeof setTimeout>>;
@@ -10107,6 +10112,64 @@ export const runAutoBattleReplayFrame = <TSkill>({
       execute: executeStep,
     }),
   };
+};
+
+export const runAutoBattleReplayStateFrame = <TSkill>({
+  isReplayingBattle,
+  replaySession,
+  currentEnemy,
+  currentEnemyInstanceId,
+  activeMonsters,
+  respawnMapId,
+  resolveSkillByName,
+  timerSet,
+  playerPosition,
+  enemyAttackRange,
+  executeStepStatePlan,
+}: {
+  isReplayingBattle: boolean;
+  replaySession: AutoBattleReplaySession | null;
+  currentEnemy?: Enemy | null;
+  currentEnemyInstanceId: string | null;
+  activeMonsters: ActiveMonster[];
+  respawnMapId?: string;
+  resolveSkillByName?: (skillName: string) => TSkill | undefined;
+  timerSet?: Set<ReturnType<typeof setTimeout>>;
+  playerPosition: Pick<ActiveMonster, "x" | "y">;
+  enemyAttackRange?: number;
+  executeStepStatePlan: (stepStatePlan: AutoBattleReplayStepStatePlan) => void;
+}): AutoBattleReplayFrameStateResult => {
+  const replayFrame = runAutoBattleReplayFrame({
+    isReplayingBattle,
+    replaySession,
+    currentEnemy,
+    currentEnemyInstanceId,
+    activeMonsters,
+    respawnMapId,
+    resolveSkillByName,
+    timerSet,
+    executeStep: (resolvedStep) => {
+      executeStepStatePlan(
+        createAutoBattleReplayStepStatePlan({
+          ...resolvedStep,
+          playerPosition,
+          enemyAttackRange,
+        })
+      );
+    },
+  });
+
+  if (replayFrame.kind === "finish") {
+    return {
+      kind: "finish",
+      finishResultPlan: resolveAutoBattleReplayFinishResultPlan({
+        replayOutcome: replayFrame.replayOutcome,
+        currentEnemy,
+      }),
+    };
+  }
+
+  return replayFrame;
 };
 
 export const createAutoBattleReplayStepStatePlan = <TSkill>({

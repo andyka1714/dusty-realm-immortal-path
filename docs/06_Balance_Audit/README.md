@@ -39,6 +39,7 @@
 - `Adventure` 內 `runAutoBattle() -> replay` 的橋接與 replay step state transition，現在也已開始共用 `createAutoBattleReplaySession(...) / advanceAutoBattleReplaySession(...)`，頁面不再自己重建 first log / snapshot / replayQueue，也不再自己手動 append log、slice queue、patch snapshot
 - battle timer bucket 與 replay 啟動 / 重置判定，現在也已開始共用 `createCombatTimerBuckets(...) / clearCombatTimerBucket(...) / clearAllCombatTimers(...) / resolveAutoBattleReplayTransitionStatePlan(...)`，頁面不再自己維護 world / replay timer manager 與 replay lifecycle gate
 - replay step / reset 的 state shape，現在也已開始共用 `resolveAutoBattleReplayTransitionStatePlan(...) / createAutoBattleReplayStepStatePlan(...)`，頁面不再自己手拼 replay session state 與 replay visual payload
+- replay frame 的 step / finish 外殼，現在也已開始共用 `runAutoBattleReplayStateFrame(...)`，頁面不再自己先拆 `runAutoBattleReplayFrame(...)` 的 step / finish 結果再組對應 plan
 - replay finish 的 battle result、finish effects、rewards 與 defeat log，現在也已開始共用 `resolveAutoBattleReplayFinishResultPlan(...)`，頁面不再自己手拼 replay 結算 payload
 - battle rewards 的掉落 / 修為 / loot log manifest，現在也已開始共用 `createBattleRewardManifest(...) / createBattleRewardApplicationPlan(...)`，而 live world strike 也已開始透過 `createPlayerWorldStrikeOutcomeStatePlan(...)` 直接取得 reward apply plan；頁面不再自己手算 exp、靈石與掉落字串
 - `Adventure` 內舊戰報 replay 的 visual payload，現在已正式共用 `battleSystem.ts` 的 `createBattleReplayVisualPlan(...)`，頁面不再自己維護 attack / damage visual 規則

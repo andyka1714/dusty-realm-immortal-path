@@ -106,6 +106,7 @@
 - `Adventure` 內 `runAutoBattle() -> replay` 的橋接，現在也已開始共用 `battleSystem.ts` 提供的 `createAutoBattleReplaySession(...) / advanceAutoBattleReplaySession(...)`，world 頁面不再自己重建 first log / snapshot / replayQueue，也不再自己手動 append log、slice queue、patch snapshot
 - `Adventure` 內 `runAutoBattle() -> replay` 的啟動入口與 replay state shape，現在也已開始改走 `resolveAutoBattleReplayTransitionStatePlan(...) + createAutoBattleReplaySession(...)`，頁面 effect 不再自己拼接 replay lifecycle gate 與本地 replay state 組裝
 - replay step 的 state shape 與 visual payload，現在也已開始共用 `createAutoBattleReplayStepStatePlan(...)`，頁面不再自己手拼 replay session state 與 attack / damage visual 規則
+- replay frame 的 step / finish 外殼，現在也已開始共用 `runAutoBattleReplayStateFrame(...)`，頁面不再自己先拆 `runAutoBattleReplayFrame(...)` 的 step / finish 結果再組對應 plan
 - battle rewards 的掉落 / 修為 / loot log manifest，現在也已開始共用 `createBattleRewardManifest(...) / createBattleRewardApplicationPlan(...)`，而 live world strike 也已開始透過 `createPlayerWorldStrikeOutcomeStatePlan(...)` 直接拿到 reward apply plan；頁面不再自己手算 exp、靈石與掉落字串
 - `Adventure` 內舊戰報 replay 的 visual payload，現在已正式共用 `battleSystem.ts` 的 `createBattleReplayVisualPlan(...)`，頁面不再自己維護 attack / damage visual 規則
 - `Adventure` 內 player / enemy world strike 的 execute 結果組裝，現在也已開始共用 `createPlayerWorldStrikeExecutionPlan(...) / createEnemyWorldStrikeExecutionPlan(...) / resolvePlayerWorldStrikeOutcomePlan(...) / resolveEnemyWorldStrikeOutcomePlan(...) / createPlayerWorldStrikeOutcomeStatePlan(...) / createEnemyWorldStrikeOutcomeStatePlan(...)`，頁面不再自己手算範圍命中、護盾吸收、命中特效、擊殺獎勵與敗北 outcome

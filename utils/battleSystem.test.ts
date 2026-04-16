@@ -59,6 +59,7 @@ import {
   resolveEnemyWorldStrike,
   resolvePlayerWorldStrike,
   runAutoBattleReplayFrame,
+  runAutoBattleReplayStateFrame,
   runWorldCombatActionWindowStep,
   runWorldCombatStep,
   selectNearestWorldCombatTarget,
@@ -469,6 +470,29 @@ describe("battle system balance", () => {
 
       expect(replayFrameStep.kind).toBe("step");
 
+      const replayFrameStateStep = runAutoBattleReplayStateFrame({
+        isReplayingBattle: true,
+        replaySession: replayRunnerSession,
+        currentEnemy: COMMON_ENEMIES.m1_c1,
+        currentEnemyInstanceId: "enemy-1",
+        activeMonsters: [{ instanceId: "enemy-1", x: 3, y: 4 } as ActiveMonster],
+        respawnMapId: "4",
+        resolveSkillByName: (skillName) => ({ skillName }),
+        timerSet,
+        playerPosition: { x: 1, y: 1 },
+        enemyAttackRange: COMMON_ENEMIES.m1_c1.attackRange,
+        executeStepStatePlan: (stepStatePlan) =>
+          calls.push(
+            `frame-state:step:${stepStatePlan.replayState.displayedLogs.at(-1)?.message}`
+          ),
+      });
+
+      expect(replayFrameStateStep.kind).toBe("step");
+      if (replayFrameStateStep.kind === "step") {
+        vi.advanceTimersByTime(460);
+        expect(calls).toContain("frame-state:step:你施展【火球術】");
+      }
+
       expect(
         selectNearestWorldCombatTarget({
           targets: [
@@ -668,6 +692,40 @@ describe("battle system balance", () => {
       if (replayFrameFinish.kind === "finish") {
         expect(replayFrameFinish.replayOutcome.won).toBe(true);
         expect(replayFrameFinish.replayOutcome.defeatedMonster?.instanceId).toBe("enemy-1");
+      }
+
+      const replayFrameStateFinish = runAutoBattleReplayStateFrame({
+        isReplayingBattle: true,
+        replaySession: {
+          displayedLogs: replayRunnerSession.displayedLogs,
+          replayQueue: [],
+          battleSnapshot: {
+            playerHp: 320,
+            playerMaxHp: 500,
+            enemyHp: 0,
+            enemyMaxHp: 400,
+            won: true,
+            rewards: {
+              exp: 100,
+              spiritStones: 50,
+              drops: [],
+            },
+          },
+        },
+        currentEnemy: COMMON_ENEMIES.m1_c1,
+        currentEnemyInstanceId: "enemy-1",
+        activeMonsters: [{ instanceId: "enemy-1", x: 3, y: 4 } as ActiveMonster],
+        respawnMapId: "4",
+        timerSet,
+        playerPosition: { x: 1, y: 1 },
+        enemyAttackRange: COMMON_ENEMIES.m1_c1.attackRange,
+        executeStepStatePlan: () => calls.push("frame-state:unexpected"),
+      });
+
+      expect(replayFrameStateFinish.kind).toBe("finish");
+      if (replayFrameStateFinish.kind === "finish") {
+        expect(replayFrameStateFinish.finishResultPlan.battleResult.won).toBe(true);
+        expect(replayFrameStateFinish.finishResultPlan.rewardManifest?.expAmount).toBe(100);
       }
 
       const blockedReadyAt = Date.now() + 500;

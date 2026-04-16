@@ -13,7 +13,6 @@ import {
   createBattleRewardApplicationPlan,
   createCombatTimerBuckets,
   createAutoBattleReplayState,
-  createAutoBattleReplayStepStatePlan,
   createAutoBattleReplaySession,
   createClearWorldCombatEncounterState,
   createEnemyWorldStrikeOutcomeStatePlan,
@@ -26,7 +25,6 @@ import {
   calculatePlayerStats,
   getBattleReportAutoCloseDelayMs,
   getBattleRespawnMapId,
-  resolveAutoBattleReplayFinishResultPlan,
   resolveEnemyWorldStrikeOutcomePlan,
   resolvePlayerWorldStrikeOutcomePlan,
   resolveAutoBattleReplayTransitionStatePlan,
@@ -34,7 +32,7 @@ import {
   resolveWorldBattleResultCleanup,
   resolvePlayerWorldStrike,
   resolveEnemyWorldStrike,
-  runAutoBattleReplayFrame,
+  runAutoBattleReplayStateFrame,
   runWorldCombatStep,
   getResolvedSkillCooldownSeconds,
   runEnemyWorldStrikeAction,
@@ -1530,7 +1528,7 @@ export const Adventure: React.FC<AdventureProps> = ({
           battleSnapshot,
         }
       : null;
-    const replayFrame = runAutoBattleReplayFrame({
+    const replayFrame = runAutoBattleReplayStateFrame({
       isReplayingBattle,
       replaySession,
       currentEnemy,
@@ -1539,13 +1537,9 @@ export const Adventure: React.FC<AdventureProps> = ({
       respawnMapId: getBattleRespawnMapId(completedQuests),
       resolveSkillByName: getFormalSkillByName,
       timerSet: combatTimersRef.current.replay,
-      executeStep: (resolvedStep) => {
-        const stepStatePlan = createAutoBattleReplayStepStatePlan({
-          ...resolvedStep,
-          playerPosition,
-          enemyAttackRange: currentEnemy?.attackRange,
-        });
-
+      playerPosition,
+      enemyAttackRange: currentEnemy?.attackRange,
+      executeStepStatePlan: (stepStatePlan) => {
         applyBattleReplayState(stepStatePlan.replayState);
 
         if (stepStatePlan.shouldAutoScroll) {
@@ -1558,10 +1552,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     });
 
     if (replayFrame.kind === 'finish') {
-      const finishResultPlan = resolveAutoBattleReplayFinishResultPlan({
-        replayOutcome: replayFrame.replayOutcome,
-        currentEnemy,
-      });
+      const { finishResultPlan } = replayFrame;
       if (finishResultPlan.shouldStopReplay) {
         setIsReplayingBattle(false);
       }
