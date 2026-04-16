@@ -17,8 +17,12 @@ import {
   ELEMENT_NAMES,
 } from "../constants";
 import { getFormalSkillId, getSkill } from "../data/skills";
-import { formatSpiritStone } from "./currency";
 import { getWorldSkillAreaTargets } from "./worldCombat";
+import {
+  clearCombatLogSnapshotProvider,
+  pushCombatLog,
+  setCombatLogSnapshotProvider,
+} from "./battleLog";
 import {
   AutoBattleReplayTransitionStatePlan,
   CombatTimerBucket,
@@ -253,21 +257,13 @@ export {
   runWorldPlayerCombatAction,
   selectNearestWorldCombatTarget,
 } from "./battleWorldController";
-
-const formatSpiritStones = (amount: number): string => {
-  if (amount <= 0) return "";
-
-  const high = Math.floor(amount / 1000000);
-  const medium = Math.floor((amount % 1000000) / 1000);
-  const low = amount % 1000;
-
-  const parts: string[] = [];
-  if (high > 0) parts.push(`<stones q="2">${high} 上品 靈石</stones>`);
-  if (medium > 0) parts.push(`<stones q="1">${medium} 中品 靈石</stones>`);
-  if (low > 0) parts.push(`<stones q="0">${low} 下品 靈石</stones>`);
-
-  return parts.join("，");
-};
+export type { CombatLogSnapshotProvider } from "./battleLog";
+export {
+  clearCombatLogSnapshotProvider,
+  formatSpiritStones,
+  pushCombatLog,
+  setCombatLogSnapshotProvider,
+} from "./battleLog";
 
 export interface PlayerCombatStats {
   hp: number;
@@ -620,19 +616,6 @@ const getEnemyAttackPowerMultiplier = (enemy: Enemy) => {
   if (hasEnemyAffix(enemy, "統御")) multiplier *= 1.05;
   return multiplier;
 };
-
-type CombatLogSnapshotProvider = (
-  timeMs: number
-) => Pick<
-  CombatLog,
-  | "playerStatuses"
-  | "enemyStatuses"
-  | "playerActiveSkillName"
-  | "playerActiveSkillCooldownRemainingMs"
-  | "playerActiveSkillCooldownTotalMs"
->;
-
-let combatLogSnapshotProvider: CombatLogSnapshotProvider | null = null;
 
 const getRestriction = (
   attacker: ElementType,
@@ -2839,13 +2822,15 @@ const createCombatInfrastructure = ({
   getPlayerDamagedSinceSwordHeartWindow: () => boolean;
   setPlayerDamagedSinceSwordHeartWindow: (value: boolean) => void;
 }) => {
-  combatLogSnapshotProvider = createCombatSnapshotProvider({
-    activeSkill,
-    playerStatusesRef,
-    enemyStatusesRef,
-    activeSkillReadyAtMsRef,
-    learnedSkills,
-  });
+  setCombatLogSnapshotProvider(
+    createCombatSnapshotProvider({
+      activeSkill,
+      playerStatusesRef,
+      enemyStatusesRef,
+      activeSkillReadyAtMsRef,
+      learnedSkills,
+    })
+  );
 
   const processStatusTicks = createStatusTickProcessor({
     getTurn,
@@ -3358,8 +3343,6 @@ const executeAutoBattleTimeline = ({
     enemy,
     playerHp: finalState.playerHp,
     enemyHp: finalState.enemyHp,
-    pushCombatLog,
-    formatSpiritStones,
   });
 };
 
@@ -4506,15 +4489,6 @@ const resolveStatusTickOutcome = ({
   }
 
   return { damage, message, restoreToPlayer, restoreToEnemy };
-};
-
-const pushCombatLog = (logs: CombatLog[], log: CombatLog) => {
-  const snapshotTimeMs = log.timeMs ?? 0;
-  const snapshots = combatLogSnapshotProvider?.(snapshotTimeMs);
-  logs.push({
-    ...log,
-    ...(snapshots ?? {}),
-  });
 };
 
 const getStatusLabel = (statusId: string) => {
@@ -8176,7 +8150,7 @@ export const runAutoBattle = (
     logs,
     prepared: prepareAutoBattleExecution(player, enemy, logs),
   });
-  combatLogSnapshotProvider = undefined;
+  clearCombatLogSnapshotProvider();
   return result;
 };
 

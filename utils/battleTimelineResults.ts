@@ -2,6 +2,7 @@ import { CombatLog, Enemy, ItemInstance, ItemQuality } from "../types";
 import { getDropRewards } from "../data/drop_tables";
 import { getItem } from "../data/items";
 import { generateDrops } from "./dropSystem";
+import { formatSpiritStones, pushCombatLog } from "./battleLog";
 
 export interface AutoBattleRewards {
   spiritStones: number;
@@ -15,10 +16,7 @@ export interface AutoBattleTimelineResult {
   rewards?: AutoBattleRewards;
 }
 
-type PushCombatLog = (logs: CombatLog[], log: CombatLog) => void;
-
 const buildVictoryLootMessage = (
-  formatSpiritStones: (amount: number) => string,
   spiritStones: number,
   drops: { itemId: string; count: number; instance?: ItemInstance }[]
 ) => {
@@ -63,8 +61,6 @@ export const resolveVictoryRewards = ({
   playerHp,
   playerMaxHp,
   enemyHp,
-  pushCombatLog,
-  formatSpiritStones,
 }: {
   enemy: Enemy;
   logs: CombatLog[];
@@ -73,8 +69,6 @@ export const resolveVictoryRewards = ({
   playerHp: number;
   playerMaxHp: number;
   enemyHp: number;
-  pushCombatLog: PushCombatLog;
-  formatSpiritStones: (amount: number) => string;
 }): AutoBattleRewards => {
   const exp = enemy.exp || 0;
   pushCombatLog(logs, {
@@ -102,11 +96,7 @@ export const resolveVictoryRewards = ({
   });
 
   if (spiritStones > 0 || finalDrops.length > 0) {
-    const lootMsg = buildVictoryLootMessage(
-      formatSpiritStones,
-      spiritStones,
-      finalDrops
-    );
+    const lootMsg = buildVictoryLootMessage(spiritStones, finalDrops);
 
     pushCombatLog(logs, {
       turn,
@@ -132,7 +122,6 @@ export const createCombatDefeatLog = ({
   playerHp,
   playerMaxHp,
   enemyHp,
-  pushCombatLog,
 }: {
   logs: CombatLog[];
   turn: number;
@@ -141,7 +130,6 @@ export const createCombatDefeatLog = ({
   playerHp: number;
   playerMaxHp: number;
   enemyHp: number;
-  pushCombatLog: PushCombatLog;
 }) => {
   pushCombatLog(logs, {
     turn,
@@ -165,8 +153,6 @@ export const finalizeCombatResult = ({
   enemy,
   playerHp,
   enemyHp,
-  pushCombatLog,
-  formatSpiritStones,
 }: {
   won: boolean;
   logs: CombatLog[];
@@ -176,8 +162,6 @@ export const finalizeCombatResult = ({
   enemy: Enemy;
   playerHp: number;
   enemyHp: number;
-  pushCombatLog: PushCombatLog;
-  formatSpiritStones: (amount: number) => string;
 }): AutoBattleTimelineResult => {
   if (won) {
     const rewards = resolveVictoryRewards({
@@ -188,8 +172,6 @@ export const finalizeCombatResult = ({
       playerHp,
       playerMaxHp,
       enemyHp,
-      pushCombatLog,
-      formatSpiritStones,
     });
 
     return { won, logs, rewards };
@@ -203,7 +185,6 @@ export const finalizeCombatResult = ({
     playerHp,
     playerMaxHp,
     enemyHp,
-    pushCombatLog,
   });
 
   return { won, logs };
