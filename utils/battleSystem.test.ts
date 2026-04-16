@@ -66,6 +66,9 @@ import {
   runAutoBattleReplayStep,
   runEnemyWorldStrikeAction,
   runPlayerWorldStrikeAction,
+  runWorldCombatControllerStep,
+  runWorldEnemyCombatAction,
+  runWorldPlayerCombatAction,
   runResolvedBattleReplayStep,
   runResolvedTimedCombatPlan,
   runResolvedWorldStrikeAction,
@@ -660,6 +663,103 @@ describe("battle system balance", () => {
         "enemy:cast:special",
         "enemy:preview:true:special",
         "enemy:execute:special",
+      ]);
+
+      const livePlayerActionTimer = runWorldPlayerCombatAction({
+        readyAt: 0,
+        canExecute: () => true,
+        target: { instanceId: "enemy-1", name: "木人" },
+        primaryActiveSkill: { id: "skill-2" },
+        playerSkillReadyAt: 1400,
+        useSkill: true,
+        resolveStrike: (chosenSkill) => ({
+          executionTimeMs: 0,
+          skillId: chosenSkill?.id ?? "basic",
+        }),
+        applyCastEffect: ({ strike }) => calls.push(`live-player:cast:${strike.skillId}`),
+        applyPreview: ({ strike }) => calls.push(`live-player:preview:${strike.skillId}`),
+        execute: ({ strike }) => calls.push(`live-player:execute:${strike.skillId}`),
+      });
+
+      expect(livePlayerActionTimer).toBeUndefined();
+      expect(calls.slice(-3)).toEqual([
+        "live-player:cast:skill-2",
+        "live-player:preview:skill-2",
+        "live-player:execute:skill-2",
+      ]);
+
+      const liveEnemyActionTimer = runWorldEnemyCombatAction({
+        enemySpecialReadyAt: 999999,
+        resolveStrike: (canUseSpecial) => ({
+          executionTimeMs: 0,
+          mode: canUseSpecial ? "special" : "basic",
+        }),
+        applyCastEffect: ({ strike }) => calls.push(`live-enemy:cast:${strike.mode}`),
+        applyPreview: ({ strike }) => calls.push(`live-enemy:preview:${strike.mode}`),
+        execute: ({ strike }) => calls.push(`live-enemy:execute:${strike.mode}`),
+      });
+
+      expect(liveEnemyActionTimer).toBeUndefined();
+      expect(calls.slice(-3)).toEqual([
+        "live-enemy:cast:basic",
+        "live-enemy:preview:basic",
+        "live-enemy:execute:basic",
+      ]);
+
+      const controllerWindow = runWorldCombatControllerStep({
+        now: 1500,
+        distance: 1,
+        playerEngagementRange: 2,
+        playerActionReadyAt: 1200,
+        playerSkillReadyAt: 1400,
+        primaryActiveSkill: { id: "skill-3" },
+        isAutoBattling: true,
+        worldCombatTargetId: null,
+        targetedMonsterInstanceId: "enemy-1",
+        enemyEngagementRange: 1,
+        enemyActionReadyAt: 1300,
+        enemySpecialReadyAt: 1400,
+        playerAction: {
+          canExecute: () => true,
+          target: { instanceId: "enemy-1", name: "木人" },
+          resolveStrike: (chosenSkill) => ({
+            executionTimeMs: 0,
+            skillId: chosenSkill?.id ?? "basic",
+          }),
+          applyCastEffect: ({ strike }) =>
+            calls.push(`controller-player:cast:${strike.skillId}`),
+          applyPreview: ({ strike }) =>
+            calls.push(`controller-player:preview:${strike.skillId}`),
+          execute: ({ strike }) =>
+            calls.push(`controller-player:execute:${strike.skillId}`),
+        },
+        enemyAction: {
+          resolveStrike: (canUseSpecial) => ({
+            executionTimeMs: 0,
+            mode: canUseSpecial ? "special" : "basic",
+          }),
+          applyCastEffect: ({ strike }) =>
+            calls.push(`controller-enemy:cast:${strike.mode}`),
+          applyPreview: ({ strike }) =>
+            calls.push(`controller-enemy:preview:${strike.mode}`),
+          execute: ({ strike }) =>
+            calls.push(`controller-enemy:execute:${strike.mode}`),
+        },
+      });
+
+      expect(controllerWindow).toEqual({
+        engagedTargetId: "enemy-1",
+        shouldPlayerAct: true,
+        usePlayerSkill: true,
+        shouldEnemyAct: true,
+      });
+      expect(calls.slice(-6)).toEqual([
+        "controller-player:cast:skill-3",
+        "controller-player:preview:skill-3",
+        "controller-player:execute:skill-3",
+        "controller-enemy:cast:special",
+        "controller-enemy:preview:special",
+        "controller-enemy:execute:special",
       ]);
 
       const replayFrameFinish = runAutoBattleReplayFrame({
