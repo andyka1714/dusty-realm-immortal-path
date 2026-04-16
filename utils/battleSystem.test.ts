@@ -26,6 +26,7 @@ import {
   createResolvedWorldStrikeActionPlan,
   createEnemyWorldStrikeOutcomeStatePlan,
   createEnemyWorldStrikeExecutionPlan,
+  resolveEnemyWorldStrikeOutcomeStatePlan,
   resolveEnemyWorldStrikeOutcomePlan,
   createTimedCombatPlan,
   createAutoBattleReplaySession,
@@ -35,6 +36,7 @@ import {
   createPlayerWorldStrikeOutcomeStatePlan,
   createPlayerWorldStrikePreviewPlan,
   createPlayerWorldStrikeExecutionPlan,
+  resolvePlayerWorldStrikeOutcomeStatePlan,
   resolvePlayerWorldStrikeOutcomePlan,
   createResetWorldCombatEncounterState,
   createWorldStrikeQueuePlan,
@@ -1508,6 +1510,8 @@ describe("battle system balance", () => {
   });
 
   it("shares live world strike outcome state plans inside battle core", () => {
+    fixedRandom.mockReturnValue(0.5);
+
     const defeatPlan = resolveWorldPlayerDefeatPlan({
       completedQuestIds: ["sect_sword_join"],
       playerMaxHp: 500,
@@ -1642,6 +1646,82 @@ describe("battle system balance", () => {
       shouldClearEncounter: true,
     });
 
+    const normalizeRewardPlans = (
+      rewardApplicationPlans: Array<ReturnType<typeof createBattleRewardApplicationPlan>>
+    ) =>
+      rewardApplicationPlans.map((plan) => ({
+        ...plan,
+        inventoryRewards: plan.inventoryRewards.map((reward) => ({
+          ...reward,
+          instance: reward.instance
+            ? {
+                ...reward.instance,
+                instanceId: "<normalized>",
+              }
+            : reward.instance,
+        })),
+      }));
+
+    const resolvedPlayerOutcomeStatePlan = resolvePlayerWorldStrikeOutcomeStatePlan({
+      strike: {
+        damage: 80,
+        isCrit: false,
+        skillName: "火球術",
+        nextActionDelayMs: 400,
+        skillCooldownMs: 1200,
+        executionTimeMs: 320,
+        playerStatusNames: [],
+        enemyStatusNames: [],
+        playerShieldGain: 0,
+        areaShape: "single",
+        areaRadius: 0,
+        maxTargets: 1,
+        isProjectile: true,
+      },
+      skillName: "火球術",
+      skillProfession: ProfessionType.Mage,
+      targetedMonster: {
+        instanceId: "enemy-1",
+        templateId: COMMON_ENEMIES.m1_c1.id,
+        name: COMMON_ENEMIES.m1_c1.name,
+        x: 3,
+        y: 4,
+        currentHp: 1,
+      } as ActiveMonster,
+      activeMonsters: [
+        {
+          instanceId: "enemy-1",
+          templateId: COMMON_ENEMIES.m1_c1.id,
+          name: COMMON_ENEMIES.m1_c1.name,
+          x: 3,
+          y: 4,
+          currentHp: 1,
+        } as ActiveMonster,
+      ],
+      playerPosition: { x: 1, y: 1 },
+      mapEnemies: [COMMON_ENEMIES.m1_c1],
+      playerMaxHp: 500,
+      currentWorldPlayerHp: 420,
+    });
+
+    const expectedPlayerOutcomeStatePlan = createPlayerWorldStrikeOutcomeStatePlan({
+      outcomePlan: playerOutcomePlan,
+      currentWorldPlayerHp: 420,
+      playerMaxHp: 500,
+    });
+
+    expect({
+      ...resolvedPlayerOutcomeStatePlan,
+      rewardApplicationPlans: normalizeRewardPlans(
+        resolvedPlayerOutcomeStatePlan.rewardApplicationPlans
+      ),
+    }).toEqual({
+      ...expectedPlayerOutcomeStatePlan,
+      rewardApplicationPlans: normalizeRewardPlans(
+        expectedPlayerOutcomeStatePlan.rewardApplicationPlans
+      ),
+    });
+
     const enemyExecutionPlan = createEnemyWorldStrikeExecutionPlan({
       strike: {
         damage: 120,
@@ -1681,6 +1761,33 @@ describe("battle system balance", () => {
         defeatPlan: enemyOutcomePlan.defeatPlan!,
       }),
     });
+
+    expect(
+      resolveEnemyWorldStrikeOutcomeStatePlan({
+        strike: {
+          damage: 120,
+          skillName: "撕咬",
+          executionTimeMs: 260,
+          areaShape: "single",
+          areaRadius: 0,
+          isProjectile: false,
+          statusNames: [],
+        },
+        enemyName: COMMON_ENEMIES.m1_c1.name,
+        enemyPosition: { x: 3, y: 4 },
+        fallbackSourcePosition: { x: 3, y: 4 },
+        playerPosition: { x: 1, y: 1 },
+        currentShield: 0,
+        currentHp: 100,
+        currentStatuses: [],
+        completedQuestIds: ["sect_sword_join"],
+        playerMaxHp: 500,
+      })
+    ).toEqual(
+      createEnemyWorldStrikeOutcomeStatePlan({
+        outcomePlan: enemyOutcomePlan,
+      })
+    );
   });
 
   it("shares enemy special timeline metadata between world strikes and timeline combat", () => {

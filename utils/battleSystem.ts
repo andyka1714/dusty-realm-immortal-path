@@ -1073,6 +1073,44 @@ export const createPlayerWorldStrikeOutcomeStatePlan = ({
   };
 };
 
+export const resolvePlayerWorldStrikeOutcomeStatePlan = ({
+  strike,
+  skillName,
+  skillProfession,
+  targetedMonster,
+  activeMonsters,
+  playerPosition,
+  mapEnemies,
+  playerMaxHp,
+  currentWorldPlayerHp,
+}: {
+  strike: WorldStrikeResult;
+  skillName?: string;
+  skillProfession?: ProfessionType;
+  targetedMonster: ActiveMonster;
+  activeMonsters: ActiveMonster[];
+  playerPosition: Pick<ActiveMonster, "x" | "y">;
+  mapEnemies: Enemy[] | undefined;
+  playerMaxHp: number;
+  currentWorldPlayerHp: number;
+}): PlayerWorldStrikeOutcomeStatePlan =>
+  createPlayerWorldStrikeOutcomeStatePlan({
+    outcomePlan: resolvePlayerWorldStrikeOutcomePlan({
+      executionPlan: createPlayerWorldStrikeExecutionPlan({
+        strike,
+        skillName,
+        skillProfession,
+        targetedMonster,
+        activeMonsters,
+        playerPosition,
+      }),
+      mapEnemies,
+      playerMaxHp,
+    }),
+    currentWorldPlayerHp,
+    playerMaxHp,
+  });
+
 export const createEnemyWorldStrikeExecutionPlan = ({
   strike,
   enemyName,
@@ -1192,6 +1230,55 @@ export const createEnemyWorldStrikeOutcomeStatePlan = ({
       })
     : undefined,
 });
+
+export const resolveEnemyWorldStrikeOutcomeStatePlan = ({
+  strike,
+  enemyName,
+  enemyPosition,
+  fallbackSourcePosition,
+  playerPosition,
+  currentShield,
+  currentHp,
+  currentStatuses,
+  completedQuestIds,
+  playerMaxHp,
+}: {
+  strike: Pick<
+    ReturnType<typeof resolveEnemyWorldStrike>,
+    | "damage"
+    | "skillName"
+    | "executionTimeMs"
+    | "areaShape"
+    | "areaRadius"
+    | "isProjectile"
+    | "statusNames"
+  >;
+  enemyName: string;
+  enemyPosition?: Pick<ActiveMonster, "x" | "y"> | null;
+  fallbackSourcePosition: Pick<ActiveMonster, "x" | "y">;
+  playerPosition: Pick<ActiveMonster, "x" | "y">;
+  currentShield: number;
+  currentHp: number;
+  currentStatuses: string[];
+  completedQuestIds: string[];
+  playerMaxHp: number;
+}): EnemyWorldStrikeOutcomeStatePlan =>
+  createEnemyWorldStrikeOutcomeStatePlan({
+    outcomePlan: resolveEnemyWorldStrikeOutcomePlan({
+      executionPlan: createEnemyWorldStrikeExecutionPlan({
+        strike,
+        enemyName,
+        enemyPosition,
+        fallbackSourcePosition,
+        playerPosition,
+        currentShield,
+        currentHp,
+        currentStatuses,
+      }),
+      completedQuestIds,
+      playerMaxHp,
+    }),
+  });
 
 export const selectNearestWorldCombatTarget = <TTarget,>({
   targets,

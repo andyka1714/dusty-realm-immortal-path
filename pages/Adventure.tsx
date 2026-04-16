@@ -15,18 +15,14 @@ import {
   createAutoBattleReplayState,
   createAutoBattleReplaySession,
   createClearWorldCombatEncounterState,
-  createEnemyWorldStrikeOutcomeStatePlan,
   createEnemyWorldStrikePreviewPlan,
-  createEnemyWorldStrikeExecutionPlan,
-  createPlayerWorldStrikeOutcomeStatePlan,
   createPlayerWorldStrikePreviewPlan,
-  createPlayerWorldStrikeExecutionPlan,
   createResetWorldCombatEncounterState,
   calculatePlayerStats,
   getBattleReportAutoCloseDelayMs,
   getBattleRespawnMapId,
-  resolveEnemyWorldStrikeOutcomePlan,
-  resolvePlayerWorldStrikeOutcomePlan,
+  resolveEnemyWorldStrikeOutcomeStatePlan,
+  resolvePlayerWorldStrikeOutcomeStatePlan,
   resolveAutoBattleReplayTransitionStatePlan,
   resolveWorldCombatAutoTarget,
   resolveWorldBattleResultCleanup,
@@ -1010,23 +1006,16 @@ export const Adventure: React.FC<AdventureProps> = ({
     targetedMonster: ActiveMonster;
     activeMonsters: ActiveMonster[];
   }) => {
-    const executionPlan = createPlayerWorldStrikeExecutionPlan({
+    const outcomeStatePlan = resolvePlayerWorldStrikeOutcomeStatePlan({
       strike,
       skillName: chosenSkill?.name,
       skillProfession: chosenSkill?.profession,
       targetedMonster,
       activeMonsters,
       playerPosition,
-    });
-    const outcomePlan = resolvePlayerWorldStrikeOutcomePlan({
-      executionPlan,
       mapEnemies: mapData?.enemies,
       playerMaxHp: playerStats.maxHp,
-    });
-    const outcomeStatePlan = createPlayerWorldStrikeOutcomeStatePlan({
-      outcomePlan,
       currentWorldPlayerHp: worldPlayerHp,
-      playerMaxHp: playerStats.maxHp,
     });
 
     outcomeStatePlan.monsterDamageApplications.forEach(({ monsterInstanceId, damage }) => {
@@ -1060,7 +1049,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     strike: ReturnType<typeof resolveEnemyWorldStrike>;
     enemyTemplate: NonNullable<typeof targetedMonsterTemplate>;
   }) => {
-    const executionPlan = createEnemyWorldStrikeExecutionPlan({
+    const outcomeStatePlan = resolveEnemyWorldStrikeOutcomeStatePlan({
       strike,
       enemyName: enemyTemplate.name,
       enemyPosition: targetedMonster,
@@ -1072,14 +1061,8 @@ export const Adventure: React.FC<AdventureProps> = ({
       currentShield: worldPlayerShield,
       currentHp: worldPlayerHp,
       currentStatuses: worldCombatPlayerStatuses,
-    });
-    const outcomePlan = resolveEnemyWorldStrikeOutcomePlan({
-      executionPlan,
       completedQuestIds: completedQuests,
       playerMaxHp: playerStats.maxHp,
-    });
-    const outcomeStatePlan = createEnemyWorldStrikeOutcomeStatePlan({
-      outcomePlan,
     });
 
     if (outcomeStatePlan.shouldUpdateWorldPlayerShield) {
@@ -1163,7 +1146,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   };
 
   const applyBattleRewardApplicationPlan = (
-    rewardApplicationPlan: ReturnType<typeof createPlayerWorldStrikeOutcomeStatePlan>['rewardApplicationPlans'][number]
+    rewardApplicationPlan: ReturnType<typeof createBattleRewardApplicationPlan>
   ) => {
     if (rewardApplicationPlan.expAmount > 0) {
       dispatch(gainExperience(rewardApplicationPlan.expAmount));
@@ -1180,7 +1163,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   };
 
   const applyWorldPlayerDefeatStatePlan = (
-    defeatStatePlan: ReturnType<typeof createEnemyWorldStrikeOutcomeStatePlan>['defeatStatePlan']
+    defeatStatePlan: ReturnType<typeof resolveEnemyWorldStrikeOutcomeStatePlan>['defeatStatePlan']
   ) => {
     if (!defeatStatePlan) return;
 
