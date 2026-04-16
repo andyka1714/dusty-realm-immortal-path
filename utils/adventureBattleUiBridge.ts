@@ -9,7 +9,6 @@ import {
   createBattleRewardApplicationPlan,
   createResetWorldCombatEncounterState,
   createWorldPlayerDefeatStatePlan,
-  type WorldStrikeVisualPlan,
 } from './battleSystem';
 
 type BattleReplayState = ReturnType<typeof createAutoBattleReplayState>;
@@ -49,11 +48,6 @@ type AdventureBattleUiBridgeParams = {
   setIsAutoBattling: (isAutoBattling: boolean) => void;
   setWorldPlayerHp: (worldPlayerHp: number) => void;
   clearWorldCombatTimers: () => void;
-  dispatchWorldStrikeProjectileEffect: (
-    projectile: NonNullable<WorldStrikeVisualPlan['projectile']>
-  ) => void;
-  dispatchWorldStrikeAreaEffect: (area: NonNullable<WorldStrikeVisualPlan['area']>) => void;
-  applyWorldStrikeImpactBundle: (impact: NonNullable<WorldStrikeVisualPlan['impact']>) => void;
 };
 
 export const createAdventureBattleUiBridge = ({
@@ -76,28 +70,7 @@ export const createAdventureBattleUiBridge = ({
   setIsAutoBattling,
   setWorldPlayerHp,
   clearWorldCombatTimers,
-  dispatchWorldStrikeProjectileEffect,
-  dispatchWorldStrikeAreaEffect,
-  applyWorldStrikeImpactBundle,
 }: AdventureBattleUiBridgeParams) => {
-  const dispatchWorldStrikeVisualPlan = ({
-    projectile,
-    area,
-    impact,
-  }: WorldStrikeVisualPlan) => {
-    if (projectile) {
-      dispatchWorldStrikeProjectileEffect(projectile);
-    }
-
-    if (area) {
-      dispatchWorldStrikeAreaEffect(area);
-    }
-
-    if (impact) {
-      applyWorldStrikeImpactBundle(impact);
-    }
-  };
-
   const applyBattleReplayState = ({
     displayedLogs,
     replayQueue,
@@ -169,7 +142,6 @@ export const createAdventureBattleUiBridge = ({
   };
 
   return {
-    dispatchWorldStrikeVisualPlan,
     applyBattleReplayState,
     applyWorldCombatEncounterState,
     applyBattleRewardApplicationPlan,

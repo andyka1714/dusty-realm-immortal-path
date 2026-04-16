@@ -12,11 +12,9 @@ import {
   clearCombatTimerBucket,
   createBattleRewardApplicationPlan,
   createCombatTimerBuckets,
-  createAutoBattleReplayState,
   createAutoBattleReplaySession,
   createClearWorldCombatEncounterState,
   createResetWorldCombatEncounterState,
-  createWorldPlayerDefeatStatePlan,
   calculatePlayerStats,
   getBattleRespawnMapId,
   resolveWorldBattleResultLifecyclePlan,
@@ -27,9 +25,7 @@ import {
   runWorldCombatControllerFrame,
   runPlayerWorldStrikePipeline,
   getResolvedSkillCooldownSeconds,
-  type WorldStrikeVisualPlan,
 } from '../utils/battleSystem';
-import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move, Swords, Flame, Droplets, Shield, ShieldOff, Zap, Snowflake, Sparkles } from 'lucide-react';
 import { parseBattleLog } from '../utils/logParser';
@@ -37,7 +33,7 @@ import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory, 
 import { MOVEMENT_SPEEDS, REALM_NAMES, ELEMENT_COLORS, ELEMENT_NAMES } from '../constants';
 import clsx from 'clsx';
 import { Modal } from '../components/Modal';
-import { addSpiritStones, gainExperience, setProfession } from '@/store/slices/characterSlice';
+import { setProfession } from '@/store/slices/characterSlice';
 import AdventureStage from '../components/adventure/AdventureStage';
 import ShopPanel from '../components/adventure/ShopPanel';
 import { QuestModal } from '../components/adventure/QuestModal';
@@ -49,6 +45,7 @@ import { getEnemyEngagementRange, getGridDistance, getPlayerEngagementRange } fr
 import { getLearnedSkillEngagementRange } from '../utils/skillRealtime';
 import { getFormalSkillByName, normalizeLearnedSkills } from '../data/skills';
 import { createAdventureBattleUiBridge } from '../utils/adventureBattleUiBridge';
+import { createAdventureBattleVisualBridge } from '../utils/adventureBattleVisualBridge';
 
 
 // --- VISUAL CONFIG ---
@@ -730,217 +727,15 @@ export const Adventure: React.FC<AdventureProps> = ({
     );
   };
 
-  const dispatchWorldStrikeProjectileEffect = ({
-    color,
-    colorInt,
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-    durationMs,
-  }: {
-    color: string;
-    colorInt: number;
-    sourceX: number;
-    sourceY: number;
-    targetX: number;
-    targetY: number;
-    durationMs: number;
-  }) => {
-    dispatch(addVisualEffect({
-      type: 'projectile',
-      text: '',
-      color,
-      x: sourceX,
-      y: sourceY,
-      targetX,
-      targetY,
-      colorInt,
-      durationMs,
-    }));
-  };
-
-  const dispatchWorldStrikeAreaEffect = ({
-    color,
-    colorInt,
-    targetX,
-    targetY,
-    radius,
-    durationMs,
-  }: {
-    color: string;
-    colorInt: number;
-    targetX: number;
-    targetY: number;
-    radius: number;
-    durationMs: number;
-  }) => {
-    dispatch(addVisualEffect({
-      type: 'area',
-      text: '',
-      color,
-      targetX,
-      targetY,
-      radius,
-      colorInt,
-      durationMs,
-    }));
-  };
-
-  const dispatchWorldStrikeImpactEffect = ({
-    color,
-    colorInt,
-    targetX,
-    targetY,
-    radius,
-    durationMs,
-  }: {
-    color: string;
-    colorInt: number;
-    targetX: number;
-    targetY: number;
-    radius: number;
-    durationMs: number;
-  }) => {
-    dispatch(addVisualEffect({
-      type: 'impact',
-      text: '',
-      color,
-      targetX,
-      targetY,
-      radius,
-      colorInt,
-      durationMs,
-    }));
-  };
-
-  const dispatchWorldStrikeTextEffect = ({
-    text,
-    color,
-    colorInt,
-    x,
-    y,
-    durationMs = 1200,
-  }: {
-    text: string;
-    color: string;
-    colorInt: number;
-    x: number;
-    y: number;
-    durationMs?: number;
-  }) => {
-    dispatch(addVisualEffect({
-      type: 'text',
-      text,
-      color,
-      x,
-      y,
-      colorInt,
-      durationMs,
-    }));
-  };
-
-  const dispatchWorldStrikeCastEffect = ({
-    color,
-    colorInt,
-    targetX,
-    targetY,
-    durationMs,
-  }: {
-    color: string;
-    colorInt: number;
-    targetX: number;
-    targetY: number;
-    durationMs: number;
-  }) => {
-    dispatch(addVisualEffect({
-      type: 'cast',
-      text: '',
-      color,
-      colorInt,
-      targetX,
-      targetY,
-      radius: 0.7,
-      durationMs,
-    }));
-  };
-
-  const dispatchPlayerWorldStrikeCastEffect = ({
-    chosenSkill,
-    strike,
-  }: {
-    chosenSkill?: typeof primaryActiveSkill;
-    strike: ReturnType<typeof resolvePlayerWorldStrike>;
-  }) => {
-    if ((!strike.executionTimeMs && !chosenSkill?.castTimeMs) || !chosenSkill) {
-      return;
-    }
-
-    dispatchWorldStrikeCastEffect({
-      color: chosenSkill.profession === ProfessionType.Mage ? '#60a5fa' : '#f59e0b',
-      colorInt: chosenSkill.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
-      targetX: playerPosition.x,
-      targetY: playerPosition.y,
-      durationMs: Math.max(180, chosenSkill.castTimeMs ?? 220),
-    });
-  };
-
-  const dispatchEnemyWorldStrikeCastEffect = ({
-    strike,
-  }: {
-    strike: ReturnType<typeof resolveEnemyWorldStrike>;
-  }) => {
-    if (!strike.skillName) {
-      return;
-    }
-
-    dispatchWorldStrikeCastEffect({
-      color: '#f87171',
-      colorInt: 0xf87171,
-      targetX: targetedMonster?.x ?? playerPosition.x,
-      targetY: targetedMonster?.y ?? playerPosition.y,
-      durationMs: 220,
-    });
-  };
-
-  const applyWorldStrikeImpactBundle = ({
-    color,
-    colorInt,
-    targetX,
-    targetY,
-    damageText,
-    damageTextColor,
-    damageTextColorInt,
-    radius,
-  }: {
-    color: string;
-    colorInt: number;
-    targetX: number;
-    targetY: number;
-    damageText: string;
-    damageTextColor: string;
-    damageTextColorInt: number;
-    radius: number;
-  }) => {
-    dispatchWorldStrikeImpactEffect({
-      color,
-      colorInt,
-      targetX,
-      targetY,
-      radius,
-      durationMs: 220,
-    });
-    dispatchWorldStrikeTextEffect({
-      text: damageText,
-      color: damageTextColor,
-      colorInt: damageTextColorInt,
-      x: targetX,
-      y: targetY,
-    });
-  };
-
   const {
     dispatchWorldStrikeVisualPlan,
+    dispatchPlayerWorldStrikeCastEffect,
+    dispatchEnemyWorldStrikeCastEffect,
+  } = createAdventureBattleVisualBridge({
+    dispatch,
+  });
+
+  const {
     applyBattleReplayState,
     applyWorldCombatEncounterState,
     applyBattleRewardApplicationPlan,
@@ -965,9 +760,6 @@ export const Adventure: React.FC<AdventureProps> = ({
     setIsAutoBattling,
     setWorldPlayerHp,
     clearWorldCombatTimers: () => clearCombatTimerBucket(combatTimersRef.current, 'world'),
-    dispatchWorldStrikeProjectileEffect,
-    dispatchWorldStrikeAreaEffect,
-    applyWorldStrikeImpactBundle,
   });
 
   const runPlayerWorldAction = (useSkill: boolean) =>
@@ -988,7 +780,13 @@ export const Adventure: React.FC<AdventureProps> = ({
       currentShield: worldPlayerShield,
       timerSet: combatTimersRef.current.world,
       applyCastEffect: ({ chosenSkill, strike }) =>
-        dispatchPlayerWorldStrikeCastEffect({ chosenSkill, strike }),
+        dispatchPlayerWorldStrikeCastEffect({
+          profession: chosenSkill?.profession,
+          castTimeMs: chosenSkill?.castTimeMs,
+          executionTimeMs: strike.executionTimeMs,
+          targetX: playerPosition.x,
+          targetY: playerPosition.y,
+        }),
       applyPreviewStatePlan: (previewPlan) => {
         setWorldCombatTargetId(previewPlan.worldCombatTargetId);
         setWorldCombatTargetStatuses(previewPlan.worldCombatTargetStatuses);
@@ -1041,7 +839,11 @@ export const Adventure: React.FC<AdventureProps> = ({
             resolveEnemyWorldStrike(targetedMonsterTemplate, playerStats, canUseSpecial),
           timerSet: combatTimersRef.current.world,
           applyCastEffect: ({ strike }) =>
-            dispatchEnemyWorldStrikeCastEffect({ strike }),
+            dispatchEnemyWorldStrikeCastEffect({
+              hasSkillName: Boolean(strike.skillName),
+              targetX: targetedMonster?.x ?? playerPosition.x,
+              targetY: targetedMonster?.y ?? playerPosition.y,
+            }),
           applyPreviewStatePlan: (previewPlan, enemyInstanceId) => {
             setEnemyActionReadyAtById((prev) => ({
               ...prev,
