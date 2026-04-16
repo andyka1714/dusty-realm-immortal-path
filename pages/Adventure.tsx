@@ -6,23 +6,17 @@ import { RootState } from '../store/store';
 import { MAPS } from '../data/maps';
 import { ITEMS } from '../data/items';
 import { QUESTS } from '../data/quests';
-import { enterMap, movePlayer, tickMonsters, applyWorldDamageToMonster, resolveBattle, closeBattleReport, cancelBattle, markMapVisited, addVisualEffect } from '../store/slices/adventureSlice';
+import { enterMap, movePlayer, tickMonsters, applyWorldDamageToMonster, cancelBattle, markMapVisited } from '../store/slices/adventureSlice';
 import {
   clearAllCombatTimers,
   clearCombatTimerBucket,
-  createBattleRewardApplicationPlan,
   createCombatTimerBuckets,
-  createAutoBattleReplaySession,
   createClearWorldCombatEncounterState,
   createResetWorldCombatEncounterState,
   calculatePlayerStats,
-  getBattleRespawnMapId,
-  resolveWorldBattleResultLifecyclePlan,
   resolvePlayerWorldStrike,
   resolveEnemyWorldStrike,
   runEnemyWorldStrikePipeline,
-  runAutoBattleReplayController,
-  runWorldCombatControllerFrame,
   runPlayerWorldStrikePipeline,
   getResolvedSkillCooldownSeconds,
 } from '../utils/battleSystem';
@@ -43,9 +37,14 @@ import { GameTooltip } from '../components/game/GameTooltip';
 import { SHOPS } from '../data/shops';
 import { getEnemyEngagementRange, getGridDistance, getPlayerEngagementRange } from '../utils/worldCombat';
 import { getLearnedSkillEngagementRange } from '../utils/skillRealtime';
-import { getFormalSkillByName, normalizeLearnedSkills } from '../data/skills';
+import { normalizeLearnedSkills } from '../data/skills';
 import { createAdventureBattleUiBridge } from '../utils/adventureBattleUiBridge';
 import { createAdventureBattleVisualBridge } from '../utils/adventureBattleVisualBridge';
+import {
+  useAutoBattleReplayControllerEffect,
+  useBattleResultLifecycleEffect,
+  useWorldCombatControllerEffect,
+} from '../hooks/useAdventureBattleEffects';
 
 
 // --- VISUAL CONFIG ---
@@ -950,53 +949,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     return () => clearInterval(interval);
   }, [dispatch, isBattling, showIntro]);
 
-  useEffect(() => {
-      if (showIntro || isBattling) return;
-
-      const interval = setInterval(() => {
-          const controllerFrame = runWorldCombatControllerFrame({
-            autoTarget: {
-              isAutoBattling,
-              isBattling,
-              hasTargetMonster: Boolean(targetMonsterId),
-              showIntro,
-              targets: activeMonsters,
-              getId: (monster) => monster.instanceId,
-              getDistance: (monster) => getGridDistance(playerPosition, monster),
-            },
-            combatStep:
-              targetedMonster && targetedMonsterTemplate
-                ? {
-                    distance: getGridDistance(playerPosition, targetedMonster),
-                    playerEngagementRange,
-                    playerActionReadyAt,
-                    playerSkillReadyAt,
-                    primaryActiveSkill,
-                    isAutoBattling,
-                    worldCombatTargetId,
-                    targetedMonsterInstanceId: targetedMonster.instanceId,
-                    enemyEngagementRange: getEnemyEngagementRange(targetedMonsterTemplate),
-                    enemyActionReadyAt:
-                      enemyActionReadyAtById[targetedMonster.instanceId] ?? 0,
-                    enemySpecialReadyAt:
-                      enemySpecialReadyAtById[targetedMonster.instanceId] ?? 0,
-                    playerAction: {
-                      run: runPlayerWorldAction,
-                    },
-                    enemyAction: {
-                      run: runEnemyWorldAction,
-                    },
-                  }
-                : undefined,
-          });
-
-          if (controllerFrame.nextTargetMonsterId) {
-            setTargetMonsterId(controllerFrame.nextTargetMonsterId);
-          }
-      }, 120);
-
-      return () => clearInterval(interval);
-  }, [
+  useWorldCombatControllerEffect({
     showIntro,
     isBattling,
     isAutoBattling,
@@ -1012,31 +965,22 @@ export const Adventure: React.FC<AdventureProps> = ({
     enemySpecialReadyAtById,
     worldCombatTargetId,
     primaryActiveSkill,
-    canEngageTarget,
-    playerStats,
-  ]);
+    setTargetMonsterId,
+    runPlayerWorldAction,
+    runEnemyWorldAction,
+  });
 
   // --- Auto-Battle Logic ---
 
-  useEffect(() => {
-      const lifecyclePlan = resolveWorldBattleResultLifecyclePlan({
-          lastBattleResult,
-          isReplayingBattle,
-          isAutoBattling,
-      });
-
-      if (lifecyclePlan.shouldClearTargetMonster) setTargetMonsterId(null);
-      if (lifecyclePlan.shouldClearAutoMovePath) setAutoMovePath([]);
-      if (lifecyclePlan.shouldStopAutoBattle) setIsAutoBattling(false);
-
-      if (lifecyclePlan.autoCloseDelayMs === null) return;
-
-      const timer = setTimeout(() => {
-          dispatch(closeBattleReport());
-      }, lifecyclePlan.autoCloseDelayMs);
-
-      return () => clearTimeout(timer);
-  }, [lastBattleResult, isReplayingBattle, isAutoBattling, dispatch]);
+  useBattleResultLifecycleEffect({
+    dispatch,
+    lastBattleResult,
+    isReplayingBattle,
+    isAutoBattling,
+    setTargetMonsterId,
+    setAutoMovePath,
+    setIsAutoBattling,
+  });
 
   // Keyboard Controls
   useEffect(() => {
@@ -1153,98 +1097,8 @@ export const Adventure: React.FC<AdventureProps> = ({
   // Battle Logic Effect
   const battleProcessedRef = useRef(false);
 
-  useEffect(() => {
-    const replaySession = battleSnapshot
-      ? {
-          displayedLogs,
-          replayQueue,
-          battleSnapshot,
-        }
-      : null;
-    const replayController = runAutoBattleReplayController({
-      isBattling,
-      hasCurrentEnemy: Boolean(currentEnemy),
-      lastBattleResult,
-      replayProcessed: battleProcessedRef.current,
-      createReplaySession: currentEnemy
-        ? () => {
-            const playerStats = calculatePlayerStats(
-              attributes,
-              majorRealm,
-              spiritRootId,
-              equipmentStats,
-              character.name,
-              profession,
-              character.skills
-            );
-            return createAutoBattleReplaySession(playerStats, currentEnemy);
-          }
-        : undefined,
-      isReplayingBattle,
-      replaySession,
-      currentEnemy,
-      currentEnemyInstanceId,
-      activeMonsters,
-      respawnMapId: getBattleRespawnMapId(completedQuests),
-      resolveSkillByName: getFormalSkillByName,
-      timerSet: combatTimersRef.current.replay,
-      playerPosition,
-      enemyAttackRange: currentEnemy?.attackRange,
-      executeStepStatePlan: (stepStatePlan) => {
-        applyBattleReplayState(stepStatePlan.replayState);
-
-        if (stepStatePlan.shouldAutoScroll) {
-          const logContainer = document.getElementById('battle-log-container');
-          if (logContainer) logContainer.scrollTop = logContainer.scrollHeight;
-        }
-
-        dispatchWorldStrikeVisualPlan(stepStatePlan.visualPlan);
-      },
-    });
-
-    battleProcessedRef.current = replayController.nextProcessed;
-
-    if (replayController.shouldClearReplayTimers) {
-      battleProcessedRef.current = false;
-      clearCombatTimerBucket(combatTimersRef.current, 'replay');
-    }
-
-    if (replayController.kind === 'transition') {
-      applyBattleReplayState(replayController.replayState);
-      return;
-    }
-
-    if (replayController.kind === 'finish') {
-      const { finishResultPlan } = replayController;
-      if (finishResultPlan.shouldStopReplay) {
-        setIsReplayingBattle(false);
-      }
-
-      finishResultPlan.finishEffects.forEach((effect) =>
-        dispatch(addVisualEffect(effect))
-      );
-
-      dispatch(resolveBattle(finishResultPlan.battleResult));
-
-      if (finishResultPlan.rewardManifest) {
-        applyBattleRewardApplicationPlan(
-          createBattleRewardApplicationPlan({
-            rewardManifest: finishResultPlan.rewardManifest,
-          })
-        );
-      } else if (finishResultPlan.defeatLogMessage) {
-        dispatch(addLog({ message: finishResultPlan.defeatLogMessage, type: 'danger' }));
-      }
-
-      return;
-    }
-
-    if (replayController.kind !== 'step') {
-      return;
-    }
-
-    return () => clearTimeout(replayController.timer);
-  }, [
+  useAutoBattleReplayControllerEffect({
+    dispatch,
     isBattling,
     lastBattleResult,
     isReplayingBattle,
@@ -1260,11 +1114,16 @@ export const Adventure: React.FC<AdventureProps> = ({
     majorRealm,
     spiritRootId,
     equipmentStats,
-    character.name,
+    characterName: character.name,
     profession,
-    character.skills,
-    dispatch,
-  ]);
+    characterSkills: character.skills,
+    battleProcessedRef,
+    replayTimerSet: combatTimersRef.current.replay,
+    applyBattleReplayState,
+    dispatchWorldStrikeVisualPlan,
+    applyBattleRewardApplicationPlan,
+    clearReplayTimers: () => clearCombatTimerBucket(combatTimersRef.current, 'replay'),
+  });
 
   // Auto-Scroll Battle Logs
   useEffect(() => {
