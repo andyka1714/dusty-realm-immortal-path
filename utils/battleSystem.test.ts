@@ -24,11 +24,13 @@ import {
   calculatePlayerStats,
   createResolvedWorldStrikeActionPlan,
   createEnemyWorldStrikeExecutionPlan,
+  resolveEnemyWorldStrikeOutcomePlan,
   createTimedCombatPlan,
   createAutoBattleReplaySession,
   createClearWorldCombatEncounterState,
   createIdleAutoBattleReplayState,
   createPlayerWorldStrikeExecutionPlan,
+  resolvePlayerWorldStrikeOutcomePlan,
   createResetWorldCombatEncounterState,
   createWorldStrikeQueuePlan,
   getBattleReportAutoCloseDelayMs,
@@ -1127,6 +1129,117 @@ describe("battle system balance", () => {
         rewards: replayWinOutcome.rewards,
       }),
       defeatLogMessage: undefined,
+    });
+  });
+
+  it("shares live world strike reward and defeat outcome plans inside battle core", () => {
+    fixedRandom.mockReturnValue(0.2);
+
+    const playerStrike = resolvePlayerWorldStrike(
+      {
+        hp: 500,
+        maxHp: 500,
+        mp: 300,
+        maxMp: 300,
+        attack: 120,
+        magic: 80,
+        defense: 40,
+        res: 30,
+        speed: 20,
+        crit: 0.1,
+        critDamage: 1.5,
+        dodge: 0,
+        blockRate: 0,
+        damageReduction: 0,
+        alchemyBonus: 0,
+        craftingBonus: 0,
+        breakthroughBonus: 0,
+        dropRateBonus: 0,
+        cultivationSpeedBonus: 0,
+        name: "測試者",
+        element: ElementType.Fire,
+        regenHp: 0,
+        profession: ProfessionType.Mage,
+        learnedSkills: [],
+      },
+      COMMON_ENEMIES.m1_c1
+    );
+
+    const playerExecutionPlan = createPlayerWorldStrikeExecutionPlan({
+      strike: playerStrike,
+      targetedMonster: {
+        instanceId: "enemy-1",
+        templateId: COMMON_ENEMIES.m1_c1.id,
+        name: COMMON_ENEMIES.m1_c1.name,
+        x: 3,
+        y: 4,
+        currentHp: 1,
+      } as ActiveMonster,
+      activeMonsters: [
+        {
+          instanceId: "enemy-1",
+          templateId: COMMON_ENEMIES.m1_c1.id,
+          name: COMMON_ENEMIES.m1_c1.name,
+          x: 3,
+          y: 4,
+          currentHp: 1,
+        } as ActiveMonster,
+      ],
+      playerPosition: { x: 1, y: 1 },
+    });
+
+    expect(
+      resolvePlayerWorldStrikeOutcomePlan({
+        executionPlan: playerExecutionPlan,
+        mapEnemies: [COMMON_ENEMIES.m1_c1],
+        playerMaxHp: 500,
+      })
+    ).toEqual({
+      executionPlan: playerExecutionPlan,
+      defeatedResults: [
+        {
+          monsterName: COMMON_ENEMIES.m1_c1.name,
+          rewardManifest: createBattleRewardManifest({
+            enemy: COMMON_ENEMIES.m1_c1,
+          }),
+          recoveryAmount: 40,
+          recoveryLogMessage: "脫戰調息，恢復 <heal>40 氣血</heal>。",
+          victoryLogMessage: `你擊敗了 ${COMMON_ENEMIES.m1_c1.name}。`,
+        },
+      ],
+    });
+
+    const enemyExecutionPlan = createEnemyWorldStrikeExecutionPlan({
+      strike: {
+        damage: 120,
+        skillName: "撕咬",
+        executionTimeMs: 260,
+        areaShape: "single",
+        areaRadius: 0,
+        isProjectile: false,
+        statusNames: [],
+      },
+      enemyName: COMMON_ENEMIES.m1_c1.name,
+      enemyPosition: { x: 3, y: 4 },
+      fallbackSourcePosition: { x: 3, y: 4 },
+      playerPosition: { x: 1, y: 1 },
+      currentShield: 0,
+      currentHp: 100,
+      currentStatuses: [],
+    });
+
+    expect(
+      resolveEnemyWorldStrikeOutcomePlan({
+        executionPlan: enemyExecutionPlan,
+        completedQuestIds: ["sect_sword_join"],
+        playerMaxHp: 500,
+      })
+    ).toEqual({
+      executionPlan: enemyExecutionPlan,
+      defeatPlan: resolveWorldPlayerDefeatPlan({
+        completedQuestIds: ["sect_sword_join"],
+        playerMaxHp: 500,
+      }),
     });
   });
 

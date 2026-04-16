@@ -832,6 +832,36 @@ export const createPlayerWorldStrikeExecutionPlan = ({
   };
 };
 
+export const resolvePlayerWorldStrikeOutcomePlan = ({
+  executionPlan,
+  mapEnemies,
+  playerMaxHp,
+}: {
+  executionPlan: PlayerWorldStrikeExecutionPlan;
+  mapEnemies: Enemy[] | undefined;
+  playerMaxHp: number;
+}): PlayerWorldStrikeOutcomePlan => ({
+  executionPlan,
+  defeatedResults: executionPlan.defeatedTargets.flatMap((monster) => {
+    const monsterTemplate = mapEnemies?.find((enemy) => enemy.id === monster.templateId);
+    if (!monsterTemplate) return [];
+
+    const recoveryAmount = Math.max(8, Math.floor(playerMaxHp * 0.08));
+
+    return [
+      {
+        monsterName: monster.name,
+        rewardManifest: createBattleRewardManifest({
+          enemy: monsterTemplate,
+        }),
+        recoveryAmount,
+        recoveryLogMessage: `脫戰調息，恢復 <heal>${recoveryAmount} 氣血</heal>。`,
+        victoryLogMessage: `你擊敗了 ${monster.name}。`,
+      },
+    ];
+  }),
+});
+
 export const createEnemyWorldStrikeExecutionPlan = ({
   strike,
   enemyName,
@@ -913,6 +943,24 @@ export const createEnemyWorldStrikeExecutionPlan = ({
     shouldHandleDefeat: nextHp <= 0,
   };
 };
+
+export const resolveEnemyWorldStrikeOutcomePlan = ({
+  executionPlan,
+  completedQuestIds,
+  playerMaxHp,
+}: {
+  executionPlan: EnemyWorldStrikeExecutionPlan;
+  completedQuestIds: string[];
+  playerMaxHp: number;
+}): EnemyWorldStrikeOutcomePlan => ({
+  executionPlan,
+  defeatPlan: executionPlan.shouldHandleDefeat
+    ? resolveWorldPlayerDefeatPlan({
+        completedQuestIds,
+        playerMaxHp,
+      })
+    : undefined,
+});
 
 export const selectNearestWorldCombatTarget = <TTarget,>({
   targets,
@@ -1691,6 +1739,19 @@ export interface PlayerWorldStrikeExecutionPlan {
   shouldClearEncounter: boolean;
 }
 
+export interface PlayerWorldStrikeDefeatResult {
+  monsterName: string;
+  rewardManifest: BattleRewardManifest;
+  recoveryAmount: number;
+  recoveryLogMessage: string;
+  victoryLogMessage: string;
+}
+
+export interface PlayerWorldStrikeOutcomePlan {
+  executionPlan: PlayerWorldStrikeExecutionPlan;
+  defeatedResults: PlayerWorldStrikeDefeatResult[];
+}
+
 export interface EnemyWorldStrikeExecutionPlan {
   shieldResolution: WorldShieldedDamageResolution;
   nextHp: number;
@@ -1698,6 +1759,11 @@ export interface EnemyWorldStrikeExecutionPlan {
   resolutionMessage: string;
   visualPlan: WorldStrikeVisualPlan;
   shouldHandleDefeat: boolean;
+}
+
+export interface EnemyWorldStrikeOutcomePlan {
+  executionPlan: EnemyWorldStrikeExecutionPlan;
+  defeatPlan?: WorldPlayerDefeatPlan;
 }
 
 export interface SkillTimelineProfile {
