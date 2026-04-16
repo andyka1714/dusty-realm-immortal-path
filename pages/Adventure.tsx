@@ -10,13 +10,16 @@ import { enterMap, movePlayer, tickMonsters, applyWorldDamageToMonster, resolveB
 import {
   clearAllCombatTimers,
   clearCombatTimerBucket,
+  createBattleRewardApplicationPlan,
   createCombatTimerBuckets,
   createAutoBattleReplayState,
   createAutoBattleReplayStepStatePlan,
   createAutoBattleReplaySession,
   createClearWorldCombatEncounterState,
+  createEnemyWorldStrikeOutcomeStatePlan,
   createEnemyWorldStrikePreviewPlan,
   createEnemyWorldStrikeExecutionPlan,
+  createPlayerWorldStrikeOutcomeStatePlan,
   createPlayerWorldStrikePreviewPlan,
   createPlayerWorldStrikeExecutionPlan,
   createResetWorldCombatEncounterState,
@@ -1023,34 +1026,31 @@ export const Adventure: React.FC<AdventureProps> = ({
       mapEnemies: mapData?.enemies,
       playerMaxHp: playerStats.maxHp,
     });
+    const outcomeStatePlan = createPlayerWorldStrikeOutcomeStatePlan({
+      outcomePlan,
+      currentWorldPlayerHp: worldPlayerHp,
+      playerMaxHp: playerStats.maxHp,
+    });
 
-    outcomePlan.executionPlan.impactTargets.forEach(({ target, damage, visualPlan }) => {
+    outcomeStatePlan.monsterDamageApplications.forEach(({ monsterInstanceId, damage }) => {
       dispatch(applyWorldDamageToMonster({
-        monsterInstanceId: target.instanceId,
+        monsterInstanceId,
         damage,
       }));
-      dispatchWorldStrikeVisualPlan(visualPlan);
+    });
+    outcomeStatePlan.visualPlans.forEach((visualPlan) =>
+      dispatchWorldStrikeVisualPlan(visualPlan)
+    );
+    setWorldLastCombatMessage(outcomeStatePlan.worldLastCombatMessage);
+    outcomeStatePlan.rewardApplicationPlans.forEach((rewardApplicationPlan) => {
+      applyBattleRewardApplicationPlan(rewardApplicationPlan);
+    });
+    setWorldPlayerHp(outcomeStatePlan.nextWorldPlayerHp);
+    outcomeStatePlan.logEntries.forEach((logEntry) => {
+      dispatch(addLog(logEntry));
     });
 
-    dispatchWorldStrikeVisualPlan(outcomePlan.executionPlan.strikeVisualPlan);
-    setWorldLastCombatMessage(outcomePlan.executionPlan.resolutionMessage);
-
-    outcomePlan.defeatedResults.forEach((defeatedResult) => {
-      applyBattleRewardManifest(defeatedResult.rewardManifest);
-      setWorldPlayerHp((prev) =>
-        Math.min(playerStats.maxHp, prev + defeatedResult.recoveryAmount)
-      );
-      dispatch(addLog({
-        message: defeatedResult.recoveryLogMessage,
-        type: 'gain',
-      }));
-      dispatch(addLog({
-        message: defeatedResult.victoryLogMessage,
-        type: 'success',
-      }));
-    });
-
-    if (outcomePlan.executionPlan.shouldClearEncounter) {
+    if (outcomeStatePlan.shouldClearEncounter) {
       setTargetMonsterId(null);
       clearWorldEncounterState();
     }
@@ -1081,17 +1081,20 @@ export const Adventure: React.FC<AdventureProps> = ({
       completedQuestIds: completedQuests,
       playerMaxHp: playerStats.maxHp,
     });
+    const outcomeStatePlan = createEnemyWorldStrikeOutcomeStatePlan({
+      outcomePlan,
+    });
 
-    if (outcomePlan.executionPlan.shieldResolution.absorbed > 0) {
-      setWorldPlayerShield(outcomePlan.executionPlan.shieldResolution.remainingShield);
+    if (outcomeStatePlan.shouldUpdateWorldPlayerShield) {
+      setWorldPlayerShield(outcomeStatePlan.nextWorldPlayerShield);
     }
 
-    setWorldPlayerHp(outcomePlan.executionPlan.nextHp);
-    setWorldCombatPlayerStatuses(outcomePlan.executionPlan.nextStatuses);
-    setWorldLastCombatMessage(outcomePlan.executionPlan.resolutionMessage);
-    dispatchWorldStrikeVisualPlan(outcomePlan.executionPlan.visualPlan);
+    setWorldPlayerHp(outcomeStatePlan.nextWorldPlayerHp);
+    setWorldCombatPlayerStatuses(outcomeStatePlan.nextWorldCombatPlayerStatuses);
+    setWorldLastCombatMessage(outcomeStatePlan.worldLastCombatMessage);
+    dispatchWorldStrikeVisualPlan(outcomeStatePlan.visualPlan);
 
-    applyWorldPlayerDefeatPlan(outcomePlan.defeatPlan);
+    applyWorldPlayerDefeatStatePlan(outcomeStatePlan.defeatStatePlan);
   };
 
   const applyPlayerWorldStrikePreview = ({
@@ -1162,54 +1165,42 @@ export const Adventure: React.FC<AdventureProps> = ({
     setWorldLastCombatMessage(previewPlan.worldLastCombatMessage);
   };
 
-  const applyBattleRewardManifest = (
-    rewardManifest: ReturnType<typeof resolvePlayerWorldStrikeOutcomePlan>['defeatedResults'][number]['rewardManifest']
+  const applyBattleRewardApplicationPlan = (
+    rewardApplicationPlan: ReturnType<typeof createPlayerWorldStrikeOutcomeStatePlan>['rewardApplicationPlans'][number]
   ) => {
-    if (rewardManifest.expAmount > 0) {
-      dispatch(gainExperience(rewardManifest.expAmount));
+    if (rewardApplicationPlan.expAmount > 0) {
+      dispatch(gainExperience(rewardApplicationPlan.expAmount));
     }
-    if (rewardManifest.expLogMessage) {
-      dispatch(addLog({
-        message: rewardManifest.expLogMessage,
-        type: 'gain',
-      }));
-    }
-
-    rewardManifest.spiritStoneAwards.forEach((amount) => {
+    rewardApplicationPlan.spiritStoneAwards.forEach((amount) => {
       dispatch(addSpiritStones({ amount, source: 'battle' }));
     });
-    rewardManifest.inventoryRewards.forEach((drop) => {
+    rewardApplicationPlan.inventoryRewards.forEach((drop) => {
       dispatch(addItem({ itemId: drop.itemId, count: drop.count, instance: drop.instance }));
     });
-
-    if (rewardManifest.lootLogMessage) {
-      dispatch(addLog({
-        message: rewardManifest.lootLogMessage,
-        type: 'gold',
-      }));
-    }
+    rewardApplicationPlan.logEntries.forEach((logEntry) => {
+      dispatch(addLog(logEntry));
+    });
   };
 
-  const applyWorldPlayerDefeatPlan = (
-    defeatPlan: ReturnType<typeof resolveEnemyWorldStrikeOutcomePlan>['defeatPlan']
+  const applyWorldPlayerDefeatStatePlan = (
+    defeatStatePlan: ReturnType<typeof createEnemyWorldStrikeOutcomeStatePlan>['defeatStatePlan']
   ) => {
-    if (!defeatPlan) return;
+    if (!defeatStatePlan) return;
 
-    dispatch(addLog({
-      message: defeatPlan.defeatOutcome.logMessage,
-      type: 'danger',
-    }));
+    dispatch(addLog(defeatStatePlan.logEntry));
     dispatch(enterMap({
-      mapId: defeatPlan.defeatOutcome.respawnMapId,
-      startX: defeatPlan.defeatOutcome.startX,
-      startY: defeatPlan.defeatOutcome.startY,
+      mapId: defeatStatePlan.respawnMapId,
+      startX: defeatStatePlan.startX,
+      startY: defeatStatePlan.startY,
     }));
-    if (defeatPlan.shouldClearTargetMonster) setTargetMonsterId(null);
-    if (defeatPlan.shouldClearAutoMovePath) setAutoMovePath([]);
-    if (defeatPlan.shouldStopAutoBattle) setIsAutoBattling(false);
-    setWorldPlayerHp(defeatPlan.nextWorldPlayerHp);
-    applyWorldCombatEncounterState(defeatPlan.encounterState);
-    clearCombatTimerBucket(combatTimersRef.current, 'world');
+    if (defeatStatePlan.shouldClearTargetMonster) setTargetMonsterId(null);
+    if (defeatStatePlan.shouldClearAutoMovePath) setAutoMovePath([]);
+    if (defeatStatePlan.shouldStopAutoBattle) setIsAutoBattling(false);
+    setWorldPlayerHp(defeatStatePlan.nextWorldPlayerHp);
+    applyWorldCombatEncounterState(defeatStatePlan.encounterState);
+    if (defeatStatePlan.shouldClearWorldCombatTimers) {
+      clearCombatTimerBucket(combatTimersRef.current, 'world');
+    }
   };
 
   const performWorldPlayerAction = (useSkill: boolean) =>
@@ -1582,7 +1573,11 @@ export const Adventure: React.FC<AdventureProps> = ({
       dispatch(resolveBattle(finishResultPlan.battleResult));
 
       if (finishResultPlan.rewardManifest) {
-        applyBattleRewardManifest(finishResultPlan.rewardManifest);
+        applyBattleRewardApplicationPlan(
+          createBattleRewardApplicationPlan({
+            rewardManifest: finishResultPlan.rewardManifest,
+          })
+        );
       } else if (finishResultPlan.defeatLogMessage) {
         dispatch(addLog({ message: finishResultPlan.defeatLogMessage, type: 'danger' }));
       }

@@ -3,6 +3,7 @@ import {
   BaseAttributes,
   Enemy,
   CombatLog,
+  LogEntry,
   MajorRealm,
   SpiritRootId,
   ElementType,
@@ -160,6 +161,22 @@ export interface WorldPlayerDefeatPlan {
   encounterState: WorldCombatEncounterState;
 }
 
+export interface WorldPlayerDefeatStatePlan {
+  logEntry: {
+    message: string;
+    type: LogEntry["type"];
+  };
+  respawnMapId: string;
+  startX: number;
+  startY: number;
+  shouldClearTargetMonster: true;
+  shouldClearAutoMovePath: true;
+  shouldStopAutoBattle: true;
+  nextWorldPlayerHp: number;
+  encounterState: WorldCombatEncounterState;
+  shouldClearWorldCombatTimers: true;
+}
+
 export interface BattleRewardManifest {
   expAmount: number;
   spiritStoneAwards: number[];
@@ -170,6 +187,18 @@ export interface BattleRewardManifest {
   }[];
   expLogMessage?: string;
   lootLogMessage?: string;
+}
+
+export interface BattleLogEntryPlan {
+  message: string;
+  type: LogEntry["type"];
+}
+
+export interface BattleRewardApplicationPlan {
+  expAmount: number;
+  spiritStoneAwards: number[];
+  inventoryRewards: BattleRewardManifest["inventoryRewards"];
+  logEntries: BattleLogEntryPlan[];
 }
 
 export interface ResolvedAutoBattleReplayStep<TMonster, TSkill> {
@@ -530,6 +559,26 @@ export const resolveWorldPlayerDefeatPlan = ({
   encounterState: createResetWorldCombatEncounterState(),
 });
 
+export const createWorldPlayerDefeatStatePlan = ({
+  defeatPlan,
+}: {
+  defeatPlan: WorldPlayerDefeatPlan;
+}): WorldPlayerDefeatStatePlan => ({
+  logEntry: {
+    message: defeatPlan.defeatOutcome.logMessage,
+    type: "danger",
+  },
+  respawnMapId: defeatPlan.defeatOutcome.respawnMapId,
+  startX: defeatPlan.defeatOutcome.startX,
+  startY: defeatPlan.defeatOutcome.startY,
+  shouldClearTargetMonster: defeatPlan.shouldClearTargetMonster,
+  shouldClearAutoMovePath: defeatPlan.shouldClearAutoMovePath,
+  shouldStopAutoBattle: defeatPlan.shouldStopAutoBattle,
+  nextWorldPlayerHp: defeatPlan.nextWorldPlayerHp,
+  encounterState: defeatPlan.encounterState,
+  shouldClearWorldCombatTimers: true,
+});
+
 export const createBattleRewardManifest = ({
   enemy,
   rewards,
@@ -589,6 +638,35 @@ export const createBattleRewardManifest = ({
         : undefined,
     lootLogMessage:
       lootParts.length > 0 ? `獲得戰利品：${lootParts.join("，")}` : undefined,
+  };
+};
+
+export const createBattleRewardApplicationPlan = ({
+  rewardManifest,
+}: {
+  rewardManifest: BattleRewardManifest;
+}): BattleRewardApplicationPlan => {
+  const logEntries: BattleLogEntryPlan[] = [];
+
+  if (rewardManifest.expLogMessage) {
+    logEntries.push({
+      message: rewardManifest.expLogMessage,
+      type: "gain",
+    });
+  }
+
+  if (rewardManifest.lootLogMessage) {
+    logEntries.push({
+      message: rewardManifest.lootLogMessage,
+      type: "gold",
+    });
+  }
+
+  return {
+    expAmount: rewardManifest.expAmount,
+    spiritStoneAwards: rewardManifest.spiritStoneAwards,
+    inventoryRewards: rewardManifest.inventoryRewards,
+    logEntries,
   };
 };
 
@@ -941,6 +1019,55 @@ export const resolvePlayerWorldStrikeOutcomePlan = ({
   }),
 });
 
+export const createPlayerWorldStrikeOutcomeStatePlan = ({
+  outcomePlan,
+  currentWorldPlayerHp,
+  playerMaxHp,
+}: {
+  outcomePlan: PlayerWorldStrikeOutcomePlan;
+  currentWorldPlayerHp: number;
+  playerMaxHp: number;
+}): PlayerWorldStrikeOutcomeStatePlan => {
+  const nextWorldPlayerHp = outcomePlan.defeatedResults.reduce(
+    (hp, defeatedResult) =>
+      Math.min(playerMaxHp, hp + defeatedResult.recoveryAmount),
+    currentWorldPlayerHp
+  );
+
+  return {
+    monsterDamageApplications: outcomePlan.executionPlan.impactTargets.map(
+      ({ target, damage }) => ({
+        monsterInstanceId: target.instanceId,
+        damage,
+      })
+    ),
+    visualPlans: [
+      ...outcomePlan.executionPlan.impactTargets.map(
+        ({ visualPlan }) => visualPlan
+      ),
+      outcomePlan.executionPlan.strikeVisualPlan,
+    ],
+    worldLastCombatMessage: outcomePlan.executionPlan.resolutionMessage,
+    rewardApplicationPlans: outcomePlan.defeatedResults.map((defeatedResult) =>
+      createBattleRewardApplicationPlan({
+        rewardManifest: defeatedResult.rewardManifest,
+      })
+    ),
+    logEntries: outcomePlan.defeatedResults.flatMap((defeatedResult) => [
+      {
+        message: defeatedResult.recoveryLogMessage,
+        type: "gain" as const,
+      },
+      {
+        message: defeatedResult.victoryLogMessage,
+        type: "success" as const,
+      },
+    ]),
+    nextWorldPlayerHp,
+    shouldClearEncounter: outcomePlan.executionPlan.shouldClearEncounter,
+  };
+};
+
 export const createEnemyWorldStrikeExecutionPlan = ({
   strike,
   enemyName,
@@ -1037,6 +1164,26 @@ export const resolveEnemyWorldStrikeOutcomePlan = ({
     ? resolveWorldPlayerDefeatPlan({
         completedQuestIds,
         playerMaxHp,
+      })
+    : undefined,
+});
+
+export const createEnemyWorldStrikeOutcomeStatePlan = ({
+  outcomePlan,
+}: {
+  outcomePlan: EnemyWorldStrikeOutcomePlan;
+}): EnemyWorldStrikeOutcomeStatePlan => ({
+  shouldUpdateWorldPlayerShield:
+    outcomePlan.executionPlan.shieldResolution.absorbed > 0,
+  nextWorldPlayerShield:
+    outcomePlan.executionPlan.shieldResolution.remainingShield,
+  nextWorldPlayerHp: outcomePlan.executionPlan.nextHp,
+  nextWorldCombatPlayerStatuses: outcomePlan.executionPlan.nextStatuses,
+  worldLastCombatMessage: outcomePlan.executionPlan.resolutionMessage,
+  visualPlan: outcomePlan.executionPlan.visualPlan,
+  defeatStatePlan: outcomePlan.defeatPlan
+    ? createWorldPlayerDefeatStatePlan({
+        defeatPlan: outcomePlan.defeatPlan,
       })
     : undefined,
 });
@@ -1831,6 +1978,19 @@ export interface PlayerWorldStrikeOutcomePlan {
   defeatedResults: PlayerWorldStrikeDefeatResult[];
 }
 
+export interface PlayerWorldStrikeOutcomeStatePlan {
+  monsterDamageApplications: Array<{
+    monsterInstanceId: string;
+    damage: number;
+  }>;
+  visualPlans: WorldStrikeVisualPlan[];
+  worldLastCombatMessage: string;
+  rewardApplicationPlans: BattleRewardApplicationPlan[];
+  logEntries: BattleLogEntryPlan[];
+  nextWorldPlayerHp: number;
+  shouldClearEncounter: boolean;
+}
+
 export interface EnemyWorldStrikeExecutionPlan {
   shieldResolution: WorldShieldedDamageResolution;
   nextHp: number;
@@ -1843,6 +2003,16 @@ export interface EnemyWorldStrikeExecutionPlan {
 export interface EnemyWorldStrikeOutcomePlan {
   executionPlan: EnemyWorldStrikeExecutionPlan;
   defeatPlan?: WorldPlayerDefeatPlan;
+}
+
+export interface EnemyWorldStrikeOutcomeStatePlan {
+  shouldUpdateWorldPlayerShield: boolean;
+  nextWorldPlayerShield: number;
+  nextWorldPlayerHp: number;
+  nextWorldCombatPlayerStatuses: string[];
+  worldLastCombatMessage: string;
+  visualPlan: WorldStrikeVisualPlan;
+  defeatStatePlan?: WorldPlayerDefeatStatePlan;
 }
 
 export interface PlayerWorldStrikePreviewPlan {

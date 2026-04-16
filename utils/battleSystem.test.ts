@@ -19,10 +19,12 @@ import {
   createAutoBattleReplayState,
   createAutoBattleReplayStepStatePlan,
   createBattleReplayVisualPlan,
+  createBattleRewardApplicationPlan,
   createBattleRewardManifest,
   createBattleReplayStepPlan,
   calculatePlayerStats,
   createResolvedWorldStrikeActionPlan,
+  createEnemyWorldStrikeOutcomeStatePlan,
   createEnemyWorldStrikeExecutionPlan,
   resolveEnemyWorldStrikeOutcomePlan,
   createTimedCombatPlan,
@@ -30,6 +32,7 @@ import {
   createClearWorldCombatEncounterState,
   createEnemyWorldStrikePreviewPlan,
   createIdleAutoBattleReplayState,
+  createPlayerWorldStrikeOutcomeStatePlan,
   createPlayerWorldStrikePreviewPlan,
   createPlayerWorldStrikeExecutionPlan,
   resolvePlayerWorldStrikeOutcomePlan,
@@ -48,6 +51,7 @@ import {
   resolveAutoBattleReplayFinishResultPlan,
   resolveAutoBattleReplayTransitionStatePlan,
   resolveWorldBattleResultCleanup,
+  createWorldPlayerDefeatStatePlan,
   resolveWorldPlayerDefeatPlan,
   resolveWorldPlayerDefeatOutcome,
   resolveWorldCombatAutoTarget,
@@ -1342,6 +1346,182 @@ describe("battle system balance", () => {
       worldLastCombatMessage: enemyStrike.skillName
         ? `${COMMON_ENEMIES.m1_c1.name} 正在施展【${enemyStrike.skillName}】。`
         : `${COMMON_ENEMIES.m1_c1.name} 朝你撲殺而來。`,
+    });
+  });
+
+  it("shares live world strike outcome state plans inside battle core", () => {
+    const defeatPlan = resolveWorldPlayerDefeatPlan({
+      completedQuestIds: ["sect_sword_join"],
+      playerMaxHp: 500,
+    });
+
+    expect(
+      createWorldPlayerDefeatStatePlan({
+        defeatPlan,
+      })
+    ).toEqual({
+      logEntry: {
+        message: defeatPlan.defeatOutcome.logMessage,
+        type: "danger",
+      },
+      respawnMapId: defeatPlan.defeatOutcome.respawnMapId,
+      startX: defeatPlan.defeatOutcome.startX,
+      startY: defeatPlan.defeatOutcome.startY,
+      shouldClearTargetMonster: true,
+      shouldClearAutoMovePath: true,
+      shouldStopAutoBattle: true,
+      nextWorldPlayerHp: 500,
+      encounterState: createResetWorldCombatEncounterState(),
+      shouldClearWorldCombatTimers: true,
+    });
+
+    const rewardManifest = createBattleRewardManifest({
+      enemy: COMMON_ENEMIES.m1_c1,
+    });
+
+    expect(
+      createBattleRewardApplicationPlan({
+        rewardManifest,
+      })
+    ).toEqual({
+      expAmount: rewardManifest.expAmount,
+      spiritStoneAwards: rewardManifest.spiritStoneAwards,
+      inventoryRewards: rewardManifest.inventoryRewards,
+      logEntries: [
+        rewardManifest.expLogMessage
+          ? {
+              message: rewardManifest.expLogMessage,
+              type: "gain",
+            }
+          : undefined,
+        rewardManifest.lootLogMessage
+          ? {
+              message: rewardManifest.lootLogMessage,
+              type: "gold",
+            }
+          : undefined,
+      ].filter(Boolean),
+    });
+
+    const playerExecutionPlan = createPlayerWorldStrikeExecutionPlan({
+      strike: {
+        damage: 80,
+        isCrit: false,
+        skillName: "火球術",
+        nextActionDelayMs: 400,
+        skillCooldownMs: 1200,
+        executionTimeMs: 320,
+        playerStatusNames: [],
+        enemyStatusNames: [],
+        playerShieldGain: 0,
+        areaShape: "single",
+        areaRadius: 0,
+        maxTargets: 1,
+        isProjectile: true,
+      },
+      skillName: "火球術",
+      skillProfession: ProfessionType.Mage,
+      targetedMonster: {
+        instanceId: "enemy-1",
+        templateId: COMMON_ENEMIES.m1_c1.id,
+        name: COMMON_ENEMIES.m1_c1.name,
+        x: 3,
+        y: 4,
+        currentHp: 1,
+      } as ActiveMonster,
+      activeMonsters: [
+        {
+          instanceId: "enemy-1",
+          templateId: COMMON_ENEMIES.m1_c1.id,
+          name: COMMON_ENEMIES.m1_c1.name,
+          x: 3,
+          y: 4,
+          currentHp: 1,
+        } as ActiveMonster,
+      ],
+      playerPosition: { x: 1, y: 1 },
+    });
+    const playerOutcomePlan = resolvePlayerWorldStrikeOutcomePlan({
+      executionPlan: playerExecutionPlan,
+      mapEnemies: [COMMON_ENEMIES.m1_c1],
+      playerMaxHp: 500,
+    });
+
+    expect(
+      createPlayerWorldStrikeOutcomeStatePlan({
+        outcomePlan: playerOutcomePlan,
+        currentWorldPlayerHp: 420,
+        playerMaxHp: 500,
+      })
+    ).toEqual({
+      monsterDamageApplications: [
+        {
+          monsterInstanceId: "enemy-1",
+          damage: 80,
+        },
+      ],
+      visualPlans: [
+        playerExecutionPlan.impactTargets[0].visualPlan,
+        playerExecutionPlan.strikeVisualPlan,
+      ],
+      worldLastCombatMessage: playerExecutionPlan.resolutionMessage,
+      rewardApplicationPlans: [
+        createBattleRewardApplicationPlan({
+          rewardManifest: playerOutcomePlan.defeatedResults[0].rewardManifest,
+        }),
+      ],
+      logEntries: [
+        {
+          message: playerOutcomePlan.defeatedResults[0].recoveryLogMessage,
+          type: "gain",
+        },
+        {
+          message: playerOutcomePlan.defeatedResults[0].victoryLogMessage,
+          type: "success",
+        },
+      ],
+      nextWorldPlayerHp: 460,
+      shouldClearEncounter: true,
+    });
+
+    const enemyExecutionPlan = createEnemyWorldStrikeExecutionPlan({
+      strike: {
+        damage: 120,
+        skillName: "撕咬",
+        executionTimeMs: 260,
+        areaShape: "single",
+        areaRadius: 0,
+        isProjectile: false,
+        statusNames: [],
+      },
+      enemyName: COMMON_ENEMIES.m1_c1.name,
+      enemyPosition: { x: 3, y: 4 },
+      fallbackSourcePosition: { x: 3, y: 4 },
+      playerPosition: { x: 1, y: 1 },
+      currentShield: 0,
+      currentHp: 100,
+      currentStatuses: [],
+    });
+    const enemyOutcomePlan = resolveEnemyWorldStrikeOutcomePlan({
+      executionPlan: enemyExecutionPlan,
+      completedQuestIds: ["sect_sword_join"],
+      playerMaxHp: 500,
+    });
+
+    expect(
+      createEnemyWorldStrikeOutcomeStatePlan({
+        outcomePlan: enemyOutcomePlan,
+      })
+    ).toEqual({
+      shouldUpdateWorldPlayerShield: false,
+      nextWorldPlayerShield: enemyExecutionPlan.shieldResolution.remainingShield,
+      nextWorldPlayerHp: enemyExecutionPlan.nextHp,
+      nextWorldCombatPlayerStatuses: enemyExecutionPlan.nextStatuses,
+      worldLastCombatMessage: enemyExecutionPlan.resolutionMessage,
+      visualPlan: enemyExecutionPlan.visualPlan,
+      defeatStatePlan: createWorldPlayerDefeatStatePlan({
+        defeatPlan: enemyOutcomePlan.defeatPlan!,
+      }),
     });
   });
 
