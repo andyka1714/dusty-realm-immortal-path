@@ -1,5 +1,5 @@
-import { getFormalSkillId } from "../data/skills";
 import { Enemy, ProfessionType, Skill } from "../types";
+import { getCanonicalSkillId, type PlayerPassiveFlags } from "./battlePassives";
 import { getStatusLabel } from "./battleStatuses";
 
 type CombatStatusKindLike =
@@ -22,15 +22,8 @@ type CombatStatusLike = {
   nextTickAtMs?: number;
 };
 
-type PlayerPassiveFlagsLike = {
-  hasSwordQiPassive?: boolean;
-};
-
 const hasEnemyAffix = (enemy: Enemy, affix: string) =>
   enemy.affixes?.includes(affix) ?? false;
-
-const getCanonicalSkillId = (skill?: Skill) =>
-  skill ? getFormalSkillId(skill.id) : undefined;
 
 const createSwordQiArmorBreakStatus = (
   currentTimeMs: number
@@ -340,7 +333,7 @@ export const shouldApplySwordQiArmorBreak = ({
   isCrit,
   enemyHp,
 }: {
-  passiveFlags: PlayerPassiveFlagsLike;
+  passiveFlags: Pick<PlayerPassiveFlags, "hasSwordQiPassive">;
   skill?: Skill;
   isCrit: boolean;
   enemyHp: number;
@@ -361,7 +354,7 @@ const resolvePlayerAppliedEnemyStatuses = ({
 }: {
   enemy: Enemy;
   statuses: CombatStatusLike[];
-  passiveFlags: PlayerPassiveFlagsLike;
+  passiveFlags: Pick<PlayerPassiveFlags, "hasSwordQiPassive">;
   skill?: Skill;
   isCrit: boolean;
   currentTimeMs: number;
@@ -396,7 +389,7 @@ export const resolvePlayerSkillStatusApplication = ({
   skill: Skill | undefined;
   targetMaxHp: number;
   enemy: Enemy;
-  passiveFlags: PlayerPassiveFlagsLike;
+  passiveFlags: Pick<PlayerPassiveFlags, "hasSwordQiPassive">;
   dealsDirectDamage: boolean;
   isCrit: boolean;
   currentTimeMs: number;
