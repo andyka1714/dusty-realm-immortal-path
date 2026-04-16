@@ -77,6 +77,14 @@ import {
   resolveVictoryRewards,
 } from "./battleTimelineResults";
 import {
+  CombatLoopState,
+  applyPreparedCombatLoopState,
+  buildCombatLoopState,
+  buildCombatLoopStepResult,
+  createInitialCombatLoopState,
+  runCombatTimelineLoop,
+} from "./battleTimeline";
+import {
   EnemyWorldStrikeOutcomeStatePlan,
   EnemyWorldStrikePreviewPlan,
   EnemyWorldStrikeResolved,
@@ -2700,82 +2708,6 @@ const advanceCombatLoop = ({
   exceededTurnLimit: turn + 1 > 500,
 });
 
-type CombatLoopState = {
-  turn: number;
-  currentTimeMs: number;
-  playerNextActionMs: number;
-  enemyNextActionMs: number;
-  activeSkillReadyAtMs: number;
-  enemySpecialReadyAtMs: number;
-  bossBroken: boolean;
-  playerDebuffed: boolean;
-  lastRegenTimeMs: number;
-  playerHp: number;
-  enemyHp: number;
-  playerMp: number;
-  playerStatuses: CombatStatus[];
-  enemyStatuses: CombatStatus[];
-  swordDeathWardUsed: boolean;
-  bodyRebirthTrueUsed: boolean;
-  bodyTribulationStacks: number;
-  mageFoundationStacks: number;
-  swordHeartStacks: number;
-  playerDamagedSinceSwordHeartWindow: boolean;
-  nextSwordImmortalGuardAtMs: number;
-};
-
-const buildCombatLoopState = (state: CombatLoopState): CombatLoopState => ({ ...state });
-
-const buildCombatLoopStepResult = ({
-  combatEnded,
-  state,
-}: {
-  combatEnded: boolean;
-  state: CombatLoopState;
-}) => ({
-  combatEnded,
-  state: buildCombatLoopState(state),
-});
-
-const applyPreparedCombatLoopState = (
-  state: CombatLoopState,
-  prepared: Pick<
-    ReturnType<typeof prepareCombatLoopEnvironment>,
-    "playerStatuses" | "enemySpecialReadyAtMs"
-  >
-): CombatLoopState => ({
-  ...state,
-  playerStatuses: prepared.playerStatuses,
-  enemySpecialReadyAtMs: prepared.enemySpecialReadyAtMs,
-});
-
-const createInitialCombatLoopState = (
-  player: PlayerCombatStats,
-  enemy: Enemy
-): CombatLoopState => ({
-  turn: 1,
-  currentTimeMs: 0,
-  playerNextActionMs: 0,
-  enemyNextActionMs: 0,
-  activeSkillReadyAtMs: 0,
-  enemySpecialReadyAtMs: 0,
-  bossBroken: false,
-  playerDebuffed: false,
-  lastRegenTimeMs: 0,
-  playerHp: player.hp,
-  enemyHp: enemy.hp,
-  playerMp: player.mp,
-  playerStatuses: [],
-  enemyStatuses: [],
-  swordDeathWardUsed: false,
-  bodyRebirthTrueUsed: false,
-  bodyTribulationStacks: 0,
-  mageFoundationStacks: 0,
-  swordHeartStacks: 0,
-  playerDamagedSinceSwordHeartWindow: false,
-  nextSwordImmortalGuardAtMs: 5000,
-});
-
 type CombatRuntimeContext = {
   activeSkill?: Skill;
   playerAttackIntervalMs: number;
@@ -2998,7 +2930,7 @@ const resolveCombatLoopStep = ({
   runtimeContext,
   featureFlags,
 }: {
-  state: CombatLoopState;
+  state: CombatLoopState<CombatStatus>;
   processStatusTicks: (currentMs: number) => void;
   player: PlayerCombatStats;
   enemy: Enemy;
@@ -3213,50 +3145,12 @@ const resolveCombatLoopStep = ({
   return finalizeLoopStep(turnAdvance.exceededTurnLimit);
 };
 
-const runCombatTimelineLoop = ({
-  initialState,
-  processStatusTicks,
-  player,
-  enemy,
-  logs,
-  runtimeContext,
-  featureFlags,
-}: {
-  initialState: CombatLoopState;
-  processStatusTicks: (currentMs: number) => void;
-  player: PlayerCombatStats;
-  enemy: Enemy;
-  logs: CombatLog[];
-  runtimeContext: CombatRuntimeContext;
-  featureFlags: CombatLoopFeatureFlags;
-}) => {
-  const state = initialState;
-
-  while (state.playerHp > 0 && state.enemyHp > 0) {
-    const loopStep = resolveCombatLoopStep({
-      state,
-      processStatusTicks,
-      player,
-      enemy,
-      logs,
-      runtimeContext,
-      featureFlags,
-    });
-
-    Object.assign(state, loopStep.state);
-
-    if (loopStep.combatEnded) break;
-  }
-
-  return state;
-};
-
 const prepareAutoBattleExecution = (
   player: PlayerCombatStats,
   enemy: Enemy,
   logs: CombatLog[]
 ) => {
-  let state = createInitialCombatLoopState(player, enemy);
+  let state = createInitialCombatLoopState<CombatStatus>(player, enemy);
   let lastStatusTickMs = 0;
 
   const {
@@ -3350,6 +3244,7 @@ const executeAutoBattleTimeline = ({
     logs,
     runtimeContext: prepared.runtimeContext,
     featureFlags: prepared.featureFlags,
+    resolveCombatLoopStep,
   });
 
   return finalizeCombatResult({
