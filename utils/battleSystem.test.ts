@@ -17,6 +17,7 @@ import {
   createAutoBattleReplayFinishEffects,
   createAutoBattleReplayFinishPlan,
   createAutoBattleReplayState,
+  createBattleRewardManifest,
   createBattleReplayStepPlan,
   calculatePlayerStats,
   createResolvedWorldStrikeActionPlan,
@@ -37,6 +38,7 @@ import {
   resolveAutoBattleReplayLifecycle,
   resolveAutoBattleReplayTransition,
   resolveWorldBattleResultCleanup,
+  resolveWorldPlayerDefeatPlan,
   resolveWorldPlayerDefeatOutcome,
   resolveWorldCombatAutoTarget,
   resolveWorldCombatActionWindow,
@@ -1657,6 +1659,24 @@ describe("battle system balance", () => {
       enemyActionReadyAtById: {},
       enemySpecialReadyAtById: {},
     });
+    expect(
+      resolveWorldPlayerDefeatPlan({
+        completedQuestIds: ["sect_beast_join"],
+        playerMaxHp: player.maxHp,
+      })
+    ).toEqual({
+      defeatOutcome: {
+        respawnMapId: "14",
+        startX: 20,
+        startY: 20,
+        logMessage: "你在野外遭受重創，被傳送回安全地帶調息。",
+      },
+      nextWorldPlayerHp: player.maxHp,
+      shouldClearTargetMonster: true,
+      shouldClearAutoMovePath: true,
+      shouldStopAutoBattle: true,
+      encounterState: createResetWorldCombatEncounterState(),
+    });
     expect(createResetWorldCombatEncounterState()).toEqual({
       worldCombatTargetId: null,
       worldCombatTargetStatuses: [],
@@ -1667,6 +1687,26 @@ describe("battle system balance", () => {
       playerSkillReadyAt: 0,
       enemyActionReadyAtById: {},
       enemySpecialReadyAtById: {},
+    });
+    expect(
+      createBattleRewardManifest({
+        enemy: COMMON_ENEMIES.m30_c1,
+        rewards: {
+          exp: 120,
+          spiritStones: 1500,
+          drops: [
+            { itemId: "spirit_stone", count: 300 },
+            { itemId: "iron_ore", count: 2 },
+          ],
+        },
+      })
+    ).toEqual({
+      expAmount: 120,
+      spiritStoneAwards: [1500, 300],
+      inventoryRewards: [{ itemId: "iron_ore", count: 2, instance: undefined }],
+      expLogMessage: `擊敗 <enemy rank="${COMMON_ENEMIES.m30_c1.rank}">${COMMON_ENEMIES.m30_c1.name}</enemy>，獲得 <exp>120 修為</exp>`,
+      lootLogMessage:
+        '獲得戰利品：1 中品 500 下品，300 下品，<item q="0">玄鐵礦(下品)</item> x2',
     });
 
     const advancedSession = advanceAutoBattleReplaySession(session);

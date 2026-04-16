@@ -15,6 +15,7 @@ import {
   createAutoBattleReplaySession,
   createAutoBattleReplayFinishPlan,
   createAutoBattleReplayState,
+  createBattleRewardManifest,
   createClearWorldCombatEncounterState,
   createIdleAutoBattleReplayState,
   createResetWorldCombatEncounterState,
@@ -23,7 +24,7 @@ import {
   getBattleReportAutoCloseDelayMs,
   getBattleRespawnMapId,
   queueTimedCombatPlan,
-  resolveWorldPlayerDefeatOutcome,
+  resolveWorldPlayerDefeatPlan,
   resolveAutoBattleReplayTransition,
   resolveWorldCombatAutoTarget,
   resolveWorldBattleResultCleanup,
@@ -43,9 +44,7 @@ import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory, 
 import { MOVEMENT_SPEEDS, REALM_NAMES, ELEMENT_COLORS, ELEMENT_NAMES } from '../constants';
 import clsx from 'clsx';
 import { Modal } from '../components/Modal';
-import { getDropRewards } from '@/data/drop_tables';
 import { addSpiritStones, gainExperience, setProfession } from '@/store/slices/characterSlice';
-import { formatSpiritStone } from '@/utils/currency';
 import AdventureStage from '../components/adventure/AdventureStage';
 import ShopPanel from '../components/adventure/ShopPanel';
 import { QuestModal } from '../components/adventure/QuestModal';
@@ -56,7 +55,6 @@ import { SHOPS } from '../data/shops';
 import { getEnemyEngagementRange, getGridDistance, getPlayerEngagementRange, getWorldSkillAreaTargets } from '../utils/worldCombat';
 import { getLearnedSkillEngagementRange } from '../utils/skillRealtime';
 import { getFormalSkillByName, normalizeLearnedSkills } from '../data/skills';
-import { generateDrops } from '../utils/dropSystem';
 
 
 // --- VISUAL CONFIG ---
@@ -1466,50 +1464,31 @@ export const Adventure: React.FC<AdventureProps> = ({
     enemy: Enemy;
     rewards?: NonNullable<ReturnType<typeof createAutoBattleReplaySession>['battleSnapshot']['rewards']>;
   }) => {
-    const expAmount = rewards?.exp && rewards.exp > 0 ? rewards.exp : enemy.exp;
-    if (expAmount > 0) {
-      dispatch(gainExperience(expAmount));
+    const rewardManifest = createBattleRewardManifest({
+      enemy,
+      rewards,
+    });
+
+    if (rewardManifest.expAmount > 0) {
+      dispatch(gainExperience(rewardManifest.expAmount));
+    }
+    if (rewardManifest.expLogMessage) {
       dispatch(addLog({
-        message: `擊敗 <enemy rank="${enemy.rank}">${enemy.name}</enemy>，獲得 <exp>${expAmount} 修為</exp>`,
+        message: rewardManifest.expLogMessage,
         type: 'gain',
       }));
     }
 
-    const spiritStones = rewards?.spiritStones ?? getDropRewards(enemy).spiritStones;
-    const drops = rewards?.drops ?? generateDrops(enemy);
-    const lootParts: string[] = [];
-
-    if (spiritStones > 0) {
-      dispatch(addSpiritStones({ amount: spiritStones, source: 'battle' }));
-      lootParts.push(formatSpiritStone(spiritStones));
-    }
-
-    drops.forEach((drop) => {
-      if (drop.itemId === 'spirit_stone') {
-        dispatch(addSpiritStones({ amount: drop.count, source: 'battle' }));
-        lootParts.push(formatSpiritStone(drop.count));
-        return;
-      }
-
+    rewardManifest.spiritStoneAwards.forEach((amount) => {
+      dispatch(addSpiritStones({ amount, source: 'battle' }));
+    });
+    rewardManifest.inventoryRewards.forEach((drop) => {
       dispatch(addItem({ itemId: drop.itemId, count: drop.count, instance: drop.instance }));
-      const item = ITEMS[drop.itemId];
-      if (!item) return;
-
-      const qualityValue = drop.instance?.quality ?? item.quality ?? 0;
-      let itemStr = item.name;
-      if (qualityValue === 0) itemStr += '(下品)';
-      if (qualityValue === 1) itemStr += '(中品)';
-      if (qualityValue === 2) itemStr += '(上品)';
-      if (qualityValue === 3) itemStr += '(仙品)';
-
-      lootParts.push(
-        `${drop.count > 1 ? `<item q="${qualityValue}">${itemStr}</item> x${drop.count}` : `<item q="${qualityValue}">${itemStr}</item>`}`
-      );
     });
 
-    if (lootParts.length > 0) {
+    if (rewardManifest.lootLogMessage) {
       dispatch(addLog({
-        message: `獲得戰利品：${lootParts.join('，')}`,
+        message: rewardManifest.lootLogMessage,
         type: 'gold',
       }));
     }
@@ -1520,23 +1499,25 @@ export const Adventure: React.FC<AdventureProps> = ({
   };
 
   const handleWorldPlayerDefeat = () => {
-    const defeatOutcome = resolveWorldPlayerDefeatOutcome({
+    const defeatPlan = resolveWorldPlayerDefeatPlan({
       completedQuestIds: completedQuests,
+      playerMaxHp: playerStats.maxHp,
     });
     dispatch(addLog({
-      message: defeatOutcome.logMessage,
+      message: defeatPlan.defeatOutcome.logMessage,
       type: 'danger',
     }));
     dispatch(enterMap({
-      mapId: defeatOutcome.respawnMapId,
-      startX: defeatOutcome.startX,
-      startY: defeatOutcome.startY,
+      mapId: defeatPlan.defeatOutcome.respawnMapId,
+      startX: defeatPlan.defeatOutcome.startX,
+      startY: defeatPlan.defeatOutcome.startY,
     }));
-    setTargetMonsterId(null);
-    setAutoMovePath([]);
-    setIsAutoBattling(false);
-    setWorldPlayerHp(playerStats.maxHp);
-    resetWorldCombatState();
+    if (defeatPlan.shouldClearTargetMonster) setTargetMonsterId(null);
+    if (defeatPlan.shouldClearAutoMovePath) setAutoMovePath([]);
+    if (defeatPlan.shouldStopAutoBattle) setIsAutoBattling(false);
+    setWorldPlayerHp(defeatPlan.nextWorldPlayerHp);
+    applyWorldCombatEncounterState(defeatPlan.encounterState);
+    clearCombatTimerBucket(combatTimersRef.current, 'world');
   };
 
   const performWorldPlayerAction = (useSkill: boolean) =>

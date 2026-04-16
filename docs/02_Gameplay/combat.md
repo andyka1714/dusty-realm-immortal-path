@@ -106,8 +106,10 @@
 - `Adventure` 內 `runAutoBattle() -> replay` 的橋接，現在也已開始共用 `battleSystem.ts` 提供的 `createAutoBattleReplaySession(...) / advanceAutoBattleReplaySession(...)`，world 頁面不再自己重建 first log / snapshot / replayQueue，也不再自己手動 append log、slice queue、patch snapshot
 - `Adventure` 內 `runAutoBattle() -> replay` 的啟動入口與 replay state shape，現在也已開始改走 `resolveAutoBattleReplayTransition(...) + createAutoBattleReplaySession(...) + createAutoBattleReplayState(...) / createIdleAutoBattleReplayState(...)`，頁面 effect 不再自己拼接 replay lifecycle gate 與本地 replay state 組裝
 - replay finish 的 victory effect payload，現在也已開始共用 `createAutoBattleReplayFinishEffects(...)`，頁面不再自己手拼 replay 勝利特效
+- battle rewards 的掉落 / 修為 / loot log manifest，現在也已開始共用 `createBattleRewardManifest(...)`，頁面不再自己手算 exp、靈石與掉落字串
 - battle timer bucket 與 replay 啟動 / 重置判定，現在也已開始共用 `createCombatTimerBuckets(...) / clearCombatTimerBucket(...) / clearAllCombatTimers(...) / resolveAutoBattleReplayTransition(...)`，頁面不再自己維護 world / replay timer manager 與 replay start/reset 條件
 - world encounter 的 clear/reset state shape，現在也已開始共用 `createClearWorldCombatEncounterState(...) / createResetWorldCombatEncounterState(...)`，頁面不再自己手拼 target/status/cooldown/shield 清理欄位
+- world defeat 的 respawn + 頁面狀態重置 plan，現在也已開始共用 `resolveWorldPlayerDefeatPlan(...)`，頁面不再自己散寫 auto-battle 停止、world hp 重置與 encounter state 套用
 - live world defeat 的回城地點、重生座標與提示文案，現在也已開始共用 `resolveWorldPlayerDefeatOutcome(...)`，頁面不再自己手寫敗北 outcome
 - replay 完成時的勝敗、擊殺目標與回城規則，現在也已開始共用 `resolveAutoBattleReplayOutcome(...) / getBattleRespawnMapId(...)`，頁面不再自己重算 defeated monster 與 replay defeat respawn 判定
 - replay 完成時的 battle result、victory target、rewards 與 defeat log，也已開始共用 `createAutoBattleReplayFinishPlan(...)`，頁面不再自己從 replay outcome 手拆這批結算欄位

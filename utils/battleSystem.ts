@@ -23,6 +23,7 @@ import { getItem } from "../data/items";
 import { getDropRewards } from "../data/drop_tables";
 import { getFormalSkillId, getSkill } from "../data/skills";
 import { generateDrops } from "./dropSystem";
+import { formatSpiritStone } from "./currency";
 
 const formatSpiritStones = (amount: number): string => {
   if (amount <= 0) return "";
@@ -133,6 +134,27 @@ export interface WorldPlayerDefeatOutcome {
   startX: number;
   startY: number;
   logMessage: string;
+}
+
+export interface WorldPlayerDefeatPlan {
+  defeatOutcome: WorldPlayerDefeatOutcome;
+  nextWorldPlayerHp: number;
+  shouldClearTargetMonster: true;
+  shouldClearAutoMovePath: true;
+  shouldStopAutoBattle: true;
+  encounterState: WorldCombatEncounterState;
+}
+
+export interface BattleRewardManifest {
+  expAmount: number;
+  spiritStoneAwards: number[];
+  inventoryRewards: {
+    itemId: string;
+    count: number;
+    instance?: ItemInstance;
+  }[];
+  expLogMessage?: string;
+  lootLogMessage?: string;
 }
 
 export interface ResolvedAutoBattleReplayStep<TMonster, TSkill> {
@@ -408,6 +430,85 @@ export const resolveWorldPlayerDefeatOutcome = ({
   startY: 20,
   logMessage: "你在野外遭受重創，被傳送回安全地帶調息。",
 });
+
+export const resolveWorldPlayerDefeatPlan = ({
+  completedQuestIds,
+  playerMaxHp,
+}: {
+  completedQuestIds: string[];
+  playerMaxHp: number;
+}): WorldPlayerDefeatPlan => ({
+  defeatOutcome: resolveWorldPlayerDefeatOutcome({
+    completedQuestIds,
+  }),
+  nextWorldPlayerHp: playerMaxHp,
+  shouldClearTargetMonster: true,
+  shouldClearAutoMovePath: true,
+  shouldStopAutoBattle: true,
+  encounterState: createResetWorldCombatEncounterState(),
+});
+
+export const createBattleRewardManifest = ({
+  enemy,
+  rewards,
+}: {
+  enemy: Enemy;
+  rewards?: AutoBattleReplaySession["battleSnapshot"]["rewards"];
+}): BattleRewardManifest => {
+  const expAmount = rewards?.exp && rewards.exp > 0 ? rewards.exp : enemy.exp;
+  const spiritStones = rewards?.spiritStones ?? getDropRewards(enemy).spiritStones;
+  const drops = rewards?.drops ?? generateDrops(enemy);
+  const spiritStoneAwards: number[] = [];
+  const inventoryRewards: BattleRewardManifest["inventoryRewards"] = [];
+  const lootParts: string[] = [];
+
+  if (spiritStones > 0) {
+    spiritStoneAwards.push(spiritStones);
+    lootParts.push(formatSpiritStone(spiritStones));
+  }
+
+  drops.forEach((drop) => {
+    if (drop.itemId === "spirit_stone") {
+      spiritStoneAwards.push(drop.count);
+      lootParts.push(formatSpiritStone(drop.count));
+      return;
+    }
+
+    inventoryRewards.push({
+      itemId: drop.itemId,
+      count: drop.count,
+      instance: drop.instance,
+    });
+
+    const item = getItem(drop.itemId);
+    if (!item) return;
+
+    const qualityValue = drop.instance?.quality ?? item.quality ?? 0;
+    let itemStr = item.name;
+    if (qualityValue === 0) itemStr += "(下品)";
+    if (qualityValue === 1) itemStr += "(中品)";
+    if (qualityValue === 2) itemStr += "(上品)";
+    if (qualityValue === 3) itemStr += "(仙品)";
+
+    lootParts.push(
+      drop.count > 1
+        ? `<item q="${qualityValue}">${itemStr}</item> x${drop.count}`
+        : `<item q="${qualityValue}">${itemStr}</item>`
+    );
+  });
+
+  return {
+    expAmount,
+    spiritStoneAwards,
+    inventoryRewards,
+    expLogMessage:
+      expAmount > 0
+        ? `擊敗 <enemy rank="${enemy.rank}">${enemy.name}</enemy>，獲得 <exp>${expAmount} 修為</exp>`
+        : undefined,
+    lootLogMessage:
+      lootParts.length > 0 ? `獲得戰利品：${lootParts.join("，")}` : undefined,
+  };
+};
 
 export const selectNearestWorldCombatTarget = <TTarget,>({
   targets,
