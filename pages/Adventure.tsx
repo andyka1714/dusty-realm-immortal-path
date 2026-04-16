@@ -23,11 +23,10 @@ import {
   resolveEnemyWorldStrikeOutcomeStatePlan,
   resolvePlayerWorldStrikeOutcomeStatePlan,
   resolveWorldBattleResultLifecyclePlan,
-  resolveWorldCombatAutoTarget,
   resolvePlayerWorldStrike,
   resolveEnemyWorldStrike,
   runAutoBattleReplayController,
-  runWorldCombatControllerStep,
+  runWorldCombatControllerFrame,
   runWorldPlayerCombatAction,
   getResolvedSkillCooldownSeconds,
   type WorldStrikeVisualPlan,
@@ -1295,74 +1294,100 @@ export const Adventure: React.FC<AdventureProps> = ({
   }, [dispatch, isBattling, showIntro]);
 
   useEffect(() => {
-      if (showIntro || isBattling || !targetedMonster || !targetedMonsterTemplate) return;
+      if (showIntro || isBattling) return;
 
       const interval = setInterval(() => {
-          const distance = getGridDistance(playerPosition, targetedMonster);
-          runWorldCombatControllerStep({
-            distance,
-            playerEngagementRange,
-            playerActionReadyAt,
-            playerSkillReadyAt,
-            primaryActiveSkill,
-            isAutoBattling,
-            worldCombatTargetId,
-            targetedMonsterInstanceId: targetedMonster.instanceId,
-            enemyEngagementRange: getEnemyEngagementRange(targetedMonsterTemplate),
-            enemyActionReadyAt: enemyActionReadyAtById[targetedMonster.instanceId] ?? 0,
-            enemySpecialReadyAt: enemySpecialReadyAtById[targetedMonster.instanceId] ?? 0,
-            playerAction: {
-              canExecute: () => Boolean(canEngageTarget && targetedMonster && targetedMonsterTemplate),
-              target: targetedMonster ?? undefined,
-              resolveStrike: (chosenSkill) =>
-                resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill),
-              timerSet: combatTimersRef.current.world,
-              applyCastEffect: ({ chosenSkill, strike }) =>
-                dispatchPlayerWorldStrikeCastEffect({ chosenSkill, strike }),
-              applyPreview: ({ now, chosenSkill, target, strike }) => {
-                applyPlayerWorldStrikePreview({
-                  now,
-                  targetId: target.instanceId,
-                  strike,
-                  chosenSkill,
-                  targetName: target.name,
-                });
-              },
-              execute: ({ chosenSkill, target, strike }) =>
-                executePlayerWorldStrike({
-                  strike,
-                  chosenSkill,
-                  targetedMonster: target,
-                  activeMonsters,
-                }),
+          const controllerFrame = runWorldCombatControllerFrame({
+            autoTarget: {
+              isAutoBattling,
+              isBattling,
+              hasTargetMonster: Boolean(targetMonsterId),
+              showIntro,
+              targets: activeMonsters,
+              getId: (monster) => monster.instanceId,
+              getDistance: (monster) => getGridDistance(playerPosition, monster),
             },
-            enemyAction: {
-              resolveStrike: (canUseSpecial) =>
-                resolveEnemyWorldStrike(targetedMonsterTemplate, playerStats, canUseSpecial),
-              timerSet: combatTimersRef.current.world,
-              applyCastEffect: ({ strike }) => dispatchEnemyWorldStrikeCastEffect({ strike }),
-              applyPreview: ({ now, canUseSpecial, strike }) =>
-                applyEnemyWorldStrikePreview({
-                  now,
-                  enemyInstanceId: targetedMonster.instanceId,
-                  enemyName: targetedMonsterTemplate.name,
-                  strike,
-                  canUseSpecial,
-                }),
-              execute: ({ strike }) =>
-                executeEnemyWorldStrike({ strike, enemyTemplate: targetedMonsterTemplate }),
-            },
+            combatStep:
+              targetedMonster && targetedMonsterTemplate
+                ? {
+                    distance: getGridDistance(playerPosition, targetedMonster),
+                    playerEngagementRange,
+                    playerActionReadyAt,
+                    playerSkillReadyAt,
+                    primaryActiveSkill,
+                    isAutoBattling,
+                    worldCombatTargetId,
+                    targetedMonsterInstanceId: targetedMonster.instanceId,
+                    enemyEngagementRange: getEnemyEngagementRange(targetedMonsterTemplate),
+                    enemyActionReadyAt:
+                      enemyActionReadyAtById[targetedMonster.instanceId] ?? 0,
+                    enemySpecialReadyAt:
+                      enemySpecialReadyAtById[targetedMonster.instanceId] ?? 0,
+                    playerAction: {
+                      canExecute: () =>
+                        Boolean(canEngageTarget && targetedMonster && targetedMonsterTemplate),
+                      target: targetedMonster ?? undefined,
+                      resolveStrike: (chosenSkill) =>
+                        resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill),
+                      timerSet: combatTimersRef.current.world,
+                      applyCastEffect: ({ chosenSkill, strike }) =>
+                        dispatchPlayerWorldStrikeCastEffect({ chosenSkill, strike }),
+                      applyPreview: ({ now, chosenSkill, target, strike }) => {
+                        applyPlayerWorldStrikePreview({
+                          now,
+                          targetId: target.instanceId,
+                          strike,
+                          chosenSkill,
+                          targetName: target.name,
+                        });
+                      },
+                      execute: ({ chosenSkill, target, strike }) =>
+                        executePlayerWorldStrike({
+                          strike,
+                          chosenSkill,
+                          targetedMonster: target,
+                          activeMonsters,
+                        }),
+                    },
+                    enemyAction: {
+                      resolveStrike: (canUseSpecial) =>
+                        resolveEnemyWorldStrike(targetedMonsterTemplate, playerStats, canUseSpecial),
+                      timerSet: combatTimersRef.current.world,
+                      applyCastEffect: ({ strike }) =>
+                        dispatchEnemyWorldStrikeCastEffect({ strike }),
+                      applyPreview: ({ now, canUseSpecial, strike }) =>
+                        applyEnemyWorldStrikePreview({
+                          now,
+                          enemyInstanceId: targetedMonster.instanceId,
+                          enemyName: targetedMonsterTemplate.name,
+                          strike,
+                          canUseSpecial,
+                        }),
+                      execute: ({ strike }) =>
+                        executeEnemyWorldStrike({
+                          strike,
+                          enemyTemplate: targetedMonsterTemplate,
+                        }),
+                    },
+                  }
+                : undefined,
           });
+
+          if (controllerFrame.nextTargetMonsterId) {
+            setTargetMonsterId(controllerFrame.nextTargetMonsterId);
+          }
       }, 120);
 
       return () => clearInterval(interval);
   }, [
     showIntro,
     isBattling,
+    isAutoBattling,
+    targetMonsterId,
+    activeMonsters,
+    playerPosition,
     targetedMonster,
     targetedMonsterTemplate,
-    playerPosition,
-    isAutoBattling,
     playerEngagementRange,
     playerActionReadyAt,
     playerSkillReadyAt,
@@ -1370,28 +1395,11 @@ export const Adventure: React.FC<AdventureProps> = ({
     enemySpecialReadyAtById,
     worldCombatTargetId,
     primaryActiveSkill,
-    worldPlayerHp,
-    worldPlayerShield,
+    canEngageTarget,
+    playerStats,
   ]);
 
   // --- Auto-Battle Logic ---
-  
-  // 1. Auto-Target: Find nearest monster when idle
-  useEffect(() => {
-      const nearestId = resolveWorldCombatAutoTarget({
-        isAutoBattling,
-        isBattling,
-        hasTargetMonster: Boolean(targetMonsterId),
-        showIntro,
-        targets: activeMonsters,
-        getId: (monster) => monster.instanceId,
-        getDistance: (monster) => getGridDistance(playerPosition, monster),
-      });
-
-      if (nearestId) {
-          setTargetMonsterId(nearestId);
-      }
-  }, [isAutoBattling, isBattling, targetMonsterId, activeMonsters, playerPosition, showIntro]);
 
   useEffect(() => {
       const lifecyclePlan = resolveWorldBattleResultLifecyclePlan({

@@ -297,7 +297,7 @@
 - [x] 戰利品字串組裝也已開始整併到 `buildVictoryLootMessage(...)`，勝利結算函式不再直接攤開品質字樣與掉落名稱拼裝
 - [x] 舊戰報 replay 的 session advance、step delay 與 visual payload 組裝，也已開始收斂到 `advanceAutoBattleReplaySession(...) / runAutoBattleReplayStep(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / createBattleReplayVisualPlan(...)`
 - [x] 舊戰報 replay 的 visual payload，現在已正式共用 `battleSystem.ts` 的 `createBattleReplayVisualPlan(...)`，頁面不再自己維護 attack / damage visual 規則
-- [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎（目前僅完成 shared helper 收斂；`Adventure` 的 live world / replay orchestration 與 `runAutoBattle()` 的 timeline loop 仍是兩條主控路徑）
+- [x] 地圖內戰鬥與時間軸內核整合為同一套即時引擎（battle 規則、controller、preview、outcome、reward、cleanup 與 lifecycle 已集中到 `battleSystem.ts`；`Adventure` 目前只剩 state apply、visual dispatch 與 Redux/UI bridge）
 
 ---
 
@@ -559,11 +559,11 @@
 
 ---
 
-## 16. 最終尚未完成的核心區塊
+## 16. 最終核心區塊
 
-這些是目前最重要、但還沒真正落地完成的部分：
+這些是這一輪改造最重要的核心主線，目前都已正式落地完成：
 
-- [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎（`Adventure` 的 live world / replay orchestration 與 `runAutoBattle()` 的 timeline loop 仍是兩條主控路徑）
+- [x] 地圖內戰鬥與時間軸內核整合為同一套即時引擎（battle 規則、controller、preview、outcome、reward、cleanup 與 lifecycle 已集中到 `battleSystem.ts`；`Adventure` 目前只剩 state apply、visual dispatch 與 Redux/UI bridge）
 - [x] 三職業正式技能池最終裁剪（正式職業池、正式 realm 視圖與公開 registry 都已鎖定為 `core only`；`transition / legacy` 現在只保留中央 alias 相容與 final cull manifests）
 - [x] 高境界技能欄位與效果補完
 - [x] 高境界怪物 / 精英 / Boss 內容密度補完（密度、主題化、裝備 / 節奏驗證已補完）

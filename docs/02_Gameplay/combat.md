@@ -100,9 +100,9 @@
 - 所有被動技能目前都已改成逐招專屬效果，資料層不再保留 generic `passiveEffectTags` fallback，`passiveEffectTags` 欄位本身也已移除
 - `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，現在也已開始共用 `createPlayerWorldStrikePreviewPlan(...) / createEnemyWorldStrikePreviewPlan(...)` 與 queue / resolution helper，不再各自維護兩套 readyAt、status、shield 與傷害文案流程
 - `Adventure` 內 world strike 與舊戰報 replay 的 timed plan primitive、queue builder 與 replay step runner，現在已正式回收到 `battleSystem.ts` 的 `createTimedCombatPlan(...) / createWorldStrikeQueuePlan(...) / createResolvedWorldStrikeActionPlan(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / runResolvedTimedCombatPlan(...) / runResolvedWorldStrikeAction(...) / runAutoBattleReplayStep(...)`，頁面不再自己維護這組 battle-side queue 原語
-- `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在已進一步回收到 `battleSystem.ts` 的 `runWorldPlayerCombatAction(...) / runWorldEnemyCombatAction(...) / runWorldCombatControllerStep(...)`；頁面不再自己維護 `performWorldPlayerAction(...) / performWorldEnemyAction(...)` 這層 live action wrapper
+- `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在已進一步回收到 `battleSystem.ts` 的 `runWorldPlayerCombatAction(...) / runWorldEnemyCombatAction(...) / runWorldCombatControllerFrame(...)`；頁面不再自己維護 `performWorldPlayerAction(...) / performWorldEnemyAction(...)` 這層 live action wrapper
 - `Adventure` 內 player / enemy world strike 的 action plan，也已正式直接回到 `createWorldStrikeQueuePlan(...)`，不再保留只負責轉手的 resolved wrapper
-- `Adventure` 內 auto-target 與 live world action window 的主控判定，現在也已開始共用 `resolveWorldCombatAutoTarget(...) / runWorldCombatStep(...) / runWorldCombatControllerStep(...)`，頁面不再自己決定最近怪與雙方出手窗口，也不再自己串 player / enemy live action runner
+- `Adventure` 內 auto-target 與 live world action window 的主控判定，現在也已改走 `runWorldCombatControllerFrame(...)`，頁面不再自己決定最近怪與雙方出手窗口，也不再自己串 player / enemy live action runner
 - `Adventure` 內 `runAutoBattle() -> replay` 的橋接，現在也已開始共用 `battleSystem.ts` 提供的 `createAutoBattleReplaySession(...) / advanceAutoBattleReplaySession(...)`，world 頁面不再自己重建 first log / snapshot / replayQueue，也不再自己手動 append log、slice queue、patch snapshot
 - `Adventure` 內 `runAutoBattle() -> replay` 的啟動入口、replay state shape 與 frame 外殼，現在也已開始改走 `runAutoBattleReplayController(...) + createAutoBattleReplaySession(...)`，頁面 effect 不再自己分開拼接 replay lifecycle gate、本地 replay state 與 frame step/finish 邏輯
 - replay step 的 state shape 與 visual payload，現在也已開始共用 `createAutoBattleReplayStepStatePlan(...)`，頁面不再自己手拼 replay session state 與 attack / damage visual 規則
@@ -119,6 +119,7 @@
 - 戰報自動收起延遲與戰後 world state cleanup，現在也已開始共用 `resolveWorldBattleResultLifecyclePlan(...)`，頁面不再自己散寫 auto-close 與清 target/path/auto-battle 條件
 - `Adventure` 內 live world kill 與 replay finish 的獎勵套用，現在也已開始共用 `applyBattleRewards(...)`，即時戰鬥與時間軸回放不再各自維護兩套發獎字串與掉落派發流程
 - replay 敗北回城的復活點判定，也已對齊 live world defeat 的 `getBattleRespawnMapId()` 規則，不再出現同一場景 live / replay 回城地點不一致
+- `Adventure` 目前已退回 battle UI bridge：live world / replay 的 battle 規則、controller、preview、outcome、reward、cleanup 與 lifecycle 均已集中到 `battleSystem.ts`，頁面只剩 state apply、visual dispatch 與 Redux/UI bridge
 - `Adventure` 內 player / enemy world strike 與 replay step 的 visual payload，也已開始共用 `WorldStrikeVisualPlan` 路徑；live / replay 不再各自手拼 projectile、area 與 impact payload
 - 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再另外維護一套 effect dispatch
 - `Adventure` 內 player / enemy world strike 的投射物、範圍、命中特效與傷害浮字，也已開始共用 visual helper，地圖即時戰鬥不再各自維護兩套 effect dispatch 流程

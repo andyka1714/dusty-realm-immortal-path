@@ -31,7 +31,7 @@
 - `SKILL_PROFESSION_POOLS / SKILL_POOL_REGISTRY / CORE_SKILL_SETS_BY_REALM` 現在都已正式鎖定為 `core only`；`transition / legacy` 只保留中央 alias 相容與 final cull manifests，不再混入正式技能池
 - skill index 目前也已不再保留 `battle-absorbed / retirement-ready` 的 resolved retired skill 過渡出口；resolved 視圖正式只留 alias-layer 與測試側組裝
 - 所有 passive，包含 formal core 與 retired passive alias，現在都已退出 generic fallback，`passiveEffectTags` 欄位也已從技能資料層移除
-- `runAutoBattle()` 已拆出多個 shared helper，world strike 與 timeline combat 的 cooldown、status、runtime、outcome 與 action queue 正持續收斂，但目前仍不是同一套即時引擎
+- `runAutoBattle()` 目前仍保留作為時間軸數值驗證入口，但 world / timeline / replay 的 queue、controller、preview、outcome、reward、cleanup 與 lifecycle 現在都已集中到 `battleSystem.ts` 的同一套 battle core
 - `Adventure` 內 world strike 與舊戰報 replay 的 preview、queue、execute、resolution、visual dispatch、replay step、replay context，現在都已開始共用 helper；其中 preview state 也已回收到 `createPlayerWorldStrikePreviewPlan(...) / createEnemyWorldStrikePreviewPlan(...)`，不再維護多套近似流程
 - `Adventure` 內 world strike 與舊戰報 replay 的 timed plan primitive、queue builder 與 replay step runner，現在也已回收到 `battleSystem.ts` 的 `createTimedCombatPlan(...) / createWorldStrikeQueuePlan(...) / createResolvedWorldStrikeActionPlan(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / runResolvedTimedCombatPlan(...) / runResolvedWorldStrikeAction(...) / runAutoBattleReplayStep(...)`，頁面不再自己維護 battle-side queue 原語
 - `Adventure` 內 world strike 與 replay step 的 visual payload，現在也已開始共用 `WorldStrikeVisualPlan` 路徑；live / replay 的 effect dispatch 不再各自維護 payload 組裝
@@ -52,18 +52,14 @@
 - 戰報自動收起延遲與戰後 world state cleanup，現在也已開始共用 `resolveWorldBattleResultLifecyclePlan(...)`，頁面不再自己散寫 auto-close 與清 target/path/auto-battle 條件
 - `Adventure` 內舊戰報 replay 的 visual payload 也已開始共用 `createBattleReplayVisualPlan(...)`，attack / damage visual dispatch 不再在 replay step 內直接拼裝輸入
 - `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，現在也已開始共用 `queueTimedCombatPlan(...)`，不再各自維護一套 `setTimeout` 流程
-- `Adventure` 內 player / enemy world strike 的 live action wrapper，現在也已回收到 `battleSystem.ts` 的 `runWorldPlayerCombatAction(...) / runWorldEnemyCombatAction(...) / runWorldCombatControllerStep(...)`，頁面不再自己維護 `performWorldPlayerAction(...) / performWorldEnemyAction(...)` 這層 resolved strike plan 樣板
-- `Adventure` 內 auto-target 與 live world action window 的判定，現在也已開始共用 `resolveWorldCombatAutoTarget(...) / runWorldCombatStep(...) / runWorldCombatControllerStep(...)`，頁面不再自己維護最近怪、出手窗口與 player/enemy live action 串接
+- `Adventure` 內 player / enemy world strike 的 live action wrapper，現在也已回收到 `battleSystem.ts` 的 `runWorldPlayerCombatAction(...) / runWorldEnemyCombatAction(...) / runWorldCombatControllerFrame(...)`，頁面不再自己維護 `performWorldPlayerAction(...) / performWorldEnemyAction(...)` 這層 resolved strike plan 樣板
+- `Adventure` 內 auto-target 與 live world action window 的判定，現在也已開始共用 `runWorldCombatControllerFrame(...)`，頁面不再自己維護最近怪、出手窗口與 player / enemy live action 串接
+- `Adventure` 內 live world / replay 的 battle 規則目前都已退回 `battleSystem.ts`；頁面只剩 state apply、visual dispatch 與 Redux/UI bridge
 - `GameTooltip / GameHintBubble / GamePanel / Modal / GameSection` 已成為主要 UI 殼層語言，且 `Dashboard / QuestModal / Workshop / Adventure` 內部資訊區與操作區都已開始套入同一套 section chrome
 
 ## 尚未結案的主線
 
-- 世界戰鬥與 timeline battle 收成單一最終引擎
-
-其中 `世界戰鬥與 timeline battle 收成單一最終引擎` 目前仍未結案：
-- `Adventure` 仍自行維護 live world action / replay 的 timed queue orchestration
-- `runAutoBattle()` 仍自行維護 `resolveCombatLoopStep(...) + runCombatTimelineLoop(...)` 的 timeline 主循環
-- 兩邊目前是大量共用 helper，而不是共用同一個 battle runner
+- 目前 checklist 主線已全數落地完成；後續若再擴 battle，只屬於下一輪優化，不再是這輪改造遺留
 
 ## 建議閱讀順序
 

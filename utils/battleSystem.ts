@@ -232,6 +232,11 @@ export interface WorldCombatActionWindow {
   shouldEnemyAct: boolean;
 }
 
+export interface WorldCombatControllerFrameResult {
+  nextTargetMonsterId: string | null;
+  actionWindow: WorldCombatActionWindow | null;
+}
+
 export interface WorldCombatAutoTargetContext<TTarget> {
   isAutoBattling: boolean;
   isBattling: boolean;
@@ -1991,6 +1996,79 @@ export const runWorldCombatControllerStep = <
 
   return actionWindow;
 };
+
+export const runWorldCombatControllerFrame = <
+  TTarget,
+  TSkill,
+  TPlayerStrike extends { executionTimeMs: number },
+  TEnemyStrike extends { executionTimeMs: number },
+>({
+  autoTarget,
+  combatStep,
+}: {
+  autoTarget: WorldCombatAutoTargetContext<TTarget>;
+  combatStep?: {
+    now?: number;
+    distance: number;
+    playerEngagementRange: number;
+    playerActionReadyAt: number;
+    playerSkillReadyAt: number;
+    primaryActiveSkill?: TSkill;
+    isAutoBattling: boolean;
+    worldCombatTargetId: string | null;
+    targetedMonsterInstanceId: string;
+    enemyEngagementRange: number;
+    enemyActionReadyAt: number;
+    enemySpecialReadyAt: number;
+    playerAction: {
+      canExecute?: () => boolean;
+      target?: TTarget;
+      resolveStrike: (chosenSkill: TSkill | undefined) => TPlayerStrike;
+      timerSet?: Set<ReturnType<typeof setTimeout>>;
+      applyCastEffect?: (resolved: {
+        now: number;
+        chosenSkill: TSkill | undefined;
+        target: TTarget;
+        strike: TPlayerStrike;
+      }) => void;
+      applyPreview: (resolved: {
+        now: number;
+        chosenSkill: TSkill | undefined;
+        target: TTarget;
+        strike: TPlayerStrike;
+      }) => void;
+      execute: (resolved: {
+        now: number;
+        chosenSkill: TSkill | undefined;
+        target: TTarget;
+        strike: TPlayerStrike;
+      }) => void;
+    };
+    enemyAction: {
+      canExecute?: () => boolean;
+      resolveStrike: (canUseSpecial: boolean) => TEnemyStrike;
+      timerSet?: Set<ReturnType<typeof setTimeout>>;
+      applyCastEffect?: (resolved: {
+        now: number;
+        canUseSpecial: boolean;
+        strike: TEnemyStrike;
+      }) => void;
+      applyPreview: (resolved: {
+        now: number;
+        canUseSpecial: boolean;
+        strike: TEnemyStrike;
+      }) => void;
+      execute: (resolved: {
+        now: number;
+        canUseSpecial: boolean;
+        strike: TEnemyStrike;
+      }) => void;
+    };
+  };
+}): WorldCombatControllerFrameResult => ({
+  nextTargetMonsterId: resolveWorldCombatAutoTarget(autoTarget),
+  actionWindow: combatStep ? runWorldCombatControllerStep(combatStep) : null,
+});
 
 export const runResolvedBattleReplayStep = <TResolved,>({
   resolve,

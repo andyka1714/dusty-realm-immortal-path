@@ -65,6 +65,7 @@ import {
   runAutoBattleReplayController,
   runAutoBattleReplayStateFrame,
   runWorldCombatActionWindowStep,
+  runWorldCombatControllerFrame,
   runWorldCombatStep,
   selectNearestWorldCombatTarget,
   runAutoBattleReplayStep,
@@ -764,6 +765,96 @@ describe("battle system balance", () => {
         "controller-enemy:cast:special",
         "controller-enemy:preview:special",
         "controller-enemy:execute:special",
+      ]);
+
+      const controllerFrameAutoTarget = runWorldCombatControllerFrame({
+        autoTarget: {
+          isAutoBattling: true,
+          isBattling: false,
+          hasTargetMonster: false,
+          showIntro: false,
+          targets: [
+            { instanceId: "far", distance: 4 },
+            { instanceId: "near", distance: 1 },
+          ],
+          getId: (target) => target.instanceId,
+          getDistance: (target) => target.distance,
+        },
+      });
+
+      expect(controllerFrameAutoTarget).toEqual({
+        nextTargetMonsterId: "near",
+        actionWindow: null,
+      });
+
+      const controllerFrameCombat = runWorldCombatControllerFrame({
+        autoTarget: {
+          isAutoBattling: true,
+          isBattling: false,
+          hasTargetMonster: true,
+          showIntro: false,
+          targets: [{ instanceId: "enemy-1", distance: 1 }],
+          getId: (target) => target.instanceId,
+          getDistance: (target) => target.distance,
+        },
+        combatStep: {
+          now: 1500,
+          distance: 1,
+          playerEngagementRange: 2,
+          playerActionReadyAt: 1200,
+          playerSkillReadyAt: 1400,
+          primaryActiveSkill: { id: "skill-4" },
+          isAutoBattling: true,
+          worldCombatTargetId: null,
+          targetedMonsterInstanceId: "enemy-1",
+          enemyEngagementRange: 1,
+          enemyActionReadyAt: 1300,
+          enemySpecialReadyAt: 1400,
+          playerAction: {
+            canExecute: () => true,
+            target: { instanceId: "enemy-1", name: "木人" },
+            resolveStrike: (chosenSkill) => ({
+              executionTimeMs: 0,
+              skillId: chosenSkill?.id ?? "basic",
+            }),
+            applyCastEffect: ({ strike }) =>
+              calls.push(`frame-player:cast:${strike.skillId}`),
+            applyPreview: ({ strike }) =>
+              calls.push(`frame-player:preview:${strike.skillId}`),
+            execute: ({ strike }) =>
+              calls.push(`frame-player:execute:${strike.skillId}`),
+          },
+          enemyAction: {
+            resolveStrike: (canUseSpecial) => ({
+              executionTimeMs: 0,
+              mode: canUseSpecial ? "special" : "basic",
+            }),
+            applyCastEffect: ({ strike }) =>
+              calls.push(`frame-enemy:cast:${strike.mode}`),
+            applyPreview: ({ strike }) =>
+              calls.push(`frame-enemy:preview:${strike.mode}`),
+            execute: ({ strike }) =>
+              calls.push(`frame-enemy:execute:${strike.mode}`),
+          },
+        },
+      });
+
+      expect(controllerFrameCombat).toEqual({
+        nextTargetMonsterId: null,
+        actionWindow: {
+          engagedTargetId: "enemy-1",
+          shouldPlayerAct: true,
+          usePlayerSkill: true,
+          shouldEnemyAct: true,
+        },
+      });
+      expect(calls.slice(-6)).toEqual([
+        "frame-player:cast:skill-4",
+        "frame-player:preview:skill-4",
+        "frame-player:execute:skill-4",
+        "frame-enemy:cast:special",
+        "frame-enemy:preview:special",
+        "frame-enemy:execute:special",
       ]);
 
       const replayFrameFinish = runAutoBattleReplayFrame({
