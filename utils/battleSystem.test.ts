@@ -17,6 +17,7 @@ import {
   createAutoBattleReplayFinishEffects,
   createAutoBattleReplayFinishPlan,
   createAutoBattleReplayState,
+  createAutoBattleReplayStepStatePlan,
   createBattleReplayVisualPlan,
   createBattleRewardManifest,
   createBattleReplayStepPlan,
@@ -40,6 +41,8 @@ import {
   resolveAutoBattleReplayOutcome,
   resolveAutoBattleReplayLifecycle,
   resolveAutoBattleReplayTransition,
+  resolveAutoBattleReplayFinishResultPlan,
+  resolveAutoBattleReplayTransitionStatePlan,
   resolveWorldBattleResultCleanup,
   resolveWorldPlayerDefeatPlan,
   resolveWorldPlayerDefeatOutcome,
@@ -948,6 +951,183 @@ describe("battle system balance", () => {
         }),
       })
     ).toEqual([]);
+  });
+
+  it("shares replay transition, step state, and finish result plans inside battle core", () => {
+    const session = {
+      displayedLogs: [
+        {
+          turn: 1,
+          message: "你與木人展開交戰。",
+          isPlayer: true,
+          playerHp: 500,
+          playerMaxHp: 500,
+          enemyHp: 400,
+          enemyMaxHp: 400,
+        },
+      ],
+      replayQueue: [
+        {
+          turn: 2,
+          message: "你施展【火球術】",
+          isPlayer: true,
+          timeMs: 460,
+          playerHp: 480,
+          playerMaxHp: 500,
+          enemyHp: 320,
+          enemyMaxHp: 400,
+        },
+      ],
+      battleSnapshot: {
+        playerHp: 500,
+        playerMaxHp: 500,
+        enemyHp: 400,
+        enemyMaxHp: 400,
+        won: true,
+        rewards: {
+          exp: 120,
+          spiritStones: 60,
+          drops: [],
+        },
+      },
+    };
+
+    const startPlan = resolveAutoBattleReplayTransitionStatePlan({
+      isBattling: true,
+      hasCurrentEnemy: true,
+      lastBattleResult: null,
+      replayProcessed: false,
+      createReplaySession: () => session,
+    });
+
+    expect(startPlan.kind).toBe("start");
+    if (startPlan.kind === "start") {
+      expect(startPlan.shouldClearReplayTimers).toBe(false);
+      expect(startPlan.replayState).toEqual(
+        createAutoBattleReplayState({
+          session,
+        })
+      );
+    }
+
+    expect(
+      resolveAutoBattleReplayTransitionStatePlan({
+        isBattling: false,
+        hasCurrentEnemy: false,
+        lastBattleResult: null,
+        replayProcessed: true,
+      })
+    ).toEqual({
+      kind: "reset",
+      nextProcessed: false,
+      shouldClearReplayTimers: true,
+      replayState: createIdleAutoBattleReplayState(),
+    });
+
+    const advancedStep = advanceAutoBattleReplaySession(session);
+    expect(advancedStep.nextLog).toBeDefined();
+    if (!advancedStep.nextLog) {
+      throw new Error("expected replay step log");
+    }
+
+    const stepStatePlan = createAutoBattleReplayStepStatePlan({
+      nextLog: advancedStep.nextLog,
+      nextSession: advancedStep.nextSession,
+      targetMonster: { instanceId: "enemy-1", x: 3, y: 4 } as ActiveMonster,
+      normalizedUsedSkill: {
+        castRange: 4,
+        castTimeMs: 320,
+      },
+      playerPosition: { x: 1, y: 1 },
+      enemyAttackRange: COMMON_ENEMIES.m1_c1.attackRange,
+    });
+
+    expect(stepStatePlan.shouldAutoScroll).toBe(true);
+    expect(stepStatePlan.replayState).toEqual(
+      createAutoBattleReplayState({
+        session: advancedStep.nextSession,
+      })
+    );
+    expect(stepStatePlan.visualPlan.projectile).toEqual({
+      color: "#60a5fa",
+      colorInt: 0x60a5fa,
+      sourceX: 1,
+      sourceY: 1,
+      targetX: 3,
+      targetY: 4,
+      durationMs: 320,
+    });
+
+    const replayWinOutcome = resolveAutoBattleReplayOutcome({
+      battleSnapshot: {
+        playerHp: 420,
+        playerMaxHp: 500,
+        enemyHp: 0,
+        enemyMaxHp: 400,
+        won: true,
+        rewards: {
+          exp: 120,
+          spiritStones: 60,
+          drops: [],
+        },
+      },
+      displayedLogs: [
+        {
+          turn: 1,
+          message: "勝利",
+          isPlayer: true,
+          playerHp: 420,
+          playerMaxHp: 500,
+          enemyHp: 0,
+          enemyMaxHp: 400,
+        },
+      ],
+      currentEnemy: COMMON_ENEMIES.m1_c1,
+      currentEnemyInstanceId: "enemy-1",
+      activeMonsters: [{ instanceId: "enemy-1", x: 3, y: 4 } as ActiveMonster],
+      respawnMapId: "4",
+    });
+
+    expect(
+      resolveAutoBattleReplayFinishResultPlan({
+        replayOutcome: replayWinOutcome,
+        currentEnemy: COMMON_ENEMIES.m1_c1,
+      })
+    ).toEqual({
+      shouldStopReplay: true,
+      battleResult: {
+        won: true,
+        logs: replayWinOutcome.logs,
+        respawnMapId: undefined,
+      },
+      finishEffects: [
+        {
+          type: "area",
+          text: "",
+          color: "#fca5a5",
+          colorInt: 0xfca5a5,
+          targetX: 3,
+          targetY: 4,
+          radius: 0.9,
+          durationMs: 420,
+        },
+        {
+          type: "impact",
+          text: "",
+          color: "#ffffff",
+          colorInt: 0xffffff,
+          targetX: 3,
+          targetY: 4,
+          radius: 0.85,
+          durationMs: 320,
+        },
+      ],
+      rewardManifest: createBattleRewardManifest({
+        enemy: COMMON_ENEMIES.m1_c1,
+        rewards: replayWinOutcome.rewards,
+      }),
+      defeatLogMessage: undefined,
+    });
   });
 
   it("shares enemy special timeline metadata between world strikes and timeline combat", () => {

@@ -106,6 +106,12 @@ export interface AutoBattleReplayState {
   isReplayingBattle: boolean;
 }
 
+export interface AutoBattleReplayStepStatePlan {
+  replayState: AutoBattleReplayState;
+  visualPlan: WorldStrikeVisualPlan;
+  shouldAutoScroll: true;
+}
+
 export interface AutoBattleReplayFinishPlan {
   shouldStopReplay: true;
   battleResult: {
@@ -115,6 +121,14 @@ export interface AutoBattleReplayFinishPlan {
   };
   victoryTarget?: Pick<ActiveMonster, "x" | "y">;
   rewards?: AutoBattleReplaySession["battleSnapshot"]["rewards"];
+  defeatLogMessage?: string;
+}
+
+export interface AutoBattleReplayFinishResultPlan {
+  shouldStopReplay: true;
+  battleResult: AutoBattleReplayFinishPlan["battleResult"];
+  finishEffects: Array<Omit<VisualEffect, "id">>;
+  rewardManifest?: BattleRewardManifest;
   defeatLogMessage?: string;
 }
 
@@ -221,6 +235,25 @@ export type AutoBattleReplayTransition<TSession> =
       session: TSession;
     };
 
+export type AutoBattleReplayTransitionStatePlan =
+  | {
+      kind: "idle";
+      nextProcessed: boolean;
+      shouldClearReplayTimers: false;
+    }
+  | {
+      kind: "reset";
+      nextProcessed: false;
+      shouldClearReplayTimers: true;
+      replayState: AutoBattleReplayState;
+    }
+  | {
+      kind: "start";
+      nextProcessed: true;
+      shouldClearReplayTimers: false;
+      replayState: AutoBattleReplayState;
+    };
+
 export interface WorldBattleResultCleanup {
   shouldClearTargetMonster: boolean;
   shouldClearAutoMovePath: boolean;
@@ -320,6 +353,54 @@ export const resolveAutoBattleReplayTransition = <TSession>({
   return {
     kind: "idle",
     nextProcessed: replayLifecycle.nextProcessed,
+  };
+};
+
+export const resolveAutoBattleReplayTransitionStatePlan = ({
+  isBattling,
+  hasCurrentEnemy,
+  lastBattleResult,
+  replayProcessed,
+  createReplaySession,
+}: {
+  isBattling: boolean;
+  hasCurrentEnemy: boolean;
+  lastBattleResult: string | null;
+  replayProcessed: boolean;
+  createReplaySession?: () => AutoBattleReplaySession | undefined;
+}): AutoBattleReplayTransitionStatePlan => {
+  const replayTransition = resolveAutoBattleReplayTransition({
+    isBattling,
+    hasCurrentEnemy,
+    lastBattleResult,
+    replayProcessed,
+    createReplaySession,
+  });
+
+  if (replayTransition.kind === "reset") {
+    return {
+      kind: "reset",
+      nextProcessed: false,
+      shouldClearReplayTimers: true,
+      replayState: createIdleAutoBattleReplayState(),
+    };
+  }
+
+  if (replayTransition.kind === "start") {
+    return {
+      kind: "start",
+      nextProcessed: true,
+      shouldClearReplayTimers: false,
+      replayState: createAutoBattleReplayState({
+        session: replayTransition.session,
+      }),
+    };
+  }
+
+  return {
+    kind: "idle",
+    nextProcessed: replayTransition.nextProcessed,
+    shouldClearReplayTimers: false,
   };
 };
 
@@ -9697,6 +9778,30 @@ export const runAutoBattleReplayFrame = <TSkill>({
   };
 };
 
+export const createAutoBattleReplayStepStatePlan = <TSkill>({
+  nextLog,
+  nextSession,
+  targetMonster,
+  normalizedUsedSkill,
+  playerPosition,
+  enemyAttackRange,
+}: ResolvedAutoBattleReplayStep<ActiveMonster, TSkill> & {
+  playerPosition: Pick<ActiveMonster, "x" | "y">;
+  enemyAttackRange?: number;
+}): AutoBattleReplayStepStatePlan => ({
+  replayState: createAutoBattleReplayState({
+    session: nextSession,
+  }),
+  visualPlan: createBattleReplayVisualPlan({
+    nextLog,
+    targetMonster,
+    playerPosition,
+    enemyAttackRange,
+    normalizedUsedSkill,
+  }),
+  shouldAutoScroll: true,
+});
+
 export const createAutoBattleReplayFinishPlan = ({
   replayOutcome,
 }: {
@@ -9751,4 +9856,30 @@ export const createAutoBattleReplayFinishEffects = ({
       durationMs: 320,
     },
   ];
+};
+
+export const resolveAutoBattleReplayFinishResultPlan = ({
+  replayOutcome,
+  currentEnemy,
+}: {
+  replayOutcome: AutoBattleReplayOutcome;
+  currentEnemy?: Enemy | null;
+}): AutoBattleReplayFinishResultPlan => {
+  const finishPlan = createAutoBattleReplayFinishPlan({
+    replayOutcome,
+  });
+
+  return {
+    shouldStopReplay: true,
+    battleResult: finishPlan.battleResult,
+    finishEffects: createAutoBattleReplayFinishEffects({ finishPlan }),
+    rewardManifest:
+      finishPlan.rewards && currentEnemy
+        ? createBattleRewardManifest({
+            enemy: currentEnemy,
+            rewards: finishPlan.rewards,
+          })
+        : undefined,
+    defeatLogMessage: finishPlan.defeatLogMessage,
+  };
 };
