@@ -592,6 +592,85 @@ export const createBattleRewardManifest = ({
   };
 };
 
+export const getPlayerWorldStrikePreviewMessage = ({
+  targetName,
+  skillName,
+}: {
+  targetName: string;
+  skillName?: string;
+}) =>
+  skillName ? `你開始施展【${skillName}】。` : `你朝 ${targetName} 發動攻擊。`;
+
+export const getEnemyWorldStrikePreviewMessage = ({
+  enemyName,
+  skillName,
+}: {
+  enemyName: string;
+  skillName?: string;
+}) =>
+  skillName ? `${enemyName} 正在施展【${skillName}】。` : `${enemyName} 朝你撲殺而來。`;
+
+export const createPlayerWorldStrikePreviewPlan = ({
+  now,
+  targetId,
+  targetName,
+  strike,
+  currentShield,
+  skillName,
+}: {
+  now: number;
+  targetId: string;
+  targetName: string;
+  strike: Pick<
+    WorldStrikeResult,
+    | "enemyStatusNames"
+    | "playerStatusNames"
+    | "playerShieldGain"
+    | "nextActionDelayMs"
+    | "skillCooldownMs"
+  >;
+  currentShield: number;
+  skillName?: string;
+}): PlayerWorldStrikePreviewPlan => ({
+  worldCombatTargetId: targetId,
+  worldCombatTargetStatuses: strike.enemyStatusNames,
+  worldCombatPlayerStatuses: strike.playerStatusNames,
+  nextWorldPlayerShield: currentShield + strike.playerShieldGain,
+  worldLastCombatMessage: getPlayerWorldStrikePreviewMessage({
+    targetName,
+    skillName,
+  }),
+  nextPlayerActionReadyAt: now + strike.nextActionDelayMs,
+  nextPlayerSkillReadyAt: skillName
+    ? now + strike.skillCooldownMs
+    : undefined,
+});
+
+export const createEnemyWorldStrikePreviewPlan = ({
+  now,
+  enemyName,
+  strike,
+  canUseSpecial,
+}: {
+  now: number;
+  enemyName: string;
+  strike: Pick<
+    ReturnType<typeof resolveEnemyWorldStrike>,
+    "skillName" | "nextActionDelayMs" | "specialCooldownMs"
+  >;
+  canUseSpecial: boolean;
+}): EnemyWorldStrikePreviewPlan => ({
+  nextEnemyActionReadyAt: now + strike.nextActionDelayMs,
+  nextEnemySpecialReadyAt:
+    canUseSpecial && strike.specialCooldownMs > 0
+      ? now + strike.specialCooldownMs
+      : undefined,
+  worldLastCombatMessage: getEnemyWorldStrikePreviewMessage({
+    enemyName,
+    skillName: strike.skillName,
+  }),
+});
+
 export const getPlayerWorldStrikeResolutionMessage = ({
   skillName,
   targetName,
@@ -1764,6 +1843,22 @@ export interface EnemyWorldStrikeExecutionPlan {
 export interface EnemyWorldStrikeOutcomePlan {
   executionPlan: EnemyWorldStrikeExecutionPlan;
   defeatPlan?: WorldPlayerDefeatPlan;
+}
+
+export interface PlayerWorldStrikePreviewPlan {
+  worldCombatTargetId: string;
+  worldCombatTargetStatuses: string[];
+  worldCombatPlayerStatuses: string[];
+  nextWorldPlayerShield: number;
+  worldLastCombatMessage: string;
+  nextPlayerActionReadyAt: number;
+  nextPlayerSkillReadyAt?: number;
+}
+
+export interface EnemyWorldStrikePreviewPlan {
+  nextEnemyActionReadyAt: number;
+  nextEnemySpecialReadyAt?: number;
+  worldLastCombatMessage: string;
 }
 
 export interface SkillTimelineProfile {

@@ -28,7 +28,9 @@ import {
   createTimedCombatPlan,
   createAutoBattleReplaySession,
   createClearWorldCombatEncounterState,
+  createEnemyWorldStrikePreviewPlan,
   createIdleAutoBattleReplayState,
+  createPlayerWorldStrikePreviewPlan,
   createPlayerWorldStrikeExecutionPlan,
   resolvePlayerWorldStrikeOutcomePlan,
   createResetWorldCombatEncounterState,
@@ -1240,6 +1242,106 @@ describe("battle system balance", () => {
         completedQuestIds: ["sect_sword_join"],
         playerMaxHp: 500,
       }),
+    });
+  });
+
+  it("shares live world strike preview plans inside battle core", () => {
+    const playerStrike = resolvePlayerWorldStrike(
+      {
+        hp: 500,
+        maxHp: 500,
+        mp: 300,
+        maxMp: 300,
+        attack: 120,
+        magic: 80,
+        defense: 40,
+        res: 30,
+        speed: 20,
+        crit: 0.1,
+        critDamage: 1.5,
+        dodge: 0,
+        blockRate: 0,
+        damageReduction: 0,
+        alchemyBonus: 0,
+        craftingBonus: 0,
+        breakthroughBonus: 0,
+        dropRateBonus: 0,
+        cultivationSpeedBonus: 0,
+        name: "測試者",
+        element: ElementType.Fire,
+        regenHp: 0,
+        profession: ProfessionType.Mage,
+        learnedSkills: [],
+      },
+      COMMON_ENEMIES.m1_c1
+    );
+
+    expect(
+      createPlayerWorldStrikePreviewPlan({
+        now: 1000,
+        targetId: "enemy-1",
+        targetName: COMMON_ENEMIES.m1_c1.name,
+        strike: playerStrike,
+        currentShield: 12,
+        skillName: "火球術",
+      })
+    ).toEqual({
+      worldCombatTargetId: "enemy-1",
+      worldCombatTargetStatuses: playerStrike.enemyStatusNames,
+      worldCombatPlayerStatuses: playerStrike.playerStatusNames,
+      nextWorldPlayerShield: 12 + playerStrike.playerShieldGain,
+      worldLastCombatMessage: "你開始施展【火球術】。",
+      nextPlayerActionReadyAt: 1000 + playerStrike.nextActionDelayMs,
+      nextPlayerSkillReadyAt: 1000 + playerStrike.skillCooldownMs,
+    });
+
+    const enemyStrike = resolveEnemyWorldStrike(
+      COMMON_ENEMIES.m1_c1,
+      {
+        hp: 500,
+        maxHp: 500,
+        mp: 300,
+        maxMp: 300,
+        attack: 120,
+        magic: 80,
+        defense: 40,
+        res: 30,
+        speed: 20,
+        crit: 0.1,
+        critDamage: 1.5,
+        dodge: 0,
+        blockRate: 0,
+        damageReduction: 0,
+        alchemyBonus: 0,
+        craftingBonus: 0,
+        breakthroughBonus: 0,
+        dropRateBonus: 0,
+        cultivationSpeedBonus: 0,
+        name: "測試者",
+        element: ElementType.Fire,
+        regenHp: 0,
+        profession: ProfessionType.Mage,
+        learnedSkills: [],
+      },
+      true
+    );
+
+    expect(
+      createEnemyWorldStrikePreviewPlan({
+        now: 1600,
+        enemyName: COMMON_ENEMIES.m1_c1.name,
+        strike: enemyStrike,
+        canUseSpecial: true,
+      })
+    ).toEqual({
+      nextEnemyActionReadyAt: 1600 + enemyStrike.nextActionDelayMs,
+      nextEnemySpecialReadyAt:
+        enemyStrike.specialCooldownMs > 0
+          ? 1600 + enemyStrike.specialCooldownMs
+          : undefined,
+      worldLastCombatMessage: enemyStrike.skillName
+        ? `${COMMON_ENEMIES.m1_c1.name} 正在施展【${enemyStrike.skillName}】。`
+        : `${COMMON_ENEMIES.m1_c1.name} 朝你撲殺而來。`,
     });
   });
 

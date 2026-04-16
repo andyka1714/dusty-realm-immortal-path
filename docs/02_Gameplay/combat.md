@@ -98,7 +98,7 @@
 - 戰鬥快捷列內部也已開始改走 `GameSection`，底部操作面不再只是裸按鈕列，而是正式收進遊戲化 section chrome
 - 舊的中央戰報窗已退場，戰鬥結果改為右下角 HUD 短暫顯示後自動收起
 - 所有被動技能目前都已改成逐招專屬效果，資料層不再保留 generic `passiveEffectTags` fallback，`passiveEffectTags` 欄位本身也已移除
-- `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，現在也已開始共用 queue / preview / resolution helper，不再各自維護兩套 readyAt 與傷害文案流程
+- `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，現在也已開始共用 `createPlayerWorldStrikePreviewPlan(...) / createEnemyWorldStrikePreviewPlan(...)` 與 queue / resolution helper，不再各自維護兩套 readyAt、status、shield 與傷害文案流程
 - `Adventure` 內 world strike 與舊戰報 replay 的 timed plan primitive、queue builder 與 replay step runner，現在已正式回收到 `battleSystem.ts` 的 `createTimedCombatPlan(...) / createWorldStrikeQueuePlan(...) / createResolvedWorldStrikeActionPlan(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / runResolvedTimedCombatPlan(...) / runResolvedWorldStrikeAction(...) / runAutoBattleReplayStep(...)`，頁面不再自己維護這組 battle-side queue 原語
 - `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在已回收到 `battleSystem.ts` 的 `runPlayerWorldStrikeAction(...) / runEnemyWorldStrikeAction(...)`，頁面不再自己維護 player / enemy 的 resolved strike plan 樣板
 - `Adventure` 內 player / enemy world strike 的 action plan，也已正式直接回到 `createWorldStrikeQueuePlan(...)`，不再保留只負責轉手的 resolved wrapper
@@ -252,7 +252,7 @@
 - world strike 的狀態名組裝，也已開始拆成 `buildPlayerWorldStrikeStatusNames(...) / buildEnemyWorldStrikeStatusNames(...)`，player-side 與 enemy-side 的 stance / incoming status 不再在結果組裝裡直接攤平
 - world strike 的被動狀態整理也已拆層：enemy 端改成 `defensive / survival` 兩段 helper，player 端改成 `sword / body / mage` 三段 helper，降低單一函式持續膨脹的風險
 - `Adventure` 的 world strike 預覽與延遲執行排程，也已開始抽成 `queueTimedCombatPlan(...) / queueWorldStrikePlan(...) / applyPlayerWorldStrikePreview(...) / applyEnemyWorldStrikePreview(...)`，玩家與怪物分支不再各自維護 readyAt / 狀態 / 戰鬥訊息的重複流程
-- world strike 的預覽文案也已開始收斂到共用 helper，玩家與怪物分支不再各自手寫 preview message
+- world strike 的預覽文案、預覽狀態與 readyAt/shield 更新，現在也已開始收斂到 `createPlayerWorldStrikePreviewPlan(...) / createEnemyWorldStrikePreviewPlan(...)`，玩家與怪物分支不再各自手寫 preview message 與狀態套用樣板
 - `Adventure` 的 world strike queue orchestration，也已開始收斂到 `createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)`，cast、preview 與 execute 不再在 player / enemy 分支重複拼接
 - `Adventure` 的 live world action 出手鏈，現在直接走 `runPlayerWorldStrikeAction(...) / runEnemyWorldStrikeAction(...)`
 - `queueResolvedWorldStrike(...)` 也已改成更單純的 `queueWorldStrikePlan(...)`，live world action 現在只保留 timed 判定、strike resolve 與 plan 執行三段

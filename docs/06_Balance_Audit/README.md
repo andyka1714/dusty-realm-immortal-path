@@ -32,7 +32,7 @@
 - skill index 目前也已不再保留 `battle-absorbed / retirement-ready` 的 resolved retired skill 過渡出口；resolved 視圖正式只留 alias-layer 與測試側組裝
 - 所有 passive，包含 formal core 與 retired passive alias，現在都已退出 generic fallback，`passiveEffectTags` 欄位也已從技能資料層移除
 - `runAutoBattle()` 已拆出多個 shared helper，world strike 與 timeline combat 的 cooldown、status、runtime、outcome 與 action queue 正持續收斂，但目前仍不是同一套即時引擎
-- `Adventure` 內 world strike 與舊戰報 replay 的 preview、queue、execute、resolution、visual dispatch、replay step、replay context，現在都已開始共用 helper，不再維護多套近似流程
+- `Adventure` 內 world strike 與舊戰報 replay 的 preview、queue、execute、resolution、visual dispatch、replay step、replay context，現在都已開始共用 helper；其中 preview state 也已回收到 `createPlayerWorldStrikePreviewPlan(...) / createEnemyWorldStrikePreviewPlan(...)`，不再維護多套近似流程
 - `Adventure` 內 world strike 與舊戰報 replay 的 timed plan primitive、queue builder 與 replay step runner，現在也已回收到 `battleSystem.ts` 的 `createTimedCombatPlan(...) / createWorldStrikeQueuePlan(...) / createResolvedWorldStrikeActionPlan(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / runResolvedTimedCombatPlan(...) / runResolvedWorldStrikeAction(...) / runAutoBattleReplayStep(...)`，頁面不再自己維護 battle-side queue 原語
 - `Adventure` 內 world strike 與 replay step 的 visual payload，現在也已開始共用 `WorldStrikeVisualPlan` 路徑；live / replay 的 effect dispatch 不再各自維護 payload 組裝
 - `Adventure` 內舊戰報 replay 的 delay 與 context 組裝，現在也已開始共用 `createBattleReplayStepPlan(...) + queueTimedCombatPlan(...)`，回放 effect 不再每次重算 step delay 與 target / skill context

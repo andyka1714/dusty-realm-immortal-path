@@ -15,7 +15,9 @@ import {
   createAutoBattleReplayStepStatePlan,
   createAutoBattleReplaySession,
   createClearWorldCombatEncounterState,
+  createEnemyWorldStrikePreviewPlan,
   createEnemyWorldStrikeExecutionPlan,
+  createPlayerWorldStrikePreviewPlan,
   createPlayerWorldStrikeExecutionPlan,
   createResetWorldCombatEncounterState,
   calculatePlayerStats,
@@ -736,22 +738,6 @@ export const Adventure: React.FC<AdventureProps> = ({
     );
   };
 
-  const getPlayerWorldStrikePreviewMessage = (
-    targetName: string,
-    chosenSkill?: typeof primaryActiveSkill
-  ) =>
-    chosenSkill
-      ? `你開始施展【${chosenSkill.name}】。`
-      : `你朝 ${targetName} 發動攻擊。`;
-
-  const getEnemyWorldStrikePreviewMessage = (
-    enemyName: string,
-    strike: ReturnType<typeof resolveEnemyWorldStrike>
-  ) =>
-    strike.skillName
-      ? `${enemyName} 正在施展【${strike.skillName}】。`
-      : `${enemyName} 朝你撲殺而來。`;
-
   const dispatchWorldStrikeProjectileEffect = ({
     color,
     colorInt,
@@ -1110,22 +1096,34 @@ export const Adventure: React.FC<AdventureProps> = ({
 
   const applyPlayerWorldStrikePreview = ({
     now,
+    targetId,
     strike,
     chosenSkill,
     targetName,
   }: {
     now: number;
+    targetId: string;
     strike: ReturnType<typeof resolvePlayerWorldStrike>;
     chosenSkill?: typeof primaryActiveSkill;
     targetName: string;
   }) => {
-    setWorldCombatTargetStatuses(strike.enemyStatusNames);
-    setWorldCombatPlayerStatuses(strike.playerStatusNames);
-    setWorldPlayerShield((prev) => prev + strike.playerShieldGain);
-    setWorldLastCombatMessage(getPlayerWorldStrikePreviewMessage(targetName, chosenSkill));
-    setPlayerActionReadyAt(now + strike.nextActionDelayMs);
-    if (chosenSkill) {
-      setPlayerSkillReadyAt(now + strike.skillCooldownMs);
+    const previewPlan = createPlayerWorldStrikePreviewPlan({
+      now,
+      targetId,
+      targetName,
+      strike,
+      currentShield: worldPlayerShield,
+      skillName: chosenSkill?.name,
+    });
+
+    setWorldCombatTargetId(previewPlan.worldCombatTargetId);
+    setWorldCombatTargetStatuses(previewPlan.worldCombatTargetStatuses);
+    setWorldCombatPlayerStatuses(previewPlan.worldCombatPlayerStatuses);
+    setWorldPlayerShield(previewPlan.nextWorldPlayerShield);
+    setWorldLastCombatMessage(previewPlan.worldLastCombatMessage);
+    setPlayerActionReadyAt(previewPlan.nextPlayerActionReadyAt);
+    if (previewPlan.nextPlayerSkillReadyAt !== undefined) {
+      setPlayerSkillReadyAt(previewPlan.nextPlayerSkillReadyAt);
     }
   };
 
@@ -1142,19 +1140,26 @@ export const Adventure: React.FC<AdventureProps> = ({
     strike: ReturnType<typeof resolveEnemyWorldStrike>;
     canUseSpecial: boolean;
   }) => {
+    const previewPlan = createEnemyWorldStrikePreviewPlan({
+      now,
+      enemyName,
+      strike,
+      canUseSpecial,
+    });
+
     setEnemyActionReadyAtById((prev) => ({
       ...prev,
-      [enemyInstanceId]: now + strike.nextActionDelayMs,
+      [enemyInstanceId]: previewPlan.nextEnemyActionReadyAt,
     }));
 
-    if (canUseSpecial && strike.specialCooldownMs > 0) {
+    if (previewPlan.nextEnemySpecialReadyAt !== undefined) {
       setEnemySpecialReadyAtById((prev) => ({
         ...prev,
-        [enemyInstanceId]: now + strike.specialCooldownMs,
+        [enemyInstanceId]: previewPlan.nextEnemySpecialReadyAt,
       }));
     }
 
-    setWorldLastCombatMessage(getEnemyWorldStrikePreviewMessage(enemyName, strike));
+    setWorldLastCombatMessage(previewPlan.worldLastCombatMessage);
   };
 
   const applyBattleRewardManifest = (
@@ -1222,9 +1227,9 @@ export const Adventure: React.FC<AdventureProps> = ({
       applyCastEffect: ({ chosenSkill, strike }) =>
         dispatchPlayerWorldStrikeCastEffect({ chosenSkill, strike }),
       applyPreview: ({ now, chosenSkill, target, strike }) => {
-        setWorldCombatTargetId(target.instanceId);
         applyPlayerWorldStrikePreview({
           now,
+          targetId: target.instanceId,
           strike,
           chosenSkill,
           targetName: target.name,
