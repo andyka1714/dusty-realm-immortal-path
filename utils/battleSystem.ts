@@ -7,8 +7,6 @@ import {
   SpiritRootId,
   ElementType,
   EnemyRank,
-  ItemInstance,
-  ItemQuality,
   ProfessionType,
   Skill,
 } from "../types";
@@ -18,10 +16,7 @@ import {
   SPIRIT_ROOT_TO_ELEMENT,
   ELEMENT_NAMES,
 } from "../constants";
-import { getItem } from "../data/items";
-import { getDropRewards } from "../data/drop_tables";
 import { getFormalSkillId, getSkill } from "../data/skills";
-import { generateDrops } from "./dropSystem";
 import { formatSpiritStone } from "./currency";
 import { getWorldSkillAreaTargets } from "./worldCombat";
 import {
@@ -58,6 +53,12 @@ import {
   createBattleRewardApplicationPlan,
   createBattleRewardManifest,
 } from "./battleRewards";
+import {
+  AutoBattleTimelineResult,
+  createCombatDefeatLog,
+  finalizeCombatResult,
+  resolveVictoryRewards,
+} from "./battleTimelineResults";
 import {
   EnemyWorldStrikeOutcomeStatePlan,
   EnemyWorldStrikePreviewPlan,
@@ -176,6 +177,12 @@ export {
   createBattleRewardApplicationPlan,
   createBattleRewardManifest,
 } from "./battleRewards";
+export type { AutoBattleRewards, AutoBattleTimelineResult } from "./battleTimelineResults";
+export {
+  createCombatDefeatLog,
+  finalizeCombatResult,
+  resolveVictoryRewards,
+} from "./battleTimelineResults";
 export type { TimedCombatQueuePlan } from "./battleTiming";
 export {
   createBattleReplayStepPlan,
@@ -2832,7 +2839,6 @@ const createCombatInfrastructure = ({
   getPlayerDamagedSinceSwordHeartWindow: () => boolean;
   setPlayerDamagedSinceSwordHeartWindow: (value: boolean) => void;
 }) => {
-  const previousSnapshotProvider = combatLogSnapshotProvider;
   combatLogSnapshotProvider = createCombatSnapshotProvider({
     activeSkill,
     playerStatusesRef,
@@ -2862,7 +2868,6 @@ const createCombatInfrastructure = ({
   });
 
   return {
-    previousSnapshotProvider,
     processStatusTicks,
   };
 };
@@ -2913,7 +2918,7 @@ const prepareCombatLoopEnvironment = ({
   playerStatuses: CombatStatus[];
 }) => {
   const { activeSkill, passiveFlags, pVsE, enemyElementalAffinity } = runtimeContext;
-  const { previousSnapshotProvider, processStatusTicks } = createCombatInfrastructure({
+  const { processStatusTicks } = createCombatInfrastructure({
     player,
     enemy,
     logs,
@@ -2949,7 +2954,6 @@ const prepareCombatLoopEnvironment = ({
   });
 
   return {
-    previousSnapshotProvider,
     processStatusTicks,
     ...seededEncounter,
   };
@@ -3272,7 +3276,6 @@ const prepareAutoBattleExecution = (
   } satisfies CombatRuntimeContext;
 
   const {
-    previousSnapshotProvider,
     processStatusTicks,
     playerStatuses: seededPlayerStatuses,
     enemySpecialReadyAtMs: seededEnemySpecialReadyAtMs,
@@ -3321,7 +3324,6 @@ const prepareAutoBattleExecution = (
     state,
     runtimeContext,
     featureFlags,
-    previousSnapshotProvider,
     processStatusTicks,
   };
 };
@@ -3352,11 +3354,12 @@ const executeAutoBattleTimeline = ({
     logs,
     turn: finalState.turn,
     currentTimeMs: finalState.currentTimeMs,
-    player,
+    playerMaxHp: player.maxHp,
     enemy,
     playerHp: finalState.playerHp,
     enemyHp: finalState.enemyHp,
-    previousSnapshotProvider: prepared.previousSnapshotProvider,
+    pushCombatLog,
+    formatSpiritStones,
   });
 };
 
@@ -4269,184 +4272,6 @@ const getEnemyAttackIntervalMs = (enemy: Enemy) => {
   const rangePenalty = (enemy.attackRange ?? 1) > 1 ? 120 : 0;
   const affixReduction = hasEnemyAffix(enemy, "迅影") ? 120 : 0;
   return Math.max(650, rankBase[enemy.rank] + rangePenalty - affixReduction);
-};
-
-const buildVictoryLootMessage = (
-  spiritStones: number,
-  drops: { itemId: string; count: number; instance?: ItemInstance }[]
-) => {
-  let lootMsg = "";
-
-  if (spiritStones > 0) {
-    lootMsg += formatSpiritStones(spiritStones);
-  }
-
-  if (drops.length > 0) {
-    if (lootMsg) lootMsg += "，";
-    const dropNames = drops.map((d) => {
-      const item = getItem(d.itemId);
-      const name = item ? item.name : d.itemId;
-      let qStr = "";
-      let qVal = 0;
-
-      if (d.instance) {
-        qVal = d.instance.quality;
-      } else if (item) {
-        qVal = item.quality || 0;
-      }
-
-      if (qVal === ItemQuality.Low) qStr = "(下品)";
-      if (qVal === ItemQuality.Medium) qStr = "(中品)";
-      if (qVal === ItemQuality.High) qStr = "(上品)";
-      if (qVal === ItemQuality.Immortal) qStr = "(仙品)";
-
-      return `<item q="${qVal}">${name}${qStr}</item>`;
-    });
-    lootMsg += dropNames.join("，");
-  }
-
-  return lootMsg;
-};
-
-const resolveVictoryRewards = ({
-  enemy,
-  logs,
-  turn,
-  currentTimeMs,
-  playerHp,
-  playerMaxHp,
-  enemyHp,
-}: {
-  enemy: Enemy;
-  logs: CombatLog[];
-  turn: number;
-  currentTimeMs: number;
-  playerHp: number;
-  playerMaxHp: number;
-  enemyHp: number;
-}) => {
-  const exp = enemy.exp || 0;
-  pushCombatLog(logs, {
-    turn,
-    timeMs: currentTimeMs,
-    isPlayer: true,
-    message: `<acc>擊敗了</acc> <enemy rank="${enemy.rank}">${enemy.name}</enemy>，獲得 <exp>${exp} 修為</exp>`,
-    damage: 0,
-    playerHp,
-    playerMaxHp,
-    enemyHp,
-    enemyMaxHp: enemy.maxHp,
-  });
-
-  let { spiritStones } = getDropRewards(enemy);
-  const drops = generateDrops(enemy);
-  const finalDrops: { itemId: string; count: number; instance?: ItemInstance }[] = [];
-
-  drops.forEach((d) => {
-    if (d.itemId === "spirit_stone") {
-      spiritStones += d.count;
-    } else {
-      finalDrops.push(d);
-    }
-  });
-
-  if (spiritStones > 0 || finalDrops.length > 0) {
-    const lootMsg = buildVictoryLootMessage(spiritStones, finalDrops);
-
-    pushCombatLog(logs, {
-      turn,
-      timeMs: currentTimeMs,
-      isPlayer: true,
-      message: `獲得戰利品：${lootMsg}`,
-      damage: 0,
-      playerHp,
-      playerMaxHp,
-      enemyHp,
-      enemyMaxHp: enemy.maxHp,
-    });
-  }
-
-  return { spiritStones, exp, drops };
-};
-
-const createCombatDefeatLog = ({
-  logs,
-  turn,
-  currentTimeMs,
-  enemy,
-  playerHp,
-  playerMaxHp,
-  enemyHp,
-}: {
-  logs: CombatLog[];
-  turn: number;
-  currentTimeMs: number;
-  enemy: Enemy;
-  playerHp: number;
-  playerMaxHp: number;
-  enemyHp: number;
-}) => {
-  pushCombatLog(logs, {
-    turn,
-    timeMs: currentTimeMs,
-    isPlayer: false,
-    message: `不敵 [${enemy.name}]，身受重傷...`,
-    damage: 0,
-    playerHp,
-    playerMaxHp,
-    enemyHp,
-    enemyMaxHp: enemy.maxHp,
-  });
-};
-
-const finalizeCombatResult = ({
-  won,
-  logs,
-  turn,
-  currentTimeMs,
-  player,
-  enemy,
-  playerHp,
-  enemyHp,
-  previousSnapshotProvider,
-}: {
-  won: boolean;
-  logs: CombatLog[];
-  turn: number;
-  currentTimeMs: number;
-  player: PlayerCombatStats;
-  enemy: Enemy;
-  playerHp: number;
-  enemyHp: number;
-  previousSnapshotProvider?: typeof combatLogSnapshotProvider;
-}) => {
-  if (won) {
-    const { spiritStones, exp, drops } = resolveVictoryRewards({
-      enemy,
-      logs,
-      turn,
-      currentTimeMs,
-      playerHp,
-      playerMaxHp: player.maxHp,
-      enemyHp,
-    });
-
-    combatLogSnapshotProvider = previousSnapshotProvider;
-    return { won, logs, rewards: { spiritStones, exp, drops } };
-  }
-
-  createCombatDefeatLog({
-    logs,
-    turn,
-    currentTimeMs,
-    enemy,
-    playerHp,
-    playerMaxHp: player.maxHp,
-    enemyHp,
-  });
-
-  combatLogSnapshotProvider = previousSnapshotProvider;
-  return { won, logs };
 };
 
 const resolvePlayerActiveSkillWindow = ({
@@ -8343,22 +8168,16 @@ export const calculatePlayerStats = (
 export const runAutoBattle = (
   player: PlayerCombatStats,
   enemy: Enemy
-): {
-  won: boolean;
-  logs: CombatLog[];
-  rewards?: {
-    spiritStones: number;
-    exp: number;
-    drops: { itemId: string; count: number; instance?: ItemInstance }[];
-  };
-} => {
+): AutoBattleTimelineResult => {
   const logs: CombatLog[] = [];
-  return executeAutoBattleTimeline({
+  const result = executeAutoBattleTimeline({
     player,
     enemy,
     logs,
     prepared: prepareAutoBattleExecution(player, enemy, logs),
   });
+  combatLogSnapshotProvider = undefined;
+  return result;
 };
 
 export const createAutoBattleReplaySession = (
