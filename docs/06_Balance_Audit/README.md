@@ -52,7 +52,7 @@
 - 戰報自動收起延遲與戰後 world state cleanup，現在也已開始共用 `resolveWorldBattleResultLifecyclePlan(...)`，頁面不再自己散寫 auto-close 與清 target/path/auto-battle 條件
 - `Adventure` 內舊戰報 replay 的 visual payload 也已開始共用 `createBattleReplayVisualPlan(...)`，attack / damage visual dispatch 不再在 replay step 內直接拼裝輸入
 - `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，現在也已開始共用 `queueTimedCombatPlan(...)`，不再各自維護一套 `setTimeout` 流程
-- `Adventure` 內 player / enemy world strike 的 live action wrapper，現在也已回收到 `battleSystem.ts` 的 `runWorldPlayerCombatAction(...) / runWorldEnemyCombatAction(...) / runWorldCombatControllerFrame(...)`，頁面不再自己維護 `performWorldPlayerAction(...) / performWorldEnemyAction(...)` 這層 resolved strike plan 樣板
+- `Adventure` 內 player / enemy world strike 的 live action wrapper，現在也已回收到 `battleSystem.ts` 的 `runPlayerWorldStrikePipeline(...) / runEnemyWorldStrikePipeline(...) / runWorldCombatControllerFrame(...)`，頁面不再自己維護 preview、execute 與 outcome apply 的 resolved strike plan 樣板
 - `Adventure` 內 auto-target 與 live world action window 的判定，現在也已開始共用 `runWorldCombatControllerFrame(...)`，頁面不再自己維護最近怪、出手窗口與 player / enemy live action 串接
 - `Adventure` 內 live world / replay 的 battle 規則目前都已退回 `battleSystem.ts`；頁面只剩 state apply、visual dispatch 與 Redux/UI bridge
 - `GameTooltip / GameHintBubble / GamePanel / Modal / GameSection` 已成為主要 UI 殼層語言，且 `Dashboard / QuestModal / Workshop / Adventure` 內部資訊區與操作區都已開始套入同一套 section chrome

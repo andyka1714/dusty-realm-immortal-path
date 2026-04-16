@@ -71,8 +71,10 @@ import {
   selectNearestWorldCombatTarget,
   runAutoBattleReplayStep,
   runEnemyWorldStrikeAction,
+  runEnemyWorldStrikePipeline,
   runPlayerWorldStrikeOutcomePipeline,
   runPlayerWorldStrikeAction,
+  runPlayerWorldStrikePipeline,
   runWorldCombatControllerStep,
   runWorldEnemyCombatAction,
   runWorldPlayerCombatAction,
@@ -813,30 +815,11 @@ describe("battle system balance", () => {
           enemyActionReadyAt: 1300,
           enemySpecialReadyAt: 1400,
           playerAction: {
-            canExecute: () => true,
-            target: { instanceId: "enemy-1", name: "木人" },
-            resolveStrike: (chosenSkill) => ({
-              executionTimeMs: 0,
-              skillId: chosenSkill?.id ?? "basic",
-            }),
-            applyCastEffect: ({ strike }) =>
-              calls.push(`frame-player:cast:${strike.skillId}`),
-            applyPreview: ({ strike }) =>
-              calls.push(`frame-player:preview:${strike.skillId}`),
-            execute: ({ strike }) =>
-              calls.push(`frame-player:execute:${strike.skillId}`),
+            run: (useSkill) =>
+              calls.push(`frame-player:run:${useSkill ? "skill" : "basic"}`),
           },
           enemyAction: {
-            resolveStrike: (canUseSpecial) => ({
-              executionTimeMs: 0,
-              mode: canUseSpecial ? "special" : "basic",
-            }),
-            applyCastEffect: ({ strike }) =>
-              calls.push(`frame-enemy:cast:${strike.mode}`),
-            applyPreview: ({ strike }) =>
-              calls.push(`frame-enemy:preview:${strike.mode}`),
-            execute: ({ strike }) =>
-              calls.push(`frame-enemy:execute:${strike.mode}`),
+            run: () => calls.push("frame-enemy:run"),
           },
         },
       });
@@ -850,13 +833,9 @@ describe("battle system balance", () => {
           shouldEnemyAct: true,
         },
       });
-      expect(calls.slice(-6)).toEqual([
-        "frame-player:cast:skill-4",
-        "frame-player:preview:skill-4",
-        "frame-player:execute:skill-4",
-        "frame-enemy:cast:special",
-        "frame-enemy:preview:special",
-        "frame-enemy:execute:special",
+      expect(calls.slice(-2)).toEqual([
+        "frame-player:run:skill",
+        "frame-enemy:run",
       ]);
 
       const replayFrameFinish = runAutoBattleReplayFrame({
@@ -2129,6 +2108,125 @@ describe("battle system balance", () => {
     expect(enemyPipelineState.message).toBe(enemyPipelinePlan.worldLastCombatMessage);
     expect(enemyPipelineState.defeatApplied).toBe(true);
     expect(enemyPipelineCalls).toEqual(["visual:-120", "defeat:true"]);
+
+    const worldActionCalls: string[] = [];
+    const livePlayerTimer = runPlayerWorldStrikePipeline({
+      readyAt: 0,
+      canExecute: () => true,
+      target: {
+        instanceId: "enemy-1",
+        templateId: COMMON_ENEMIES.m1_c1.id,
+        name: COMMON_ENEMIES.m1_c1.name,
+        x: 3,
+        y: 4,
+        currentHp: 1,
+      } as ActiveMonster,
+      primaryActiveSkill: {
+        id: "skill-9",
+        name: "火球術",
+        profession: ProfessionType.Mage,
+      },
+      playerSkillReadyAt: 0,
+      useSkill: true,
+      resolveStrike: (chosenSkill) => ({
+        damage: 80,
+        isCrit: false,
+        skillName: chosenSkill?.name,
+        nextActionDelayMs: 400,
+        skillCooldownMs: 1200,
+        executionTimeMs: 0,
+        playerStatusNames: [],
+        enemyStatusNames: [],
+        playerShieldGain: 0,
+        areaShape: "single",
+        areaRadius: 0,
+        maxTargets: 1,
+        isProjectile: true,
+      }),
+      activeMonsters: [
+        {
+          instanceId: "enemy-1",
+          templateId: COMMON_ENEMIES.m1_c1.id,
+          name: COMMON_ENEMIES.m1_c1.name,
+          x: 3,
+          y: 4,
+          currentHp: 1,
+        } as ActiveMonster,
+      ],
+      playerPosition: { x: 1, y: 1 },
+      mapEnemies: [COMMON_ENEMIES.m1_c1],
+      playerMaxHp: 500,
+      currentWorldPlayerHp: 420,
+      currentShield: 0,
+      applyCastEffect: ({ strike }) =>
+        worldActionCalls.push(`player:cast:${strike.skillName}`),
+      applyPreviewStatePlan: (previewPlan) =>
+        worldActionCalls.push(`player:preview:${previewPlan.worldCombatTargetId}`),
+      applyMonsterDamage: ({ monsterInstanceId, damage }) =>
+        worldActionCalls.push(`player:damage:${monsterInstanceId}:${damage}`),
+      applyVisualPlan: () => worldActionCalls.push("player:visual"),
+      applyRewardApplicationPlan: (rewardPlan) =>
+        worldActionCalls.push(`player:reward:${rewardPlan.expAmount}`),
+      appendLogEntry: (logEntry) =>
+        worldActionCalls.push(`player:log:${logEntry.type}`),
+      setWorldLastCombatMessage: (message) =>
+        worldActionCalls.push(`player:message:${message}`),
+      setWorldPlayerHp: (hp) => worldActionCalls.push(`player:hp:${hp}`),
+      clearEncounter: () => worldActionCalls.push("player:clear"),
+    });
+
+    expect(livePlayerTimer).toBeUndefined();
+    expect(worldActionCalls).toContain("player:preview:enemy-1");
+    expect(worldActionCalls).toContain("player:damage:enemy-1:80");
+    expect(worldActionCalls).toContain("player:clear");
+
+    const liveEnemyTimer = runEnemyWorldStrikePipeline({
+      canExecute: () => true,
+      enemySpecialReadyAt: 0,
+      enemyInstanceId: "enemy-1",
+      enemyName: COMMON_ENEMIES.m1_c1.name,
+      enemyPosition: { x: 3, y: 4 },
+      fallbackSourcePosition: { x: 3, y: 4 },
+      playerPosition: { x: 1, y: 1 },
+      currentShield: 0,
+      currentHp: 100,
+      currentStatuses: [],
+      completedQuestIds: ["sect_sword_join"],
+      playerMaxHp: 500,
+      resolveStrike: () => ({
+        damage: 120,
+        skillName: "撕咬",
+        nextActionDelayMs: 400,
+        specialCooldownMs: 0,
+        executionTimeMs: 0,
+        areaShape: "single",
+        areaRadius: 0,
+        isProjectile: false,
+        statusNames: [],
+      }),
+      applyCastEffect: ({ strike }) =>
+        worldActionCalls.push(`enemy:cast:${strike.skillName}`),
+      applyPreviewStatePlan: (previewPlan, enemyInstanceId) =>
+        worldActionCalls.push(
+          `enemy:preview:${enemyInstanceId}:${previewPlan.nextEnemyActionReadyAt}`
+        ),
+      setWorldPlayerShield: (shield) =>
+        worldActionCalls.push(`enemy:shield:${shield}`),
+      setWorldPlayerHp: (hp) => worldActionCalls.push(`enemy:hp:${hp}`),
+      setWorldCombatPlayerStatuses: (statuses) =>
+        worldActionCalls.push(`enemy:statuses:${statuses.length}`),
+      setWorldLastCombatMessage: (message) =>
+        worldActionCalls.push(`enemy:message:${message}`),
+      applyVisualPlan: () => worldActionCalls.push("enemy:visual"),
+      applyDefeatStatePlan: (defeatStatePlan) =>
+        worldActionCalls.push(`enemy:defeat:${Boolean(defeatStatePlan)}`),
+    });
+
+    expect(liveEnemyTimer).toBeUndefined();
+    expect(
+      worldActionCalls.some((entry) => entry.startsWith("enemy:preview:enemy-1:"))
+    ).toBe(true);
+    expect(worldActionCalls).toContain("enemy:defeat:true");
   });
 
   it("shares enemy special timeline metadata between world strikes and timeline combat", () => {

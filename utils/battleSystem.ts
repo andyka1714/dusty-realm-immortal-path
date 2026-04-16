@@ -2013,6 +2013,267 @@ export const runWorldEnemyCombatAction = <
     execute,
   });
 
+export const runPlayerWorldStrikePipeline = <
+  TSkill extends { name?: string; profession?: ProfessionType },
+>({
+  readyAt,
+  canExecute,
+  target,
+  primaryActiveSkill,
+  playerSkillReadyAt,
+  useSkill,
+  resolveStrike,
+  activeMonsters,
+  playerPosition,
+  mapEnemies,
+  playerMaxHp,
+  currentWorldPlayerHp,
+  currentShield,
+  timerSet,
+  applyCastEffect,
+  applyPreviewStatePlan,
+  applyMonsterDamage,
+  applyVisualPlan,
+  applyRewardApplicationPlan,
+  appendLogEntry,
+  setWorldLastCombatMessage,
+  setWorldPlayerHp,
+  clearEncounter,
+}: {
+  readyAt?: number;
+  canExecute?: () => boolean;
+  target?: ActiveMonster;
+  primaryActiveSkill?: TSkill;
+  playerSkillReadyAt: number;
+  useSkill: boolean;
+  resolveStrike: (chosenSkill: TSkill | undefined) => WorldStrikeResult;
+  activeMonsters: ActiveMonster[];
+  playerPosition: Pick<ActiveMonster, "x" | "y">;
+  mapEnemies: Enemy[] | undefined;
+  playerMaxHp: number;
+  currentWorldPlayerHp: number;
+  currentShield: number;
+  timerSet?: Set<ReturnType<typeof setTimeout>>;
+  applyCastEffect?: (resolved: {
+    now: number;
+    chosenSkill: TSkill | undefined;
+    target: ActiveMonster;
+    strike: WorldStrikeResult;
+  }) => void;
+  applyPreviewStatePlan: (
+    previewPlan: ReturnType<typeof createPlayerWorldStrikePreviewPlan>
+  ) => void;
+  applyMonsterDamage: (
+    damageApplication: PlayerWorldStrikeOutcomeStatePlan["monsterDamageApplications"][number]
+  ) => void;
+  applyVisualPlan: (visualPlan: WorldStrikeVisualPlan) => void;
+  applyRewardApplicationPlan: (
+    rewardApplicationPlan: PlayerWorldStrikeOutcomeStatePlan["rewardApplicationPlans"][number]
+  ) => void;
+  appendLogEntry: (
+    logEntry: PlayerWorldStrikeOutcomeStatePlan["logEntries"][number]
+  ) => void;
+  setWorldLastCombatMessage: (message: string) => void;
+  setWorldPlayerHp: (hp: number) => void;
+  clearEncounter?: () => void;
+}) =>
+  runWorldPlayerCombatAction({
+    readyAt,
+    canExecute,
+    target,
+    primaryActiveSkill,
+    playerSkillReadyAt,
+    useSkill,
+    resolveStrike,
+    timerSet,
+    applyCastEffect,
+    applyPreview: ({ now, chosenSkill, target, strike }) =>
+      applyPreviewStatePlan(
+        createPlayerWorldStrikePreviewPlan({
+          now,
+          targetId: target.instanceId,
+          targetName: target.name,
+          strike,
+          currentShield,
+          skillName: chosenSkill?.name,
+        })
+      ),
+    execute: ({ chosenSkill, target, strike }) =>
+      runPlayerWorldStrikeOutcomePipeline({
+        strike,
+        skillName: chosenSkill?.name,
+        skillProfession: chosenSkill?.profession,
+        targetedMonster: target,
+        activeMonsters,
+        playerPosition,
+        mapEnemies,
+        playerMaxHp,
+        currentWorldPlayerHp,
+        applyMonsterDamage,
+        applyVisualPlan,
+        applyRewardApplicationPlan,
+        appendLogEntry,
+        setWorldLastCombatMessage,
+        setWorldPlayerHp,
+        clearEncounter,
+      }),
+  });
+
+export const runEnemyWorldStrikePipeline = ({
+  canExecute,
+  enemySpecialReadyAt,
+  enemyInstanceId,
+  enemyName,
+  enemyPosition,
+  fallbackSourcePosition,
+  playerPosition,
+  currentShield,
+  currentHp,
+  currentStatuses,
+  completedQuestIds,
+  playerMaxHp,
+  resolveStrike,
+  timerSet,
+  applyCastEffect,
+  applyPreviewStatePlan,
+  setWorldPlayerShield,
+  setWorldPlayerHp,
+  setWorldCombatPlayerStatuses,
+  setWorldLastCombatMessage,
+  applyVisualPlan,
+  applyDefeatStatePlan,
+}: {
+  canExecute?: () => boolean;
+  enemySpecialReadyAt: number;
+  enemyInstanceId: string;
+  enemyName: string;
+  enemyPosition?: Pick<ActiveMonster, "x" | "y"> | null;
+  fallbackSourcePosition: Pick<ActiveMonster, "x" | "y">;
+  playerPosition: Pick<ActiveMonster, "x" | "y">;
+  currentShield: number;
+  currentHp: number;
+  currentStatuses: string[];
+  completedQuestIds: string[];
+  playerMaxHp: number;
+  resolveStrike: (
+    canUseSpecial: boolean
+  ) => ReturnType<typeof resolveEnemyWorldStrike>;
+  timerSet?: Set<ReturnType<typeof setTimeout>>;
+  applyCastEffect?: (resolved: {
+    now: number;
+    canUseSpecial: boolean;
+    strike: ReturnType<typeof resolveEnemyWorldStrike>;
+  }) => void;
+  applyPreviewStatePlan: (
+    previewPlan: ReturnType<typeof createEnemyWorldStrikePreviewPlan>,
+    enemyInstanceId: string
+  ) => void;
+  setWorldPlayerShield: (shield: number) => void;
+  setWorldPlayerHp: (hp: number) => void;
+  setWorldCombatPlayerStatuses: (statuses: string[]) => void;
+  setWorldLastCombatMessage: (message: string) => void;
+  applyVisualPlan: (visualPlan: WorldStrikeVisualPlan) => void;
+  applyDefeatStatePlan: (
+    defeatStatePlan: EnemyWorldStrikeOutcomeStatePlan["defeatStatePlan"]
+  ) => void;
+}) =>
+  runWorldEnemyCombatAction({
+    canExecute,
+    enemySpecialReadyAt,
+    resolveStrike,
+    timerSet,
+    applyCastEffect,
+    applyPreview: ({ now, canUseSpecial, strike }) =>
+      applyPreviewStatePlan(
+        createEnemyWorldStrikePreviewPlan({
+          now,
+          enemyName,
+          strike,
+          canUseSpecial,
+        }),
+        enemyInstanceId
+      ),
+    execute: ({ strike }) =>
+      runEnemyWorldStrikeOutcomePipeline({
+        strike,
+        enemyName,
+        enemyPosition,
+        fallbackSourcePosition,
+        playerPosition,
+        currentShield,
+        currentHp,
+        currentStatuses,
+        completedQuestIds,
+        playerMaxHp,
+        setWorldPlayerShield,
+        setWorldPlayerHp,
+        setWorldCombatPlayerStatuses,
+        setWorldLastCombatMessage,
+        applyVisualPlan,
+        applyDefeatStatePlan,
+      }),
+  });
+
+type WorldCombatPlayerActionRunner = {
+  run: (usePlayerSkill: boolean) => void;
+};
+
+type WorldCombatEnemyActionRunner = {
+  run: () => void;
+};
+
+type WorldCombatPlayerActionConfig<
+  TTarget,
+  TSkill,
+  TPlayerStrike extends { executionTimeMs: number },
+> = {
+  canExecute?: () => boolean;
+  target?: TTarget;
+  resolveStrike: (chosenSkill: TSkill | undefined) => TPlayerStrike;
+  timerSet?: Set<ReturnType<typeof setTimeout>>;
+  applyCastEffect?: (resolved: {
+    now: number;
+    chosenSkill: TSkill | undefined;
+    target: TTarget;
+    strike: TPlayerStrike;
+  }) => void;
+  applyPreview: (resolved: {
+    now: number;
+    chosenSkill: TSkill | undefined;
+    target: TTarget;
+    strike: TPlayerStrike;
+  }) => void;
+  execute: (resolved: {
+    now: number;
+    chosenSkill: TSkill | undefined;
+    target: TTarget;
+    strike: TPlayerStrike;
+  }) => void;
+};
+
+type WorldCombatEnemyActionConfig<
+  TEnemyStrike extends { executionTimeMs: number },
+> = {
+  canExecute?: () => boolean;
+  resolveStrike: (canUseSpecial: boolean) => TEnemyStrike;
+  timerSet?: Set<ReturnType<typeof setTimeout>>;
+  applyCastEffect?: (resolved: {
+    now: number;
+    canUseSpecial: boolean;
+    strike: TEnemyStrike;
+  }) => void;
+  applyPreview: (resolved: {
+    now: number;
+    canUseSpecial: boolean;
+    strike: TEnemyStrike;
+  }) => void;
+  execute: (resolved: {
+    now: number;
+    canUseSpecial: boolean;
+    strike: TEnemyStrike;
+  }) => void;
+};
+
 export const runWorldCombatControllerStep = <
   TTarget,
   TSkill,
@@ -2046,50 +2307,12 @@ export const runWorldCombatControllerStep = <
   enemyEngagementRange: number;
   enemyActionReadyAt: number;
   enemySpecialReadyAt: number;
-  playerAction: {
-    canExecute?: () => boolean;
-    target?: TTarget;
-    resolveStrike: (chosenSkill: TSkill | undefined) => TPlayerStrike;
-    timerSet?: Set<ReturnType<typeof setTimeout>>;
-    applyCastEffect?: (resolved: {
-      now: number;
-      chosenSkill: TSkill | undefined;
-      target: TTarget;
-      strike: TPlayerStrike;
-    }) => void;
-    applyPreview: (resolved: {
-      now: number;
-      chosenSkill: TSkill | undefined;
-      target: TTarget;
-      strike: TPlayerStrike;
-    }) => void;
-    execute: (resolved: {
-      now: number;
-      chosenSkill: TSkill | undefined;
-      target: TTarget;
-      strike: TPlayerStrike;
-    }) => void;
-  };
-  enemyAction: {
-    canExecute?: () => boolean;
-    resolveStrike: (canUseSpecial: boolean) => TEnemyStrike;
-    timerSet?: Set<ReturnType<typeof setTimeout>>;
-    applyCastEffect?: (resolved: {
-      now: number;
-      canUseSpecial: boolean;
-      strike: TEnemyStrike;
-    }) => void;
-    applyPreview: (resolved: {
-      now: number;
-      canUseSpecial: boolean;
-      strike: TEnemyStrike;
-    }) => void;
-    execute: (resolved: {
-      now: number;
-      canUseSpecial: boolean;
-      strike: TEnemyStrike;
-    }) => void;
-  };
+  playerAction:
+    | WorldCombatPlayerActionRunner
+    | WorldCombatPlayerActionConfig<TTarget, TSkill, TPlayerStrike>;
+  enemyAction:
+    | WorldCombatEnemyActionRunner
+    | WorldCombatEnemyActionConfig<TEnemyStrike>;
 }) => {
   const actionWindow = resolveWorldCombatActionWindow({
     now,
@@ -2106,31 +2329,39 @@ export const runWorldCombatControllerStep = <
   });
 
   if (actionWindow.shouldPlayerAct) {
-    runWorldPlayerCombatAction({
-      readyAt: playerActionReadyAt,
-      canExecute: playerAction.canExecute,
-      target: playerAction.target,
-      primaryActiveSkill,
-      playerSkillReadyAt,
-      useSkill: actionWindow.usePlayerSkill,
-      resolveStrike: playerAction.resolveStrike,
-      timerSet: playerAction.timerSet,
-      applyCastEffect: playerAction.applyCastEffect,
-      applyPreview: playerAction.applyPreview,
-      execute: playerAction.execute,
-    });
+    if ("run" in playerAction) {
+      playerAction.run(actionWindow.usePlayerSkill);
+    } else {
+      runWorldPlayerCombatAction({
+        readyAt: playerActionReadyAt,
+        canExecute: playerAction.canExecute,
+        target: playerAction.target,
+        primaryActiveSkill,
+        playerSkillReadyAt,
+        useSkill: actionWindow.usePlayerSkill,
+        resolveStrike: playerAction.resolveStrike,
+        timerSet: playerAction.timerSet,
+        applyCastEffect: playerAction.applyCastEffect,
+        applyPreview: playerAction.applyPreview,
+        execute: playerAction.execute,
+      });
+    }
   }
 
   if (actionWindow.shouldEnemyAct) {
-    runWorldEnemyCombatAction({
-      canExecute: enemyAction.canExecute,
-      enemySpecialReadyAt,
-      resolveStrike: enemyAction.resolveStrike,
-      timerSet: enemyAction.timerSet,
-      applyCastEffect: enemyAction.applyCastEffect,
-      applyPreview: enemyAction.applyPreview,
-      execute: enemyAction.execute,
-    });
+    if ("run" in enemyAction) {
+      enemyAction.run();
+    } else {
+      runWorldEnemyCombatAction({
+        canExecute: enemyAction.canExecute,
+        enemySpecialReadyAt,
+        resolveStrike: enemyAction.resolveStrike,
+        timerSet: enemyAction.timerSet,
+        applyCastEffect: enemyAction.applyCastEffect,
+        applyPreview: enemyAction.applyPreview,
+        execute: enemyAction.execute,
+      });
+    }
   }
 
   return actionWindow;
@@ -2159,50 +2390,12 @@ export const runWorldCombatControllerFrame = <
     enemyEngagementRange: number;
     enemyActionReadyAt: number;
     enemySpecialReadyAt: number;
-    playerAction: {
-      canExecute?: () => boolean;
-      target?: TTarget;
-      resolveStrike: (chosenSkill: TSkill | undefined) => TPlayerStrike;
-      timerSet?: Set<ReturnType<typeof setTimeout>>;
-      applyCastEffect?: (resolved: {
-        now: number;
-        chosenSkill: TSkill | undefined;
-        target: TTarget;
-        strike: TPlayerStrike;
-      }) => void;
-      applyPreview: (resolved: {
-        now: number;
-        chosenSkill: TSkill | undefined;
-        target: TTarget;
-        strike: TPlayerStrike;
-      }) => void;
-      execute: (resolved: {
-        now: number;
-        chosenSkill: TSkill | undefined;
-        target: TTarget;
-        strike: TPlayerStrike;
-      }) => void;
-    };
-    enemyAction: {
-      canExecute?: () => boolean;
-      resolveStrike: (canUseSpecial: boolean) => TEnemyStrike;
-      timerSet?: Set<ReturnType<typeof setTimeout>>;
-      applyCastEffect?: (resolved: {
-        now: number;
-        canUseSpecial: boolean;
-        strike: TEnemyStrike;
-      }) => void;
-      applyPreview: (resolved: {
-        now: number;
-        canUseSpecial: boolean;
-        strike: TEnemyStrike;
-      }) => void;
-      execute: (resolved: {
-        now: number;
-        canUseSpecial: boolean;
-        strike: TEnemyStrike;
-      }) => void;
-    };
+    playerAction:
+      | WorldCombatPlayerActionRunner
+      | WorldCombatPlayerActionConfig<TTarget, TSkill, TPlayerStrike>;
+    enemyAction:
+      | WorldCombatEnemyActionRunner
+      | WorldCombatEnemyActionConfig<TEnemyStrike>;
   };
 }): WorldCombatControllerFrameResult => ({
   nextTargetMonsterId: resolveWorldCombatAutoTarget(autoTarget),
