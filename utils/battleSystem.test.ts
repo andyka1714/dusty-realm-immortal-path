@@ -47,6 +47,7 @@ import {
   getEnemySpecialTimelineProfile,
   getSkillTimelineProfile,
   queueTimedCombatPlan,
+  resolveWorldBattleResultLifecyclePlan,
   resolveAutoBattleReplayOutcome,
   resolveAutoBattleReplayLifecycle,
   resolveAutoBattleReplayTransition,
@@ -61,6 +62,7 @@ import {
   resolveEnemyWorldStrike,
   resolvePlayerWorldStrike,
   runAutoBattleReplayFrame,
+  runAutoBattleReplayController,
   runAutoBattleReplayStateFrame,
   runWorldCombatActionWindowStep,
   runWorldCombatStep,
@@ -950,6 +952,19 @@ describe("battle system balance", () => {
         shouldClearAutoMovePath: true,
         shouldStopAutoBattle: false,
       });
+
+      expect(
+        resolveWorldBattleResultLifecyclePlan({
+          lastBattleResult: "lost",
+          isReplayingBattle: false,
+          isAutoBattling: false,
+        })
+      ).toEqual({
+        autoCloseDelayMs: 2200,
+        shouldClearTargetMonster: true,
+        shouldClearAutoMovePath: true,
+        shouldStopAutoBattle: true,
+      });
     } finally {
       vi.useRealTimers();
     }
@@ -1192,6 +1207,35 @@ describe("battle system balance", () => {
       replayState: createIdleAutoBattleReplayState(),
     });
 
+    expect(
+      runAutoBattleReplayController({
+        isBattling: true,
+        hasCurrentEnemy: true,
+        lastBattleResult: null,
+        replayProcessed: false,
+        createReplaySession: () => session,
+        isReplayingBattle: false,
+        replaySession: null,
+        currentEnemy: COMMON_ENEMIES.m1_c1,
+        currentEnemyInstanceId: "enemy-1",
+        activeMonsters: [{ instanceId: "enemy-1", x: 3, y: 4 } as ActiveMonster],
+        respawnMapId: "4",
+        timerSet: new Set(),
+        playerPosition: { x: 1, y: 1 },
+        enemyAttackRange: COMMON_ENEMIES.m1_c1.attackRange,
+        executeStepStatePlan: () => {
+          throw new Error("should not execute replay step on transition");
+        },
+      })
+    ).toEqual({
+      kind: "transition",
+      nextProcessed: true,
+      shouldClearReplayTimers: false,
+      replayState: createAutoBattleReplayState({
+        session,
+      }),
+    });
+
     const advancedStep = advanceAutoBattleReplaySession(session);
     expect(advancedStep.nextLog).toBeDefined();
     if (!advancedStep.nextLog) {
@@ -1296,6 +1340,47 @@ describe("battle system balance", () => {
       }),
       defeatLogMessage: undefined,
     });
+
+    const replayControllerFinish = runAutoBattleReplayController({
+      isBattling: true,
+      hasCurrentEnemy: true,
+      lastBattleResult: null,
+      replayProcessed: true,
+      isReplayingBattle: true,
+      replaySession: {
+        displayedLogs: session.displayedLogs,
+        replayQueue: [],
+        battleSnapshot: {
+          playerHp: 420,
+          playerMaxHp: 500,
+          enemyHp: 0,
+          enemyMaxHp: 400,
+          won: true,
+          rewards: {
+            exp: 120,
+            spiritStones: 60,
+            drops: [],
+          },
+        },
+      },
+      currentEnemy: COMMON_ENEMIES.m1_c1,
+      currentEnemyInstanceId: "enemy-1",
+      activeMonsters: [{ instanceId: "enemy-1", x: 3, y: 4 } as ActiveMonster],
+      respawnMapId: "4",
+      timerSet: new Set(),
+      playerPosition: { x: 1, y: 1 },
+      enemyAttackRange: COMMON_ENEMIES.m1_c1.attackRange,
+      executeStepStatePlan: () => {
+        throw new Error("should not execute replay step on finish");
+      },
+    });
+
+    expect(replayControllerFinish.kind).toBe("finish");
+    if (replayControllerFinish.kind === "finish") {
+      expect(replayControllerFinish.nextProcessed).toBe(true);
+      expect(replayControllerFinish.shouldClearReplayTimers).toBe(false);
+      expect(replayControllerFinish.finishResultPlan.battleResult.won).toBe(true);
+    }
   });
 
   it("shares live world strike reward and defeat outcome plans inside battle core", () => {
@@ -1354,20 +1439,43 @@ describe("battle system balance", () => {
       playerPosition: { x: 1, y: 1 },
     });
 
-    expect(
-      resolvePlayerWorldStrikeOutcomePlan({
+    const normalizeRewardManifest = (
+      rewardManifest: ReturnType<typeof createBattleRewardManifest>
+    ) => ({
+      ...rewardManifest,
+      inventoryRewards: rewardManifest.inventoryRewards.map((reward) => ({
+        ...reward,
+        instance: reward.instance
+          ? {
+              ...reward.instance,
+              instanceId: "<normalized>",
+            }
+          : reward.instance,
+      })),
+    });
+
+    expect({
+      ...resolvePlayerWorldStrikeOutcomePlan({
         executionPlan: playerExecutionPlan,
         mapEnemies: [COMMON_ENEMIES.m1_c1],
         playerMaxHp: 500,
-      })
-    ).toEqual({
+      }),
+      defeatedResults: resolvePlayerWorldStrikeOutcomePlan({
+        executionPlan: playerExecutionPlan,
+        mapEnemies: [COMMON_ENEMIES.m1_c1],
+        playerMaxHp: 500,
+      }).defeatedResults.map((result) => ({
+        ...result,
+        rewardManifest: normalizeRewardManifest(result.rewardManifest),
+      })),
+    }).toEqual({
       executionPlan: playerExecutionPlan,
       defeatedResults: [
         {
           monsterName: COMMON_ENEMIES.m1_c1.name,
-          rewardManifest: createBattleRewardManifest({
+          rewardManifest: normalizeRewardManifest(createBattleRewardManifest({
             enemy: COMMON_ENEMIES.m1_c1,
-          }),
+          })),
           recoveryAmount: 40,
           recoveryLogMessage: "脫戰調息，恢復 <heal>40 氣血</heal>。",
           victoryLogMessage: `你擊敗了 ${COMMON_ENEMIES.m1_c1.name}。`,

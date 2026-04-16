@@ -288,10 +288,40 @@ export type AutoBattleReplayTransitionStatePlan =
       replayState: AutoBattleReplayState;
     };
 
+export type AutoBattleReplayControllerResult =
+  | {
+      kind: "idle";
+      nextProcessed: boolean;
+      shouldClearReplayTimers: false;
+    }
+  | {
+      kind: "transition";
+      nextProcessed: boolean;
+      shouldClearReplayTimers: boolean;
+      replayState: AutoBattleReplayState;
+    }
+  | {
+      kind: "finish";
+      nextProcessed: boolean;
+      shouldClearReplayTimers: false;
+      finishResultPlan: AutoBattleReplayFinishResultPlan;
+    }
+  | {
+      kind: "step";
+      nextProcessed: boolean;
+      shouldClearReplayTimers: false;
+      timer: ReturnType<typeof setTimeout> | undefined;
+    };
+
 export interface WorldBattleResultCleanup {
   shouldClearTargetMonster: boolean;
   shouldClearAutoMovePath: boolean;
   shouldStopAutoBattle: boolean;
+}
+
+export interface WorldBattleResultLifecyclePlan
+  extends WorldBattleResultCleanup {
+  autoCloseDelayMs: number | null;
 }
 
 export const createCombatTimerBuckets = (): CombatTimerBuckets => ({
@@ -478,6 +508,25 @@ export const resolveWorldBattleResultCleanup = ({
     shouldStopAutoBattle: false,
   };
 };
+
+export const resolveWorldBattleResultLifecyclePlan = ({
+  lastBattleResult,
+  isReplayingBattle,
+  isAutoBattling,
+}: {
+  lastBattleResult: "won" | "lost" | null;
+  isReplayingBattle: boolean;
+  isAutoBattling: boolean;
+}): WorldBattleResultLifecyclePlan => ({
+  autoCloseDelayMs: getBattleReportAutoCloseDelayMs({
+    lastBattleResult,
+    isReplayingBattle,
+    isAutoBattling,
+  }),
+  ...resolveWorldBattleResultCleanup({
+    lastBattleResult,
+  }),
+});
 
 export const scheduleTimedCombatAction = ({
   delayMs,
@@ -10480,6 +10529,97 @@ export const runAutoBattleReplayStateFrame = <TSkill>({
   }
 
   return replayFrame;
+};
+
+export const runAutoBattleReplayController = <TSkill>({
+  isBattling,
+  hasCurrentEnemy,
+  lastBattleResult,
+  replayProcessed,
+  createReplaySession,
+  isReplayingBattle,
+  replaySession,
+  currentEnemy,
+  currentEnemyInstanceId,
+  activeMonsters,
+  respawnMapId,
+  resolveSkillByName,
+  timerSet,
+  playerPosition,
+  enemyAttackRange,
+  executeStepStatePlan,
+}: {
+  isBattling: boolean;
+  hasCurrentEnemy: boolean;
+  lastBattleResult: string | null;
+  replayProcessed: boolean;
+  createReplaySession?: () => AutoBattleReplaySession | undefined;
+  isReplayingBattle: boolean;
+  replaySession: AutoBattleReplaySession | null;
+  currentEnemy?: Enemy | null;
+  currentEnemyInstanceId: string | null;
+  activeMonsters: ActiveMonster[];
+  respawnMapId?: string;
+  resolveSkillByName?: (skillName: string) => TSkill | undefined;
+  timerSet?: Set<ReturnType<typeof setTimeout>>;
+  playerPosition: Pick<ActiveMonster, "x" | "y">;
+  enemyAttackRange?: number;
+  executeStepStatePlan: (stepStatePlan: AutoBattleReplayStepStatePlan) => void;
+}): AutoBattleReplayControllerResult => {
+  const replayTransitionStatePlan = resolveAutoBattleReplayTransitionStatePlan({
+    isBattling,
+    hasCurrentEnemy,
+    lastBattleResult,
+    replayProcessed,
+    createReplaySession,
+  });
+
+  if (replayTransitionStatePlan.kind !== "idle") {
+    return {
+      kind: "transition",
+      nextProcessed: replayTransitionStatePlan.nextProcessed,
+      shouldClearReplayTimers: replayTransitionStatePlan.shouldClearReplayTimers,
+      replayState: replayTransitionStatePlan.replayState,
+    };
+  }
+
+  const replayFrame = runAutoBattleReplayStateFrame({
+    isReplayingBattle,
+    replaySession,
+    currentEnemy,
+    currentEnemyInstanceId,
+    activeMonsters,
+    respawnMapId,
+    resolveSkillByName,
+    timerSet,
+    playerPosition,
+    enemyAttackRange,
+    executeStepStatePlan,
+  });
+
+  if (replayFrame.kind === "finish") {
+    return {
+      kind: "finish",
+      nextProcessed: replayTransitionStatePlan.nextProcessed,
+      shouldClearReplayTimers: false,
+      finishResultPlan: replayFrame.finishResultPlan,
+    };
+  }
+
+  if (replayFrame.kind === "step") {
+    return {
+      kind: "step",
+      nextProcessed: replayTransitionStatePlan.nextProcessed,
+      shouldClearReplayTimers: false,
+      timer: replayFrame.timer,
+    };
+  }
+
+  return {
+    kind: "idle",
+    nextProcessed: replayTransitionStatePlan.nextProcessed,
+    shouldClearReplayTimers: false,
+  };
 };
 
 export const createAutoBattleReplayStepStatePlan = <TSkill>({

@@ -104,19 +104,19 @@
 - `Adventure` 內 player / enemy world strike 的 action plan，也已正式直接回到 `createWorldStrikeQueuePlan(...)`，不再保留只負責轉手的 resolved wrapper
 - `Adventure` 內 auto-target 與 live world action window 的主控判定，現在也已開始共用 `resolveWorldCombatAutoTarget(...) / runWorldCombatStep(...) / runWorldCombatControllerStep(...)`，頁面不再自己決定最近怪與雙方出手窗口，也不再自己串 player / enemy live action runner
 - `Adventure` 內 `runAutoBattle() -> replay` 的橋接，現在也已開始共用 `battleSystem.ts` 提供的 `createAutoBattleReplaySession(...) / advanceAutoBattleReplaySession(...)`，world 頁面不再自己重建 first log / snapshot / replayQueue，也不再自己手動 append log、slice queue、patch snapshot
-- `Adventure` 內 `runAutoBattle() -> replay` 的啟動入口與 replay state shape，現在也已開始改走 `resolveAutoBattleReplayTransitionStatePlan(...) + createAutoBattleReplaySession(...)`，頁面 effect 不再自己拼接 replay lifecycle gate 與本地 replay state 組裝
+- `Adventure` 內 `runAutoBattle() -> replay` 的啟動入口、replay state shape 與 frame 外殼，現在也已開始改走 `runAutoBattleReplayController(...) + createAutoBattleReplaySession(...)`，頁面 effect 不再自己分開拼接 replay lifecycle gate、本地 replay state 與 frame step/finish 邏輯
 - replay step 的 state shape 與 visual payload，現在也已開始共用 `createAutoBattleReplayStepStatePlan(...)`，頁面不再自己手拼 replay session state 與 attack / damage visual 規則
-- replay frame 的 step / finish 外殼，現在也已開始共用 `runAutoBattleReplayStateFrame(...)`，頁面不再自己先拆 `runAutoBattleReplayFrame(...)` 的 step / finish 結果再組對應 plan
+- replay frame 的 step / finish 外殼，現在也已併入 `runAutoBattleReplayController(...)`，頁面不再自己先拆 replay transition 再拆 replay frame 的 step / finish 結果
 - battle rewards 的掉落 / 修為 / loot log manifest，現在也已開始共用 `createBattleRewardManifest(...) / createBattleRewardApplicationPlan(...)`，而 live world strike 也已開始透過 `resolvePlayerWorldStrikeOutcomeStatePlan(...)` 直接拿到 reward apply plan；頁面不再自己手算 exp、靈石與掉落字串
 - `Adventure` 內舊戰報 replay 的 visual payload，現在已正式共用 `battleSystem.ts` 的 `createBattleReplayVisualPlan(...)`，頁面不再自己維護 attack / damage visual 規則
 - `Adventure` 內 player / enemy world strike 的 execute 結果組裝，現在也已開始共用 `resolvePlayerWorldStrikeOutcomeStatePlan(...) / resolveEnemyWorldStrikeOutcomeStatePlan(...)`；execution plan、outcome plan 與 outcome state plan 的三段 pipeline 已回收到 battle core，頁面不再自己手算範圍命中、護盾吸收、命中特效、擊殺獎勵與敗北 outcome
-- battle timer bucket 與 replay 啟動 / 重置判定，現在也已開始共用 `createCombatTimerBuckets(...) / clearCombatTimerBucket(...) / clearAllCombatTimers(...) / resolveAutoBattleReplayTransitionStatePlan(...)`，頁面不再自己維護 world / replay timer manager 與 replay start/reset 條件
+- battle timer bucket 與 replay 啟動 / 重置判定，現在也已開始共用 `createCombatTimerBuckets(...) / clearCombatTimerBucket(...) / clearAllCombatTimers(...) / runAutoBattleReplayController(...)`，頁面不再自己維護 world / replay timer manager 與 replay start/reset 條件
 - world encounter 的 clear/reset state shape，現在也已開始共用 `createClearWorldCombatEncounterState(...) / createResetWorldCombatEncounterState(...)`，頁面不再自己手拼 target/status/cooldown/shield 清理欄位
 - world defeat 的 respawn + 頁面狀態重置 plan，現在也已開始共用 `resolveWorldPlayerDefeatPlan(...) / createWorldPlayerDefeatStatePlan(...)`，並由 `resolveEnemyWorldStrikeOutcomeStatePlan(...)` 直接帶出 defeat state plan；頁面不再自己散寫 auto-battle 停止、world hp 重置與 encounter state 套用
 - live world defeat 的回城地點、重生座標與提示文案，現在也已開始共用 `resolveWorldPlayerDefeatOutcome(...)`，頁面不再自己手寫敗北 outcome
 - replay 完成時的勝敗、擊殺目標與回城規則，現在也已開始共用 `resolveAutoBattleReplayOutcome(...) / getBattleRespawnMapId(...)`，頁面不再自己重算 defeated monster 與 replay defeat respawn 判定
 - replay 完成時的 battle result、finish effects、rewards 與 defeat log，也已開始共用 `resolveAutoBattleReplayFinishResultPlan(...)`，頁面不再自己從 replay outcome 手拆這批結算欄位
-- 戰報自動收起延遲與戰後 world state cleanup，現在也已開始共用 `getBattleReportAutoCloseDelayMs(...) / resolveWorldBattleResultCleanup(...)`，頁面不再自己散寫 auto-close 與清 target/path/auto-battle 條件
+- 戰報自動收起延遲與戰後 world state cleanup，現在也已開始共用 `resolveWorldBattleResultLifecyclePlan(...)`，頁面不再自己散寫 auto-close 與清 target/path/auto-battle 條件
 - `Adventure` 內 live world kill 與 replay finish 的獎勵套用，現在也已開始共用 `applyBattleRewards(...)`，即時戰鬥與時間軸回放不再各自維護兩套發獎字串與掉落派發流程
 - replay 敗北回城的復活點判定，也已對齊 live world defeat 的 `getBattleRespawnMapId()` 規則，不再出現同一場景 live / replay 回城地點不一致
 - `Adventure` 內 player / enemy world strike 與 replay step 的 visual payload，也已開始共用 `WorldStrikeVisualPlan` 路徑；live / replay 不再各自手拼 projectile、area 與 impact payload

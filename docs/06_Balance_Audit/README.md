@@ -37,9 +37,9 @@
 - `Adventure` 內 world strike 與 replay step 的 visual payload，現在也已開始共用 `WorldStrikeVisualPlan` 路徑；live / replay 的 effect dispatch 不再各自維護 payload 組裝
 - `Adventure` 內舊戰報 replay 的 delay 與 context 組裝，現在也已開始共用 `createBattleReplayStepPlan(...) + queueTimedCombatPlan(...)`，回放 effect 不再每次重算 step delay 與 target / skill context
 - `Adventure` 內 `runAutoBattle() -> replay` 的橋接與 replay step state transition，現在也已開始共用 `createAutoBattleReplaySession(...) / advanceAutoBattleReplaySession(...)`，頁面不再自己重建 first log / snapshot / replayQueue，也不再自己手動 append log、slice queue、patch snapshot
-- battle timer bucket 與 replay 啟動 / 重置判定，現在也已開始共用 `createCombatTimerBuckets(...) / clearCombatTimerBucket(...) / clearAllCombatTimers(...) / resolveAutoBattleReplayTransitionStatePlan(...)`，頁面不再自己維護 world / replay timer manager 與 replay lifecycle gate
-- replay step / reset 的 state shape，現在也已開始共用 `resolveAutoBattleReplayTransitionStatePlan(...) / createAutoBattleReplayStepStatePlan(...)`，頁面不再自己手拼 replay session state 與 replay visual payload
-- replay frame 的 step / finish 外殼，現在也已開始共用 `runAutoBattleReplayStateFrame(...)`，頁面不再自己先拆 `runAutoBattleReplayFrame(...)` 的 step / finish 結果再組對應 plan
+- battle timer bucket 與 replay 啟動 / 重置判定，現在也已開始共用 `createCombatTimerBuckets(...) / clearCombatTimerBucket(...) / clearAllCombatTimers(...) / runAutoBattleReplayController(...)`，頁面不再自己維護 world / replay timer manager 與 replay lifecycle gate
+- replay step / reset 的 state shape，現在也已開始共用 `runAutoBattleReplayController(...) / createAutoBattleReplayStepStatePlan(...)`，頁面不再自己手拼 replay session state 與 replay visual payload
+- replay frame 的 step / finish 外殼，現在也已併入 `runAutoBattleReplayController(...)`，頁面不再自己先拆 `runAutoBattleReplayFrame(...)` 的 step / finish 結果再組對應 plan
 - replay finish 的 battle result、finish effects、rewards 與 defeat log，現在也已開始共用 `resolveAutoBattleReplayFinishResultPlan(...)`，頁面不再自己手拼 replay 結算 payload
 - battle rewards 的掉落 / 修為 / loot log manifest，現在也已開始共用 `createBattleRewardManifest(...) / createBattleRewardApplicationPlan(...)`，而 live world strike 也已開始透過 `resolvePlayerWorldStrikeOutcomeStatePlan(...)` 直接取得 reward apply plan；頁面不再自己手算 exp、靈石與掉落字串
 - `Adventure` 內舊戰報 replay 的 visual payload，現在已正式共用 `battleSystem.ts` 的 `createBattleReplayVisualPlan(...)`，頁面不再自己維護 attack / damage visual 規則
@@ -49,7 +49,7 @@
 - replay 完成時的 battle result、finish effects、rewards 與 defeat log，也已開始共用 `resolveAutoBattleReplayFinishResultPlan(...)`，頁面不再自己從 replay outcome 手拆這批結算欄位
 - world encounter 的 clear/reset state shape，現在也已開始共用 `createClearWorldCombatEncounterState(...) / createResetWorldCombatEncounterState(...)`，頁面不再自己手拼 target/status/cooldown/shield 清理欄位
 - world defeat 的 respawn + 頁面狀態重置 plan，現在也已開始共用 `resolveWorldPlayerDefeatPlan(...) / createWorldPlayerDefeatStatePlan(...)`，並由 `resolveEnemyWorldStrikeOutcomeStatePlan(...)` 直接帶出 defeat state plan；頁面不再自己散寫 auto-battle 停止、world hp 重置與 encounter state 套用
-- 戰報自動收起延遲與戰後 world state cleanup，現在也已開始共用 `getBattleReportAutoCloseDelayMs(...) / resolveWorldBattleResultCleanup(...)`，頁面不再自己散寫 auto-close 與清 target/path/auto-battle 條件
+- 戰報自動收起延遲與戰後 world state cleanup，現在也已開始共用 `resolveWorldBattleResultLifecyclePlan(...)`，頁面不再自己散寫 auto-close 與清 target/path/auto-battle 條件
 - `Adventure` 內舊戰報 replay 的 visual payload 也已開始共用 `createBattleReplayVisualPlan(...)`，attack / damage visual dispatch 不再在 replay step 內直接拼裝輸入
 - `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，現在也已開始共用 `queueTimedCombatPlan(...)`，不再各自維護一套 `setTimeout` 流程
 - `Adventure` 內 player / enemy world strike 的 live action wrapper，現在也已回收到 `battleSystem.ts` 的 `runWorldPlayerCombatAction(...) / runWorldEnemyCombatAction(...) / runWorldCombatControllerStep(...)`，頁面不再自己維護 `performWorldPlayerAction(...) / performWorldEnemyAction(...)` 這層 resolved strike plan 樣板
