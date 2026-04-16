@@ -41,6 +41,8 @@
 - replay 啟動 / step / reset 的 state shape，現在也已開始共用 `createAutoBattleReplayState(...) / createIdleAutoBattleReplayState(...)`，頁面不再自己手拼 replay session state 的欄位形狀
 - replay finish 的 victory effect payload，現在也已開始共用 `createAutoBattleReplayFinishEffects(...)`，頁面不再自己手拼 replay 勝利特效
 - battle rewards 的掉落 / 修為 / loot log manifest，現在也已開始共用 `createBattleRewardManifest(...)`，頁面不再自己手算 exp、靈石與掉落字串
+- `Adventure` 內舊戰報 replay 的 visual payload，現在已正式共用 `battleSystem.ts` 的 `createBattleReplayVisualPlan(...)`，頁面不再自己維護 attack / damage visual 規則
+- `Adventure` 內 player / enemy world strike 的 execute 結果組裝，現在也已開始共用 `createPlayerWorldStrikeExecutionPlan(...) / createEnemyWorldStrikeExecutionPlan(...)`，頁面不再自己手算範圍命中、護盾吸收、命中特效與結算訊息
 - live world defeat 的回城地點、重生座標與提示文案，現在也已開始共用 `resolveWorldPlayerDefeatOutcome(...)`，頁面不再自己手寫敗北 outcome
 - replay 完成時的勝敗、擊殺目標與回城規則，現在也已開始共用 `resolveAutoBattleReplayOutcome(...) / getBattleRespawnMapId(...)`，頁面不再自己重算 replay defeat respawn 與 defeated monster
 - replay 完成時的 battle result、victory target、rewards 與 defeat log，也已開始共用 `createAutoBattleReplayFinishPlan(...)`，頁面不再自己從 replay outcome 手拆這批結算欄位

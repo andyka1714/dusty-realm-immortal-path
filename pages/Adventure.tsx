@@ -15,15 +15,16 @@ import {
   createAutoBattleReplaySession,
   createAutoBattleReplayFinishPlan,
   createAutoBattleReplayState,
+  createBattleReplayVisualPlan,
   createBattleRewardManifest,
   createClearWorldCombatEncounterState,
+  createEnemyWorldStrikeExecutionPlan,
   createIdleAutoBattleReplayState,
+  createPlayerWorldStrikeExecutionPlan,
   createResetWorldCombatEncounterState,
-  createWorldStrikeQueuePlan,
   calculatePlayerStats,
   getBattleReportAutoCloseDelayMs,
   getBattleRespawnMapId,
-  queueTimedCombatPlan,
   resolveWorldPlayerDefeatPlan,
   resolveAutoBattleReplayTransition,
   resolveWorldCombatAutoTarget,
@@ -35,6 +36,7 @@ import {
   getResolvedSkillCooldownSeconds,
   runEnemyWorldStrikeAction,
   runPlayerWorldStrikeAction,
+  type WorldStrikeVisualPlan,
 } from '../utils/battleSystem';
 import { addItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
@@ -52,7 +54,7 @@ import { GameHintBubble } from '../components/game/GameHintBubble';
 import { GameSection } from '../components/game/GameSection';
 import { GameTooltip } from '../components/game/GameTooltip';
 import { SHOPS } from '../data/shops';
-import { getEnemyEngagementRange, getGridDistance, getPlayerEngagementRange, getWorldSkillAreaTargets } from '../utils/worldCombat';
+import { getEnemyEngagementRange, getGridDistance, getPlayerEngagementRange } from '../utils/worldCombat';
 import { getLearnedSkillEngagementRange } from '../utils/skillRealtime';
 import { getFormalSkillByName, normalizeLearnedSkills } from '../data/skills';
 
@@ -752,51 +754,6 @@ export const Adventure: React.FC<AdventureProps> = ({
       ? `${enemyName} 正在施展【${strike.skillName}】。`
       : `${enemyName} 朝你撲殺而來。`;
 
-  const getPlayerWorldStrikeResolutionMessage = ({
-    chosenSkill,
-    targetName,
-    damage,
-    impactedTargetCount,
-  }: {
-    chosenSkill?: typeof primaryActiveSkill;
-    targetName: string;
-    damage: number;
-    impactedTargetCount: number;
-  }) =>
-    chosenSkill
-      ? `你施展【${chosenSkill.name}】造成 ${damage} 點傷害${
-          impactedTargetCount > 1 ? `，波及 ${impactedTargetCount} 個目標` : ""
-        }。`
-      : `你對 ${targetName} 造成 ${damage} 點傷害。`;
-
-  const getEnemyWorldStrikeResolutionMessage = ({
-    enemyName,
-    skillName,
-    damage,
-  }: {
-    enemyName: string;
-    skillName?: string;
-    damage: number;
-  }) =>
-    skillName
-      ? `${enemyName} 施展【${skillName}】對你造成 ${damage} 點傷害。`
-      : `${enemyName} 對你造成 ${damage} 點傷害。`;
-
-  const resolveWorldShieldedDamage = ({
-    incomingDamage,
-    currentShield,
-  }: {
-    incomingDamage: number;
-    currentShield: number;
-  }) => {
-    const absorbed = Math.min(currentShield, incomingDamage);
-    return {
-      absorbed,
-      damageTaken: incomingDamage - absorbed,
-      remainingShield: Math.max(0, currentShield - absorbed),
-    };
-  };
-
   const dispatchWorldStrikeProjectileEffect = ({
     color,
     colorInt,
@@ -905,38 +862,6 @@ export const Adventure: React.FC<AdventureProps> = ({
       colorInt,
       durationMs,
     }));
-  };
-
-  type WorldStrikeImpactPlan = {
-    color: string;
-    colorInt: number;
-    targetX: number;
-    targetY: number;
-    radius: number;
-    damageText: string;
-    damageTextColor: string;
-    damageTextColorInt: number;
-  };
-
-  type WorldStrikeVisualPlan = {
-    projectile?: {
-      color: string;
-      colorInt: number;
-      sourceX: number;
-      sourceY: number;
-      targetX: number;
-      targetY: number;
-      durationMs: number;
-    };
-    area?: {
-      color: string;
-      colorInt: number;
-      targetX: number;
-      targetY: number;
-      radius: number;
-      durationMs: number;
-    };
-    impact?: WorldStrikeImpactPlan;
   };
 
   const dispatchWorldStrikeCastEffect = ({
@@ -1056,130 +981,6 @@ export const Adventure: React.FC<AdventureProps> = ({
     }
   };
 
-  const createBattleReplayAttackVisualPlan = ({
-    nextLog,
-    targetMonster,
-    normalizedUsedSkill,
-  }: {
-    nextLog: NonNullable<typeof replayQueue>[number];
-    targetMonster: ActiveMonster | null;
-    normalizedUsedSkill?: ReturnType<typeof getFormalSkillByName>;
-  }): WorldStrikeVisualPlan => {
-    if (normalizedUsedSkill && nextLog.isPlayer && targetMonster) {
-      const projectile =
-        (normalizedUsedSkill.castRange ?? 1) > 1
-          ? {
-              color: '#60a5fa',
-              colorInt: 0x60a5fa,
-              sourceX: playerPosition.x,
-              sourceY: playerPosition.y,
-              targetX: targetMonster.x,
-              targetY: targetMonster.y,
-              durationMs: Math.max(220, normalizedUsedSkill.castTimeMs ?? 280),
-            }
-          : undefined;
-      const area =
-        normalizedUsedSkill.areaShape &&
-        normalizedUsedSkill.areaShape !== 'single' &&
-        normalizedUsedSkill.areaShape !== 'self' &&
-        (normalizedUsedSkill.areaRadius ?? 0) > 0
-          ? {
-              color: '#a78bfa',
-              colorInt: 0xa78bfa,
-              targetX: targetMonster.x,
-              targetY: targetMonster.y,
-              radius: normalizedUsedSkill.areaRadius,
-              durationMs: 520,
-            }
-          : undefined;
-
-      return {
-        projectile,
-        area,
-      };
-    }
-
-    if (!nextLog.isPlayer && (currentEnemy?.attackRange ?? 1) > 1 && targetMonster) {
-      return {
-        projectile: {
-          color: '#fb7185',
-          colorInt: 0xfb7185,
-          sourceX: targetMonster.x,
-          sourceY: targetMonster.y,
-          targetX: playerPosition.x,
-          targetY: playerPosition.y,
-          durationMs: 260,
-        },
-      };
-    }
-
-    return {};
-  };
-
-  const createBattleReplayDamageVisualPlan = ({
-    nextLog,
-    targetMonster,
-  }: {
-    nextLog: NonNullable<typeof replayQueue>[number];
-    targetMonster: ActiveMonster | null;
-  }): WorldStrikeVisualPlan => {
-    if (!nextLog.damage || nextLog.damage <= 0) {
-      return {};
-    }
-
-    const impactX = nextLog.isPlayer ? targetMonster?.x : playerPosition.x;
-    const impactY = nextLog.isPlayer ? targetMonster?.y : playerPosition.y;
-
-    return {
-      impact: {
-        color: nextLog.isPlayer ? '#fde68a' : '#fca5a5',
-        colorInt: nextLog.isPlayer ? 0xfde68a : 0xfca5a5,
-        targetX: impactX,
-        targetY: impactY,
-        radius: 0.55,
-        damageText: `${nextLog.damage}`,
-        damageTextColor: nextLog.isPlayer ? '#fbbf24' : '#fb7185',
-        damageTextColorInt: nextLog.isPlayer ? 0xfbbf24 : 0xfb7185,
-      },
-    };
-  };
-
-  const dispatchBattleReplayVisuals = ({
-    nextLog,
-    targetMonster,
-    normalizedUsedSkill,
-  }: {
-    nextLog: NonNullable<typeof replayQueue>[number];
-    targetMonster: ActiveMonster | null;
-    normalizedUsedSkill?: ReturnType<typeof getFormalSkillByName>;
-  }) => {
-    dispatchWorldStrikeVisualPlan({
-      ...createBattleReplayAttackVisualPlan({
-        nextLog,
-        targetMonster,
-        normalizedUsedSkill,
-      }),
-      ...createBattleReplayDamageVisualPlan({
-        nextLog,
-        targetMonster,
-      }),
-    });
-  };
-
-  const createBattleReplayVisualPlan = ({
-    nextLog,
-    targetMonster,
-    normalizedUsedSkill,
-  }: {
-    nextLog: NonNullable<typeof replayQueue>[number];
-    targetMonster: ActiveMonster | null;
-    normalizedUsedSkill?: ReturnType<typeof getFormalSkillByName>;
-  }) => ({
-    nextLog,
-    targetMonster,
-    normalizedUsedSkill,
-  });
-
   const applyBattleReplayState = ({
     displayedLogs,
     replayQueue,
@@ -1223,92 +1024,31 @@ export const Adventure: React.FC<AdventureProps> = ({
   }: {
     strike: ReturnType<typeof resolvePlayerWorldStrike>;
     chosenSkill?: typeof primaryActiveSkill;
-    targetedMonster: {
-      instanceId: string;
-      templateId: string;
-      name: string;
-      x: number;
-      y: number;
-      currentHp: number;
-    };
+    targetedMonster: ActiveMonster;
     activeMonsters: ActiveMonster[];
     mapEnemies: MapData["enemies"] | undefined;
   }) => {
-    const strikeColor =
-      chosenSkill?.profession === ProfessionType.Mage ? '#60a5fa' : '#f59e0b';
-    const strikeColorInt =
-      chosenSkill?.profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b;
-    const impactedMonsters = getWorldSkillAreaTargets({
-      origin: playerPosition,
-      primaryTarget: { x: targetedMonster.x, y: targetedMonster.y },
-      monsters: activeMonsters,
-      primaryTargetId: targetedMonster.instanceId,
-      areaShape: strike.areaShape,
-      areaRadius: strike.areaRadius,
-      maxTargets: strike.maxTargets,
+    const executionPlan = createPlayerWorldStrikeExecutionPlan({
+      strike,
+      skillName: chosenSkill?.name,
+      skillProfession: chosenSkill?.profession,
+      targetedMonster,
+      activeMonsters,
+      playerPosition,
     });
 
-    impactedMonsters.forEach((monster, index) => {
-      if (strike.damage <= 0) return;
-
+    executionPlan.impactTargets.forEach(({ target, damage, visualPlan }) => {
       dispatch(applyWorldDamageToMonster({
-        monsterInstanceId: monster.instanceId,
-        damage: strike.damage,
+        monsterInstanceId: target.instanceId,
+        damage,
       }));
-
-      dispatchWorldStrikeVisualPlan({
-        impact: {
-          color: strikeColor,
-          colorInt: strikeColorInt,
-          targetX: monster.x,
-          targetY: monster.y,
-          radius: strike.areaShape && strike.areaShape !== 'single' ? 0.8 : 0.45,
-          damageText: `${index === 0 && strike.isCrit ? '暴擊 ' : ''}${strike.damage}`,
-          damageTextColor: index === 0 && strike.isCrit ? '#facc15' : '#ffffff',
-          damageTextColorInt: index === 0 && strike.isCrit ? 0xfacc15 : 0xffffff,
-        },
-      });
+      dispatchWorldStrikeVisualPlan(visualPlan);
     });
 
-    dispatchWorldStrikeVisualPlan({
-      projectile: strike.isProjectile
-        ? {
-            color: strikeColor,
-            colorInt: strikeColorInt,
-            sourceX: playerPosition.x,
-            sourceY: playerPosition.y,
-            targetX: targetedMonster.x,
-            targetY: targetedMonster.y,
-            durationMs: Math.max(240, strike.executionTimeMs || 360),
-          }
-        : undefined,
-      area:
-        strike.areaShape && strike.areaShape !== 'single' && strike.areaShape !== 'self'
-          ? {
-              color: strikeColor,
-              colorInt: strikeColorInt,
-              targetX: targetedMonster.x,
-              targetY: targetedMonster.y,
-              radius: Math.max(0.8, strike.areaRadius ?? 1),
-              durationMs: 420,
-            }
-          : undefined,
-    });
+    dispatchWorldStrikeVisualPlan(executionPlan.strikeVisualPlan);
+    setWorldLastCombatMessage(executionPlan.resolutionMessage);
 
-    setWorldLastCombatMessage(
-      getPlayerWorldStrikeResolutionMessage({
-        chosenSkill,
-        targetName: targetedMonster.name,
-        damage: strike.damage,
-        impactedTargetCount: impactedMonsters.length,
-      })
-    );
-
-    let primaryDefeated = false;
-    impactedMonsters.forEach((monster) => {
-      const remainingHp = Math.max(0, monster.currentHp - strike.damage);
-      if (remainingHp > 0) return;
-
+    executionPlan.defeatedTargets.forEach((monster) => {
       const monsterTemplate = mapEnemies?.find((enemy) => enemy.id === monster.templateId);
       if (!monsterTemplate) return;
 
@@ -1318,12 +1058,9 @@ export const Adventure: React.FC<AdventureProps> = ({
         message: `你擊敗了 ${monster.name}。`,
         type: 'success',
       }));
-      if (monster.instanceId === targetedMonster.instanceId) {
-        primaryDefeated = true;
-      }
     });
 
-    if (primaryDefeated) {
+    if (executionPlan.shouldClearEncounter) {
       setTargetMonsterId(null);
       clearWorldEncounterState();
     }
@@ -1336,65 +1073,30 @@ export const Adventure: React.FC<AdventureProps> = ({
     strike: ReturnType<typeof resolveEnemyWorldStrike>;
     enemyTemplate: NonNullable<typeof targetedMonsterTemplate>;
   }) => {
-    const shieldResolution = resolveWorldShieldedDamage({
-      incomingDamage: strike.damage,
+    const executionPlan = createEnemyWorldStrikeExecutionPlan({
+      strike,
+      enemyName: enemyTemplate.name,
+      enemyPosition: targetedMonster,
+      fallbackSourcePosition: {
+        x: enemyTemplate.attackRange ?? 0,
+        y: playerPosition.y,
+      },
+      playerPosition,
       currentShield: worldPlayerShield,
+      currentHp: worldPlayerHp,
+      currentStatuses: worldCombatPlayerStatuses,
     });
-    const incomingDamage = shieldResolution.damageTaken;
-    const absorbed = shieldResolution.absorbed;
-    if (absorbed > 0) {
-      setWorldPlayerShield(shieldResolution.remainingShield);
+
+    if (executionPlan.shieldResolution.absorbed > 0) {
+      setWorldPlayerShield(executionPlan.shieldResolution.remainingShield);
     }
 
-    const nextHp = Math.max(0, worldPlayerHp - incomingDamage);
-    setWorldPlayerHp(nextHp);
-    setWorldCombatPlayerStatuses((prev) =>
-      Array.from(new Set([...prev, ...strike.statusNames]))
-    );
-    setWorldLastCombatMessage(
-      getEnemyWorldStrikeResolutionMessage({
-        enemyName: enemyTemplate.name,
-        skillName: strike.skillName,
-        damage: incomingDamage,
-      })
-    );
+    setWorldPlayerHp(executionPlan.nextHp);
+    setWorldCombatPlayerStatuses(executionPlan.nextStatuses);
+    setWorldLastCombatMessage(executionPlan.resolutionMessage);
+    dispatchWorldStrikeVisualPlan(executionPlan.visualPlan);
 
-    dispatchWorldStrikeVisualPlan({
-      projectile: strike.isProjectile
-        ? {
-            color: '#f87171',
-            colorInt: 0xf87171,
-            sourceX: targetedMonster?.x ?? enemyTemplate.attackRange ?? 0,
-            sourceY: targetedMonster?.y ?? playerPosition.y,
-            targetX: playerPosition.x,
-            targetY: playerPosition.y,
-            durationMs: Math.max(240, strike.executionTimeMs || 320),
-          }
-        : undefined,
-      area:
-        strike.areaShape && strike.areaShape !== 'single' && strike.areaShape !== 'self'
-          ? {
-              color: '#f87171',
-              colorInt: 0xf87171,
-              targetX: playerPosition.x,
-              targetY: playerPosition.y,
-              radius: Math.max(0.8, strike.areaRadius ?? 1),
-              durationMs: 360,
-            }
-          : undefined,
-      impact: {
-        color: '#f87171',
-        colorInt: 0xf87171,
-        targetX: playerPosition.x,
-        targetY: playerPosition.y,
-        radius: 0.45,
-        damageText: absorbed > 0 ? `-${incomingDamage} / 格擋 ${absorbed}` : `-${incomingDamage}`,
-        damageTextColor: absorbed > 0 ? '#67e8f9' : '#fca5a5',
-        damageTextColorInt: absorbed > 0 ? 0x67e8f9 : 0xfca5a5,
-      },
-    });
-
-    if (nextHp <= 0) {
+    if (executionPlan.shouldHandleDefeat) {
       handleWorldPlayerDefeat();
     }
   };
@@ -1867,10 +1569,12 @@ export const Adventure: React.FC<AdventureProps> = ({
         const logContainer = document.getElementById('battle-log-container');
         if (logContainer) logContainer.scrollTop = logContainer.scrollHeight;
 
-        dispatchBattleReplayVisuals(
+        dispatchWorldStrikeVisualPlan(
           createBattleReplayVisualPlan({
             nextLog,
             targetMonster,
+            playerPosition,
+            enemyAttackRange: currentEnemy?.attackRange,
             normalizedUsedSkill,
           })
         );

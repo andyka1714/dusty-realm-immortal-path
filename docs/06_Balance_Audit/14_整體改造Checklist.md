@@ -296,6 +296,7 @@
 - [x] `s_f_passive` / `b_bi_passive` / `m_im_passive` 也已補齊 timeline combat 開場待命訊息，正式標出 `養劍術` / `金剛法相` / `五氣朝元`
 - [x] 戰利品字串組裝也已開始整併到 `buildVictoryLootMessage(...)`，勝利結算函式不再直接攤開品質字樣與掉落名稱拼裝
 - [x] 舊戰報 replay 的 session advance、step delay 與 visual payload 組裝，也已開始收斂到 `advanceAutoBattleReplaySession(...) / runAutoBattleReplayStep(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / createBattleReplayVisualPlan(...)`
+- [x] 舊戰報 replay 的 visual payload，現在已正式共用 `battleSystem.ts` 的 `createBattleReplayVisualPlan(...)`，頁面不再自己維護 attack / damage visual 規則
 - [ ] 地圖內戰鬥與時間軸內核整合為同一套即時引擎（目前僅完成 shared helper 收斂；`Adventure` 的 live world / replay orchestration 與 `runAutoBattle()` 的 timeline loop 仍是兩條主控路徑）
 
 ---
@@ -460,6 +461,7 @@
 - [x] `Adventure` 內 player / enemy world strike 的 action plan 也已正式直接回到 `createWorldStrikeQueuePlan(...)`，queue helper 不再各自臨時拼接 cast、preview 與 execute 閉包
 - [x] `Adventure` 內 player / enemy world strike 的出手入口，現在也已回收到 `runPlayerWorldStrikeAction(...) / runEnemyWorldStrikeAction(...)`，live 分支不再各自維護 `Date.now()`、readyAt 與 resolved strike plan 樣板
 - [x] `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在直接走 `runPlayerWorldStrikeAction(...) / runEnemyWorldStrikeAction(...)`
+- [x] `Adventure` 內 player / enemy world strike 的 execute 結果組裝，現在也已開始共用 `createPlayerWorldStrikeExecutionPlan(...) / createEnemyWorldStrikeExecutionPlan(...)`，頁面不再自己手算範圍命中、護盾吸收、命中特效與結算訊息
 - [x] `Adventure` 內 auto-target 與 live world action window 的判定，現在也已開始共用 `resolveWorldCombatAutoTarget(...) / runWorldCombatStep(...)`，頁面不再自己維護最近怪與雙方出手條件邏輯
 - [x] `queueResolvedWorldStrike(...)` 也已改成更單純的 `queueWorldStrikePlan(...)`，live world action 現在只保留 timed 判定、strike resolve 與 plan 執行三段
 - [x] `Adventure` 內 world strike 與舊戰報 replay 的延遲排程，也已開始共用 `scheduleTimedCombatAction(...)`，不再各自維護一套 `setTimeout` orchestration

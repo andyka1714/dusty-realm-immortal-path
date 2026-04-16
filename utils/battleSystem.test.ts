@@ -17,14 +17,17 @@ import {
   createAutoBattleReplayFinishEffects,
   createAutoBattleReplayFinishPlan,
   createAutoBattleReplayState,
+  createBattleReplayVisualPlan,
   createBattleRewardManifest,
   createBattleReplayStepPlan,
   calculatePlayerStats,
   createResolvedWorldStrikeActionPlan,
+  createEnemyWorldStrikeExecutionPlan,
   createTimedCombatPlan,
   createAutoBattleReplaySession,
   createClearWorldCombatEncounterState,
   createIdleAutoBattleReplayState,
+  createPlayerWorldStrikeExecutionPlan,
   createResetWorldCombatEncounterState,
   createWorldStrikeQueuePlan,
   getBattleReportAutoCloseDelayMs,
@@ -975,6 +978,160 @@ describe("battle system balance", () => {
     expect(getResolvedEnemySpecialCooldownSeconds(enemy)).toBe(
       profile.cooldownSeconds
     );
+  });
+
+  it("shares replay visual plans in the battle core", () => {
+    const targetMonster = {
+      instanceId: "enemy-1",
+      templateId: COMMON_ENEMIES.m1_c1.id,
+      name: COMMON_ENEMIES.m1_c1.name,
+      x: 3,
+      y: 4,
+      currentHp: 90,
+      rank: COMMON_ENEMIES.m1_c1.rank,
+      spawnX: 3,
+      spawnY: 4,
+    } satisfies ActiveMonster;
+
+    expect(
+      createBattleReplayVisualPlan({
+        nextLog: {
+          turn: 1,
+          timeMs: 600,
+          message: "施法命中",
+          isPlayer: true,
+          damage: 84,
+          playerHp: 300,
+          playerMaxHp: 300,
+          enemyHp: 120,
+          enemyMaxHp: 200,
+        },
+        targetMonster,
+        playerPosition: { x: 1, y: 2 },
+        enemyAttackRange: COMMON_ENEMIES.m1_c1.attackRange,
+        normalizedUsedSkill: {
+          castRange: 3,
+          castTimeMs: 420,
+          areaShape: "circle",
+          areaRadius: 2,
+        },
+      })
+    ).toEqual({
+      projectile: {
+        color: "#60a5fa",
+        colorInt: 0x60a5fa,
+        sourceX: 1,
+        sourceY: 2,
+        targetX: 3,
+        targetY: 4,
+        durationMs: 420,
+      },
+      area: {
+        color: "#a78bfa",
+        colorInt: 0xa78bfa,
+        targetX: 3,
+        targetY: 4,
+        radius: 2,
+        durationMs: 520,
+      },
+      impact: {
+        color: "#fde68a",
+        colorInt: 0xfde68a,
+        targetX: 3,
+        targetY: 4,
+        radius: 0.55,
+        damageText: "84",
+        damageTextColor: "#fbbf24",
+        damageTextColorInt: 0xfbbf24,
+      },
+    });
+  });
+
+  it("shares world strike execution plans in the battle core", () => {
+    const targetedMonster = {
+      instanceId: "enemy-1",
+      templateId: COMMON_ENEMIES.m1_c1.id,
+      name: COMMON_ENEMIES.m1_c1.name,
+      x: 3,
+      y: 3,
+      currentHp: 50,
+      rank: COMMON_ENEMIES.m1_c1.rank,
+      spawnX: 3,
+      spawnY: 3,
+    } satisfies ActiveMonster;
+    const secondaryMonster = {
+      instanceId: "enemy-2",
+      templateId: COMMON_ENEMIES.m1_c2.id,
+      name: COMMON_ENEMIES.m1_c2.name,
+      x: 4,
+      y: 3,
+      currentHp: 40,
+      rank: COMMON_ENEMIES.m1_c2.rank,
+      spawnX: 4,
+      spawnY: 3,
+    } satisfies ActiveMonster;
+
+    const playerPlan = createPlayerWorldStrikeExecutionPlan({
+      strike: {
+        damage: 60,
+        isCrit: true,
+        skillName: "烈焰斬",
+        nextActionDelayMs: 500,
+        skillCooldownMs: 1800,
+        executionTimeMs: 320,
+        playerStatusNames: [],
+        enemyStatusNames: [],
+        playerShieldGain: 0,
+        areaShape: "circle",
+        areaRadius: 1.2,
+        maxTargets: 3,
+        isProjectile: true,
+      },
+      skillName: "烈焰斬",
+      skillProfession: ProfessionType.Mage,
+      targetedMonster,
+      activeMonsters: [targetedMonster, secondaryMonster],
+      playerPosition: { x: 1, y: 1 },
+    });
+
+    expect(playerPlan.impactTargets).toHaveLength(2);
+    expect(playerPlan.defeatedTargets.map((target) => target.instanceId)).toEqual([
+      "enemy-1",
+      "enemy-2",
+    ]);
+    expect(playerPlan.shouldClearEncounter).toBe(true);
+    expect(playerPlan.resolutionMessage).toContain("波及 2 個目標");
+    expect(playerPlan.strikeVisualPlan.projectile?.targetX).toBe(3);
+    expect(playerPlan.impactTargets[0]?.visualPlan.impact?.damageText).toContain("暴擊 60");
+
+    const enemyPlan = createEnemyWorldStrikeExecutionPlan({
+      strike: {
+        damage: 55,
+        skillName: "魔狼撲殺",
+        executionTimeMs: 260,
+        statusNames: ["破甲"],
+        areaShape: "single",
+        areaRadius: 0,
+        isProjectile: true,
+      },
+      enemyName: COMMON_ENEMIES.m1_c1.name,
+      enemyPosition: targetedMonster,
+      fallbackSourcePosition: { x: 0, y: 1 },
+      playerPosition: { x: 1, y: 1 },
+      currentShield: 20,
+      currentHp: 30,
+      currentStatuses: ["護盾"],
+    });
+
+    expect(enemyPlan.shieldResolution).toEqual({
+      absorbed: 20,
+      damageTaken: 35,
+      remainingShield: 0,
+    });
+    expect(enemyPlan.nextHp).toBe(0);
+    expect(enemyPlan.nextStatuses).toEqual(["護盾", "破甲"]);
+    expect(enemyPlan.shouldHandleDefeat).toBe(true);
+    expect(enemyPlan.visualPlan.impact?.damageText).toBe("-35 / 格擋 20");
   });
 
   it("uses explicit sword passive stat bonuses instead of profession-tier fallback", () => {

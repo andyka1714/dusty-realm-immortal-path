@@ -24,6 +24,7 @@ import { getDropRewards } from "../data/drop_tables";
 import { getFormalSkillId, getSkill } from "../data/skills";
 import { generateDrops } from "./dropSystem";
 import { formatSpiritStone } from "./currency";
+import { getWorldSkillAreaTargets } from "./worldCombat";
 
 const formatSpiritStones = (amount: number): string => {
   if (amount <= 0) return "";
@@ -507,6 +508,328 @@ export const createBattleRewardManifest = ({
         : undefined,
     lootLogMessage:
       lootParts.length > 0 ? `獲得戰利品：${lootParts.join("，")}` : undefined,
+  };
+};
+
+export const getPlayerWorldStrikeResolutionMessage = ({
+  skillName,
+  targetName,
+  damage,
+  impactedTargetCount,
+}: {
+  skillName?: string;
+  targetName: string;
+  damage: number;
+  impactedTargetCount: number;
+}) =>
+  skillName
+    ? `你施展【${skillName}】造成 ${damage} 點傷害${
+        impactedTargetCount > 1 ? `，波及 ${impactedTargetCount} 個目標` : ""
+      }。`
+    : `你對 ${targetName} 造成 ${damage} 點傷害。`;
+
+export const getEnemyWorldStrikeResolutionMessage = ({
+  enemyName,
+  skillName,
+  damage,
+}: {
+  enemyName: string;
+  skillName?: string;
+  damage: number;
+}) =>
+  skillName
+    ? `${enemyName} 施展【${skillName}】對你造成 ${damage} 點傷害。`
+    : `${enemyName} 對你造成 ${damage} 點傷害。`;
+
+export const resolveWorldShieldedDamage = ({
+  incomingDamage,
+  currentShield,
+}: {
+  incomingDamage: number;
+  currentShield: number;
+}): WorldShieldedDamageResolution => {
+  const absorbed = Math.min(currentShield, incomingDamage);
+  return {
+    absorbed,
+    damageTaken: incomingDamage - absorbed,
+    remainingShield: Math.max(0, currentShield - absorbed),
+  };
+};
+
+export const createBattleReplayVisualPlan = <TSkill extends {
+  castRange?: number;
+  castTimeMs?: number;
+  areaShape?: Skill["areaShape"];
+  areaRadius?: number;
+}>({
+  nextLog,
+  targetMonster,
+  playerPosition,
+  enemyAttackRange,
+  normalizedUsedSkill,
+}: {
+  nextLog: CombatLog;
+  targetMonster: ActiveMonster | null;
+  playerPosition: Pick<ActiveMonster, "x" | "y">;
+  enemyAttackRange?: number;
+  normalizedUsedSkill?: TSkill;
+}): WorldStrikeVisualPlan => {
+  const projectilePlan =
+    normalizedUsedSkill && nextLog.isPlayer && targetMonster
+      ? (normalizedUsedSkill.castRange ?? 1) > 1
+        ? {
+            color: "#60a5fa",
+            colorInt: 0x60a5fa,
+            sourceX: playerPosition.x,
+            sourceY: playerPosition.y,
+            targetX: targetMonster.x,
+            targetY: targetMonster.y,
+            durationMs: Math.max(220, normalizedUsedSkill.castTimeMs ?? 280),
+          }
+        : undefined
+      : !nextLog.isPlayer && (enemyAttackRange ?? 1) > 1 && targetMonster
+        ? {
+            color: "#fb7185",
+            colorInt: 0xfb7185,
+            sourceX: targetMonster.x,
+            sourceY: targetMonster.y,
+            targetX: playerPosition.x,
+            targetY: playerPosition.y,
+            durationMs: 260,
+          }
+        : undefined;
+
+  const areaPlan =
+    normalizedUsedSkill &&
+    nextLog.isPlayer &&
+    targetMonster &&
+    normalizedUsedSkill.areaShape &&
+    normalizedUsedSkill.areaShape !== "single" &&
+    normalizedUsedSkill.areaShape !== "self" &&
+    (normalizedUsedSkill.areaRadius ?? 0) > 0
+      ? {
+          color: "#a78bfa",
+          colorInt: 0xa78bfa,
+          targetX: targetMonster.x,
+          targetY: targetMonster.y,
+          radius: normalizedUsedSkill.areaRadius,
+          durationMs: 520,
+        }
+      : undefined;
+
+  const impactPlan =
+    nextLog.damage && nextLog.damage > 0
+      ? nextLog.isPlayer
+        ? targetMonster
+          ? {
+              color: "#fde68a",
+              colorInt: 0xfde68a,
+              targetX: targetMonster.x,
+              targetY: targetMonster.y,
+              radius: 0.55,
+              damageText: `${nextLog.damage}`,
+              damageTextColor: "#fbbf24",
+              damageTextColorInt: 0xfbbf24,
+            }
+          : undefined
+        : {
+            color: "#fca5a5",
+            colorInt: 0xfca5a5,
+            targetX: playerPosition.x,
+            targetY: playerPosition.y,
+            radius: 0.55,
+            damageText: `${nextLog.damage}`,
+            damageTextColor: "#fb7185",
+            damageTextColorInt: 0xfb7185,
+          }
+      : undefined;
+
+  return {
+    projectile: projectilePlan,
+    area: areaPlan,
+    impact: impactPlan,
+  };
+};
+
+export const createPlayerWorldStrikeExecutionPlan = ({
+  strike,
+  skillName,
+  skillProfession,
+  targetedMonster,
+  activeMonsters,
+  playerPosition,
+}: {
+  strike: WorldStrikeResult;
+  skillName?: string;
+  skillProfession?: ProfessionType;
+  targetedMonster: ActiveMonster;
+  activeMonsters: ActiveMonster[];
+  playerPosition: Pick<ActiveMonster, "x" | "y">;
+}): PlayerWorldStrikeExecutionPlan => {
+  const strikeColor =
+    skillProfession === ProfessionType.Mage ? "#60a5fa" : "#f59e0b";
+  const strikeColorInt =
+    skillProfession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b;
+
+  const impactedMonsters = getWorldSkillAreaTargets({
+    origin: playerPosition,
+    primaryTarget: { x: targetedMonster.x, y: targetedMonster.y },
+    monsters: activeMonsters,
+    primaryTargetId: targetedMonster.instanceId,
+    areaShape: strike.areaShape,
+    areaRadius: strike.areaRadius,
+    maxTargets: strike.maxTargets,
+  });
+
+  const impactTargets = impactedMonsters
+    .filter(() => strike.damage > 0)
+    .map((monster, index) => {
+      const defeated = Math.max(0, monster.currentHp - strike.damage) <= 0;
+      return {
+        target: monster,
+        damage: strike.damage,
+        defeated,
+        visualPlan: {
+          impact: {
+            color: strikeColor,
+            colorInt: strikeColorInt,
+            targetX: monster.x,
+            targetY: monster.y,
+            radius:
+              strike.areaShape && strike.areaShape !== "single" ? 0.8 : 0.45,
+            damageText: `${index === 0 && strike.isCrit ? "暴擊 " : ""}${strike.damage}`,
+            damageTextColor: index === 0 && strike.isCrit ? "#facc15" : "#ffffff",
+            damageTextColorInt:
+              index === 0 && strike.isCrit ? 0xfacc15 : 0xffffff,
+          },
+        },
+      };
+    });
+
+  const defeatedTargets = impactTargets
+    .filter((impactTarget) => impactTarget.defeated)
+    .map((impactTarget) => impactTarget.target);
+
+  return {
+    strikeVisualPlan: {
+      projectile: strike.isProjectile
+        ? {
+            color: strikeColor,
+            colorInt: strikeColorInt,
+            sourceX: playerPosition.x,
+            sourceY: playerPosition.y,
+            targetX: targetedMonster.x,
+            targetY: targetedMonster.y,
+            durationMs: Math.max(240, strike.executionTimeMs || 360),
+          }
+        : undefined,
+      area:
+        strike.areaShape &&
+        strike.areaShape !== "single" &&
+        strike.areaShape !== "self"
+          ? {
+              color: strikeColor,
+              colorInt: strikeColorInt,
+              targetX: targetedMonster.x,
+              targetY: targetedMonster.y,
+              radius: Math.max(0.8, strike.areaRadius ?? 1),
+              durationMs: 420,
+            }
+          : undefined,
+    },
+    impactTargets,
+    defeatedTargets,
+    resolutionMessage: getPlayerWorldStrikeResolutionMessage({
+      skillName,
+      targetName: targetedMonster.name,
+      damage: strike.damage,
+      impactedTargetCount: impactedMonsters.length,
+    }),
+    shouldClearEncounter: defeatedTargets.some(
+      (defeatedTarget) => defeatedTarget.instanceId === targetedMonster.instanceId
+    ),
+  };
+};
+
+export const createEnemyWorldStrikeExecutionPlan = ({
+  strike,
+  enemyName,
+  enemyPosition,
+  fallbackSourcePosition,
+  playerPosition,
+  currentShield,
+  currentHp,
+  currentStatuses,
+}: {
+  strike: Pick<
+    ReturnType<typeof resolveEnemyWorldStrike>,
+    "damage" | "skillName" | "executionTimeMs" | "areaShape" | "areaRadius" | "isProjectile" | "statusNames"
+  >;
+  enemyName: string;
+  enemyPosition?: Pick<ActiveMonster, "x" | "y"> | null;
+  fallbackSourcePosition: Pick<ActiveMonster, "x" | "y">;
+  playerPosition: Pick<ActiveMonster, "x" | "y">;
+  currentShield: number;
+  currentHp: number;
+  currentStatuses: string[];
+}): EnemyWorldStrikeExecutionPlan => {
+  const shieldResolution = resolveWorldShieldedDamage({
+    incomingDamage: strike.damage,
+    currentShield,
+  });
+  const nextHp = Math.max(0, currentHp - shieldResolution.damageTaken);
+  const sourcePosition = enemyPosition ?? fallbackSourcePosition;
+
+  return {
+    shieldResolution,
+    nextHp,
+    nextStatuses: Array.from(new Set([...currentStatuses, ...strike.statusNames])),
+    resolutionMessage: getEnemyWorldStrikeResolutionMessage({
+      enemyName,
+      skillName: strike.skillName,
+      damage: shieldResolution.damageTaken,
+    }),
+    visualPlan: {
+      projectile: strike.isProjectile
+        ? {
+            color: "#f87171",
+            colorInt: 0xf87171,
+            sourceX: sourcePosition.x,
+            sourceY: sourcePosition.y,
+            targetX: playerPosition.x,
+            targetY: playerPosition.y,
+            durationMs: Math.max(240, strike.executionTimeMs || 320),
+          }
+        : undefined,
+      area:
+        strike.areaShape &&
+        strike.areaShape !== "single" &&
+        strike.areaShape !== "self"
+          ? {
+              color: "#f87171",
+              colorInt: 0xf87171,
+              targetX: playerPosition.x,
+              targetY: playerPosition.y,
+              radius: Math.max(0.8, strike.areaRadius ?? 1),
+              durationMs: 360,
+            }
+          : undefined,
+      impact: {
+        color: "#f87171",
+        colorInt: 0xf87171,
+        targetX: playerPosition.x,
+        targetY: playerPosition.y,
+        radius: 0.45,
+        damageText:
+          shieldResolution.absorbed > 0
+            ? `-${shieldResolution.damageTaken} / 格擋 ${shieldResolution.absorbed}`
+            : `-${shieldResolution.damageTaken}`,
+        damageTextColor: shieldResolution.absorbed > 0 ? "#67e8f9" : "#fca5a5",
+        damageTextColorInt:
+          shieldResolution.absorbed > 0 ? 0x67e8f9 : 0xfca5a5,
+      },
+    },
+    shouldHandleDefeat: nextHp <= 0,
   };
 };
 
@@ -1232,6 +1555,68 @@ export interface WorldStrikeResult {
   areaRadius?: number;
   maxTargets?: number;
   isProjectile: boolean;
+}
+
+export interface WorldStrikeImpactPlan {
+  color: string;
+  colorInt: number;
+  targetX: number;
+  targetY: number;
+  radius: number;
+  damageText: string;
+  damageTextColor: string;
+  damageTextColorInt: number;
+}
+
+export interface WorldStrikeVisualPlan {
+  projectile?: {
+    color: string;
+    colorInt: number;
+    sourceX: number;
+    sourceY: number;
+    targetX: number;
+    targetY: number;
+    durationMs: number;
+  };
+  area?: {
+    color: string;
+    colorInt: number;
+    targetX: number;
+    targetY: number;
+    radius: number;
+    durationMs: number;
+  };
+  impact?: WorldStrikeImpactPlan;
+}
+
+export interface WorldShieldedDamageResolution {
+  absorbed: number;
+  damageTaken: number;
+  remainingShield: number;
+}
+
+export interface PlayerWorldStrikeImpactTarget {
+  target: ActiveMonster;
+  damage: number;
+  defeated: boolean;
+  visualPlan: WorldStrikeVisualPlan;
+}
+
+export interface PlayerWorldStrikeExecutionPlan {
+  strikeVisualPlan: WorldStrikeVisualPlan;
+  impactTargets: PlayerWorldStrikeImpactTarget[];
+  defeatedTargets: ActiveMonster[];
+  resolutionMessage: string;
+  shouldClearEncounter: boolean;
+}
+
+export interface EnemyWorldStrikeExecutionPlan {
+  shieldResolution: WorldShieldedDamageResolution;
+  nextHp: number;
+  nextStatuses: string[];
+  resolutionMessage: string;
+  visualPlan: WorldStrikeVisualPlan;
+  shouldHandleDefeat: boolean;
 }
 
 export interface SkillTimelineProfile {
