@@ -1165,6 +1165,73 @@ export const resolvePlayerWorldStrikeOutcomeStatePlan = ({
     playerMaxHp,
   });
 
+export const runPlayerWorldStrikeOutcomePipeline = ({
+  strike,
+  skillName,
+  skillProfession,
+  targetedMonster,
+  activeMonsters,
+  playerPosition,
+  mapEnemies,
+  playerMaxHp,
+  currentWorldPlayerHp,
+  applyMonsterDamage,
+  applyVisualPlan,
+  applyRewardApplicationPlan,
+  appendLogEntry,
+  setWorldLastCombatMessage,
+  setWorldPlayerHp,
+  clearEncounter,
+}: {
+  strike: WorldStrikeResult;
+  skillName?: string;
+  skillProfession?: ProfessionType;
+  targetedMonster: ActiveMonster;
+  activeMonsters: ActiveMonster[];
+  playerPosition: Pick<ActiveMonster, "x" | "y">;
+  mapEnemies: Enemy[] | undefined;
+  playerMaxHp: number;
+  currentWorldPlayerHp: number;
+  applyMonsterDamage: (
+    damageApplication: PlayerWorldStrikeOutcomeStatePlan["monsterDamageApplications"][number]
+  ) => void;
+  applyVisualPlan: (visualPlan: WorldStrikeVisualPlan) => void;
+  applyRewardApplicationPlan: (
+    rewardApplicationPlan: PlayerWorldStrikeOutcomeStatePlan["rewardApplicationPlans"][number]
+  ) => void;
+  appendLogEntry: (
+    logEntry: PlayerWorldStrikeOutcomeStatePlan["logEntries"][number]
+  ) => void;
+  setWorldLastCombatMessage: (message: string) => void;
+  setWorldPlayerHp: (hp: number) => void;
+  clearEncounter?: () => void;
+}): PlayerWorldStrikeOutcomeStatePlan => {
+  const outcomeStatePlan = resolvePlayerWorldStrikeOutcomeStatePlan({
+    strike,
+    skillName,
+    skillProfession,
+    targetedMonster,
+    activeMonsters,
+    playerPosition,
+    mapEnemies,
+    playerMaxHp,
+    currentWorldPlayerHp,
+  });
+
+  outcomeStatePlan.monsterDamageApplications.forEach(applyMonsterDamage);
+  outcomeStatePlan.visualPlans.forEach(applyVisualPlan);
+  setWorldLastCombatMessage(outcomeStatePlan.worldLastCombatMessage);
+  outcomeStatePlan.rewardApplicationPlans.forEach(applyRewardApplicationPlan);
+  setWorldPlayerHp(outcomeStatePlan.nextWorldPlayerHp);
+  outcomeStatePlan.logEntries.forEach(appendLogEntry);
+
+  if (outcomeStatePlan.shouldClearEncounter) {
+    clearEncounter?.();
+  }
+
+  return outcomeStatePlan;
+};
+
 export const createEnemyWorldStrikeExecutionPlan = ({
   strike,
   enemyName,
@@ -1333,6 +1400,78 @@ export const resolveEnemyWorldStrikeOutcomeStatePlan = ({
       playerMaxHp,
     }),
   });
+
+export const runEnemyWorldStrikeOutcomePipeline = ({
+  strike,
+  enemyName,
+  enemyPosition,
+  fallbackSourcePosition,
+  playerPosition,
+  currentShield,
+  currentHp,
+  currentStatuses,
+  completedQuestIds,
+  playerMaxHp,
+  setWorldPlayerShield,
+  setWorldPlayerHp,
+  setWorldCombatPlayerStatuses,
+  setWorldLastCombatMessage,
+  applyVisualPlan,
+  applyDefeatStatePlan,
+}: {
+  strike: Pick<
+    ReturnType<typeof resolveEnemyWorldStrike>,
+    | "damage"
+    | "skillName"
+    | "executionTimeMs"
+    | "areaShape"
+    | "areaRadius"
+    | "isProjectile"
+    | "statusNames"
+  >;
+  enemyName: string;
+  enemyPosition?: Pick<ActiveMonster, "x" | "y"> | null;
+  fallbackSourcePosition: Pick<ActiveMonster, "x" | "y">;
+  playerPosition: Pick<ActiveMonster, "x" | "y">;
+  currentShield: number;
+  currentHp: number;
+  currentStatuses: string[];
+  completedQuestIds: string[];
+  playerMaxHp: number;
+  setWorldPlayerShield: (shield: number) => void;
+  setWorldPlayerHp: (hp: number) => void;
+  setWorldCombatPlayerStatuses: (statuses: string[]) => void;
+  setWorldLastCombatMessage: (message: string) => void;
+  applyVisualPlan: (visualPlan: WorldStrikeVisualPlan) => void;
+  applyDefeatStatePlan: (
+    defeatStatePlan: EnemyWorldStrikeOutcomeStatePlan["defeatStatePlan"]
+  ) => void;
+}): EnemyWorldStrikeOutcomeStatePlan => {
+  const outcomeStatePlan = resolveEnemyWorldStrikeOutcomeStatePlan({
+    strike,
+    enemyName,
+    enemyPosition,
+    fallbackSourcePosition,
+    playerPosition,
+    currentShield,
+    currentHp,
+    currentStatuses,
+    completedQuestIds,
+    playerMaxHp,
+  });
+
+  if (outcomeStatePlan.shouldUpdateWorldPlayerShield) {
+    setWorldPlayerShield(outcomeStatePlan.nextWorldPlayerShield);
+  }
+
+  setWorldPlayerHp(outcomeStatePlan.nextWorldPlayerHp);
+  setWorldCombatPlayerStatuses(outcomeStatePlan.nextWorldCombatPlayerStatuses);
+  setWorldLastCombatMessage(outcomeStatePlan.worldLastCombatMessage);
+  applyVisualPlan(outcomeStatePlan.visualPlan);
+  applyDefeatStatePlan(outcomeStatePlan.defeatStatePlan);
+
+  return outcomeStatePlan;
+};
 
 export const selectNearestWorldCombatTarget = <TTarget,>({
   targets,

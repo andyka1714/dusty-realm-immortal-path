@@ -38,6 +38,7 @@ import {
   createPlayerWorldStrikeExecutionPlan,
   resolvePlayerWorldStrikeOutcomeStatePlan,
   resolvePlayerWorldStrikeOutcomePlan,
+  runEnemyWorldStrikeOutcomePipeline,
   createResetWorldCombatEncounterState,
   createWorldStrikeQueuePlan,
   getBattleReportAutoCloseDelayMs,
@@ -70,6 +71,7 @@ import {
   selectNearestWorldCombatTarget,
   runAutoBattleReplayStep,
   runEnemyWorldStrikeAction,
+  runPlayerWorldStrikeOutcomePipeline,
   runPlayerWorldStrikeAction,
   runWorldCombatControllerStep,
   runWorldEnemyCombatAction,
@@ -1987,6 +1989,146 @@ describe("battle system balance", () => {
         outcomePlan: enemyOutcomePlan,
       })
     );
+
+    const playerPipelineCalls: string[] = [];
+    const playerPipelineState = {
+      message: "",
+      hp: 0,
+      cleared: false,
+    };
+    const playerPipelinePlan = runPlayerWorldStrikeOutcomePipeline({
+      strike: {
+        damage: 80,
+        isCrit: false,
+        skillName: "火球術",
+        nextActionDelayMs: 400,
+        skillCooldownMs: 1200,
+        executionTimeMs: 320,
+        playerStatusNames: [],
+        enemyStatusNames: [],
+        playerShieldGain: 0,
+        areaShape: "single",
+        areaRadius: 0,
+        maxTargets: 1,
+        isProjectile: true,
+      },
+      skillName: "火球術",
+      skillProfession: ProfessionType.Mage,
+      targetedMonster: {
+        instanceId: "enemy-1",
+        templateId: COMMON_ENEMIES.m1_c1.id,
+        name: COMMON_ENEMIES.m1_c1.name,
+        x: 3,
+        y: 4,
+        currentHp: 1,
+      } as ActiveMonster,
+      activeMonsters: [
+        {
+          instanceId: "enemy-1",
+          templateId: COMMON_ENEMIES.m1_c1.id,
+          name: COMMON_ENEMIES.m1_c1.name,
+          x: 3,
+          y: 4,
+          currentHp: 1,
+        } as ActiveMonster,
+      ],
+      playerPosition: { x: 1, y: 1 },
+      mapEnemies: [COMMON_ENEMIES.m1_c1],
+      playerMaxHp: 500,
+      currentWorldPlayerHp: 420,
+      applyMonsterDamage: ({ monsterInstanceId, damage }) =>
+        playerPipelineCalls.push(`damage:${monsterInstanceId}:${damage}`),
+      applyVisualPlan: (visualPlan) =>
+        playerPipelineCalls.push(
+          `visual:${visualPlan.impact?.targetX ?? visualPlan.projectile?.targetX ?? -1}`
+        ),
+      applyRewardApplicationPlan: (rewardPlan) =>
+        playerPipelineCalls.push(`reward:${rewardPlan.expAmount}`),
+      appendLogEntry: (logEntry) =>
+        playerPipelineCalls.push(`log:${logEntry.type}:${logEntry.message}`),
+      setWorldLastCombatMessage: (message) => {
+        playerPipelineState.message = message;
+      },
+      setWorldPlayerHp: (hp) => {
+        playerPipelineState.hp = hp;
+      },
+      clearEncounter: () => {
+        playerPipelineState.cleared = true;
+      },
+    });
+
+    expect(playerPipelinePlan.shouldClearEncounter).toBe(true);
+    expect(playerPipelineState.message).toBe(playerPipelinePlan.worldLastCombatMessage);
+    expect(playerPipelineState.hp).toBe(playerPipelinePlan.nextWorldPlayerHp);
+    expect(playerPipelineState.cleared).toBe(true);
+    expect(playerPipelineCalls).toContain("damage:enemy-1:80");
+    expect(playerPipelineCalls.some((entry) => entry.startsWith("reward:"))).toBe(true);
+    expect(
+      playerPipelineCalls.some((entry) => entry.startsWith("log:gain:"))
+    ).toBe(true);
+    expect(
+      playerPipelineCalls.some((entry) => entry.startsWith("log:success:"))
+    ).toBe(true);
+
+    const enemyPipelineCalls: string[] = [];
+    const enemyPipelineState = {
+      shield: 0,
+      hp: 0,
+      statuses: [] as string[],
+      message: "",
+      defeatApplied: false,
+    };
+    const enemyPipelinePlan = runEnemyWorldStrikeOutcomePipeline({
+      strike: {
+        damage: 120,
+        skillName: "撕咬",
+        executionTimeMs: 260,
+        areaShape: "single",
+        areaRadius: 0,
+        isProjectile: false,
+        statusNames: [],
+      },
+      enemyName: COMMON_ENEMIES.m1_c1.name,
+      enemyPosition: { x: 3, y: 4 },
+      fallbackSourcePosition: { x: 3, y: 4 },
+      playerPosition: { x: 1, y: 1 },
+      currentShield: 0,
+      currentHp: 100,
+      currentStatuses: [],
+      completedQuestIds: ["sect_sword_join"],
+      playerMaxHp: 500,
+      setWorldPlayerShield: (shield) => {
+        enemyPipelineState.shield = shield;
+      },
+      setWorldPlayerHp: (hp) => {
+        enemyPipelineState.hp = hp;
+      },
+      setWorldCombatPlayerStatuses: (statuses) => {
+        enemyPipelineState.statuses = statuses;
+      },
+      setWorldLastCombatMessage: (message) => {
+        enemyPipelineState.message = message;
+      },
+      applyVisualPlan: (visualPlan) => {
+        enemyPipelineCalls.push(
+          `visual:${visualPlan.impact?.damageText ?? "none"}`
+        );
+      },
+      applyDefeatStatePlan: (defeatStatePlan) => {
+        enemyPipelineCalls.push(`defeat:${Boolean(defeatStatePlan)}`);
+        enemyPipelineState.defeatApplied = Boolean(defeatStatePlan);
+      },
+    });
+
+    expect(enemyPipelinePlan.shouldUpdateWorldPlayerShield).toBe(false);
+    expect(enemyPipelineState.shield).toBe(0);
+    expect(enemyPipelineState.hp).toBe(enemyPipelinePlan.nextWorldPlayerHp);
+    expect(enemyPipelineState.statuses).toEqual(
+      enemyPipelinePlan.nextWorldCombatPlayerStatuses
+    );
+    expect(enemyPipelineState.message).toBe(enemyPipelinePlan.worldLastCombatMessage);
+    expect(enemyPipelineState.defeatApplied).toBe(true);
+    expect(enemyPipelineCalls).toEqual(["visual:-120", "defeat:true"]);
   });
 
   it("shares enemy special timeline metadata between world strikes and timeline combat", () => {

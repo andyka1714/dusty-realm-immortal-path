@@ -18,15 +18,16 @@ import {
   createEnemyWorldStrikePreviewPlan,
   createPlayerWorldStrikePreviewPlan,
   createResetWorldCombatEncounterState,
+  createWorldPlayerDefeatStatePlan,
   calculatePlayerStats,
   getBattleRespawnMapId,
-  resolveEnemyWorldStrikeOutcomeStatePlan,
-  resolvePlayerWorldStrikeOutcomeStatePlan,
   resolveWorldBattleResultLifecyclePlan,
   resolvePlayerWorldStrike,
   resolveEnemyWorldStrike,
+  runEnemyWorldStrikeOutcomePipeline,
   runAutoBattleReplayController,
   runWorldCombatControllerFrame,
+  runPlayerWorldStrikeOutcomePipeline,
   runWorldPlayerCombatAction,
   getResolvedSkillCooldownSeconds,
   type WorldStrikeVisualPlan,
@@ -1003,7 +1004,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     targetedMonster: ActiveMonster;
     activeMonsters: ActiveMonster[];
   }) => {
-    const outcomeStatePlan = resolvePlayerWorldStrikeOutcomeStatePlan({
+    runPlayerWorldStrikeOutcomePipeline({
       strike,
       skillName: chosenSkill?.name,
       skillProfession: chosenSkill?.profession,
@@ -1013,30 +1014,24 @@ export const Adventure: React.FC<AdventureProps> = ({
       mapEnemies: mapData?.enemies,
       playerMaxHp: playerStats.maxHp,
       currentWorldPlayerHp: worldPlayerHp,
+      applyMonsterDamage: ({ monsterInstanceId, damage }) => {
+        dispatch(applyWorldDamageToMonster({
+          monsterInstanceId,
+          damage,
+        }));
+      },
+      applyVisualPlan: dispatchWorldStrikeVisualPlan,
+      applyRewardApplicationPlan: applyBattleRewardApplicationPlan,
+      appendLogEntry: (logEntry) => {
+        dispatch(addLog(logEntry));
+      },
+      setWorldLastCombatMessage,
+      setWorldPlayerHp,
+      clearEncounter: () => {
+        setTargetMonsterId(null);
+        clearWorldEncounterState();
+      },
     });
-
-    outcomeStatePlan.monsterDamageApplications.forEach(({ monsterInstanceId, damage }) => {
-      dispatch(applyWorldDamageToMonster({
-        monsterInstanceId,
-        damage,
-      }));
-    });
-    outcomeStatePlan.visualPlans.forEach((visualPlan) =>
-      dispatchWorldStrikeVisualPlan(visualPlan)
-    );
-    setWorldLastCombatMessage(outcomeStatePlan.worldLastCombatMessage);
-    outcomeStatePlan.rewardApplicationPlans.forEach((rewardApplicationPlan) => {
-      applyBattleRewardApplicationPlan(rewardApplicationPlan);
-    });
-    setWorldPlayerHp(outcomeStatePlan.nextWorldPlayerHp);
-    outcomeStatePlan.logEntries.forEach((logEntry) => {
-      dispatch(addLog(logEntry));
-    });
-
-    if (outcomeStatePlan.shouldClearEncounter) {
-      setTargetMonsterId(null);
-      clearWorldEncounterState();
-    }
   };
 
   const executeEnemyWorldStrike = ({
@@ -1046,7 +1041,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     strike: ReturnType<typeof resolveEnemyWorldStrike>;
     enemyTemplate: NonNullable<typeof targetedMonsterTemplate>;
   }) => {
-    const outcomeStatePlan = resolveEnemyWorldStrikeOutcomeStatePlan({
+    runEnemyWorldStrikeOutcomePipeline({
       strike,
       enemyName: enemyTemplate.name,
       enemyPosition: targetedMonster,
@@ -1060,18 +1055,13 @@ export const Adventure: React.FC<AdventureProps> = ({
       currentStatuses: worldCombatPlayerStatuses,
       completedQuestIds: completedQuests,
       playerMaxHp: playerStats.maxHp,
+      setWorldPlayerShield,
+      setWorldPlayerHp,
+      setWorldCombatPlayerStatuses,
+      setWorldLastCombatMessage,
+      applyVisualPlan: dispatchWorldStrikeVisualPlan,
+      applyDefeatStatePlan: applyWorldPlayerDefeatStatePlan,
     });
-
-    if (outcomeStatePlan.shouldUpdateWorldPlayerShield) {
-      setWorldPlayerShield(outcomeStatePlan.nextWorldPlayerShield);
-    }
-
-    setWorldPlayerHp(outcomeStatePlan.nextWorldPlayerHp);
-    setWorldCombatPlayerStatuses(outcomeStatePlan.nextWorldCombatPlayerStatuses);
-    setWorldLastCombatMessage(outcomeStatePlan.worldLastCombatMessage);
-    dispatchWorldStrikeVisualPlan(outcomeStatePlan.visualPlan);
-
-    applyWorldPlayerDefeatStatePlan(outcomeStatePlan.defeatStatePlan);
   };
 
   const applyPlayerWorldStrikePreview = ({
@@ -1160,7 +1150,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   };
 
   const applyWorldPlayerDefeatStatePlan = (
-    defeatStatePlan: ReturnType<typeof resolveEnemyWorldStrikeOutcomeStatePlan>['defeatStatePlan']
+    defeatStatePlan: ReturnType<typeof createWorldPlayerDefeatStatePlan> | undefined
   ) => {
     if (!defeatStatePlan) return;
 
