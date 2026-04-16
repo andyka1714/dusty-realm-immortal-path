@@ -475,7 +475,7 @@
 - [x] 舊戰報 replay 的目標怪解析與技能名正規化，也已開始併入 `runAutoBattleReplayStep(...)`，replay orchestration 不再每次在 effect 內重做 target / skill 組裝
 - [x] `Adventure` 內 player / enemy world strike 的 projectile / area / impact / text dispatch 也已開始共用 visual helper，地圖即時戰鬥效果派發不再各自維護兩套流程
 - [x] `Adventure` 內 player / enemy world strike 與 replay step 的 visual payload，也已開始共用 `WorldStrikeVisualPlan` 路徑，live / replay 不再各自手拼 projectile、area 與 impact payload
-- [x] `Adventure` 內 player / enemy world strike 的實際執行鏈也已開始抽成 `executePlayerWorldStrike(...) / executeEnemyWorldStrike(...)`，命中後流程不再各自攤開
+- [x] `Adventure` 內 player / enemy world strike 的實際執行鏈，現在也已進一步整併到 `runPlayerWorldStrikePipeline(...) / runEnemyWorldStrikePipeline(...)`，命中後流程不再各自攤開
 - [x] `FINAL_CULL_SKILL_GROUPS_BY_PROFESSION / FINAL_CULL_SKILLS_BY_PROFESSION / FINAL_CULL_SKILL_MAP_BY_PROFESSION` 也已正式存在，最後一批 `transition / legacy` 技能刪整可以直接按職業切進 final cull replacement 視圖
 - [x] `FINAL_CULL_SKILLS_BY_PROFESSION_AND_REPLACEMENT` 也已正式存在，現在最後一批技能本體刪整可以直接按「職業 × replacement」切進 final cull 視圖
 - [x] `FINAL_CULL_SKILL_MAP_BY_PROFESSION_AND_REPLACEMENT / FINAL_CULL_SKILL_IDS_BY_PROFESSION` 也已補齊，最後一批 `transition / legacy` 技能刪整現在已有可直接批次操作的 id/map 視圖

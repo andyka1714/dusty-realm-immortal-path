@@ -41,9 +41,9 @@
 - replay step / reset 的 state shape，現在也已開始共用 `runAutoBattleReplayController(...) / createAutoBattleReplayStepStatePlan(...)`，頁面不再自己手拼 replay session state 與 replay visual payload
 - replay frame 的 step / finish 外殼，現在也已併入 `runAutoBattleReplayController(...)`，頁面不再自己先拆 `runAutoBattleReplayFrame(...)` 的 step / finish 結果再組對應 plan
 - replay finish 的 battle result、finish effects、rewards 與 defeat log，現在也已開始共用 `resolveAutoBattleReplayFinishResultPlan(...)`，頁面不再自己手拼 replay 結算 payload
-- battle rewards 的掉落 / 修為 / loot log manifest，現在也已開始共用 `createBattleRewardManifest(...) / createBattleRewardApplicationPlan(...)`，而 live world strike 也已開始透過 `runPlayerWorldStrikeOutcomePipeline(...)` 直接套用 reward / log / encounter clear；頁面不再自己手算 exp、靈石與掉落字串
+- battle rewards 的掉落 / 修為 / loot log manifest，現在也已開始共用 `createBattleRewardManifest(...) / createBattleRewardApplicationPlan(...)`，而 live world strike 也已開始透過 `runPlayerWorldStrikePipeline(...) / runEnemyWorldStrikePipeline(...)` 直接套用 reward / log / defeat / encounter clear；頁面不再自己手算 exp、靈石與掉落字串
 - `Adventure` 內舊戰報 replay 的 visual payload，現在已正式共用 `battleSystem.ts` 的 `createBattleReplayVisualPlan(...)`，頁面不再自己維護 attack / damage visual 規則
-- `Adventure` 內 player / enemy world strike 的 execute 結果組裝，現在也已開始共用 `runPlayerWorldStrikeOutcomePipeline(...) / runEnemyWorldStrikeOutcomePipeline(...)`；execution plan、outcome plan 與 outcome state plan 的套用流程已回收到 battle core，頁面不再自己 loop 套用範圍命中、護盾吸收、命中特效、擊殺獎勵與敗北 outcome
+- `Adventure` 內 player / enemy world strike 的 execute 結果組裝與 outcome state 套用，現在也已整併到 `runPlayerWorldStrikePipeline(...) / runEnemyWorldStrikePipeline(...)`；execution plan、outcome plan 與 outcome state plan 的內部流程已回收到 battle core，頁面不再自己 loop 套用範圍命中、護盾吸收、命中特效、擊殺獎勵與敗北 outcome
 - live world defeat 的回城地點、重生座標與提示文案，現在也已開始共用 `resolveWorldPlayerDefeatOutcome(...)`，頁面不再自己手寫敗北 outcome
 - replay 完成時的勝敗、擊殺目標與回城規則，現在也已開始共用 `resolveAutoBattleReplayOutcome(...) / getBattleRespawnMapId(...)`，頁面不再自己重算 replay defeat respawn 與 defeated monster
 - replay 完成時的 battle result、finish effects、rewards 與 defeat log，也已開始共用 `resolveAutoBattleReplayFinishResultPlan(...)`，頁面不再自己從 replay outcome 手拆這批結算欄位

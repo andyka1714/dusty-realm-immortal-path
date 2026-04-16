@@ -107,9 +107,9 @@
 - `Adventure` 內 `runAutoBattle() -> replay` 的啟動入口、replay state shape 與 frame 外殼，現在也已開始改走 `runAutoBattleReplayController(...) + createAutoBattleReplaySession(...)`，頁面 effect 不再自己分開拼接 replay lifecycle gate、本地 replay state 與 frame step/finish 邏輯
 - replay step 的 state shape 與 visual payload，現在也已開始共用 `createAutoBattleReplayStepStatePlan(...)`，頁面不再自己手拼 replay session state 與 attack / damage visual 規則
 - replay frame 的 step / finish 外殼，現在也已併入 `runAutoBattleReplayController(...)`，頁面不再自己先拆 replay transition 再拆 replay frame 的 step / finish 結果
-- battle rewards 的掉落 / 修為 / loot log manifest，現在也已開始共用 `createBattleRewardManifest(...) / createBattleRewardApplicationPlan(...)`，而 live world strike 也已開始透過 `runPlayerWorldStrikeOutcomePipeline(...)` 直接套用 reward / log / encounter clear；頁面不再自己手算 exp、靈石與掉落字串
+- battle rewards 的掉落 / 修為 / loot log manifest，現在也已開始共用 `createBattleRewardManifest(...) / createBattleRewardApplicationPlan(...)`，而 live world strike 也已開始透過 `runPlayerWorldStrikePipeline(...) / runEnemyWorldStrikePipeline(...)` 直接套用 reward / log / defeat / encounter clear；頁面不再自己手算 exp、靈石與掉落字串
 - `Adventure` 內舊戰報 replay 的 visual payload，現在已正式共用 `battleSystem.ts` 的 `createBattleReplayVisualPlan(...)`，頁面不再自己維護 attack / damage visual 規則
-- `Adventure` 內 player / enemy world strike 的 execute 結果組裝，現在也已開始共用 `runPlayerWorldStrikeOutcomePipeline(...) / runEnemyWorldStrikeOutcomePipeline(...)`；execution plan、outcome plan 與 outcome state plan 的套用流程已回收到 battle core，頁面不再自己 loop 套用範圍命中、護盾吸收、命中特效、擊殺獎勵與敗北 outcome
+- `Adventure` 內 player / enemy world strike 的 execute 結果組裝與 outcome state 套用，現在也已整併到 `runPlayerWorldStrikePipeline(...) / runEnemyWorldStrikePipeline(...)`；execution plan、outcome plan 與 outcome state plan 的內部流程已回收到 battle core，頁面不再自己 loop 套用範圍命中、護盾吸收、命中特效、擊殺獎勵與敗北 outcome
 - battle timer bucket 與 replay 啟動 / 重置判定，現在也已開始共用 `createCombatTimerBuckets(...) / clearCombatTimerBucket(...) / clearAllCombatTimers(...) / runAutoBattleReplayController(...)`，頁面不再自己維護 world / replay timer manager 與 replay start/reset 條件
 - world encounter 的 clear/reset state shape，現在也已開始共用 `createClearWorldCombatEncounterState(...) / createResetWorldCombatEncounterState(...)`，頁面不再自己手拼 target/status/cooldown/shield 清理欄位
 - world defeat 的 respawn + 頁面狀態重置 plan，現在也已開始共用 `resolveWorldPlayerDefeatPlan(...) / createWorldPlayerDefeatStatePlan(...)`，並由 `resolveEnemyWorldStrikeOutcomeStatePlan(...)` 直接帶出 defeat state plan；頁面不再自己散寫 auto-battle 停止、world hp 重置與 encounter state 套用
@@ -123,7 +123,7 @@
 - `Adventure` 內 player / enemy world strike 與 replay step 的 visual payload，也已開始共用 `WorldStrikeVisualPlan` 路徑；live / replay 不再各自手拼 projectile、area 與 impact payload
 - 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再另外維護一套 effect dispatch
 - `Adventure` 內 player / enemy world strike 的投射物、範圍、命中特效與傷害浮字，也已開始共用 visual helper，地圖即時戰鬥不再各自維護兩套 effect dispatch 流程
-- `Adventure` 內 player / enemy world strike 的實際執行鏈，也已開始抽成 `executePlayerWorldStrike(...) / executeEnemyWorldStrike(...)`，玩家與怪物分支不再各自攤開整段命中後流程
+- `Adventure` 內 player / enemy world strike 的實際執行鏈，現在也已進一步整併到 `runPlayerWorldStrikePipeline(...) / runEnemyWorldStrikePipeline(...)`，玩家與怪物分支不再各自攤開整段命中後流程
 - formal core 被動的基礎屬性收益，已改成逐招明確對照表；absorbed retired passive 透過 formal id 承接時，也會吃到同一份 explicit 對照
 - 所有正式核心被動現在都至少會對一項正式戰鬥屬性產生明確變化，可直接透過測試驗證不再只靠職業 / 境界 fallback 才看得出差異
 - timeline combat 內主動術式施加的 player-side / enemy-side 狀態，已開始走共用的「狀態推入 + 戰鬥日誌」helper，降低 world / timeline 分叉風險
@@ -253,7 +253,7 @@
 - world strike 的結果運算本體，也已開始拆成 `resolvePlayerWorldStrikeOutcome(...) / resolveEnemyWorldStrikeOutcome(...)`，world 視角的傷害、stance 與狀態套用不再全部擠在入口函式內
 - world strike 的狀態名組裝，也已開始拆成 `buildPlayerWorldStrikeStatusNames(...) / buildEnemyWorldStrikeStatusNames(...)`，player-side 與 enemy-side 的 stance / incoming status 不再在結果組裝裡直接攤平
 - world strike 的被動狀態整理也已拆層：enemy 端改成 `defensive / survival` 兩段 helper，player 端改成 `sword / body / mage` 三段 helper，降低單一函式持續膨脹的風險
-- `Adventure` 的 world strike 預覽與延遲執行排程，也已開始抽成 `queueTimedCombatPlan(...) / queueWorldStrikePlan(...) / applyPlayerWorldStrikePreview(...) / applyEnemyWorldStrikePreview(...)`，玩家與怪物分支不再各自維護 readyAt / 狀態 / 戰鬥訊息的重複流程
+- `Adventure` 的 world strike 預覽與延遲執行排程，也已開始抽成 `createPlayerWorldStrikePreviewPlan(...) / createEnemyWorldStrikePreviewPlan(...) / createWorldStrikeQueuePlan(...) / queueTimedCombatPlan(...)`，玩家與怪物分支不再各自維護 readyAt / 狀態 / 戰鬥訊息的重複流程
 - world strike 的預覽文案、預覽狀態與 readyAt/shield 更新，現在也已開始收斂到 `createPlayerWorldStrikePreviewPlan(...) / createEnemyWorldStrikePreviewPlan(...)`，玩家與怪物分支不再各自手寫 preview message 與狀態套用樣板
 - `Adventure` 的 world strike queue orchestration，也已開始收斂到 `createWorldStrikeQueuePlan(...) + queueTimedCombatPlan(...)`，cast、preview 與 execute 不再在 player / enemy 分支重複拼接
 - `Adventure` 的 live world action 出手鏈，現在已進一步改走 `runPlayerWorldStrikePipeline(...) / runEnemyWorldStrikePipeline(...) / runWorldCombatControllerFrame(...)`，頁面不再維護 preview、execute 與 outcome apply 的中間 wrapper
