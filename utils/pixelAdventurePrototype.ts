@@ -1,4 +1,4 @@
-import { ActiveMonster, Coordinate, MapData, Portal } from "../types";
+import { ActiveMonster, Coordinate, EnemyRank, MapData, Portal } from "../types";
 import type { WorldCombatStagePresentation } from "./worldCombatPresentation";
 
 export const PIXEL_PROTOTYPE_MAP_ID = "20";
@@ -49,6 +49,8 @@ export interface PixelPrototypeMonsterModel extends Coordinate {
   isTargeted: boolean;
   worldX: number;
   worldY: number;
+  tokenLabel: string;
+  tokenTone: "enemy" | "elite" | "boss";
 }
 
 export interface PixelPrototypePortalModel extends Coordinate {
@@ -61,6 +63,8 @@ export interface PixelPrototypePortalModel extends Coordinate {
 export interface PixelPrototypePlayerModel extends Coordinate {
   worldX: number;
   worldY: number;
+  tokenLabel: string;
+  tokenTone: "player";
 }
 
 export interface PixelPrototypeCueModel {
@@ -210,6 +214,20 @@ const resolveMonsterArchetype = (
   return "melee";
 };
 
+const resolveEntityTokenLabel = (name: string, fallback: string) => {
+  const trimmed = name.trim();
+  if (!trimmed) return fallback;
+  return trimmed[trimmed.length - 1] ?? fallback;
+};
+
+const resolveMonsterTokenTone = (
+  rank: EnemyRank
+): "enemy" | "elite" | "boss" => {
+  if (rank === EnemyRank.Boss) return "boss";
+  if (rank === EnemyRank.Elite) return "elite";
+  return "enemy";
+};
+
 const buildTerrain = (
   viewport: PixelPrototypeViewport,
   portals: Portal[]
@@ -276,6 +294,8 @@ export const buildPixelPrototypeScene = ({
         ...playerPosition,
         worldX: playerPosition.x,
         worldY: playerPosition.y,
+        tokenLabel: "我",
+        tokenTone: "player",
       },
       monsters: [],
       portals: [],
@@ -301,6 +321,8 @@ export const buildPixelPrototypeScene = ({
       worldY: monster.y,
       archetype: resolveMonsterArchetype(mapData, monster),
       isTargeted: monster.instanceId === targetMonsterId,
+      tokenLabel: resolveEntityTokenLabel(monster.name, "敵"),
+      tokenTone: resolveMonsterTokenTone(monster.rank),
     }));
 
   const targetedMonster = monsters.find((monster) => monster.isTargeted) ?? null;
@@ -316,6 +338,8 @@ export const buildPixelPrototypeScene = ({
       ...playerPosition,
       worldX: playerPosition.x,
       worldY: playerPosition.y,
+      tokenLabel: "我",
+      tokenTone: "player",
     },
     monsters,
     portals: portals.map((portal) => ({

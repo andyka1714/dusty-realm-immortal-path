@@ -9,7 +9,7 @@ const map20 = MAPS.find((map) => map.id === "20");
 const map21 = MAPS.find((map) => map.id === "21");
 
 describe("AdventurePixelStagePrototype", () => {
-  it("renders the pixel prototype legend for the representative map", () => {
+  it("renders the hybrid pixel-map and text-token legend for the representative map", () => {
     expect(map20).toBeTruthy();
 
     const markup = renderToStaticMarkup(
@@ -38,7 +38,7 @@ describe("AdventurePixelStagePrototype", () => {
       />
     );
 
-    expect(markup).toContain("像素原型 Vertical Slice");
+    expect(markup).toContain("像素地圖 + 文字 token");
     expect(markup).toContain("東郊靈田");
     expect(markup).toContain("近戰命中");
     expect(markup).toContain("投射物");

@@ -207,7 +207,7 @@ export const AdventurePixelPrototypePreview: React.FC<
                 {preview.mapData.name} 像素風 vertical slice 驗證入口
               </h1>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-stone-300 md:text-[15px]">
-                這個入口只用來驗證 web / mobile 的像素縮放、右側 HUD 可讀性與基本效能 budget，
+                這個入口只用來驗證像素地圖、文字 token 實體、右側 HUD 可讀性與基本效能 budget，
                 不改動正式遊玩流程。帶上
                 <code className="mx-1 rounded bg-stone-900 px-1.5 py-0.5 text-cyan-200">
                   ?pixel-prototype-preview=1
@@ -218,7 +218,7 @@ export const AdventurePixelPrototypePreview: React.FC<
             <div className="rounded-xl border border-cyan-900/50 bg-cyan-950/30 px-4 py-3 text-sm text-cyan-100">
               Desktop / Mobile
               <div className="mt-1 text-xs text-cyan-200/80">
-                同一入口直接對照 3x / 2x scaling 與 HUD 密度
+                同一入口直接對照 3x / 2x scaling、文字 token 與 HUD 密度
               </div>
             </div>
           </div>

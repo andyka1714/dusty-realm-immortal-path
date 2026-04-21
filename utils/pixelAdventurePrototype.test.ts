@@ -107,6 +107,60 @@ describe("pixelAdventurePrototype", () => {
     expect(model.cues.showTargetFocus).toBe(true);
   });
 
+  it("builds readable text-token metadata for the player and monsters", () => {
+    expect(map20).toBeTruthy();
+
+    const model = buildPixelPrototypeScene({
+      mapData: map20!,
+      playerPosition: { x: 40, y: 40 },
+      activeMonsters: [
+        {
+          instanceId: "monster-ranged",
+          templateId: "m20_c1",
+          name: "蝕骨田鼬",
+          x: 42,
+          y: 40,
+          currentHp: 30,
+          rank: EnemyRank.Common,
+          spawnX: 42,
+          spawnY: 40,
+        },
+        {
+          instanceId: "monster-melee",
+          templateId: "m20_c2",
+          name: "偷糧碩鼠",
+          x: 39,
+          y: 41,
+          currentHp: 26,
+          rank: EnemyRank.Common,
+          spawnX: 39,
+          spawnY: 41,
+        },
+      ],
+      portals: map20!.portals,
+      targetMonsterId: "monster-ranged",
+      combatPresentation: null,
+      width: 600,
+      height: 600,
+      isMobile: false,
+    });
+
+    expect(model.player.tokenLabel).toBe("我");
+    expect(model.player.tokenTone).toBe("player");
+    expect(
+      model.monsters.find((monster) => monster.instanceId === "monster-ranged")
+        ?.tokenLabel
+    ).toBe("鼬");
+    expect(
+      model.monsters.find((monster) => monster.instanceId === "monster-melee")
+        ?.tokenLabel
+    ).toBe("鼠");
+    expect(
+      model.monsters.find((monster) => monster.instanceId === "monster-ranged")
+        ?.tokenTone
+    ).toBe("enemy");
+  });
+
   it("rejects maps outside the representative prototype scope", () => {
     expect(map21).toBeTruthy();
 

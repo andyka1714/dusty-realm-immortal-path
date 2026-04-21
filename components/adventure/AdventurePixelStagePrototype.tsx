@@ -21,51 +21,6 @@ interface AdventurePixelStagePrototypeProps {
   onPrototypeReady?: (runtime: { renderFrame: () => void } | null) => void;
 }
 
-type PixelBlock = {
-  x: number;
-  y: number;
-  width?: number;
-  height?: number;
-  color: number;
-};
-
-const PLAYER_BLOCKS: PixelBlock[] = [
-  { x: 12, y: 2, width: 8, height: 6, color: 0xf8d8b0 },
-  { x: 10, y: 8, width: 12, height: 11, color: 0x355cde },
-  { x: 8, y: 12, width: 16, height: 12, color: 0x243c9f },
-  { x: 9, y: 20, width: 6, height: 9, color: 0x7d5228 },
-  { x: 17, y: 20, width: 6, height: 9, color: 0x7d5228 },
-  { x: 7, y: 9, width: 3, height: 7, color: 0xf3c969 },
-  { x: 22, y: 10, width: 3, height: 9, color: 0xf3c969 },
-];
-
-const MELEE_BLOCKS: PixelBlock[] = [
-  { x: 11, y: 3, width: 10, height: 6, color: 0x6f5842 },
-  { x: 8, y: 9, width: 16, height: 11, color: 0x8a6f52 },
-  { x: 6, y: 15, width: 20, height: 10, color: 0x5f4a34 },
-  { x: 7, y: 24, width: 7, height: 5, color: 0x3f3124 },
-  { x: 18, y: 24, width: 7, height: 5, color: 0x3f3124 },
-  { x: 22, y: 10, width: 4, height: 4, color: 0xf6e27a },
-];
-
-const RANGED_BLOCKS: PixelBlock[] = [
-  { x: 10, y: 2, width: 12, height: 6, color: 0xdccaa1 },
-  { x: 8, y: 8, width: 16, height: 10, color: 0x8aa35a },
-  { x: 6, y: 16, width: 20, height: 10, color: 0x69783c },
-  { x: 8, y: 24, width: 7, height: 5, color: 0x52492b },
-  { x: 17, y: 24, width: 7, height: 5, color: 0x52492b },
-  { x: 23, y: 10, width: 3, height: 11, color: 0xc68f42 },
-];
-
-const CASTER_BLOCKS: PixelBlock[] = [
-  { x: 11, y: 2, width: 10, height: 6, color: 0xd5d7e8 },
-  { x: 7, y: 8, width: 18, height: 11, color: 0x6a59b5 },
-  { x: 5, y: 18, width: 22, height: 9, color: 0x483889 },
-  { x: 8, y: 24, width: 6, height: 5, color: 0x2d2554 },
-  { x: 18, y: 24, width: 6, height: 5, color: 0x2d2554 },
-  { x: 23, y: 9, width: 3, height: 7, color: 0x9ee8ff },
-];
-
 const TERRAIN_FILL_COLORS = {
   grass: 0x406a37,
   dirt: 0x6f5133,
@@ -74,34 +29,6 @@ const TERRAIN_FILL_COLORS = {
   path: 0x8a744d,
   portal: 0x3f4a2b,
 } as const;
-
-const drawPixelBlocks = ({
-  container,
-  blocks,
-  size,
-}: {
-  container: PIXI.Container;
-  blocks: PixelBlock[];
-  size: number;
-}) => {
-  const pixelSize = size / 32;
-  const sprite = new PIXI.Graphics();
-
-  blocks.forEach((block) => {
-    sprite.beginFill(block.color, 1);
-    sprite.drawRect(
-      block.x * pixelSize,
-      block.y * pixelSize,
-      (block.width ?? 1) * pixelSize,
-      (block.height ?? 1) * pixelSize
-    );
-    sprite.endFill();
-  });
-
-  sprite.x = -size / 2;
-  sprite.y = -size + pixelSize * 2;
-  container.addChild(sprite);
-};
 
 const drawTerrainTile = ({
   graphics,
@@ -263,10 +190,58 @@ const drawStatusCue = ({
   container.addChild(badge);
 };
 
-const resolveMonsterBlocks = (archetype: "melee" | "ranged" | "caster") => {
-  if (archetype === "caster") return CASTER_BLOCKS;
-  if (archetype === "ranged") return RANGED_BLOCKS;
-  return MELEE_BLOCKS;
+const resolveTokenAccent = (tone: "player" | "enemy" | "elite" | "boss") => {
+  if (tone === "player") return 0x4ade80;
+  if (tone === "elite") return 0xfacc15;
+  if (tone === "boss") return 0xfb7185;
+  return 0xf59e0b;
+};
+
+const drawEntityToken = ({
+  container,
+  centerX,
+  centerY,
+  label,
+  tone,
+  isTargeted = false,
+  cellSize,
+}: {
+  container: PIXI.Container;
+  centerX: number;
+  centerY: number;
+  label: string;
+  tone: "player" | "enemy" | "elite" | "boss";
+  isTargeted?: boolean;
+  cellSize: number;
+}) => {
+  const accent = resolveTokenAccent(tone);
+  const tokenSize = Math.max(24, Math.floor(cellSize * 0.72));
+  const token = new PIXI.Graphics();
+
+  token.beginFill(0x111827, 0.96);
+  token.lineStyle(isTargeted ? 3 : 2, accent, 1);
+  token.drawRoundedRect(
+    -tokenSize / 2,
+    -tokenSize / 2,
+    tokenSize,
+    tokenSize,
+    6
+  );
+  token.endFill();
+
+  const text = new PIXI.Text(label, {
+    fontFamily: "PingFang TC, Noto Sans TC, sans-serif",
+    fontSize: Math.max(14, Math.floor(cellSize * 0.42)),
+    fontWeight: "700",
+    fill: 0xf8fafc,
+  });
+  text.anchor.set(0.5);
+  text.x = centerX;
+  text.y = centerY + 1;
+
+  token.x = centerX;
+  token.y = centerY;
+  container.addChild(token, text);
 };
 
 export const AdventurePixelStagePrototype: React.FC<AdventurePixelStagePrototypeProps> = ({
@@ -400,18 +375,18 @@ export const AdventurePixelStagePrototype: React.FC<AdventurePixelStagePrototype
     const entityLayer = new PIXI.Container();
 
     model.monsters.forEach((monster) => {
-      const container = new PIXI.Container();
       const centerX = (monster.x - model.viewport.startX + 0.5) * model.metrics.cellSize;
       const centerY = (monster.y - model.viewport.startY + 0.5) * model.metrics.cellSize;
 
-      container.x = centerX;
-      container.y = centerY + model.metrics.cellSize * 0.15;
-      drawPixelBlocks({
-        container,
-        blocks: resolveMonsterBlocks(monster.archetype),
-        size: model.metrics.entityDisplaySize,
+      drawEntityToken({
+        container: entityLayer,
+        centerX,
+        centerY: centerY + model.metrics.cellSize * 0.12,
+        label: monster.tokenLabel,
+        tone: monster.tokenTone,
+        isTargeted: monster.isTargeted,
+        cellSize: model.metrics.cellSize,
       });
-      entityLayer.addChild(container);
 
       if (monster.isTargeted && model.cues.showTargetFocus) {
         drawTargetFocus({
@@ -441,19 +416,18 @@ export const AdventurePixelStagePrototype: React.FC<AdventurePixelStagePrototype
       }
     });
 
-    const playerContainer = new PIXI.Container();
     const playerCenterX =
       (model.player.x - model.viewport.startX + 0.5) * model.metrics.cellSize;
     const playerCenterY =
       (model.player.y - model.viewport.startY + 0.5) * model.metrics.cellSize;
-    playerContainer.x = playerCenterX;
-    playerContainer.y = playerCenterY + model.metrics.cellSize * 0.15;
-    drawPixelBlocks({
-      container: playerContainer,
-      blocks: PLAYER_BLOCKS,
-      size: model.metrics.entityDisplaySize,
+    drawEntityToken({
+      container: entityLayer,
+      centerX: playerCenterX,
+      centerY: playerCenterY + model.metrics.cellSize * 0.12,
+      label: model.player.tokenLabel,
+      tone: model.player.tokenTone,
+      cellSize: model.metrics.cellSize,
     });
-    entityLayer.addChild(playerContainer);
 
     if (model.cues.showProjectileCue) {
       const targetMonster = model.monsters.find((monster) => monster.isTargeted);
@@ -496,7 +470,7 @@ export const AdventurePixelStagePrototype: React.FC<AdventurePixelStagePrototype
   return (
     <div className="relative h-full w-full overflow-hidden rounded-xl border border-stone-700 bg-stone-950/95">
       <div className="absolute left-3 top-3 z-10 rounded-lg border border-cyan-900/60 bg-black/70 px-3 py-2 text-xs text-cyan-100 backdrop-blur">
-        <div className="font-bold tracking-[0.18em] text-cyan-200">像素原型 Vertical Slice</div>
+        <div className="font-bold tracking-[0.18em] text-cyan-200">像素地圖 + 文字 token</div>
         <div className="mt-1 text-stone-300">
           {mapData.name} · {isMobile ? "Mobile 2x" : "Desktop 3x"}
         </div>
