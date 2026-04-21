@@ -294,6 +294,40 @@ describe("adventureTerrainPixelization", () => {
     expect(celestialPrison.find((tile) => tile.x === 9 && tile.y === 9)?.kind).toBe("accent");
   });
 
+  it("keeps center-route maps visually distinct even when they share the same theme", () => {
+    const battlefield = buildAdventureTerrainTiles({
+      mapId: "120",
+      theme: "Center",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const abyss = buildAdventureTerrainTiles({
+      mapId: "121",
+      theme: "Center",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const bridge = buildAdventureTerrainTiles({
+      mapId: "122",
+      theme: "Center",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(battlefield.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(battlefield.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
+    expect(abyss.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("water");
+    expect(abyss.find((tile) => tile.x === 5 && tile.y === 5)?.kind).toBe("accent");
+    expect(bridge.find((tile) => tile.x === 2 && tile.y === 6)?.kind).toBe("path");
+    expect(bridge.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("path");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");

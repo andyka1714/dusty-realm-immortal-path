@@ -299,6 +299,7 @@ prototype 不要求：
 - 有 Boss spawn 的正式地圖應在背景層自帶小型 arena / altar / battlefield clearing，讓戰鬥場域感來自 terrain，而不是改 entity token
 - 同一個 theme 底下的不同正式地圖也不應完全共用同一版 floorplan；像 `太初外環 / 歸墟裂界 / 鴻蒙道宮` 這種都屬 `Ultimate`，仍應保留 route-specific 輪廓差異
 - 同理，`接引仙殿 / 九重天闕 / 玉詔仙獄` 這類同屬 `Immortal` 的地圖，也應各自保留天階、宮闕台階或仙獄柵欄等背景輪廓差異
+- `三界戰場 / 隕仙深淵 / 殞星界橋` 這類同屬 `Center` 的高境界地圖，也不應退化成城鎮 plaza 規則，而應保有戰場、深淵與界橋的專屬 landmark
 - prototype 內的 entity token 實驗只保留在驗證入口，不直接推進到主流程
 
 ---
