@@ -29,6 +29,7 @@
 - 繼續以 `PixiJS` 作為 prototype renderer，不新增第二套 3D 技術棧
 - vertical slice 只鎖定一張代表性地圖，預設為 `東郊靈田 (map 20)`，因為它尺寸小、地形清楚、容易驗證 tile / terrain cue 的第一版語言
 - prototype 的最小角色組合固定為：`1` 個玩家、`1` 個近戰怪、`1` 個遠程 / 法術怪，外加傳送門與 target focus，但角色本體維持文字 token 而不是像素 sprite
+- 角色 token 的最終 prototype 基線不是「一般文字方塊」，而是更接近地圖單字牌的緊湊 plaque chrome；一般目標只顯示單字，target / 高優先敵人才顯示最短名牌
 - 像素資產規格固定採用：
   - 地面 tile：`16x16`
   - 主要 VFX / telegraph 單元：`16x16` 或 `32x32`

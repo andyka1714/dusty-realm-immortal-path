@@ -34,6 +34,9 @@
 - 玩家固定顯示 `我`
 - 怪物使用名稱中的高辨識單字作為 token，例如 `鼬`、`狼`
 - NPC / 功能點沿用 `商`、`匠`、`長` 這種文字牌語言
+- entity chrome 應收斂成緊湊的「單字牌」而不是一般 debug 方塊
+- 玩家牌預設只顯示單字；一般怪物也只顯示單字，避免把畫面重新做成 full sprite RPG
+- 只有 target 中、精英或 Boss 類的高優先目標，才允許在 token 上方顯示最短名牌
 - token 的辨識優先順序固定為：`單字 > 框色 > target/status 外圈 > HUD`
 - 保留目前 `?pixel-prototype-preview=1` 與 `pixel-prototype-mode=desktop|mobile` 驗證入口，避免重新做一套驗證殼
 
@@ -50,5 +53,7 @@
 
 - 像素原型畫面不再出現玩家 / 怪物 block sprite
 - 桌機與手機 preview 都能看到一致的文字 token entity
+- token 視覺更接近地圖上的單字牌，而不是一般文字方塊
+- target 怪物若帶上方名牌，也不會壓住危險圈、投射物與 focus cue
 - Target HUD、危險區與投射物 cue 在 token 模式下仍然可讀
 - 現有 preview 測試、build、typecheck 與 OpenSpec 驗證維持通過
