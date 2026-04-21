@@ -585,11 +585,28 @@ const buildThemeMacroZones = ({
   }
 
   if (theme === "Void") {
-    pushVerticalLine(forcedZones, centerX, 2, height - 3, "water");
-    forcedZones.push({ x: centerX - 1, y: centerY - 1, radius: 0, kind: "accent" });
-    forcedZones.push({ x: centerX + 1, y: centerY + 1, radius: 0, kind: "accent" });
-    forcedZones.push({ x: centerX - 1, y: centerY + 1, radius: 0, kind: "accent" });
-    forcedZones.push({ x: centerX + 1, y: centerY - 1, radius: 0, kind: "accent" });
+    if (mapId === "130") {
+      pushVerticalLine(forcedZones, centerX, 2, height - 3, "water");
+      forcedZones.push({ x: centerX - 2, y: centerY, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 2, y: centerY, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX - 1, y: centerY - 1, radius: 0, kind: "accent" });
+    } else if (mapId === "131") {
+      forcedZones.push({ x: centerX, y: centerY, radius: 0, kind: "water" });
+      forcedZones.push({ x: centerX - 3, y: centerY - 3, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 3, y: centerY + 3, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX - 3, y: centerY + 3, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 3, y: centerY - 3, radius: 0, kind: "accent" });
+    } else if (mapId === "132") {
+      pushHorizontalLine(forcedZones, centerY, 2, width - 3, "path");
+      pushVerticalLine(forcedZones, centerX - 2, 2, height - 3, "accent");
+      pushVerticalLine(forcedZones, centerX + 2, 2, height - 3, "accent");
+    } else {
+      pushVerticalLine(forcedZones, centerX, 2, height - 3, "water");
+      forcedZones.push({ x: centerX - 1, y: centerY - 1, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 1, y: centerY + 1, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX - 1, y: centerY + 1, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 1, y: centerY - 1, radius: 0, kind: "accent" });
+    }
   }
 
   if (theme === "Spirit") {

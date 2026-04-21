@@ -328,6 +328,40 @@ describe("adventureTerrainPixelization", () => {
     expect(bridge.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("path");
   });
 
+  it("keeps void-route maps visually distinct even when they share the same theme", () => {
+    const timeRiver = buildAdventureTerrainTiles({
+      mapId: "130",
+      theme: "Void",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const brokenVoid = buildAdventureTerrainTiles({
+      mapId: "131",
+      theme: "Void",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const corridor = buildAdventureTerrainTiles({
+      mapId: "132",
+      theme: "Void",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(timeRiver.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("water");
+    expect(timeRiver.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
+    expect(brokenVoid.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("water");
+    expect(brokenVoid.find((tile) => tile.x === 3 && tile.y === 3)?.kind).toBe("accent");
+    expect(corridor.find((tile) => tile.x === 2 && tile.y === 6)?.kind).toBe("path");
+    expect(corridor.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("path");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");
