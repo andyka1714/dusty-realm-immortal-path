@@ -226,6 +226,40 @@ describe("adventureTerrainPixelization", () => {
     expect(wildRoute.find((tile) => tile.x === 6 && tile.y === 6)?.kind).not.toBe("path");
   });
 
+  it("keeps ultimate-route maps visually distinct even when they share the same theme", () => {
+    const emperorPalace = buildAdventureTerrainTiles({
+      mapId: "180",
+      theme: "Ultimate",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const outerRing = buildAdventureTerrainTiles({
+      mapId: "181",
+      theme: "Ultimate",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const riftRoute = buildAdventureTerrainTiles({
+      mapId: "182",
+      theme: "Ultimate",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(emperorPalace.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(outerRing.find((tile) => tile.x === 3 && tile.y === 6)?.kind).toBe("path");
+    expect(outerRing.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("path");
+    expect(riftRoute.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("water");
+    expect(riftRoute.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("water");
+    expect(riftRoute.find((tile) => tile.x === 5 && tile.y === 5)?.kind).toBe("accent");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");

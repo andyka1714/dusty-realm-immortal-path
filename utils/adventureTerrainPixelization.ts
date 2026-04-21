@@ -542,10 +542,12 @@ const buildStructuredZones = ({
 };
 
 const buildThemeMacroZones = ({
+  mapId,
   theme,
   width,
   height,
 }: {
+  mapId: string;
   theme: string;
   width: number;
   height: number;
@@ -601,11 +603,26 @@ const buildThemeMacroZones = ({
   }
 
   if (theme === "Ultimate") {
-    forcedZones.push({ x: centerX, y: centerY, radius: 0, kind: "path" });
-    forcedZones.push({ x: centerX - 1, y: centerY - 1, radius: 0, kind: "accent" });
-    forcedZones.push({ x: centerX + 1, y: centerY - 1, radius: 0, kind: "accent" });
-    forcedZones.push({ x: centerX - 1, y: centerY + 1, radius: 0, kind: "accent" });
-    forcedZones.push({ x: centerX + 1, y: centerY + 1, radius: 0, kind: "accent" });
+    if (mapId === "181") {
+      pushHorizontalLine(forcedZones, centerY, centerX - 3, centerX + 3, "path");
+      pushVerticalLine(forcedZones, centerX, centerY - 3, centerY + 3, "path");
+      forcedZones.push({ x: centerX - 3, y: centerY - 3, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 3, y: centerY - 3, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX - 3, y: centerY + 3, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 3, y: centerY + 3, radius: 0, kind: "accent" });
+    } else if (mapId === "182") {
+      pushVerticalLine(forcedZones, centerX, 2, height - 3, "water");
+      forcedZones.push({ x: centerX - 1, y: centerY - 1, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 1, y: centerY - 1, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX - 1, y: centerY + 1, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 1, y: centerY + 1, radius: 0, kind: "accent" });
+    } else {
+      forcedZones.push({ x: centerX, y: centerY, radius: 0, kind: "path" });
+      forcedZones.push({ x: centerX - 1, y: centerY - 1, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 1, y: centerY - 1, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX - 1, y: centerY + 1, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 1, y: centerY + 1, radius: 0, kind: "accent" });
+    }
   }
 
   return forcedZones;
@@ -713,6 +730,7 @@ export const buildAdventureTerrainTiles = ({
     npcs,
   });
   const forcedZones = buildThemeMacroZones({
+    mapId,
     theme,
     width,
     height,
