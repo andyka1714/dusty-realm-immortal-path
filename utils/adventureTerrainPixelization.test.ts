@@ -362,6 +362,41 @@ describe("adventureTerrainPixelization", () => {
     expect(corridor.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("path");
   });
 
+  it("keeps spirit-route maps visually distinct even when they share the same theme", () => {
+    const spiritCity = buildAdventureTerrainTiles({
+      mapId: "140",
+      theme: "Spirit",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const spiritCore = buildAdventureTerrainTiles({
+      mapId: "141",
+      theme: "Spirit",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const spiritAltar = buildAdventureTerrainTiles({
+      mapId: "142",
+      theme: "Spirit",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(spiritCity.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(spiritCity.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
+    expect(spiritCore.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(spiritCore.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("accent");
+    expect(spiritCore.find((tile) => tile.x === 8 && tile.y === 8)?.kind).toBe("accent");
+    expect(spiritAltar.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("path");
+    expect(spiritAltar.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("path");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");

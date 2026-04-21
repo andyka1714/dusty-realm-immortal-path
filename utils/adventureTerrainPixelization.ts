@@ -610,11 +610,23 @@ const buildThemeMacroZones = ({
   }
 
   if (theme === "Spirit") {
-    forcedZones.push({ x: centerX, y: centerY, radius: 0, kind: "path" });
-    forcedZones.push({ x: centerX - 2, y: centerY, radius: 0, kind: "accent" });
-    forcedZones.push({ x: centerX + 2, y: centerY, radius: 0, kind: "accent" });
-    forcedZones.push({ x: centerX, y: centerY - 2, radius: 0, kind: "accent" });
-    forcedZones.push({ x: centerX, y: centerY + 2, radius: 0, kind: "accent" });
+    if (mapId === "141") {
+      forcedZones.push({ x: centerX, y: centerY, radius: 0, kind: "path" });
+      forcedZones.push({ x: centerX - 2, y: centerY - 2, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 2, y: centerY - 2, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX - 2, y: centerY + 2, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 2, y: centerY + 2, radius: 0, kind: "accent" });
+    } else if (mapId === "142") {
+      pushVerticalLine(forcedZones, centerX, 2, height - 3, "path");
+      forcedZones.push({ x: centerX - 2, y: centerY, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 2, y: centerY, radius: 0, kind: "accent" });
+    } else {
+      forcedZones.push({ x: centerX, y: centerY, radius: 0, kind: "path" });
+      forcedZones.push({ x: centerX - 2, y: centerY, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 2, y: centerY, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX, y: centerY - 2, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX, y: centerY + 2, radius: 0, kind: "accent" });
+    }
   }
 
   if (theme === "Sky") {
