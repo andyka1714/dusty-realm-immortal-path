@@ -49,6 +49,12 @@ interface BuildAdventureTerrainTilesInput {
   npcs?: Pick<NPC, "x" | "y">[];
 }
 
+interface TerrainZone {
+  x: number;
+  y: number;
+  radius: number;
+}
+
 const DEFAULT_PALETTE: AdventureTerrainPaletteConfig = {
   theme: "Default",
   backgroundColor: 0x14110f,
@@ -404,8 +410,94 @@ const isNearPoint = (
   radius: number
 ) => points.some((point) => Math.abs(point.x - x) <= radius && Math.abs(point.y - y) <= radius);
 
+const isInsideZone = (x: number, y: number, zones: TerrainZone[]) =>
+  zones.some((zone) => Math.abs(zone.x - x) <= zone.radius && Math.abs(zone.y - y) <= zone.radius);
+
 const getPaletteConfig = (theme: string): AdventureTerrainPaletteConfig =>
   TERRAIN_PALETTES[theme] ?? DEFAULT_PALETTE;
+
+const clampPoint = (value: number, max: number) => Math.max(0, Math.min(value, max));
+
+const buildOrthogonalRoute = (
+  from: { x: number; y: number },
+  to: { x: number; y: number }
+) => {
+  const points: { x: number; y: number }[] = [];
+  const stepX = from.x <= to.x ? 1 : -1;
+  const stepY = from.y <= to.y ? 1 : -1;
+
+  for (let x = from.x; x !== to.x; x += stepX) {
+    points.push({ x, y: from.y });
+  }
+  points.push({ x: to.x, y: from.y });
+
+  for (let y = from.y; y !== to.y; y += stepY) {
+    points.push({ x: to.x, y });
+  }
+  points.push({ x: to.x, y: to.y });
+
+  return points;
+};
+
+const buildStructuredZones = ({
+  theme,
+  width,
+  height,
+  portals,
+  npcs,
+}: {
+  theme: string;
+  width: number;
+  height: number;
+  portals: Portal[];
+  npcs: Pick<NPC, "x" | "y">[];
+}) => {
+  if (theme !== "Center" && theme !== "Sect") {
+    return {
+      pathPoints: [...portals.map((portal) => ({ x: portal.x, y: portal.y })), ...npcs],
+      plazaZones: [] as TerrainZone[],
+    };
+  }
+
+  const fallbackHub = {
+    x: clampPoint(Math.floor(width / 2), width - 1),
+    y: clampPoint(Math.floor(height / 2), height - 1),
+  };
+  const npcHub =
+    npcs.length > 0
+      ? {
+          x: clampPoint(
+            Math.round(npcs.reduce((sum, npc) => sum + npc.x, 0) / npcs.length),
+            width - 1
+          ),
+          y: clampPoint(
+            Math.round(npcs.reduce((sum, npc) => sum + npc.y, 0) / npcs.length),
+            height - 1
+          ),
+        }
+      : fallbackHub;
+
+  const pathPoints = [
+    ...portals.map((portal) => ({ x: portal.x, y: portal.y })),
+    ...npcs.map((npc) => ({ x: npc.x, y: npc.y })),
+    ...buildOrthogonalRoute(fallbackHub, npcHub),
+  ];
+
+  portals.forEach((portal) => {
+    pathPoints.push(...buildOrthogonalRoute({ x: portal.x, y: portal.y }, npcHub));
+  });
+  npcs.forEach((npc) => {
+    pathPoints.push(...buildOrthogonalRoute({ x: npc.x, y: npc.y }, npcHub));
+  });
+
+  const plazaZones: TerrainZone[] = [
+    { ...npcHub, radius: theme === "Center" ? 2 : 1 },
+    ...npcs.map((npc) => ({ x: npc.x, y: npc.y, radius: 2 })),
+    ...portals.map((portal) => ({ x: portal.x, y: portal.y, radius: 1 })),
+  ];
+
+  return { pathPoints, plazaZones };
+};
 
 export const resolveAdventureTerrainPalette = (theme: string): AdventureTerrainPalette => {
   const palette = getPaletteConfig(theme);
@@ -424,13 +516,18 @@ const resolveTileKind = ({
   y,
   palette,
   pathPoints,
+  plazaZones,
 }: {
   seed: number;
   x: number;
   y: number;
   palette: AdventureTerrainPaletteConfig;
   pathPoints: { x: number; y: number }[];
+  plazaZones: TerrainZone[];
 }): AdventureTerrainTileKind => {
+  if (isInsideZone(x, y, plazaZones)) {
+    return "path";
+  }
   if (isNearPoint(x, y, pathPoints, 1)) {
     return "path";
   }
@@ -454,10 +551,13 @@ export const buildAdventureTerrainTiles = ({
 }: BuildAdventureTerrainTilesInput): AdventureTerrainTile[] => {
   const palette = getPaletteConfig(theme);
   const seed = createSeed(mapId, theme);
-  const pathPoints = [
-    ...portals.map((portal) => ({ x: portal.x, y: portal.y })),
-    ...npcs.map((npc) => ({ x: npc.x, y: npc.y })),
-  ];
+  const { pathPoints, plazaZones } = buildStructuredZones({
+    theme,
+    width,
+    height,
+    portals,
+    npcs,
+  });
 
   const tiles: AdventureTerrainTile[] = [];
 
@@ -469,6 +569,7 @@ export const buildAdventureTerrainTiles = ({
         y,
         palette,
         pathPoints,
+        plazaZones,
       });
       const detailNoise = hashNoise(seed, x, y, 5);
       const showDetail =
