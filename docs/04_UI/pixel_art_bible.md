@@ -294,6 +294,7 @@ prototype 不要求：
 - 玩家、NPC、怪物與戰鬥中的文字 avatar 維持現狀，不改成 prototype 的文字 token 牌
 - combat overlay、target marker、status cue 與 portal marker 仍沿用正式版視覺語言
 - `仙緣鎮 / 宗門` 這類安全地圖的 terrain 應偏向結構化鋪地、空地與連接路徑，而不是完全隨機野外 patch
+- `Sea / Thunder / Immortal / Ultimate` 這類高境界 theme 也應有明確 macro shape，例如水帶、雷脈、天階或中央壇域，而不是只換 palette
 - prototype 內的 entity token 實驗只保留在驗證入口，不直接推進到主流程
 
 ---

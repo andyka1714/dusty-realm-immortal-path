@@ -109,6 +109,50 @@ describe("adventureTerrainPixelization", () => {
     expect(eastWild.find((tile) => tile.x === 3 && tile.y === 6)?.kind).not.toBe("path");
   });
 
+  it("builds macro shapes for high-realm route themes instead of palette-only swaps", () => {
+    const seaRoute = buildAdventureTerrainTiles({
+      mapId: "150",
+      theme: "Sea",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const thunderRoute = buildAdventureTerrainTiles({
+      mapId: "161",
+      theme: "Thunder",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const immortalRoute = buildAdventureTerrainTiles({
+      mapId: "170",
+      theme: "Immortal",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const ultimateRoute = buildAdventureTerrainTiles({
+      mapId: "180",
+      theme: "Ultimate",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(seaRoute.find((tile) => tile.x === 2 && tile.y === 6)?.kind).toBe("water");
+    expect(seaRoute.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("water");
+    expect(thunderRoute.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("accent");
+    expect(thunderRoute.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("accent");
+    expect(immortalRoute.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(immortalRoute.find((tile) => tile.x === 3 && tile.y === 6)?.kind).toBe("path");
+    expect(ultimateRoute.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(ultimateRoute.find((tile) => tile.x === 5 && tile.y === 5)?.kind).toBe("accent");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");

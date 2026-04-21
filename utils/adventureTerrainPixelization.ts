@@ -55,6 +55,10 @@ interface TerrainZone {
   radius: number;
 }
 
+interface ForcedTerrainZone extends TerrainZone {
+  kind: AdventureTerrainTileKind;
+}
+
 const DEFAULT_PALETTE: AdventureTerrainPaletteConfig = {
   theme: "Default",
   backgroundColor: 0x14110f,
@@ -413,6 +417,19 @@ const isNearPoint = (
 const isInsideZone = (x: number, y: number, zones: TerrainZone[]) =>
   zones.some((zone) => Math.abs(zone.x - x) <= zone.radius && Math.abs(zone.y - y) <= zone.radius);
 
+const resolveForcedKind = (
+  x: number,
+  y: number,
+  zones: ForcedTerrainZone[]
+): AdventureTerrainTileKind | null => {
+  for (const zone of zones) {
+    if (Math.abs(zone.x - x) <= zone.radius && Math.abs(zone.y - y) <= zone.radius) {
+      return zone.kind;
+    }
+  }
+  return null;
+};
+
 const getPaletteConfig = (theme: string): AdventureTerrainPaletteConfig =>
   TERRAIN_PALETTES[theme] ?? DEFAULT_PALETTE;
 
@@ -499,6 +516,49 @@ const buildStructuredZones = ({
   return { pathPoints, plazaZones };
 };
 
+const buildThemeMacroZones = ({
+  theme,
+  width,
+  height,
+}: {
+  theme: string;
+  width: number;
+  height: number;
+}) => {
+  const centerX = clampPoint(Math.floor(width / 2), width - 1);
+  const centerY = clampPoint(Math.floor(height / 2), height - 1);
+  const forcedZones: ForcedTerrainZone[] = [];
+
+  if (theme === "Sea") {
+    for (let x = 2; x < width - 2; x += 1) {
+      forcedZones.push({ x, y: centerY, radius: 0, kind: "water" });
+    }
+  }
+
+  if (theme === "Thunder") {
+    for (let y = 2; y < height - 2; y += 1) {
+      forcedZones.push({ x: centerX, y, radius: 0, kind: "accent" });
+    }
+  }
+
+  if (theme === "Immortal") {
+    forcedZones.push({ x: centerX, y: centerY, radius: 1, kind: "path" });
+    forcedZones.push({ x: centerX - 3, y: centerY, radius: 1, kind: "path" });
+    forcedZones.push({ x: centerX + 3, y: centerY, radius: 1, kind: "path" });
+    forcedZones.push({ x: centerX, y: centerY - 3, radius: 1, kind: "path" });
+  }
+
+  if (theme === "Ultimate") {
+    forcedZones.push({ x: centerX, y: centerY, radius: 0, kind: "path" });
+    forcedZones.push({ x: centerX - 1, y: centerY - 1, radius: 0, kind: "accent" });
+    forcedZones.push({ x: centerX + 1, y: centerY - 1, radius: 0, kind: "accent" });
+    forcedZones.push({ x: centerX - 1, y: centerY + 1, radius: 0, kind: "accent" });
+    forcedZones.push({ x: centerX + 1, y: centerY + 1, radius: 0, kind: "accent" });
+  }
+
+  return forcedZones;
+};
+
 export const resolveAdventureTerrainPalette = (theme: string): AdventureTerrainPalette => {
   const palette = getPaletteConfig(theme);
   return {
@@ -517,6 +577,7 @@ const resolveTileKind = ({
   palette,
   pathPoints,
   plazaZones,
+  forcedZones,
 }: {
   seed: number;
   x: number;
@@ -524,7 +585,12 @@ const resolveTileKind = ({
   palette: AdventureTerrainPaletteConfig;
   pathPoints: { x: number; y: number }[];
   plazaZones: TerrainZone[];
+  forcedZones: ForcedTerrainZone[];
 }): AdventureTerrainTileKind => {
+  const forcedKind = resolveForcedKind(x, y, forcedZones);
+  if (forcedKind) {
+    return forcedKind;
+  }
   if (isInsideZone(x, y, plazaZones)) {
     return "path";
   }
@@ -558,6 +624,11 @@ export const buildAdventureTerrainTiles = ({
     portals,
     npcs,
   });
+  const forcedZones = buildThemeMacroZones({
+    theme,
+    width,
+    height,
+  });
 
   const tiles: AdventureTerrainTile[] = [];
 
@@ -570,6 +641,7 @@ export const buildAdventureTerrainTiles = ({
         palette,
         pathPoints,
         plazaZones,
+        forcedZones,
       });
       const detailNoise = hashNoise(seed, x, y, 5);
       const showDetail =
