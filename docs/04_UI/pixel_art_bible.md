@@ -286,6 +286,15 @@ prototype 不要求：
 - 若進入下一條 `pixel-art full rollout`，才需要補更多地圖、更多怪物密度與更長時間運行下的實機 profile
 - 目前 vertical slice 已不再缺第一輪 web / mobile / budget 驗證，而是缺是否值得擴張成正式 art direction 的決策
 
+### 10.6 正式整合的收斂方向
+
+若下一步要把像素風接回正式 `AdventureStage`，目前已鎖定的方向是：
+
+- 只像素化正式主畫面的 terrain / background layer
+- 玩家、NPC、怪物與戰鬥中的文字 avatar 維持現狀，不改成 prototype 的文字 token 牌
+- combat overlay、target marker、status cue 與 portal marker 仍沿用正式版視覺語言
+- prototype 內的 entity token 實驗只保留在驗證入口，不直接推進到主流程
+
 ---
 
 ## 11. 自主生成素材的邊界
