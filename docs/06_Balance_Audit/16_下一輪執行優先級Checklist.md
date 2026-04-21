@@ -63,4 +63,4 @@
 - `update-emperor-endgame-density-polish` 已完成，正式收口 `仙帝` 端內容密度、路線專屬感與終盤門檻細修
 - `add-meta-progression-foundation` 已完成，正式收口版本化存檔、`soul` progression、Life Review / Reincarnation Hall / Rebirth flow 與 base spec truth 回寫
 - `add-workshop-and-event-loops` 已完成，正式收口 `Workshop` recipe loop、pending event flow 與高境界 multiplier regression 對齊
-- `evaluate-pixel-art-vertical-slice` 已進入 runtime prototype，`Adventure` 可切換 `東郊靈田` 像素原型；目前剩 web/mobile 與效能驗證收尾
+- `evaluate-pixel-art-vertical-slice` 已完成，正式收口 `Adventure` representative pixel-art vertical slice、web/mobile 驗證與效能 budget 基線

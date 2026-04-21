@@ -4,6 +4,7 @@ import { EnemyRank } from "../types";
 import type { WorldCombatStagePresentation } from "./worldCombatPresentation";
 import {
   buildPixelPrototypeScene,
+  createPixelPrototypePixiAppOptions,
   getPixelPrototypeMetrics,
   PIXEL_PROTOTYPE_MAP_ID,
   resolveAdventureStageRenderMode,
@@ -146,5 +147,17 @@ describe("pixelAdventurePrototype", () => {
         mapId: PIXEL_PROTOTYPE_MAP_ID,
       })
     ).toBe("official");
+  });
+
+  it("forces canvas renderer options so automated browser captures do not crash on headless renderer detection", () => {
+    const options = createPixelPrototypePixiAppOptions({
+      width: 528,
+      height: 528,
+    });
+
+    expect(options.forceCanvas).toBe(true);
+    expect(options.antialias).toBe(false);
+    expect(options.autoDensity).toBe(false);
+    expect(options.resolution).toBe(1);
   });
 });

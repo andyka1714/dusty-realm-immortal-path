@@ -85,6 +85,23 @@ export interface PixelPrototypeSceneModel {
   cues: PixelPrototypeCueModel;
 }
 
+export const createPixelPrototypePixiAppOptions = ({
+  width,
+  height,
+}: {
+  width: number;
+  height: number;
+}) => ({
+  width,
+  height,
+  antialias: false,
+  autoDensity: false,
+  resolution: 1,
+  backgroundAlpha: 1,
+  backgroundColor: 0x110f0d,
+  forceCanvas: true,
+});
+
 const ensureOdd = (value: number) => {
   let nextValue = Math.max(MIN_VIEWPORT_CELLS, Math.floor(value));
   if (nextValue % 2 === 0) {

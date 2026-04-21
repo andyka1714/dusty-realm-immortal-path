@@ -1,8 +1,11 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import * as PIXI from "pixi.js";
+import * as PIXI from "pixi.js-legacy";
 import { ActiveMonster, Coordinate, MapData, Portal } from "../../types";
 import type { WorldCombatStagePresentation } from "../../utils/worldCombatPresentation";
-import { buildPixelPrototypeScene } from "../../utils/pixelAdventurePrototype";
+import {
+  buildPixelPrototypeScene,
+  createPixelPrototypePixiAppOptions,
+} from "../../utils/pixelAdventurePrototype";
 
 interface AdventurePixelStagePrototypeProps {
   mapData: MapData;
@@ -15,6 +18,7 @@ interface AdventurePixelStagePrototypeProps {
   height: number;
   onTileClick: (x: number, y: number) => void;
   onPlayerArrive?: (x: number, y: number) => void;
+  onPrototypeReady?: (runtime: { renderFrame: () => void } | null) => void;
 }
 
 type PixelBlock = {
@@ -276,6 +280,7 @@ export const AdventurePixelStagePrototype: React.FC<AdventurePixelStagePrototype
   height,
   onTileClick,
   onPlayerArrive,
+  onPrototypeReady,
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<PIXI.Application | null>(null);
@@ -313,25 +318,23 @@ export const AdventurePixelStagePrototype: React.FC<AdventurePixelStagePrototype
       return;
     }
 
-    const app = new PIXI.Application({
-      width,
-      height,
-      antialias: false,
-      autoDensity: false,
-      resolution: 1,
-      backgroundAlpha: 1,
-      backgroundColor: 0x110f0d,
-    });
+    const app = new PIXI.Application(
+      createPixelPrototypePixiAppOptions({
+        width,
+        height,
+      })
+    );
 
     canvasRef.current.innerHTML = "";
     canvasRef.current.appendChild(app.view as HTMLCanvasElement);
     appRef.current = app;
 
     return () => {
+      onPrototypeReady?.(null);
       app.destroy(true, true);
       appRef.current = null;
     };
-  }, [height, model.supported, width]);
+  }, [height, model.supported, onPrototypeReady, width]);
 
   useEffect(() => {
     const app = appRef.current;
@@ -471,7 +474,11 @@ export const AdventurePixelStagePrototype: React.FC<AdventurePixelStagePrototype
     }
 
     root.addChild(entityLayer);
-  }, [model, onTileClick]);
+    app.render();
+    onPrototypeReady?.({
+      renderFrame: () => appRef.current?.render(),
+    });
+  }, [model, onPrototypeReady, onTileClick]);
 
   useEffect(() => {
     const currentKey = `${playerPosition.x},${playerPosition.y}`;

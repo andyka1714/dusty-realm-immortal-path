@@ -266,11 +266,14 @@ prototype 不要求：
 - 桌機 `3x` / 手機 `2x` 的整數倍像素縮放規則已有測試覆蓋
 - prototype shell 的 legend 與 scope notice 已有元件測試覆蓋
 - prototype stage 與正式 stage 已能在 `Adventure` 中共存切換
+- `?pixel-prototype-preview=1` 已成為固定驗證入口，並可再用 `pixel-prototype-mode=desktop|mobile` 強制切到對應平台排版
+- Safari 實測已確認 `Desktop 3x` 與 `Mobile 2x` 都能顯示代表地圖、Target HUD 與 performance panel
+- 目前 representative vertical slice 的實測值可穩定落在 `BOOT 14-16ms / 400ms`，且 `FPS` 明顯高於桌機 `55` 與手機 `45` 的驗收線
 
 ### 10.5 仍待補的驗證
 
-- 真機或等效條件下的 web / mobile HUD 可讀性確認
-- prototype cue 疊加下的效能 budget 實測
+- 若進入下一條 `pixel-art full rollout`，才需要補更多地圖、更多怪物密度與更長時間運行下的實機 profile
+- 目前 vertical slice 已不再缺第一輪 web / mobile / budget 驗證，而是缺是否值得擴張成正式 art direction 的決策
 
 ---
 

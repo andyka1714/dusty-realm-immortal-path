@@ -9,6 +9,6 @@
 - [x] 2.3 接回至少一套 live combat cue：近戰命中、投射物、危險區 telegraph、target / status cue
 
 ## 3. 驗證、文件與追蹤
-- [ ] 3.1 驗證 web / mobile 的像素縮放、HUD 可讀性與效能 budget
+- [x] 3.1 驗證 web / mobile 的像素縮放、HUD 可讀性與效能 budget
 - [x] 3.2 更新 `docs/04_UI/pixel_art_bible.md`、`docs/06_Balance_Audit/13_3D渲染與戰鬥呈現評估.md` 與 tracking docs
 - [x] 3.3 驗證 `openspec validate evaluate-pixel-art-vertical-slice --strict` 與相關 prototype 檢查
