@@ -388,6 +388,7 @@ export interface NPC extends Coordinate {
 export interface MapData {
   id: string;
   name: string;
+  theme: string;
   minRealm: MajorRealm;
   description: string;
   introText: string; // Typewriter text

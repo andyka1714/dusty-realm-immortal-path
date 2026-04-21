@@ -724,6 +724,7 @@ export const MAPS: MapData[] = RAW_MAPS_V60.map((raw, index) => {
     return {
         id: id.toString(),
         name: raw.name,
+        theme: raw.theme,
         minRealm: realm,
         description: raw.description || '...', 
         introText: `踏入${raw.name}，${raw.description || '靈氣流動似乎有些不同...'}`,
