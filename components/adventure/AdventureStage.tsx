@@ -9,6 +9,11 @@ import { QUESTS } from '../../data/quests'; // Import QUESTS
 import { current } from '@reduxjs/toolkit';
 import { getVisualEffectPresentation } from '../../utils/visualEffectPresentation';
 import type { WorldCombatStagePresentation } from '../../utils/worldCombatPresentation';
+import {
+  buildAdventureTerrainTiles,
+  type AdventureTerrainTile,
+  resolveAdventureTerrainPalette,
+} from '../../utils/adventureTerrainPixelization';
 
 interface AdventureStageProps {
   mapData: MapData;
@@ -41,6 +46,49 @@ const THEME_COLORS = {
     [EnemyRank.Boss]:   0xf87171, // Red-400
 };
 const PLAYER_COLOR = 0x4ade80; // Green-400
+
+const drawAdventureTerrainTile = ({
+  graphics,
+  tile,
+  cellSize,
+}: {
+  graphics: PIXI.Graphics;
+  tile: AdventureTerrainTile;
+  cellSize: number;
+}) => {
+  const px = tile.x * cellSize;
+  const py = tile.y * cellSize;
+
+  graphics.beginFill(tile.fillColor, 1);
+  graphics.drawRect(px, py, cellSize, cellSize);
+  graphics.endFill();
+
+  if (tile.detailKind === 'none') return;
+
+  graphics.beginFill(tile.detailColor, tile.kind === 'path' ? 0.18 : 0.24);
+
+  if (tile.detailKind === 'bars') {
+      graphics.drawRect(px + cellSize * 0.18, py + cellSize * 0.18, cellSize * 0.08, cellSize * 0.42);
+      graphics.drawRect(px + cellSize * 0.44, py + cellSize * 0.14, cellSize * 0.08, cellSize * 0.5);
+      graphics.drawRect(px + cellSize * 0.7, py + cellSize * 0.22, cellSize * 0.08, cellSize * 0.36);
+  } else if (tile.detailKind === 'dots') {
+      graphics.drawRect(px + cellSize * 0.28, py + cellSize * 0.26, cellSize * 0.1, cellSize * 0.1);
+      graphics.drawRect(px + cellSize * 0.6, py + cellSize * 0.54, cellSize * 0.1, cellSize * 0.1);
+  } else if (tile.detailKind === 'ripples') {
+      graphics.drawRect(px + cellSize * 0.18, py + cellSize * 0.26, cellSize * 0.22, cellSize * 0.05);
+      graphics.drawRect(px + cellSize * 0.48, py + cellSize * 0.52, cellSize * 0.24, cellSize * 0.05);
+  } else if (tile.detailKind === 'cracks') {
+      graphics.drawRect(px + cellSize * 0.22, py + cellSize * 0.3, cellSize * 0.36, cellSize * 0.05);
+      graphics.drawRect(px + cellSize * 0.5, py + cellSize * 0.48, cellSize * 0.2, cellSize * 0.05);
+      graphics.drawRect(px + cellSize * 0.62, py + cellSize * 0.44, cellSize * 0.05, cellSize * 0.18);
+  } else if (tile.detailKind === 'glyph') {
+      graphics.drawRect(px + cellSize * 0.28, py + cellSize * 0.2, cellSize * 0.14, cellSize * 0.14);
+      graphics.drawRect(px + cellSize * 0.58, py + cellSize * 0.58, cellSize * 0.14, cellSize * 0.14);
+      graphics.drawRect(px + cellSize * 0.58, py + cellSize * 0.2, cellSize * 0.08, cellSize * 0.32);
+  }
+
+  graphics.endFill();
+};
 
 export default function AdventureStage({
   mapData,
@@ -216,6 +264,7 @@ export default function AdventureStage({
 
   // Retained Display Objects
   const displayRefs = useRef({
+      terrainLayer: null as PIXI.Graphics | null,
       playerContainer: null as PIXI.Container | null,
       monsterContainers: new Map<string, PIXI.Container>(),
       entityLayer: null as PIXI.Container | null,
@@ -433,6 +482,10 @@ export default function AdventureStage({
       app.stage.addChild(world);
 
       // Layers
+      const terrainLayer = new PIXI.Graphics();
+      world.addChild(terrainLayer);
+      displayRefs.current.terrainLayer = terrainLayer;
+
       const gridGraphics = new PIXI.Graphics();
       world.addChild(gridGraphics);
 
@@ -545,13 +598,30 @@ export default function AdventureStage({
           if (!mapData) return;
           const drawW = mapData.width;
           const drawH = mapData.height;
+          const terrainPalette = resolveAdventureTerrainPalette(mapData.theme);
+          const terrainTiles = buildAdventureTerrainTiles({
+              mapId: mapData.id,
+              theme: mapData.theme,
+              width: drawW,
+              height: drawH,
+              portals: latestDataRef.current.portals,
+              npcs: mapData.npcs,
+          });
+
+          terrainLayer.clear();
+          terrainLayer.beginFill(terrainPalette.backgroundColor);
+          terrainLayer.drawRect(0, 0, drawW * cellSize, drawH * cellSize);
+          terrainLayer.endFill();
+          terrainTiles.forEach((tile) =>
+              drawAdventureTerrainTile({
+                  graphics: terrainLayer,
+                  tile,
+                  cellSize,
+              })
+          );
 
           gridGraphics.clear();
-          gridGraphics.beginFill(GRID_BG);
-          gridGraphics.drawRect(0, 0, drawW * cellSize, drawH * cellSize);
-          gridGraphics.endFill();
-          
-          gridGraphics.lineStyle(1, GRID_COLOR, 0.3);
+          gridGraphics.lineStyle(1, terrainPalette.gridColor || GRID_COLOR, 0.18);
           for (let x = 0; x <= drawW; x++) {
              gridGraphics.moveTo(x * cellSize, 0);
              gridGraphics.lineTo(x * cellSize, drawH * cellSize);

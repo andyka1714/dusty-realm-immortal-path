@@ -36,6 +36,7 @@ interface AdventureTerrainPaletteConfig extends AdventureTerrainPalette {
   waterChance: number;
   accentChance: number;
   altChance: number;
+  detailChance: number;
   detailKinds: Record<AdventureTerrainTileKind, AdventureTerrainDetailKind>;
 }
 
@@ -63,6 +64,7 @@ const DEFAULT_PALETTE: AdventureTerrainPaletteConfig = {
   waterChance: 0.07,
   accentChance: 0.17,
   altChance: 0.36,
+  detailChance: 0.18,
   detailKinds: {
     base: "bars",
     alt: "dots",
@@ -88,6 +90,7 @@ const TERRAIN_PALETTES: Record<string, AdventureTerrainPaletteConfig> = {
     waterChance: 0.12,
     accentChance: 0.19,
     altChance: 0.4,
+    detailChance: 0.22,
     detailKinds: {
       base: "dots",
       alt: "bars",
@@ -111,6 +114,7 @@ const TERRAIN_PALETTES: Record<string, AdventureTerrainPaletteConfig> = {
     waterChance: 0.03,
     accentChance: 0.22,
     altChance: 0.4,
+    detailChance: 0.16,
     detailKinds: {
       base: "cracks",
       alt: "dots",
@@ -134,6 +138,7 @@ const TERRAIN_PALETTES: Record<string, AdventureTerrainPaletteConfig> = {
     waterChance: 0.08,
     accentChance: 0.16,
     altChance: 0.42,
+    detailChance: 0.14,
     detailKinds: {
       base: "cracks",
       alt: "dots",
@@ -157,6 +162,7 @@ const TERRAIN_PALETTES: Record<string, AdventureTerrainPaletteConfig> = {
     waterChance: 0.02,
     accentChance: 0.14,
     altChance: 0.38,
+    detailChance: 0.15,
     detailKinds: {
       base: "glyph",
       alt: "dots",
@@ -180,6 +186,7 @@ const TERRAIN_PALETTES: Record<string, AdventureTerrainPaletteConfig> = {
     waterChance: 0.04,
     accentChance: 0.18,
     altChance: 0.39,
+    detailChance: 0.16,
     detailKinds: {
       base: "dots",
       alt: "cracks",
@@ -203,6 +210,7 @@ const TERRAIN_PALETTES: Record<string, AdventureTerrainPaletteConfig> = {
     waterChance: 0.06,
     accentChance: 0.18,
     altChance: 0.45,
+    detailChance: 0.15,
     detailKinds: {
       base: "dots",
       alt: "cracks",
@@ -226,6 +234,7 @@ const TERRAIN_PALETTES: Record<string, AdventureTerrainPaletteConfig> = {
     waterChance: 0.05,
     accentChance: 0.19,
     altChance: 0.37,
+    detailChance: 0.17,
     detailKinds: {
       base: "bars",
       alt: "dots",
@@ -249,6 +258,7 @@ const TERRAIN_PALETTES: Record<string, AdventureTerrainPaletteConfig> = {
     waterChance: 0.18,
     accentChance: 0.15,
     altChance: 0.35,
+    detailChance: 0.18,
     detailKinds: {
       base: "ripples",
       alt: "dots",
@@ -272,6 +282,7 @@ const TERRAIN_PALETTES: Record<string, AdventureTerrainPaletteConfig> = {
     waterChance: 0.03,
     accentChance: 0.2,
     altChance: 0.4,
+    detailChance: 0.13,
     detailKinds: {
       base: "dots",
       alt: "cracks",
@@ -295,6 +306,7 @@ const TERRAIN_PALETTES: Record<string, AdventureTerrainPaletteConfig> = {
     waterChance: 0.03,
     accentChance: 0.22,
     altChance: 0.46,
+    detailChance: 0.14,
     detailKinds: {
       base: "cracks",
       alt: "dots",
@@ -318,6 +330,7 @@ const TERRAIN_PALETTES: Record<string, AdventureTerrainPaletteConfig> = {
     waterChance: 0.05,
     accentChance: 0.2,
     altChance: 0.42,
+    detailChance: 0.15,
     detailKinds: {
       base: "cracks",
       alt: "dots",
@@ -341,6 +354,7 @@ const TERRAIN_PALETTES: Record<string, AdventureTerrainPaletteConfig> = {
     waterChance: 0.05,
     accentChance: 0.18,
     altChance: 0.4,
+    detailChance: 0.16,
     detailKinds: {
       base: "bars",
       alt: "dots",
@@ -364,6 +378,7 @@ const TERRAIN_PALETTES: Record<string, AdventureTerrainPaletteConfig> = {
     waterChance: 0.02,
     accentChance: 0.24,
     altChance: 0.48,
+    detailChance: 0.13,
     detailKinds: {
       base: "cracks",
       alt: "dots",
@@ -455,13 +470,18 @@ export const buildAdventureTerrainTiles = ({
         palette,
         pathPoints,
       });
+      const detailNoise = hashNoise(seed, x, y, 5);
+      const showDetail =
+        kind !== "path" && detailNoise < palette.detailChance
+          ? true
+          : kind === "path" && detailNoise < palette.detailChance * 0.5;
       tiles.push({
         x,
         y,
         kind,
         fillColor: palette.fillColors[kind],
         detailColor: palette.detailColor,
-        detailKind: palette.detailKinds[kind],
+        detailKind: showDetail ? palette.detailKinds[kind] : "none",
       });
     }
   }
