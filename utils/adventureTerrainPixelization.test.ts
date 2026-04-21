@@ -422,6 +422,31 @@ describe("adventureTerrainPixelization", () => {
     expect(loneBeacon.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("water");
   });
 
+  it("keeps thunder-route maps visually distinct even when they share the same theme", () => {
+    const thunderCorridor = buildAdventureTerrainTiles({
+      mapId: "162",
+      theme: "Thunder",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const thunderPool = buildAdventureTerrainTiles({
+      mapId: "161",
+      theme: "Thunder",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(thunderCorridor.find((tile) => tile.x === 2 && tile.y === 6)?.kind).toBe("accent");
+    expect(thunderCorridor.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("accent");
+    expect(thunderPool.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("water");
+    expect(thunderPool.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("accent");
+    expect(thunderPool.find((tile) => tile.x === 5 && tile.y === 5)?.kind).toBe("accent");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");

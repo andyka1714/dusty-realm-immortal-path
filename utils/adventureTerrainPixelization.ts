@@ -591,7 +591,19 @@ const buildThemeMacroZones = ({
   }
 
   if (theme === "Thunder") {
-    pushVerticalLine(forcedZones, centerX, 2, height - 3, "accent");
+    if (mapId === "162") {
+      pushHorizontalLine(forcedZones, centerY, 2, width - 3, "accent");
+      forcedZones.push({ x: centerX - 2, y: centerY - 1, radius: 0, kind: "path" });
+      forcedZones.push({ x: centerX + 2, y: centerY + 1, radius: 0, kind: "path" });
+    } else if (mapId === "161") {
+      pushVerticalLine(forcedZones, centerX, 2, centerY - 1, "accent");
+      pushVerticalLine(forcedZones, centerX, centerY + 1, height - 3, "accent");
+      forcedZones.push({ x: centerX, y: centerY, radius: 0, kind: "water" });
+      forcedZones.push({ x: centerX - 1, y: centerY - 1, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 1, y: centerY + 1, radius: 0, kind: "accent" });
+    } else {
+      pushVerticalLine(forcedZones, centerX, 2, height - 3, "accent");
+    }
   }
 
   if (theme === "Void") {
