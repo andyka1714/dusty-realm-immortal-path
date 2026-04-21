@@ -295,6 +295,7 @@ prototype 不要求：
 - combat overlay、target marker、status cue 與 portal marker 仍沿用正式版視覺語言
 - `仙緣鎮 / 宗門` 這類安全地圖的 terrain 應偏向結構化鋪地、空地與連接路徑，而不是完全隨機野外 patch
 - `Sea / Thunder / Immortal / Ultimate` 這類高境界 theme 也應有明確 macro shape，例如水帶、雷脈、天階或中央壇域，而不是只換 palette
+- `Void / Spirit / Sky / Dark` 也應有可辨識的 terrain anchor，例如裂隙、法壇、登階與污池，避免高境界背景退化成只有調色的抽象底圖
 - prototype 內的 entity token 實驗只保留在驗證入口，不直接推進到主流程
 
 ---

@@ -153,6 +153,54 @@ describe("adventureTerrainPixelization", () => {
     expect(ultimateRoute.find((tile) => tile.x === 5 && tile.y === 5)?.kind).toBe("accent");
   });
 
+  it("adds dedicated terrain anchors for void, spirit, sky, and dark routes", () => {
+    const voidRoute = buildAdventureTerrainTiles({
+      mapId: "130",
+      theme: "Void",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const spiritRoute = buildAdventureTerrainTiles({
+      mapId: "140",
+      theme: "Spirit",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const skyRoute = buildAdventureTerrainTiles({
+      mapId: "151",
+      theme: "Sky",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const darkRoute = buildAdventureTerrainTiles({
+      mapId: "160",
+      theme: "Dark",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(voidRoute.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("water");
+    expect(voidRoute.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("water");
+    expect(voidRoute.find((tile) => tile.x === 5 && tile.y === 5)?.kind).toBe("accent");
+    expect(spiritRoute.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(spiritRoute.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
+    expect(spiritRoute.find((tile) => tile.x === 8 && tile.y === 6)?.kind).toBe("accent");
+    expect(skyRoute.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("path");
+    expect(skyRoute.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("path");
+    expect(skyRoute.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("accent");
+    expect(darkRoute.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("water");
+    expect(darkRoute.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
+    expect(darkRoute.find((tile) => tile.x === 8 && tile.y === 6)?.kind).toBe("accent");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");

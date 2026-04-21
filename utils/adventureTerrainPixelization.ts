@@ -435,6 +435,30 @@ const getPaletteConfig = (theme: string): AdventureTerrainPaletteConfig =>
 
 const clampPoint = (value: number, max: number) => Math.max(0, Math.min(value, max));
 
+const pushHorizontalLine = (
+  zones: ForcedTerrainZone[],
+  y: number,
+  fromX: number,
+  toX: number,
+  kind: AdventureTerrainTileKind
+) => {
+  for (let x = fromX; x <= toX; x += 1) {
+    zones.push({ x, y, radius: 0, kind });
+  }
+};
+
+const pushVerticalLine = (
+  zones: ForcedTerrainZone[],
+  x: number,
+  fromY: number,
+  toY: number,
+  kind: AdventureTerrainTileKind
+) => {
+  for (let y = fromY; y <= toY; y += 1) {
+    zones.push({ x, y, radius: 0, kind });
+  }
+};
+
 const buildOrthogonalRoute = (
   from: { x: number; y: number },
   to: { x: number; y: number }
@@ -530,15 +554,42 @@ const buildThemeMacroZones = ({
   const forcedZones: ForcedTerrainZone[] = [];
 
   if (theme === "Sea") {
-    for (let x = 2; x < width - 2; x += 1) {
-      forcedZones.push({ x, y: centerY, radius: 0, kind: "water" });
-    }
+    pushHorizontalLine(forcedZones, centerY, 2, width - 3, "water");
   }
 
   if (theme === "Thunder") {
-    for (let y = 2; y < height - 2; y += 1) {
-      forcedZones.push({ x: centerX, y, radius: 0, kind: "accent" });
-    }
+    pushVerticalLine(forcedZones, centerX, 2, height - 3, "accent");
+  }
+
+  if (theme === "Void") {
+    pushVerticalLine(forcedZones, centerX, 2, height - 3, "water");
+    forcedZones.push({ x: centerX - 1, y: centerY - 1, radius: 0, kind: "accent" });
+    forcedZones.push({ x: centerX + 1, y: centerY + 1, radius: 0, kind: "accent" });
+    forcedZones.push({ x: centerX - 1, y: centerY + 1, radius: 0, kind: "accent" });
+    forcedZones.push({ x: centerX + 1, y: centerY - 1, radius: 0, kind: "accent" });
+  }
+
+  if (theme === "Spirit") {
+    forcedZones.push({ x: centerX, y: centerY, radius: 0, kind: "path" });
+    forcedZones.push({ x: centerX - 2, y: centerY, radius: 0, kind: "accent" });
+    forcedZones.push({ x: centerX + 2, y: centerY, radius: 0, kind: "accent" });
+    forcedZones.push({ x: centerX, y: centerY - 2, radius: 0, kind: "accent" });
+    forcedZones.push({ x: centerX, y: centerY + 2, radius: 0, kind: "accent" });
+  }
+
+  if (theme === "Sky") {
+    pushVerticalLine(forcedZones, centerX, 2, height - 3, "path");
+    forcedZones.push({ x: centerX - 2, y: centerY - 2, radius: 0, kind: "accent" });
+    forcedZones.push({ x: centerX - 1, y: centerY - 1, radius: 0, kind: "accent" });
+    forcedZones.push({ x: centerX + 1, y: centerY + 1, radius: 0, kind: "accent" });
+    forcedZones.push({ x: centerX + 2, y: centerY + 2, radius: 0, kind: "accent" });
+  }
+
+  if (theme === "Dark") {
+    forcedZones.push({ x: centerX, y: centerY, radius: 1, kind: "water" });
+    pushHorizontalLine(forcedZones, centerY, centerX - 2, centerX + 2, "accent");
+    pushVerticalLine(forcedZones, centerX, centerY - 2, centerY + 2, "accent");
+    forcedZones.push({ x: centerX, y: centerY, radius: 0, kind: "water" });
   }
 
   if (theme === "Immortal") {
