@@ -296,6 +296,7 @@ prototype 不要求：
 - `仙緣鎮 / 宗門` 這類安全地圖的 terrain 應偏向結構化鋪地、空地與連接路徑，而不是完全隨機野外 patch
 - `Sea / Thunder / Immortal / Ultimate` 這類高境界 theme 也應有明確 macro shape，例如水帶、雷脈、天階或中央壇域，而不是只換 palette
 - `Void / Spirit / Sky / Dark` 也應有可辨識的 terrain anchor，例如裂隙、法壇、登階與污池，避免高境界背景退化成只有調色的抽象底圖
+- 有 Boss spawn 的正式地圖應在背景層自帶小型 arena / altar / battlefield clearing，讓戰鬥場域感來自 terrain，而不是改 entity token
 - prototype 內的 entity token 實驗只保留在驗證入口，不直接推進到主流程
 
 ---

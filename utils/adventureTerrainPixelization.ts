@@ -47,6 +47,7 @@ interface BuildAdventureTerrainTilesInput {
   height: number;
   portals: Portal[];
   npcs?: Pick<NPC, "x" | "y">[];
+  bossSpawn?: { x: number; y: number };
 }
 
 interface TerrainZone {
@@ -610,6 +611,41 @@ const buildThemeMacroZones = ({
   return forcedZones;
 };
 
+const buildBossArenaZones = ({
+  bossSpawn,
+  width,
+  height,
+}: {
+  bossSpawn?: { x: number; y: number };
+  width: number;
+  height: number;
+}) => {
+  if (!bossSpawn) {
+    return [] as ForcedTerrainZone[];
+  }
+
+  const centerX = clampPoint(bossSpawn.x, width - 1);
+  const centerY = clampPoint(bossSpawn.y, height - 1);
+  const forcedZones: ForcedTerrainZone[] = [{ x: centerX, y: centerY, radius: 1, kind: "path" }];
+
+  pushHorizontalLine(
+    forcedZones,
+    centerY,
+    clampPoint(centerX - 2, width - 1),
+    clampPoint(centerX + 2, width - 1),
+    "accent"
+  );
+  pushVerticalLine(
+    forcedZones,
+    centerX,
+    clampPoint(centerY - 2, height - 1),
+    clampPoint(centerY + 2, height - 1),
+    "accent"
+  );
+
+  return forcedZones;
+};
+
 export const resolveAdventureTerrainPalette = (theme: string): AdventureTerrainPalette => {
   const palette = getPaletteConfig(theme);
   return {
@@ -665,6 +701,7 @@ export const buildAdventureTerrainTiles = ({
   height,
   portals,
   npcs = [],
+  bossSpawn,
 }: BuildAdventureTerrainTilesInput): AdventureTerrainTile[] => {
   const palette = getPaletteConfig(theme);
   const seed = createSeed(mapId, theme);
@@ -680,6 +717,11 @@ export const buildAdventureTerrainTiles = ({
     width,
     height,
   });
+  const bossArenaZones = buildBossArenaZones({
+    bossSpawn,
+    width,
+    height,
+  });
 
   const tiles: AdventureTerrainTile[] = [];
 
@@ -692,7 +734,7 @@ export const buildAdventureTerrainTiles = ({
         palette,
         pathPoints,
         plazaZones,
-        forcedZones,
+        forcedZones: [...bossArenaZones, ...forcedZones],
       });
       const detailNoise = hashNoise(seed, x, y, 5);
       const showDetail =

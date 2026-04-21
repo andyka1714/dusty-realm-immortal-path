@@ -606,6 +606,7 @@ export default function AdventureStage({
               height: drawH,
               portals: latestDataRef.current.portals,
               npcs: mapData.npcs,
+              bossSpawn: mapData.bossSpawn
           });
 
           terrainLayer.clear();

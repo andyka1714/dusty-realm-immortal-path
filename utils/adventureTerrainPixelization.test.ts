@@ -201,6 +201,31 @@ describe("adventureTerrainPixelization", () => {
     expect(darkRoute.find((tile) => tile.x === 8 && tile.y === 6)?.kind).toBe("accent");
   });
 
+  it("builds a terrain arena around boss spawns without changing entity rendering", () => {
+    const bossArena = buildAdventureTerrainTiles({
+      mapId: "22",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+      bossSpawn: { x: 6, y: 6 },
+    });
+    const wildRoute = buildAdventureTerrainTiles({
+      mapId: "21",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(bossArena.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(bossArena.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
+    expect(bossArena.find((tile) => tile.x === 8 && tile.y === 6)?.kind).toBe("accent");
+    expect(wildRoute.find((tile) => tile.x === 6 && tile.y === 6)?.kind).not.toBe("path");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");
