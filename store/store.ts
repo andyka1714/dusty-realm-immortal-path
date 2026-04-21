@@ -5,6 +5,8 @@ import adventureReducer from './slices/adventureSlice';
 import inventoryReducer from './slices/inventorySlice';
 import workshopReducer from './slices/workshopSlice';
 import questReducer from './slices/questSlice'; // 1. Import questReducer
+import soulReducer from './slices/soulSlice';
+import encounterReducer from './slices/encounterSlice';
 import { loadState, saveState } from './localStorage';
 
 const rootReducer = combineReducers({
@@ -14,6 +16,8 @@ const rootReducer = combineReducers({
   inventory: inventoryReducer,
   workshop: workshopReducer,
   quest: questReducer, // 2. Add quest: questReducer
+  soul: soulReducer,
+  encounter: encounterReducer,
 });
 
 const preloadedState = loadState() as Partial<ReturnType<typeof rootReducer>> | undefined;
@@ -34,6 +38,8 @@ store.subscribe(() => {
         inventory: store.getState().inventory,
         workshop: store.getState().workshop,
         quest: store.getState().quest,
+        soul: store.getState().soul,
+        encounter: store.getState().encounter,
     });
     lastSave = now;
   }

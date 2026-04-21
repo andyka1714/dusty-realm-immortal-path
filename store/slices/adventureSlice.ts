@@ -14,6 +14,7 @@ import {
   getEnemyEngagementRange,
   getGridDistance,
   shouldEnemyHoldPreferredRange,
+  shouldEnemyRetreatFromCloseRange,
   shouldEnemyStrafeNearRange,
 } from '../../utils/worldCombat';
 
@@ -381,7 +382,13 @@ const adventureSlice = createSlice({
            let dx = 0, dy = 0;
 
            if (aggroRange > 0 && distToPlayer <= aggroRange) {
-               if (shouldEnemyHoldPreferredRange(template, distToPlayer)) {
+               if (shouldEnemyRetreatFromCloseRange(template, distToPlayer)) {
+                   if (monster.x < state.playerPosition.x) dx = -1;
+                   else if (monster.x > state.playerPosition.x) dx = 1;
+
+                   if (monster.y < state.playerPosition.y) dy = -1;
+                   else if (monster.y > state.playerPosition.y) dy = 1;
+               } else if (shouldEnemyHoldPreferredRange(template, distToPlayer)) {
                    if (shouldEnemyStrafeNearRange(template, distToPlayer)) {
                        const deltaX = state.playerPosition.x - monster.x;
                        const deltaY = state.playerPosition.y - monster.y;
@@ -529,7 +536,8 @@ const adventureSlice = createSlice({
     clearVisualEffect: (state, action: PayloadAction<string>) => {
         if (!state.visualEffects) return;
         state.visualEffects = state.visualEffects.filter(e => e.id !== action.payload);
-    }
+    },
+    resetAdventure: () => initialState,
   },
 });
 
@@ -545,5 +553,6 @@ export const {
   markMapVisited,
   addVisualEffect,
   clearVisualEffect,
+  resetAdventure,
 } = adventureSlice.actions;
 export default adventureSlice.reducer;

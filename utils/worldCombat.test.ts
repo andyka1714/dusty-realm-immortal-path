@@ -2,12 +2,14 @@ import { describe, expect, it } from "vitest";
 import { EnemyRank, ElementType, MajorRealm, ProfessionType } from "../types";
 import {
   getEnemyAggroRange,
+  getEnemyCombatRoleProfile,
   getEnemyEngagementRange,
   getEnemyPreferredDistance,
   getGridDistance,
   getPlayerEngagementRange,
   getWorldSkillAreaTargets,
   shouldEnemyHoldPreferredRange,
+  shouldEnemyRetreatFromCloseRange,
   shouldEnemyStrafeNearRange,
 } from "./worldCombat";
 
@@ -60,9 +62,80 @@ describe("world combat ranges", () => {
     };
 
     expect(getEnemyPreferredDistance(casterEnemy)).toBe(5);
+    expect(shouldEnemyRetreatFromCloseRange(casterEnemy, 2)).toBe(true);
     expect(shouldEnemyHoldPreferredRange(casterEnemy, 5)).toBe(true);
     expect(shouldEnemyStrafeNearRange(casterEnemy, 4)).toBe(true);
     expect(shouldEnemyStrafeNearRange(casterEnemy, 2)).toBe(false);
+  });
+
+  it("builds distinct live-combat role profiles for melee, ranged, caster, and boss enemies", () => {
+    const meleeRole = getEnemyCombatRoleProfile({
+      id: "wolf",
+      name: "裂爪妖狼",
+      realm: MajorRealm.Foundation,
+      rank: EnemyRank.Common,
+      hp: 100,
+      maxHp: 100,
+      attack: 20,
+      defense: 8,
+      element: ElementType.None,
+      drops: [],
+      exp: 8,
+    });
+    const rangedRole = getEnemyCombatRoleProfile({
+      id: "archer",
+      name: "裂羽獵妖",
+      realm: MajorRealm.Foundation,
+      rank: EnemyRank.Elite,
+      aiStyle: "ranged",
+      attackRange: 4,
+      hp: 160,
+      maxHp: 160,
+      attack: 42,
+      defense: 18,
+      element: ElementType.Fire,
+      drops: [],
+      exp: 30,
+    });
+    const casterRole = getEnemyCombatRoleProfile({
+      id: "mage",
+      name: "玄雷咒師",
+      realm: MajorRealm.GoldenCore,
+      rank: EnemyRank.Elite,
+      aiStyle: "caster",
+      attackRange: 4,
+      hp: 220,
+      maxHp: 220,
+      attack: 55,
+      defense: 24,
+      element: ElementType.Water,
+      drops: [],
+      exp: 60,
+    });
+    const bossRole = getEnemyCombatRoleProfile({
+      id: "boss",
+      name: "焚海魔蛟",
+      realm: MajorRealm.SpiritSevering,
+      rank: EnemyRank.Boss,
+      aiStyle: "caster",
+      attackRange: 5,
+      hp: 2000,
+      maxHp: 2000,
+      attack: 180,
+      defense: 70,
+      element: ElementType.Fire,
+      drops: [],
+      exp: 800,
+      specialAttack: {
+        name: "焚海墜星",
+        cooldownSeconds: 10,
+      },
+    });
+
+    expect(meleeRole.id).toBe("melee-pressure");
+    expect(rangedRole.id).toBe("ranged-skirmisher");
+    expect(casterRole.id).toBe("caster-channeler");
+    expect(bossRole.id).toBe("boss-hazard");
   });
 
   it("selects nearby monsters for circular world-skill AOE", () => {

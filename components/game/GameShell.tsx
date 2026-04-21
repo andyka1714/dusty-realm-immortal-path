@@ -1,8 +1,15 @@
-import React, { Suspense, lazy, useMemo, useState } from "react";
+import React, { Suspense, lazy, useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { FloatingDock, GamePanelId } from "./FloatingDock";
 import { GameHUD } from "./GameHUD";
 import { GamePanel } from "./GamePanel";
 import { BookOpen, Hammer, Home, Package } from "lucide-react";
+import { Modal } from "../Modal";
+import { PendingEncounterPanel } from "./PendingEncounterPanel";
+import { AppDispatch, RootState } from "../../store/store";
+import { checkTimeEvents } from "../../store/actions/timeActions";
+import { getEncounterEventById } from "../../data/encounters";
+import { resolvePendingEncounterChoice } from "../../store/actions/encounterActions";
 
 const Adventure = lazy(() =>
   import("../../pages/Adventure").then((module) => ({
@@ -64,7 +71,20 @@ const PANEL_CONFIG: Record<
 };
 
 export const GameShell: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const [activePanel, setActivePanel] = useState<GamePanelId | null>(null);
+  const { age, isInitialized, isDead } = useSelector(
+    (state: RootState) => state.character
+  );
+  const pendingEncounter = useSelector(
+    (state: RootState) => state.encounter.pendingEvent
+  );
+
+  useEffect(() => {
+    if (isInitialized && !isDead) {
+      dispatch(checkTimeEvents());
+    }
+  }, [dispatch, age, isInitialized, isDead]);
 
   const handleTogglePanel = (panel: GamePanelId) => {
     setActivePanel((current) => (current === panel ? null : panel));
@@ -79,6 +99,9 @@ export const GameShell: React.FC = () => {
 
     return PANEL_CONFIG[activePanel];
   }, [activePanel]);
+  const pendingEncounterEvent = pendingEncounter
+    ? getEncounterEventById(pendingEncounter.eventId)
+    : null;
 
   return (
     <div className="relative h-[100dvh] w-screen overflow-hidden bg-black font-serif text-stone-100">
@@ -120,6 +143,22 @@ export const GameShell: React.FC = () => {
             embedded
           />
         </GamePanel>
+
+        <Modal
+          isOpen={Boolean(pendingEncounter && pendingEncounterEvent)}
+          onClose={() => undefined}
+          title={pendingEncounterEvent?.title ?? "機緣乍現"}
+          eyebrow="FATED ENCOUNTER"
+          size="medium"
+        >
+          {pendingEncounter && pendingEncounterEvent && (
+            <PendingEncounterPanel
+              event={pendingEncounterEvent}
+              pending={pendingEncounter}
+              onChoose={(choiceId) => dispatch(resolvePendingEncounterChoice(choiceId))}
+            />
+          )}
+        </Modal>
       </Suspense>
     </div>
   );

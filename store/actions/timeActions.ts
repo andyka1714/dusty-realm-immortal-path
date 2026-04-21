@@ -5,6 +5,8 @@ import { addLog } from '../slices/logSlice';
 import { AGE_FLAVOR_TEXTS, EPIPHANY_LOGS, STAT_NAMES, LIFESPAN_WARNINGS } from '../../data/age_content';
 import { BaseAttributes, MajorRealm } from '../../types';
 import { DAYS_PER_YEAR } from '../../constants';
+import { pickEncounterEvent } from '../../data/encounters';
+import { setPendingEncounter } from '../slices/encounterSlice';
 
 // Thunk action to check for time-based events (Yearly + Lifespan Warnings)
 export const checkTimeEvents = (): ThunkAction<void, RootState, unknown, Action<string>> => 
@@ -75,7 +77,7 @@ export const checkTimeEvents = (): ThunkAction<void, RootState, unknown, Action<
         for (let i = 0; i < yearsToProcess; i++) {
              processed++;
              const processingYear = processed;
-             processSingleYear(dispatch, processingYear, majorRealm);
+             processSingleYear(dispatch, getState, processingYear, majorRealm);
         }
 
         // Update state
@@ -83,7 +85,7 @@ export const checkTimeEvents = (): ThunkAction<void, RootState, unknown, Action<
     }
 };
 
-const processSingleYear = (dispatch: any, year: number, realm: MajorRealm) => {
+const processSingleYear = (dispatch: any, getState: () => RootState, year: number, realm: MajorRealm) => {
     // 1% Chance for Epiphany
     const roll = Math.random();
     
@@ -107,6 +109,22 @@ const processSingleYear = (dispatch: any, year: number, realm: MajorRealm) => {
         }));
 
     } else {
+        const encounterState = getState().encounter;
+        if (!encounterState.pendingEvent) {
+            const encounterRoll = Math.random();
+            if (encounterRoll < 0.05) {
+                const encounter = pickEncounterEvent(realm, Math.random());
+                if (encounter) {
+                    dispatch(setPendingEncounter({ eventId: encounter.id, year }));
+                    dispatch(addLog({
+                        message: `【${year}歲】你誤入一段機緣：【${encounter.title}】`,
+                        type: 'info'
+                    }));
+                    return;
+                }
+            }
+        }
+
         // --- Normal Year Log ---
         const realmLogs = AGE_FLAVOR_TEXTS[realm] || AGE_FLAVOR_TEXTS[MajorRealm.Mortal];
         

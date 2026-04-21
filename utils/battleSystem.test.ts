@@ -2380,7 +2380,8 @@ describe("battle system balance", () => {
     ]);
     expect(playerPlan.shouldClearEncounter).toBe(true);
     expect(playerPlan.resolutionMessage).toContain("波及 2 個目標");
-    expect(playerPlan.strikeVisualPlan.projectile?.targetX).toBe(3);
+    expect(playerPlan.strikeVisualPlan.projectile).toBeUndefined();
+    expect(playerPlan.strikeVisualPlan.area?.targetX).toBe(3);
     expect(playerPlan.impactTargets[0]?.visualPlan.impact?.damageText).toContain("暴擊 60");
 
     const enemyPlan = createEnemyWorldStrikeExecutionPlan({

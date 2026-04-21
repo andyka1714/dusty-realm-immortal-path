@@ -4,10 +4,19 @@ import clsx from 'clsx';
 import { getRealmLabel } from '../utils/realm';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store/store';
-import { manualCultivate, attemptBreakthrough, reincarnate, startSeclusion } from '../store/slices/characterSlice';
-import { checkTimeEvents } from '../store/actions/timeActions';
+import { manualCultivate, attemptBreakthrough, startSeclusion } from '../store/slices/characterSlice';
+import {
+  completeRebirthFromHall,
+  startLifeReviewFromCurrentRun,
+} from '../store/actions/reincarnationActions';
 import { removeItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
+import {
+  enterReincarnationHall,
+  setRebirthSpiritRootOverride,
+  toggleRebirthPerk,
+  toggleSelectedHeirloom,
+} from '../store/slices/soulSlice';
 import { REALM_NAMES, REALM_MODIFIERS, MINOR_REALM_CAP, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN, SECLUSION_DURATION_MS, SPIRIT_ROOT_DETAILS } from '../constants';
 import { ITEMS } from '../data/items';
 import { ProgressBar } from '../components/ProgressBar';
@@ -17,11 +26,13 @@ import { StatsPanel } from '../components/StatsPanel';
 import { Modal } from '../components/Modal';
 import { IntroSequence } from '../components/IntroSequence';
 import { GameHintBubble } from '../components/game/GameHintBubble';
+import { ReincarnationFlow } from '../components/game/ReincarnationFlow';
 import { GameSection } from '../components/game/GameSection';
 import { GameTooltip } from '../components/game/GameTooltip';
-import { Play, ChevronsUp, Moon, Info, Skull, AlertTriangle, Zap, Lock } from 'lucide-react';
-import { MajorRealm, SpiritRootType } from '../types';
+import { Play, ChevronsUp, Moon, Info, AlertTriangle, Zap, Lock } from 'lucide-react';
+import { MajorRealm, SpiritRootId, SpiritRootType } from '../types';
 import { calculateSeclusionCost, getBaseCultivationRate, getGatheringMultiplier, getManualCultivateCooldown, getPassiveCultivationRate } from '../utils/cultivation';
+import { DEFAULT_REINCARNATION_PERKS } from '../utils/reincarnation';
 
 
 // Custom Animation Style
@@ -41,10 +52,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
   const dispatch = useDispatch<AppDispatch>();
   const character = useSelector((state: RootState) => state.character);
   const inventory = useSelector((state: RootState) => state.inventory.items);
+  const soul = useSelector((state: RootState) => state.soul);
   const { 
     isInitialized, isDead, name, gender, majorRealm, minorRealm, currentExp, maxExp, spiritStones, 
     cultivationRate, isBreakthroughAvailable, isInSeclusion, seclusionEndTime, attributes, spiritRootId,
-    lastBreakthroughResult, age, lifespan, gatheringLevel, lastManualCultivateTime
+    lastBreakthroughResult, age, lifespan, gatheringLevel, lastManualCultivateTime, lastDeathCause
   } = character;
   
   const spiritRoot = spiritRootId;
@@ -84,12 +96,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
     setTooltip(null);
   }, []);
 
-  // Monitor Age for Year Events
   useEffect(() => {
-     if (isInitialized && !isDead) {
-         dispatch(checkTimeEvents());
-     }
-  }, [age, isInitialized, isDead, dispatch]);
+    if (isInitialized && isDead && soul.flowStep === "inactive") {
+      dispatch(startLifeReviewFromCurrentRun(lastDeathCause));
+    }
+  }, [dispatch, isInitialized, isDead, soul.flowStep, lastDeathCause]);
 
   // Monitor breakthrough result
   useEffect(() => {
@@ -141,10 +152,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
     }, 100);
     return () => clearInterval(interval);
   }, [lastManualCultivateTime]);
-
-  const handleReincarnate = () => {
-      dispatch(reincarnate());
-  };
 
   const handleManualCultivate = useCallback(() => {
     if (isInSeclusion) {
@@ -263,27 +270,54 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
   ).toFixed(1);
 
   const isCriticalLifespan = (lifespan - age) <= 365 && !isDead;
+  const unlockedRebirthPerks = DEFAULT_REINCARNATION_PERKS.filter((perk) =>
+    soul.unlockedPerkIds.includes(perk.id)
+  );
 
   if (!isInitialized || isDead) {
       if (isDead) {
+          if (
+            soul.pendingLifeReview &&
+            (soul.flowStep === "life_review" || soul.flowStep === "hall")
+          ) {
+            return (
+              <ReincarnationFlow
+                flowStep={soul.flowStep}
+                summary={soul.pendingLifeReview}
+                totalMerit={soul.totalMerit}
+                lifetimeStats={soul.lifetimeStats}
+                unlockedPerks={unlockedRebirthPerks}
+                config={soul.rebirthConfig}
+                onEnterHall={() => dispatch(enterReincarnationHall())}
+                onTogglePerk={(perkId) => dispatch(toggleRebirthPerk(perkId))}
+                onToggleHeirloom={(heirloomId) =>
+                  dispatch(toggleSelectedHeirloom(heirloomId))
+                }
+                onSelectSpiritRoot={(nextSpiritRootId) =>
+                  dispatch(
+                    setRebirthSpiritRootOverride(
+                      nextSpiritRootId as SpiritRootId | undefined
+                    )
+                  )
+                }
+                onConfirm={() => dispatch(completeRebirthFromHall())}
+              />
+            );
+          }
+
           return (
-              <div className="flex items-center justify-center h-full w-full p-6 relative overflow-hidden">
-                  <div className="bg-stone-900 border border-stone-800 p-8 rounded-xl max-w-md w-full text-center space-y-6 relative z-10 shadow-2xl">
-                      <h1 className="text-3xl font-bold text-amber-500 tracking-widest">身死道消</h1>
-                      <div className="space-y-4">
-                          <Skull size={48} className="mx-auto text-stone-600" />
-                          <p className="text-stone-400">
-                              壽元已盡，輪迴路遠。<br/>
-                              道友享年 {Math.floor(age/DAYS_PER_YEAR)} 歲，境界止步於 {REALM_NAMES[majorRealm]}。
-                          </p>
-                          <button 
-                            onClick={handleReincarnate}
-                            className="w-full bg-stone-800 hover:bg-stone-700 text-stone-100 py-3 rounded border border-stone-600 transition-all"
-                          >
-                              重入輪迴
-                          </button>
-                      </div>
-                  </div>
+              <div className="flex h-full w-full items-center justify-center p-6">
+                <div className="rounded-2xl border border-stone-800 bg-stone-900/85 px-8 py-6 text-center shadow-xl">
+                  <p className="text-sm uppercase tracking-[0.45em] text-stone-500">
+                    Reincarnation
+                  </p>
+                  <h1 className="mt-3 text-2xl font-bold text-stone-100">
+                    因果回溯中
+                  </h1>
+                  <p className="mt-3 text-sm text-stone-400">
+                    正在整理本世功德與遺珍，稍候即將進入輪迴結算。
+                  </p>
+                </div>
               </div>
           );
       }

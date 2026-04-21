@@ -1,0 +1,488 @@
+import { MajorRealm, type PendingEncounter } from "../types";
+
+export interface EncounterChoiceReward {
+  experience?: number;
+  spiritStones?: number;
+  items?: Array<{
+    itemId: string;
+    count: number;
+  }>;
+  logMessage: string;
+}
+
+export interface EncounterChoice {
+  id: string;
+  label: string;
+  description: string;
+  reward: EncounterChoiceReward;
+}
+
+export interface EncounterEvent {
+  id: string;
+  title: string;
+  description: string;
+  minRealm: MajorRealm;
+  maxRealm: MajorRealm;
+  choices: EncounterChoice[];
+}
+
+const createSingleRealmEncounterEvent = (
+  event: Omit<EncounterEvent, "minRealm" | "maxRealm"> & { realm: MajorRealm }
+): EncounterEvent => ({
+  id: event.id,
+  title: event.title,
+  description: event.description,
+  minRealm: event.realm,
+  maxRealm: event.realm,
+  choices: event.choices,
+});
+
+export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
+  herb_garden: {
+    id: "herb_garden",
+    title: "荒山藥圃",
+    description: "你在山霧間發現一片被陣紋遮掩的荒廢藥圃，藥香仍未完全散去。",
+    minRealm: MajorRealm.Mortal,
+    maxRealm: MajorRealm.GoldenCore,
+    choices: [
+      {
+        id: "gather_herbs",
+        label: "採摘靈草",
+        description: "趁藥圃尚未崩壞前，搶收可用靈草。",
+        reward: {
+          items: [{ itemId: "spirit_herb", count: 2 }],
+          logMessage: "你趁亂採下兩株聚靈草，正好能補進丹爐。",
+        },
+      },
+      {
+        id: "meditate",
+        label: "凝神觀想",
+        description: "不動其物，只觀察殘留靈機，化作一段短暫感悟。",
+        reward: {
+          experience: 80,
+          logMessage: "你在殘破藥圃中靜坐片刻，藥香化作一段溫和修為。",
+        },
+      },
+    ],
+  },
+  wandering_smith: {
+    id: "wandering_smith",
+    title: "流火匠影",
+    description: "一名背著破爐的流浪匠人暫歇路旁，願意用低價替你點出礦材中的雜質。",
+    minRealm: MajorRealm.Mortal,
+    maxRealm: MajorRealm.Foundation,
+    choices: [
+      {
+        id: "buy_ore",
+        label: "購下礦材",
+        description: "拿出靈石，換取他手中尚未完全冷卻的玄鐵礦。",
+        reward: {
+          items: [{ itemId: "iron_ore", count: 2 }],
+          spiritStones: -20,
+          logMessage: "你花了些靈石，換到兩份仍帶火氣的玄鐵礦。",
+        },
+      },
+      {
+        id: "seek_advice",
+        label: "請教鍛法",
+        description: "不買礦，單純請他指點如何避開凡鐵脆裂。",
+        reward: {
+          items: [{ itemId: "wolf_fang", count: 1 }],
+          logMessage: "匠人隨手丟來一枚妖狼牙，示意你拿去試手。",
+        },
+      },
+    ],
+  },
+  spirit_severing_herb_tide: createSingleRealmEncounterEvent({
+    id: "spirit_severing_herb_tide",
+    title: "裂神藥潮",
+    description: "化神地脈滲出一波裂神藥潮，若出手夠快，足以補起下一段丹火底盤。",
+    realm: MajorRealm.SpiritSevering,
+    choices: [
+      {
+        id: "refine_now",
+        label: "即刻收藥",
+        description: "趁藥潮未散，先把可入爐的靈材收入囊中。",
+        reward: {
+          items: [{ itemId: "bt_spirit_void", count: 1 }],
+          logMessage: "你強收一縷裂神藥潮，煉成了足以承接下一境的太虛破障丹。",
+        },
+      },
+      {
+        id: "steady_breath",
+        label: "穩住心神",
+        description: "不急著搶材，轉而順著藥潮吐納，化成一段穩定修為。",
+        reward: {
+          experience: 125000,
+          logMessage: "你借藥潮調息，讓化神後段的靈息穩穩沉了下來。",
+        },
+      },
+    ],
+  }),
+  spirit_severing_edict: createSingleRealmEncounterEvent({
+    id: "spirit_severing_edict",
+    title: "神遊法旨",
+    description: "一頁古老法旨自虛空落下，記著前輩如何以洞府與丹火補平化神期的修為裂口。",
+    realm: MajorRealm.SpiritSevering,
+    choices: [
+      {
+        id: "copy_formula",
+        label: "抄錄法旨",
+        description: "將法旨內容完整抄下，留待之後照方補齊修行節奏。",
+        reward: {
+          spiritStones: 1200,
+          logMessage: "你抄下整篇法旨，順手還在法頁夾層中找到一袋靈石。",
+        },
+      },
+      {
+        id: "insight_flow",
+        label: "當場參悟",
+        description: "現場體會其中的洞府佈局，化成更直接的修行收穫。",
+        reward: {
+          experience: 150000,
+          logMessage: "你在法旨前靜坐良久，對化神洞府與丹火並進的節奏有了更清楚把握。",
+        },
+      },
+    ],
+  }),
+  void_refining_void_barter: createSingleRealmEncounterEvent({
+    id: "void_refining_void_barter",
+    title: "虛市殘攤",
+    description: "煉虛亂流中殘留一處短暫虛市，攤主願以極低代價換走你手中多餘靈石。",
+    realm: MajorRealm.VoidRefining,
+    choices: [
+      {
+        id: "buy_void_marrow",
+        label: "買下虛髓",
+        description: "直接換走攤上的萬法歸一髓，補起合體前的最後缺口。",
+        reward: {
+          items: [{ itemId: "bt_void_fusion", count: 1 }],
+          spiritStones: -800,
+          logMessage: "你以靈石換到一份萬法歸一髓，足以讓煉虛後段的進度不再乾耗。",
+        },
+      },
+      {
+        id: "harvest_residue",
+        label: "掃空殘攤",
+        description: "不求完整寶物，只把攤上散落的虛市殘財全部帶走。",
+        reward: {
+          spiritStones: 2200,
+          logMessage: "你把虛市殘財盡數收入囊中，至少替後續煉虛資源周轉補了口氣。",
+        },
+      },
+    ],
+  }),
+  void_refining_star_chart: createSingleRealmEncounterEvent({
+    id: "void_refining_star_chart",
+    title: "裂空星圖",
+    description: "殘缺星圖標出了幾處最容易催動聚靈陣的節點，像是在提醒你別只靠閉關硬磨。",
+    realm: MajorRealm.VoidRefining,
+    choices: [
+      {
+        id: "trace_nodes",
+        label: "記下節點",
+        description: "將星圖節點逐一記下，回去重整洞府節奏。",
+        reward: {
+          experience: 280000,
+          logMessage: "你依著星圖推演洞府節點，讓煉虛期的聚靈效率明顯上了一段。",
+        },
+      },
+      {
+        id: "salvage_chart",
+        label: "拆取星砂",
+        description: "不留圖紙，直接拆下凝成星圖的虛砂精華。",
+        reward: {
+          spiritStones: 2600,
+          logMessage: "你拆走星圖上的虛砂殘晶，替洞府與丹爐多添了一筆高境界周轉。",
+        },
+      },
+    ],
+  }),
+  fusion_law_forge: createSingleRealmEncounterEvent({
+    id: "fusion_law_forge",
+    title: "法相熔坊",
+    description: "合體邊境出現一座暫時顯化的法相熔坊，像是專門替高境界修士補齊丹火與鍛體的短板。",
+    realm: MajorRealm.Fusion,
+    choices: [
+      {
+        id: "claim_fruit",
+        label: "收下道果",
+        description: "以法相承接熔坊中央的道果殘光。",
+        reward: {
+          items: [{ itemId: "bt_fusion_maha", count: 1 }],
+          logMessage: "你從法相熔坊中央摘下一枚天道感悟果，讓合體後段的節奏不再被卡死。",
+        },
+      },
+      {
+        id: "temper_body",
+        label: "借爐煉體",
+        description: "放棄直接取寶，改用熔坊殘火洗鍊自身法相。",
+        reward: {
+          experience: 520000,
+          logMessage: "你借熔坊殘火煉體，使合體期的法相與修為同步穩了下來。",
+        },
+      },
+    ],
+  }),
+  fusion_resonance_record: createSingleRealmEncounterEvent({
+    id: "fusion_resonance_record",
+    title: "萬法合鳴錄",
+    description: "一卷舊錄詳記合體修士如何把洞府、丹藥與掃圖首殺接成一條真正有感的追趕線。",
+    realm: MajorRealm.Fusion,
+    choices: [
+      {
+        id: "preserve_record",
+        label: "抄錄全卷",
+        description: "把關鍵段落完整抄下，往後慢慢化進自己的修行節奏。",
+        reward: {
+          spiritStones: 3200,
+          logMessage: "你抄錄了合鳴錄的完整節奏，還在卷末找到一袋留給後人的靈石。",
+        },
+      },
+      {
+        id: "digest_record",
+        label: "當場消化",
+        description: "現場參悟卷中節奏，直接轉成一段紮實修為。",
+        reward: {
+          experience: 610000,
+          logMessage: "你當場消化了合鳴錄，把合體期該如何並進多條乘區看得更透。",
+        },
+      },
+    ],
+  }),
+  mahayana_pillar_blessing: createSingleRealmEncounterEvent({
+    id: "mahayana_pillar_blessing",
+    title: "天柱餘照",
+    description: "大乘天柱灑下短暫餘照，能把平日累積的丹火與洞府成果一口氣放大。",
+    realm: MajorRealm.Mahayana,
+    choices: [
+      {
+        id: "draw_tribulation_pill",
+        label: "引照入丹",
+        description: "把天柱餘照直接灌入丹火，為渡劫做最後預備。",
+        reward: {
+          items: [{ itemId: "bt_maha_trib", count: 1 }],
+          logMessage: "你將天柱餘照納入丹火，煉出一枚足以護住心脈的九轉渡劫丹。",
+        },
+      },
+      {
+        id: "steady_mind",
+        label: "收束道心",
+        description: "不求丹成，只借餘照穩住即將迎劫的道心。",
+        reward: {
+          experience: 980000,
+          logMessage: "你借天柱餘照收束道心，大乘期後段的修為節奏因此穩了不少。",
+        },
+      },
+    ],
+  }),
+  mahayana_ancestral_feast: createSingleRealmEncounterEvent({
+    id: "mahayana_ancestral_feast",
+    title: "古宗遺宴",
+    description: "一場古宗遺宴只剩最後一桌，但桌上留下的靈膳與紀錄正好能接上大乘末段的修行耗時。",
+    realm: MajorRealm.Mahayana,
+    choices: [
+      {
+        id: "take_spirit_stones",
+        label: "收下遺宴靈資",
+        description: "優先把能立即轉成洞府與丹爐週轉的資源帶走。",
+        reward: {
+          spiritStones: 5400,
+          logMessage: "你把遺宴靈資悉數帶走，讓大乘後段的洞府與丹火不用再硬撐。",
+        },
+      },
+      {
+        id: "share_inheritance",
+        label: "啟讀遺錄",
+        description: "閱讀遺宴留下的修行紀錄，直接消化成修為收益。",
+        reward: {
+          experience: 1050000,
+          logMessage: "你讀完遺宴遺錄，對大乘期該怎麼把多條成長線串成閉環有了更直觀的體會。",
+        },
+      },
+    ],
+  }),
+  tribulation_lightning_cache: createSingleRealmEncounterEvent({
+    id: "tribulation_lightning_cache",
+    title: "劫雷秘庫",
+    description: "渡劫殘雷在山脊下震開一處秘庫，裡頭只留下最適合迎接下一步飛昇的資源。",
+    realm: MajorRealm.Tribulation,
+    choices: [
+      {
+        id: "take_ascent_token",
+        label: "取飛昇引",
+        description: "直取最關鍵的飛昇仙引，不再把渡劫後段耗在無止盡等待。",
+        reward: {
+          items: [{ itemId: "bt_trib_immortal", count: 1 }],
+          logMessage: "你從劫雷秘庫中取走飛昇仙引，將渡劫末段最兇的瓶頸直接往前推進了一截。",
+        },
+      },
+      {
+        id: "gather_lightning_sand",
+        label: "掃走雷砂",
+        description: "放棄最核心的寶物，改把秘庫內雷砂與靈資全部收走。",
+        reward: {
+          spiritStones: 7600,
+          logMessage: "你收走秘庫中剩餘的雷砂與靈資，替渡劫後段多換回一次安全周轉。",
+        },
+      },
+    ],
+  }),
+  tribulation_celestial_notice: createSingleRealmEncounterEvent({
+    id: "tribulation_celestial_notice",
+    title: "天劫前告",
+    description: "一道前告落在你面前，提醒你真正能縮短渡劫總時長的不是硬磨，而是事件與首通挑戰的堆疊。",
+    realm: MajorRealm.Tribulation,
+    choices: [
+      {
+        id: "heed_warning",
+        label: "記下前告",
+        description: "將前告化成往後掃圖與洞府調度的準則。",
+        reward: {
+          experience: 1420000,
+          logMessage: "你把前告中的節奏記進心裡，對渡劫該如何靠事件與挑戰補速度看得更清楚。",
+        },
+      },
+      {
+        id: "salvage_talisman",
+        label: "拆取天符",
+        description: "把前告附著的護身天符拆下，換成更直接的資源。",
+        reward: {
+          spiritStones: 8200,
+          logMessage: "你拆下前告附著的天符殘片，將其換成了足以再撐一輪洞府與丹火的靈資。",
+        },
+      },
+    ],
+  }),
+  immortal_command_cache: createSingleRealmEncounterEvent({
+    id: "immortal_command_cache",
+    title: "仙詔軍庫",
+    description: "仙人邊疆的軍庫被前朝封印，裡面殘留的資源正好能補齊仙人期最怕失速的那一段。",
+    realm: MajorRealm.Immortal,
+    choices: [
+      {
+        id: "secure_origin",
+        label: "取本源",
+        description: "先奪下最核心的鴻蒙本源，不讓仙人末段再拖成純時間牆。",
+        reward: {
+          items: [{ itemId: "bt_immortal_emperor", count: 1 }],
+          logMessage: "你從仙詔軍庫中奪得一縷鴻蒙本源，將證道仙帝前最核心的材料先握在了手裡。",
+        },
+      },
+      {
+        id: "take_supply",
+        label: "搬空靈資",
+        description: "不賭核心重寶，改把整庫能轉化成洞府與事件周轉的資源全數帶走。",
+        reward: {
+          spiritStones: 12000,
+          logMessage: "你把仙詔軍庫剩餘靈資幾乎搬空，讓仙人後段的多線培養不再那麼拮据。",
+        },
+      },
+    ],
+  }),
+  immortal_flying_decree: createSingleRealmEncounterEvent({
+    id: "immortal_flying_decree",
+    title: "飛昇殘詔",
+    description: "一紙飛昇殘詔記著仙人期如何靠洞府、丹藥、事件與首殺真正閉環，而不是只靠時間硬熬。",
+    realm: MajorRealm.Immortal,
+    choices: [
+      {
+        id: "study_decree",
+        label: "細讀殘詔",
+        description: "把殘詔中的節奏全部讀透，化成更直接的修為收益。",
+        reward: {
+          experience: 2050000,
+          logMessage: "你細讀飛昇殘詔後，終於把仙人期多條乘區如何閉環這件事看得通透。",
+        },
+      },
+      {
+        id: "sell_decree",
+        label: "換成靈資",
+        description: "不耗時間參悟，直接把殘詔交給識貨之人換取周轉資源。",
+        reward: {
+          spiritStones: 13600,
+          logMessage: "你將飛昇殘詔換成一大筆靈資，讓仙人期後段的洞府與丹火有了更穩的供應。",
+        },
+      },
+    ],
+  }),
+  emperor_rift_harvest: createSingleRealmEncounterEvent({
+    id: "emperor_rift_harvest",
+    title: "帝境裂界寶潮",
+    description: "仙帝裂界在短時間內吐出一波本源寶潮，足以決定終盤 build 是繼續拖時長，還是直接跨過最後斷層。",
+    realm: MajorRealm.ImmortalEmperor,
+    choices: [
+      {
+        id: "claim_crown",
+        label: "搶下帝冠",
+        description: "在寶潮收束前奪下最具辨識度的帝境戰利品。",
+        reward: {
+          items: [{ itemId: "emperor_crown", count: 1 }],
+          logMessage: "你從裂界寶潮中搶下一頂帝冠，終盤路線的專屬感終於不只剩抽象數值。",
+        },
+      },
+      {
+        id: "condense_tide",
+        label: "凝鍊寶潮",
+        description: "不搶單件重寶，改把整波寶潮煉成更穩定的修為與周轉。",
+        reward: {
+          experience: 3100000,
+          spiritStones: 16000,
+          logMessage: "你把帝境寶潮煉成了可直接支撐終盤節奏的修為與靈資，不再只是被動等待閉關結算。",
+        },
+      },
+    ],
+  }),
+  emperor_hongmeng_mandate: createSingleRealmEncounterEvent({
+    id: "emperor_hongmeng_mandate",
+    title: "鴻蒙帝旨",
+    description: "一道鴻蒙帝旨直接點明，帝境修行若少了事件與遭遇的高額乘區，再高的洞府也只會變成更長的乾耗。",
+    realm: MajorRealm.ImmortalEmperor,
+    choices: [
+      {
+        id: "engrave_mandate",
+        label: "銘刻帝旨",
+        description: "將帝旨的節奏刻進神魂，留作往後終盤調度的準則。",
+        reward: {
+          experience: 3560000,
+          logMessage: "你將鴻蒙帝旨銘刻進神魂，對終盤該如何同時靠洞府、丹藥、事件與遭遇提速有了定論。",
+        },
+      },
+      {
+        id: "exchange_edict",
+        label: "換取本源",
+        description: "將帝旨殘頁換成本源靈資，直接填補終盤最昂貴的養成開銷。",
+        reward: {
+          spiritStones: 18800,
+          items: [{ itemId: "bt_immortal_emperor", count: 1 }],
+          logMessage: "你以帝旨殘頁換回一縷鴻蒙本源與大量靈資，終盤節奏終於不再只靠乾熬。",
+        },
+      },
+    ],
+  }),
+};
+
+export const getEncounterEventById = (eventId: string) => ENCOUNTER_EVENTS[eventId];
+
+export const getAvailableEncounterEvents = (realm: MajorRealm) =>
+  Object.values(ENCOUNTER_EVENTS).filter(
+    (event) => realm >= event.minRealm && realm <= event.maxRealm
+  );
+
+export const pickEncounterEvent = (
+  realm: MajorRealm,
+  roll = Math.random()
+): EncounterEvent | null => {
+  const available = getAvailableEncounterEvents(realm);
+  if (available.length === 0) {
+    return null;
+  }
+
+  const index = Math.min(available.length - 1, Math.floor(roll * available.length));
+  return available[index];
+};
+
+export const getEncounterChoice = (
+  pending: PendingEncounter,
+  choiceId: string
+) => getEncounterEventById(pending.eventId)?.choices.find((choice) => choice.id === choiceId);

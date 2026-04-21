@@ -29,6 +29,7 @@ import clsx from 'clsx';
 import { Modal } from '../components/Modal';
 import { setProfession } from '@/store/slices/characterSlice';
 import AdventureStage from '../components/adventure/AdventureStage';
+import { AdventurePixelStagePrototype } from '../components/adventure/AdventurePixelStagePrototype';
 import ShopPanel from '../components/adventure/ShopPanel';
 import { QuestModal } from '../components/adventure/QuestModal';
 import { GameHintBubble } from '../components/game/GameHintBubble';
@@ -38,6 +39,19 @@ import { SHOPS } from '../data/shops';
 import { getEnemyEngagementRange, getGridDistance, getPlayerEngagementRange } from '../utils/worldCombat';
 import { getLearnedSkillEngagementRange } from '../utils/skillRealtime';
 import { normalizeLearnedSkills } from '../data/skills';
+import {
+  resolveWorldCombatStatusCues,
+  resolveWorldCombatTargetPresentation,
+  type WorldCombatCueIconKey,
+  type WorldCombatCueTone,
+  type WorldCombatEventCue,
+  type WorldCombatStatusCue,
+} from '../utils/worldCombatPresentation';
+import {
+  PIXEL_PROTOTYPE_MAP_ID,
+  resolveAdventureStageRenderMode,
+  type AdventureStageRenderMode,
+} from '../utils/pixelAdventurePrototype';
 import { createAdventureBattleUiBridge } from '../utils/adventureBattleUiBridge';
 import { createAdventureBattleVisualBridge } from '../utils/adventureBattleVisualBridge';
 import {
@@ -55,58 +69,150 @@ const GRID_SCALE_Y = 120;
 const NODE_WIDTH = 100;
 const NODE_HEIGHT = 70;
 
-const STATUS_META: Record<
-  string,
-  {
-    label: string;
-    icon: React.ComponentType<{ className?: string; size?: number }>;
-    className: string;
-  }
-> = {
-  燃燒: { label: '燃燒', icon: Flame, className: 'border-orange-700 bg-orange-950/60 text-orange-300' },
-  中毒: { label: '中毒', icon: Droplets, className: 'border-emerald-700 bg-emerald-950/60 text-emerald-300' },
-  流血: { label: '流血', icon: Droplets, className: 'border-rose-700 bg-rose-950/60 text-rose-300' },
-  護盾: { label: '護盾', icon: Shield, className: 'border-cyan-700 bg-cyan-950/60 text-cyan-300' },
-  元素護盾: { label: '元素護盾', icon: Shield, className: 'border-sky-700 bg-sky-950/60 text-sky-300' },
-  破甲: { label: '破甲', icon: ShieldOff, className: 'border-amber-700 bg-amber-950/60 text-amber-300' },
-  暈眩: { label: '暈眩', icon: Zap, className: 'border-violet-700 bg-violet-950/60 text-violet-300' },
-  凍結: { label: '凍結', icon: Snowflake, className: 'border-blue-700 bg-blue-950/60 text-blue-300' },
-  麻痺: { label: '麻痺', icon: Zap, className: 'border-yellow-700 bg-yellow-950/60 text-yellow-300' },
-  反震: { label: '反震', icon: Sparkles, className: 'border-fuchsia-700 bg-fuchsia-950/60 text-fuchsia-300' },
-  放逐: { label: '放逐', icon: Sparkles, className: 'border-indigo-700 bg-indigo-950/60 text-indigo-300' },
-  神國侵蝕: { label: '神國侵蝕', icon: Sparkles, className: 'border-red-700 bg-red-950/60 text-red-300' },
+type CombatCueRenderable = {
+  key: string;
+  label: string;
+  detail?: string;
+  timingLabel?: string;
+  tone: WorldCombatCueTone;
+  iconKey: WorldCombatCueIconKey;
 };
 
-const renderStatusBadges = (statuses: string[] = []) => {
-  if (statuses.length === 0) {
-    return <div className="text-[11px] text-stone-600">無特殊狀態</div>;
+const COMBAT_CUE_ICON_MAP: Record<
+  WorldCombatCueIconKey,
+  React.ComponentType<{ className?: string; size?: number }>
+> = {
+  target: Target,
+  swords: Swords,
+  move: Move,
+  sparkles: Sparkles,
+  shield: Shield,
+  shieldOff: ShieldOff,
+  zap: Zap,
+  snowflake: Snowflake,
+  flame: Flame,
+  droplets: Droplets,
+  skull: Skull,
+};
+
+const COMBAT_CUE_TONE_STYLES: Record<
+  WorldCombatCueTone,
+  { badge: string; subText: string }
+> = {
+  neutral: {
+    badge: 'border-stone-700 bg-stone-900/90 text-stone-300',
+    subText: 'text-stone-500',
+  },
+  warning: {
+    badge: 'border-amber-700 bg-amber-950/60 text-amber-200',
+    subText: 'text-amber-300/80',
+  },
+  danger: {
+    badge: 'border-rose-700 bg-rose-950/60 text-rose-200',
+    subText: 'text-rose-300/80',
+  },
+  ready: {
+    badge: 'border-red-500/70 bg-red-950/70 text-red-100',
+    subText: 'text-red-200/80',
+  },
+  buff: {
+    badge: 'border-emerald-700 bg-emerald-950/50 text-emerald-200',
+    subText: 'text-emerald-300/80',
+  },
+  debuff: {
+    badge: 'border-orange-700 bg-orange-950/60 text-orange-200',
+    subText: 'text-orange-300/80',
+  },
+  control: {
+    badge: 'border-violet-700 bg-violet-950/60 text-violet-200',
+    subText: 'text-violet-300/80',
+  },
+  immune: {
+    badge: 'border-cyan-700 bg-cyan-950/60 text-cyan-200',
+    subText: 'text-cyan-300/80',
+  },
+};
+
+const renderCombatCueBadges = ({
+  cues,
+  emptyLabel,
+  maxVisible = 4,
+  compact = false,
+}: {
+  cues: CombatCueRenderable[];
+  emptyLabel: string;
+  maxVisible?: number;
+  compact?: boolean;
+}) => {
+  if (cues.length === 0) {
+    return <div className="text-[11px] text-stone-600">{emptyLabel}</div>;
   }
+
+  const visibleCues = cues.slice(0, maxVisible);
+  const hiddenCount = Math.max(0, cues.length - visibleCues.length);
 
   return (
     <div className="flex flex-wrap gap-1.5">
-      {statuses.map((status) => {
-        const meta = STATUS_META[status] ?? {
-          label: status,
-          icon: Info,
-          className: 'border-stone-700 bg-stone-900 text-stone-300',
-        };
-        const Icon = meta.icon;
+      {visibleCues.map((cue) => {
+        const Icon = COMBAT_CUE_ICON_MAP[cue.iconKey] ?? Info;
+        const toneStyle = COMBAT_CUE_TONE_STYLES[cue.tone];
+        const secondaryText = cue.timingLabel ?? cue.detail;
+
         return (
           <span
-            key={status}
+            key={cue.key}
             className={clsx(
-              'inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[11px] font-semibold',
-              meta.className
+              compact
+                ? 'inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[11px] font-semibold'
+                : 'inline-flex items-start gap-1.5 rounded-lg border px-2 py-1.5 text-[11px] font-semibold',
+              toneStyle.badge
             )}
           >
-            <Icon size={12} />
-            {meta.label}
+            <Icon size={12} className="mt-0.5 shrink-0" />
+            <span className={clsx('min-w-0', compact ? '' : 'flex flex-col leading-tight')}>
+              <span>{cue.label}</span>
+              {!compact && secondaryText && (
+                <span className={clsx('text-[10px] font-medium', toneStyle.subText)}>
+                  {secondaryText}
+                </span>
+              )}
+            </span>
           </span>
         );
       })}
+      {hiddenCount > 0 && (
+        <span className="inline-flex items-center rounded-full border border-stone-700 bg-stone-900/80 px-2 py-1 text-[11px] font-semibold text-stone-300">
+          +{hiddenCount}
+        </span>
+      )}
     </div>
   );
 };
+
+const asRenderableCue = (
+  cue: WorldCombatStatusCue | WorldCombatEventCue,
+  index: number
+): CombatCueRenderable => ({
+  key: `${cue.label}:${cue.tone}:${index}`,
+  label: cue.label,
+  detail: cue.detail,
+  timingLabel: 'timingLabel' in cue ? cue.timingLabel : undefined,
+  tone: cue.tone,
+  iconKey: cue.iconKey,
+});
+
+const renderStatusBadges = (
+  statuses: string[] = [],
+  owner: 'player' | 'enemy' = 'player'
+) =>
+  renderCombatCueBadges({
+    cues: resolveWorldCombatStatusCues({ statuses, owner }).map((cue, index) =>
+      asRenderableCue(cue, index)
+    ),
+    emptyLabel: '無特殊狀態',
+    compact: true,
+    maxVisible: 5,
+  });
 
 // Simple BFS for Pathfinding
 const findPath = (start: Coordinate, end: Coordinate, width: number, height: number): Coordinate[] => {
@@ -528,6 +634,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   // Expanded Map State
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [mapTab, setMapTab] = useState<'area' | 'world'>('area');
+  const [stageRenderMode, setStageRenderMode] = useState<AdventureStageRenderMode>('official');
 
   // Auto-Movement State
   const [autoMovePath, setAutoMovePath] = useState<Coordinate[]>([]);
@@ -544,6 +651,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   const [playerSkillReadyAt, setPlayerSkillReadyAt] = useState(0);
   const [enemyActionReadyAtById, setEnemyActionReadyAtById] = useState<Record<string, number>>({});
   const [enemySpecialReadyAtById, setEnemySpecialReadyAtById] = useState<Record<string, number>>({});
+  const [worldUiNow, setWorldUiNow] = useState(() => Date.now());
   const combatTimersRef = useRef(createCombatTimerBuckets());
   
   // NPC Interaction State
@@ -651,7 +759,12 @@ export const Adventure: React.FC<AdventureProps> = ({
   }, [currentMapId, dispatch]);
 
   const mapData = MAPS.find(m => m.id === currentMapId);
-  const currentTimestamp = Date.now();
+  const canPreviewPixelPrototype = mapData?.id === PIXEL_PROTOTYPE_MAP_ID;
+  const activeStageRenderMode = resolveAdventureStageRenderMode({
+    requestedMode: stageRenderMode,
+    mapId: mapData?.id ?? null,
+  });
+  const currentTimestamp = worldUiNow;
   const playerStats = calculatePlayerStats(
     attributes,
     majorRealm,
@@ -685,6 +798,55 @@ export const Adventure: React.FC<AdventureProps> = ({
     targetDistance <= playerEngagementRange &&
     !isBattling &&
     !showIntro;
+  const primaryActiveSkillCooldownMs = primaryActiveSkill
+    ? getResolvedSkillCooldownSeconds(primaryActiveSkill, character.skills) * 1000
+    : 0;
+  const worldCombatPresentation =
+    targetedMonster &&
+    targetedMonsterTemplate &&
+    targetDistance !== null
+      ? resolveWorldCombatTargetPresentation({
+          now: currentTimestamp,
+          distance: targetDistance,
+          playerEngagementRange,
+          profession,
+          playerSpeed: playerStats.speed,
+          playerActionReadyAt,
+          playerSkillReadyAt,
+          playerSkillTotalMs: primaryActiveSkillCooldownMs,
+          enemy: targetedMonsterTemplate,
+          enemyActionReadyAt:
+            enemyActionReadyAtById[targetedMonster.instanceId] ?? 0,
+          enemySpecialReadyAt:
+            enemySpecialReadyAtById[targetedMonster.instanceId] ?? 0,
+          worldCombatTargetId,
+          targetMonsterInstanceId: targetedMonster.instanceId,
+          isAutoBattling,
+          playerStatusNames: worldCombatPlayerStatuses,
+          enemyStatusNames: worldCombatTargetStatuses,
+          recentMessage: worldLastCombatMessage,
+        })
+      : null;
+
+  useEffect(() => {
+    if (!targetedMonster || isBattling || showIntro) {
+      setWorldUiNow(Date.now());
+      return;
+    }
+
+    setWorldUiNow(Date.now());
+    const timer = setInterval(() => {
+      setWorldUiNow(Date.now());
+    }, 120);
+
+    return () => clearInterval(timer);
+  }, [targetedMonster, isBattling, showIntro]);
+
+  useEffect(() => {
+    if (stageRenderMode === 'pixel_prototype' && !canPreviewPixelPrototype) {
+      setStageRenderMode('official');
+    }
+  }, [stageRenderMode, canPreviewPixelPrototype]);
 
   useEffect(() => {
     setWorldPlayerHp(playerStats.maxHp);
@@ -783,8 +945,11 @@ export const Adventure: React.FC<AdventureProps> = ({
           profession: chosenSkill?.profession,
           castTimeMs: chosenSkill?.castTimeMs,
           executionTimeMs: strike.executionTimeMs,
-          targetX: playerPosition.x,
-          targetY: playerPosition.y,
+          isProjectile: strike.isProjectile,
+          sourceX: playerPosition.x,
+          sourceY: playerPosition.y,
+          targetX: targetedMonster?.x ?? playerPosition.x,
+          targetY: targetedMonster?.y ?? playerPosition.y,
         }),
       applyPreviewStatePlan: (previewPlan) => {
         setWorldCombatTargetId(previewPlan.worldCombatTargetId);
@@ -835,13 +1000,34 @@ export const Adventure: React.FC<AdventureProps> = ({
           completedQuestIds: completedQuests,
           playerMaxHp: playerStats.maxHp,
           resolveStrike: (canUseSpecial) =>
-            resolveEnemyWorldStrike(targetedMonsterTemplate, playerStats, canUseSpecial),
+            resolveEnemyWorldStrike(
+              targetedMonsterTemplate,
+              playerStats,
+              canUseSpecial,
+              worldCombatPlayerStatuses
+            ),
           timerSet: combatTimersRef.current.world,
           applyCastEffect: ({ strike }) =>
             dispatchEnemyWorldStrikeCastEffect({
               hasSkillName: Boolean(strike.skillName),
-              targetX: targetedMonster?.x ?? playerPosition.x,
-              targetY: targetedMonster?.y ?? playerPosition.y,
+              executionTimeMs: strike.executionTimeMs,
+              isProjectile: strike.isProjectile,
+              sourceX: targetedMonster?.x ?? playerPosition.x,
+              sourceY: targetedMonster?.y ?? playerPosition.y,
+              targetX: playerPosition.x,
+              targetY: playerPosition.y,
+              warningRadius:
+                strike.skillName &&
+                ((strike.areaShape &&
+                  strike.areaShape !== 'single' &&
+                  strike.areaShape !== 'self')
+                  ? Math.max(1, strike.areaRadius ?? 1)
+                  : targetedMonsterTemplate.rank === EnemyRank.Boss
+                    ? 0.95
+                    : undefined),
+              isBossThreat:
+                targetedMonsterTemplate.rank === EnemyRank.Boss &&
+                Boolean(strike.skillName),
             }),
           applyPreviewStatePlan: (previewPlan, enemyInstanceId) => {
             setEnemyActionReadyAtById((prev) => ({
@@ -1233,6 +1419,35 @@ export const Adventure: React.FC<AdventureProps> = ({
              <div className="flex flex-col items-end gap-1">
                  <div className="flex items-center gap-2">
                      <button
+                        onClick={() =>
+                          setStageRenderMode((currentMode) =>
+                            currentMode === 'pixel_prototype' ? 'official' : 'pixel_prototype'
+                          )
+                        }
+                        disabled={!canPreviewPixelPrototype}
+                        className={clsx(
+                            "h-8 w-8 flex items-center justify-center rounded backdrop-blur border transition-all group relative",
+                            activeStageRenderMode === 'pixel_prototype'
+                                ? "bg-emerald-900/80 border-emerald-500 text-emerald-200 shadow-[0_0_10px_rgba(16,185,129,0.35)]"
+                                : canPreviewPixelPrototype
+                                  ? "bg-black/50 border-stone-800 text-stone-500 hover:text-stone-200 hover:border-stone-600"
+                                  : "bg-black/30 border-stone-900 text-stone-700 cursor-not-allowed opacity-70"
+                        )}
+                     >
+                         <Sparkles size={16} />
+                         
+                         <GameHintBubble
+                           eyebrow="PIXEL PROTOTYPE"
+                           className="left-1/2 top-full mt-1 -translate-x-1/2"
+                         >
+                            {canPreviewPixelPrototype
+                              ? activeStageRenderMode === 'pixel_prototype'
+                                ? "切回正式 AdventureStage"
+                                : "切換到像素風 vertical slice 原型"
+                              : "目前只在東郊靈田開放像素原型預覽"}
+                         </GameHintBubble>
+                     </button>
+                     <button
                         onClick={() => setIsAutoBattling(!isAutoBattling)}
                         className={clsx(
                             "h-8 w-8 flex items-center justify-center rounded backdrop-blur border transition-all group relative",
@@ -1313,6 +1528,43 @@ export const Adventure: React.FC<AdventureProps> = ({
                             <div className="mt-1 text-xs text-stone-500">
                                 {REALM_NAMES[targetedMonsterTemplate.realm]} {targetedMonsterTemplate.minorRealm}
                             </div>
+                            {worldCombatPresentation && (
+                                <div className="mt-1 text-[11px] text-stone-400">
+                                    {worldCombatPresentation.rolePresentation.label} · {worldCombatPresentation.rolePresentation.detail}
+                                </div>
+                            )}
+                            {worldCombatPresentation && (
+                                <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
+                                    <span className="rounded-full border border-stone-700 bg-stone-900/80 px-2 py-1 text-stone-300">
+                                        角色分工：{worldCombatPresentation.rolePresentation.label}
+                                    </span>
+                                    <span
+                                        className={clsx(
+                                            "rounded-full border px-2 py-1 font-semibold",
+                                            worldCombatPresentation.intentTone === 'ready'
+                                              ? "border-rose-500/60 bg-rose-950/60 text-rose-200"
+                                              : worldCombatPresentation.intentTone === 'danger'
+                                                ? "border-amber-500/60 bg-amber-950/60 text-amber-200"
+                                                : worldCombatPresentation.intentTone === 'warning'
+                                                  ? "border-sky-500/60 bg-sky-950/60 text-sky-200"
+                                                  : "border-stone-700 bg-stone-900/80 text-stone-300"
+                                        )}
+                                    >
+                                        敵方意圖：{worldCombatPresentation.intentLabel}
+                                    </span>
+                                    <span className="rounded-full border border-stone-700 bg-stone-900/80 px-2 py-1 text-stone-300">
+                                        {worldCombatPresentation.rangeHint}
+                                    </span>
+                                    <span
+                                        className={clsx(
+                                            "rounded-full border px-2 py-1 font-semibold",
+                                            COMBAT_CUE_TONE_STYLES[worldCombatPresentation.recentEventCue.tone].badge
+                                        )}
+                                    >
+                                        {worldCombatPresentation.recentEventCue.label}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                         <div className="text-right text-xs text-stone-400">
                             <div>距離 {targetDistance}</div>
@@ -1366,11 +1618,68 @@ export const Adventure: React.FC<AdventureProps> = ({
                                 <span>氣血 {Math.floor(worldPlayerHp)} / {playerStats.maxHp}</span>
                                 <span>{worldPlayerShield > 0 ? `護盾 ${Math.floor(worldPlayerShield)}` : '無護盾'}</span>
                             </div>
-                            <div className="mt-2">{renderStatusBadges(worldCombatPlayerStatuses)}</div>
+                            <div className="mt-2">
+                                {worldCombatPresentation
+                                  ? renderCombatCueBadges({
+                                      cues: worldCombatPresentation.playerStatusCues.map((cue, index) =>
+                                        asRenderableCue(cue, index)
+                                      ),
+                                      emptyLabel: '目前無主要增益',
+                                      maxVisible: 4,
+                                    })
+                                  : renderStatusBadges(worldCombatPlayerStatuses, 'player')}
+                            </div>
+                            {worldCombatPresentation && (
+                                <div className="mt-3 space-y-3">
+                                    <div>
+                                        <div className="mb-1 flex items-center justify-between text-[11px] text-stone-500">
+                                            <span>普攻節奏</span>
+                                            <span className={worldCombatPresentation.playerAction.ready ? 'text-emerald-300' : 'text-amber-300'}>
+                                                {worldCombatPresentation.playerAction.ready ? '可出手' : worldCombatPresentation.playerAction.label}
+                                            </span>
+                                        </div>
+                                        <div className="h-2 overflow-hidden rounded-full border border-stone-800 bg-stone-950">
+                                            <div
+                                                className={clsx(
+                                                    "h-full transition-all duration-150",
+                                                    worldCombatPresentation.playerAction.ready ? "bg-emerald-500" : "bg-amber-500"
+                                                )}
+                                                style={{ width: `${worldCombatPresentation.playerAction.fillPercent}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                    {primaryActiveSkill && worldCombatPresentation.playerSkill && (
+                                        <div>
+                                            <div className="mb-1 flex items-center justify-between text-[11px] text-stone-500">
+                                                <span>{primaryActiveSkill.name}</span>
+                                                <span className={worldCombatPresentation.playerSkill.ready ? 'text-emerald-300' : 'text-amber-300'}>
+                                                    {worldCombatPresentation.playerSkill.ready ? '可施放' : worldCombatPresentation.playerSkill.label}
+                                                </span>
+                                            </div>
+                                            <div className="h-2 overflow-hidden rounded-full border border-stone-800 bg-stone-950">
+                                                <div
+                                                    className={clsx(
+                                                        "h-full transition-all duration-150",
+                                                        worldCombatPresentation.playerSkill.ready ? "bg-emerald-500" : "bg-amber-500"
+                                                    )}
+                                                    style={{ width: `${worldCombatPresentation.playerSkill.fillPercent}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                         <div className="rounded-lg border border-rose-900/50 bg-stone-950/70 p-3">
                             <div className="mb-2 flex items-center justify-between">
-                                <div className="text-sm font-bold text-rose-300">{targetedMonster.name}</div>
+                                <div>
+                                    <div className="text-sm font-bold text-rose-300">{targetedMonster.name}</div>
+                                    {worldCombatPresentation && (
+                                        <div className="mt-1 text-[11px] text-stone-500">
+                                            {worldCombatPresentation.rolePresentation.label} · {worldCombatPresentation.rolePresentation.summary}
+                                        </div>
+                                    )}
+                                </div>
                                 <div className="text-[11px] text-stone-500">{targetedMonster.rank === EnemyRank.Boss ? 'Boss' : targetedMonster.rank === EnemyRank.Elite ? 'Elite' : 'Common'}</div>
                             </div>
                             <div className="h-2 overflow-hidden rounded-full border border-stone-800 bg-stone-950">
@@ -1383,7 +1692,57 @@ export const Adventure: React.FC<AdventureProps> = ({
                                 <span>氣血 {targetedMonster.currentHp} / {targetedMonsterTemplate.maxHp}</span>
                                 <span>射程 {getEnemyEngagementRange(targetedMonsterTemplate)}</span>
                             </div>
-                            <div className="mt-2">{renderStatusBadges(worldCombatTargetStatuses)}</div>
+                            <div className="mt-2">
+                                {worldCombatPresentation
+                                  ? renderCombatCueBadges({
+                                      cues: worldCombatPresentation.enemyStatusCues.map((cue, index) =>
+                                        asRenderableCue(cue, index)
+                                      ),
+                                      emptyLabel: '目前無主要壓制',
+                                      maxVisible: 4,
+                                    })
+                                  : renderStatusBadges(worldCombatTargetStatuses, 'enemy')}
+                            </div>
+                            {worldCombatPresentation && (
+                                <div className="mt-3 space-y-3">
+                                    <div>
+                                        <div className="mb-1 flex items-center justify-between text-[11px] text-stone-500">
+                                            <span>敵方出手</span>
+                                            <span className={worldCombatPresentation.enemyAction.ready ? 'text-rose-300' : 'text-amber-300'}>
+                                                {worldCombatPresentation.enemyAction.ready ? '已就緒' : worldCombatPresentation.enemyAction.label}
+                                            </span>
+                                        </div>
+                                        <div className="h-2 overflow-hidden rounded-full border border-stone-800 bg-stone-950">
+                                            <div
+                                                className={clsx(
+                                                    "h-full transition-all duration-150",
+                                                    worldCombatPresentation.enemyAction.ready ? "bg-rose-500" : "bg-amber-500"
+                                                )}
+                                                style={{ width: `${worldCombatPresentation.enemyAction.fillPercent}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                    {worldCombatPresentation.enemySpecial && (
+                                        <div>
+                                            <div className="mb-1 flex items-center justify-between text-[11px] text-stone-500">
+                                                <span>{worldCombatPresentation.enemySpecial.name}</span>
+                                                <span className={worldCombatPresentation.enemySpecial.ready ? 'text-rose-300' : 'text-amber-300'}>
+                                                    {worldCombatPresentation.enemySpecial.ready ? '特招就緒' : worldCombatPresentation.enemySpecial.label}
+                                                </span>
+                                            </div>
+                                            <div className="h-2 overflow-hidden rounded-full border border-stone-800 bg-stone-950">
+                                                <div
+                                                    className={clsx(
+                                                        "h-full transition-all duration-150",
+                                                        worldCombatPresentation.enemySpecial.ready ? "bg-rose-500" : "bg-amber-500"
+                                                    )}
+                                                    style={{ width: `${worldCombatPresentation.enemySpecial.fillPercent}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className="mt-3 rounded-lg border border-stone-800 bg-stone-950/70 px-3 py-2">
@@ -1393,45 +1752,38 @@ export const Adventure: React.FC<AdventureProps> = ({
                         <div className="text-sm text-stone-300">
                             {worldLastCombatMessage ?? '尚未開始交手'}
                         </div>
-                        {primaryActiveSkill && (
-                            <div className="mt-3">
-                                <div className="mb-1 flex items-center justify-between text-[11px] text-stone-500">
-                                    <span>{primaryActiveSkill.name}</span>
-                                    <span className={(currentTimestamp < playerSkillReadyAt) ? 'text-amber-300' : 'text-emerald-300'}>
-                                        {currentTimestamp < playerSkillReadyAt ? `${((playerSkillReadyAt - currentTimestamp) / 1000).toFixed(1)}s` : '可施放'}
+                        {worldCombatPresentation && (
+                            <div className={clsx(
+                                'mt-2 text-[11px]',
+                                COMBAT_CUE_TONE_STYLES[worldCombatPresentation.recentEventCue.tone].subText
+                            )}>
+                                {worldCombatPresentation.recentEventCue.detail}
+                            </div>
+                        )}
+                        {worldCombatPresentation && (
+                            <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
+                                <span className="rounded-full border border-emerald-900/60 bg-emerald-950/40 px-2 py-1 text-emerald-200">
+                                    你的距離 {playerEngagementRange} 格
+                                </span>
+                                <span className="rounded-full border border-rose-900/60 bg-rose-950/40 px-2 py-1 text-rose-200">
+                                    敵方危險區 {worldCombatPresentation.enemyEngagementRange} 格
+                                </span>
+                                <span className="rounded-full border border-stone-700 bg-stone-900/80 px-2 py-1 text-stone-300">
+                                    {worldCombatPresentation.rolePresentation.label}
+                                </span>
+                                <span
+                                    className={clsx(
+                                        "rounded-full border px-2 py-1 font-semibold",
+                                        COMBAT_CUE_TONE_STYLES[worldCombatPresentation.recentEventCue.tone].badge
+                                    )}
+                                >
+                                    {worldCombatPresentation.recentEventCue.label}
+                                </span>
+                                {worldCombatPresentation.enemySpecial && (
+                                    <span className="rounded-full border border-amber-900/60 bg-amber-950/40 px-2 py-1 text-amber-200">
+                                        {worldCombatPresentation.enemySpecial.warningLabel}
                                     </span>
-                                </div>
-                                <div className="h-2 overflow-hidden rounded-full border border-stone-800 bg-stone-950">
-                                    <div
-                                        className={clsx(
-                                            "h-full transition-all duration-200",
-                                            currentTimestamp < playerSkillReadyAt ? "bg-amber-500" : "bg-emerald-500"
-                                        )}
-                                        style={{
-                                          width: `${
-                                            getResolvedSkillCooldownSeconds(
-                                              primaryActiveSkill,
-                                              character.skills
-                                            )
-                                              ? Math.max(
-                                                  0,
-                                                  100 -
-                                                    ((Math.max(
-                                                      0,
-                                                      playerSkillReadyAt - currentTimestamp
-                                                    ) /
-                                                      (getResolvedSkillCooldownSeconds(
-                                                        primaryActiveSkill,
-                                                        character.skills
-                                                      ) *
-                                                        1000)) *
-                                                      100)
-                                                )
-                                              : 100
-                                          }%`,
-                                        }}
-                                    />
-                                </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -1446,25 +1798,42 @@ export const Adventure: React.FC<AdventureProps> = ({
 
             {/* PixiJS Stage */}
             {gridMetrics.pixelWidth > 0 && mapData && (
-                 <AdventureStage
-                    key={currentMapId} // Force Remount on Map Change to prevent visual drift
-                    mapData={mapData}
-                    playerPosition={playerPosition}
-                    activeMonsters={activeMonsters}
-                    portals={mapData.portals}
-                    onTileClick={handleGridClick}
-                    onPlayerArrive={handlePlayerArrive}
-                    width={gridMetrics.pixelWidth}
-                    height={gridMetrics.pixelHeight}
-                    cellSize={gridMetrics.cellSize}
-                    majorRealm={character.majorRealm}
-                    targetMonsterId={targetMonsterId}
-                    isBattling={isBattling}
-                    playerName={character.name}
-                    moveDestination={autoMovePath.length > 0 ? autoMovePath[autoMovePath.length - 1] : null}
-                    activeQuests={activeQuests}
-                    completedQuests={completedQuests}
-                 />
+                 activeStageRenderMode === 'pixel_prototype' ? (
+                     <AdventurePixelStagePrototype
+                        key={`${currentMapId}-pixel-prototype`}
+                        mapData={mapData}
+                        playerPosition={playerPosition}
+                        activeMonsters={activeMonsters}
+                        portals={mapData.portals}
+                        targetMonsterId={targetMonsterId}
+                        combatPresentation={worldCombatPresentation?.stagePresentation ?? null}
+                        width={gridMetrics.pixelWidth}
+                        height={gridMetrics.pixelHeight}
+                        onTileClick={handleGridClick}
+                        onPlayerArrive={handlePlayerArrive}
+                     />
+                 ) : (
+                     <AdventureStage
+                        key={currentMapId} // Force Remount on Map Change to prevent visual drift
+                        mapData={mapData}
+                        playerPosition={playerPosition}
+                        activeMonsters={activeMonsters}
+                        portals={mapData.portals}
+                        onTileClick={handleGridClick}
+                        onPlayerArrive={handlePlayerArrive}
+                        width={gridMetrics.pixelWidth}
+                        height={gridMetrics.pixelHeight}
+                        cellSize={gridMetrics.cellSize}
+                        majorRealm={character.majorRealm}
+                        targetMonsterId={targetMonsterId}
+                        combatPresentation={worldCombatPresentation?.stagePresentation ?? null}
+                        isBattling={isBattling}
+                        playerName={character.name}
+                        moveDestination={autoMovePath.length > 0 ? autoMovePath[autoMovePath.length - 1] : null}
+                        activeQuests={activeQuests}
+                        completedQuests={completedQuests}
+                     />
+                 )
             )}
         </div>
 
@@ -1555,7 +1924,7 @@ export const Adventure: React.FC<AdventureProps> = ({
                                  )}
                                  <div className="mt-3 border-t border-stone-800/70 pt-2">
                                     <div className="mb-1 text-[10px] tracking-[0.22em] uppercase text-stone-500">狀態</div>
-                                    {renderStatusBadges(latestBattleLog?.playerStatuses)}
+                                    {renderStatusBadges(latestBattleLog?.playerStatuses, 'player')}
                                  </div>
                              </div>
 
@@ -1594,7 +1963,7 @@ export const Adventure: React.FC<AdventureProps> = ({
                                  </div>
                                  <div className="mt-3 border-t border-stone-800/70 pt-2">
                                     <div className="mb-1 text-[10px] tracking-[0.22em] uppercase text-stone-500">狀態</div>
-                                    {renderStatusBadges(latestBattleLog?.enemyStatuses)}
+                                    {renderStatusBadges(latestBattleLog?.enemyStatuses, 'enemy')}
                                  </div>
                              </div>
                         </div>

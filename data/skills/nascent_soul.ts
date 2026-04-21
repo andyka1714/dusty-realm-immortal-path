@@ -6,7 +6,7 @@ export const NASCENT_SOUL_SKILLS: Record<string, Skill> = {
     id: "s_n_active",
     name: "天外飛仙",
     description:
-      "對單體造成 400% 真實傷害(無視防禦)，若目標生命低於 30% 則傷害翻倍；若未斬殺則附加【流血】3 回合。",
+      "對單體造成 400% 劍傷，並附加【流血】3 回合。",
     type: "Active",
     cooldown: 6,
     minRealm: MajorRealm.NascentSoul,
@@ -67,7 +67,7 @@ export const NASCENT_SOUL_SKILLS: Record<string, Skill> = {
     id: "m_n_active",
     name: "九天雷劫",
     description:
-      "引導 2 回合，每回合對全體造成 250% 雷系傷害，對「凍結」目標造成雙倍傷害。",
+      "對全體造成 250% 雷法傷害。",
     type: "Active",
     cooldown: 6,
     minRealm: MajorRealm.NascentSoul,

@@ -1,4 +1,9 @@
-import { MajorRealm, ProfessionType, Skill } from "../../types";
+import {
+  MajorRealm,
+  ProfessionType,
+  Skill,
+  SkillAcquisitionTier,
+} from "../../types";
 import { QI_REFINING_SKILLS } from "./qi_refining";
 import { FOUNDATION_SKILLS } from "./foundation";
 import { GOLDEN_CORE_SKILLS } from "./golden_core";
@@ -494,6 +499,42 @@ export const FORMAL_CORE_SKILLS_BY_SOURCE_TIER: Record<
   ).sort(compareSkills),
 };
 
+export const getSkillFormalAcquisitionTier = (
+  skill: Skill
+): SkillAcquisitionTier => {
+  if (skill.formalSourceTier === "inheritance") {
+    return "inheritance";
+  }
+  if (skill.formalSourceTier === "boss") {
+    return "boss_core";
+  }
+  if (
+    skill.formalSourceTier === "elite" ||
+    (skill.formalSourceTier === "shop" && skill.minRealm > MajorRealm.QiRefining)
+  ) {
+    return "advanced";
+  }
+  return "basic";
+};
+
+export const FORMAL_CORE_SKILLS_BY_ACQUISITION_TIER: Record<
+  SkillAcquisitionTier,
+  Skill[]
+> = {
+  basic: FORMAL_CORE_SKILLS.filter(
+    (skill) => getSkillFormalAcquisitionTier(skill) === "basic"
+  ).sort(compareSkills),
+  advanced: FORMAL_CORE_SKILLS.filter(
+    (skill) => getSkillFormalAcquisitionTier(skill) === "advanced"
+  ).sort(compareSkills),
+  boss_core: FORMAL_CORE_SKILLS.filter(
+    (skill) => getSkillFormalAcquisitionTier(skill) === "boss_core"
+  ).sort(compareSkills),
+  inheritance: FORMAL_CORE_SKILLS.filter(
+    (skill) => getSkillFormalAcquisitionTier(skill) === "inheritance"
+  ).sort(compareSkills),
+};
+
 export const FORMAL_CORE_PASSIVE_SKILLS = FORMAL_CORE_SKILLS_SORTED.filter(
   (skill) => skill.type === "Passive"
 );
@@ -793,6 +834,7 @@ export const getFormalCoreSkills = (options?: {
   profession?: ProfessionType;
   minRealm?: Skill["minRealm"];
   formalSourceTier?: NonNullable<Skill["formalSourceTier"]>;
+  formalAcquisitionTier?: SkillAcquisitionTier;
   type?: Skill["type"];
 }) =>
   FORMAL_CORE_SKILLS_SORTED.filter((skill) => {
@@ -805,6 +847,12 @@ export const getFormalCoreSkills = (options?: {
     if (
       options?.formalSourceTier &&
       skill.formalSourceTier !== options.formalSourceTier
+    ) {
+      return false;
+    }
+    if (
+      options?.formalAcquisitionTier &&
+      getSkillFormalAcquisitionTier(skill) !== options.formalAcquisitionTier
     ) {
       return false;
     }

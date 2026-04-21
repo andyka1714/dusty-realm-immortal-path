@@ -68,6 +68,7 @@ import {
   FORMAL_CORE_PASSIVE_SKILLS,
   FORMAL_CORE_SKILLS_BY_REALM,
   FORMAL_CORE_SKILLS_SORTED,
+  FORMAL_CORE_SKILLS_BY_ACQUISITION_TIER,
   FINAL_CULL_SKILL_GROUPS_BY_PROFESSION,
   FINAL_CULL_SKILL_IDS_BY_PROFESSION,
   FINAL_CULL_SKILL_MAP_BY_PROFESSION_AND_REPLACEMENT,
@@ -78,6 +79,7 @@ import {
   FORMAL_CORE_SKILLS_BY_SOURCE_TIER,
   getFormalCoreSkillsByRealm,
   getFormalCoreSkills,
+  getSkillFormalAcquisitionTier,
   getSkill,
   LEGACY_SKILL_MAP,
   LEGACY_SKILLS_BY_PROFESSION_AND_REPLACEMENT,
@@ -773,8 +775,14 @@ describe("skill pool registry", () => {
       FORMAL_CORE_SKILLS_BY_SOURCE_TIER.elite.length +
       FORMAL_CORE_SKILLS_BY_SOURCE_TIER.boss.length +
       FORMAL_CORE_SKILLS_BY_SOURCE_TIER.inheritance.length;
+    const indexedAcquisitionCount =
+      FORMAL_CORE_SKILLS_BY_ACQUISITION_TIER.basic.length +
+      FORMAL_CORE_SKILLS_BY_ACQUISITION_TIER.advanced.length +
+      FORMAL_CORE_SKILLS_BY_ACQUISITION_TIER.boss_core.length +
+      FORMAL_CORE_SKILLS_BY_ACQUISITION_TIER.inheritance.length;
 
     expect(indexedCoreCount).toBe(FORMAL_CORE_SKILLS_SORTED.length);
+    expect(indexedAcquisitionCount).toBe(FORMAL_CORE_SKILLS_SORTED.length);
   });
 
   it("supports formal core filtering by source tier, realm, profession, and type", () => {
@@ -798,7 +806,26 @@ describe("skill pool registry", () => {
     ).toBe(true);
 
     expect(
+      getFormalCoreSkills({ formalAcquisitionTier: "boss_core" }).every(
+        (skill) => getSkillFormalAcquisitionTier(skill) === "boss_core"
+      )
+    ).toBe(true);
+
+    expect(
       getFormalCoreSkills({ minRealm: 7 }).every((skill) => skill.minRealm === 7)
+    ).toBe(true);
+
+    expect(
+      getFormalCoreSkills({
+        profession: ProfessionType.Body,
+        formalAcquisitionTier: "advanced",
+        type: "Passive",
+      }).every(
+        (skill) =>
+          skill.profession === ProfessionType.Body &&
+          getSkillFormalAcquisitionTier(skill) === "advanced" &&
+          skill.type === "Passive"
+      )
     ).toBe(true);
   });
 

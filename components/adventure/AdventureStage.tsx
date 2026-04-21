@@ -8,6 +8,7 @@ import { MOVEMENT_SPEEDS } from '../../constants';
 import { QUESTS } from '../../data/quests'; // Import QUESTS
 import { current } from '@reduxjs/toolkit';
 import { getVisualEffectPresentation } from '../../utils/visualEffectPresentation';
+import type { WorldCombatStagePresentation } from '../../utils/worldCombatPresentation';
 
 interface AdventureStageProps {
   mapData: MapData;
@@ -15,6 +16,7 @@ interface AdventureStageProps {
   activeMonsters: ActiveMonster[];
   portals: Portal[];
   targetMonsterId: string | null;
+  combatPresentation?: WorldCombatStagePresentation | null;
   majorRealm: MajorRealm;
   isBattling: boolean;
   onTileClick: (x: number, y: number) => void;
@@ -46,6 +48,7 @@ export default function AdventureStage({
   activeMonsters,
   portals,
   targetMonsterId,
+  combatPresentation,
   majorRealm,
   isBattling,
   onTileClick,
@@ -102,6 +105,9 @@ export default function AdventureStage({
                    projectile.endFill();
                    projectile.lineStyle(2, 0xffffff, 0.3);
                    projectile.drawCircle(0, 0, Math.max(6, cellSize * 0.16));
+                   projectile.lineStyle(2, color, 0.45);
+                   projectile.moveTo(-Math.max(8, cellSize * 0.2), 0);
+                   projectile.lineTo(-Math.max(16, cellSize * 0.35), 0);
                    projectile.x = startX;
                    projectile.y = startY + 20;
                    displayObject = projectile;
@@ -111,6 +117,8 @@ export default function AdventureStage({
                    area.beginFill(color, 0.16);
                    area.drawCircle(0, 0, radiusPx ?? cellSize);
                    area.endFill();
+                   area.lineStyle(1, 0xffffff, 0.2);
+                   area.drawCircle(0, 0, (radiusPx ?? cellSize) * 0.62);
                    area.x = targetX ?? startX;
                    area.y = targetY ?? startY;
                    displayObject = area;
@@ -120,6 +128,12 @@ export default function AdventureStage({
                    impact.drawCircle(0, 0, radiusPx ?? cellSize * 0.2);
                    impact.lineStyle(1, 0xffffff, 0.35);
                    impact.drawCircle(0, 0, (radiusPx ?? cellSize * 0.2) * 0.6);
+                   const burstRadius = radiusPx ?? cellSize * 0.2;
+                   impact.lineStyle(2, color, 0.75);
+                   impact.moveTo(-burstRadius, 0);
+                   impact.lineTo(burstRadius, 0);
+                   impact.moveTo(0, -burstRadius);
+                   impact.lineTo(0, burstRadius);
                    impact.x = targetX ?? startX;
                    impact.y = targetY ?? startY;
                    displayObject = impact;
@@ -129,6 +143,8 @@ export default function AdventureStage({
                    cast.drawCircle(0, 0, radiusPx ?? cellSize * 0.3);
                    cast.lineStyle(1, 0xffffff, 0.28);
                    cast.drawCircle(0, 0, (radiusPx ?? cellSize * 0.3) * 0.65);
+                   cast.lineStyle(1, color, 0.35);
+                   cast.drawCircle(0, 0, (radiusPx ?? cellSize * 0.3) * 1.35);
                    cast.x = targetX ?? startX;
                    cast.y = targetY ?? startY;
                    displayObject = cast;
@@ -203,6 +219,7 @@ export default function AdventureStage({
       playerContainer: null as PIXI.Container | null,
       monsterContainers: new Map<string, PIXI.Container>(),
       entityLayer: null as PIXI.Container | null,
+      combatOverlay: null as PIXI.Graphics | null,
       portalsLayer: null as PIXI.Container | null,
       targetMarker: null as PIXI.Graphics | null,
       destinationMarker: null as PIXI.Graphics | null,
@@ -214,7 +231,7 @@ export default function AdventureStage({
 
   const onTileClickRef = useRef(onTileClick);
   const entitiesRef = useRef({ monsters: activeMonsters, portals: portals });
-  const latestDataRef = useRef({ mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName, moveDestination, activeQuests, completedQuests });
+  const latestDataRef = useRef({ mapData, playerPosition, activeMonsters, portals, targetMonsterId, combatPresentation, majorRealm, isBattling, playerName, moveDestination, activeQuests, completedQuests });
 
   // Sync latest props
   useEffect(() => {
@@ -224,8 +241,8 @@ export default function AdventureStage({
   useLayoutEffect(() => {
     entitiesRef.current.monsters = activeMonsters;
     entitiesRef.current.portals = portals;
-    latestDataRef.current = { mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName, moveDestination, activeQuests, completedQuests };
-  }, [mapData, playerPosition, activeMonsters, portals, targetMonsterId, majorRealm, isBattling, playerName, moveDestination, activeQuests, completedQuests]);
+    latestDataRef.current = { mapData, playerPosition, activeMonsters, portals, targetMonsterId, combatPresentation, majorRealm, isBattling, playerName, moveDestination, activeQuests, completedQuests };
+  }, [mapData, playerPosition, activeMonsters, portals, targetMonsterId, combatPresentation, majorRealm, isBattling, playerName, moveDestination, activeQuests, completedQuests]);
 
   // Force Snap (New Map)
   useLayoutEffect(() => {
@@ -423,6 +440,10 @@ export default function AdventureStage({
       hitArea.interactive = true;
       hitArea.alpha = 0; 
       world.addChild(hitArea);
+
+      const combatOverlay = new PIXI.Graphics();
+      world.addChild(combatOverlay);
+      displayRefs.current.combatOverlay = combatOverlay;
 
       // Portals Layer
       const portalsLayer = new PIXI.Container();
@@ -665,6 +686,129 @@ export default function AdventureStage({
               playerContainer.scale.set(pulse); // Apply Pulse
           }
 
+          const combatOverlay = displayRefs.current.combatOverlay;
+          if (combatOverlay) {
+              combatOverlay.clear();
+              const presentation = latestDataRef.current.combatPresentation;
+              if (presentation) {
+                  const playerCenterX = (visualRef.current.player.x + 0.5) * cellSize;
+                  const playerCenterY = (visualRef.current.player.y + 0.5) * cellSize;
+                  const playerPulse = 0.98 + Math.sin(time * 3.5) * 0.03;
+
+                  if (presentation.bossTelegraphRadius) {
+                      const telegraphColor =
+                          presentation.bossTelegraphState === 'ready' ? 0xfb7185 : 0xf59e0b;
+                      const telegraphAlpha =
+                          presentation.bossTelegraphState === 'ready' ? 0.18 : 0.12;
+                      combatOverlay.lineStyle(2, telegraphColor, 0.8);
+                      combatOverlay.beginFill(telegraphColor, telegraphAlpha);
+                      combatOverlay.drawCircle(
+                          playerCenterX,
+                          playerCenterY,
+                          presentation.bossTelegraphRadius * cellSize * (0.94 + Math.sin(time * 5.4) * 0.04)
+                      );
+                      combatOverlay.endFill();
+                  }
+
+                  combatOverlay.lineStyle(2, 0x4ade80, 0.3);
+                  combatOverlay.drawCircle(
+                      playerCenterX,
+                      playerCenterY,
+                      presentation.playerRangeRadius * cellSize * playerPulse
+                  );
+
+                  const targetId = latestDataRef.current.targetMonsterId;
+                  const targetCoords = targetId
+                      ? visualRef.current.monsterCoords.get(targetId)
+                      : undefined;
+
+                  if (targetCoords) {
+                      const targetCenterX = (targetCoords.x + 0.5) * cellSize;
+                      const targetCenterY = (targetCoords.y + 0.5) * cellSize;
+                      const enemyPulse = 0.98 + Math.sin(time * 4.8) * 0.03;
+
+                      if (presentation.showEnemyDangerFill) {
+                          combatOverlay.beginFill(
+                              presentation.enemyRoleAccentColor,
+                              presentation.enemyDangerFillAlpha
+                          );
+                          combatOverlay.drawCircle(
+                              targetCenterX,
+                              targetCenterY,
+                              presentation.enemyRangeRadius * cellSize * enemyPulse
+                          );
+                          combatOverlay.endFill();
+                      }
+
+                      if (presentation.showEnemyAggroRing) {
+                          combatOverlay.lineStyle(1, presentation.enemyAggroColor, 0.18);
+                          combatOverlay.drawCircle(
+                              targetCenterX,
+                              targetCenterY,
+                              presentation.enemyAggroRadius * cellSize
+                          );
+                      }
+
+                      if (presentation.showEnemyPreferredRing) {
+                          combatOverlay.lineStyle(1.5, presentation.enemyPreferredColor, 0.24);
+                          combatOverlay.drawCircle(
+                              targetCenterX,
+                              targetCenterY,
+                              presentation.enemyPreferredRadius * cellSize
+                          );
+                      }
+
+                      if (presentation.showEnemyRetreatBand) {
+                          combatOverlay.lineStyle(1.25, presentation.enemyPreferredColor, 0.2);
+                          combatOverlay.drawCircle(
+                              targetCenterX,
+                              targetCenterY,
+                              Math.max(
+                                  presentation.enemyRangeRadius,
+                                  presentation.enemyPreferredRadius - 0.4
+                              ) * cellSize
+                          );
+                      }
+
+                      if (presentation.enemyChargeRadius) {
+                          const chargeColor =
+                              presentation.enemyChargeState === 'ready'
+                                  ? 0xfb7185
+                                  : presentation.enemyChargeColor ?? presentation.enemyRoleAccentColor;
+                          combatOverlay.lineStyle(2, chargeColor, 0.75);
+                          combatOverlay.drawCircle(
+                              targetCenterX,
+                              targetCenterY,
+                              presentation.enemyChargeRadius *
+                                  cellSize *
+                                  (0.9 + Math.sin(time * 5.8) * 0.06)
+                          );
+                      }
+
+                      combatOverlay.lineStyle(2, presentation.enemyRoleAccentColor, 0.3);
+                      combatOverlay.drawCircle(
+                          targetCenterX,
+                          targetCenterY,
+                          presentation.enemyRangeRadius * cellSize * enemyPulse
+                      );
+
+                      if (presentation.showTargetFocusReticle) {
+                          const reticleRadius = Math.max(8, cellSize * 0.22);
+                          combatOverlay.lineStyle(1.5, presentation.enemyRoleAccentColor, 0.55);
+                          combatOverlay.drawCircle(targetCenterX, targetCenterY, reticleRadius);
+                          combatOverlay.moveTo(targetCenterX - reticleRadius - 6, targetCenterY);
+                          combatOverlay.lineTo(targetCenterX - reticleRadius + 2, targetCenterY);
+                          combatOverlay.moveTo(targetCenterX + reticleRadius - 2, targetCenterY);
+                          combatOverlay.lineTo(targetCenterX + reticleRadius + 6, targetCenterY);
+                          combatOverlay.moveTo(targetCenterX, targetCenterY - reticleRadius - 6);
+                          combatOverlay.lineTo(targetCenterX, targetCenterY - reticleRadius + 2);
+                          combatOverlay.moveTo(targetCenterX, targetCenterY + reticleRadius - 2);
+                          combatOverlay.lineTo(targetCenterX, targetCenterY + reticleRadius + 6);
+                      }
+                  }
+              }
+          }
+
           // --- 2. Camera ---
           const CAM_LERP = 0.06 * delta;
           const targetCamX = (visualRef.current.player.x + 0.5) * cellSize;
@@ -760,11 +904,12 @@ export default function AdventureStage({
                           projectile.x = sx + (tx - sx) * progress;
                           projectile.y = sy + (ty - sy) * progress;
                           projectile.alpha = 0.65 + (1 - progress) * 0.35;
-                          projectile.scale.set(1 - progress * 0.15);
+                          projectile.rotation = Math.atan2(ty - sy, tx - sx);
+                          projectile.scale.set(1 - progress * 0.12, 1 - progress * 0.18);
                       } else if (effect.type === 'area') {
                           const area = effect.displayObject as PIXI.Graphics;
-                          area.alpha = 0.65 * (1 - progress);
-                          area.scale.set(1 + progress * 0.18);
+                          area.alpha = 0.75 * (1 - progress * 0.85);
+                          area.scale.set(0.96 + progress * 0.24);
                       } else if (effect.type === 'impact') {
                           const impact = effect.displayObject as PIXI.Graphics;
                           impact.alpha = 0.9 * (1 - progress);
@@ -772,7 +917,7 @@ export default function AdventureStage({
                       } else if (effect.type === 'cast') {
                           const cast = effect.displayObject as PIXI.Graphics;
                           cast.alpha = 0.8 * (1 - progress * 0.7);
-                          cast.scale.set(0.9 + progress * 0.45);
+                          cast.scale.set(0.85 + progress * 0.55);
                       }
                   } else {
                       effect.displayObject.visible = false;

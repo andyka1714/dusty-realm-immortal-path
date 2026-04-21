@@ -1,5 +1,28 @@
-import { Quest, QuestType, MajorRealm, ItemQuality } from '../types';
+import { Quest, QuestType, MajorRealm, ItemQuality, ProfessionType } from '../types';
 import { getSkillManualId } from './items/manuals';
+import { getFormalCoreSkills } from './skills';
+
+const getSectTrialManualId = (profession: ProfessionType) => {
+    const skill = getFormalCoreSkills({
+        profession,
+        minRealm: MajorRealm.QiRefining,
+        type: 'Active',
+        formalSourceTier: 'shop',
+    })[0];
+
+    if (!skill) {
+        throw new Error(`缺少 ${profession} 的宗門試煉入門技能書`);
+    }
+
+    return getSkillManualId(skill.id);
+};
+
+const SECT_TRIAL_MANUALS: Record<ProfessionType, string> = {
+    [ProfessionType.None]: '',
+    [ProfessionType.Sword]: getSectTrialManualId(ProfessionType.Sword),
+    [ProfessionType.Body]: getSectTrialManualId(ProfessionType.Body),
+    [ProfessionType.Mage]: getSectTrialManualId(ProfessionType.Mage),
+};
 
 export const QUESTS: Record<string, Quest> = {
     // --- Tutorial Quests ---
@@ -109,7 +132,7 @@ export const QUESTS: Record<string, Quest> = {
         ],
         rewards: [
             { exp: 800, spiritStones: 500 },
-            { items: [{ itemId: getSkillManualId('s_q_active'), count: 1, quality: ItemQuality.Medium }] }
+            { items: [{ itemId: SECT_TRIAL_MANUALS[ProfessionType.Sword], count: 1, quality: ItemQuality.Medium }] }
         ],
         dialogue: {
             start: [
@@ -170,7 +193,7 @@ export const QUESTS: Record<string, Quest> = {
         ],
         rewards: [
             { exp: 800, spiritStones: 500 },
-            { items: [{ itemId: getSkillManualId('b_q_active'), count: 1, quality: ItemQuality.Medium }] }
+            { items: [{ itemId: SECT_TRIAL_MANUALS[ProfessionType.Body], count: 1, quality: ItemQuality.Medium }] }
         ],
         dialogue: {
             start: [
@@ -229,7 +252,7 @@ export const QUESTS: Record<string, Quest> = {
         ],
         rewards: [
             { exp: 800, spiritStones: 500 },
-            { items: [{ itemId: getSkillManualId('m_q_active'), count: 1, quality: ItemQuality.Medium }] }
+            { items: [{ itemId: SECT_TRIAL_MANUALS[ProfessionType.Mage], count: 1, quality: ItemQuality.Medium }] }
         ],
         dialogue: {
             start: [

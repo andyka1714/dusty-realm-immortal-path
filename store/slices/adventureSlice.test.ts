@@ -154,6 +154,38 @@ describe("adventure engagement flow", () => {
     expect(getGridDistance(caster!, next.playerPosition)).toBeGreaterThanOrEqual(5);
   });
 
+  it("lets ranged and caster enemies backstep when the player gets too close", () => {
+    fixedRandom.mockReturnValue(0);
+
+    let state = reducer(undefined, enterMap({ mapId: "26", startX: 20, startY: 20 }));
+    state = {
+      ...state,
+      activeMonsters: [
+        {
+          instanceId: "caster",
+          templateId: "m26_b1",
+          name: "靈湖水蛟",
+          symbol: "蛟",
+          x: 21,
+          y: 20,
+          spawnX: 21,
+          spawnY: 20,
+          currentHp: 4650,
+          rank: EnemyRank.Boss,
+          nextMoveTime: 0,
+        },
+      ],
+    };
+
+    const next = reducer(state, tickMonsters());
+    const caster = next.activeMonsters.find((monster) => monster.instanceId === "caster");
+    expect(caster).toBeDefined();
+    expect(caster?.x).toBeGreaterThan(state.activeMonsters[0].x);
+    expect(getGridDistance(caster!, next.playerPosition)).toBeGreaterThan(
+      getGridDistance(state.activeMonsters[0], state.playerPosition)
+    );
+  });
+
   it("applies direct world damage to the selected monster instance", () => {
     let state = reducer(undefined, enterMap({ mapId: "20", startX: 20, startY: 20 }));
 
@@ -188,7 +220,7 @@ describe("adventure engagement flow", () => {
     expect(defeated.activeMonsters).toHaveLength(0);
   });
 
-  it("does not let monsters move into the player's occupied cell", () => {
+  it("does not let monsters end movement on the player's occupied cell", () => {
     let state = reducer(undefined, enterMap({ mapId: "20", startX: 20, startY: 20 }));
 
     state = {
@@ -211,8 +243,7 @@ describe("adventure engagement flow", () => {
     };
 
     const next = reducer(state, tickMonsters());
-    expect(next.activeMonsters[0].x).toBe(21);
-    expect(next.activeMonsters[0].y).toBe(20);
+    expect(next.activeMonsters[0].x === next.playerPosition.x && next.activeMonsters[0].y === next.playerPosition.y).toBe(false);
   });
 
   it("spawns monsters away from the player's starting cell", () => {

@@ -43,9 +43,10 @@ const questSlice = createSlice({
                     state.completedQuests.push(questId);
                 }
             }
-        }
+        },
+        resetQuest: () => initialState,
     }
 });
 
-export const { acceptQuest, updateQuestProgress, completeQuest } = questSlice.actions;
+export const { acceptQuest, updateQuestProgress, completeQuest, resetQuest } = questSlice.actions;
 export default questSlice.reducer;

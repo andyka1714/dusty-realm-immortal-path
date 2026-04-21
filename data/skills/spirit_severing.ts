@@ -5,7 +5,7 @@ export const SPIRIT_SEVERING_SKILLS: Record<string, Skill> = {
   s_sf_active: {
     id: "s_sf_active",
     name: "斬天拔劍術",
-    description: "蓄力 1 回合，下回合優先行動並造成 600% 攻擊傷害，必定暴擊。",
+    description: "對單體造成 600% 劍傷，且本次必定暴擊。",
     type: "Active",
     cooldown: 8,
     minRealm: MajorRealm.SpiritSevering,
@@ -32,7 +32,7 @@ export const SPIRIT_SEVERING_SKILLS: Record<string, Skill> = {
     id: "b_sf_active",
     name: "撼地擊",
     description:
-      "對全體造成 250% 攻擊傷害，並降低目標 30% 速度與防禦，持續 2 回合。",
+      "對全體造成 250% 體魄傷害，並施加【破甲】與【易傷】2 回合。",
     type: "Active",
     cooldown: 5,
     minRealm: MajorRealm.SpiritSevering,
@@ -64,7 +64,7 @@ export const SPIRIT_SEVERING_SKILLS: Record<string, Skill> = {
     id: "m_sf_active",
     name: "三昧真火",
     description:
-      "對單體造成 300% 火系傷害，並附加「燃燒」(每回合扣除 3% 當前生命)，持續 3 回合，不可驅散。",
+      "對單體造成 300% 火法傷害，並附加【燃燒】3 回合。",
     type: "Active",
     cooldown: 4,
     minRealm: MajorRealm.SpiritSevering,

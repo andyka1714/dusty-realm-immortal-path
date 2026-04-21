@@ -27,6 +27,7 @@
 使用者體驗與介面規範。
 - [flow.md](04_UI/flow.md): 遊戲初始化流程 (序幕->抽卡->主頁) 與導航結構。
 - [components.md](04_UI/components.md): UI 組件庫規範 (Tailwind 配色、按鈕樣式)。
+- [pixel_art_bible.md](04_UI/pixel_art_bible.md): 像素風 pre-production 視覺基線、tile/sprite/VFX 規格與 vertical slice 驗收條件。
   - 補充：角色屬性、商店、圖鑑、區域地圖情報、任務獎勵、底部 dock、道途頁資訊與多個操作提示，已開始共用 `GameTooltip / GameHintBubble` 遊戲化外觀；`GamePanel / Modal / GameTooltip` 的標題層已開始共用 `GameTitleStack`，裝飾框體則已開始共用 `GameOrnamentFrame`。
   - 補充：`StatsPanel / ShopPanel / Inventory / Dashboard / QuestModal / Workshop` 內部的主要資訊區，也已開始共用 `GameSection`，面板內層不再只是零散的 border box。
   - 補充：`World / UI / Audit` 對於地圖情報 tooltip、短提示 eyebrow 與 battle shared resolver 的說法，已開始回到同一套正式描述。
@@ -57,3 +58,6 @@
 - [12_技能書實作收斂.md](06_Balance_Audit/12_技能書實作收斂.md): 技能書正式實作、來源規則、前置條件與與程式對齊結果。
 - [13_3D渲染與戰鬥呈現評估.md](06_Balance_Audit/13_3D渲染與戰鬥呈現評估.md): 3D、Three.js 與目前 Pixi 戰鬥呈現層的可行性評估。
 - [14_整體改造Checklist.md](06_Balance_Audit/14_整體改造Checklist.md): 本輪所有已完成 / 未完成細項的逐條追蹤表。
+- [15_battle_core下一輪收尾Checklist.md](06_Balance_Audit/15_battle_core下一輪收尾Checklist.md): battle core follow-up 主線的模組化、狀態補完、文件同步與驗證追蹤表。
+- [16_下一輪執行優先級Checklist.md](06_Balance_Audit/16_下一輪執行優先級Checklist.md): battle core follow-up 結案後的 `P0 / P1 / P2` backlog 執行順序與下一輪優先級總表。
+- [17_下一階段主線整合與優先級建議.md](06_Balance_Audit/17_下一階段主線整合與優先級建議.md): 輪迴、百業、事件、宗門內容、spec/persistence 與像素風主線的整合優先級建議。

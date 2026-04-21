@@ -175,9 +175,10 @@ const inventorySlice = createSlice({
         // We do NOT add it back to items because it never left
         state.equipmentStats = calculateStats(state.items, state.equipment);
       }
-    }
+    },
+    resetInventory: () => initialState,
   },
 });
 
-export const { addItem, removeItem, removeItems, sortItems, equipItem, unequipItem } = inventorySlice.actions;
+export const { addItem, removeItem, removeItems, sortItems, equipItem, unequipItem, resetInventory } = inventorySlice.actions;
 export default inventorySlice.reducer;

@@ -102,6 +102,7 @@ export interface BreakthroughResult {
 export interface CharacterState {
   isInitialized: boolean;
   isDead: boolean;
+  lastDeathCause?: LifeEndCause;
   name: string;
   gender: Gender;
   title: string;
@@ -144,6 +145,63 @@ export interface CharacterState {
   skills: string[]; // Learned Skill IDs
 }
 
+export type LifeEndCause = "lifespan" | "battle" | "voluntary";
+
+export type ReincarnationFlowStep = "inactive" | "life_review" | "hall";
+
+export interface HeirloomCandidate {
+  id: string;
+  itemId: string;
+  label: string;
+  sourceType: "equipment" | "skill_manual";
+  count: number;
+  quality: ItemQuality;
+  instanceId?: string;
+  instance?: ItemInstance;
+}
+
+export interface LifeReviewSummary {
+  cause: LifeEndCause;
+  ageYears: number;
+  highestRealm: MajorRealm;
+  realmMerit: number;
+  ageMerit: number;
+  totalMeritGained: number;
+  eligibleHeirlooms: HeirloomCandidate[];
+}
+
+export interface SoulLifetimeStats {
+  highestRealmEver: MajorRealm;
+  highestAgeYears: number;
+  totalDeaths: number;
+  totalReincarnations: number;
+}
+
+export interface ReincarnationPerk {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  statBonuses?: Partial<BaseAttributes>;
+  spiritStoneBonus?: number;
+}
+
+export interface RebirthConfig {
+  selectedPerkIds: string[];
+  selectedHeirloomIds: string[];
+  spiritRootOverride?: SpiritRootId;
+}
+
+export interface SoulState {
+  totalMerit: number;
+  flowStep: ReincarnationFlowStep;
+  lifetimeStats: SoulLifetimeStats;
+  unlockedPerkIds: string[];
+  heirloomVault: HeirloomCandidate[];
+  pendingLifeReview: LifeReviewSummary | null;
+  rebirthConfig: RebirthConfig;
+}
+
 export interface LogEntry {
   id: string;
   timestamp: number;
@@ -161,6 +219,28 @@ export interface LogEntry {
     | "warning-critical"
     | "tribulation";
 }
+
+export type StatusEffectId =
+  | "stun"
+  | "freeze"
+  | "paralyze"
+  | "banish"
+  | "burn"
+  | "true_fire_burn"
+  | "poison"
+  | "bleed"
+  | "armorBreak"
+  | "vulnerable"
+  | "taunt"
+  | "reflect_taunt"
+  | "sword_qi"
+  | "god_kingdom"
+  | "spirit_sever"
+  | "earth_shatter_debuff"
+  | "beast_god_form"
+  | "giant_form"
+  | "zhuxian_domain"
+  | "drain";
 
 export interface Skill {
   id: string;
@@ -184,7 +264,7 @@ export interface Skill {
   effectType?: "damage" | "heal" | "buff" | "debuff" | "summon" | "special";
   targetType?: "single" | "all" | "self";
   statusEffect?: {
-    id: string; // e.g. 'stun', 'poison'
+    id: StatusEffectId | string;
     duration: number;
     chance: number;
     value?: number; // e.g. Poison damage %
@@ -196,6 +276,20 @@ export interface Skill {
   formalSourceTier?: "shop" | "elite" | "boss" | "inheritance";
   prerequisiteSkillIds?: string[];
 }
+
+export type SkillAcquisitionTier =
+  | "basic"
+  | "advanced"
+  | "boss_core"
+  | "inheritance";
+
+export type SkillManualSourceType =
+  | "shop_mortal"
+  | "shop_sect"
+  | "quest_sect_trial"
+  | "drop_elite"
+  | "drop_boss"
+  | "inheritance";
 
 // --- Combat & Map ---
 
@@ -245,7 +339,7 @@ export interface Enemy {
     cooldownSeconds: number;
     damageMultiplier?: number;
     statusEffect?: {
-      id: string;
+      id: StatusEffectId | string;
       duration: number;
       chance: number;
       value?: number;
@@ -388,6 +482,10 @@ export interface ConsumableItem extends BaseItem {
   maxUsage?: number;
   requiredProfession?: ProfessionType;
   requiredRealm?: MajorRealm;
+  manualSkillId?: string;
+  manualAcquisitionTier?: SkillAcquisitionTier;
+  manualSourceTypes?: SkillManualSourceType[];
+  prerequisiteSkillIds?: string[];
 }
 
 // -- Materials --
@@ -491,6 +589,17 @@ export interface WorkshopState {
   alchemyLevel: number;
   blacksmithLevel: number;
   unlockedRecipes: string[];
+  craftedRecipeCounts: Record<string, number>;
+}
+
+export interface PendingEncounter {
+  eventId: string;
+  year: number;
+}
+
+export interface EncounterState {
+  pendingEvent: PendingEncounter | null;
+  resolvedEventIds: string[];
 }
 
 // --- Quest System ---

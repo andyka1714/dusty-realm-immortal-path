@@ -10,9 +10,14 @@ import { ItemCategory, ItemQuality, EquipmentSlot, ConsumableItem, InventorySlot
 import { REALM_NAMES } from '../constants';
 import { Modal } from '../components/Modal';
 import clsx from 'clsx';
-import { getFormalSkill, getSkill } from '../data/skills';
+import { getFormalSkill } from '../data/skills';
 import { getMissingPrerequisiteSkillIds, resolveReplacementSkillId } from '../data/skills/pool';
-import { getSkillManualCategoryLabel, getSkillManualSourceLabels, getSkillManualTierLabel } from '../data/items/manuals';
+import {
+  getSkillManualAcquisitionTierLabel,
+  getSkillManualCategoryLabel,
+  getSkillManualSourceLabels,
+  getSkillManualTierLabel,
+} from '../data/items/manuals';
 import { GameHintBubble } from '../components/game/GameHintBubble';
 import { GameTooltip } from '../components/game/GameTooltip';
 import { GameSection } from '../components/game/GameSection';
@@ -103,7 +108,10 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
     const missingPrerequisites = getMissingPrerequisiteSkillIds(character.skills, skill.id);
     if (missingPrerequisites.length > 0) {
       return `缺少前置：${missingPrerequisites
-        .map((prerequisiteSkillId) => getSkill(prerequisiteSkillId)?.name ?? prerequisiteSkillId)
+        .map(
+          (prerequisiteSkillId) =>
+            getFormalSkill(prerequisiteSkillId)?.name ?? prerequisiteSkillId
+        )
         .join('、')}`;
     }
     return null;
@@ -614,6 +622,9 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                           <span className="rounded-full border border-amber-700/50 bg-amber-950/30 px-2 py-1 text-[11px] font-bold text-amber-300">
                             {getSkillManualTierLabel(selectedSkill)}
                           </span>
+                          <span className="rounded-full border border-emerald-700/50 bg-emerald-950/30 px-2 py-1 text-[11px] font-bold text-emerald-300">
+                            {getSkillManualAcquisitionTierLabel(selectedSkill)}
+                          </span>
                           <span className="rounded-full border border-stone-700 bg-stone-950/40 px-2 py-1 text-[11px] font-bold text-stone-300">
                             {selectedSkill.type === 'Active' ? '主動術式' : '被動心法'}
                           </span>
@@ -732,7 +743,10 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                              <div>
                                前置條件：
                                {selectedSkill.prerequisiteSkillIds
-                                 .map((prerequisiteSkillId) => getSkill(prerequisiteSkillId)?.name ?? prerequisiteSkillId)
+                                 .map(
+                                   (prerequisiteSkillId) =>
+                                     getFormalSkill(prerequisiteSkillId)?.name ?? prerequisiteSkillId
+                                 )
                                  .join('、')}
                              </div>
                            )}
@@ -915,7 +929,10 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
               前置：
               <span className="text-stone-200">
                 {hoveredSkill.prerequisiteSkillIds
-                  .map((prerequisiteSkillId) => getSkill(prerequisiteSkillId)?.name ?? prerequisiteSkillId)
+                  .map(
+                    (prerequisiteSkillId) =>
+                      getFormalSkill(prerequisiteSkillId)?.name ?? prerequisiteSkillId
+                  )
                   .join('、')}
               </span>
             </div>

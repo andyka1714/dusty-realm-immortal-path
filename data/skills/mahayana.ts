@@ -6,7 +6,7 @@ export const MAHAYANA_SKILLS: Record<string, Skill> = {
     id: "s_ma_active",
     name: "絕仙劍",
     description:
-      "對全體敵人造成 500% 傷害，並斬斷其靈力流動，使其無法回復靈力，持續 3 回合。",
+      "對全體造成 500% 劍傷，並施加【絕仙封脈】3 回合；後續劍陣會再追斬兩次。",
     type: "Active",
     cooldown: 8,
     minRealm: MajorRealm.Mahayana,
@@ -25,7 +25,7 @@ export const MAHAYANA_SKILLS: Record<string, Skill> = {
     id: "b_ma_active",
     name: "星辰隕",
     description:
-      "跳向高空墜落，對全體造成 (攻擊力 + 50% 當前生命值) 的物理傷害，並暈眩 1 回合。",
+      "對全體造成重擊並附加【暈眩】1 回合；同時獲得【法天象地】護體並回復氣血。",
     type: "Active",
     cooldown: 8,
     minRealm: MajorRealm.Mahayana,

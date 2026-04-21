@@ -6,7 +6,7 @@ export const VOID_REFINING_SKILLS: Record<string, Skill> = {
     id: "b_vr_active",
     name: "吞天蝕日",
     description:
-      "吞噬一名非 Boss 敵人(低於自身境界)立即斬殺；對 Boss 造成 500% 傷害並附加【蝕骨毒】3 回合，同時回復大量生命。",
+      "對非 Boss 直接吞噬斬殺；對 Boss 造成 500% 傷害並附加【中毒】3 回合，自身獲得【反震】。",
     type: "Active",
     cooldown: 10,
     minRealm: MajorRealm.VoidRefining,
@@ -26,7 +26,7 @@ export const VOID_REFINING_SKILLS: Record<string, Skill> = {
     id: "m_vr_active",
     name: "袖裡乾坤",
     description:
-      "將敵方放逐至異空間 1 回合(無法行動、無敵)，並使其冷卻時間暫停。",
+      "將敵方放逐 1 回合，使其暫時無法行動。",
     type: "Active",
     cooldown: 7,
     minRealm: MajorRealm.VoidRefining,

@@ -2,6 +2,7 @@ import { AppDispatch } from '../store/store';
 import { addVisualEffect } from '../store/slices/adventureSlice';
 import { ProfessionType } from '../types';
 import { WorldStrikeVisualPlan } from './battleSystem';
+import { getWorldProjectileTravelDurationMs } from './worldCombatPresentation';
 
 type AdventureBattleVisualBridgeParams = {
   dispatch: AppDispatch;
@@ -159,12 +160,18 @@ export const createAdventureBattleVisualBridge = ({
     profession,
     castTimeMs,
     executionTimeMs,
+    isProjectile,
+    sourceX,
+    sourceY,
     targetX,
     targetY,
   }: {
     profession?: ProfessionType;
     castTimeMs?: number;
     executionTimeMs?: number;
+    isProjectile?: boolean;
+    sourceX: number;
+    sourceY: number;
     targetX: number;
     targetY: number;
   }) => {
@@ -175,20 +182,50 @@ export const createAdventureBattleVisualBridge = ({
     dispatchWorldStrikeCastEffect({
       color: profession === ProfessionType.Mage ? '#60a5fa' : '#f59e0b',
       colorInt: profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
+      targetX: sourceX,
+      targetY: sourceY,
+      durationMs: Math.max(180, castTimeMs ?? 220),
+    });
+
+    if (!isProjectile) {
+      return;
+    }
+
+    dispatchWorldStrikeProjectileEffect({
+      color: profession === ProfessionType.Mage ? '#60a5fa' : '#f59e0b',
+      colorInt: profession === ProfessionType.Mage ? 0x60a5fa : 0xf59e0b,
+      sourceX,
+      sourceY,
       targetX,
       targetY,
-      durationMs: Math.max(180, castTimeMs ?? 220),
+      durationMs: getWorldProjectileTravelDurationMs({
+        source: { x: sourceX, y: sourceY },
+        target: { x: targetX, y: targetY },
+        executionTimeMs,
+      }),
     });
   };
 
   const dispatchEnemyWorldStrikeCastEffect = ({
     hasSkillName,
+    executionTimeMs,
+    isProjectile,
+    sourceX,
+    sourceY,
     targetX,
     targetY,
+    warningRadius,
+    isBossThreat,
   }: {
     hasSkillName: boolean;
+    executionTimeMs?: number;
+    isProjectile?: boolean;
+    sourceX: number;
+    sourceY: number;
     targetX: number;
     targetY: number;
+    warningRadius?: number;
+    isBossThreat?: boolean;
   }) => {
     if (!hasSkillName) {
       return;
@@ -197,10 +234,37 @@ export const createAdventureBattleVisualBridge = ({
     dispatchWorldStrikeCastEffect({
       color: '#f87171',
       colorInt: 0xf87171,
-      targetX,
-      targetY,
-      durationMs: 220,
+      targetX: sourceX,
+      targetY: sourceY,
+      durationMs: Math.max(220, Math.min(900, executionTimeMs ?? 220)),
     });
+
+    if (isProjectile) {
+      dispatchWorldStrikeProjectileEffect({
+        color: '#f87171',
+        colorInt: 0xf87171,
+        sourceX,
+        sourceY,
+        targetX,
+        targetY,
+        durationMs: getWorldProjectileTravelDurationMs({
+          source: { x: sourceX, y: sourceY },
+          target: { x: targetX, y: targetY },
+          executionTimeMs,
+        }),
+      });
+    }
+
+    if (warningRadius) {
+      dispatchWorldStrikeAreaEffect({
+        color: isBossThreat ? '#fb7185' : '#f87171',
+        colorInt: isBossThreat ? 0xfb7185 : 0xf87171,
+        targetX,
+        targetY,
+        radius: warningRadius,
+        durationMs: Math.max(360, Math.min(1200, executionTimeMs ?? 420)),
+      });
+    }
   };
 
   const applyWorldStrikeImpactBundle = ({

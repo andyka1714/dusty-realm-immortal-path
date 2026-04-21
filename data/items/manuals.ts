@@ -8,8 +8,16 @@ import {
   MajorRealmCN,
   ProfessionType,
   Skill,
+  SkillAcquisitionTier,
+  SkillManualSourceType,
 } from "../../types";
-import { FORMAL_CORE_SKILLS_SORTED } from "../skills";
+import {
+  FINAL_CULL_REMOVAL_SKILLS_BY_PROFESSION,
+  FORMAL_CORE_SKILLS_SORTED,
+  getFormalSkill,
+  getSkill,
+  getSkillFormalAcquisitionTier,
+} from "../skills";
 
 const PROFESSION_CN: Record<ProfessionType, string> = {
   [ProfessionType.None]: "通用",
@@ -18,18 +26,26 @@ const PROFESSION_CN: Record<ProfessionType, string> = {
   [ProfessionType.Mage]: "法修",
 };
 
-export type SkillManualSourceType =
-  | "shop_mortal"
-  | "shop_sect"
-  | "quest_sect_trial"
-  | "drop_elite"
-  | "drop_boss"
-  | "inheritance";
-
 export interface SkillManualSourceEntry {
   type: SkillManualSourceType;
   label: string;
 }
+
+const MANUAL_SOURCE_LABELS: Record<SkillManualSourceType, string> = {
+  shop_mortal: "凡界藏經閣",
+  shop_sect: "宗門藏經閣",
+  quest_sect_trial: "宗門入門試煉",
+  drop_elite: "同境界精英",
+  drop_boss: "同境界 Boss",
+  inheritance: "古修傳承",
+};
+
+const MANUAL_ACQUISITION_LABELS: Record<SkillAcquisitionTier, string> = {
+  basic: "基礎秘卷",
+  advanced: "進階秘卷",
+  boss_core: "核心秘卷",
+  inheritance: "傳承秘卷",
+};
 
 export const getSkillManualTierLabel = (skill: Skill) => {
   if (skill.minRealm <= MajorRealm.QiRefining) {
@@ -44,29 +60,95 @@ export const getSkillManualTierLabel = (skill: Skill) => {
   return "大道秘卷";
 };
 
+export const getSkillManualAcquisitionTier = (skill: Skill) =>
+  getSkillFormalAcquisitionTier(skill);
+
+export const getSkillManualAcquisitionTierLabel = (
+  skillOrTier: Skill | SkillAcquisitionTier
+) => {
+  const tier =
+    typeof skillOrTier === "string"
+      ? skillOrTier
+      : getSkillManualAcquisitionTier(skillOrTier);
+  return MANUAL_ACQUISITION_LABELS[tier];
+};
+
+export const getSkillManualSourceTypeLabel = (
+  sourceType: SkillManualSourceType
+) => MANUAL_SOURCE_LABELS[sourceType];
+
 export const getSkillManualSources = (skill: Skill): SkillManualSourceEntry[] => {
   switch (skill.formalSourceTier) {
     case "shop":
+      if (skill.minRealm <= MajorRealm.QiRefining) {
+        return skill.type === "Active"
+          ? [
+              {
+                type: "shop_mortal",
+                label: getSkillManualSourceTypeLabel("shop_mortal"),
+              },
+              {
+                type: "quest_sect_trial",
+                label: getSkillManualSourceTypeLabel("quest_sect_trial"),
+              },
+            ]
+          : [
+              {
+                type: "shop_mortal",
+                label: getSkillManualSourceTypeLabel("shop_mortal"),
+              },
+            ];
+      }
+
       return [
         {
-          type:
-            skill.minRealm <= MajorRealm.QiRefining ? "shop_mortal" : "shop_sect",
-          label: skill.minRealm <= MajorRealm.QiRefining ? "凡界藏經閣" : "宗門藏經閣",
+          type: "shop_sect",
+          label: getSkillManualSourceTypeLabel("shop_sect"),
         },
       ];
     case "elite":
-      return [{ type: "drop_elite", label: "同境界精英" }];
+      return [
+        {
+          type: "drop_elite",
+          label: getSkillManualSourceTypeLabel("drop_elite"),
+        },
+      ];
     case "boss":
-      return [{ type: "drop_boss", label: "同境界 Boss" }];
+      return [
+        {
+          type: "drop_boss",
+          label: getSkillManualSourceTypeLabel("drop_boss"),
+        },
+      ];
     case "inheritance":
-      return [{ type: "inheritance", label: "古修傳承" }];
+      return [
+        {
+          type: "inheritance",
+          label: getSkillManualSourceTypeLabel("inheritance"),
+        },
+      ];
     default:
       if (skill.minRealm === MajorRealm.QiRefining) {
-        return [{ type: "shop_mortal", label: "凡界藏經閣" }];
+        return [
+          {
+            type: "shop_mortal",
+            label: getSkillManualSourceTypeLabel("shop_mortal"),
+          },
+        ];
       }
       return skill.type === "Active"
-        ? [{ type: "drop_boss", label: "同境界 Boss" }]
-        : [{ type: "drop_elite", label: "同境界精英" }];
+        ? [
+            {
+              type: "drop_boss",
+              label: getSkillManualSourceTypeLabel("drop_boss"),
+            },
+          ]
+        : [
+            {
+              type: "drop_elite",
+              label: getSkillManualSourceTypeLabel("drop_elite"),
+            },
+          ];
   }
 };
 
@@ -78,6 +160,65 @@ export const getSkillManualCategoryLabel = (skill: Skill) =>
 
 export const getSkillManualId = (skillId: string) => `manual_${skillId}`;
 
+const FINAL_CULL_REMOVED_SKILL_MANUAL_MIGRATION_MAP: Record<string, string> = Object.fromEntries(
+  Object.values(FINAL_CULL_REMOVAL_SKILLS_BY_PROFESSION)
+    .flat()
+    .flatMap((skill) => {
+      const formalSkill = getFormalSkill(skill.id);
+      if (!formalSkill) {
+        return [];
+      }
+
+      const targetManualId = getSkillManualId(formalSkill.id);
+      return [
+        [getSkillManualId(skill.id), targetManualId],
+        [`${skill.id}_manual`, targetManualId],
+      ] as Array<[string, string]>;
+    })
+);
+
+const getSkillIdFromManualItemPattern = (itemId: string) => {
+  if (itemId.startsWith("manual_")) {
+    return itemId.slice("manual_".length);
+  }
+
+  if (itemId.endsWith("_manual")) {
+    return itemId.slice(0, -"_manual".length);
+  }
+
+  return undefined;
+};
+
+export const isSkillManualLikeItemId = (itemId: string) =>
+  itemId in SKILL_MANUAL_ITEMS ||
+  itemId in FINAL_CULL_REMOVED_SKILL_MANUAL_MIGRATION_MAP ||
+  itemId.startsWith("manual_") ||
+  itemId.endsWith("_manual");
+
+export const resolveFormalSkillManualItemId = (itemId: string): string | undefined => {
+  if (itemId in SKILL_MANUAL_ITEMS) {
+    return itemId;
+  }
+
+  const knownMigrationTarget = FINAL_CULL_REMOVED_SKILL_MANUAL_MIGRATION_MAP[itemId];
+  if (knownMigrationTarget) {
+    return knownMigrationTarget;
+  }
+
+  const parsedSkillId = getSkillIdFromManualItemPattern(itemId);
+  if (!parsedSkillId) {
+    return undefined;
+  }
+
+  const skill = getSkill(parsedSkillId);
+  if (!skill) {
+    return undefined;
+  }
+
+  const formalSkill = getFormalSkill(skill.id);
+  return formalSkill ? getSkillManualId(formalSkill.id) : undefined;
+};
+
 export const SKILL_MANUAL_SOURCE_REGISTRY: Record<
   string,
   {
@@ -85,7 +226,12 @@ export const SKILL_MANUAL_SOURCE_REGISTRY: Record<
     manualId: string;
     categoryLabel: string;
     tierLabel: string;
+    acquisitionTier: SkillAcquisitionTier;
+    acquisitionTierLabel: string;
     sources: SkillManualSourceEntry[];
+    requiredRealm: MajorRealm;
+    requiredProfession?: ProfessionType;
+    prerequisiteSkillIds: string[];
   }
 > = Object.fromEntries(
   FORMAL_CORE_SKILLS_SORTED.map((skill) => [
@@ -95,7 +241,15 @@ export const SKILL_MANUAL_SOURCE_REGISTRY: Record<
       manualId: getSkillManualId(skill.id),
       categoryLabel: getSkillManualCategoryLabel(skill),
       tierLabel: getSkillManualTierLabel(skill),
+      acquisitionTier: getSkillManualAcquisitionTier(skill),
+      acquisitionTierLabel: getSkillManualAcquisitionTierLabel(skill),
       sources: getSkillManualSources(skill),
+      requiredRealm: skill.minRealm,
+      requiredProfession:
+        skill.profession && skill.profession !== ProfessionType.None
+          ? skill.profession
+          : undefined,
+      prerequisiteSkillIds: skill.prerequisiteSkillIds ?? [],
     },
   ])
 );
@@ -119,13 +273,27 @@ const createSkillManual = (skill: Skill): ConsumableItem => {
     skill.profession && skill.profession !== ProfessionType.None
       ? `${PROFESSION_CN[skill.profession]}專用`
       : "通用秘卷";
+  const manualSources = getSkillManualSources(skill);
+  const manualAcquisitionTier = getSkillManualAcquisitionTier(skill);
+  const prerequisiteSkillIds = skill.prerequisiteSkillIds ?? [];
+  const prerequisiteText =
+    prerequisiteSkillIds.length > 0
+      ? `前置需求：${prerequisiteSkillIds
+          .map(
+            (prerequisiteSkillId) =>
+              getFormalSkill(prerequisiteSkillId)?.name ?? prerequisiteSkillId
+          )
+          .join("、")}。`
+      : "";
 
   return {
     id: getSkillManualId(skill.id),
     name: `${skill.name}秘卷`,
     category: ItemCategory.Consumable,
     subType: ConsumableType.Manual,
-    description: `${professionText}，${realmText}可參悟。${getSkillManualCategoryLabel(skill)}。主要來源：${getSkillManualSourceLabels(skill).join("、")}。${skill.description} 使用後習得【${skill.name}】。`,
+    description: `${professionText}，${realmText}可參悟。${getSkillManualCategoryLabel(skill)} / ${getSkillManualAcquisitionTierLabel(manualAcquisitionTier)}。主要來源：${manualSources
+      .map((source) => source.label)
+      .join("、")}。${prerequisiteText}可先收藏秘卷，待符合職業、境界與前置條件後再參悟。${skill.description} 使用後習得【${skill.name}】。`,
     price: getSkillManualPrice(skill),
     quality: getSkillManualQuality(skill.minRealm),
     maxStack: 1,
@@ -134,6 +302,10 @@ const createSkillManual = (skill: Skill): ConsumableItem => {
         ? skill.profession
         : undefined,
     requiredRealm: skill.minRealm,
+    manualSkillId: skill.id,
+    manualAcquisitionTier,
+    manualSourceTypes: manualSources.map((source) => source.type),
+    prerequisiteSkillIds,
     effects: [{ type: "learn_skill", value: 0, skillId: skill.id }],
   };
 };

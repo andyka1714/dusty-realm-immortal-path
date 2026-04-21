@@ -1,114 +1,158 @@
 # 輪迴轉生系統設計 (Reincarnation System Design)
 
-## 1. 核心概念
-「身死道消」不再是終點，而是另一個起點。
-當角色死亡或主動選擇轉生時，系統將結算該角色的**「生平評價」**並轉化為**「功德值 (Merit)」**（或稱輪迴點數）。
-玩家消耗功德值購買**「出身加成」**，在下一世獲得更高的起點。
+## 1. 目前已落地的 foundation
 
-## 2. 架構變更
-為了實作此功能，存檔結構需分為兩層：
-1.  **當前存檔 (Current Save)**: 角色狀態、背包、任務（死亡時清除）。
-2.  **靈魂存檔 (Soul/Global Save)**: 永久保存的數據，包括：
-    -   累積功德值 (Total Merit)
-    -   歷史最高境界
-    -   解鎖的成就/詞條
-    -   傳家寶倉庫 (Heirloom Storage)
+`add-meta-progression-foundation` 第一批已把輪迴從「死亡後直接 reset」改成正式 meta progression 流程：
 
-### 數據結構示意
+1. 存檔改為版本化 save envelope，明確拆成 `current` 與 `soul`
+2. `soul` 會永久保留 `功德 / Lifetime Stats / 已解鎖魂印 / 傳承遺珍`
+3. 角色死亡後不再直接回到開場，而是先進入 `本世結算 (Life Review)`
+4. 玩家可在 `輪迴大殿 (Reincarnation Hall)` 配置魂印、選擇遺珍、改寫靈根
+5. `Rebirth` 後只重置 current run，`soul` progression 不會被清掉
+
+這代表「身死道消」現在已經是新一輪 build 的開始，而不是單純清檔。
+
+## 2. 存檔模型
+
+第一批 foundation 已將 LocalStorage 升級為版本化格式：
+
 ```typescript
-interface GlobalState {
-    totalMerit: number;       // 當前持有的功德值
-    lifetimeStats: {
-        highestRealm: MajorRealm;
-        maxAge: number;
-        totalDeaths: number;
-    };
-    unlockedPerks: string[];  // 已解鎖的永久天賦 ID
-    heirloomItems: string[];  // 放入虛空倉庫保留的物品 ID
+interface PersistedEnvelopeV2 {
+  schemaVersion: 2;
+  current: {
+    character: CharacterState;
+    inventory: InventoryState;
+    adventure: AdventureState;
+    workshop: WorkshopState;
+    quest: QuestState;
+    logs: LogState;
+  };
+  soul: SoulState;
 }
 ```
 
-## 3. 結算系統 (Life Evaluation)
-死亡時，系統將根據角色在該世的成就計算「功德值 (Merit)」。以下為詳細計算公式：
+### `current`
+
+- 當世角色
+- 背包
+- 任務
+- 洞府 / 百業當世進度
+- 探索 / 冒險狀態
+- 當世 log
+
+### `soul`
+
+- `totalMerit`
+- `lifetimeStats`
+  - `highestRealmEver`
+  - `highestAgeYears`
+  - `totalDeaths`
+  - `totalReincarnations`
+- `unlockedPerkIds`
+- `heirloomVault`
+- `pendingLifeReview`
+- `rebirthConfig`
+
+此外，legacy raw save 也已經有 migration，舊存檔讀入時會自動補出新的 `soul` 結構。
+
+## 3. 本世結算 (Life Review)
+
+死亡時，系統會根據本世成就換算成功德值。
 
 ### A. 境界功德 (Realm Merit)
-這是功德值的核心來源，玩家**曾經達到過**的最高境界（不考慮修為倒退）將決定基礎分。
 
-| 境界 (Major Realm) | 基礎功德值 | 備註 |
-| :--- | :--- | :--- |
-| **凡人 (Mortal)** | 0 | 凡胎肉體，未入仙途 |
-| **練氣 (Qi Refining)** | 10 | 初窺門徑 |
-| **築基 (Foundation)** | 50 | 鑄就道基，壽元二百 |
-| **金丹 (Golden Core)** | 200 | 結丹長生，我也非人 |
-| **元嬰 (Nascent Soul)** | 1,000 | 碎丹成嬰，神通大成 |
-| **化神 (Spirit Severing)** | 5,000 | 神念通天，半步仙人 |
-| **煉虛 (Void Refining)** | 20,000 | 破碎虛空，遨遊太虛 |
-| **合體 (Fusion)** | 100,000 | 天人合一，法力無邊 |
-| **大乘 (Mahayana)** | 500,000 | 肉身成聖，近乎天道 |
-| **渡劫 (Tribulation)** | 2,000,000 | 歷經雷劫，逆天改命 |
-| **仙人 (Immortal)** | 10,000,000 | 飛升上界，位列仙班 |
-| **仙帝 (Immortal Emperor)** | 100,000,000 | 諸天至尊，萬古不朽 |
+| 境界 (Major Realm) | 基礎功德值 |
+| :--- | :--- |
+| 凡人 | 0 |
+| 練氣 | 10 |
+| 築基 | 50 |
+| 金丹 | 200 |
+| 元嬰 | 1,000 |
+| 化神 | 5,000 |
+| 煉虛 | 20,000 |
+| 合體 | 100,000 |
+| 大乘 | 500,000 |
+| 渡劫 | 2,000,000 |
+| 仙人 | 10,000,000 |
+| 仙帝 | 100,000,000 |
 
 ### B. 壽元功德 (Age Merit)
-活得久代表在修仙路上走得穩，也是一種成就。
-*   **公式**: `活過的年數 (Age) × 0.5` (向下取整)
-*   *範例: 活了 120 歲 => 獲得 60 點功德。*
 
+- 公式：`活過的年數 × 0.5`，向下取整
 
----
+### 範例
 
-### 計算範例
-假設玩家在 **金丹期 (Golden Core)** 隕落：
-*   **境界**: 金丹 (200點)
-*   **壽元**: 享年 350 歲 (350 * 0.5 = 175點)
-*   **總計功德**: 200 + 175 = **375 點**
+- 金丹期隕落：`200`
+- 享年 350 歲：`175`
+- 本世新增功德：`375`
 
-這 375 點功德可以用來在下一世購買部分福利，或者積累到「靈魂存檔」中。
+## 4. 第一批已開放的輪迴配置
 
-## 4. 轉生福利 (Reincarnation Bonuses)
-玩家在「投胎介面」消耗功德值進行配置：
+目前第一批 foundation 已正式支援以下配置：
 
-### A. 靈根重塑 (Spirit Root Reroll)
-- **基礎**: 隨機生成 (免費)
-- **天道垂青 (100 功德)**: 必定出現「真靈根」以上
-- **逆天改命 (500 功德)**: 必定出現「天靈根」或「變異靈根」
-- **指定靈根 (1000 功德)**: 鎖定某種屬性 (如雷靈根)
+### A. 魂印 (Perks)
 
-### B. 屬性加成 (Attribute Bonus)
-- **聰慧過人**: 消耗功德購買初始 **悟性**
-- **福星高照**: 消耗功德購買初始 **福緣**
-- **先天道體**: 消耗功德購買初始 **根骨**
+- `先天根骨`：下一世根骨 `+2`，花費 `25` 功德
+- `靈慧早開`：下一世悟性 `+2`，花費 `25` 功德
+- `前世餘澤`：下一世初始靈石 `+150`，花費 `40` 功德
 
-### C. 物資遺產 (Legacy Items)
-- **保留物品**: 消耗大量功德，將「上一世」背包中的某件物品帶到下一世。
-- **初始資源**: 攜帶少量靈石出生。
+### B. 靈根改寫
 
-### D. 財富傳承 (Wealth Inheritance)
-- **靈石繼承**: 轉生後，自動保留上一世剩餘靈石的 **10%** 作為新一世的初始資金。
-  *(例如：上一世剩餘 50,000 靈石，轉生後初始攜帶 5,000 靈石)*
+- 可在輪迴大殿指定下一世靈根
+- 第一批 cost 固定為 `100` 功德
+- 若不指定，則承接前世靈根作為 rebirth baseline
 
-## 5. UI 流程設計
+### C. 遺珍繼承
 
-1.  **死亡介面 (Death Screen)**
-    -   顯示原因：壽元已盡 / 戰敗身亡。
-    -   顯示結算動畫：計算本世功德。
-    -   按鈕：「進入輪迴」。
+- 第一批只開 `1` 格
+- 可攜物類型：
+  - 有 instance 的裝備
+  - 技能書 / 功法手札
 
-2.  **輪迴大殿 (Reincarnation Hall)**
-    -   顯示當前擁有的功德值。
-    -   **配置面板**：
-        -   [靈根骰子]: 花費功德重骰。
-        -   [屬性加點]: 分配點數。
-        -   [遺物選擇]: 從上一世遺產中挑選 0-3 件帶入。
-    -   按鈕：「投胎轉世」 -> 觸發 `RESET_GAME` 並帶入初始參數。
+## 5. 目前正式 UI 流程
 
-## 6. 實作步驟建議
+### 角色死亡後
 
-1.  **建立 Global Slice**: 新增 `store/slices/globalSlice.ts` 用於儲存功德和永久數據，並確保其在 `RESET_GAME` 時**不會**被清除。
-2.  **修改結算邏輯**: 在 `reincarnate` 或新的 `finalizeLife` action 中計算功德並加到 Global Slice。
-3.  **製作「輪迴大殿」頁面**: 取代原本單調的死亡彈窗，作為新遊戲的配置入口。
-4.  **修改初始化邏輯**: `characterSlice` 的初始化現在需要接收參數 (InitialConfig)，應用玩家購買的加成。
+1. `Dashboard` 偵測 `isDead`
+2. 若 `soul.flowStep === inactive`，自動建立 `Life Review`
+3. 顯示 `本世結算`
+4. 玩家按下 `進入輪迴大殿`
+5. 顯示 `輪迴大殿`
+6. 玩家配置魂印 / 靈根 / 遺珍
+7. 按下 `投胎轉世`
+8. 重建新一世角色，保留 `soul progression`
 
-## 7. 擴展性 (Future Works)
-- **成就系統**: 達成特定條件（如單身修練至元嬰）解鎖特殊轉生詞條。
-- **多周目劇情**: 轉生次數影響 NPC 對話或隱藏劇情。
+### 重生後會被重置的內容
+
+- 角色境界與修為
+- 當世背包
+- 當世任務
+- 冒險地圖狀態
+- 洞府 / 百業當世進度
+- 當世 log
+
+### 重生後會保留的內容
+
+- `totalMerit`
+- `lifetimeStats`
+- 已解鎖魂印
+- 已選中的遺珍（以新 instance 重建）
+
+## 6. 目前尚未在第一批開放的內容
+
+以下仍屬後續批次，而不是這一批 foundation 已完成內容：
+
+- 主動坐化 / 非死亡型輪迴入口
+- 更大的魂印 catalog
+- 職業專屬輪迴分支
+- 多格遺珍繼承
+- 財富繼承百分比
+- 輪迴次數影響 NPC / 劇情 / 世界事件
+
+## 7. 後續方向
+
+下一批應優先補的，不是再重做 `soul` 結構，而是建立真正的 meta loop：
+
+1. 把 `Reincarnation Hall` 從 foundation UI 擴成正式 build planner
+2. 把 `Workshop / 百業 / 事件奇遇` 接進多周目長線收益
+3. 回寫正式 base specs，讓目前 live combat 與 reincarnation truth 成為 spec baseline

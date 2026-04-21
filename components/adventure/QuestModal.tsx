@@ -13,7 +13,12 @@ import { Modal } from '../Modal';
 import { GameSection } from '../game/GameSection';
 import { GameTooltip } from '../game/GameTooltip';
 import { getFormalSkill } from '../../data/skills';
-import { getSkillManualCategoryLabel, getSkillManualSourceLabels, getSkillManualTierLabel } from '../../data/items/manuals';
+import {
+    getSkillManualAcquisitionTierLabel,
+    getSkillManualCategoryLabel,
+    getSkillManualSourceLabels,
+    getSkillManualTierLabel,
+} from '../../data/items/manuals';
 import { MessageCircle, Gift, CheckCircle, Circle, ScrollText } from 'lucide-react';
 
 interface QuestModalProps {
@@ -463,6 +468,9 @@ export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
                                                                     </div>
                                                                     <div className="text-xs text-stone-400">
                                                                         {getSkillManualTierLabel(rewardSkill)}
+                                                                    </div>
+                                                                    <div className="text-xs text-emerald-300">
+                                                                        {getSkillManualAcquisitionTierLabel(rewardSkill)}
                                                                     </div>
                                                                     <div className="text-xs text-stone-500">
                                                                         來源：{getSkillManualSourceLabels(rewardSkill).join('、')}

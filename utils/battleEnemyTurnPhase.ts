@@ -1,0 +1,71 @@
+import type { EnemyTurnPhaseArgs } from "./battleTurnPhaseEnemyArgTypes";
+import { resolveEnemyTurnPhaseResult } from "./battleTurnPhaseEnemyDispatcher";
+import { resolveEnemyActionWindow } from "./battleTurnPhaseEnemyActionWindow";
+import type { EnemyTurnPhaseResult } from "./battleTurnPhaseEnemyTypes";
+
+export const resolveEnemyTurnPhase = ({
+  currentTimeMs,
+  turn,
+  player,
+  enemy,
+  logs,
+  passiveFlags,
+  playerHp,
+  playerMp,
+  enemyHp,
+  playerStatuses,
+  enemyStatuses,
+  swordDeathWardUsed,
+  bodyTribulationStacks,
+  bodyRebirthTrueUsed,
+  hasSwordHeartPassive,
+  playerDamagedSinceSwordHeartWindow,
+  swordHeartStacks,
+  enemyAttackIntervalMs,
+  enemySpecialReadyAtMs,
+  dependencies,
+}: EnemyTurnPhaseArgs): EnemyTurnPhaseResult => {
+  const enemyActionWindow = resolveEnemyActionWindow({
+    currentTimeMs,
+    turn,
+    player,
+    enemy,
+    logs,
+    passiveFlags,
+    playerStatuses,
+    enemyStatuses,
+    playerHp,
+    playerMp,
+    enemyHp,
+    enemyAttackIntervalMs,
+    enemySpecialReadyAtMs,
+    bodyTribulationStacks,
+    hasSwordHeartPassive,
+    playerDamagedSinceSwordHeartWindow,
+    swordHeartStacks,
+    dependencies,
+  });
+
+  return resolveEnemyTurnPhaseResult({
+    enemyActionWindow,
+    currentTimeMs,
+    turn,
+    player,
+    enemy,
+    logs,
+    passiveFlags,
+    playerHp,
+    playerMp,
+    enemyHp,
+    playerStatuses,
+    enemyStatuses,
+    swordDeathWardUsed,
+    bodyTribulationStacks,
+    bodyRebirthTrueUsed,
+    hasSwordHeartPassive,
+    playerDamagedSinceSwordHeartWindow,
+    swordHeartStacks,
+    enemyAttackIntervalMs,
+    dependencies,
+  });
+};

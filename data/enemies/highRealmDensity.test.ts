@@ -1,7 +1,29 @@
 import { describe, expect, it } from "vitest";
 import { BESTIARY } from ".";
 
-const HIGH_REALM_MAP_IDS = [120, 121, 130, 131, 140, 141, 150, 151, 160, 161, 170, 171, 180];
+const HIGH_REALM_MAP_IDS = [
+  120,
+  121,
+  122,
+  130,
+  131,
+  132,
+  140,
+  141,
+  142,
+  150,
+  151,
+  152,
+  160,
+  161,
+  162,
+  170,
+  171,
+  172,
+  180,
+  181,
+  182,
+];
 
 describe("high realm enemy density", () => {
   it("provides four common enemies for every map from spirit severing onward", () => {

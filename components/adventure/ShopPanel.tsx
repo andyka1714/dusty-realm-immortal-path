@@ -3,7 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 import { SHOPS, ShopItem } from '../../data/shops';
 import { ITEMS } from '../../data/items';
-import { ItemQuality, ItemCategory, EquipmentSlot, MajorRealm } from '../../types';
+import {
+    ConsumableItem,
+    ConsumableType,
+    ItemCategory,
+    ItemQuality,
+    EquipmentSlot,
+    MajorRealm,
+} from '../../types';
 import { REALM_NAMES } from '../../constants';
 import { formatSpiritStone } from '../../utils/currency';
 import { spendSpiritStones } from '../../store/slices/characterSlice';
@@ -14,6 +21,11 @@ import clsx from 'clsx';
 import { Modal } from '../Modal';
 import { GameTooltip } from '../game/GameTooltip';
 import { GameSection } from '../game/GameSection';
+import { getFormalSkill } from '../../data/skills';
+import {
+    getSkillManualAcquisitionTierLabel,
+    getSkillManualSourceLabels,
+} from '../../data/items/manuals';
 
 
 // Helper for attribute names (Moved from Inventory to be shared concept ideally, but kept here for now)
@@ -185,6 +197,7 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                         }
                         if (
                             item.category === ItemCategory.Consumable &&
+                            (item as ConsumableItem).subType !== ConsumableType.Manual &&
                             'requiredRealm' in item &&
                             item.requiredRealm !== undefined &&
                             item.requiredRealm > character.majorRealm
@@ -394,6 +407,41 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                                                 {effect.type === 'breakthrough_chance' && `突破機率: +${effect.value}%`}
                                             </div>
                                         ))}
+                                        {(() => {
+                                            const consumable = item as ConsumableItem;
+                                            if (consumable.subType !== ConsumableType.Manual) {
+                                                return null;
+                                            }
+
+                                            const manualSkillId = consumable.effects.find(
+                                                (effect) => effect.type === 'learn_skill' && effect.skillId
+                                            )?.skillId;
+                                            const manualSkill = manualSkillId ? getFormalSkill(manualSkillId) : null;
+                                            if (!manualSkill) {
+                                                return null;
+                                            }
+
+                                            const prerequisiteNames = (manualSkill.prerequisiteSkillIds ?? []).map(
+                                                (prerequisiteSkillId) =>
+                                                    getFormalSkill(prerequisiteSkillId)?.name ??
+                                                    prerequisiteSkillId
+                                            );
+
+                                            return (
+                                                <div className="mt-3 rounded border border-indigo-900/50 bg-indigo-950/20 p-2 space-y-1">
+                                                    <div className="text-indigo-200">
+                                                        {getSkillManualAcquisitionTierLabel(manualSkill)} · {manualSkill.type === 'Active' ? '主動術式' : '被動心法'}
+                                                    </div>
+                                                    <div>來源：{getSkillManualSourceLabels(manualSkill).join('、')}</div>
+                                                    {consumable.requiredRealm !== undefined && (
+                                                        <div>可先購得，需 {REALM_NAMES[consumable.requiredRealm]} 期方可參悟。</div>
+                                                    )}
+                                                    {prerequisiteNames.length > 0 && (
+                                                        <div>前置：{prerequisiteNames.join('、')}</div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })()}
                                      </div>
                                 )}
                             </div>

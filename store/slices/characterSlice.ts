@@ -155,6 +155,7 @@ const getProfessionGrowthKey = (
 const initialState: CharacterState = {
   isInitialized: false,
   isDead: false,
+  lastDeathCause: undefined,
   name: "無名道友",
   gender: Gender.Male,
   title: "初入江湖",
@@ -200,20 +201,28 @@ const characterSlice = createSlice({
     ) => {
       state.isInitialized = true;
       state.isDead = false;
+      state.lastDeathCause = undefined;
       state.name = action.payload.name || "無名道友";
       state.gender = action.payload.gender;
 
       state.majorRealm = MajorRealm.Mortal;
       state.minorRealm = 0;
+      state.profession = ProfessionType.None;
+      state.title = "初入江湖";
       state.currentExp = 0;
       state.maxExp = calculateMaxExp(MajorRealm.Mortal, 0);
       state.spiritStones = 0;
+      state.cultivationRate = 0;
       state.cultivationCycle = 0;
+      state.isBreakthroughAvailable = false;
       state.isInSeclusion = false;
+      state.seclusionEndTime = undefined;
+      state.gatheringLevel = 1;
       state.lastSaveTime = Date.now();
       state.lastBreakthroughResult = undefined;
       state.itemConsumption = {};
       state.lastProcessedYear = 10;
+      state.lastWarningAge = undefined;
       state.lastManualCultivateTime = 0;
       state.skills = normalizeFormalSkillIds(state.skills);
 
@@ -254,6 +263,7 @@ const characterSlice = createSlice({
     reincarnate: (state) => {
       state.isInitialized = false;
       state.isDead = false;
+      state.lastDeathCause = undefined;
       state.itemConsumption = {};
       state.lastProcessedYear = 10;
     },
@@ -393,6 +403,7 @@ const characterSlice = createSlice({
 
         if (state.age >= state.lifespan) {
           state.isDead = true;
+          state.lastDeathCause = "lifespan";
           state.age = state.lifespan;
         }
       }
@@ -408,6 +419,7 @@ const characterSlice = createSlice({
 
       if (state.age >= state.lifespan) {
         state.isDead = true;
+        state.lastDeathCause = "lifespan";
         return;
       }
 

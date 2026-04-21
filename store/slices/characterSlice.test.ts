@@ -126,6 +126,26 @@ describe("character skill acquisition rules", () => {
     expect(learned.skills).toContain("s_f_active");
   });
 
+  it("uses replacement-aware prerequisite checks for legacy learned skills", () => {
+    const base = reducer(undefined, { type: "test/init" });
+
+    const learned = reducer(
+      {
+        ...base,
+        profession: ProfessionType.Sword,
+        majorRealm: MajorRealm.Tribulation,
+        skills: ["s_n_active", "s_vr_active"],
+      },
+      consumeItem({
+        itemId: "legacy_bi_manual",
+        effects: [{ type: "learn_skill", skillId: "s_bi_active", value: 0 }],
+      })
+    );
+
+    expect(learned.skills).toContain("s_tr_active");
+    expect(learned.skills).not.toContain("s_bi_active");
+  });
+
   it("normalizes retired skills into their formal replacement on character init flows", () => {
     const base = reducer(undefined, { type: "test/init" });
 

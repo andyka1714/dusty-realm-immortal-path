@@ -54,7 +54,7 @@
 - 玩家在地圖上的接戰距離，已開始吃「職業基礎距離 + 已學主動技能射程」
 - `runAutoBattle()` 已從純回合式結算改為時間軸模擬，用來承接後續真正的同場即時戰鬥
 - `castTimeMs` 與 `projectileSpeed` 已正式進入戰鬥節奏計算
-- `burn`、`poison`、`bleed`、`shield`、`armorBreak` 已正式接進時間軸戰鬥內核
+- `stun`、`freeze`、`paralyze`、`banish` 這批控制型效果，以及 `burn`、`poison`、`bleed`、`shield`、`armorBreak`、`vulnerable` 這批正式狀態，現在都已接進共用 battle 語意；`taunt` 與 `獸神附體` 這類正面狀態也已開始共用同一套 builder / logger / visibility 路徑
 - `areaShape / areaRadius / maxTargets` 已正式進入目前的單體戰鬥判定，用來影響範圍技能在單體對決時的承傷效率
 - 地圖內世界戰鬥已開始使用同一批欄位做第一版多目標命中：`circle / line / cone` 技能會依玩家與主目標的相對位置，波及附近其他怪物，而不再只是播放地面提示
 - 即時戰鬥表現層的投射物、施法圈、AOE 與命中特效參數，已抽成可測的 presentation helper，後續調整不必只靠人工目測
@@ -99,17 +99,17 @@
 - 舊的中央戰報窗已退場，戰鬥結果改為右下角 HUD 短暫顯示後自動收起
 - 所有被動技能目前都已改成逐招專屬效果，資料層不再保留 generic `passiveEffectTags` fallback，`passiveEffectTags` 欄位本身也已移除
 - `Adventure` 內 player / enemy world strike 的預覽、施法前搖、排程與結算訊息，現在也已開始共用 `createPlayerWorldStrikePreviewPlan(...) / createEnemyWorldStrikePreviewPlan(...)` 與 queue / resolution helper，不再各自維護兩套 readyAt、status、shield 與傷害文案流程
-- `Adventure` 內 world strike 與舊戰報 replay 的 timed plan primitive、queue builder 與 replay step runner，現在已正式回收到 `battleSystem.ts` 的 `createTimedCombatPlan(...) / createWorldStrikeQueuePlan(...) / createResolvedWorldStrikeActionPlan(...) / createBattleReplayStepPlan(...) / queueTimedCombatPlan(...) / runResolvedTimedCombatPlan(...) / runResolvedWorldStrikeAction(...) / runAutoBattleReplayStep(...)`，頁面不再自己維護這組 battle-side queue 原語
-- `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在已進一步回收到 `battleSystem.ts` 的 `runPlayerWorldStrikePipeline(...) / runEnemyWorldStrikePipeline(...) / runWorldCombatControllerFrame(...)`；頁面不再自己維護 preview、execute 與 outcome apply 的 live action wrapper
+- `Adventure` 內 world strike 與舊戰報 replay 的 timed plan primitive、queue builder、replay session advance 與 step runner，現在已正式回收到 `battleTiming / battleReplay / battleWorldStrike`；頁面不再自己維護 battle-side queue 原語，也不再自己重建 replay step delay / target / skill context
+- `Adventure` 內 player / enemy world strike 的 live 出手鏈，現在已正式回收到 `battleWorldController / battleWorldStrike / battleLifecycle`；preview、execute、outcome apply、reward、defeat 與 timer cleanup 不再由頁面各自維護 wrapper
 - `Adventure` 內 player / enemy world strike 的 action plan，也已正式直接回到 `createWorldStrikeQueuePlan(...)`，不再保留只負責轉手的 resolved wrapper
 - `Adventure` 內 auto-target 與 live world action window 的主控判定，現在也已改走 `runWorldCombatControllerFrame(...)`，頁面不再自己決定最近怪與雙方出手窗口，也不再自己串 player / enemy live action runner
-- `Adventure` 內 `runAutoBattle() -> replay` 的橋接，現在也已開始共用 `battleSystem.ts` 提供的 `createAutoBattleReplaySession(...) / advanceAutoBattleReplaySession(...)`，world 頁面不再自己重建 first log / snapshot / replayQueue，也不再自己手動 append log、slice queue、patch snapshot
+- `Adventure` 內 `runAutoBattle() -> replay` 的橋接，現在已改走 `battleAutoTimeline / battleReplay / battleLifecycle` 的 session、frame 與 controller helper；world 頁面不再自己重建 first log / snapshot / replayQueue，也不再自己手動 append log、slice queue、patch snapshot
 - `Adventure` 內 `runAutoBattle() -> replay` 的啟動入口、replay state shape 與 frame 外殼，現在也已開始改走 `runAutoBattleReplayController(...) + createAutoBattleReplaySession(...)`，頁面 effect 不再自己分開拼接 replay lifecycle gate、本地 replay state 與 frame step/finish 邏輯
 - replay step 的 state shape 與 visual payload，現在也已開始共用 `createAutoBattleReplayStepStatePlan(...)`，頁面不再自己手拼 replay session state 與 attack / damage visual 規則
 - replay frame 的 step / finish 外殼，現在也已併入 `runAutoBattleReplayController(...)`，頁面不再自己先拆 replay transition 再拆 replay frame 的 step / finish 結果
 - battle rewards 的掉落 / 修為 / loot log manifest，現在也已開始共用 `createBattleRewardManifest(...) / createBattleRewardApplicationPlan(...)`，而 live world strike 也已開始透過 `runPlayerWorldStrikePipeline(...) / runEnemyWorldStrikePipeline(...)` 直接套用 reward / log / defeat / encounter clear；頁面不再自己手算 exp、靈石與掉落字串
-- `Adventure` 內舊戰報 replay 的 visual payload，現在已正式共用 `battleSystem.ts` 的 `createBattleReplayVisualPlan(...)`，頁面不再自己維護 attack / damage visual 規則
-- `Adventure` 內 player / enemy world strike 的 execute 結果組裝與 outcome state 套用，現在也已整併到 `runPlayerWorldStrikePipeline(...) / runEnemyWorldStrikePipeline(...)`；execution plan、outcome plan 與 outcome state plan 的內部流程已回收到 battle core，頁面不再自己 loop 套用範圍命中、護盾吸收、命中特效、擊殺獎勵與敗北 outcome
+- `Adventure` 內舊戰報 replay 的 visual payload，現在已正式共用 `battleReplayVisuals.ts` 的 `createBattleReplayVisualPlan(...)`，頁面不再自己維護 attack / damage visual 規則
+- `Adventure` 內 player / enemy world strike 的 execute 結果組裝與 outcome state 套用，現在已整併到 `battleWorldStrikePlayerOutcome.ts / battleWorldStrikeEnemyOutcome.ts`；execution plan、outcome plan 與 outcome state plan 的內部流程已回收到 battle core，頁面不再自己 loop 套用範圍命中、護盾吸收、命中特效、擊殺獎勵與敗北 outcome
 - battle timer bucket 與 replay 啟動 / 重置判定，現在也已開始共用 `createCombatTimerBuckets(...) / clearCombatTimerBucket(...) / clearAllCombatTimers(...) / runAutoBattleReplayController(...)`，頁面不再自己維護 world / replay timer manager 與 replay start/reset 條件
 - world encounter 的 clear/reset state shape，現在也已開始共用 `createClearWorldCombatEncounterState(...) / createResetWorldCombatEncounterState(...)`，頁面不再自己手拼 target/status/cooldown/shield 清理欄位
 - world defeat 的 respawn + 頁面狀態重置 plan，現在也已開始共用 `resolveWorldPlayerDefeatPlan(...) / createWorldPlayerDefeatStatePlan(...)`，並由 `resolveEnemyWorldStrikeOutcomeStatePlan(...)` 直接帶出 defeat state plan；頁面不再自己散寫 auto-battle 停止、world hp 重置與 encounter state 套用
@@ -119,8 +119,8 @@
 - 戰報自動收起延遲與戰後 world state cleanup，現在也已開始共用 `resolveWorldBattleResultLifecyclePlan(...)`，頁面不再自己散寫 auto-close 與清 target/path/auto-battle 條件
 - `Adventure` 內 live world kill 與 replay finish 的獎勵套用，現在也已開始共用 `applyBattleRewards(...)`，即時戰鬥與時間軸回放不再各自維護兩套發獎字串與掉落派發流程
 - replay 敗北回城的復活點判定，也已對齊 live world defeat 的 `getBattleRespawnMapId()` 規則，不再出現同一場景 live / replay 回城地點不一致
-- `Adventure` 目前已退回 battle UI bridge：live world / replay 的 battle 規則、controller、preview、outcome、reward、cleanup 與 lifecycle 均已集中到 `battleSystem.ts`，而頁面上的 React/Redux 套用、visual dispatch 與 world/replay effect 外殼也已開始分別收斂到 `createAdventureBattleUiBridge(...) / createAdventureBattleVisualBridge(...) / useAdventureBattleEffects(...)`；頁面本體只剩 state apply、visual dispatch 與 Redux/UI bridge
-- battle 第二輪整理也已開始把純函式自 `battleSystem.ts` 分流：`battleLog.ts` 承接 combat log / snapshot provider 容器，`battlePassives.ts` 承接 passive flags / canonical skill / passive 判定，`battleStatuses.ts` 承接 status snapshot / DOT tick / status label，`battleStatusEffects.ts` 承接技能 / 特招狀態生成與套用，`battleProfiles.ts` 承接 skill / special timeline profile 與攻速 / 冷卻解析，`battleTiming.ts` 承接 timed queue / replay delay / resolved queue primitive，`battleEncounter.ts` 承接 opening / upkeep / runtime context / encounter seed，`battleTimeline.ts` 承接 auto-battle loop state / runner，`battleRewards.ts` 承接 reward manifest / application plan，`battleReplay.ts` 承接 replay controller、state、visual 與 finish plan，`battleLifecycle.ts` 承接 timer / replay transition / respawn / encounter reset，`battleWorldStrike.ts` 承接 world-strike 的 preview / execution / outcome / state plan，`battleWorldController.ts` 承接 auto-target、action window、world step 與 live world action pipeline，`battleTurnPhases.ts` 承接 player / enemy turn phase orchestration，`battleTimelineResults.ts` 承接 auto-battle 的結果收尾與戰利品結算；後續 battle 擴充會優先沿這個模組邊界拆分，而不是回頭把純資料組裝塞回頁面
+- `Adventure` 目前已退回 battle UI bridge：live world / replay 的 battle 規則、controller、preview、outcome、reward、cleanup 與 lifecycle 均已集中到 battle core，而頁面上的 React/Redux 套用、visual dispatch 與 world/replay effect 外殼則收斂到 `createAdventureBattleUiBridge(...) / createAdventureBattleVisualBridge(...) / useAdventureBattleEffects(...)`；頁面本體只剩 state apply、visual dispatch 與 Redux/UI bridge
+- battle 第二輪整理已從單一 `battleSystem.ts` 演進到 barrel + 專責模組：`battleStatuses.ts` 已再拆成 labels / logs / snapshots / ticks，`battleStatusEffects.ts` 已再拆成 builders / normalization / applications，`battleReplay.ts` 已再拆成 types / state / visuals / steps / frames / controller / finish，`battleLifecycle.ts` 已再拆成 timers / replay transition / world result / encounter state，`battleAutoTimeline.ts` 已再拆成 combat loop / execution / runner；後續 battle 擴充會沿這個模組邊界繼續演進，而不是回頭把純資料組裝塞回頁面
 - `Adventure` 內 player / enemy world strike 與 replay step 的 visual payload，也已開始共用 `WorldStrikeVisualPlan` 路徑；live / replay 不再各自手拼 projectile、area 與 impact payload
 - 舊戰報 replay 的 projectile / area / impact / text 派發，現在也已開始共用同一批 world strike 視覺 helper，不再另外維護一套 effect dispatch
 - `Adventure` 內 player / enemy world strike 的投射物、範圍、命中特效與傷害浮字，也已開始共用 visual helper，地圖即時戰鬥不再各自維護兩套 effect dispatch 流程
@@ -237,6 +237,7 @@
 - 第一批高境界主動技能也已開始正式接入，而不再只有描述：
   - `s_vr_active`：虛空劍陣會追加多段斬擊
   - `m_im_active`：撒豆成兵會生成多段召喚攻勢
+  - `b_n_active`：獸神附體會正式套入變身增傷、吸血與控制免疫，並在 world strike / timeline / replay 同步回報 `獸神附體`
   - `b_im_active`：祖巫降臨會把部分傷害轉為治療
   - `s_tr_active`：擊殺後會重置冷卻
   - `m_tr_active`：對麻痺目標會額外放大雷劫傷害
@@ -299,7 +300,7 @@
   - `不死不滅`
 - 敵方出手前的攻勢計算，也已開始抽成 `resolveEnemyOffenseRoll(...)`，把屬性克制、特招倍率、格擋 / 閃避 / 虛空轉移與承傷前數值準備集中處理
 - `m_tr_passive`：enemy special 造成控制時，也已開始在 enemy world strike 正式回報 `雷劫煉心`
-- `enemy special` 的免疫 / 控制縮短訊息，已開始抽成共用 resistance helper，避免 timeline combat 再散寫 `仙體無垢 / 萬法皆空 / 雷劫煉心 / 人劍合神`
+- `enemy special` 的免疫 / 控制縮短訊息，已開始抽成共用 resistance helper，避免 timeline combat 再散寫 `仙體無垢 / 萬法皆空 / 雷劫煉心 / 人劍合神 / 獸神附體`
 - 時間軸戰鬥內的致命保命分支，也已開始抽成共用 helper，集中處理 `護體劍罡`、`滴血重生（真）`、`不死不滅` 這批生死線特例
 - `StatsPanel / ShopPanel` 的資訊浮層也已進一步對齊 `GameTooltip` 的標題、內文、註腳結構，往同一套遊戲化資訊殼層收斂
 - `s_tr_passive` 在地圖 world strike 也已正式對齊時間軸戰鬥：低血量時會直接進入 `向死而生` 狀態，強制暴擊並同步抬升輸出
@@ -321,22 +322,37 @@
 - 地圖探索階段已補上：
   - 鎖定目標 HUD
   - 目標名稱 / 階級 / 境界 / 距離 / 當前氣血
+- 右下角同場戰鬥 HUD 目前已正式收斂成主流程：
+  - 玩家 / 目標血條
+  - 最近戰況
+  - 玩家普攻節奏與主動技能冷卻
+  - 敵方出手節奏與特招倒數
+  - 敵方意圖與危險區提示
 - 戰報回放中的傷害事件，已開始透過 `visualEffects` 回灌到地圖舞台，顯示第一版浮動傷害數字
-- 遠程技能與遠程怪物已開始透過 `visualEffects` 回灌第一版投射物
+- 遠程技能與遠程怪物的投射物，現在已改成在施法 / 蓄力階段就從來源飛向目標，不再等命中後才補播
 - 技能施放前已開始透過 `visualEffects` 回灌第一版聚氣 / 施法前搖圈
-- 範圍技能已開始透過 `visualEffects` 回灌第一版地面範圍提示
+- 範圍技能與 Boss 特招，現在已開始透過 `visualEffects` 回灌地面範圍提示與危險圈
 - 命中傷害已開始透過 `visualEffects` 回灌第一版受擊爆點 / 震盪圈
 - 戰鬥勝利後，怪物會先在地圖上播放第一版潰散脈衝，再從地圖移除
 - battle modal 已從全屏中央大視窗壓縮為右下角戰鬥 HUD，先降低對地圖戰鬥視野的遮蔽
+- `AdventureStage` 現在也會直接畫出：
+  - 玩家攻擊距離圈
+  - 目標危險區 / 警戒圈
+  - 遠程 / 法術怪的偏好距離圈
+  - Boss 特招落點預警圈
+- live-combat role / status polish 也已正式接回主流程：
+  - 怪物現在會明確區分近戰壓迫、遠程風箏、法術蓄力與 Boss 危險節奏
+  - 遠程 / 法術怪在距離過近時會主動後撤拉距，而不是全部退化成貼臉追擊
+  - 目標 HUD 與右下角同場戰鬥 HUD 會顯示角色分工、狀態 cue、控制命中 / 免疫提示與特招倒數
+  - `AdventureStage` 會依怪物分工改變危險圈、蓄力 aura、退距帶與 target focus reticle
+  - 投射物、施法圈、命中震盪圈與危險區的 visual language 已再強化一輪，不再只有單層圓圈提示
 
 ## 3. 後續規劃
 
 - 後續會將目前的自動結算保留作為數值驗證工具
 - 地圖內戰鬥將逐步改造成即時戰鬥
-- 目前已完成第一階段的「距離接戰」基礎，下一步才是把實際攻擊動作、技能 CD、血條變化做成同場即時播放
-- 即時版本預計引入：
-  - 完全移除 battle modal 後的同場傷害數字
-  - 角色 / 怪物血條
-  - 投射物飛行與命中特效
-  - 範圍提示圈
-  - 更完整的狀態圖示
+- 目前「同場攻擊播放 / 技能 CD / 血條變化 / 射程圈 / Boss 預警圈 / 怪物分工 / 狀態提示」都已進入正式主流程
+- 即時版本接下來的重點不再是補第一版 HUD，而是持續微調：
+  - 怪物行為數值與個別地圖的壓力曲線
+  - 更細的資產品質與命中特效節奏
+  - 視需要再評估 battle modal 是否退成純戰報回放工具

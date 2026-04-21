@@ -1,5 +1,19 @@
 import { ActiveMonster, Coordinate, Enemy, EnemyRank, ProfessionType, Skill } from "../types";
 
+export type WorldCombatEnemyRoleId =
+  | "melee-pressure"
+  | "ranged-skirmisher"
+  | "caster-channeler"
+  | "boss-hazard";
+
+export interface WorldCombatEnemyRoleProfile {
+  id: WorldCombatEnemyRoleId;
+  label: string;
+  summary: string;
+  detail: string;
+  accentColor: number;
+}
+
 export const getGridDistance = (
   from: { x: number; y: number },
   to: { x: number; y: number }
@@ -56,6 +70,50 @@ export const getEnemyPreferredDistance = (enemy: Enemy) => {
   return 1;
 };
 
+export const getEnemyCombatRoleProfile = (
+  enemy: Enemy
+): WorldCombatEnemyRoleProfile => {
+  if (enemy.rank === EnemyRank.Boss) {
+    return {
+      id: "boss-hazard",
+      label: "Boss 危險節奏",
+      summary: enemy.specialAttack ? "特招與危險區壓迫" : "高壓近戰壓迫",
+      detail: enemy.specialAttack
+        ? "會以蓄力與落點危險區改變站位節奏"
+        : "會持續維持高壓接戰距離",
+      accentColor: 0xfb7185,
+    };
+  }
+
+  if (enemy.aiStyle === "caster") {
+    return {
+      id: "caster-channeler",
+      label: "蓄力施法",
+      summary: "拉距蓄力",
+      detail: "傾向維持施法距離，並在特招前提供更長前搖",
+      accentColor: 0x60a5fa,
+    };
+  }
+
+  if (enemy.aiStyle === "ranged") {
+    return {
+      id: "ranged-skirmisher",
+      label: "游擊射手",
+      summary: "風箏射擊",
+      detail: "傾向維持火線，距離過近時會優先後撤拉距",
+      accentColor: 0xf59e0b,
+    };
+  }
+
+  return {
+    id: "melee-pressure",
+    label: "近戰壓迫",
+    summary: "貼身突進",
+    detail: "會持續縮短距離並把壓力集中在近身危險區",
+    accentColor: 0xef4444,
+  };
+};
+
 export const shouldEnemyHoldPreferredRange = (
   enemy: Enemy,
   distance: number
@@ -66,6 +124,15 @@ export const shouldEnemyHoldPreferredRange = (
   const preferredDistance = getEnemyPreferredDistance(enemy);
 
   return distance > engagementRange && distance <= preferredDistance;
+};
+
+export const shouldEnemyRetreatFromCloseRange = (
+  enemy: Enemy,
+  distance: number
+) => {
+  if (enemy.aiStyle !== "caster" && enemy.aiStyle !== "ranged") return false;
+
+  return distance < getEnemyEngagementRange(enemy);
 };
 
 export const shouldEnemyStrafeNearRange = (enemy: Enemy, distance: number) => {

@@ -485,8 +485,15 @@ const RAW_MAPS_V60: RawMap[] = [
             { target_id: 92, dir: "South", pos: [75, 150] },       // From North Path
             { target_id: 102, dir: "SouthWest", pos: [0, 150] },   // From West Path
             { target_id: 112, dir: "SouthEast", pos: [150, 150] }, // From East Path
-            { target_id: 121, dir: "North", pos: [75, 0] }
+            { target_id: 121, dir: "North", pos: [75, 0] },
+            { target_id: 122, dir: "East", pos: [150, 75] }
         ],
+        boss: null
+    },
+    {
+        id: 122, name: "殞星界橋", realm: "化神", size: [150, 150], pos: [2, 11], theme: "Center",
+        description: "殞落星橋橫跨界縫，是飛昇殘軍與妖魔反覆衝殺的狹橋。",
+        portals: [{ target_id: 120, dir: "West", pos: [0, 75] }, { target_id: 121, dir: "North", pos: [75, 0] }],
         boss: null
     },
     {
@@ -500,7 +507,13 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 130, name: "時光長河", realm: "煉虛", size: [160, 160], pos: [0, 13], theme: "Void",
         description: "過去未來交織，稍有不慎便老死其中。",
-        portals: [{ target_id: 121, dir: "South", pos: [80, 160] }, { target_id: 131, dir: "North", pos: [80, 0] }], boss: null
+        portals: [{ target_id: 121, dir: "South", pos: [80, 160] }, { target_id: 131, dir: "North", pos: [80, 0] }, { target_id: 132, dir: "East", pos: [160, 80] }], boss: null
+    },
+    {
+        id: 132, name: "虛淵迴廊", realm: "煉虛", size: [160, 160], pos: [2, 13], theme: "Void",
+        description: "迴廊飄浮在虛淵邊緣，時間亂流與碎界殘片在此交錯。",
+        portals: [{ target_id: 130, dir: "West", pos: [0, 80] }, { target_id: 131, dir: "North", pos: [80, 0] }],
+        boss: null
     },
     {
         id: 131, name: "破碎虛空", realm: "煉虛", size: [160, 160], pos: [0, 14], theme: "Void",
@@ -513,7 +526,13 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 140, name: "萬法聖城", realm: "合體", size: [160, 160], pos: [0, 15], theme: "Spirit",
         description: "靈界最繁華都市，萬族共存。",
-        portals: [{ target_id: 131, dir: "South", pos: [80, 160] }, { target_id: 141, dir: "North", pos: [80, 0] }], boss: null
+        portals: [{ target_id: 131, dir: "South", pos: [80, 160] }, { target_id: 141, dir: "North", pos: [80, 0] }, { target_id: 142, dir: "East", pos: [160, 80] }], boss: null
+    },
+    {
+        id: 142, name: "萬靈法壇", realm: "合體", size: [160, 160], pos: [2, 15], theme: "Spirit",
+        description: "萬靈法壇匯聚諸族靈脈，是進入中樞前的真正壓力試煉。",
+        portals: [{ target_id: 140, dir: "West", pos: [0, 80] }, { target_id: 141, dir: "North", pos: [80, 0] }],
+        boss: null
     },
     {
         id: 141, name: "靈界中樞", realm: "合體", size: [160, 160], pos: [0, 16], theme: "Spirit",
@@ -526,7 +545,13 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 150, name: "無盡海", realm: "大乘", size: [180, 180], pos: [0, 17], theme: "Sea",
         description: "分隔靈界與登仙路的浩瀚海洋。",
-        portals: [{ target_id: 141, dir: "South", pos: [90, 180] }, { target_id: 151, dir: "North", pos: [90, 0] }], boss: null
+        portals: [{ target_id: 141, dir: "South", pos: [90, 180] }, { target_id: 151, dir: "North", pos: [90, 0] }, { target_id: 152, dir: "East", pos: [180, 90] }], boss: null
+    },
+    {
+        id: 152, name: "界海孤烽", realm: "大乘", size: [180, 180], pos: [2, 17], theme: "Sea",
+        description: "孤烽漂浮於界海裂潮之上，專為阻截闖關者而立。",
+        portals: [{ target_id: 150, dir: "West", pos: [0, 90] }, { target_id: 151, dir: "North", pos: [90, 0] }],
+        boss: null
     },
     {
         id: 151, name: "登仙天梯", realm: "大乘", size: [180, 180], pos: [0, 18], theme: "Sky",
@@ -539,7 +564,13 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 160, name: "劫雲荒原", realm: "渡劫", size: [200, 200], pos: [0, 19], theme: "Dark",
         description: "烏雲壓頂，毀滅氣息。",
-        portals: [{ target_id: 151, dir: "South", pos: [100, 200] }, { target_id: 161, dir: "North", pos: [100, 0] }], boss: null
+        portals: [{ target_id: 151, dir: "South", pos: [100, 200] }, { target_id: 161, dir: "North", pos: [100, 0] }, { target_id: 162, dir: "East", pos: [200, 100] }], boss: null
+    },
+    {
+        id: 162, name: "天刑迴廊", realm: "渡劫", size: [200, 200], pos: [2, 19], theme: "Thunder",
+        description: "天刑雷柱沿迴廊輪轉，是踏入雷池前必經的審判地帶。",
+        portals: [{ target_id: 160, dir: "West", pos: [0, 100] }, { target_id: 161, dir: "North", pos: [100, 0] }],
+        boss: null
     },
     {
         id: 161, name: "九天雷池", realm: "渡劫", size: [200, 200], pos: [0, 20], theme: "Thunder",
@@ -552,18 +583,36 @@ const RAW_MAPS_V60: RawMap[] = [
     {
         id: 170, name: "接引仙殿", realm: "仙人", size: [200, 200], pos: [0, 21], theme: "Immortal",
         description: "飛昇者抵達仙界的第一站，金碧輝煌。",
-        portals: [{ target_id: 161, dir: "South", pos: [100, 200] }, { target_id: 171, dir: "North", pos: [100, 0] }], boss: null
+        portals: [{ target_id: 161, dir: "South", pos: [100, 200] }, { target_id: 171, dir: "North", pos: [100, 0] }, { target_id: 172, dir: "East", pos: [200, 100] }], boss: null
+    },
+    {
+        id: 172, name: "玉詔仙獄", realm: "仙人", size: [200, 200], pos: [2, 21], theme: "Immortal",
+        description: "玉詔仙獄專門囚禁違命飛昇者，仙庭鎮壓力量最為濃烈。",
+        portals: [{ target_id: 170, dir: "West", pos: [0, 100] }, { target_id: 171, dir: "North", pos: [100, 0] }],
+        boss: null
     },
     {
         id: 171, name: "九重天闕", realm: "仙人", size: [200, 200], pos: [0, 22], theme: "Immortal",
         description: "仙界權力核心，宮殿懸浮雲端。",
-        portals: [{ target_id: 170, dir: "South", pos: [100, 200] }, { target_id: 180, dir: "North", pos: [100, 0] }],
+        portals: [{ target_id: 170, dir: "South", pos: [100, 200] }, { target_id: 180, dir: "North", pos: [100, 0] }, { target_id: 181, dir: "East", pos: [200, 100] }],
         boss: { name: "九天仙尊", pos: [100, 100] }
+    },
+    {
+        id: 181, name: "太初外環", realm: "仙帝", size: [200, 200], pos: [2, 22], theme: "Ultimate",
+        description: "鴻蒙道宮外環盤旋著本源碎界，是踏入終極道場前的最後緩衝。",
+        portals: [{ target_id: 171, dir: "West", pos: [0, 100] }, { target_id: 180, dir: "North", pos: [100, 0] }, { target_id: 182, dir: "East", pos: [200, 100] }],
+        boss: null
+    },
+    {
+        id: 182, name: "歸墟裂界", realm: "仙帝", size: [200, 200], pos: [2, 23], theme: "Ultimate",
+        description: "歸墟裂界將萬道殘響與滅界碎潮壓成狹長戰場，是終盤路線專屬掉落最集中的壓力支線。",
+        portals: [{ target_id: 181, dir: "West", pos: [0, 100] }, { target_id: 180, dir: "North", pos: [100, 0] }],
+        boss: null
     },
     {
         id: 180, name: "鴻蒙道宮", realm: "仙帝", size: [200, 200], pos: [0, 23], theme: "Ultimate",
         description: "宇宙終極，大道起源。",
-        portals: [{ target_id: 171, dir: "South", pos: [100, 200] }],
+        portals: [{ target_id: 171, dir: "South", pos: [100, 200] }, { target_id: 182, dir: "East", pos: [200, 100] }],
         boss: { name: "鴻蒙道祖", pos: [100, 100] }
     }
 ];
