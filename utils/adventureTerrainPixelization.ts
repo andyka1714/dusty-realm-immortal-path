@@ -557,7 +557,17 @@ const buildThemeMacroZones = ({
   const forcedZones: ForcedTerrainZone[] = [];
 
   if (theme === "Sea") {
-    pushHorizontalLine(forcedZones, centerY, 2, width - 3, "water");
+    if (mapId === "152") {
+      pushHorizontalLine(forcedZones, centerY - 4, 2, width - 3, "water");
+      pushHorizontalLine(forcedZones, centerY + 2, 2, width - 3, "water");
+      forcedZones.push({ x: centerX, y: centerY, radius: 0, kind: "path" });
+      forcedZones.push({ x: centerX - 1, y: centerY - 1, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 1, y: centerY - 1, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX - 1, y: centerY + 1, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 1, y: centerY + 1, radius: 0, kind: "accent" });
+    } else {
+      pushHorizontalLine(forcedZones, centerY, 2, width - 3, "water");
+    }
   }
 
   if (theme === "Center") {

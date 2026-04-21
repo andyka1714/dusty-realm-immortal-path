@@ -397,6 +397,31 @@ describe("adventureTerrainPixelization", () => {
     expect(spiritAltar.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("path");
   });
 
+  it("keeps sea-route maps visually distinct even when they share the same theme", () => {
+    const endlessSea = buildAdventureTerrainTiles({
+      mapId: "150",
+      theme: "Sea",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const loneBeacon = buildAdventureTerrainTiles({
+      mapId: "152",
+      theme: "Sea",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(endlessSea.find((tile) => tile.x === 2 && tile.y === 6)?.kind).toBe("water");
+    expect(endlessSea.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("water");
+    expect(loneBeacon.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(loneBeacon.find((tile) => tile.x === 5 && tile.y === 5)?.kind).toBe("accent");
+    expect(loneBeacon.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("water");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");
