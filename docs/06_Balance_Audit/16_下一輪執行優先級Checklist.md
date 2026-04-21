@@ -64,4 +64,4 @@
 - `add-meta-progression-foundation` 已完成，正式收口版本化存檔、`soul` progression、Life Review / Reincarnation Hall / Rebirth flow 與 base spec truth 回寫
 - `add-workshop-and-event-loops` 已完成，正式收口 `Workshop` recipe loop、pending event flow 與高境界 multiplier regression 對齊
 - `evaluate-pixel-art-vertical-slice` 已完成，正式收口 `Adventure` representative pixel-art vertical slice、web/mobile 驗證與效能 budget 基線
-- `update-adventure-terrain-pixelization` 已開案，正式承接 `AdventureStage` terrain/background 像素化整合，並鎖定角色 / 玩家 / 怪物表現維持現狀
+- `update-adventure-terrain-pixelization` 已完成，正式收口 `AdventureStage` terrain/background 像素化整合，並維持角色 / 玩家 / 怪物表現現狀
