@@ -260,6 +260,40 @@ describe("adventureTerrainPixelization", () => {
     expect(riftRoute.find((tile) => tile.x === 5 && tile.y === 5)?.kind).toBe("accent");
   });
 
+  it("keeps immortal-route maps visually distinct even when they share the same theme", () => {
+    const ascensionHall = buildAdventureTerrainTiles({
+      mapId: "170",
+      theme: "Immortal",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const heavenPalace = buildAdventureTerrainTiles({
+      mapId: "171",
+      theme: "Immortal",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const celestialPrison = buildAdventureTerrainTiles({
+      mapId: "172",
+      theme: "Immortal",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(ascensionHall.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("path");
+    expect(ascensionHall.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("path");
+    expect(heavenPalace.find((tile) => tile.x === 2 && tile.y === 3)?.kind).toBe("path");
+    expect(heavenPalace.find((tile) => tile.x === 9 && tile.y === 9)?.kind).toBe("path");
+    expect(celestialPrison.find((tile) => tile.x === 3 && tile.y === 2)?.kind).toBe("accent");
+    expect(celestialPrison.find((tile) => tile.x === 9 && tile.y === 9)?.kind).toBe("accent");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");

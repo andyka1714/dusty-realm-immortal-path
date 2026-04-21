@@ -596,10 +596,27 @@ const buildThemeMacroZones = ({
   }
 
   if (theme === "Immortal") {
-    forcedZones.push({ x: centerX, y: centerY, radius: 1, kind: "path" });
-    forcedZones.push({ x: centerX - 3, y: centerY, radius: 1, kind: "path" });
-    forcedZones.push({ x: centerX + 3, y: centerY, radius: 1, kind: "path" });
-    forcedZones.push({ x: centerX, y: centerY - 3, radius: 1, kind: "path" });
+    if (mapId === "170") {
+      pushVerticalLine(forcedZones, centerX, 2, height - 3, "path");
+      pushHorizontalLine(forcedZones, centerY, centerX - 3, centerX + 3, "path");
+      forcedZones.push({ x: centerX - 1, y: centerY, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 1, y: centerY, radius: 0, kind: "accent" });
+    } else if (mapId === "171") {
+      pushHorizontalLine(forcedZones, centerY - 3, 2, width - 3, "path");
+      pushHorizontalLine(forcedZones, centerY, 2, width - 3, "path");
+      pushHorizontalLine(forcedZones, centerY + 3, 2, width - 3, "path");
+      pushVerticalLine(forcedZones, centerX, centerY - 3, centerY + 3, "accent");
+    } else if (mapId === "172") {
+      pushVerticalLine(forcedZones, centerX - 3, 2, height - 3, "accent");
+      pushVerticalLine(forcedZones, centerX, 2, height - 3, "accent");
+      pushVerticalLine(forcedZones, centerX + 3, 2, height - 3, "accent");
+      pushHorizontalLine(forcedZones, centerY, centerX - 2, centerX + 2, "path");
+    } else {
+      forcedZones.push({ x: centerX, y: centerY, radius: 1, kind: "path" });
+      forcedZones.push({ x: centerX - 3, y: centerY, radius: 1, kind: "path" });
+      forcedZones.push({ x: centerX + 3, y: centerY, radius: 1, kind: "path" });
+      forcedZones.push({ x: centerX, y: centerY - 3, radius: 1, kind: "path" });
+    }
   }
 
   if (theme === "Ultimate") {
