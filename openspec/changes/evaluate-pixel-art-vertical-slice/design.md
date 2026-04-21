@@ -27,22 +27,23 @@
 ## Decisions
 
 - 繼續以 `PixiJS` 作為 prototype renderer，不新增第二套 3D 技術棧
-- vertical slice 只鎖定一張代表性地圖，預設為 `東郊靈田 (map 20)`，因為它尺寸小、地形清楚、容易驗證 tile/sprite/cue 的第一版語言
-- prototype 的最小角色組合固定為：`1` 個玩家、`1` 個近戰怪、`1` 個遠程 / 法術怪，外加傳送門與 target focus
+- vertical slice 只鎖定一張代表性地圖，預設為 `東郊靈田 (map 20)`，因為它尺寸小、地形清楚、容易驗證 tile / terrain cue 的第一版語言
+- prototype 的最小角色組合固定為：`1` 個玩家、`1` 個近戰怪、`1` 個遠程 / 法術怪，外加傳送門與 target focus，但角色本體維持文字 token 而不是像素 sprite
 - 像素資產規格固定採用：
   - 地面 tile：`16x16`
-  - 角色 / 怪物 sprite：`32x32`
   - 主要 VFX / telegraph 單元：`16x16` 或 `32x32`
   - 桌機 stage cell：`48px (3x)`
   - 行動裝置 stage cell：`32px (2x)`
-- prototype 階段允許 agent 自主生成 placeholder tiles、角色、怪物與 VFX，但正式 rollout 前仍需人工 review 風格一致性
+- prototype 階段允許 agent 自主生成 placeholder tiles、entity token、portal marker 與 VFX，但正式 rollout 前仍需人工 review 風格一致性
 
 ## Risks / Trade-offs
 
 - 若 art bible 不夠具體，prototype 仍會變成邊做邊猜
-  - Mitigation: 先把 tile、sprite、UI、VFX、palette、scale strategy 全寫死
+  - Mitigation: 先把 tile、entity token、UI、VFX、palette、scale strategy 全寫死
 - 若 vertical slice 範圍過大，會重新踩進「像素風 full rollout」的返工風險
   - Mitigation: 嚴格限制為單地圖、單玩家、兩種怪物 archetype 與一套 cue
+- 若 entity 也像素化，容易把目前專案偏文字遊戲的辨識方式整個打掉
+  - Mitigation: 先只像素化地圖與場景 cue，玩家 / NPC / 怪物維持文字 token
 - 若全部素材都承諾自動生成，後面 production quality consistency 會失控
   - Mitigation: 在設計中區分 prototype 可自動生成與 full rollout 需 review 的資產層級
 - 若 runtime scale 不是整數倍，像素畫面會模糊

@@ -9,7 +9,7 @@
 這份 art bible 不是 full rollout 的完整資產規範，而是先鎖定：
 
 1. 視覺語言
-2. tile / sprite / UI / VFX 規格
+2. tile / entity token / UI / VFX 規格
 3. Adventure representative vertical slice 的具體範圍
 4. web / mobile 驗證門檻
 5. 自主生成素材在 prototype 階段的可用邊界
@@ -51,10 +51,16 @@ prototype 地圖固定使用：
 
 ### 3.2 最小角色組合
 
-- `1` 個玩家 sprite
-- `1` 個近戰怪 sprite
-- `1` 個遠程 / 法術怪 sprite
+- `1` 個玩家文字 token
+- `1` 個近戰怪文字 token
+- `1` 個遠程 / 法術怪文字 token
 - `1` 組傳送門 / 出口標記
+
+這條 vertical slice 現在採用 hybrid 規則：
+
+- 地圖與戰鬥 cue 使用像素化語言
+- 玩家、NPC、怪物與角色本體維持文字化 token，而不是像素 sprite
+- 角色辨識仍優先靠單字、框色、target 標記與 HUD，而不是完整角色繪製
 
 ### 3.3 最小戰鬥 cue
 
@@ -73,8 +79,8 @@ prototype 至少必須有：
 - 目前只在 `東郊靈田 (map 20)` 開放預覽
 - prototype stage 與正式 `AdventureStage` 分離，避免污染正式流程
 - 目前已接回：
-  - `1` 個玩家 placeholder
-  - `2` 種怪物 archetype (`近戰 / 遠程`)
+  - `1` 個玩家 token
+  - `2` 種怪物 archetype (`近戰 / 遠程`) token
   - 傳送門 marker
   - `近戰命中 / 投射物 / 危險區 / target focus / status cue`
 
@@ -88,9 +94,9 @@ prototype 至少必須有：
 
 - 地面 tile：`16x16`
 - 障礙 / 樹 / 石塊 / 靈田物件：`16x16` 或 `32x32`
-- 玩家 / 怪物 sprite：`32x32`
 - 傳送門 / 祭壇 / 大型物件：`32x32` 或 `48x48`
 - VFX 單元：`16x16` 或 `32x32`
+- 場上 entity token：以單字為核心，外框與 focus ring 隨 runtime cell 縮放，不另定 sprite sheet 尺寸
 
 ### 4.2 Runtime 顯示尺寸
 
@@ -108,41 +114,36 @@ prototype 至少必須有：
 
 ---
 
-## 5. Sprite 規格
+## 5. Entity Token 規格
 
-### 5.1 角色與怪物方向
+### 5.1 表現原則
 
-prototype 先固定：
+prototype 的玩家、怪物與 NPC 不再畫成像素 sprite，而是維持文字遊戲感的單字 token：
 
-- 四方向：上 / 下 / 左 / 右
+- 玩家固定顯示 `我`
+- 怪物顯示名稱中最有辨識度的單字，例如 `鼬`、`狼`
+- NPC / 功能點維持 `商`、`匠`、`長` 這類單字牌
+
+### 5.2 token 組成
+
+每個 entity token 至少包含：
+
+1. 單字本體
+2. 方形或圓角框
+3. 陣營 / 類型顏色
+4. target / 危險 / 狀態時的外圈或上方小標
 
 不做：
 
-- 八方向
-- 大量中間角度補幀
+- 八方向角色繪製
+- 完整角色動作庫
+- 依靠 sprite silhouette 才能理解的表現法
 
-### 5.2 最小動畫集
+### 5.3 可讀性規則
 
-玩家與怪物 prototype 只要求：
-
-1. idle
-2. move
-3. attack / cast
-4. hit
-
-死亡動畫可以先用：
-
-- 閃白 + 下沉
-- 透明度淡出
-
-而不是第一版就做完整幀動畫。
-
-### 5.3 輪廓規則
-
-- 外輪廓優先深色描邊
-- 內部陰影不超過 `2` 層
-- 五官與細節不追求過度寫實
-- 玩家與怪物要先靠 silhouette 區分，而不是靠名牌文字救辨識度
+- 單字本體必須在桌機 `3x` 與手機 `2x` 都能一眼看清
+- 玩家、怪物、NPC 的框色與描邊必須明顯不同
+- 角色辨識優先靠文字、框色與 HUD，不靠貼圖細節
 
 ---
 
@@ -165,15 +166,16 @@ prototype 場景分成：
 
 1. base ground
 2. overlay detail
-3. obstacle / entity
+3. obstacle
 4. combat cue / VFX
-5. HUD / target marker
+5. entity token
+6. HUD / target marker
 
 不要把全部細節塞進單層 tile。
 
 ### 6.3 陰影規則
 
-- 角色腳下固定有簡單橢圓陰影
+- entity token 不依賴角色腳下陰影來辨識
 - 大型障礙可有 baked shadow
 - prototype 不做動態光影
 
@@ -213,7 +215,7 @@ prototype 場景分成：
 
 - HUD 仍維持 HTML / React 疊在 canvas 上
 - 不把主要文字 HUD 做成場景內 sprite
-- 戰場內只保留極短資訊：target、status、damage cue
+- 戰場內 entity 只保留極短資訊：單字 token、target、status、damage cue
 
 ### 8.2 視覺語言
 
@@ -282,15 +284,15 @@ prototype 不要求：
 ### 11.1 可以由 agent 自主生成的
 
 - 地圖 tileset placeholder
-- 玩家與怪物 prototype sprite
 - 像素 VFX
 - 像素 portal / altar / focus marker
 - 小型 UI ornament
+- entity token 的字體、框體與簡化狀態標記
 
 ### 11.2 可生成但不能直接承諾 production-ready 的
 
-- 長期共用的完整角色動畫庫
-- 大量怪物族群的完整正式 spritesheet
+- 長期共用的完整 entity token 視覺系統
+- 大量怪物族群的最終命名字典與單字映射規則
 - 全專案一致的高品質像素 UI pack
 
 ### 11.3 Review gate
@@ -300,7 +302,7 @@ prototype 階段允許自動生成後直接接線驗證。
 
 1. silhouette 是否穩定
 2. palette 是否一致
-3. 動畫節奏是否與 live combat cue 一致
+3. token 的單字、框色與 cue 是否不互相搶可讀性
 4. 手機端可讀性是否仍成立
 
 ---
@@ -309,8 +311,8 @@ prototype 階段允許自動生成後直接接線驗證。
 
 要視為 vertical slice 成立，至少要滿足：
 
-1. `東郊靈田` 能以像素風 tile/sprite 正常顯示
-2. 玩家、近戰怪、遠程 / 法術怪都能被看懂
+1. `東郊靈田` 能以像素風 tile / terrain cue 正常顯示
+2. 玩家、近戰怪、遠程 / 法術怪都能透過文字 token 被看懂
 3. 近戰命中、投射物、危險區、target focus 四類 cue 都能在像素語言下成立
 4. 桌機與手機端都沒有明顯模糊或 HUD 崩壞
-5. 團隊能根據這份 art bible 決定是否值得開下一條 `pixel-art full rollout`
+5. 團隊能根據這份 hybrid 基線決定是否值得開下一條 `pixel-art full rollout`
