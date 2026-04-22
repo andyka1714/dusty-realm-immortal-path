@@ -649,6 +649,41 @@ describe("adventureTerrainPixelization", () => {
     expect(ancestorTemple.find((tile) => tile.x === 2 && tile.y === 6)?.kind).toBe("path");
   });
 
+  it("adds landmark variants for early west-route gateway maps", () => {
+    const westForest = buildAdventureTerrainTiles({
+      mapId: "10",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const hunterTrail = buildAdventureTerrainTiles({
+      mapId: "11",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const valleyGate = buildAdventureTerrainTiles({
+      mapId: "12",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(westForest.find((tile) => tile.x === 2 && tile.y === 6)?.kind).toBe("path");
+    expect(westForest.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("accent");
+    expect(hunterTrail.find((tile) => tile.x === 3 && tile.y === 8)?.kind).toBe("path");
+    expect(hunterTrail.find((tile) => tile.x === 7 && tile.y === 4)?.kind).toBe("path");
+    expect(valleyGate.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(valleyGate.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("accent");
+    expect(valleyGate.find((tile) => tile.x === 8 && tile.y === 4)?.kind).toBe("accent");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");
