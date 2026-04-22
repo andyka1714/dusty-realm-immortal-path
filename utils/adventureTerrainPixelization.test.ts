@@ -713,6 +713,65 @@ describe("adventureTerrainPixelization", () => {
     expect(ghostDomain.find((tile) => tile.x === 8 && tile.y === 6)?.kind).toBe("water");
   });
 
+  it("adds landmark variants for golden core companion maps", () => {
+    const galeLayer = buildAdventureTerrainTiles({
+      mapId: "60",
+      theme: "North",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const gravityMountain = buildAdventureTerrainTiles({
+      mapId: "70",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const poisonPit = buildAdventureTerrainTiles({
+      mapId: "72",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const stormSea = buildAdventureTerrainTiles({
+      mapId: "80",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const mirageSea = buildAdventureTerrainTiles({
+      mapId: "82",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(galeLayer.find((tile) => tile.x === 2 && tile.y === 6)?.kind).toBe("path");
+    expect(galeLayer.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("path");
+    expect(galeLayer.find((tile) => tile.x === 6 && tile.y === 4)?.kind).toBe("accent");
+    expect(gravityMountain.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("accent");
+    expect(gravityMountain.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("accent");
+    expect(gravityMountain.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("path");
+    expect(poisonPit.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("water");
+    expect(poisonPit.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
+    expect(poisonPit.find((tile) => tile.x === 8 && tile.y === 6)?.kind).toBe("accent");
+    expect(stormSea.find((tile) => tile.x === 2 && tile.y === 6)?.kind).toBe("water");
+    expect(stormSea.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("water");
+    expect(stormSea.find((tile) => tile.x === 6 && tile.y === 4)?.kind).toBe("accent");
+    expect(mirageSea.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("water");
+    expect(mirageSea.find((tile) => tile.x === 8 && tile.y === 4)?.kind).toBe("water");
+    expect(mirageSea.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+  });
+
   it("adds landmark variants for iconic east-route maps", () => {
     const trialMaze = buildAdventureTerrainTiles({
       mapId: "24",
