@@ -569,6 +569,50 @@ describe("adventureTerrainPixelization", () => {
     expect(voidRift.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("accent");
   });
 
+  it("adds landmark variants for iconic west-route maps", () => {
+    const bodyPool = buildAdventureTerrainTiles({
+      mapId: "14",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const beastValley = buildAdventureTerrainTiles({
+      mapId: "16",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const lavaInferno = buildAdventureTerrainTiles({
+      mapId: "71",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const ancestorTemple = buildAdventureTerrainTiles({
+      mapId: "102",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(bodyPool.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("water");
+    expect(bodyPool.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("accent");
+    expect(beastValley.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(beastValley.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
+    expect(lavaInferno.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("water");
+    expect(lavaInferno.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("water");
+    expect(ancestorTemple.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("accent");
+    expect(ancestorTemple.find((tile) => tile.x === 2 && tile.y === 6)?.kind).toBe("path");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");

@@ -653,6 +653,30 @@ const buildThemeMacroZones = ({
     }
   }
 
+  if (theme === "West") {
+    if (mapId === "14") {
+      forcedZones.push({ x: centerX, y: centerY, radius: 1, kind: "water" });
+      forcedZones.push({ x: centerX - 2, y: centerY - 2, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 2, y: centerY - 2, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX - 2, y: centerY + 2, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 2, y: centerY + 2, radius: 0, kind: "accent" });
+    } else if (mapId === "16") {
+      forcedZones.push({ x: centerX, y: centerY, radius: 1, kind: "path" });
+      forcedZones.push({ x: centerX - 2, y: centerY, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 2, y: centerY, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX, y: centerY - 2, radius: 0, kind: "accent" });
+    } else if (mapId === "71") {
+      pushVerticalLine(forcedZones, centerX, 2, height - 3, "water");
+      forcedZones.push({ x: centerX - 1, y: centerY - 1, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 1, y: centerY + 1, radius: 0, kind: "accent" });
+    } else if (mapId === "102") {
+      pushHorizontalLine(forcedZones, centerY, 2, width - 3, "path");
+      pushVerticalLine(forcedZones, centerX, 2, height - 3, "accent");
+      forcedZones.push({ x: centerX - 2, y: centerY - 2, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 2, y: centerY - 2, radius: 0, kind: "accent" });
+    }
+  }
+
   if (theme === "Thunder") {
     if (mapId === "162") {
       pushHorizontalLine(forcedZones, centerY, 2, width - 3, "accent");
