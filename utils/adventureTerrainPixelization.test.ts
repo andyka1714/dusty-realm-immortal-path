@@ -481,6 +481,50 @@ describe("adventureTerrainPixelization", () => {
     expect(mysticSect.find((tile) => tile.x === 3 && tile.y === 6)?.kind).toBe("water");
   });
 
+  it("adds landmark variants for iconic north-route maps", () => {
+    const swordMound = buildAdventureTerrainTiles({
+      mapId: "7",
+      theme: "North",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const floatingIsles = buildAdventureTerrainTiles({
+      mapId: "61",
+      theme: "North",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const chainBridge = buildAdventureTerrainTiles({
+      mapId: "62",
+      theme: "North",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const swordWall = buildAdventureTerrainTiles({
+      mapId: "92",
+      theme: "North",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(swordMound.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(swordMound.find((tile) => tile.x === 5 && tile.y === 5)?.kind).toBe("accent");
+    expect(floatingIsles.find((tile) => tile.x === 3 && tile.y === 4)?.kind).toBe("path");
+    expect(floatingIsles.find((tile) => tile.x === 8 && tile.y === 7)?.kind).toBe("path");
+    expect(chainBridge.find((tile) => tile.x === 2 && tile.y === 6)?.kind).toBe("path");
+    expect(chainBridge.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("path");
+    expect(swordWall.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("accent");
+    expect(swordWall.find((tile) => tile.x === 5 && tile.y === 6)?.kind).toBe("path");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");
