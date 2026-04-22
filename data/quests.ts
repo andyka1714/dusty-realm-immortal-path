@@ -150,6 +150,66 @@ export const QUESTS: Record<string, Quest> = {
             ]
         }
     },
+    'sect_sword_task_02': {
+        id: 'sect_sword_task_02',
+        type: QuestType.Side,
+        title: '劍宗歷練：鎮劍靈',
+        description: '巡山統領命你前往築基地界，鎮壓極地劍靈，穩住劍塚外溢的鋒芒。',
+        giverId: 'sect_sword_patrol_captain',
+        submitNpcId: 'sect_sword_patrol_captain',
+        prerequisiteQuestId: 'sect_sword_task_01',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.Foundation },
+            { type: 'kill', targetId: 'm32_b1', count: 1 }
+        ],
+        rewards: [
+            { exp: 2400, spiritStones: 1200 },
+            { items: [{ itemId: 'flow_light_sword', count: 1 }, { itemId: 'sword_scabbard', count: 1 }] }
+        ],
+        dialogue: {
+            start: [
+                '萬劍塚的餘勢已不足以磨你，接下來去築基地界斬那頭極地劍靈。',
+                '取其劍核回來，讓我看看你是不是只會在宗門裡耍花架子。'
+            ],
+            progress: [
+                '極地劍靈鋒芒極盛，若心志不穩，劍未出鞘便先亂了。'
+            ],
+            complete: [
+                '很好，劍核尚溫，說明你是正面斬下來的。',
+                '這對流光劍與養劍鞘歸你，往後巡山便帶著它們。'
+            ]
+        }
+    },
+    'sect_sword_task_03': {
+        id: 'sect_sword_task_03',
+        type: QuestType.Side,
+        title: '劍宗真傳：斬大鵬',
+        description: '巡山統領命你追入金丹天域，斬下金翅大鵬，為外門立威。',
+        giverId: 'sect_sword_patrol_captain',
+        submitNpcId: 'sect_sword_patrol_captain',
+        prerequisiteQuestId: 'sect_sword_task_02',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.GoldenCore },
+            { type: 'kill', targetId: 'm62_b1', count: 1 }
+        ],
+        rewards: [
+            { exp: 8200, spiritStones: 4200 },
+            { items: [{ itemId: 'azure_frost_sword', count: 1 }, { itemId: 'sword_spirit_stone', count: 1 }] }
+        ],
+        dialogue: {
+            start: [
+                '金翅大鵬橫掠雲海，已連斷我宗三條飛劍傳訊。',
+                '去，把它的金羽斬下來，你就算真正踏進劍宗真傳的門檻。'
+            ],
+            progress: [
+                '大鵬擅裂空疾襲，若只追它的影子，你永遠斬不中本體。'
+            ],
+            complete: [
+                '這根金羽夠鋒，也夠重，看來你沒辱沒凌霄劍宗。',
+                '青霜劍與劍靈石收下，往後你的劍要更快，也要更準。'
+            ]
+        }
+    },
 
     // Beast Sect
     'sect_beast_join': {
@@ -209,6 +269,66 @@ export const QUESTS: Record<string, Quest> = {
             ]
         }
     },
+    'sect_beast_task_02': {
+        id: 'sect_beast_task_02',
+        type: QuestType.Side,
+        title: '獸莊歷練：焚王骨',
+        description: '獵場監軍命你擊倒烈焰妖王，奪其妖骨，補上山莊下一批鍛體藥引。',
+        giverId: 'sect_beast_huntmaster',
+        submitNpcId: 'sect_beast_huntmaster',
+        prerequisiteQuestId: 'sect_beast_task_01',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.Foundation },
+            { type: 'kill', targetId: 'm42_b1', count: 1 }
+        ],
+        rewards: [
+            { exp: 2400, spiritStones: 1200 },
+            { items: [{ itemId: 'tiger_king_gauntlet', count: 1 }, { itemId: 'scale_shield', count: 1 }] }
+        ],
+        dialogue: {
+            start: [
+                '築基之後，光靠蠻勁沒用，你得學會怎麼把兇獸拆成自己的筋骨。',
+                '去把烈焰妖王的妖骨帶回來，我要看你夠不夠狠。'
+            ],
+            progress: [
+                '烈焰妖王火性太燥，若只會硬扛，你的骨頭會先熬不住。'
+            ],
+            complete: [
+                '妖骨焦黑卻沒碎，手法不錯。',
+                '虎王拳套和龍鱗盾拿去，下一次獵場衝陣由你開路。'
+            ]
+        }
+    },
+    'sect_beast_task_03': {
+        id: 'sect_beast_task_03',
+        type: QuestType.Side,
+        title: '獸莊真傳：壓毒體',
+        description: '獵場監軍命你鎮壓厄難毒體，驗證你是否已能以金丹之軀扛住萬厄反噬。',
+        giverId: 'sect_beast_huntmaster',
+        submitNpcId: 'sect_beast_huntmaster',
+        prerequisiteQuestId: 'sect_beast_task_02',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.GoldenCore },
+            { type: 'kill', targetId: 'm72_b1', count: 1 }
+        ],
+        rewards: [
+            { exp: 8200, spiritStones: 4200 },
+            { items: [{ itemId: 'dragon_claw', count: 1 }, { itemId: 'black_tortoise_shield', count: 1 }] }
+        ],
+        dialogue: {
+            start: [
+                '厄難毒體不是一般妖獸，它本身就是一口會擴散的災。',
+                '你若能把它壓住，才算撐得起萬獸山莊的金丹招牌。'
+            ],
+            progress: [
+                '毒域鋪開時別退，你越退，它越會把你整個人拖進去。'
+            ],
+            complete: [
+                '很好，毒血還沒滲進你的骨頭裡，表示你撐住了。',
+                '裂地龍爪和玄武盾收下，這才像山莊的真傳。'
+            ]
+        }
+    },
 
     // Mystic Sect
     'sect_mystic_join': {
@@ -265,6 +385,66 @@ export const QUESTS: Record<string, Quest> = {
             complete: [
                 "很好，靈力收放已有章法。",
                 "這卷《火羽術》秘卷你拿去參悟，往後施法當更有鋒芒。"
+            ]
+        }
+    },
+    'sect_mystic_task_02': {
+        id: 'sect_mystic_task_02',
+        type: QuestType.Side,
+        title: '仙宮歷練：平雷澤',
+        description: '外務使命你前往雷澤封區，平定雷澤領主對周遭靈脈的侵蝕。',
+        giverId: 'sect_mystic_envoy',
+        submitNpcId: 'sect_mystic_envoy',
+        prerequisiteQuestId: 'sect_mystic_task_01',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.Foundation },
+            { type: 'kill', targetId: 'm52_b1', count: 1 }
+        ],
+        rewards: [
+            { exp: 2400, spiritStones: 1200 },
+            { items: [{ itemId: 'jade_bamboo_staff', count: 1 }, { itemId: 'elemental_fan', count: 1 }] }
+        ],
+        dialogue: {
+            start: [
+                '靈湖只是入門，真正麻煩的是雷澤領主對外圍靈脈的反覆抽擊。',
+                '去把那股雷潮壓平，順便證明你不只會在丹房裡念法訣。'
+            ],
+            progress: [
+                '雷澤領主術速極快，若只想和它對轟，神識會先亂掉。'
+            ],
+            complete: [
+                '靈脈的躁動已經平下來了，做得很好。',
+                '玉竹杖與五羽扇歸你，往後外務巡查便由你接手。'
+            ]
+        }
+    },
+    'sect_mystic_task_03': {
+        id: 'sect_mystic_task_03',
+        type: QuestType.Side,
+        title: '仙宮真傳：覆海息潮',
+        description: '外務使命你擊潰覆海蛟龍，封回外海靈潮，驗證你是否已能獨當一面。',
+        giverId: 'sect_mystic_envoy',
+        submitNpcId: 'sect_mystic_envoy',
+        prerequisiteQuestId: 'sect_mystic_task_02',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.GoldenCore },
+            { type: 'kill', targetId: 'm82_b1', count: 1 }
+        ],
+        rewards: [
+            { exp: 8200, spiritStones: 4200 },
+            { items: [{ itemId: 'phoenix_feather_staff', count: 1 }, { itemId: 'yin_yang_mirror', count: 1 }] }
+        ],
+        dialogue: {
+            start: [
+                '覆海蛟龍引潮翻海，仙宮外圍的護陣已被它撞了三次。',
+                '去把潮勢息掉，你回來時，我就按真傳標準重新看你。'
+            ],
+            progress: [
+                '龍潮一層疊一層，別只看表面的浪，你要截的是底下的靈脈走向。'
+            ],
+            complete: [
+                '潮勢已息，外海的霧線也退了。',
+                '鳳羽杖和陰陽鏡收好，往後你出去，別再自稱外門弟子。'
             ]
         }
     }

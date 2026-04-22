@@ -64,6 +64,20 @@ export const SWORD_SECT_NPCS: NPC[] = [
         ]
     },
     {
+        id: 'sect_sword_patrol_captain',
+        name: '巡山統領',
+        symbol: '巡',
+        type: NPCType.Quest,
+        x: 28,
+        y: 15,
+        description: '負責外門巡山與劍塚歷練調度。',
+        questIds: ['sect_sword_task_02', 'sect_sword_task_03'],
+        dialogue: [
+            '想在劍宗往上走，就別只在山門口轉圈。',
+            '能不能扛事，看你拿回來的是劍核還是藉口。'
+        ]
+    },
+    {
         id: 'sect_sword_wanbao',
         name: '萬寶閣',
         symbol: '商',
@@ -112,6 +126,20 @@ export const BEAST_SECT_NPCS: NPC[] = [
         ]
     },
     {
+        id: 'sect_beast_huntmaster',
+        name: '獵場監軍',
+        symbol: '獵',
+        type: NPCType.Quest,
+        x: 28,
+        y: 15,
+        description: '統管山莊獵場與血戰試煉。',
+        questIds: ['sect_beast_task_02', 'sect_beast_task_03'],
+        dialogue: [
+            '山莊不要只會吼的弟子，要的是敢進獵場的狠人。',
+            '你若能把獵物拖回來，我就當你有資格再往前。'
+        ]
+    },
+    {
         id: 'sect_beast_wanbao',
         name: '萬寶閣',
         symbol: '商',
@@ -157,6 +185,20 @@ export const MYSTIC_SECT_NPCS: NPC[] = [
         dialogue: [
             "道法自然，萬物皆有靈。感悟天地，方能御使五行。",
             "修仙修心，心若冰清，天塌不驚。"
+        ]
+    },
+    {
+        id: 'sect_mystic_envoy',
+        name: '外務使',
+        symbol: '使',
+        type: NPCType.Quest,
+        x: 28,
+        y: 15,
+        description: '負責仙宮外務巡查與靈脈回報。',
+        questIds: ['sect_mystic_task_02', 'sect_mystic_task_03'],
+        dialogue: [
+            '仙宮弟子若只會閉門清修，外頭的靈潮遲早會壓回山門。',
+            '出去走一趟，把該平的事平掉，再來和我談真傳。'
         ]
     },
     {
