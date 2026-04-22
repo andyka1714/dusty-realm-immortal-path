@@ -756,6 +756,42 @@ describe("adventureTerrainPixelization", () => {
     expect(valleyGate.find((tile) => tile.x === 8 && tile.y === 4)?.kind).toBe("accent");
   });
 
+  it("adds landmark variants for mid west-route maps", () => {
+    const beastNest = buildAdventureTerrainTiles({
+      mapId: "40",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const manEaterJungle = buildAdventureTerrainTiles({
+      mapId: "41",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const flameWastes = buildAdventureTerrainTiles({
+      mapId: "42",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(beastNest.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(beastNest.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("path");
+    expect(manEaterJungle.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("path");
+    expect(manEaterJungle.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("path");
+    expect(manEaterJungle.find((tile) => tile.x === 8 && tile.y === 6)?.kind).toBe("accent");
+    expect(flameWastes.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("water");
+    expect(flameWastes.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("water");
+    expect(flameWastes.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("water");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");
