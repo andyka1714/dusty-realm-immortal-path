@@ -596,6 +596,53 @@ describe("adventureTerrainPixelization", () => {
     expect(lightningCliff.find((tile) => tile.x === 7 && tile.y === 6)?.kind).toBe("path");
   });
 
+  it("adds landmark variants for qi-phase route side maps", () => {
+    const swordTrial = buildAdventureTerrainTiles({
+      mapId: "5",
+      theme: "North",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const swordValley = buildAdventureTerrainTiles({
+      mapId: "6",
+      theme: "North",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const beastForest = buildAdventureTerrainTiles({
+      mapId: "15",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const herbValley = buildAdventureTerrainTiles({
+      mapId: "25",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(swordTrial.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(swordTrial.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("path");
+    expect(swordValley.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("path");
+    expect(swordValley.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("path");
+    expect(swordValley.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("accent");
+    expect(beastForest.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(beastForest.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("accent");
+    expect(beastForest.find((tile) => tile.x === 8 && tile.y === 4)?.kind).toBe("accent");
+    expect(herbValley.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(herbValley.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("accent");
+    expect(herbValley.find((tile) => tile.x === 8 && tile.y === 4)?.kind).toBe("accent");
+  });
+
   it("adds landmark variants for iconic east-route maps", () => {
     const trialMaze = buildAdventureTerrainTiles({
       mapId: "24",
