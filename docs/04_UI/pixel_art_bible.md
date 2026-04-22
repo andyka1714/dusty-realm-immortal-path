@@ -294,6 +294,7 @@ prototype 不要求：
 - 玩家、NPC、怪物與戰鬥中的文字 avatar 維持現狀，不改成 prototype 的文字 token 牌
 - combat overlay、target marker、status cue 與 portal marker 仍沿用正式版視覺語言
 - `仙緣鎮 / 宗門` 這類安全地圖的 terrain 應偏向結構化鋪地、空地與連接路徑，而不是完全隨機野外 patch
+- `仙緣鎮` 這個起點安全區也應保有市集十字、中央廣場與四角攤位的背景骨架，讓玩家一進正式主流程就知道這裡是城鎮，不是 generic hub
 - `Sea / Thunder / Immortal / Ultimate` 這類高境界 theme 也應有明確 macro shape，例如水帶、雷脈、天階或中央壇域，而不是只換 palette
 - `Void / Spirit / Sky / Dark` 也應有可辨識的 terrain anchor，例如裂隙、法壇、登階與污池，避免高境界背景退化成只有調色的抽象底圖
 - 有 Boss spawn 的正式地圖應在背景層自帶小型 arena / altar / battlefield clearing，讓戰鬥場域感來自 terrain，而不是改 entity token

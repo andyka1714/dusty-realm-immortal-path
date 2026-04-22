@@ -86,6 +86,51 @@ describe("adventureTerrainPixelization", () => {
     expect(sectHub.find((tile) => tile.x === 8 && tile.y === 6)?.kind).toBe("path");
   });
 
+  it("adds a market-square landmark for the origin town", () => {
+    const originTown = buildAdventureTerrainTiles({
+      mapId: "0",
+      theme: "Center",
+      width: 12,
+      height: 12,
+      portals: [
+        {
+          x: 0,
+          y: 6,
+          targetMapId: "1",
+          targetX: 0,
+          targetY: 0,
+          label: "前往 [北郊荒徑]",
+          dir: "North",
+        },
+        {
+          x: 6,
+          y: 0,
+          targetMapId: "10",
+          targetX: 0,
+          targetY: 0,
+          label: "前往 [西郊密林]",
+          dir: "West",
+        },
+        {
+          x: 11,
+          y: 6,
+          targetMapId: "20",
+          targetX: 0,
+          targetY: 0,
+          label: "前往 [東郊靈田]",
+          dir: "East",
+        },
+      ],
+      npcs: [{ x: 6, y: 6 }],
+    });
+
+    expect(originTown.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("accent");
+    expect(originTown.find((tile) => tile.x === 8 && tile.y === 4)?.kind).toBe("accent");
+    expect(originTown.find((tile) => tile.x === 4 && tile.y === 8)?.kind).toBe("accent");
+    expect(originTown.find((tile) => tile.x === 8 && tile.y === 8)?.kind).toBe("accent");
+    expect(originTown.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+  });
+
   it("keeps wild-route themes from generating town-like straight corridors", () => {
     const eastWild = buildAdventureTerrainTiles({
       mapId: "25",

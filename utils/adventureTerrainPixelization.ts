@@ -576,7 +576,12 @@ const buildThemeMacroZones = ({
   }
 
   if (theme === "Center") {
-    if (mapId === "120") {
+    if (mapId === "0") {
+      forcedZones.push({ x: centerX - 2, y: centerY - 2, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 2, y: centerY - 2, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX - 2, y: centerY + 2, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 2, y: centerY + 2, radius: 0, kind: "accent" });
+    } else if (mapId === "120") {
       forcedZones.push({ x: centerX, y: centerY, radius: 0, kind: "path" });
       forcedZones.push({ x: centerX - 2, y: centerY, radius: 0, kind: "accent" });
       forcedZones.push({ x: centerX + 2, y: centerY, radius: 0, kind: "accent" });
