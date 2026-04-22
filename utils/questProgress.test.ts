@@ -24,6 +24,22 @@ const levelAndKillQuest: Quest = {
   },
 };
 
+const dialogueOnlyQuest: Quest = {
+  id: 'test_dialogue_submit',
+  type: QuestType.Side,
+  title: '對話任務',
+  description: '只要求到指定 NPC 對話',
+  giverId: 'guide_npc',
+  submitNpcId: 'blacksmith_npc',
+  requirements: [{ type: 'dialogue', targetNpcId: 'blacksmith_npc' }],
+  rewards: [],
+  dialogue: {
+    start: ['start'],
+    progress: ['progress'],
+    complete: ['complete'],
+  },
+};
+
 describe('questProgress', () => {
   it('does not mark a level+kill quest ready before the kill target is defeated', () => {
     const ready = resolveQuestReadinessAtNpc({
@@ -59,5 +75,27 @@ describe('questProgress', () => {
     });
 
     expect(update).toBeNull();
+  });
+
+  it('marks a dialogue-only quest ready at the correct NPC', () => {
+    const ready = resolveQuestReadinessAtNpc({
+      quest: dialogueOnlyQuest,
+      activeQuestState: { progress: 0, isReadyToComplete: false },
+      majorRealm: MajorRealm.Mortal,
+      npcId: 'blacksmith_npc',
+    });
+
+    expect(ready).toBe(true);
+  });
+
+  it('does not mark a dialogue-only quest ready at the wrong NPC', () => {
+    const ready = resolveQuestReadinessAtNpc({
+      quest: dialogueOnlyQuest,
+      activeQuestState: { progress: 0, isReadyToComplete: false },
+      majorRealm: MajorRealm.Mortal,
+      npcId: 'guide_npc',
+    });
+
+    expect(ready).toBe(false);
   });
 });
