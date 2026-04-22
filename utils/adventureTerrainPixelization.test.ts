@@ -640,6 +640,43 @@ describe("adventureTerrainPixelization", () => {
     expect(lakeMeadow.find((tile) => tile.x === 6 && tile.y === 3)?.kind).toBe("water");
   });
 
+  it("adds landmark variants for mid east-route maps", () => {
+    const darkForest = buildAdventureTerrainTiles({
+      mapId: "50",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const miasmaBog = buildAdventureTerrainTiles({
+      mapId: "51",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const thunderMarsh = buildAdventureTerrainTiles({
+      mapId: "52",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(darkForest.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("path");
+    expect(darkForest.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("path");
+    expect(darkForest.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("accent");
+    expect(miasmaBog.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("water");
+    expect(miasmaBog.find((tile) => tile.x === 8 && tile.y === 6)?.kind).toBe("water");
+    expect(miasmaBog.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("accent");
+    expect(thunderMarsh.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("water");
+    expect(thunderMarsh.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("accent");
+    expect(thunderMarsh.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("accent");
+  });
+
   it("adds landmark variants for iconic west-route maps", () => {
     const bodyPool = buildAdventureTerrainTiles({
       mapId: "14",
