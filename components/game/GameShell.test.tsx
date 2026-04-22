@@ -96,9 +96,12 @@ describe("GameShell", () => {
     const markup = createMarkup(true);
 
     expect(markup).toContain("荒山藥圃");
+    expect(markup).toContain("山野機緣");
+    expect(markup).toContain('data-modal-eyebrow="山野機緣"');
     expect(markup).toContain("Encounter · 11 歲");
     expect(markup).toContain("採摘靈草");
     expect(markup).toContain("凝神觀想");
-    expect(markup).toContain("FATED ENCOUNTER");
+    expect(markup).toContain("聚靈草 x2");
+    expect(markup).toContain("煉丹材料");
   });
 });

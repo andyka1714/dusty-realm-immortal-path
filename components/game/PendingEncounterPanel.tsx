@@ -3,6 +3,19 @@ import { Sparkles } from "lucide-react";
 import { EncounterEvent } from "../../data/encounters";
 import { PendingEncounter } from "../../types";
 
+const cueToneLabels = {
+  steady: "穩定",
+  risky: "高風險",
+  costly: "需付出",
+} as const;
+
+const cueTagClassNames = {
+  resource: "border-emerald-500/25 bg-emerald-500/10 text-emerald-100",
+  cost: "border-rose-500/25 bg-rose-500/10 text-rose-100",
+  benefit: "border-amber-500/25 bg-amber-500/10 text-amber-100",
+  risk: "border-orange-500/25 bg-orange-500/10 text-orange-100",
+} as const;
+
 interface PendingEncounterPanelProps {
   event: EncounterEvent;
   pending: PendingEncounter;
@@ -28,6 +41,20 @@ export const PendingEncounterPanel: React.FC<PendingEncounterPanelProps> = ({
         </div>
       </div>
       <p className="mt-4 text-sm leading-7 text-stone-300">{event.description}</p>
+      {(event.presentation?.categoryLabel || event.presentation?.routeLabel) && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {event.presentation?.categoryLabel && (
+            <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[11px] tracking-[0.22em] text-amber-100">
+              {event.presentation.categoryLabel}
+            </span>
+          )}
+          {event.presentation?.routeLabel && (
+            <span className="rounded-full border border-stone-700 bg-stone-900/80 px-3 py-1 text-[11px] tracking-[0.22em] text-stone-200">
+              {event.presentation.routeLabel}
+            </span>
+          )}
+        </div>
+      )}
     </div>
 
     <div className="space-y-3">
@@ -39,6 +66,21 @@ export const PendingEncounterPanel: React.FC<PendingEncounterPanelProps> = ({
         >
           <div className="text-base font-medium text-stone-100">{choice.label}</div>
           <div className="mt-2 text-sm text-stone-400">{choice.description}</div>
+          {choice.cue && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="rounded-full border border-stone-700 bg-stone-900/80 px-2.5 py-1 text-[11px] tracking-[0.18em] text-stone-300">
+                {cueToneLabels[choice.cue.tone ?? "steady"]}
+              </span>
+              {choice.cue.tags?.map((tag) => (
+                <span
+                  key={`${choice.id}-${tag.kind}-${tag.label}`}
+                  className={`rounded-full border px-2.5 py-1 text-[11px] tracking-[0.16em] ${cueTagClassNames[tag.kind]}`}
+                >
+                  {tag.label}
+                </span>
+              ))}
+            </div>
+          )}
         </button>
       ))}
     </div>

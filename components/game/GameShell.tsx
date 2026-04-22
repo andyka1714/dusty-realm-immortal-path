@@ -102,6 +102,8 @@ export const GameShell: React.FC = () => {
   const pendingEncounterEvent = pendingEncounter
     ? getEncounterEventById(pendingEncounter.eventId)
     : null;
+  const pendingEncounterEyebrow =
+    pendingEncounterEvent?.presentation?.categoryLabel ?? "FATED ENCOUNTER";
 
   return (
     <div className="relative h-[100dvh] w-screen overflow-hidden bg-black font-serif text-stone-100">
@@ -148,7 +150,7 @@ export const GameShell: React.FC = () => {
           isOpen={Boolean(pendingEncounter && pendingEncounterEvent)}
           onClose={() => undefined}
           title={pendingEncounterEvent?.title ?? "機緣乍現"}
-          eyebrow="FATED ENCOUNTER"
+          eyebrow={pendingEncounterEyebrow}
           size="medium"
         >
           {pendingEncounter && pendingEncounterEvent && (
