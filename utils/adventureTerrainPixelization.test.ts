@@ -643,6 +643,76 @@ describe("adventureTerrainPixelization", () => {
     expect(herbValley.find((tile) => tile.x === 8 && tile.y === 4)?.kind).toBe("accent");
   });
 
+  it("adds landmark variants for nascent soul route companion maps", () => {
+    const frozenCave = buildAdventureTerrainTiles({
+      mapId: "90",
+      theme: "North",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const auroraRealm = buildAdventureTerrainTiles({
+      mapId: "91",
+      theme: "North",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const giantSpine = buildAdventureTerrainTiles({
+      mapId: "100",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const dragonBloodPool = buildAdventureTerrainTiles({
+      mapId: "101",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const soulSea = buildAdventureTerrainTiles({
+      mapId: "110",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const ghostDomain = buildAdventureTerrainTiles({
+      mapId: "111",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(frozenCave.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("water");
+    expect(frozenCave.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("water");
+    expect(frozenCave.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
+    expect(auroraRealm.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("path");
+    expect(auroraRealm.find((tile) => tile.x === 8 && tile.y === 6)?.kind).toBe("path");
+    expect(auroraRealm.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("accent");
+    expect(giantSpine.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("accent");
+    expect(giantSpine.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("accent");
+    expect(giantSpine.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("path");
+    expect(dragonBloodPool.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("water");
+    expect(dragonBloodPool.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("accent");
+    expect(dragonBloodPool.find((tile) => tile.x === 8 && tile.y === 4)?.kind).toBe("accent");
+    expect(soulSea.find((tile) => tile.x === 2 && tile.y === 6)?.kind).toBe("water");
+    expect(soulSea.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("water");
+    expect(soulSea.find((tile) => tile.x === 6 && tile.y === 4)?.kind).toBe("accent");
+    expect(ghostDomain.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("accent");
+    expect(ghostDomain.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("water");
+    expect(ghostDomain.find((tile) => tile.x === 8 && tile.y === 6)?.kind).toBe("water");
+  });
+
   it("adds landmark variants for iconic east-route maps", () => {
     const trialMaze = buildAdventureTerrainTiles({
       mapId: "24",
