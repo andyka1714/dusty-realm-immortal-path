@@ -525,6 +525,41 @@ describe("adventureTerrainPixelization", () => {
     expect(swordWall.find((tile) => tile.x === 5 && tile.y === 6)?.kind).toBe("path");
   });
 
+  it("adds landmark variants for early north-route gateway maps", () => {
+    const barrenTrail = buildAdventureTerrainTiles({
+      mapId: "1",
+      theme: "North",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const swordPass = buildAdventureTerrainTiles({
+      mapId: "2",
+      theme: "North",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const mountainFoot = buildAdventureTerrainTiles({
+      mapId: "3",
+      theme: "North",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(barrenTrail.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("path");
+    expect(barrenTrail.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("path");
+    expect(swordPass.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(swordPass.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("accent");
+    expect(swordPass.find((tile) => tile.x === 8 && tile.y === 4)?.kind).toBe("accent");
+    expect(mountainFoot.find((tile) => tile.x === 4 && tile.y === 3)?.kind).toBe("path");
+    expect(mountainFoot.find((tile) => tile.x === 8 && tile.y === 3)?.kind).toBe("path");
+  });
+
   it("adds landmark variants for iconic east-route maps", () => {
     const trialMaze = buildAdventureTerrainTiles({
       mapId: "24",

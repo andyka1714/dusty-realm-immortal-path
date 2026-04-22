@@ -611,7 +611,20 @@ const buildThemeMacroZones = ({
   }
 
   if (theme === "North") {
-    if (mapId === "7") {
+    if (mapId === "1") {
+      pushVerticalLine(forcedZones, centerX, 2, height - 3, "path");
+      forcedZones.push({ x: centerX - 1, y: centerY - 1, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 1, y: centerY + 1, radius: 0, kind: "accent" });
+    } else if (mapId === "2") {
+      pushVerticalLine(forcedZones, centerX, 2, height - 3, "path");
+      pushVerticalLine(forcedZones, centerX - 2, 2, height - 3, "accent");
+      pushVerticalLine(forcedZones, centerX + 2, 2, height - 3, "accent");
+    } else if (mapId === "3") {
+      pushVerticalLine(forcedZones, centerX, 2, height - 3, "path");
+      pushHorizontalLine(forcedZones, centerY - 3, centerX - 2, centerX + 2, "path");
+      forcedZones.push({ x: centerX - 2, y: centerY, radius: 0, kind: "accent" });
+      forcedZones.push({ x: centerX + 2, y: centerY, radius: 0, kind: "accent" });
+    } else if (mapId === "7") {
       forcedZones.push({ x: centerX, y: centerY, radius: 0, kind: "path" });
       forcedZones.push({ x: centerX - 1, y: centerY - 1, radius: 0, kind: "accent" });
       forcedZones.push({ x: centerX + 1, y: centerY - 1, radius: 0, kind: "accent" });
