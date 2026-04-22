@@ -65,3 +65,4 @@
 - `add-workshop-and-event-loops` 已完成，正式收口 `Workshop` recipe loop、pending event flow 與高境界 multiplier regression 對齊
 - `evaluate-pixel-art-vertical-slice` 已完成，正式收口 `Adventure` representative pixel-art vertical slice、web/mobile 驗證與效能 budget 基線
 - `update-adventure-terrain-pixelization` 已完成，正式收口 `AdventureStage` terrain/background 像素化整合，並維持角色 / 玩家 / 怪物表現現狀
+- `add-sect-midgame-progression` 已開案，承接三宗 `築基 -> 金丹` 宗門中期成長線、quest NPC 與 regression 收口
