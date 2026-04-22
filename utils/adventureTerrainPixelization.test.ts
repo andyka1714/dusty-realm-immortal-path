@@ -525,6 +525,50 @@ describe("adventureTerrainPixelization", () => {
     expect(swordWall.find((tile) => tile.x === 5 && tile.y === 6)?.kind).toBe("path");
   });
 
+  it("adds landmark variants for iconic east-route maps", () => {
+    const trialMaze = buildAdventureTerrainTiles({
+      mapId: "24",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const spiritLake = buildAdventureTerrainTiles({
+      mapId: "26",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const immortalIsland = buildAdventureTerrainTiles({
+      mapId: "81",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const voidRift = buildAdventureTerrainTiles({
+      mapId: "112",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(trialMaze.find((tile) => tile.x === 3 && tile.y === 3)?.kind).toBe("path");
+    expect(trialMaze.find((tile) => tile.x === 8 && tile.y === 8)?.kind).toBe("path");
+    expect(spiritLake.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("water");
+    expect(spiritLake.find((tile) => tile.x === 5 && tile.y === 5)?.kind).toBe("accent");
+    expect(immortalIsland.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(immortalIsland.find((tile) => tile.x === 3 && tile.y === 6)?.kind).toBe("water");
+    expect(voidRift.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("accent");
+    expect(voidRift.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("accent");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");
