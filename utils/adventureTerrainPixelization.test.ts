@@ -560,6 +560,42 @@ describe("adventureTerrainPixelization", () => {
     expect(mountainFoot.find((tile) => tile.x === 8 && tile.y === 3)?.kind).toBe("path");
   });
 
+  it("adds landmark variants for mid north-route maps", () => {
+    const snowline = buildAdventureTerrainTiles({
+      mapId: "30",
+      theme: "North",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const iceCanyon = buildAdventureTerrainTiles({
+      mapId: "31",
+      theme: "North",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const lightningCliff = buildAdventureTerrainTiles({
+      mapId: "32",
+      theme: "North",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(snowline.find((tile) => tile.x === 2 && tile.y === 6)?.kind).toBe("path");
+    expect(snowline.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("path");
+    expect(iceCanyon.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("path");
+    expect(iceCanyon.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("path");
+    expect(iceCanyon.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("water");
+    expect(lightningCliff.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("accent");
+    expect(lightningCliff.find((tile) => tile.x === 5 && tile.y === 6)?.kind).toBe("path");
+    expect(lightningCliff.find((tile) => tile.x === 7 && tile.y === 6)?.kind).toBe("path");
+  });
+
   it("adds landmark variants for iconic east-route maps", () => {
     const trialMaze = buildAdventureTerrainTiles({
       mapId: "24",
