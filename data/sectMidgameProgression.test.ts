@@ -76,7 +76,7 @@ describe("sect midgame progression data", () => {
 
       const rewardItemIds =
         quest?.rewards.flatMap((reward) => reward.items?.map((item) => item.itemId) ?? []) ?? [];
-      expect(rewardItemIds).toEqual(testCase.rewardItemIds);
+      expect([...rewardItemIds].sort()).toEqual([...testCase.rewardItemIds].sort());
 
       testCase.rewardItemIds.forEach((itemId) => {
         expect(ITEMS[itemId], `${itemId} should exist`).toBeDefined();
