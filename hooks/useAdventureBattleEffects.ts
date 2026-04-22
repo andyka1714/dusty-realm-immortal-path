@@ -2,6 +2,8 @@ import { MutableRefObject, useEffect } from 'react';
 import { AppDispatch } from '../store/store';
 import { addVisualEffect, closeBattleReport, resolveBattle } from '../store/slices/adventureSlice';
 import { addLog } from '../store/slices/logSlice';
+import { updateQuestProgress } from '../store/slices/questSlice';
+import { QUESTS } from '../data/quests';
 import { ActiveMonster, Enemy, ProfessionType, BaseAttributes, MajorRealm, SpiritRootId, Coordinate } from '../types';
 import { EquipmentStats } from '../types';
 import {
@@ -14,6 +16,7 @@ import {
   runWorldCombatControllerFrame,
 } from '../utils/battleSystem';
 import { getFormalSkillByName } from '../data/skills';
+import { resolveQuestKillProgressOnEnemyDefeat } from '../utils/questProgress';
 import { getEnemyEngagementRange, getGridDistance } from '../utils/worldCombat';
 
 type UseWorldCombatControllerEffectParams = {
@@ -184,6 +187,7 @@ type UseAutoBattleReplayControllerEffectParams = {
   currentEnemy: Enemy | null;
   currentEnemyInstanceId: string | null;
   activeMonsters: ActiveMonster[];
+  activeQuests: Record<string, { progress: number; isReadyToComplete: boolean }>;
   completedQuests: string[];
   playerPosition: Coordinate;
   attributes: BaseAttributes;
@@ -212,6 +216,7 @@ export const useAutoBattleReplayControllerEffect = ({
   currentEnemy,
   currentEnemyInstanceId,
   activeMonsters,
+  activeQuests,
   completedQuests,
   playerPosition,
   attributes,
@@ -304,6 +309,30 @@ export const useAutoBattleReplayControllerEffect = ({
 
       dispatch(resolveBattle(finishResultPlan.battleResult));
 
+      if (finishResultPlan.battleResult.won && currentEnemy) {
+        Object.entries(activeQuests).forEach(([questId, activeQuestState]) => {
+          const quest = QUESTS[questId];
+          if (!quest) return;
+
+          const update = resolveQuestKillProgressOnEnemyDefeat({
+            quest,
+            activeQuestState,
+            defeatedEnemyId: currentEnemy.id,
+            majorRealm,
+          });
+
+          if (!update) return;
+
+          dispatch(
+            updateQuestProgress({
+              questId,
+              progress: update.progress,
+              isReady: update.isReadyToComplete,
+            })
+          );
+        });
+      }
+
       if (finishResultPlan.rewardManifest) {
         applyBattleRewardApplicationPlan(
           createBattleRewardApplicationPlan({
@@ -332,6 +361,7 @@ export const useAutoBattleReplayControllerEffect = ({
     currentEnemy,
     currentEnemyInstanceId,
     activeMonsters,
+    activeQuests,
     completedQuests,
     playerPosition,
     attributes,

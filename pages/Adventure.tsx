@@ -1294,6 +1294,7 @@ export const Adventure: React.FC<AdventureProps> = ({
     currentEnemy,
     currentEnemyInstanceId,
     activeMonsters,
+    activeQuests,
     completedQuests,
     playerPosition,
     attributes,

@@ -13,6 +13,7 @@ import { Modal } from '../Modal';
 import { GameSection } from '../game/GameSection';
 import { GameTooltip } from '../game/GameTooltip';
 import { getFormalSkill } from '../../data/skills';
+import { resolveQuestReadinessAtNpc } from '../../utils/questProgress';
 import {
     getSkillManualAcquisitionTierLabel,
     getSkillManualCategoryLabel,
@@ -108,38 +109,21 @@ export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
             
             // Check readiness logic
             const activeState = activeQuests[submitQuestId];
-            
-            // Auto-complete 'dialogue' requirements interacting with this NPC
-            const dialogueReq = quest.requirements.find(r => 
-                r.type === 'dialogue' && 
-                (
-                    r.targetNpcId === npc.id || 
-                    (!r.targetNpcId && (quest.submitNpcId === npc.id || quest.giverId === npc.id))
-                )
-            );
 
-            // Check 'level' requirements
-            const levelReq = quest.requirements.find(r => r.type === 'level');
-            let levelMet = true;
-            if (levelReq && levelReq.minRealm !== undefined) {
-                levelMet = majorRealm >= levelReq.minRealm;
-            }
-            
             let isReady = activeState.isReadyToComplete;
-            
-            // If prerequisites for this interaction are met, mark as ready
-            // Note: If there are multiple requirements (e.g. Kill + Talk + Level), this simple logic might be insufficient. 
-            // But for now, assuming these quests are simple single-stage or disjoint.
-            // Actually, we should check if ALL non-dialogue requirements are met? 
-            // For 'sect_sword_join', only 'level' exists.
-            
-            if ((dialogueReq || (levelReq && levelMet)) && !isReady) {
-                 // Double check if ALL requirements are met?
-                 // For now, lenient dispatch.
-                 if (levelMet) {
-                     isReady = true;
-                     dispatch(updateQuestProgress({ questId: submitQuestId, isReady: true }));
-                 }
+
+            if (!isReady) {
+                const computedReady = resolveQuestReadinessAtNpc({
+                    quest,
+                    activeQuestState: activeState,
+                    majorRealm,
+                    npcId: npc.id,
+                });
+
+                if (computedReady) {
+                    isReady = true;
+                    dispatch(updateQuestProgress({ questId: submitQuestId, isReady: true }));
+                }
             }
 
             if (isReady) {
