@@ -31,11 +31,20 @@ export interface EncounterChoiceReward {
   logMessage: string;
 }
 
+export interface EncounterChoiceCue {
+  tone?: "steady" | "risky" | "costly";
+  tags?: Array<{
+    kind: "resource" | "cost" | "benefit" | "risk";
+    label: string;
+  }>;
+}
+
 export interface EncounterChoice {
   id: string;
   label: string;
   description: string;
   reward: EncounterChoiceReward;
+  cue?: EncounterChoiceCue;
 }
 
 export interface EncounterEvent {
@@ -80,6 +89,13 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
         id: "gather_herbs",
         label: "採摘靈草",
         description: "趁藥圃尚未崩壞前，搶收可用靈草。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "聚靈草 x2" },
+            { kind: "benefit", label: "煉丹材料" },
+          ],
+        },
         reward: {
           items: [{ itemId: "spirit_herb", count: 2 }],
           logMessage: "你趁亂採下兩株聚靈草，正好能補進丹爐。",
@@ -89,6 +105,13 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
         id: "meditate",
         label: "凝神觀想",
         description: "不動其物，只觀察殘留靈機，化作一段短暫感悟。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "穩定修為" },
+            { kind: "risk", label: "低風險" },
+          ],
+        },
         reward: {
           experience: 80,
           logMessage: "你在殘破藥圃中靜坐片刻，藥香化作一段溫和修為。",
@@ -107,6 +130,13 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
         id: "buy_ore",
         label: "購下礦材",
         description: "拿出靈石，換取他手中尚未完全冷卻的玄鐵礦。",
+        cue: {
+          tone: "costly",
+          tags: [
+            { kind: "cost", label: "耗費靈石" },
+            { kind: "resource", label: "玄鐵礦 x2" },
+          ],
+        },
         reward: {
           items: [{ itemId: "iron_ore", count: 2 }],
           spiritStones: -20,
@@ -117,9 +147,260 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
         id: "seek_advice",
         label: "請教鍛法",
         description: "不買礦，單純請他指點如何避開凡鐵脆裂。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "妖狼牙 x1" },
+            { kind: "benefit", label: "煉器起手" },
+          ],
+        },
         reward: {
           items: [{ itemId: "wolf_fang", count: 1 }],
           logMessage: "匠人隨手丟來一枚妖狼牙，示意你拿去試手。",
+        },
+      },
+    ],
+  },
+  sword_edge_resonance: {
+    id: "sword_edge_resonance",
+    title: "劍痕共鳴",
+    description: "一截古劍殘痕在山風中自鳴，只有習慣以劍意校正呼吸的修士能聽懂其中節奏。",
+    minRealm: MajorRealm.Foundation,
+    maxRealm: MajorRealm.GoldenCore,
+    selector: {
+      eligibleProfessions: [ProfessionType.Sword],
+    },
+    presentation: {
+      categoryLabel: "職業機緣",
+      routeLabel: "劍修",
+    },
+    choices: [
+      {
+        id: "temper_edge",
+        label: "借痕養鋒",
+        description: "讓殘痕中的鋒意替你校正劍勢，補一段穩定修為。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "穩定修為" },
+            { kind: "benefit", label: "劍勢校正" },
+          ],
+        },
+        reward: {
+          experience: 2600,
+          logMessage: "你順著古劍殘痕調整呼吸，讓本來浮躁的劍勢重新沉了下來。",
+        },
+      },
+      {
+        id: "strip_shards",
+        label: "拆取劍晶",
+        description: "不求參悟，只把殘痕裡最實用的劍晶拆下帶走。",
+        cue: {
+          tone: "costly",
+          tags: [
+            { kind: "cost", label: "靈石周轉" },
+            { kind: "resource", label: "劍晶資材" },
+          ],
+        },
+        reward: {
+          spiritStones: 420,
+          logMessage: "你從殘痕中拆下幾枚劍晶，至少補了一輪養劍與洞府周轉。",
+        },
+      },
+    ],
+  },
+  body_bone_cache: {
+    id: "body_bone_cache",
+    title: "荒骨藏竅",
+    description: "一處蠻荒獸骨堆裡藏著鍛體前輩留下的骨竅標記，只有敢扛傷的體修才看得出價值。",
+    minRealm: MajorRealm.Foundation,
+    maxRealm: MajorRealm.GoldenCore,
+    selector: {
+      eligibleProfessions: [ProfessionType.Body],
+    },
+    presentation: {
+      categoryLabel: "職業機緣",
+      routeLabel: "體修",
+    },
+    choices: [
+      {
+        id: "temper_bones",
+        label: "就地鍛骨",
+        description: "借荒骨殘威鍛一次筋骨，換更扎實的肉身底盤。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "高壓鍛體" },
+            { kind: "benefit", label: "體修修為" },
+          ],
+        },
+        reward: {
+          experience: 2550,
+          logMessage: "你頂著荒骨殘威鍛體一輪，筋骨雖痛，氣血卻更沉更穩了。",
+        },
+      },
+      {
+        id: "salvage_marrow",
+        label: "刮取骨髓",
+        description: "不扛鍛體風險，改收走堆裡還能用的蠻荒骨髓。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "骨髓資材" },
+            { kind: "benefit", label: "後續鍛體" },
+          ],
+        },
+        reward: {
+          spiritStones: 380,
+          logMessage: "你小心刮取荒骨中的殘髓，替後續鍛體與周轉留下一筆底子。",
+        },
+      },
+    ],
+  },
+  mage_ink_resonance: {
+    id: "mage_ink_resonance",
+    title: "靈墨鳴紋",
+    description: "半空浮現一片靈墨鳴紋，只有擅長推演術式的法修能在字跡散去前讀完其中脈絡。",
+    minRealm: MajorRealm.Foundation,
+    maxRealm: MajorRealm.GoldenCore,
+    selector: {
+      eligibleProfessions: [ProfessionType.Mage],
+    },
+    presentation: {
+      categoryLabel: "職業機緣",
+      routeLabel: "法修",
+    },
+    choices: [
+      {
+        id: "copy_runes",
+        label: "拓下靈紋",
+        description: "把最關鍵的靈紋拓入玉簡，留作往後推演術式的底稿。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "術式底稿" },
+            { kind: "benefit", label: "法修修為" },
+          ],
+        },
+        reward: {
+          experience: 2720,
+          logMessage: "你及時拓下靈墨鳴紋的主脈，讓法修前中段的術式推演順了一截。",
+        },
+      },
+      {
+        id: "sell_ink",
+        label: "收走靈墨",
+        description: "不耗時間參悟，改把靈墨殘華全部收走換成周轉資源。",
+        cue: {
+          tone: "costly",
+          tags: [
+            { kind: "resource", label: "靈墨殘華" },
+            { kind: "cost", label: "資源周轉" },
+          ],
+        },
+        reward: {
+          spiritStones: 460,
+          logMessage: "你把未散的靈墨殘華盡數收走，替洞府與術式消耗多補了一口氣。",
+        },
+      },
+    ],
+  },
+  beast_sect_blood_pit: {
+    id: "beast_sect_blood_pit",
+    title: "獸莊血池",
+    description: "萬獸山莊在外域留下一口封起來的血池，只給真正經過莊內洗禮的弟子開封。",
+    minRealm: MajorRealm.Foundation,
+    maxRealm: MajorRealm.GoldenCore,
+    selector: {
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Body],
+      requiredCompletedQuestIds: ["sect_beast_join"],
+    },
+    presentation: {
+      categoryLabel: "宗門暗線",
+      routeLabel: "萬獸山莊",
+    },
+    choices: [
+      {
+        id: "bathe_in_blood",
+        label: "引血淬體",
+        description: "直接承下血池殘威，把體魄往上再推一段。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "高風險鍛體" },
+            { kind: "benefit", label: "肉身修為" },
+          ],
+        },
+        reward: {
+          experience: 3200,
+          logMessage: "你頂著血池殘威強行淬體，疼痛幾乎撕裂筋骨，卻也換來更硬的肉身底盤。",
+        },
+      },
+      {
+        id: "seal_vials",
+        label: "封存血髓",
+        description: "不在現場淬體，改把血池中最穩定的血髓封進玉瓶帶走。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "血髓資材" },
+            { kind: "benefit", label: "宗門周轉" },
+          ],
+        },
+        reward: {
+          spiritStones: 760,
+          logMessage: "你封起幾瓶穩定血髓，讓後續鍛體與洞府周轉多了一條更穩的路。",
+        },
+      },
+    ],
+  },
+  mystic_sect_star_cache: {
+    id: "mystic_sect_star_cache",
+    title: "星儀秘匣",
+    description: "縹緲仙宮的外務使在邊境藏了一只星儀秘匣，只讓真正進過仙宮門牆的弟子開封。",
+    minRealm: MajorRealm.Foundation,
+    maxRealm: MajorRealm.GoldenCore,
+    selector: {
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Mage],
+      requiredCompletedQuestIds: ["sect_mystic_join"],
+    },
+    presentation: {
+      categoryLabel: "宗門暗線",
+      routeLabel: "縹緲仙宮",
+    },
+    choices: [
+      {
+        id: "read_star_chart",
+        label: "參讀星圖",
+        description: "現場解讀星儀秘匣中的推演星圖，把它化成更扎實的術式節奏。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "星圖推演" },
+            { kind: "benefit", label: "法修修為" },
+          ],
+        },
+        reward: {
+          experience: 3340,
+          logMessage: "你在星儀秘匣前推演星圖，讓法修中期的術式節奏和洞府規劃更容易接起來。",
+        },
+      },
+      {
+        id: "take_astral_ink",
+        label: "收起星墨",
+        description: "不在原地耗時推演，改把秘匣內的星墨與靈資全部帶走。",
+        cue: {
+          tone: "costly",
+          tags: [
+            { kind: "resource", label: "星墨資材" },
+            { kind: "cost", label: "法寶周轉" },
+          ],
+        },
+        reward: {
+          spiritStones: 820,
+          logMessage: "你把秘匣裡封存的星墨與靈資一併帶走，讓後續法寶與洞府周轉寬鬆了不少。",
         },
       },
     ],

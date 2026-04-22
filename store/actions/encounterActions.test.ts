@@ -35,4 +35,32 @@ describe("encounter actions", () => {
     expect(state.encounter.pendingEvent).toBeNull();
     expect(state.logs.logs[0]?.message).toContain("聚靈草");
   });
+
+  it("resolves a costly choice while exposing its reward preview cue in encounter data", () => {
+    const store = configureStore({
+      reducer: {
+        character: characterReducer,
+        inventory: inventoryReducer,
+        logs: logReducer,
+        encounter: encounterReducer,
+      },
+    });
+
+    store.dispatch(initializeCharacter({ name: "韓立", gender: Gender.Male }));
+    store.dispatch(
+      setPendingEncounter({
+        eventId: "wandering_smith",
+        year: 11,
+      })
+    );
+
+    store.dispatch(resolvePendingEncounterChoice("buy_ore"));
+
+    const state = store.getState();
+    const oreSlot = state.inventory.items.find((slot) => slot.itemId === "iron_ore");
+
+    expect(oreSlot?.count).toBe(2);
+    expect(state.character.spiritStones).toBe(-20);
+    expect(state.encounter.pendingEvent).toBeNull();
+  });
 });

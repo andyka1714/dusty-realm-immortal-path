@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MajorRealm, ProfessionType } from "../types";
-import { getAvailableEncounterEvents, pickEncounterEvent } from "./encounters";
+import { ENCOUNTER_EVENTS, getAvailableEncounterEvents, pickEncounterEvent } from "./encounters";
 
 describe("encounter selector", () => {
   it("filters once-per-run events after resolution", () => {
@@ -12,6 +12,11 @@ describe("encounter selector", () => {
     });
 
     expect(available.map((event) => event.id)).not.toContain("sword_sect_patrol_cache");
+  });
+
+  it("defines explicit route labels for sect and profession specific events", () => {
+    expect(ENCOUNTER_EVENTS.sword_sect_patrol_cache.presentation?.routeLabel).toBe("凌霄劍宗");
+    expect(ENCOUNTER_EVENTS.mage_ink_resonance.presentation?.routeLabel).toBe("法修");
   });
 
   it("hides sect-specific events until the matching profession and quest are present", () => {
@@ -47,6 +52,16 @@ describe("encounter selector", () => {
         (event) => event.id === "sword_sect_patrol_cache"
       )
     ).toBe(false);
+  });
+
+  it("tags costly choices with reward preview cues", () => {
+    const buyOre = ENCOUNTER_EVENTS.wandering_smith.choices.find(
+      (choice) => choice.id === "buy_ore"
+    );
+
+    expect(buyOre?.cue?.tags).toEqual(
+      expect.arrayContaining([{ kind: "cost", label: "耗費靈石" }])
+    );
   });
 
   it("uses weights when picking from the filtered pool", () => {
