@@ -129,6 +129,29 @@ describe("persisted state migration", () => {
     );
   });
 
+  it("sanitizes malformed encounter payloads while keeping valid resolved ids", () => {
+    const migrated = migratePersistedState({
+      schemaVersion: 2,
+      current: createPersistedState({
+        encounter: {
+          pendingEvent: {
+            eventId: 123,
+            year: "11",
+          },
+          resolvedEventIds: ["wandering_smith", 42, null],
+        },
+      }),
+      soul: {
+        totalMerit: 20,
+      },
+    } as PersistedState);
+
+    expect(migrated.encounter).toMatchObject({
+      pendingEvent: null,
+      resolvedEventIds: ["wandering_smith"],
+    });
+  });
+
   it("drops broken manual-like ids that cannot be mapped to a formal manual", () => {
     const migrated = migratePersistedState(
       createPersistedState({

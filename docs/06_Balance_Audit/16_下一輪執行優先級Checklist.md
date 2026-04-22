@@ -66,4 +66,4 @@
 - `evaluate-pixel-art-vertical-slice` 已完成，正式收口 `Adventure` representative pixel-art vertical slice、web/mobile 驗證與效能 budget 基線
 - `update-adventure-terrain-pixelization` 已完成，正式收口 `AdventureStage` terrain/background 像素化整合，並維持角色 / 玩家 / 怪物表現現狀
 - `add-sect-midgame-progression` 已完成，正式收口三宗 `築基 -> 金丹` 宗門中期成長線、quest NPC 與 regression
-- `sync-base-spec-persistence-truth` 已開案，承接 base specs、persisted state migration 與正式 UI / loop 基線真相收口
+- `sync-base-spec-persistence-truth` 已完成，正式收口 base specs、persisted state migration 與正式 UI / loop 基線真相

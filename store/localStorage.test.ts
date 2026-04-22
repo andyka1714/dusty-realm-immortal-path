@@ -150,4 +150,35 @@ describe("loadState", () => {
     expect(parsed.current.encounter.pendingEvent.eventId).toBe("herb_garden");
     expect(parsed.soul.totalMerit).toBe(80);
   });
+
+  it("drops malformed encounter payloads when hydrating a versioned envelope", () => {
+    storage.set(
+      KEY,
+      JSON.stringify({
+        schemaVersion: 2,
+        current: {
+          character: {},
+          logs: {},
+          adventure: {},
+          inventory: { items: [] },
+          workshop: {},
+          quest: {},
+          encounter: {
+            pendingEvent: {
+              eventId: "herb_garden",
+            },
+            resolvedEventIds: ["wandering_smith", 99],
+          },
+        },
+        soul: {},
+      })
+    );
+
+    const loaded = loadState();
+
+    expect(loaded?.encounter).toMatchObject({
+      pendingEvent: null,
+      resolvedEventIds: ["wandering_smith"],
+    });
+  });
 });

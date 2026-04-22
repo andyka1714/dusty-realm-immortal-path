@@ -8,6 +8,10 @@ import logReducer, { addLog } from "../slices/logSlice";
 import adventureReducer, { enterMap } from "../slices/adventureSlice";
 import workshopReducer, { upgradeAlchemy } from "../slices/workshopSlice";
 import questReducer, { acceptQuest } from "../slices/questSlice";
+import encounterReducer, {
+  markEncounterResolved,
+  setPendingEncounter,
+} from "../slices/encounterSlice";
 import soulReducer, {
   enterReincarnationHall,
   toggleRebirthPerk,
@@ -29,6 +33,7 @@ const createTestStore = (preloadedState?: Parameters<typeof configureStore>[0]["
       inventory: inventoryReducer,
       workshop: workshopReducer,
       quest: questReducer,
+      encounter: encounterReducer,
       soul: soulReducer,
     },
     preloadedState,
@@ -48,6 +53,8 @@ const createReincarnationReadyStore = () => {
   seeded.dispatch(enterMap({ mapId: "0", startX: 1, startY: 1 }));
   seeded.dispatch(upgradeAlchemy());
   seeded.dispatch(acceptQuest({ questId: "tutorial_01" }));
+  seeded.dispatch(setPendingEncounter({ eventId: "herb_garden", year: 350 }));
+  seeded.dispatch(markEncounterResolved("wandering_smith"));
 
   return createTestStore({
     ...seeded.getState(),
@@ -113,7 +120,13 @@ describe("reincarnation actions", () => {
     expect(state.logs.logs).toHaveLength(1);
     expect(state.logs.logs[0].message).toContain("新一世");
     expect(state.adventure.currentMapId).toBeNull();
+    expect(state.inventory.items).toHaveLength(1);
     expect(state.quest.activeQuests).toEqual({});
+    expect(state.workshop.alchemyLevel).toBe(1);
+    expect(state.workshop.blacksmithLevel).toBe(1);
+    expect(state.workshop.craftedRecipeCounts).toEqual({});
+    expect(state.encounter.pendingEvent).toBeNull();
+    expect(state.encounter.resolvedEventIds).toEqual([]);
     expect(state.soul.flowStep).toBe("inactive");
     expect(state.soul.lifetimeStats.totalReincarnations).toBe(1);
   });
