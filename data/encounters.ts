@@ -1,4 +1,25 @@
-import { MajorRealm, type PendingEncounter } from "../types";
+import { MajorRealm, ProfessionType, type PendingEncounter } from "../types";
+
+export type EncounterRepeatPolicy = "repeatable" | "once_per_run";
+
+export interface EncounterSelectorContext {
+  majorRealm: MajorRealm;
+  profession: ProfessionType;
+  completedQuestIds: string[];
+  resolvedEventIds: string[];
+}
+
+export interface EncounterEventSelector {
+  weight?: number;
+  repeatPolicy?: EncounterRepeatPolicy;
+  eligibleProfessions?: ProfessionType[];
+  requiredCompletedQuestIds?: string[];
+}
+
+export interface EncounterEventPresentation {
+  categoryLabel?: string;
+  routeLabel?: string;
+}
 
 export interface EncounterChoiceReward {
   experience?: number;
@@ -24,18 +45,21 @@ export interface EncounterEvent {
   minRealm: MajorRealm;
   maxRealm: MajorRealm;
   choices: EncounterChoice[];
+  selector?: EncounterEventSelector;
+  presentation?: EncounterEventPresentation;
 }
 
 const createSingleRealmEncounterEvent = (
   event: Omit<EncounterEvent, "minRealm" | "maxRealm"> & { realm: MajorRealm }
-): EncounterEvent => ({
-  id: event.id,
-  title: event.title,
-  description: event.description,
-  minRealm: event.realm,
-  maxRealm: event.realm,
-  choices: event.choices,
-});
+): EncounterEvent => {
+  const { realm, ...encounterEvent } = event;
+
+  return {
+    ...encounterEvent,
+    minRealm: realm,
+    maxRealm: realm,
+  };
+};
 
 export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
   herb_garden: {
@@ -44,6 +68,13 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
     description: "你在山霧間發現一片被陣紋遮掩的荒廢藥圃，藥香仍未完全散去。",
     minRealm: MajorRealm.Mortal,
     maxRealm: MajorRealm.GoldenCore,
+    selector: {
+      repeatPolicy: "once_per_run",
+    },
+    presentation: {
+      categoryLabel: "山野機緣",
+      routeLabel: "荒山藥圃",
+    },
     choices: [
       {
         id: "gather_herbs",
@@ -98,6 +129,13 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
     title: "裂神藥潮",
     description: "化神地脈滲出一波裂神藥潮，若出手夠快，足以補起下一段丹火底盤。",
     realm: MajorRealm.SpiritSevering,
+    selector: {
+      weight: 1,
+    },
+    presentation: {
+      categoryLabel: "化神通用",
+      routeLabel: "裂神藥潮",
+    },
     choices: [
       {
         id: "refine_now",
@@ -124,6 +162,10 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
     title: "神遊法旨",
     description: "一頁古老法旨自虛空落下，記著前輩如何以洞府與丹火補平化神期的修為裂口。",
     realm: MajorRealm.SpiritSevering,
+    presentation: {
+      categoryLabel: "化神機緣",
+      routeLabel: "神遊法旨",
+    },
     choices: [
       {
         id: "copy_formula",
@@ -141,6 +183,42 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
         reward: {
           experience: 150000,
           logMessage: "你在法旨前靜坐良久，對化神洞府與丹火並進的節奏有了更清楚把握。",
+        },
+      },
+    ],
+  }),
+  sword_sect_patrol_cache: createSingleRealmEncounterEvent({
+    id: "sword_sect_patrol_cache",
+    title: "巡山暗匣",
+    description: "凌霄劍宗巡山統領在化神外域留下了一只暗匣，只讓真正扛過外門歷練的劍修開啟。",
+    realm: MajorRealm.SpiritSevering,
+    selector: {
+      weight: 9,
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Sword],
+      requiredCompletedQuestIds: ["sect_sword_join"],
+    },
+    presentation: {
+      categoryLabel: "劍宗進階",
+      routeLabel: "凌霄劍宗",
+    },
+    choices: [
+      {
+        id: "claim_cache",
+        label: "取走匣中劍紋",
+        description: "直接帶走暗匣裡的劍紋與宗門靈資，補齊下一段養劍節奏。",
+        reward: {
+          spiritStones: 1800,
+          logMessage: "你打開巡山暗匣，取走其中封存的劍紋與靈資，讓化神期的養劍節奏順了不少。",
+        },
+      },
+      {
+        id: "study_inscription",
+        label: "參悟巡山劍訣",
+        description: "不急著搬走資材，先把暗匣內壁留下的巡山劍訣刻入識海。",
+        reward: {
+          experience: 168000,
+          logMessage: "你在巡山暗匣前靜坐參悟，把凌霄劍宗的巡山劍訣化成了一段紮實修為。",
         },
       },
     ],
@@ -464,22 +542,73 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
 
 export const getEncounterEventById = (eventId: string) => ENCOUNTER_EVENTS[eventId];
 
-export const getAvailableEncounterEvents = (realm: MajorRealm) =>
-  Object.values(ENCOUNTER_EVENTS).filter(
-    (event) => realm >= event.minRealm && realm <= event.maxRealm
-  );
+const isEncounterEligible = (
+  event: EncounterEvent,
+  context: EncounterSelectorContext
+) => {
+  if (context.majorRealm < event.minRealm || context.majorRealm > event.maxRealm) {
+    return false;
+  }
+
+  if (
+    event.selector?.repeatPolicy === "once_per_run" &&
+    context.resolvedEventIds.includes(event.id)
+  ) {
+    return false;
+  }
+
+  if (
+    event.selector?.eligibleProfessions &&
+    event.selector.eligibleProfessions.length > 0 &&
+    !event.selector.eligibleProfessions.includes(context.profession)
+  ) {
+    return false;
+  }
+
+  if (
+    event.selector?.requiredCompletedQuestIds &&
+    !event.selector.requiredCompletedQuestIds.every((questId) =>
+      context.completedQuestIds.includes(questId)
+    )
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
+export const getAvailableEncounterEvents = (context: EncounterSelectorContext) =>
+  Object.values(ENCOUNTER_EVENTS).filter((event) => isEncounterEligible(event, context));
 
 export const pickEncounterEvent = (
-  realm: MajorRealm,
+  context: EncounterSelectorContext,
   roll = Math.random()
 ): EncounterEvent | null => {
-  const available = getAvailableEncounterEvents(realm);
+  const available = getAvailableEncounterEvents(context);
   if (available.length === 0) {
     return null;
   }
 
-  const index = Math.min(available.length - 1, Math.floor(roll * available.length));
-  return available[index];
+  const totalWeight = available.reduce(
+    (sum, event) => sum + Math.max(0, event.selector?.weight ?? 1),
+    0
+  );
+
+  if (totalWeight <= 0) {
+    const normalizedRoll = Math.min(Math.max(roll, 0), 0.9999999999999999);
+    return available[Math.floor(normalizedRoll * available.length)];
+  }
+
+  let threshold = Math.min(Math.max(roll, 0), 0.9999999999999999) * totalWeight;
+
+  for (const event of available) {
+    threshold -= Math.max(0, event.selector?.weight ?? 1);
+    if (threshold < 0) {
+      return event;
+    }
+  }
+
+  return available[available.length - 1];
 };
 
 export const getEncounterChoice = (

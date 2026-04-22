@@ -109,11 +109,17 @@ const processSingleYear = (dispatch: any, getState: () => RootState, year: numbe
         }));
 
     } else {
-        const encounterState = getState().encounter;
+        const state = getState();
+        const encounterState = state.encounter;
         if (!encounterState.pendingEvent) {
             const encounterRoll = Math.random();
             if (encounterRoll < 0.05) {
-                const encounter = pickEncounterEvent(realm, Math.random());
+                const encounter = pickEncounterEvent({
+                    majorRealm: realm,
+                    profession: state.character.profession,
+                    completedQuestIds: state.quest.completedQuests,
+                    resolvedEventIds: encounterState.resolvedEventIds,
+                }, Math.random());
                 if (encounter) {
                     dispatch(setPendingEncounter({ eventId: encounter.id, year }));
                     dispatch(addLog({
