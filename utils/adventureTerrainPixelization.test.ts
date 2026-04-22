@@ -447,6 +447,40 @@ describe("adventureTerrainPixelization", () => {
     expect(thunderPool.find((tile) => tile.x === 5 && tile.y === 5)?.kind).toBe("accent");
   });
 
+  it("keeps sect maps visually distinct even when they share the same theme", () => {
+    const swordSect = buildAdventureTerrainTiles({
+      mapId: "4",
+      theme: "Sect",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const beastSect = buildAdventureTerrainTiles({
+      mapId: "13",
+      theme: "Sect",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const mysticSect = buildAdventureTerrainTiles({
+      mapId: "23",
+      theme: "Sect",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(swordSect.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("path");
+    expect(swordSect.find((tile) => tile.x === 5 && tile.y === 5)?.kind).toBe("accent");
+    expect(beastSect.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(beastSect.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
+    expect(mysticSect.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(mysticSect.find((tile) => tile.x === 3 && tile.y === 6)?.kind).toBe("water");
+  });
+
   it("resolves distinct palettes for east, sect, and ultimate maps", () => {
     const east = resolveAdventureTerrainPalette("East");
     const sect = resolveAdventureTerrainPalette("Sect");
