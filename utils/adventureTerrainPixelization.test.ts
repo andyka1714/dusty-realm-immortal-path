@@ -143,14 +143,14 @@ describe("adventureTerrainPixelization", () => {
       npcs: [],
     });
 
-    expect(seaRoute.find((tile) => tile.x === 2 && tile.y === 6)?.kind).toBe("water");
-    expect(seaRoute.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("water");
+    expect(seaRoute.find((tile) => tile.x === 2 && tile.y === 4)?.kind).toBe("water");
+    expect(seaRoute.find((tile) => tile.x === 9 && tile.y === 8)?.kind).toBe("water");
     expect(thunderRoute.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("accent");
     expect(thunderRoute.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("accent");
     expect(immortalRoute.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
     expect(immortalRoute.find((tile) => tile.x === 3 && tile.y === 6)?.kind).toBe("path");
-    expect(ultimateRoute.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
-    expect(ultimateRoute.find((tile) => tile.x === 5 && tile.y === 5)?.kind).toBe("accent");
+    expect(ultimateRoute.find((tile) => tile.x === 6 && tile.y === 3)?.kind).toBe("path");
+    expect(ultimateRoute.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("accent");
   });
 
   it("adds dedicated terrain anchors for void, spirit, sky, and dark routes", () => {
@@ -190,15 +190,16 @@ describe("adventureTerrainPixelization", () => {
     expect(voidRoute.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("water");
     expect(voidRoute.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("water");
     expect(voidRoute.find((tile) => tile.x === 5 && tile.y === 5)?.kind).toBe("accent");
-    expect(spiritRoute.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
-    expect(spiritRoute.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
-    expect(spiritRoute.find((tile) => tile.x === 8 && tile.y === 6)?.kind).toBe("accent");
+    expect(spiritRoute.find((tile) => tile.x === 2 && tile.y === 4)?.kind).toBe("path");
+    expect(spiritRoute.find((tile) => tile.x === 9 && tile.y === 8)?.kind).toBe("path");
+    expect(spiritRoute.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("accent");
     expect(skyRoute.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("path");
     expect(skyRoute.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("path");
-    expect(skyRoute.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("accent");
+    expect(skyRoute.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("path");
+    expect(skyRoute.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("accent");
     expect(darkRoute.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("water");
-    expect(darkRoute.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
-    expect(darkRoute.find((tile) => tile.x === 8 && tile.y === 6)?.kind).toBe("accent");
+    expect(darkRoute.find((tile) => tile.x === 2 && tile.y === 4)?.kind).toBe("accent");
+    expect(darkRoute.find((tile) => tile.x === 9 && tile.y === 8)?.kind).toBe("accent");
   });
 
   it("builds a terrain arena around boss spawns without changing entity rendering", () => {
@@ -252,7 +253,8 @@ describe("adventureTerrainPixelization", () => {
       npcs: [],
     });
 
-    expect(emperorPalace.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(emperorPalace.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("accent");
+    expect(emperorPalace.find((tile) => tile.x === 6 && tile.y === 3)?.kind).toBe("path");
     expect(outerRing.find((tile) => tile.x === 3 && tile.y === 6)?.kind).toBe("path");
     expect(outerRing.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("path");
     expect(riftRoute.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("water");
@@ -388,8 +390,9 @@ describe("adventureTerrainPixelization", () => {
       npcs: [],
     });
 
-    expect(spiritCity.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
-    expect(spiritCity.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
+    expect(spiritCity.find((tile) => tile.x === 2 && tile.y === 4)?.kind).toBe("path");
+    expect(spiritCity.find((tile) => tile.x === 9 && tile.y === 8)?.kind).toBe("path");
+    expect(spiritCity.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("accent");
     expect(spiritCore.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
     expect(spiritCore.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("accent");
     expect(spiritCore.find((tile) => tile.x === 8 && tile.y === 8)?.kind).toBe("accent");
@@ -415,8 +418,9 @@ describe("adventureTerrainPixelization", () => {
       npcs: [],
     });
 
-    expect(endlessSea.find((tile) => tile.x === 2 && tile.y === 6)?.kind).toBe("water");
-    expect(endlessSea.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("water");
+    expect(endlessSea.find((tile) => tile.x === 2 && tile.y === 4)?.kind).toBe("water");
+    expect(endlessSea.find((tile) => tile.x === 9 && tile.y === 8)?.kind).toBe("water");
+    expect(endlessSea.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
     expect(loneBeacon.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
     expect(loneBeacon.find((tile) => tile.x === 5 && tile.y === 5)?.kind).toBe("accent");
     expect(loneBeacon.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("water");
@@ -770,6 +774,68 @@ describe("adventureTerrainPixelization", () => {
     expect(mirageSea.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("water");
     expect(mirageSea.find((tile) => tile.x === 8 && tile.y === 4)?.kind).toBe("water");
     expect(mirageSea.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+  });
+
+  it("adds landmark variants for ascension mainline maps", () => {
+    const spiritCity = buildAdventureTerrainTiles({
+      mapId: "140",
+      theme: "Spirit",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const endlessSea = buildAdventureTerrainTiles({
+      mapId: "150",
+      theme: "Sea",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const ascensionStair = buildAdventureTerrainTiles({
+      mapId: "151",
+      theme: "Sky",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const tribulationFront = buildAdventureTerrainTiles({
+      mapId: "160",
+      theme: "Dark",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const originPalace = buildAdventureTerrainTiles({
+      mapId: "180",
+      theme: "Ultimate",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(spiritCity.find((tile) => tile.x === 2 && tile.y === 4)?.kind).toBe("path");
+    expect(spiritCity.find((tile) => tile.x === 9 && tile.y === 8)?.kind).toBe("path");
+    expect(spiritCity.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("accent");
+    expect(endlessSea.find((tile) => tile.x === 2 && tile.y === 4)?.kind).toBe("water");
+    expect(endlessSea.find((tile) => tile.x === 9 && tile.y === 8)?.kind).toBe("water");
+    expect(endlessSea.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
+    expect(endlessSea.find((tile) => tile.x === 8 && tile.y === 6)?.kind).toBe("accent");
+    expect(ascensionStair.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("path");
+    expect(ascensionStair.find((tile) => tile.x === 8 && tile.y === 8)?.kind).toBe("path");
+    expect(ascensionStair.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("accent");
+    expect(tribulationFront.find((tile) => tile.x === 2 && tile.y === 4)?.kind).toBe("accent");
+    expect(tribulationFront.find((tile) => tile.x === 9 && tile.y === 8)?.kind).toBe("accent");
+    expect(tribulationFront.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("water");
+    expect(originPalace.find((tile) => tile.x === 6 && tile.y === 3)?.kind).toBe("path");
+    expect(originPalace.find((tile) => tile.x === 3 && tile.y === 6)?.kind).toBe("path");
+    expect(originPalace.find((tile) => tile.x === 9 && tile.y === 6)?.kind).toBe("path");
+    expect(originPalace.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("path");
+    expect(originPalace.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("accent");
   });
 
   it("adds landmark variants for iconic east-route maps", () => {
