@@ -182,8 +182,14 @@ export interface ReincarnationPerk {
   name: string;
   description: string;
   cost: number;
+  category?: "attribute" | "resource" | "legacy";
+  unlockRequirement?: {
+    minHighestRealm?: MajorRealm;
+    minReincarnations?: number;
+  };
   statBonuses?: Partial<BaseAttributes>;
   spiritStoneBonus?: number;
+  heirloomSlotBonus?: number;
 }
 
 export interface RebirthConfig {

@@ -96,6 +96,25 @@ describe("reincarnation actions", () => {
     expect(battleDeathStore.getState().soul.pendingLifeReview?.cause).toBe("battle");
   });
 
+  it("supports voluntary life review while the current run is still alive", () => {
+    const store = createReincarnationReadyStore();
+    const seededState = store.getState();
+    const voluntaryStore = createTestStore({
+      ...seededState,
+      character: {
+        ...seededState.character,
+        isDead: false,
+      },
+    });
+
+    voluntaryStore.dispatch(startLifeReviewFromCurrentRun("voluntary"));
+
+    expect(voluntaryStore.getState().soul.pendingLifeReview?.cause).toBe(
+      "voluntary"
+    );
+    expect(voluntaryStore.getState().soul.flowStep).toBe("life_review");
+  });
+
   it("rebuilds a fresh current run while keeping soul progression", () => {
     const store = createReincarnationReadyStore();
 

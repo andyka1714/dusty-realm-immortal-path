@@ -181,4 +181,45 @@ describe("loadState", () => {
       resolvedEventIds: ["wandering_smith"],
     });
   });
+
+  it("hydrates older soul planner data into the new perk and heirloom rules", () => {
+    storage.set(
+      KEY,
+      JSON.stringify({
+        schemaVersion: 2,
+        current: {
+          character: {},
+          logs: {},
+          adventure: {},
+          inventory: { items: [] },
+          workshop: {},
+          quest: {},
+          encounter: {
+            pendingEvent: null,
+            resolvedEventIds: [],
+          },
+        },
+        soul: {
+          totalMerit: 300,
+          lifetimeStats: {
+            highestRealmEver: MajorRealm.Mortal,
+            highestAgeYears: 90,
+            totalDeaths: 1,
+            totalReincarnations: 0,
+          },
+          unlockedPerkIds: ["rebirth_extra_heirloom_slot"],
+          rebirthConfig: {
+            selectedPerkIds: ["rebirth_extra_heirloom_slot"],
+            selectedHeirloomIds: ["blade", "manual"],
+          },
+        },
+      })
+    );
+
+    const loaded = loadState();
+
+    expect(loaded?.soul.unlockedPerkIds).not.toContain("rebirth_extra_heirloom_slot");
+    expect(loaded?.soul.rebirthConfig.selectedPerkIds).toEqual([]);
+    expect(loaded?.soul.rebirthConfig.selectedHeirloomIds).toEqual(["manual"]);
+  });
 });

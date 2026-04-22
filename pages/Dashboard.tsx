@@ -29,7 +29,7 @@ import { GameHintBubble } from '../components/game/GameHintBubble';
 import { ReincarnationFlow } from '../components/game/ReincarnationFlow';
 import { GameSection } from '../components/game/GameSection';
 import { GameTooltip } from '../components/game/GameTooltip';
-import { Play, ChevronsUp, Moon, Info, AlertTriangle, Zap, Lock } from 'lucide-react';
+import { Play, ChevronsUp, Moon, Info, AlertTriangle, Zap, Lock, RefreshCw } from 'lucide-react';
 import { MajorRealm, SpiritRootId, SpiritRootType } from '../types';
 import { calculateSeclusionCost, getBaseCultivationRate, getGatheringMultiplier, getManualCultivateCooldown, getPassiveCultivationRate } from '../utils/cultivation';
 import { DEFAULT_REINCARNATION_PERKS } from '../utils/reincarnation';
@@ -273,38 +273,50 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
   const unlockedRebirthPerks = DEFAULT_REINCARNATION_PERKS.filter((perk) =>
     soul.unlockedPerkIds.includes(perk.id)
   );
+  const isReincarnationFlowActive =
+    Boolean(soul.pendingLifeReview) &&
+    (soul.flowStep === "life_review" || soul.flowStep === "hall");
+  const canVoluntarilyReincarnate =
+    !isDead &&
+    majorRealm >= MajorRealm.Foundation &&
+    soul.flowStep === "inactive";
+
+  const handleVoluntaryReincarnation = () => {
+    if (!canVoluntarilyReincarnate) {
+      return;
+    }
+
+    dispatch(startLifeReviewFromCurrentRun("voluntary"));
+  };
+
+  if (isReincarnationFlowActive && soul.pendingLifeReview) {
+    return (
+      <ReincarnationFlow
+        flowStep={soul.flowStep}
+        summary={soul.pendingLifeReview}
+        totalMerit={soul.totalMerit}
+        lifetimeStats={soul.lifetimeStats}
+        unlockedPerks={unlockedRebirthPerks}
+        config={soul.rebirthConfig}
+        onEnterHall={() => dispatch(enterReincarnationHall())}
+        onTogglePerk={(perkId) => dispatch(toggleRebirthPerk(perkId))}
+        onToggleHeirloom={(heirloomId) =>
+          dispatch(toggleSelectedHeirloom(heirloomId))
+        }
+        onSelectSpiritRoot={(nextSpiritRootId) =>
+          dispatch(
+            setRebirthSpiritRootOverride(
+              nextSpiritRootId as SpiritRootId | undefined
+            )
+          )
+        }
+        onConfirm={() => dispatch(completeRebirthFromHall())}
+      />
+    );
+  }
 
   if (!isInitialized || isDead) {
       if (isDead) {
-          if (
-            soul.pendingLifeReview &&
-            (soul.flowStep === "life_review" || soul.flowStep === "hall")
-          ) {
-            return (
-              <ReincarnationFlow
-                flowStep={soul.flowStep}
-                summary={soul.pendingLifeReview}
-                totalMerit={soul.totalMerit}
-                lifetimeStats={soul.lifetimeStats}
-                unlockedPerks={unlockedRebirthPerks}
-                config={soul.rebirthConfig}
-                onEnterHall={() => dispatch(enterReincarnationHall())}
-                onTogglePerk={(perkId) => dispatch(toggleRebirthPerk(perkId))}
-                onToggleHeirloom={(heirloomId) =>
-                  dispatch(toggleSelectedHeirloom(heirloomId))
-                }
-                onSelectSpiritRoot={(nextSpiritRootId) =>
-                  dispatch(
-                    setRebirthSpiritRootOverride(
-                      nextSpiritRootId as SpiritRootId | undefined
-                    )
-                  )
-                }
-                onConfirm={() => dispatch(completeRebirthFromHall())}
-              />
-            );
-          }
-
           return (
               <div className="flex h-full w-full items-center justify-center p-6">
                 <div className="rounded-2xl border border-stone-800 bg-stone-900/85 px-8 py-6 text-center shadow-xl">
@@ -567,6 +579,32 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                   {isMajorBreakthrough ? "衝擊大境界" : "突破小境界"}
                 </GameHintBubble>
               </button>
+              <div className="flex-1 relative group">
+                <button
+                  onClick={handleVoluntaryReincarnation}
+                  disabled={!canVoluntarilyReincarnate}
+                  className="w-full bg-stone-800 hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed text-stone-200 py-4 rounded-lg border border-stone-700 transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden h-[120px]"
+                >
+                  <RefreshCw
+                    size={20}
+                    className={
+                      canVoluntarilyReincarnate ? "text-violet-400" : "text-stone-600"
+                    }
+                  />
+                  <span className="font-bold tracking-widest">主動坐化</span>
+                  <span className="text-[10px] text-stone-500 font-normal">
+                    {canVoluntarilyReincarnate ? "結算本世並重開下一輪" : "築基後開放"}
+                  </span>
+                </button>
+                {!canVoluntarilyReincarnate && (
+                  <GameHintBubble
+                    eyebrow="REINCARNATION"
+                    className="bottom-full left-1/2 mb-2 -translate-x-1/2"
+                  >
+                    需達築基且未處於輪迴流程中
+                  </GameHintBubble>
+                )}
+              </div>
             </GameSection>
 
             <GameSection

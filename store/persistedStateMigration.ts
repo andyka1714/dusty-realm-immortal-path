@@ -5,6 +5,10 @@ import {
 } from "../data/items/manuals";
 import { getFormalSkill } from "../data/skills";
 import { normalizeFormalSkillIds } from "../data/skills/pool";
+import {
+  getAvailableReincarnationPerks,
+  getRebirthConfigHeirloomSlotCount,
+} from "../utils/reincarnation";
 import { createInitialSoulState } from "./slices/soulSlice";
 import { createInitialEncounterState } from "./slices/encounterSlice";
 
@@ -206,6 +210,38 @@ const migratePersistedSoulState = (soul: unknown): SoulState => {
       ...initialSoul.rebirthConfig,
       ...(isRecord(soul.rebirthConfig) ? soul.rebirthConfig : {}),
     },
+  };
+
+  const unlockedPerkIds = getAvailableReincarnationPerks(
+    nextSoul.lifetimeStats
+  ).map((perk) => perk.id);
+  const selectedPerkIds = Array.isArray(nextSoul.rebirthConfig.selectedPerkIds)
+    ? nextSoul.rebirthConfig.selectedPerkIds.filter(
+        (perkId): perkId is string => typeof perkId === "string"
+      )
+    : initialSoul.rebirthConfig.selectedPerkIds;
+  const selectedHeirloomIds = Array.isArray(
+    nextSoul.rebirthConfig.selectedHeirloomIds
+  )
+    ? nextSoul.rebirthConfig.selectedHeirloomIds.filter(
+        (heirloomId): heirloomId is string => typeof heirloomId === "string"
+      )
+    : initialSoul.rebirthConfig.selectedHeirloomIds;
+  const validSelectedPerkIds = selectedPerkIds.filter((perkId) =>
+    unlockedPerkIds.includes(perkId)
+  );
+  const clampedHeirloomIds = selectedHeirloomIds.slice(
+    -getRebirthConfigHeirloomSlotCount({
+      ...nextSoul.rebirthConfig,
+      selectedPerkIds: validSelectedPerkIds,
+    })
+  );
+
+  nextSoul.unlockedPerkIds = unlockedPerkIds;
+  nextSoul.rebirthConfig = {
+    ...nextSoul.rebirthConfig,
+    selectedPerkIds: validSelectedPerkIds,
+    selectedHeirloomIds: clampedHeirloomIds,
   };
 
   return nextSoul;

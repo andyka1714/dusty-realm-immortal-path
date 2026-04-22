@@ -13,7 +13,9 @@ import {
   calculateAgeMerit,
   calculateLifeReviewSummary,
   calculateRealmMerit,
+  getAvailableReincarnationPerks,
   getRebirthConfigCost,
+  getRebirthConfigHeirloomSlotCount,
 } from "./reincarnation";
 
 describe("reincarnation utils", () => {
@@ -73,5 +75,46 @@ describe("reincarnation utils", () => {
     });
 
     expect(cost).toBeGreaterThan(DEFAULT_REINCARNATION_PERKS[0].cost);
+  });
+
+  it("unlocks advanced reincarnation perks from lifetime milestones instead of exposing the full catalog immediately", () => {
+    const baselinePerks = getAvailableReincarnationPerks({
+      highestRealmEver: MajorRealm.Mortal,
+      highestAgeYears: 90,
+      totalDeaths: 1,
+      totalReincarnations: 0,
+    });
+    const advancedPerks = getAvailableReincarnationPerks({
+      highestRealmEver: MajorRealm.NascentSoul,
+      highestAgeYears: 620,
+      totalDeaths: 4,
+      totalReincarnations: 2,
+    });
+
+    expect(baselinePerks.map((perk) => perk.id)).toEqual([
+      "rebirth_root_bone",
+      "rebirth_comprehension",
+      "rebirth_spirit_stones",
+    ]);
+    expect(advancedPerks.map((perk) => perk.id)).toContain("rebirth_physique");
+    expect(advancedPerks.map((perk) => perk.id)).toContain(
+      "rebirth_extra_heirloom_slot"
+    );
+  });
+
+  it("derives heirloom slot count from the selected planner perks", () => {
+    expect(
+      getRebirthConfigHeirloomSlotCount({
+        selectedPerkIds: [],
+        selectedHeirloomIds: [],
+      })
+    ).toBe(1);
+
+    expect(
+      getRebirthConfigHeirloomSlotCount({
+        selectedPerkIds: ["rebirth_extra_heirloom_slot"],
+        selectedHeirloomIds: [],
+      })
+    ).toBe(2);
   });
 });

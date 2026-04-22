@@ -8,7 +8,9 @@ import {
 } from "../../types";
 import {
   DEFAULT_REINCARNATION_PERKS,
+  getAvailableReincarnationPerks,
   getRebirthConfigCost,
+  getRebirthConfigHeirloomSlotCount,
 } from "../../utils/reincarnation";
 
 export const createInitialSoulState = (): SoulState => ({
@@ -20,7 +22,12 @@ export const createInitialSoulState = (): SoulState => ({
     totalDeaths: 0,
     totalReincarnations: 0,
   },
-  unlockedPerkIds: DEFAULT_REINCARNATION_PERKS.map((perk) => perk.id),
+  unlockedPerkIds: getAvailableReincarnationPerks({
+    highestRealmEver: MajorRealm.Mortal,
+    highestAgeYears: 0,
+    totalDeaths: 0,
+    totalReincarnations: 0,
+  }).map((perk) => perk.id),
   heirloomVault: [],
   pendingLifeReview: null,
   rebirthConfig: {
@@ -31,6 +38,14 @@ export const createInitialSoulState = (): SoulState => ({
 
 const canAffordConfig = (state: SoulState, config: RebirthConfig) =>
   getRebirthConfigCost(config) <= state.totalMerit;
+
+const clampSelectedHeirlooms = (
+  config: RebirthConfig,
+  slotLimit = getRebirthConfigHeirloomSlotCount(config)
+): RebirthConfig => ({
+  ...config,
+  selectedHeirloomIds: config.selectedHeirloomIds.slice(-slotLimit),
+});
 
 const soulSlice = createSlice({
   name: "soul",
@@ -54,6 +69,9 @@ const soulSlice = createSlice({
         summary.ageYears
       );
       state.lifetimeStats.totalDeaths += 1;
+      state.unlockedPerkIds = getAvailableReincarnationPerks(
+        state.lifetimeStats
+      ).map((perk) => perk.id);
     },
     enterReincarnationHall: (state) => {
       if (!state.pendingLifeReview) return;
@@ -71,17 +89,20 @@ const soulSlice = createSlice({
           : [...state.rebirthConfig.selectedPerkIds, action.payload],
       };
 
-      if (!hasPerk || canAffordConfig(state, nextConfig)) {
-        state.rebirthConfig = nextConfig;
+      const clampedConfig = clampSelectedHeirlooms(nextConfig);
+
+      if (!hasPerk || canAffordConfig(state, clampedConfig)) {
+        state.rebirthConfig = clampedConfig;
       }
     },
     toggleSelectedHeirloom: (state, action: PayloadAction<string>) => {
       if (state.flowStep !== "hall" || !state.pendingLifeReview) return;
 
       const hasHeirloom = state.rebirthConfig.selectedHeirloomIds.includes(action.payload);
+      const slotLimit = getRebirthConfigHeirloomSlotCount(state.rebirthConfig);
       state.rebirthConfig.selectedHeirloomIds = hasHeirloom
         ? state.rebirthConfig.selectedHeirloomIds.filter((id) => id !== action.payload)
-        : [...state.rebirthConfig.selectedHeirloomIds, action.payload].slice(0, 1);
+        : [...state.rebirthConfig.selectedHeirloomIds, action.payload].slice(-slotLimit);
     },
     setRebirthSpiritRootOverride: (
       state,

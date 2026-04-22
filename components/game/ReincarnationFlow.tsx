@@ -17,7 +17,9 @@ import {
   SpiritRootId,
 } from "../../types";
 import {
+  DEFAULT_REINCARNATION_PERKS,
   getRebirthConfigCost,
+  getRebirthConfigHeirloomSlotCount,
   getRebirthConfigSpiritStoneBonus,
   getRebirthConfigStatBonuses,
 } from "../../utils/reincarnation";
@@ -47,6 +49,23 @@ const formatAttributeBonuses = (bonuses: Record<string, number>) => {
   return Object.entries(bonuses)
     .filter(([, value]) => value > 0)
     .map(([key, value]) => `${labels[key] ?? key} +${value}`);
+};
+
+const getPerkUnlockLabel = (perk: ReincarnationPerk) => {
+  const requirement = perk.unlockRequirement;
+  if (!requirement) {
+    return "已可參悟";
+  }
+
+  const labels: string[] = [];
+  if (requirement.minHighestRealm !== undefined) {
+    labels.push(`抵達${REALM_NAMES[requirement.minHighestRealm]}後解鎖`);
+  }
+  if (requirement.minReincarnations !== undefined) {
+    labels.push(`完成${requirement.minReincarnations}次輪迴後解鎖`);
+  }
+
+  return labels.join(" / ");
 };
 
 interface LifeReviewScreenProps {
@@ -183,6 +202,7 @@ interface ReincarnationHallScreenProps {
   summary: LifeReviewSummary;
   totalMerit: number;
   unlockedPerks: ReincarnationPerk[];
+  lockedPerks: ReincarnationPerk[];
   config: RebirthConfig;
   onTogglePerk: (perkId: string) => void;
   onToggleHeirloom: (heirloomId: string) => void;
@@ -194,6 +214,7 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
   summary,
   totalMerit,
   unlockedPerks,
+  lockedPerks,
   config,
   onTogglePerk,
   onToggleHeirloom,
@@ -201,6 +222,7 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
   onConfirm,
 }) => {
   const totalCost = getRebirthConfigCost(config);
+  const heirloomSlotCount = getRebirthConfigHeirloomSlotCount(config);
   const statBonuses = formatAttributeBonuses(getRebirthConfigStatBonuses(config));
   const spiritStoneBonus = getRebirthConfigSpiritStoneBonus(config);
   const canAfford = totalCost <= totalMerit;
@@ -248,6 +270,28 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
                     );
                   })}
                 </div>
+                {lockedPerks.length > 0 && (
+                  <div className="mt-5 space-y-3">
+                    <div className="text-sm font-medium text-stone-500">尚未悟透</div>
+                    <div className="grid gap-3">
+                      {lockedPerks.map((perk) => (
+                        <div
+                          key={perk.id}
+                          className="rounded-xl border border-stone-800 bg-stone-950/45 p-4 opacity-75"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="font-medium text-stone-300">{perk.name}</span>
+                            <span className="text-sm text-stone-600">{perk.cost} 功德</span>
+                          </div>
+                          <p className="mt-2 text-sm text-stone-500">{perk.description}</p>
+                          <p className="mt-3 text-xs text-amber-300/80">
+                            {getPerkUnlockLabel(perk)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="rounded-2xl border border-stone-800 bg-stone-900/70 p-5">
@@ -287,7 +331,9 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
                   </div>
 
                   <div className="space-y-2">
-                    <div className="text-sm text-stone-400">可攜遺珍（限 1 件）</div>
+                    <div className="text-sm text-stone-400">
+                      可攜遺珍（限 {heirloomSlotCount} 件）
+                    </div>
                     {summary.eligibleHeirlooms.length > 0 ? (
                       <div className="grid gap-2">
                         {summary.eligibleHeirlooms.map((candidate) => {
@@ -418,6 +464,10 @@ export const ReincarnationFlow: React.FC<ReincarnationFlowProps> = ({
   onSelectSpiritRoot,
   onConfirm,
 }) => {
+  const lockedPerks = DEFAULT_REINCARNATION_PERKS.filter(
+    (perk) => !unlockedPerks.some((unlockedPerk) => unlockedPerk.id === perk.id)
+  );
+
   if (flowStep === "life_review") {
     return (
       <LifeReviewScreen
@@ -434,6 +484,7 @@ export const ReincarnationFlow: React.FC<ReincarnationFlowProps> = ({
       summary={summary}
       totalMerit={totalMerit}
       unlockedPerks={unlockedPerks}
+      lockedPerks={lockedPerks}
       config={config}
       onTogglePerk={onTogglePerk}
       onToggleHeirloom={onToggleHeirloom}

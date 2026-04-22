@@ -65,6 +65,43 @@ const createDashboardMarkup = (flowStep: "life_review" | "hall") => {
   );
 };
 
+const createAliveDashboardMarkup = () => {
+  const store = configureStore({
+    reducer: {
+      character: characterReducer,
+      inventory: inventoryReducer,
+      logs: logReducer,
+      adventure: adventureReducer,
+      workshop: workshopReducer,
+      quest: questReducer,
+      soul: soulReducer,
+    },
+    preloadedState: {
+      character: {
+        ...characterReducer(undefined, { type: "@@INIT" }),
+        isInitialized: true,
+        isDead: false,
+        name: "韓立",
+        gender: Gender.Male,
+        majorRealm: MajorRealm.GoldenCore,
+        age: 350 * 365,
+      },
+      inventory: inventoryReducer(undefined, { type: "@@INIT" }),
+      logs: logReducer(undefined, { type: "@@INIT" }),
+      adventure: adventureReducer(undefined, { type: "@@INIT" }),
+      workshop: workshopReducer(undefined, { type: "@@INIT" }),
+      quest: questReducer(undefined, { type: "@@INIT" }),
+      soul: soulReducer(undefined, { type: "@@INIT" }),
+    },
+  });
+
+  return renderToStaticMarkup(
+    <Provider store={store}>
+      <Dashboard />
+    </Provider>
+  );
+};
+
 describe("Dashboard reincarnation flow", () => {
   it("renders the life review summary screen", () => {
     const markup = createDashboardMarkup("life_review");
@@ -79,5 +116,11 @@ describe("Dashboard reincarnation flow", () => {
     expect(markup).toContain("輪迴大殿");
     expect(markup).toContain("先天根骨");
     expect(markup).toContain("投胎轉世");
+  });
+
+  it("shows the voluntary reincarnation entry on a living run", () => {
+    const markup = createAliveDashboardMarkup();
+
+    expect(markup).toContain("主動坐化");
   });
 });

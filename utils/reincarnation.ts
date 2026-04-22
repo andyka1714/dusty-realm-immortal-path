@@ -8,6 +8,7 @@ import {
   MajorRealm,
   RebirthConfig,
   ReincarnationPerk,
+  SoulLifetimeStats,
   type LifeEndCause,
 } from "../types";
 import { ITEMS } from "../data/items";
@@ -35,6 +36,7 @@ export const DEFAULT_REINCARNATION_PERKS: ReincarnationPerk[] = [
     name: "先天根骨",
     description: "下一世根骨 +2。",
     cost: 25,
+    category: "attribute",
     statBonuses: { rootBone: 2 },
   },
   {
@@ -42,6 +44,7 @@ export const DEFAULT_REINCARNATION_PERKS: ReincarnationPerk[] = [
     name: "靈慧早開",
     description: "下一世悟性 +2。",
     cost: 25,
+    category: "attribute",
     statBonuses: { comprehension: 2 },
   },
   {
@@ -49,7 +52,30 @@ export const DEFAULT_REINCARNATION_PERKS: ReincarnationPerk[] = [
     name: "前世餘澤",
     description: "下一世初始靈石 +150。",
     cost: 40,
+    category: "resource",
     spiritStoneBonus: 150,
+  },
+  {
+    id: "rebirth_physique",
+    name: "武魄先成",
+    description: "下一世體魄 +2。",
+    cost: 25,
+    category: "attribute",
+    unlockRequirement: {
+      minHighestRealm: MajorRealm.GoldenCore,
+    },
+    statBonuses: { physique: 2 },
+  },
+  {
+    id: "rebirth_extra_heirloom_slot",
+    name: "前塵寶匣",
+    description: "下一世可額外攜帶 1 件遺珍。",
+    cost: 80,
+    category: "legacy",
+    unlockRequirement: {
+      minHighestRealm: MajorRealm.NascentSoul,
+    },
+    heirloomSlotBonus: 1,
   },
 ];
 
@@ -147,6 +173,39 @@ export const calculateLifeReviewSummary = ({
 export const getReincarnationPerkById = (perkId: string) =>
   DEFAULT_REINCARNATION_PERKS.find((perk) => perk.id === perkId);
 
+const meetsPerkUnlockRequirement = (
+  lifetimeStats: SoulLifetimeStats,
+  perk: ReincarnationPerk
+) => {
+  const requirement = perk.unlockRequirement;
+  if (!requirement) {
+    return true;
+  }
+
+  if (
+    requirement.minHighestRealm !== undefined &&
+    lifetimeStats.highestRealmEver < requirement.minHighestRealm
+  ) {
+    return false;
+  }
+
+  if (
+    requirement.minReincarnations !== undefined &&
+    lifetimeStats.totalReincarnations < requirement.minReincarnations
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
+export const getAvailableReincarnationPerks = (
+  lifetimeStats: SoulLifetimeStats
+) =>
+  DEFAULT_REINCARNATION_PERKS.filter((perk) =>
+    meetsPerkUnlockRequirement(lifetimeStats, perk)
+  );
+
 export const getRebirthConfigCost = (config: RebirthConfig) => {
   const perkCost = config.selectedPerkIds.reduce((total, perkId) => {
     const perk = getReincarnationPerkById(perkId);
@@ -155,6 +214,13 @@ export const getRebirthConfigCost = (config: RebirthConfig) => {
 
   return perkCost + (config.spiritRootOverride ? SPIRIT_ROOT_OVERRIDE_COST : 0);
 };
+
+export const getRebirthConfigHeirloomSlotCount = (config: RebirthConfig) =>
+  1 +
+  config.selectedPerkIds.reduce((total, perkId) => {
+    const perk = getReincarnationPerkById(perkId);
+    return total + (perk?.heirloomSlotBonus ?? 0);
+  }, 0);
 
 export const getRebirthConfigStatBonuses = (config: RebirthConfig) =>
   config.selectedPerkIds.reduce<Record<string, number>>((bonuses, perkId) => {

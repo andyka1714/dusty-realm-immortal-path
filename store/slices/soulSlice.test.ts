@@ -5,9 +5,13 @@ import soulReducer, {
   enterReincarnationHall,
   startLifeReview,
   toggleRebirthPerk,
+  toggleSelectedHeirloom,
   setRebirthSpiritRootOverride,
 } from "./soulSlice";
-import { DEFAULT_REINCARNATION_PERKS } from "../../utils/reincarnation";
+import {
+  DEFAULT_REINCARNATION_PERKS,
+  getAvailableReincarnationPerks,
+} from "../../utils/reincarnation";
 
 describe("soulSlice", () => {
   it("starts a life review and banks the gained merit", () => {
@@ -79,5 +83,75 @@ describe("soulSlice", () => {
     );
     expect(cleared.flowStep).toBe("inactive");
     expect(cleared.pendingLifeReview).toBeNull();
+  });
+
+  it("unlocks advanced planner perks when lifetime milestones are reached", () => {
+    const next = soulReducer(
+      undefined,
+      startLifeReview({
+        cause: "lifespan",
+        ageYears: 620,
+        highestRealm: MajorRealm.NascentSoul,
+        realmMerit: 1000,
+        ageMerit: 310,
+        totalMeritGained: 1310,
+        eligibleHeirlooms: [],
+      })
+    );
+
+    expect(next.unlockedPerkIds).toEqual(
+      getAvailableReincarnationPerks(next.lifetimeStats).map((perk) => perk.id)
+    );
+    expect(next.unlockedPerkIds).toContain("rebirth_physique");
+    expect(next.unlockedPerkIds).toContain("rebirth_extra_heirloom_slot");
+  });
+
+  it("lets the hall select multiple heirlooms only when the slot-expansion perk is active", () => {
+    const reviewed = soulReducer(
+      undefined,
+      startLifeReview({
+        cause: "lifespan",
+        ageYears: 620,
+        highestRealm: MajorRealm.NascentSoul,
+        realmMerit: 1000,
+        ageMerit: 310,
+        totalMeritGained: 1310,
+        eligibleHeirlooms: [
+          {
+            id: "blade",
+            itemId: "novice_sword",
+            label: "下品 新手劍",
+            sourceType: "equipment",
+            count: 1,
+            quality: 0,
+          },
+          {
+            id: "manual",
+            itemId: "s_q_passive_manual",
+            label: "青鋒訣手札 x1",
+            sourceType: "skill_manual",
+            count: 1,
+            quality: 0,
+          },
+        ],
+      })
+    );
+    const hall = soulReducer(reviewed, enterReincarnationHall());
+    const singleSlot = soulReducer(hall, toggleSelectedHeirloom("blade"));
+    const forcedSingle = soulReducer(singleSlot, toggleSelectedHeirloom("manual"));
+    const expanded = soulReducer(
+      hall,
+      toggleRebirthPerk("rebirth_extra_heirloom_slot")
+    );
+    const doubleSlot = soulReducer(
+      soulReducer(expanded, toggleSelectedHeirloom("blade")),
+      toggleSelectedHeirloom("manual")
+    );
+
+    expect(forcedSingle.rebirthConfig.selectedHeirloomIds).toEqual(["manual"]);
+    expect(doubleSlot.rebirthConfig.selectedHeirloomIds).toEqual([
+      "blade",
+      "manual",
+    ]);
   });
 });

@@ -152,6 +152,51 @@ describe("persisted state migration", () => {
     });
   });
 
+  it("bootstraps advanced planner perks from lifetime milestones even when older saves do not list them", () => {
+    const migrated = migratePersistedState({
+      schemaVersion: 2,
+      current: createPersistedState(),
+      soul: {
+        totalMerit: 900,
+        lifetimeStats: {
+          highestRealmEver: MajorRealm.NascentSoul,
+          highestAgeYears: 620,
+          totalDeaths: 4,
+          totalReincarnations: 1,
+        },
+        unlockedPerkIds: ["rebirth_root_bone"],
+      },
+    } as PersistedState);
+
+    expect(migrated.soul.unlockedPerkIds).toContain("rebirth_physique");
+    expect(migrated.soul.unlockedPerkIds).toContain("rebirth_extra_heirloom_slot");
+  });
+
+  it("drops planner selections that exceed the migrated perk and heirloom rules", () => {
+    const migrated = migratePersistedState({
+      schemaVersion: 2,
+      current: createPersistedState(),
+      soul: {
+        totalMerit: 300,
+        lifetimeStats: {
+          highestRealmEver: MajorRealm.Mortal,
+          highestAgeYears: 90,
+          totalDeaths: 1,
+          totalReincarnations: 0,
+        },
+        unlockedPerkIds: ["rebirth_extra_heirloom_slot"],
+        rebirthConfig: {
+          selectedPerkIds: ["rebirth_extra_heirloom_slot"],
+          selectedHeirloomIds: ["blade", "manual"],
+        },
+      },
+    } as PersistedState);
+
+    expect(migrated.soul.unlockedPerkIds).not.toContain("rebirth_extra_heirloom_slot");
+    expect(migrated.soul.rebirthConfig.selectedPerkIds).toEqual([]);
+    expect(migrated.soul.rebirthConfig.selectedHeirloomIds).toEqual(["manual"]);
+  });
+
   it("drops broken manual-like ids that cannot be mapped to a formal manual", () => {
     const migrated = migratePersistedState(
       createPersistedState({
