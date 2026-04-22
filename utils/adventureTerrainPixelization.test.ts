@@ -88,7 +88,7 @@ describe("adventureTerrainPixelization", () => {
 
   it("keeps wild-route themes from generating town-like straight corridors", () => {
     const eastWild = buildAdventureTerrainTiles({
-      mapId: "20",
+      mapId: "25",
       theme: "East",
       width: 12,
       height: 12,
@@ -567,6 +567,42 @@ describe("adventureTerrainPixelization", () => {
     expect(immortalIsland.find((tile) => tile.x === 3 && tile.y === 6)?.kind).toBe("water");
     expect(voidRift.find((tile) => tile.x === 6 && tile.y === 2)?.kind).toBe("accent");
     expect(voidRift.find((tile) => tile.x === 6 && tile.y === 9)?.kind).toBe("accent");
+  });
+
+  it("adds landmark variants for early east-route gateway maps", () => {
+    const spiritField = buildAdventureTerrainTiles({
+      mapId: "20",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const mistMarsh = buildAdventureTerrainTiles({
+      mapId: "21",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const lakeMeadow = buildAdventureTerrainTiles({
+      mapId: "22",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(spiritField.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(spiritField.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("water");
+    expect(spiritField.find((tile) => tile.x === 8 && tile.y === 6)?.kind).toBe("water");
+    expect(mistMarsh.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("accent");
+    expect(mistMarsh.find((tile) => tile.x === 4 && tile.y === 4)?.kind).toBe("water");
+    expect(mistMarsh.find((tile) => tile.x === 8 && tile.y === 8)?.kind).toBe("water");
+    expect(lakeMeadow.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("path");
+    expect(lakeMeadow.find((tile) => tile.x === 6 && tile.y === 3)?.kind).toBe("water");
   });
 
   it("adds landmark variants for iconic west-route maps", () => {
