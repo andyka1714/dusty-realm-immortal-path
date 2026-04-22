@@ -68,3 +68,4 @@
 - `add-sect-midgame-progression` 已完成，正式收口三宗 `築基 -> 金丹` 宗門中期成長線、quest NPC 與 regression
 - `sync-base-spec-persistence-truth` 已完成，正式收口 base specs、persisted state migration 與正式 UI / loop 基線真相
 - `update-reincarnation-build-planner` 已完成，正式收口 `主動坐化`、進階 perk / heirloom planner 與第二批輪迴 build 分化
+- `update-encounter-risk-reward-depth` 已開案，承接 encounter selector、風險收益 cue 與 route-specific event pool 深化
