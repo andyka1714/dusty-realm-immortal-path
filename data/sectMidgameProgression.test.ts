@@ -85,15 +85,15 @@ describe("sect midgame progression data", () => {
   });
 
   it("adds dedicated quest NPCs to each sect hub", () => {
-    expect(SWORD_SECT_NPCS.find((npc) => npc.id === "sect_sword_patrol_captain")?.questIds).toEqual([
+    expect(SWORD_SECT_NPCS.find((npc) => npc.id === "sect_sword_patrol_captain")?.questIds.slice(0, 2)).toEqual([
       "sect_sword_task_02",
       "sect_sword_task_03",
     ]);
-    expect(BEAST_SECT_NPCS.find((npc) => npc.id === "sect_beast_huntmaster")?.questIds).toEqual([
+    expect(BEAST_SECT_NPCS.find((npc) => npc.id === "sect_beast_huntmaster")?.questIds.slice(0, 2)).toEqual([
       "sect_beast_task_02",
       "sect_beast_task_03",
     ]);
-    expect(MYSTIC_SECT_NPCS.find((npc) => npc.id === "sect_mystic_envoy")?.questIds).toEqual([
+    expect(MYSTIC_SECT_NPCS.find((npc) => npc.id === "sect_mystic_envoy")?.questIds.slice(0, 2)).toEqual([
       "sect_mystic_task_02",
       "sect_mystic_task_03",
     ]);

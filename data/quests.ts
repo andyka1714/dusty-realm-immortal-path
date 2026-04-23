@@ -210,6 +210,37 @@ export const QUESTS: Record<string, Quest> = {
             ]
         }
     },
+    'sect_sword_task_04': {
+        id: 'sect_sword_task_04',
+        type: QuestType.Side,
+        title: '劍宗元嬰：赴三界',
+        description: '巡山統領命你斬落元嬰劍墟的守界妖劍，證明你已能踏向三界戰場，為化神做準備。',
+        giverId: 'sect_sword_patrol_captain',
+        submitNpcId: 'sect_sword_patrol_captain',
+        prerequisiteQuestId: 'sect_sword_task_03',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.NascentSoul },
+            { type: 'kill', targetId: 'm92_b1', count: 1 }
+        ],
+        rewards: [
+            { exp: 16200, spiritStones: 8400 },
+            { items: [{ itemId: 'seven_star_sword', count: 1 }, { itemId: 'void_sword_box', count: 1 }, { itemId: 'sword_intent_crystal', count: 1 }] }
+        ],
+        dialogue: {
+            start: [
+                '元嬰既成，劍氣便不能只停在山門內。',
+                '去斬碎碎星劍垣的守界妖劍，把你的劍意真正推進元嬰層次。'
+            ],
+            progress: [
+                '守界妖劍最擅借界氣反撲，別讓它把你拖回自己的劍路裡。'
+            ],
+            complete: [
+                '很好，這一劍夠穩，也夠狠。',
+                '七星龍淵、虛空劍匣與劍元結晶都收下，然後直接去三界戰場（120）。',
+                '那裡才是化神修士的門口，別再把元嬰當成終點。'
+            ]
+        }
+    },
 
     // Beast Sect
     'sect_beast_join': {
@@ -329,6 +360,37 @@ export const QUESTS: Record<string, Quest> = {
             ]
         }
     },
+    'sect_beast_task_04': {
+        id: 'sect_beast_task_04',
+        type: QuestType.Side,
+        title: '獸莊元嬰：踏界門',
+        description: '獵場監軍命你鎮壓元嬰祖廟的守界獸靈，將肉身鍛到足以踏入三界戰場。',
+        giverId: 'sect_beast_huntmaster',
+        submitNpcId: 'sect_beast_huntmaster',
+        prerequisiteQuestId: 'sect_beast_task_03',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.NascentSoul },
+            { type: 'kill', targetId: 'm102_b1', count: 1 }
+        ],
+        rewards: [
+            { exp: 16200, spiritStones: 8400 },
+            { items: [{ itemId: 'god_fiend_gauntlet', count: 1 }, { itemId: 'immortal_king_shield', count: 1 }, { itemId: 'bood_soul_bead', count: 1 }] }
+        ],
+        dialogue: {
+            start: [
+                '元嬰不是讓你收斂拳意，而是讓你把肉身的邊界再往外推一層。',
+                '去把蠻荒祖廟那頭守界獸靈壓下來，證明你已經能扛住元嬰層次的反震。'
+            ],
+            progress: [
+                '守界獸靈吃的是祖廟氣血，別被它拖進蠻力對撞裡，先壓住它的節奏。'
+            ],
+            complete: [
+                '很好，這具肉身已經有了壓界的味道。',
+                '神魔滅世拳、仙王盾與血魂珠你拿著，然後直接去三界戰場（120）。',
+                '化神之路就在那裡，別再把元嬰當成終點。'
+            ]
+        }
+    },
 
     // Mystic Sect
     'sect_mystic_join': {
@@ -445,6 +507,37 @@ export const QUESTS: Record<string, Quest> = {
             complete: [
                 '潮勢已息，外海的霧線也退了。',
                 '鳳羽杖和陰陽鏡收好，往後你出去，別再自稱外門弟子。'
+            ]
+        }
+    },
+    'sect_mystic_task_04': {
+        id: 'sect_mystic_task_04',
+        type: QuestType.Side,
+        title: '仙宮元嬰：入戰場',
+        description: '外務使命你擊潰虛空裂隙的守界法身，讓神識能真正跨入三界戰場。',
+        giverId: 'sect_mystic_envoy',
+        submitNpcId: 'sect_mystic_envoy',
+        prerequisiteQuestId: 'sect_mystic_task_03',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.NascentSoul },
+            { type: 'kill', targetId: 'm112_b1', count: 1 }
+        ],
+        rewards: [
+            { exp: 16200, spiritStones: 8400 },
+            { items: [{ itemId: 'elemental_chaos_staff', count: 1 }, { itemId: 'heaven_earth_mirror', count: 1 }, { itemId: 'bodhi_seed', count: 1 }] }
+        ],
+        dialogue: {
+            start: [
+                '元嬰之後，神識不該只拿來守丹房，而該學會撕開虛空。',
+                '去把虛空裂隙裡的守界法身斬了，證明你能承受元嬰層次的天外壓力。'
+            ],
+            progress: [
+                '那道法身借的是虛空餘波，別只看它的法訣，先截住它的靈機。'
+            ],
+            complete: [
+                '不錯，神識已經能穩穩鎮住虛空餘波了。',
+                '五行混元杖、乾坤鏡與菩提子都收好，然後直接去三界戰場（120）。',
+                '化神的門檻就在那裡，別再把元嬰當成終點。'
             ]
         }
     }

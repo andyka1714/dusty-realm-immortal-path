@@ -1,9 +1,9 @@
 ## 1. 後段宗門任務鏈
 
-- [ ] 1.1 盤點三宗 `sect_*_task_03` 之後的斷點與 `元嬰` route boss 掛點
-- [ ] 1.2 補三宗 `元嬰+` 後段任務，承接 `sect_sword_task_03 / sect_beast_task_03 / sect_mystic_task_03`
-- [ ] 1.3 補對應 NPC questIds / dialogue，確認玩家可從宗門 hub 接到任務
-- [ ] 1.4 在任務 dialogue 或文件中明確承接 `化神` 三界戰場作為下一段 world milestone
+- [x] 1.1 盤點三宗 `sect_*_task_03` 之後的斷點與 `元嬰` route boss 掛點
+- [x] 1.2 補三宗 `元嬰+` 後段任務，承接 `sect_sword_task_03 / sect_beast_task_03 / sect_mystic_task_03`
+- [x] 1.3 補對應 NPC questIds / dialogue，確認玩家可從宗門 hub 接到任務
+- [x] 1.4 在任務 dialogue 或文件中明確承接 `化神` 三界戰場作為下一段 world milestone
 
 ## 2. 世界里程碑與 route-specific encounter
 

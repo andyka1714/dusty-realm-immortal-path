@@ -71,10 +71,11 @@ export const SWORD_SECT_NPCS: NPC[] = [
         x: 28,
         y: 15,
         description: '負責外門巡山與劍塚歷練調度。',
-        questIds: ['sect_sword_task_02', 'sect_sword_task_03'],
+        questIds: ['sect_sword_task_02', 'sect_sword_task_03', 'sect_sword_task_04'],
         dialogue: [
             '想在劍宗往上走，就別只在山門口轉圈。',
-            '能不能扛事，看你拿回來的是劍核還是藉口。'
+            '能不能扛事，看你拿回來的是劍核還是藉口。',
+            '等你斬落元嬰守界妖劍，再去三界戰場（120）看真正的化神門檻。'
         ]
     },
     {
@@ -133,10 +134,11 @@ export const BEAST_SECT_NPCS: NPC[] = [
         x: 28,
         y: 15,
         description: '統管山莊獵場與血戰試煉。',
-        questIds: ['sect_beast_task_02', 'sect_beast_task_03'],
+        questIds: ['sect_beast_task_02', 'sect_beast_task_03', 'sect_beast_task_04'],
         dialogue: [
             '山莊不要只會吼的弟子，要的是敢進獵場的狠人。',
-            '你若能把獵物拖回來，我就當你有資格再往前。'
+            '你若能把獵物拖回來，我就當你有資格再往前。',
+            '元嬰妖力壓得住了，就去三界戰場（120），那裡才開始算化神。'
         ]
     },
     {
@@ -195,10 +197,11 @@ export const MYSTIC_SECT_NPCS: NPC[] = [
         x: 28,
         y: 15,
         description: '負責仙宮外務巡查與靈脈回報。',
-        questIds: ['sect_mystic_task_02', 'sect_mystic_task_03'],
+        questIds: ['sect_mystic_task_02', 'sect_mystic_task_03', 'sect_mystic_task_04'],
         dialogue: [
             '仙宮弟子若只會閉門清修，外頭的靈潮遲早會壓回山門。',
-            '出去走一趟，把該平的事平掉，再來和我談真傳。'
+            '出去走一趟，把該平的事平掉，再來和我談真傳。',
+            '元嬰既穩，就往三界戰場（120）去，化神那道門在那裡。'
         ]
     },
     {
