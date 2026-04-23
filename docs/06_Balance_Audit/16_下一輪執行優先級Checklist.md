@@ -66,7 +66,8 @@
 - `evaluate-pixel-art-vertical-slice` 已完成，正式收口 `Adventure` representative pixel-art vertical slice、web/mobile 驗證與效能 budget 基線
 - `update-adventure-terrain-pixelization` 已完成，正式收口 `AdventureStage` terrain/background 像素化整合，並維持角色 / 玩家 / 怪物表現現狀
 - `add-sect-midgame-progression` 已完成，正式收口三宗 `築基 -> 金丹` 宗門中期成長線、quest NPC 與 regression
+- `expand-sect-world-late-progression` 已完成，正式收口三宗 `元嬰+` 後段任務、世界里程碑與 route-specific world encounter；對應 regression 已由 `data/sectLateProgression.test.ts` 與 `data/encounters.test.ts` 覆蓋
 - `sync-base-spec-persistence-truth` 已完成，正式收口 base specs、persisted state migration 與正式 UI / loop 基線真相
 - `update-reincarnation-build-planner` 已完成，正式收口 `主動坐化`、進階 perk / heirloom planner 與第二批輪迴 build 分化
 - `update-encounter-risk-reward-depth` 已完成，正式收口 encounter selector、風險收益 cue 與 route-specific event pool 深化
-- `expand-sect-world-late-progression` 已開案，承接三宗 `元嬰+` 後段任務、世界里程碑與 route-specific world encounter
+- 下一個可開案的主線，優先看 `high-tier workshop depth`

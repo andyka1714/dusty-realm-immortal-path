@@ -13,7 +13,7 @@
 
 ## 3. 測試、文件與驗證
 
-- [ ] 3.1 補宗門後段 quest / NPC / encounter regression tests
-- [ ] 3.2 更新 `docs/02_Gameplay` 與 `docs/06_Balance_Audit/16_下一輪執行優先級Checklist.md`
-- [ ] 3.3 更新 `docs/06_Balance_Audit/17_下一階段主線整合與優先級建議.md`，將 encounter 主線移為已完成並把本 change 設為下一順位
-- [ ] 3.4 驗證 `openspec validate expand-sect-world-late-progression --strict` 與相關測試
+- [x] 3.1 補宗門後段 quest / NPC / encounter regression tests
+- [x] 3.2 更新 `docs/02_Gameplay` 與 `docs/06_Balance_Audit/16_下一輪執行優先級Checklist.md`
+- [x] 3.3 更新 `docs/06_Balance_Audit/17_下一階段主線整合與優先級建議.md`，將 encounter 主線移為已完成並把下一順位改為 `high-tier workshop depth`
+- [x] 3.4 驗證 `openspec validate expand-sect-world-late-progression --strict` 與相關測試
