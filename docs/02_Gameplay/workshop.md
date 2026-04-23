@@ -86,6 +86,13 @@ Workshop state 已正式記錄：
 
 這些來源都仍保留 profession 與 `task_04` gating，不會退化成無條件通用掉落。
 
+`expand-encounter-content-library` Phase 1 進一步把 encounter pool 的內容覆蓋率固定成 regression：
+
+- `元嬰 / 化神 / 煉虛 / 合體 / 大乘 / 渡劫` 都必須保有最低事件量，且不能只靠一次性事件支撐。
+- `元嬰` 補上 `三界邊門` 這類世界里程碑，以及 `劍修 / 體修 / 法修` 三條可重複職業機緣。
+- `合體 / 大乘` 補上三宗 route-specific 可重複事件，仍使用既有 profession 與 `sect_*_task_04` gating，不新增 encounter engine 或存檔欄位。
+- 新增事件都保留 `categoryLabel / routeLabel / cue tags`，選項會在 pending panel 前置顯示材料、穩定收益、宗門路線或風險提示。
+
 ## 6. 後續可擴充部分
 
 目前第二批 recipe、第一批專精效果、材料來源 cue 與專精解鎖 / 切換成本都已完成，後續若要再擴充，重點會是：

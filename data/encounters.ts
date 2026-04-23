@@ -405,6 +405,191 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
       },
     ],
   },
+  nascent_world_gate_survey: createSingleRealmEncounterEvent({
+    id: "nascent_world_gate_survey",
+    title: "嬰火界門測繪",
+    description: "元嬰邊境的界門偶爾吐出殘破星砂，正好能讓修士第一次看見後段世界線的輪廓。",
+    realm: MajorRealm.NascentSoul,
+    presentation: {
+      categoryLabel: "元嬰世界里程碑",
+      routeLabel: "三界邊門",
+    },
+    choices: [
+      {
+        id: "survey_gate",
+        label: "測繪界門",
+        description: "穩住嬰火，記下界門吐納的節點，替後續化神與煉虛路線預留方向。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "世界線測繪" },
+            { kind: "benefit", label: "元嬰修為" },
+          ],
+        },
+        reward: {
+          experience: 64000,
+          logMessage: "你測完三界邊門的吐納節點，元嬰後段的路線不再只剩閉關硬磨。",
+        },
+      },
+      {
+        id: "collect_gate_sand",
+        label: "收集界砂",
+        description: "不深究界門，只收走附近可換成洞府周轉的界砂。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "界門星砂" },
+            { kind: "benefit", label: "洞府周轉" },
+          ],
+        },
+        reward: {
+          spiritStones: 980,
+          logMessage: "你收走界門周邊的殘砂，替元嬰後段的洞府與丹火多補了一筆周轉。",
+        },
+      },
+    ],
+  }),
+  nascent_sword_soul_sheath: createSingleRealmEncounterEvent({
+    id: "nascent_sword_soul_sheath",
+    title: "元嬰劍鞘",
+    description: "一口空鞘懸在嬰火旁，只回應能以本命劍意校準神魂的劍修。",
+    realm: MajorRealm.NascentSoul,
+    selector: {
+      eligibleProfessions: [ProfessionType.Sword],
+    },
+    presentation: {
+      categoryLabel: "元嬰職業機緣",
+      routeLabel: "劍修",
+    },
+    choices: [
+      {
+        id: "temper_soul_edge",
+        label: "以鞘養嬰劍",
+        description: "把劍意收入空鞘，讓嬰火與劍勢先學會同一個節拍。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "劍意校準" },
+            { kind: "benefit", label: "劍修修為" },
+          ],
+        },
+        reward: {
+          experience: 72000,
+          logMessage: "你借元嬰劍鞘校準劍意，本命嬰火與劍勢終於不再互相拉扯。",
+        },
+      },
+      {
+        id: "trade_sheath_mark",
+        label: "拓下鞘紋",
+        description: "拓走鞘上的劍紋，留給後續養劍與百業鍛材周轉。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "元嬰劍紋" },
+            { kind: "benefit", label: "煉器路線" },
+          ],
+        },
+        reward: {
+          spiritStones: 1180,
+          logMessage: "你拓下元嬰劍鞘上的劍紋，換回一筆足以支撐養劍與鍛台的靈資。",
+        },
+      },
+    ],
+  }),
+  nascent_body_blooddrum: createSingleRealmEncounterEvent({
+    id: "nascent_body_blooddrum",
+    title: "嬰骨血鼓",
+    description: "荒原地底傳出血鼓聲，只有體修能把那股震盪導入元嬰筋骨。",
+    realm: MajorRealm.NascentSoul,
+    selector: {
+      eligibleProfessions: [ProfessionType.Body],
+    },
+    presentation: {
+      categoryLabel: "元嬰職業機緣",
+      routeLabel: "體修",
+    },
+    choices: [
+      {
+        id: "match_blooddrum",
+        label: "合拍血鼓",
+        description: "讓氣血跟著鼓聲起伏，借震盪把元嬰筋骨重新壓實。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "高壓鍛體" },
+            { kind: "benefit", label: "體修修為" },
+          ],
+        },
+        reward: {
+          experience: 70000,
+          logMessage: "你咬牙承下嬰骨血鼓的震盪，元嬰筋骨被打得更沉更穩。",
+        },
+      },
+      {
+        id: "collect_bone_powder",
+        label: "收走骨粉",
+        description: "避開最重的鼓震，只收走血鼓邊緣散落的骨粉與靈材。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "血鼓骨粉" },
+            { kind: "benefit", label: "鍛體周轉" },
+          ],
+        },
+        reward: {
+          spiritStones: 1120,
+          logMessage: "你收走血鼓旁的骨粉與靈材，體修後段的鍛體消耗多了一道緩衝。",
+        },
+      },
+    ],
+  }),
+  nascent_mage_soul_lantern: createSingleRealmEncounterEvent({
+    id: "nascent_mage_soul_lantern",
+    title: "嬰魂星燈",
+    description: "一盞星燈在識海邊緣忽明忽暗，只有法修能把燈焰拆成可用術式節點。",
+    realm: MajorRealm.NascentSoul,
+    selector: {
+      eligibleProfessions: [ProfessionType.Mage],
+    },
+    presentation: {
+      categoryLabel: "元嬰職業機緣",
+      routeLabel: "法修",
+    },
+    choices: [
+      {
+        id: "read_lantern_nodes",
+        label: "讀取燈焰節點",
+        description: "以神識順著燈焰推演，把元嬰術式的節點重新排好。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "術式節點" },
+            { kind: "benefit", label: "法修修為" },
+          ],
+        },
+        reward: {
+          experience: 74000,
+          logMessage: "你讀完嬰魂星燈的節點，元嬰後段的術式推演明顯順了一截。",
+        },
+      },
+      {
+        id: "bottle_lantern_ash",
+        label: "封存燈灰",
+        description: "把星燈燒落的燈灰封進玉瓶，留作洞府與丹火推演底料。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "星燈灰燼" },
+            { kind: "benefit", label: "煉丹推演" },
+          ],
+        },
+        reward: {
+          spiritStones: 1220,
+          logMessage: "你封起嬰魂星燈的灰燼，換回一批足以支撐術式與丹火的周轉靈資。",
+        },
+      },
+    ],
+  }),
   spirit_severing_herb_tide: createSingleRealmEncounterEvent({
     id: "spirit_severing_herb_tide",
     title: "裂神藥潮",
@@ -851,6 +1036,153 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
       },
     ],
   }),
+  fusion_sword_skyforge_oath: createSingleRealmEncounterEvent({
+    id: "fusion_sword_skyforge_oath",
+    title: "合天劍爐盟誓",
+    description: "凌霄劍宗舊劍爐在合體邊境短暫重燃，只有完成後段任務的劍修能把爐火接回本命法相。",
+    realm: MajorRealm.Fusion,
+    selector: {
+      weight: 4,
+      eligibleProfessions: [ProfessionType.Sword],
+      requiredCompletedQuestIds: ["sect_sword_task_04"],
+    },
+    presentation: {
+      categoryLabel: "合體宗門百業",
+      routeLabel: "凌霄劍宗",
+    },
+    choices: [
+      {
+        id: "draw_skyforge_starsteel",
+        label: "引爐取星鋼",
+        description: "以本命劍意定住劍爐，把爐底最後一段劍心星鋼取出。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "合天劍心星鋼 x1" },
+            { kind: "benefit", label: "合體煉器來源" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "sword_path_starsteel", count: 1 }],
+          logMessage: "你從合天劍爐取回劍心星鋼，凌霄劍宗的合體鍛材來源終於補上一道可重複入口。",
+        },
+      },
+      {
+        id: "bind_sword_law",
+        label: "束合法相劍律",
+        description: "不取材料，改把劍爐殘火導入法相，讓劍律與合體境同步。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "凌霄劍律" },
+            { kind: "benefit", label: "合體劍修修為" },
+          ],
+        },
+        reward: {
+          experience: 650000,
+          logMessage: "你借合天劍爐束合法相劍律，合體期的劍勢不再散成兩股。",
+        },
+      },
+    ],
+  }),
+  fusion_beast_lawbody_trial: createSingleRealmEncounterEvent({
+    id: "fusion_beast_lawbody_trial",
+    title: "萬獸法身試煉",
+    description: "萬獸山莊在合體邊境留下一座血骨擂台，專門檢驗體修能否把肉身與法相壓成同一口氣。",
+    realm: MajorRealm.Fusion,
+    selector: {
+      weight: 4,
+      eligibleProfessions: [ProfessionType.Body],
+      requiredCompletedQuestIds: ["sect_beast_task_04"],
+    },
+    presentation: {
+      categoryLabel: "合體宗門百業",
+      routeLabel: "萬獸山莊",
+    },
+    choices: [
+      {
+        id: "claim_lawbody_bloodbone",
+        label: "取擂台血骨",
+        description: "頂住擂台殘威，剝下一段仍能承接帝兵火候的血骨。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "resource", label: "合體血骨殘材 x1" },
+            { kind: "risk", label: "萬獸法身壓迫" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "beast_path_bloodbone", count: 1 }],
+          logMessage: "你從萬獸法身擂台取下血骨殘材，體修器方有了合體期可識別來源。",
+        },
+      },
+      {
+        id: "endure_lawbody_roar",
+        label: "承受法身獸吼",
+        description: "放棄取材，站在擂台中央承接獸吼，把肉身與法相壓緊。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "高壓法身鍛體" },
+            { kind: "benefit", label: "合體體修修為" },
+          ],
+        },
+        reward: {
+          experience: 635000,
+          logMessage: "你硬接法身獸吼，肉身與法相在劇痛中逐漸壓成同一個節拍。",
+        },
+      },
+    ],
+  }),
+  fusion_mystic_constellation_court: createSingleRealmEncounterEvent({
+    id: "fusion_mystic_constellation_court",
+    title: "仙宮合星庭",
+    description: "縹緲仙宮殘留的合星庭在夜裡開啟，只有法修能讀懂庭中星軌對合體術式的校準。",
+    realm: MajorRealm.Fusion,
+    selector: {
+      weight: 4,
+      eligibleProfessions: [ProfessionType.Mage],
+      requiredCompletedQuestIds: ["sect_mystic_task_04"],
+    },
+    presentation: {
+      categoryLabel: "合體宗門百業",
+      routeLabel: "縹緲仙宮",
+    },
+    choices: [
+      {
+        id: "gather_constellation_starlotus",
+        label: "採下合星蓮",
+        description: "沿著星軌採下一株仍帶合體靈機的星魂蓮。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "合星星魂蓮 x1" },
+            { kind: "benefit", label: "合體煉丹來源" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "mystic_path_starlotus", count: 1 }],
+          logMessage: "你從仙宮合星庭採下星魂蓮，法修丹方有了合體期可重複來源。",
+        },
+      },
+      {
+        id: "align_constellation_spell",
+        label: "校準合星術式",
+        description: "不採蓮，改用星軌把法相與術式推演對齊。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "縹緲星軌" },
+            { kind: "benefit", label: "合體法修修為" },
+          ],
+        },
+        reward: {
+          experience: 670000,
+          logMessage: "你借合星庭校準術式，法相與星軌終於能在同一輪推演中運轉。",
+        },
+      },
+    ],
+  }),
   fusion_law_forge: createSingleRealmEncounterEvent({
     id: "fusion_law_forge",
     title: "法相熔坊",
@@ -899,6 +1231,153 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
         reward: {
           experience: 610000,
           logMessage: "你當場消化了合鳴錄，把合體期該如何並進多條乘區看得更透。",
+        },
+      },
+    ],
+  }),
+  mahayana_sword_heaven_pillar_duel: createSingleRealmEncounterEvent({
+    id: "mahayana_sword_heaven_pillar_duel",
+    title: "大乘天柱劍約",
+    description: "凌霄劍宗在天柱餘照中留下最後一道劍約，要求劍修把宗門鋒勢與大乘道心一起壓穩。",
+    realm: MajorRealm.Mahayana,
+    selector: {
+      weight: 4,
+      eligibleProfessions: [ProfessionType.Sword],
+      requiredCompletedQuestIds: ["sect_sword_task_04"],
+    },
+    presentation: {
+      categoryLabel: "大乘宗門里程碑",
+      routeLabel: "凌霄劍宗",
+    },
+    choices: [
+      {
+        id: "accept_pillar_duel",
+        label: "赴天柱劍約",
+        description: "在餘照中接下一場無人的劍約，讓道心與劍勢重新對齊。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "凌霄天柱劍約" },
+            { kind: "benefit", label: "大乘劍修修為" },
+          ],
+        },
+        reward: {
+          experience: 1120000,
+          logMessage: "你赴完凌霄劍宗的天柱劍約，大乘道心與本命劍勢終於重新合拍。",
+        },
+      },
+      {
+        id: "claim_pillar_starsteel",
+        label: "收走柱底星鋼",
+        description: "不延長劍約，改把柱底被餘照洗過的星鋼收進鍛台。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "天柱劍星鋼 x1" },
+            { kind: "benefit", label: "大乘煉器來源" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "sword_path_starsteel", count: 1 }],
+          logMessage: "你收走天柱餘照洗過的劍心星鋼，替大乘器方補上一個宗門來源。",
+        },
+      },
+    ],
+  }),
+  mahayana_beast_worldspine_procession: createSingleRealmEncounterEvent({
+    id: "mahayana_beast_worldspine_procession",
+    title: "萬獸撐天脊",
+    description: "萬獸山莊的古獸殘影沿世界脊梁巡行，體修若能跟上步伐，就能把大乘肉身再壓實一輪。",
+    realm: MajorRealm.Mahayana,
+    selector: {
+      weight: 4,
+      eligibleProfessions: [ProfessionType.Body],
+      requiredCompletedQuestIds: ["sect_beast_task_04"],
+    },
+    presentation: {
+      categoryLabel: "大乘世界宗門",
+      routeLabel: "萬獸山莊",
+    },
+    choices: [
+      {
+        id: "walk_worldspine",
+        label: "隨古獸巡脊",
+        description: "跟著古獸殘影走完世界脊梁，把氣血壓進更深的道基。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "撐天脊壓迫" },
+            { kind: "benefit", label: "大乘體修修為" },
+          ],
+        },
+        reward: {
+          experience: 1090000,
+          logMessage: "你隨萬獸古影走完撐天脊，大乘肉身被壓得更沉也更能承劫。",
+        },
+      },
+      {
+        id: "take_worldspine_bloodbone",
+        label: "拾取脊骨血材",
+        description: "在古獸殘影散去後，收走脊梁上剝落的血骨殘材。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "撐天血骨殘材 x1" },
+            { kind: "benefit", label: "大乘鍛體來源" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "beast_path_bloodbone", count: 1 }],
+          logMessage: "你從世界脊梁拾回血骨殘材，萬獸山莊的大乘材料線不再只有渡劫巢穴。",
+        },
+      },
+    ],
+  }),
+  mahayana_mystic_star_court_verdict: createSingleRealmEncounterEvent({
+    id: "mahayana_mystic_star_court_verdict",
+    title: "縹緲天星裁決",
+    description: "縹緲仙宮的天星裁決短暫顯化，逼法修在大乘前把星圖、丹火與術式答案對齊。",
+    realm: MajorRealm.Mahayana,
+    selector: {
+      weight: 4,
+      eligibleProfessions: [ProfessionType.Mage],
+      requiredCompletedQuestIds: ["sect_mystic_task_04"],
+    },
+    presentation: {
+      categoryLabel: "大乘世界宗門",
+      routeLabel: "縹緲仙宮",
+    },
+    choices: [
+      {
+        id: "answer_star_verdict",
+        label: "答覆天星裁決",
+        description: "以神識逐條答覆裁決星圖，把大乘術式中的斷點補齊。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "縹緲天星裁決" },
+            { kind: "benefit", label: "大乘法修修為" },
+          ],
+        },
+        reward: {
+          experience: 1160000,
+          logMessage: "你答完縹緲天星裁決，大乘術式與丹火推演終於能接成完整閉環。",
+        },
+      },
+      {
+        id: "harvest_verdict_starlotus",
+        label: "採下裁決星蓮",
+        description: "在裁決星圖合攏前，採下一株由星砂凝成的星魂蓮。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "裁決星魂蓮 x1" },
+            { kind: "benefit", label: "大乘煉丹來源" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "mystic_path_starlotus", count: 1 }],
+          logMessage: "你採下裁決星魂蓮，縹緲仙宮的大乘丹材來源被正式接回百業。",
         },
       },
     ],

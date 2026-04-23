@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { MajorRealm, ProfessionType } from "../types";
 import {
   ENCOUNTER_EVENTS,
+  type EncounterEvent,
   getAvailableEncounterEvents,
   getEncounterMaterialSourceCues,
   pickEncounterEvent,
@@ -66,6 +67,70 @@ const SECONDARY_WORKSHOP_MATERIAL_SOURCE_CASES = [
     rewardItemId: "mystic_path_starlotus",
   },
 ] as const;
+
+const PHASE_ONE_NEW_EVENT_IDS = [
+  "nascent_world_gate_survey",
+  "nascent_sword_soul_sheath",
+  "nascent_body_blooddrum",
+  "nascent_mage_soul_lantern",
+  "fusion_sword_skyforge_oath",
+  "fusion_beast_lawbody_trial",
+  "fusion_mystic_constellation_court",
+  "mahayana_sword_heaven_pillar_duel",
+  "mahayana_beast_worldspine_procession",
+  "mahayana_mystic_star_court_verdict",
+] as const;
+
+const MIDDLE_LATE_REALM_COVERAGE_THRESHOLDS = [
+  { realm: MajorRealm.NascentSoul, minEvents: 4, minRepeatableEvents: 2 },
+  { realm: MajorRealm.SpiritSevering, minEvents: 4, minRepeatableEvents: 2 },
+  { realm: MajorRealm.VoidRefining, minEvents: 3, minRepeatableEvents: 2 },
+  { realm: MajorRealm.Fusion, minEvents: 5, minRepeatableEvents: 2 },
+  { realm: MajorRealm.Mahayana, minEvents: 5, minRepeatableEvents: 2 },
+  { realm: MajorRealm.Tribulation, minEvents: 3, minRepeatableEvents: 2 },
+] as const;
+
+const FULL_LATE_SECT_QUEST_IDS = [
+  "sect_sword_task_04",
+  "sect_beast_task_04",
+  "sect_mystic_task_04",
+] as const;
+
+const PHASE_ONE_ROUTE_COVERAGE_CASES = [
+  {
+    profession: ProfessionType.Sword,
+    routeLabels: ["劍修", "凌霄劍宗"],
+  },
+  {
+    profession: ProfessionType.Body,
+    routeLabels: ["體修", "萬獸山莊"],
+  },
+  {
+    profession: ProfessionType.Mage,
+    routeLabels: ["法修", "縹緲仙宮"],
+  },
+] as const;
+
+const PHASE_ONE_ROUTE_COVERAGE_REALMS = [
+  MajorRealm.NascentSoul,
+  MajorRealm.Fusion,
+  MajorRealm.Mahayana,
+] as const;
+
+const hasChoiceCueTags = (event: EncounterEvent) =>
+  event.choices.some((choice) => (choice.cue?.tags?.length ?? 0) > 0);
+
+const buildEncounterCoverageForRealm = (realm: MajorRealm) => {
+  const events = Object.values(ENCOUNTER_EVENTS).filter(
+    (event) => realm >= event.minRealm && realm <= event.maxRealm
+  );
+
+  return {
+    events,
+    repeatableEvents: events.filter((event) => event.selector?.repeatPolicy !== "once_per_run"),
+    oneTimeEvents: events.filter((event) => event.selector?.repeatPolicy === "once_per_run"),
+  };
+};
 
 describe("encounter selector", () => {
   it("filters once-per-run events after resolution", () => {
@@ -266,6 +331,75 @@ describe("encounter selector", () => {
             categoryLabel: expect.stringContaining(testCase.categoryLabel),
           }),
         ])
+      );
+    });
+  });
+
+  it("keeps middle and late realm encounter pools above coverage floors", () => {
+    MIDDLE_LATE_REALM_COVERAGE_THRESHOLDS.forEach((threshold) => {
+      const coverage = buildEncounterCoverageForRealm(threshold.realm);
+
+      expect(
+        coverage.events.length,
+        `${threshold.realm} should keep enough events`
+      ).toBeGreaterThanOrEqual(threshold.minEvents);
+      expect(
+        coverage.repeatableEvents.length,
+        `${threshold.realm} should not rely on once-per-run events`
+      ).toBeGreaterThanOrEqual(threshold.minRepeatableEvents);
+      expect(
+        coverage.oneTimeEvents.length,
+        `${threshold.realm} should not only have one-time events`
+      ).toBeLessThan(coverage.events.length);
+    });
+  });
+
+  it("keeps profession and route recognizable cues across Phase 1 realms", () => {
+    PHASE_ONE_ROUTE_COVERAGE_CASES.forEach((testCase) => {
+      PHASE_ONE_ROUTE_COVERAGE_REALMS.forEach((realm) => {
+        const available = getAvailableEncounterEvents({
+          majorRealm: realm,
+          profession: testCase.profession,
+          completedQuestIds: [...FULL_LATE_SECT_QUEST_IDS],
+          resolvedEventIds: [],
+        });
+        const routeEvents = available.filter(
+          (event) =>
+            event.selector?.eligibleProfessions?.includes(testCase.profession) &&
+            event.presentation?.routeLabel &&
+            testCase.routeLabels.some(
+              (routeLabel) => routeLabel === event.presentation?.routeLabel
+            ) &&
+            event.presentation.categoryLabel &&
+            hasChoiceCueTags(event)
+        );
+
+        expect(
+          routeEvents.length,
+          `${testCase.profession} should have recognizable route cues in ${realm}`
+        ).toBeGreaterThanOrEqual(1);
+      });
+    });
+  });
+
+  it("exposes category labels, route labels, choice cue tags, and concrete rewards on new Phase 1 events", () => {
+    PHASE_ONE_NEW_EVENT_IDS.forEach((eventId) => {
+      const event = ENCOUNTER_EVENTS[eventId];
+      const rewardBearingChoices = event.choices.filter(
+        (choice) =>
+          choice.reward.experience !== undefined ||
+          choice.reward.spiritStones !== undefined ||
+          (choice.reward.items?.length ?? 0) > 0
+      );
+
+      expect(
+        event.presentation?.categoryLabel,
+        `${eventId} missing categoryLabel`
+      ).toBeTruthy();
+      expect(event.presentation?.routeLabel, `${eventId} missing routeLabel`).toBeTruthy();
+      expect(hasChoiceCueTags(event), `${eventId} missing cue tags`).toBe(true);
+      expect(rewardBearingChoices.length, `${eventId} missing concrete rewards`).toBe(
+        event.choices.length
       );
     });
   });
