@@ -1,16 +1,17 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   MajorRealm,
+  ReincarnationBuildIdentity,
   SoulState,
   LifeReviewSummary,
   RebirthConfig,
   SpiritRootId,
 } from "../../types";
 import {
-  DEFAULT_REINCARNATION_PERKS,
-  getAvailableReincarnationPerks,
   getRebirthConfigCost,
-  getRebirthConfigHeirloomSlotCount,
+  getAvailableReincarnationPerks,
+  REINCARNATION_PLANNER_VERSION,
+  sanitizeRebirthConfig,
 } from "../../utils/reincarnation";
 
 export const createInitialSoulState = (): SoulState => ({
@@ -23,29 +24,23 @@ export const createInitialSoulState = (): SoulState => ({
     totalReincarnations: 0,
   },
   unlockedPerkIds: getAvailableReincarnationPerks({
-    highestRealmEver: MajorRealm.Mortal,
-    highestAgeYears: 0,
-    totalDeaths: 0,
-    totalReincarnations: 0,
+    lifetimeStats: {
+      highestRealmEver: MajorRealm.Mortal,
+      highestAgeYears: 0,
+      totalDeaths: 0,
+      totalReincarnations: 0,
+    },
+    worldMemoryTags: [],
   }).map((perk) => perk.id),
   heirloomVault: [],
   worldMemoryTags: [],
   pendingLifeReview: null,
   rebirthConfig: {
+    plannerVersion: REINCARNATION_PLANNER_VERSION,
+    selectedBuildIdentity: "balanced",
     selectedPerkIds: [],
     selectedHeirloomIds: [],
   },
-});
-
-const canAffordConfig = (state: SoulState, config: RebirthConfig) =>
-  getRebirthConfigCost(config) <= state.totalMerit;
-
-const clampSelectedHeirlooms = (
-  config: RebirthConfig,
-  slotLimit = getRebirthConfigHeirloomSlotCount(config)
-): RebirthConfig => ({
-  ...config,
-  selectedHeirloomIds: config.selectedHeirloomIds.slice(-slotLimit),
 });
 
 const soulSlice = createSlice({
@@ -57,10 +52,6 @@ const soulSlice = createSlice({
       state.totalMerit += summary.totalMeritGained;
       state.flowStep = "life_review";
       state.pendingLifeReview = summary;
-      state.rebirthConfig = {
-        selectedPerkIds: [],
-        selectedHeirloomIds: [],
-      };
       state.lifetimeStats.highestRealmEver = Math.max(
         state.lifetimeStats.highestRealmEver,
         summary.highestRealm
@@ -70,16 +61,78 @@ const soulSlice = createSlice({
         summary.ageYears
       );
       state.lifetimeStats.totalDeaths += 1;
-      state.unlockedPerkIds = getAvailableReincarnationPerks(
-        state.lifetimeStats
-      ).map((perk) => perk.id);
+      state.unlockedPerkIds = getAvailableReincarnationPerks({
+        lifetimeStats: state.lifetimeStats,
+        worldMemoryTags: state.worldMemoryTags,
+      }).map((perk) => perk.id);
+      state.rebirthConfig = sanitizeRebirthConfig({
+        config: undefined,
+        totalMerit: state.totalMerit,
+        plannerContext: {
+          lifetimeStats: state.lifetimeStats,
+          worldMemoryTags: state.worldMemoryTags,
+        },
+        summary,
+      });
     },
     enterReincarnationHall: (state) => {
       if (!state.pendingLifeReview) return;
       state.flowStep = "hall";
     },
+    setRebirthBuildIdentity: (
+      state,
+      action: PayloadAction<ReincarnationBuildIdentity>
+    ) => {
+      if (state.flowStep !== "hall" || !state.pendingLifeReview) return;
+      state.rebirthConfig = sanitizeRebirthConfig({
+        config: {
+          ...state.rebirthConfig,
+          selectedBuildIdentity: action.payload,
+          selectedSealId:
+            action.payload === "balanced"
+              ? undefined
+              : state.rebirthConfig.selectedSealId,
+        },
+        totalMerit: state.totalMerit,
+        plannerContext: {
+          lifetimeStats: state.lifetimeStats,
+          worldMemoryTags: state.worldMemoryTags,
+        },
+        summary: state.pendingLifeReview,
+      });
+    },
+    setRebirthSoulSeal: (state, action: PayloadAction<string | undefined>) => {
+      if (state.flowStep !== "hall" || !state.pendingLifeReview) return;
+
+      const selectedSeal = action.payload;
+      const selectedBuildIdentity =
+        selectedSeal === "seal_sword_edge"
+          ? "sword"
+          : selectedSeal === "seal_body_forge"
+            ? "body"
+            : selectedSeal === "seal_mage_lantern"
+              ? "mage"
+              : state.rebirthConfig.selectedBuildIdentity;
+
+      state.rebirthConfig = sanitizeRebirthConfig({
+        config: {
+          ...state.rebirthConfig,
+          selectedBuildIdentity,
+          selectedSealId:
+            state.rebirthConfig.selectedSealId === selectedSeal
+              ? undefined
+              : selectedSeal,
+        },
+        totalMerit: state.totalMerit,
+        plannerContext: {
+          lifetimeStats: state.lifetimeStats,
+          worldMemoryTags: state.worldMemoryTags,
+        },
+        summary: state.pendingLifeReview,
+      });
+    },
     toggleRebirthPerk: (state, action: PayloadAction<string>) => {
-      if (state.flowStep !== "hall") return;
+      if (state.flowStep !== "hall" || !state.pendingLifeReview) return;
       if (!state.unlockedPerkIds.includes(action.payload)) return;
 
       const hasPerk = state.rebirthConfig.selectedPerkIds.includes(action.payload);
@@ -89,41 +142,66 @@ const soulSlice = createSlice({
           ? state.rebirthConfig.selectedPerkIds.filter((perkId) => perkId !== action.payload)
           : [...state.rebirthConfig.selectedPerkIds, action.payload],
       };
-
-      const clampedConfig = clampSelectedHeirlooms(nextConfig);
-
-      if (!hasPerk || canAffordConfig(state, clampedConfig)) {
-        state.rebirthConfig = clampedConfig;
-      }
+      state.rebirthConfig = sanitizeRebirthConfig({
+        config: nextConfig,
+        totalMerit: state.totalMerit,
+        plannerContext: {
+          lifetimeStats: state.lifetimeStats,
+          worldMemoryTags: state.worldMemoryTags,
+        },
+        summary: state.pendingLifeReview,
+      });
     },
     toggleSelectedHeirloom: (state, action: PayloadAction<string>) => {
       if (state.flowStep !== "hall" || !state.pendingLifeReview) return;
 
       const hasHeirloom = state.rebirthConfig.selectedHeirloomIds.includes(action.payload);
-      const slotLimit = getRebirthConfigHeirloomSlotCount(state.rebirthConfig);
-      state.rebirthConfig.selectedHeirloomIds = hasHeirloom
-        ? state.rebirthConfig.selectedHeirloomIds.filter((id) => id !== action.payload)
-        : [...state.rebirthConfig.selectedHeirloomIds, action.payload].slice(-slotLimit);
+      state.rebirthConfig = sanitizeRebirthConfig({
+        config: {
+          ...state.rebirthConfig,
+          selectedHeirloomIds: hasHeirloom
+            ? state.rebirthConfig.selectedHeirloomIds.filter((id) => id !== action.payload)
+            : [...state.rebirthConfig.selectedHeirloomIds, action.payload],
+        },
+        totalMerit: state.totalMerit,
+        plannerContext: {
+          lifetimeStats: state.lifetimeStats,
+          worldMemoryTags: state.worldMemoryTags,
+        },
+        summary: state.pendingLifeReview,
+      });
     },
     setRebirthSpiritRootOverride: (
       state,
       action: PayloadAction<SpiritRootId | undefined>
     ) => {
-      if (state.flowStep !== "hall") return;
-
-      const nextConfig: RebirthConfig = {
-        ...state.rebirthConfig,
-        spiritRootOverride: action.payload,
-      };
-
-      if (canAffordConfig(state, nextConfig)) {
-        state.rebirthConfig = nextConfig;
-      }
+      if (state.flowStep !== "hall" || !state.pendingLifeReview) return;
+      state.rebirthConfig = sanitizeRebirthConfig({
+        config: {
+          ...state.rebirthConfig,
+          spiritRootOverride: action.payload,
+        },
+        totalMerit: state.totalMerit,
+        plannerContext: {
+          lifetimeStats: state.lifetimeStats,
+          worldMemoryTags: state.worldMemoryTags,
+        },
+        summary: state.pendingLifeReview,
+      });
     },
     finalizeRebirth: (state) => {
       const pending = state.pendingLifeReview;
       if (!pending) return;
 
+      state.rebirthConfig = sanitizeRebirthConfig({
+        config: state.rebirthConfig,
+        totalMerit: state.totalMerit,
+        plannerContext: {
+          lifetimeStats: state.lifetimeStats,
+          worldMemoryTags: state.worldMemoryTags,
+        },
+        summary: pending,
+      });
       const selectedCandidates = pending.eligibleHeirlooms.filter((candidate) =>
         state.rebirthConfig.selectedHeirloomIds.includes(candidate.id)
       );
@@ -134,6 +212,8 @@ const soulSlice = createSlice({
       state.flowStep = "inactive";
       state.pendingLifeReview = null;
       state.rebirthConfig = {
+        plannerVersion: REINCARNATION_PLANNER_VERSION,
+        selectedBuildIdentity: "balanced",
         selectedPerkIds: [],
         selectedHeirloomIds: [],
       };
@@ -148,11 +228,28 @@ const soulSlice = createSlice({
           state.worldMemoryTags.push(tag);
         }
       });
+      state.unlockedPerkIds = getAvailableReincarnationPerks({
+        lifetimeStats: state.lifetimeStats,
+        worldMemoryTags: state.worldMemoryTags,
+      }).map((perk) => perk.id);
+      if (state.pendingLifeReview) {
+        state.rebirthConfig = sanitizeRebirthConfig({
+          config: state.rebirthConfig,
+          totalMerit: state.totalMerit,
+          plannerContext: {
+            lifetimeStats: state.lifetimeStats,
+            worldMemoryTags: state.worldMemoryTags,
+          },
+          summary: state.pendingLifeReview,
+        });
+      }
     },
     clearReincarnationFlow: (state) => {
       state.flowStep = "inactive";
       state.pendingLifeReview = null;
       state.rebirthConfig = {
+        plannerVersion: REINCARNATION_PLANNER_VERSION,
+        selectedBuildIdentity: "balanced",
         selectedPerkIds: [],
         selectedHeirloomIds: [],
       };
@@ -163,6 +260,8 @@ const soulSlice = createSlice({
 export const {
   startLifeReview,
   enterReincarnationHall,
+  setRebirthBuildIdentity,
+  setRebirthSoulSeal,
   toggleRebirthPerk,
   toggleSelectedHeirloom,
   setRebirthSpiritRootOverride,

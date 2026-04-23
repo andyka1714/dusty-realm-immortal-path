@@ -88,29 +88,69 @@ interface PersistedEnvelopeV2 {
 
 ## 4. 目前正式支援的輪迴配置
 
-目前正式輪迴 planner 已支援以下配置：
+目前正式輪迴 planner 已升級到 v2，正式支援以下配置：
 
-### A. 魂印 (Perks)
+### A. Build Identity / Planner v2
+
+- `rebirthConfig` 現在固定帶有：
+  - `plannerVersion`
+  - `selectedBuildIdentity`
+  - `selectedSealId`
+  - `selectedPerkIds`
+  - `selectedHeirloomIds`
+  - `spiritRootOverride`
+- `selectedBuildIdentity` 目前有四種：
+  - `均衡開局`
+  - `劍修轉世`
+  - `體修轉世`
+  - `法修轉世`
+- 非 `均衡開局` 時，輪迴 Hall 會明確限制不相符的職業武器 / 手札遺珍，並阻擋互斥魂印。
+- 舊存檔進入 v2 時，migration 會自動補 `plannerVersion = 2`，並清掉不合法的流派、魂印、遺珍與 cost 組合。
+
+### B. 魂印 (Perks)
 
 - `先天根骨`：下一世根骨 `+2`，花費 `25` 功德
 - `靈慧早開`：下一世悟性 `+2`，花費 `25` 功德
 - `前世餘澤`：下一世初始靈石 `+150`，花費 `40` 功德
 - `武魄先成`：下一世體魄 `+2`，於至少抵達 `金丹` 後開放，花費 `25` 功德
 - `前塵寶匣`：下一世可額外攜帶 `1` 件遺珍，於至少抵達 `元嬰` 後開放，花費 `80` 功德
+- `劍骨先鳴 / 戰軀先成 / 玄識早醒`：第二批 build-lane 專屬魂印，只能在對應流派下選取
+- `劍鞘殘響 / 血鼓殘響 / 星燈殘響`：需讀取 `soul.worldMemoryTags` 的 route memory 才能解鎖的輪迴魂印
 
-### B. 靈根改寫
+### C. 本命魂印 (Soul Seals)
+
+- `劍脈轉世`
+- `戰軀轉世`
+- `玄燈轉世`
+
+本命魂印會額外提供：
+
+- 更強的下一世 build identity cue
+- 一組固定 stat / 起手資源 bonus
+- 更明確的遺珍限制說明
+
+這三個魂印目前都需要：
+
+- 至少曾抵達 `金丹`
+- 對應的 route / world memory 已被寫入 `soul.worldMemoryTags`
+
+### D. 靈根改寫
 
 - 可在輪迴大殿指定下一世靈根
 - 第一批 cost 固定為 `100` 功德
 - 若不指定，則承接前世靈根作為 rebirth baseline
 
-### C. 遺珍繼承
+### E. 遺珍繼承
 
 - 基礎可攜 `1` 格
 - 若選擇 `前塵寶匣`，可擴成 `2` 格
 - 可攜物類型：
   - 有 instance 的裝備
   - 技能書 / 功法手札
+- v2 新增流派限制：
+  - `均衡開局` 不限制職業向遺珍
+  - `劍修轉世 / 體修轉世 / 法修轉世` 會自動排除不相符的職業武器與手札
+  - 通用防具 / 飾品仍可帶入
 
 ## 5. 目前正式 UI 流程
 
@@ -122,7 +162,7 @@ interface PersistedEnvelopeV2 {
 4. 顯示 `本世結算`
 5. 玩家按下 `進入輪迴大殿`
 6. 顯示 `輪迴大殿`
-7. 玩家配置魂印 / 靈根 / 遺珍
+7. 玩家配置 build identity / 本命魂印 / 魂印 / 靈根 / 遺珍
 8. 按下 `投胎轉世`
 9. 重建新一世角色，保留 `soul progression`
 
@@ -139,23 +179,24 @@ interface PersistedEnvelopeV2 {
 
 - `totalMerit`
 - `lifetimeStats`
+- `worldMemoryTags`
 - 已解鎖魂印
 - 已選中的遺珍（以新 instance 重建）
 
 ## 6. 目前尚未在第一批開放的內容
 
-以下仍屬後續批次，而不是這一批 foundation 已完成內容：
+以下仍屬後續批次，而不是目前已完成內容：
 
-- 更大的魂印 catalog 與更細的鎖定條件
-- 職業專屬輪迴分支
-- 更高上限的多格遺珍繼承
+- 更大的魂印 / 本命魂印 catalog
+- 輪迴 build identity 直接影響 NPC / 劇情 / 世界反應
+- 更高上限的多格遺珍繼承與更深的 heirloom quality rule
 - 財富繼承百分比
 - 輪迴次數影響 NPC / 劇情 / 世界事件
 
 ## 7. 後續方向
 
-下一批應優先補的，不是再重做 `soul` 結構，而是繼續把 planner 接進更大的 meta loop：
+下一批應優先補的，不是再重做 `soul` 結構，而是把 v2 planner 接進更大的 meta loop：
 
 1. 把更多 `Workshop / 百業 / 事件奇遇` 收益接進多周目長線
-2. 擴張職業專屬或路線專屬的 reincarnation perk / heirloom planner
+2. 擴張職業專屬或路線專屬的 reincarnation perk / seal / heirloom planner
 3. 讓輪迴次數開始影響世界、宗門與 route-specific 內容

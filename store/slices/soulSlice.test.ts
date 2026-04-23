@@ -3,6 +3,8 @@ import { MajorRealm, SpiritRootId } from "../../types";
 import soulReducer, {
   clearReincarnationFlow,
   enterReincarnationHall,
+  setRebirthBuildIdentity,
+  setRebirthSoulSeal,
   startLifeReview,
   toggleRebirthPerk,
   toggleSelectedHeirloom,
@@ -56,6 +58,8 @@ describe("soulSlice", () => {
 
     expect(selected.flowStep).toBe("hall");
     expect(selected.rebirthConfig.selectedPerkIds).toEqual([perkId]);
+    expect(selected.rebirthConfig.plannerVersion).toBe(2);
+    expect(selected.rebirthConfig.selectedBuildIdentity).toBe("balanced");
   });
 
   it("tracks a spirit-root override and can clear the reincarnation flow", () => {
@@ -153,5 +157,83 @@ describe("soulSlice", () => {
       "blade",
       "manual",
     ]);
+  });
+
+  it("keeps lane-specific perks mutually exclusive with the selected build identity", () => {
+    const reviewed = soulReducer(
+      undefined,
+      startLifeReview({
+        cause: "lifespan",
+        ageYears: 620,
+        highestRealm: MajorRealm.NascentSoul,
+        realmMerit: 1000,
+        ageMerit: 310,
+        totalMeritGained: 1310,
+        eligibleHeirlooms: [],
+      })
+    );
+    const hall = soulReducer(reviewed, enterReincarnationHall());
+    const sword = soulReducer(hall, setRebirthBuildIdentity("sword"));
+    const rejectedMage = soulReducer(sword, toggleRebirthPerk("rebirth_mage_insight"));
+    const acceptedSword = soulReducer(rejectedMage, toggleRebirthPerk("rebirth_sword_edge"));
+
+    expect(rejectedMage.rebirthConfig.selectedPerkIds).toEqual([]);
+    expect(acceptedSword.rebirthConfig.selectedPerkIds).toEqual([
+      "rebirth_sword_edge",
+    ]);
+  });
+
+  it("drops incompatible heirlooms and seals when the build identity changes", () => {
+    const reviewed = soulReducer(
+      {
+        ...soulReducer(undefined, { type: "@@INIT" }),
+        worldMemoryTags: ["route:sword:soul-sheath", "route:mage:lantern"],
+      },
+      startLifeReview({
+        cause: "battle",
+        ageYears: 620,
+        highestRealm: MajorRealm.NascentSoul,
+        realmMerit: 1000,
+        ageMerit: 310,
+        totalMeritGained: 1310,
+        eligibleHeirlooms: [
+          {
+            id: "sword_manual",
+            itemId: "manual_s_tr_active",
+            label: "通玄劍錄 x1",
+            sourceType: "skill_manual",
+            count: 1,
+            quality: 2,
+          },
+          {
+            id: "mage_manual",
+            itemId: "manual_m_tr_active",
+            label: "太乙玄光策 x1",
+            sourceType: "skill_manual",
+            count: 1,
+            quality: 2,
+          },
+        ],
+      })
+    );
+    const hall = soulReducer(reviewed, enterReincarnationHall());
+    const sword = soulReducer(hall, setRebirthBuildIdentity("sword"));
+    const sealed = soulReducer(sword, setRebirthSoulSeal("seal_sword_edge"));
+    const withSwordManual = soulReducer(sealed, toggleSelectedHeirloom("sword_manual"));
+    const attemptedMageManual = soulReducer(
+      withSwordManual,
+      toggleSelectedHeirloom("mage_manual")
+    );
+    const switchedToMage = soulReducer(
+      attemptedMageManual,
+      setRebirthBuildIdentity("mage")
+    );
+
+    expect(attemptedMageManual.rebirthConfig.selectedHeirloomIds).toEqual([
+      "sword_manual",
+    ]);
+    expect(sealed.rebirthConfig.selectedSealId).toBe("seal_sword_edge");
+    expect(switchedToMage.rebirthConfig.selectedSealId).toBeUndefined();
+    expect(switchedToMage.rebirthConfig.selectedHeirloomIds).toEqual([]);
   });
 });

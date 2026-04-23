@@ -14,6 +14,8 @@ import encounterReducer, {
 } from "../slices/encounterSlice";
 import soulReducer, {
   enterReincarnationHall,
+  setRebirthBuildIdentity,
+  setRebirthSoulSeal,
   toggleRebirthPerk,
   toggleSelectedHeirloom,
 } from "../slices/soulSlice";
@@ -148,5 +150,57 @@ describe("reincarnation actions", () => {
     expect(state.encounter.resolvedEventIds).toEqual([]);
     expect(state.soul.flowStep).toBe("inactive");
     expect(state.soul.lifetimeStats.totalReincarnations).toBe(1);
+  });
+
+  it("enforces build-identity heirloom constraints and carries the identity bonus into the next life", () => {
+    const seeded = createReincarnationReadyStore();
+    seeded.dispatch(addItem({ itemId: "wooden_shield", count: 1 }));
+    seeded.dispatch(addItem({ itemId: getSkillManualId("m_tr_active"), count: 1 }));
+    seeded.dispatch(addItem({ itemId: getSkillManualId("s_tr_active"), count: 1 }));
+    const store = createTestStore({
+      ...seeded.getState(),
+      soul: {
+        ...seeded.getState().soul,
+        worldMemoryTags: ["route:sword:soul-sheath"],
+      },
+      character: {
+        ...seeded.getState().character,
+        majorRealm: MajorRealm.GoldenCore,
+      },
+    });
+
+    store.dispatch(startLifeReviewFromCurrentRun("lifespan"));
+    store.dispatch(enterReincarnationHall());
+    store.dispatch(setRebirthBuildIdentity("sword"));
+    store.dispatch(setRebirthSoulSeal("seal_sword_edge"));
+    store.dispatch(toggleRebirthPerk("rebirth_sword_edge"));
+    store.dispatch(toggleRebirthPerk("rebirth_extra_heirloom_slot"));
+
+    const candidates = store.getState().soul.pendingLifeReview?.eligibleHeirlooms ?? [];
+    const genericShieldId =
+      candidates.find((candidate) => candidate.itemId === "wooden_shield")?.id ?? "";
+    const swordManualId =
+      candidates.find((candidate) => candidate.itemId === getSkillManualId("s_tr_active"))?.id ??
+      "";
+    const mageManualId =
+      candidates.find((candidate) => candidate.itemId === getSkillManualId("m_tr_active"))?.id ??
+      "";
+
+    store.dispatch(toggleSelectedHeirloom(mageManualId));
+    store.dispatch(toggleSelectedHeirloom(genericShieldId));
+    store.dispatch(toggleSelectedHeirloom(swordManualId));
+    store.dispatch(completeRebirthFromHall());
+
+    const state = store.getState();
+
+    expect(state.soul.rebirthConfig.plannerVersion).toBe(2);
+    expect(state.soul.heirloomVault.map((candidate) => candidate.itemId)).toEqual([
+      getSkillManualId("s_tr_active"),
+    ]);
+    expect(state.inventory.items.map((slot) => slot.itemId)).toEqual([
+      getSkillManualId("s_tr_active"),
+    ]);
+    expect(state.character.attributes.rootBone).toBeGreaterThan(10);
+    expect(state.character.attributes.comprehension).toBeGreaterThan(10);
   });
 });

@@ -1,7 +1,10 @@
 import {
   EncounterState,
+  HeirloomCandidate,
   InventorySlot,
   ItemInstance,
+  LifeReviewSummary,
+  MajorRealm,
   SoulState,
   WorkshopDiscipline,
   WorkshopState,
@@ -14,7 +17,7 @@ import { getFormalSkill } from "../data/skills";
 import { normalizeFormalSkillIds } from "../data/skills/pool";
 import {
   getAvailableReincarnationPerks,
-  getRebirthConfigHeirloomSlotCount,
+  sanitizeRebirthConfig,
 } from "../utils/reincarnation";
 import { createInitialSoulState } from "./slices/soulSlice";
 import { createInitialEncounterState } from "./slices/encounterSlice";
@@ -175,6 +178,77 @@ const mergeStackableInventorySlots = (slots: InventorySlot[]) => {
   return mergedSlots;
 };
 
+const migratePersistedHeirloomCandidate = (candidate: unknown): HeirloomCandidate | null => {
+  if (!isRecord(candidate)) {
+    return null;
+  }
+
+  if (
+    typeof candidate.id !== "string" ||
+    typeof candidate.itemId !== "string" ||
+    typeof candidate.label !== "string" ||
+    (candidate.sourceType !== "equipment" && candidate.sourceType !== "skill_manual") ||
+    !isPositiveInteger(candidate.count) ||
+    !isNonNegativeInteger(candidate.quality)
+  ) {
+    return null;
+  }
+
+  const nextCandidate: HeirloomCandidate = {
+    id: candidate.id,
+    itemId: candidate.itemId,
+    label: candidate.label,
+    sourceType: candidate.sourceType,
+    count: candidate.count,
+    quality: candidate.quality,
+  };
+
+  if (typeof candidate.instanceId === "string") {
+    nextCandidate.instanceId = candidate.instanceId;
+  }
+  if (candidate.instance !== undefined) {
+    const migratedInstance = migratePersistedItemInstance(candidate.instance);
+    if (migratedInstance) {
+      nextCandidate.instance = migratedInstance;
+    }
+  }
+
+  return nextCandidate;
+};
+
+const migratePersistedLifeReviewSummary = (summary: unknown): LifeReviewSummary | null => {
+  if (!isRecord(summary)) {
+    return null;
+  }
+
+  if (
+    (summary.cause !== "lifespan" &&
+      summary.cause !== "battle" &&
+      summary.cause !== "voluntary") ||
+    !isNonNegativeInteger(summary.ageYears) ||
+    !isFiniteNumber(summary.highestRealm) ||
+    !isFiniteNumber(summary.realmMerit) ||
+    !isFiniteNumber(summary.ageMerit) ||
+    !isFiniteNumber(summary.totalMeritGained)
+  ) {
+    return null;
+  }
+
+  return {
+    cause: summary.cause,
+    ageYears: summary.ageYears,
+    highestRealm: summary.highestRealm as MajorRealm,
+    realmMerit: summary.realmMerit,
+    ageMerit: summary.ageMerit,
+    totalMeritGained: summary.totalMeritGained,
+    eligibleHeirlooms: Array.isArray(summary.eligibleHeirlooms)
+      ? summary.eligibleHeirlooms
+          .map((candidate) => migratePersistedHeirloomCandidate(candidate))
+          .filter((candidate): candidate is HeirloomCandidate => Boolean(candidate))
+      : [],
+  };
+};
+
 export const migratePersistedCharacterState = (character: unknown) => {
   if (!isRecord(character)) {
     return character;
@@ -239,39 +313,27 @@ const migratePersistedSoulState = (soul: unknown): SoulState => {
           )
         )
       : initialSoul.worldMemoryTags,
+    pendingLifeReview: migratePersistedLifeReviewSummary(soul.pendingLifeReview),
   };
 
-  const unlockedPerkIds = getAvailableReincarnationPerks(
-    nextSoul.lifetimeStats
-  ).map((perk) => perk.id);
-  const selectedPerkIds = Array.isArray(nextSoul.rebirthConfig.selectedPerkIds)
-    ? nextSoul.rebirthConfig.selectedPerkIds.filter(
-        (perkId): perkId is string => typeof perkId === "string"
-      )
-    : initialSoul.rebirthConfig.selectedPerkIds;
-  const selectedHeirloomIds = Array.isArray(
-    nextSoul.rebirthConfig.selectedHeirloomIds
-  )
-    ? nextSoul.rebirthConfig.selectedHeirloomIds.filter(
-        (heirloomId): heirloomId is string => typeof heirloomId === "string"
-      )
-    : initialSoul.rebirthConfig.selectedHeirloomIds;
-  const validSelectedPerkIds = selectedPerkIds.filter((perkId) =>
-    unlockedPerkIds.includes(perkId)
-  );
-  const clampedHeirloomIds = selectedHeirloomIds.slice(
-    -getRebirthConfigHeirloomSlotCount({
-      ...nextSoul.rebirthConfig,
-      selectedPerkIds: validSelectedPerkIds,
-    })
+  const plannerContext = {
+    lifetimeStats: nextSoul.lifetimeStats,
+    worldMemoryTags: nextSoul.worldMemoryTags,
+  };
+  const unlockedPerkIds = getAvailableReincarnationPerks(plannerContext).map(
+    (perk) => perk.id
   );
 
   nextSoul.unlockedPerkIds = unlockedPerkIds;
-  nextSoul.rebirthConfig = {
-    ...nextSoul.rebirthConfig,
-    selectedPerkIds: validSelectedPerkIds,
-    selectedHeirloomIds: clampedHeirloomIds,
-  };
+  nextSoul.rebirthConfig = sanitizeRebirthConfig({
+    config: nextSoul.rebirthConfig,
+    totalMerit: nextSoul.totalMerit,
+    plannerContext,
+    summary: nextSoul.pendingLifeReview,
+  });
+  if (nextSoul.flowStep !== "inactive" && !nextSoul.pendingLifeReview) {
+    nextSoul.flowStep = "inactive";
+  }
 
   return nextSoul;
 };

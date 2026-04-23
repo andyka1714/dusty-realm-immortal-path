@@ -13,6 +13,8 @@ import { removeItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
 import {
   enterReincarnationHall,
+  setRebirthBuildIdentity,
+  setRebirthSoulSeal,
   setRebirthSpiritRootOverride,
   toggleRebirthPerk,
   toggleSelectedHeirloom,
@@ -296,9 +298,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
         summary={soul.pendingLifeReview}
         totalMerit={soul.totalMerit}
         lifetimeStats={soul.lifetimeStats}
+        worldMemoryTags={soul.worldMemoryTags}
         unlockedPerks={unlockedRebirthPerks}
         config={soul.rebirthConfig}
         onEnterHall={() => dispatch(enterReincarnationHall())}
+        onSelectBuildIdentity={(identity) =>
+          dispatch(setRebirthBuildIdentity(identity))
+        }
+        onSelectSoulSeal={(sealId) => dispatch(setRebirthSoulSeal(sealId))}
         onTogglePerk={(perkId) => dispatch(toggleRebirthPerk(perkId))}
         onToggleHeirloom={(heirloomId) =>
           dispatch(toggleSelectedHeirloom(heirloomId))

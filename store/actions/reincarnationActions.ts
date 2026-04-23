@@ -6,6 +6,7 @@ import {
   calculateLifeReviewSummary,
   getRebirthConfigSpiritStoneBonus,
   getRebirthConfigStatBonuses,
+  sanitizeRebirthConfig,
 } from "../../utils/reincarnation";
 import { finalizeRebirth, startLifeReview } from "../slices/soulSlice";
 import {
@@ -87,15 +88,24 @@ export const completeRebirthFromHall = (): ThunkAction<
     return;
   }
 
+  const normalizedConfig = sanitizeRebirthConfig({
+    config: state.soul.rebirthConfig,
+    totalMerit: state.soul.totalMerit,
+    plannerContext: {
+      lifetimeStats: state.soul.lifetimeStats,
+      worldMemoryTags: state.soul.worldMemoryTags,
+    },
+    summary: pendingReview,
+  });
   const selectedHeirlooms = pendingReview.eligibleHeirlooms.filter((candidate) =>
-    state.soul.rebirthConfig.selectedHeirloomIds.includes(candidate.id)
+    normalizedConfig.selectedHeirloomIds.includes(candidate.id)
   );
 
   const spiritRootId =
-    state.soul.rebirthConfig.spiritRootOverride ?? state.character.spiritRootId;
+    normalizedConfig.spiritRootOverride ?? state.character.spiritRootId;
   const attributes = applyAttributeBonuses(
     generateInitialStats(spiritRootId as SpiritRootId),
-    getRebirthConfigStatBonuses(state.soul.rebirthConfig)
+    getRebirthConfigStatBonuses(normalizedConfig)
   );
 
   dispatch(clearLogs());
@@ -113,7 +123,7 @@ export const completeRebirthFromHall = (): ThunkAction<
     })
   );
 
-  const spiritStoneBonus = getRebirthConfigSpiritStoneBonus(state.soul.rebirthConfig);
+  const spiritStoneBonus = getRebirthConfigSpiritStoneBonus(normalizedConfig);
   if (spiritStoneBonus > 0) {
     dispatch(addSpiritStones({ amount: spiritStoneBonus, source: "other" }));
   }

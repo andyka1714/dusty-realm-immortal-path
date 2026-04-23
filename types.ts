@@ -148,6 +148,7 @@ export interface CharacterState {
 export type LifeEndCause = "lifespan" | "battle" | "voluntary";
 
 export type ReincarnationFlowStep = "inactive" | "life_review" | "hall";
+export type ReincarnationBuildIdentity = "balanced" | "sword" | "body" | "mage";
 
 export interface HeirloomCandidate {
   id: string;
@@ -183,19 +184,62 @@ export interface ReincarnationPerk {
   description: string;
   cost: number;
   category?: "attribute" | "resource" | "legacy";
+  buildIdentity?: Exclude<ReincarnationBuildIdentity, "balanced">;
   unlockRequirement?: {
     minHighestRealm?: MajorRealm;
     minReincarnations?: number;
   };
+  requiredWorldMemoryTags?: string[];
   statBonuses?: Partial<BaseAttributes>;
   spiritStoneBonus?: number;
   heirloomSlotBonus?: number;
 }
 
+export interface ReincarnationSoulSeal {
+  id: string;
+  lane: Exclude<ReincarnationBuildIdentity, "balanced">;
+  name: string;
+  description: string;
+  cost: number;
+  unlockRequirement?: {
+    minHighestRealm?: MajorRealm;
+    minReincarnations?: number;
+  };
+  requiredWorldMemoryTags?: string[];
+  statBonuses?: Partial<BaseAttributes>;
+  spiritStoneBonus?: number;
+  identityTitle: string;
+  identityCue: string;
+  heirloomHint: string;
+}
+
+export interface ReincarnationPlannerContext {
+  lifetimeStats: SoulLifetimeStats;
+  worldMemoryTags: string[];
+}
+
 export interface RebirthConfig {
+  plannerVersion: number;
+  selectedBuildIdentity: ReincarnationBuildIdentity;
+  selectedSealId?: string;
   selectedPerkIds: string[];
   selectedHeirloomIds: string[];
   spiritRootOverride?: SpiritRootId;
+}
+
+export interface RebirthValidationReason {
+  type: "merit" | "slot" | "prereq" | "mutual_exclusion";
+  message: string;
+}
+
+export interface RebirthPlanPreview {
+  identityTitle: string;
+  identityCue: string;
+  expectedBenefits: string[];
+  invalidReasons: RebirthValidationReason[];
+  perkBlockedReasons: Record<string, RebirthValidationReason | undefined>;
+  heirloomBlockedReasons: Record<string, RebirthValidationReason | undefined>;
+  canConfirm: boolean;
 }
 
 export interface SoulState {

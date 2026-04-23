@@ -5,14 +5,17 @@ import { ItemQuality, MajorRealm } from "../../types";
 import { ReincarnationFlow } from "./ReincarnationFlow";
 import { getAvailableReincarnationPerks } from "../../utils/reincarnation";
 
+const createLifetimeStats = (realm = MajorRealm.NascentSoul) =>
+  ({
+    highestRealmEver: realm,
+    highestAgeYears: 620,
+    totalDeaths: 4,
+    totalReincarnations: 1,
+  }) as const;
+
 describe("ReincarnationFlow", () => {
   it("renders advanced planner perks and expanded heirloom slots in the hall", () => {
-    const lifetimeStats = {
-      highestRealmEver: MajorRealm.NascentSoul,
-      highestAgeYears: 620,
-      totalDeaths: 4,
-      totalReincarnations: 1,
-    } as const;
+    const lifetimeStats = createLifetimeStats();
 
     const markup = renderToStaticMarkup(
       <ReincarnationFlow
@@ -45,12 +48,20 @@ describe("ReincarnationFlow", () => {
         }}
         totalMerit={1310}
         lifetimeStats={lifetimeStats}
-        unlockedPerks={getAvailableReincarnationPerks(lifetimeStats)}
+        worldMemoryTags={["route:sword:soul-sheath"]}
+        unlockedPerks={getAvailableReincarnationPerks({
+          lifetimeStats,
+          worldMemoryTags: ["route:sword:soul-sheath"],
+        })}
         config={{
+          plannerVersion: 2,
+          selectedBuildIdentity: "balanced",
           selectedPerkIds: ["rebirth_extra_heirloom_slot"],
           selectedHeirloomIds: ["blade"],
         }}
         onEnterHall={() => undefined}
+        onSelectBuildIdentity={() => undefined}
+        onSelectSoulSeal={() => undefined}
         onTogglePerk={() => undefined}
         onToggleHeirloom={() => undefined}
         onSelectSpiritRoot={() => undefined}
@@ -85,12 +96,20 @@ describe("ReincarnationFlow", () => {
         }}
         totalMerit={375}
         lifetimeStats={lifetimeStats}
-        unlockedPerks={getAvailableReincarnationPerks(lifetimeStats)}
+        worldMemoryTags={[]}
+        unlockedPerks={getAvailableReincarnationPerks({
+          lifetimeStats,
+          worldMemoryTags: [],
+        })}
         config={{
+          plannerVersion: 2,
+          selectedBuildIdentity: "balanced",
           selectedPerkIds: [],
           selectedHeirloomIds: [],
         }}
         onEnterHall={() => undefined}
+        onSelectBuildIdentity={() => undefined}
+        onSelectSoulSeal={() => undefined}
         onTogglePerk={() => undefined}
         onToggleHeirloom={() => undefined}
         onSelectSpiritRoot={() => undefined}
@@ -101,5 +120,74 @@ describe("ReincarnationFlow", () => {
     expect(markup).toContain("尚未悟透");
     expect(markup).toContain("前塵寶匣");
     expect(markup).toContain("抵達元嬰後解鎖");
+  });
+
+  it("shows build identity cues, expected benefits, and blocked reasons in the hall preview", () => {
+    const lifetimeStats = {
+      highestRealmEver: MajorRealm.GoldenCore,
+      highestAgeYears: 280,
+      totalDeaths: 2,
+      totalReincarnations: 0,
+    } as const;
+
+    const markup = renderToStaticMarkup(
+      <ReincarnationFlow
+        flowStep="hall"
+        summary={{
+          cause: "lifespan",
+          ageYears: 280,
+          highestRealm: MajorRealm.Foundation,
+          realmMerit: 50,
+          ageMerit: 140,
+          totalMeritGained: 190,
+          eligibleHeirlooms: [
+            {
+              id: "shield",
+              itemId: "wooden_shield",
+              label: "下品 木鍋蓋",
+              sourceType: "equipment",
+              count: 1,
+              quality: ItemQuality.Low,
+            },
+            {
+              id: "mage-manual",
+              itemId: "manual_m_tr_active",
+              label: "天演真解秘卷 x1",
+              sourceType: "skill_manual",
+              count: 1,
+              quality: ItemQuality.Medium,
+            },
+          ],
+        }}
+        totalMerit={100}
+        lifetimeStats={lifetimeStats}
+        worldMemoryTags={["route:sword:soul-sheath"]}
+        unlockedPerks={getAvailableReincarnationPerks({
+          lifetimeStats,
+          worldMemoryTags: ["route:sword:soul-sheath"],
+        })}
+        config={{
+          plannerVersion: 2,
+          selectedBuildIdentity: "sword",
+          selectedSealId: "seal_sword_edge",
+          selectedPerkIds: ["rebirth_sword_edge", "rebirth_extra_heirloom_slot"],
+          selectedHeirloomIds: ["shield"],
+        }}
+        onEnterHall={() => undefined}
+        onSelectBuildIdentity={() => undefined}
+        onSelectSoulSeal={() => undefined}
+        onTogglePerk={() => undefined}
+        onToggleHeirloom={() => undefined}
+        onSelectSpiritRoot={() => undefined}
+        onConfirm={() => undefined}
+      />
+    );
+
+    expect(markup).toContain("劍修轉世");
+    expect(markup).toContain("本命魂印");
+    expect(markup).toContain("劍脈轉世");
+    expect(markup).toContain("功德不足");
+    expect(markup).toContain("與當前劍修流派不符");
+    expect(markup).toContain("與當前劍修流派互斥");
   });
 });

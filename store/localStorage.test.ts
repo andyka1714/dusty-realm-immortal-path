@@ -107,7 +107,7 @@ describe("loadState", () => {
     expect((loaded?.character as { skills?: string[] }).skills).toEqual(["m_tr_active"]);
     expect(loaded?.soul).toMatchObject({
       totalMerit: 512,
-      flowStep: "hall",
+      flowStep: "inactive",
       worldMemoryTags: ["route:sword:soul-sheath"],
     });
     expect(loaded?.encounter).toMatchObject({
@@ -208,15 +208,45 @@ describe("loadState", () => {
         soul: {
           totalMerit: 300,
           lifetimeStats: {
-            highestRealmEver: MajorRealm.Mortal,
-            highestAgeYears: 90,
-            totalDeaths: 1,
+            highestRealmEver: MajorRealm.GoldenCore,
+            highestAgeYears: 280,
+            totalDeaths: 2,
             totalReincarnations: 0,
           },
-          unlockedPerkIds: ["rebirth_extra_heirloom_slot"],
+          worldMemoryTags: ["route:sword:soul-sheath"],
+          unlockedPerkIds: ["rebirth_extra_heirloom_slot", "rebirth_mage_insight"],
+          pendingLifeReview: {
+            cause: "lifespan",
+            ageYears: 280,
+            highestRealm: MajorRealm.GoldenCore,
+            realmMerit: 200,
+            ageMerit: 140,
+            totalMeritGained: 340,
+            eligibleHeirlooms: [
+              {
+                id: "sword-manual",
+                itemId: getSkillManualId("s_tr_active"),
+                label: "通玄劍錄 x1",
+                sourceType: "skill_manual",
+                count: 1,
+                quality: 2,
+              },
+              {
+                id: "mage-manual",
+                itemId: getSkillManualId("m_tr_active"),
+                label: "太乙玄光策 x1",
+                sourceType: "skill_manual",
+                count: 1,
+                quality: 2,
+              },
+            ],
+          },
           rebirthConfig: {
-            selectedPerkIds: ["rebirth_extra_heirloom_slot"],
-            selectedHeirloomIds: ["blade", "manual"],
+            plannerVersion: 0,
+            selectedBuildIdentity: "sword",
+            selectedSealId: "seal_mage_lantern",
+            selectedPerkIds: ["rebirth_extra_heirloom_slot", "rebirth_mage_insight"],
+            selectedHeirloomIds: ["sword-manual", "mage-manual"],
           },
         },
       })
@@ -224,8 +254,12 @@ describe("loadState", () => {
 
     const loaded = loadState();
 
-    expect(loaded?.soul.unlockedPerkIds).not.toContain("rebirth_extra_heirloom_slot");
+    expect(loaded?.soul.rebirthConfig.plannerVersion).toBe(2);
+    expect(loaded?.soul.rebirthConfig.selectedBuildIdentity).toBe("sword");
+    expect(loaded?.soul.rebirthConfig.selectedSealId).toBeUndefined();
     expect(loaded?.soul.rebirthConfig.selectedPerkIds).toEqual([]);
-    expect(loaded?.soul.rebirthConfig.selectedHeirloomIds).toEqual(["manual"]);
+    expect(loaded?.soul.rebirthConfig.selectedHeirloomIds).toEqual([
+      "sword-manual",
+    ]);
   });
 });

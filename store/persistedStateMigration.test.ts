@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getSkillManualId } from "../data/items/manuals";
-import { MajorRealm } from "../types";
+import { ItemQuality, MajorRealm } from "../types";
 import {
   PersistedState,
   migratePersistedState,
@@ -70,7 +70,7 @@ describe("persisted state migration", () => {
     expect((migrated.character as { skills?: string[] }).skills).toEqual(["s_tr_active"]);
     expect(migrated.soul).toMatchObject({
       totalMerit: 420,
-      flowStep: "hall",
+      flowStep: "inactive",
       lifetimeStats: {
         highestRealmEver: MajorRealm.NascentSoul,
         totalDeaths: 3,
@@ -390,6 +390,76 @@ describe("persisted state migration", () => {
     expect(migrated.soul.unlockedPerkIds).not.toContain("rebirth_extra_heirloom_slot");
     expect(migrated.soul.rebirthConfig.selectedPerkIds).toEqual([]);
     expect(migrated.soul.rebirthConfig.selectedHeirloomIds).toEqual(["manual"]);
+  });
+
+  it("fills planner v2 defaults and sanitizes illegal build identity state from older saves", () => {
+    const migrated = migratePersistedState({
+      schemaVersion: 2,
+      current: createPersistedState(),
+      soul: {
+        totalMerit: 100,
+        flowStep: "hall",
+        lifetimeStats: {
+          highestRealmEver: MajorRealm.Foundation,
+          highestAgeYears: 280,
+          totalDeaths: 2,
+          totalReincarnations: 0,
+        },
+        pendingLifeReview: {
+          cause: "lifespan",
+          ageYears: 280,
+          highestRealm: MajorRealm.Foundation,
+          realmMerit: 50,
+          ageMerit: 140,
+          totalMeritGained: 190,
+          eligibleHeirlooms: [
+            {
+              id: "shield",
+              itemId: "wooden_shield",
+              label: "下品 木鍋蓋",
+              sourceType: "equipment",
+              count: 1,
+              quality: 0,
+            },
+            {
+              id: "sword-manual",
+              itemId: getSkillManualId("s_tr_active"),
+              label: "通玄劍錄 x1",
+              sourceType: "skill_manual",
+              count: 1,
+              quality: ItemQuality.High,
+            },
+            {
+              id: "mage-manual",
+              itemId: getSkillManualId("m_tr_active"),
+              label: "天演真解秘卷 x1",
+              sourceType: "skill_manual",
+              count: 1,
+              quality: ItemQuality.Medium,
+            },
+          ],
+        },
+        rebirthConfig: {
+          plannerVersion: 99,
+          selectedBuildIdentity: "sword",
+          selectedSealId: "seal_mage_lantern",
+          selectedPerkIds: [
+            "rebirth_sword_edge",
+            "rebirth_mage_insight",
+            "rebirth_extra_heirloom_slot",
+          ],
+          selectedHeirloomIds: ["mage-manual", "shield", "sword-manual"],
+        },
+      },
+    } as PersistedState);
+
+    expect(migrated.soul.rebirthConfig).toMatchObject({
+      plannerVersion: 2,
+      selectedBuildIdentity: "sword",
+      selectedSealId: undefined,
+      selectedPerkIds: ["rebirth_sword_edge"],
+      selectedHeirloomIds: ["sword-manual"],
+    });
   });
 
   it("drops broken manual-like ids that cannot be mapped to a formal manual", () => {
