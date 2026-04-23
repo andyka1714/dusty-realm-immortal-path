@@ -1,6 +1,6 @@
 # 洞府百業 (Workshop)
 
-目前 `聚靈陣 / 煉丹 / 煉器` 三個卡片已統一吃 `GameSection` 的內層框體語言，不再各自維護獨立 card chrome。`add-workshop-and-event-loops` 第一批也已把 `煉丹 / 煉器` 從 placeholder 推進成正式可操作 slice，`update-high-tier-workshop-depth` 已把第一批高階 recipe、材料 sink、熟練度與 UI cue 接進主流程，`update-workshop-specialization-expansion` 已補上第二批中高階 / 終盤 recipe 與第一批專精效果，而 `expand-workshop-source-specialization-unlocks` 已把材料來源與專精解鎖 / 切換成本正式化。
+目前 `聚靈陣 / 煉丹 / 煉器` 三個卡片已統一吃 `GameSection` 的內層框體語言，不再各自維護獨立 card chrome。`add-workshop-and-event-loops` 第一批也已把 `煉丹 / 煉器` 從 placeholder 推進成正式可操作 slice，`update-high-tier-workshop-depth` 已把第一批高階 recipe、材料 sink、熟練度與 UI cue 接進主流程，`update-workshop-specialization-expansion` 已補上第二批中高階 / 終盤 recipe 與第一批專精效果，`expand-workshop-source-specialization-unlocks` 已把材料來源與專精解鎖 / 切換成本正式化，而 `update-workshop-specialization-tree` 進一步把專精從單一 slot 升級成可重置的分支樹。
 
 ## 1. 聚靈陣 (Spirit Array)
 - **功能**: 提升基礎修煉速率。
@@ -15,7 +15,11 @@
   - `九轉鴻蒙丹`: 消耗 `縹緲星魂蓮 / 萬獸血骨殘材 / 聚靈草` 與爐火靈石，產出 `鴻蒙本源`
   - `萬獸飛昇液`: 消耗 `萬獸血骨殘材 / 縹緲星魂蓮 / 聚靈草`，產出 `飛昇仙引`
 - **用途**: `聚氣丹` 可直接補修為，是輪迴後前期修煉節奏的第一個百業入口。
-- **專精**: `鴻蒙凝丹` 需 `丹道熟練 24` 才能解鎖，切換成本為 `500 靈石`，重置成本為 `200 靈石`。效果會降低高階丹方靈石火耗並提高丹道熟練，但不減免 route-specific 材料。
+- **專精樹**:
+  - `內火定基`: 根基節點，需 `丹道熟練 8`，提供高階丹方熟練與品質穩定 cue。
+  - `鴻蒙凝丹`: 需先解鎖 `內火定基` 並達 `丹道熟練 24`。效果會降低高階丹方靈石火耗並提高丹道熟練，但不減免 route-specific 材料。
+  - `萬獸生息`: 需先解鎖 `內火定基`、達 `丹道熟練 30` 與 `渡劫` 境界。偏向品質 / 副收益 cue 與更高熟練收益。
+  - `鴻蒙凝丹` 與 `萬獸生息` 互斥，切換到另一分支前必須先重置丹道專精樹。
 - **目前定位**: 低階丹方提供修為補給，高階丹方承接宗門 / 世界後段材料，讓丹藥乘區不只停在 audit table。
 
 ## 3. 煉器 (Smithing)
@@ -26,7 +30,11 @@
   - `大道真身鑄胚`: 消耗 `萬獸血骨殘材 / 凌霄劍星鋼 / 玄鐵礦`，產出 `大道真身`
   - `至高法杖鍛造`: 消耗 `縹緲星魂蓮 / 凌霄劍星鋼 / 玄鐵礦`，產出 `至高法則杖`
 - **用途**: 讓玩家可透過材料與洞府投入，直接為當世 build 補第一件可自製裝備。
-- **專精**: `星火鍛胚` 需 `器道熟練 30` 才能解鎖，切換成本為 `500 靈石`，重置成本為 `200 靈石`。效果會降低高階器方靈石火耗並提高器道熟練，但不減免 route-specific 材料。
+- **專精樹**:
+  - `爐心定鍛`: 根基節點，需 `器道熟練 10`，提供高階器方熟練與品質穩定 cue。
+  - `星火鍛胚`: 需先解鎖 `爐心定鍛` 並達 `器道熟練 30`。效果會降低高階器方靈石火耗並提高器道熟練，但不減免 route-specific 材料。
+  - `魂鋼銘紋`: 需先解鎖 `爐心定鍛`、達 `器道熟練 36` 與 `仙人` 境界。偏向品質 / 副收益 cue 與更高熟練收益。
+  - `星火鍛胚` 與 `魂鋼銘紋` 互斥，切換到另一分支前必須先重置器道專精樹。
 - **目前定位**: 低階器方驗證材料 -> 裝備實例，高階器方開始承接 route-specific 材料與終盤 build 裝備追求。
 
 ## 4. 熟練度、品質與鎖定 cue
@@ -34,8 +42,11 @@
 Workshop state 已正式記錄：
 
 - `masteryByDiscipline`
+- `specializationTreeByDiscipline`
 - `specializationByDiscipline`
 - `craftedRecipeCounts`
+
+`specializationTreeByDiscipline` 是新的主狀態，記錄每個 discipline 的 `unlockedNodeIds / activeNodeId / activeBranchId`。`specializationByDiscipline` 仍保留為舊存檔與舊 selector 的相容 mirror，新規則與 recipe effect 都從專精樹推導。
 
 高階 recipe card 會顯示：
 
@@ -43,12 +54,12 @@ Workshop state 已正式記錄：
 - route tags
 - 材料擁有量與來源提示
 - 產出與品質提示
-- 目前專精、可選專精、解鎖條件、鎖定原因、切換 / 重置成本與 recipe 受專精影響的 cue
+- 目前專精節點、啟用分支、已解鎖節點、前置節點、互斥分支、鎖定原因、切換 / 解鎖 / 重置成本與 recipe 受專精影響的 cue
 - `丹道 / 器道` 熟練度收益與專精後的調整值
 - route-specific 材料來源 cue，對應到實際 encounter 的 route / category
 - 境界、百業等級、靈石或材料不足時的鎖定原因
 
-舊存檔若缺少熟練度或專精欄位，migration 會補上安全預設值。
+舊存檔若缺少熟練度或專精樹欄位，migration 會補上安全預設值。若舊存檔仍只有扁平 `specializationByDiscipline`，合法舊專精會映射成對應專精樹節點並自動補上必要前置節點；不合法或未知值不會成為 active tree node。
 
 ## 5. 事件與奇遇承接
 
@@ -95,7 +106,7 @@ Workshop state 已正式記錄：
 
 ## 6. 後續可擴充部分
 
-目前第二批 recipe、第一批專精效果、材料來源 cue 與專精解鎖 / 切換成本都已完成，後續若要再擴充，重點會是：
+目前第二批 recipe、第一批專精效果、材料來源 cue、專精解鎖 / 切換成本與可重置分支樹都已完成，後續若要再擴充，重點會是：
 
 - 更多職業 / 宗門專屬 recipe 分支
-- 更細的專精樹、專精重置懲罰或跨路線專精互斥
+- 更多跨路線專精互斥、專精副收益實裝或更高階的 root-to-leaf 分支

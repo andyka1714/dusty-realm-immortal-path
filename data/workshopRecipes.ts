@@ -1,4 +1,11 @@
 import { MajorRealm, ItemQuality, type WorkshopDiscipline, type WorkshopState } from "../types";
+import {
+  WORKSHOP_SPECIALIZATION_NODES,
+  getActiveWorkshopSpecializationNode,
+  getWorkshopRecipeSpecializationEffect,
+  getWorkshopSpecializationNodeStatus,
+  type WorkshopSpecializationNode,
+} from "./workshopSpecializationTree";
 
 export type WorkshopRecipeDiscipline = WorkshopDiscipline;
 export type WorkshopRecipeTier = "basic" | "advanced" | "highRealm";
@@ -27,20 +34,7 @@ export interface WorkshopRecipe {
   }>;
 }
 
-export interface WorkshopSpecialization {
-  id: string;
-  name: string;
-  discipline: WorkshopRecipeDiscipline;
-  description: string;
-  appliesToTier?: WorkshopRecipeTier;
-  unlockRequirement?: {
-    minMastery?: number;
-  };
-  switchCost?: number;
-  resetCost?: number;
-  spiritStoneCostMultiplier?: number;
-  masteryYieldBonus?: number;
-}
+export type WorkshopSpecialization = WorkshopSpecializationNode;
 
 export interface WorkshopSpecializationUnlockStatus {
   unlocked: boolean;
@@ -51,38 +45,12 @@ export interface WorkshopRecipeCraftingPlan {
   spiritStoneCost: number;
   masteryYield: number;
   activeSpecialization: WorkshopSpecialization | null;
+  qualityCues: string[];
+  outputCues: string[];
 }
 
-export const WORKSHOP_SPECIALIZATIONS: Record<string, WorkshopSpecialization> = {
-  alchemy_hongmeng_condenser: {
-    id: "alchemy_hongmeng_condenser",
-    name: "鴻蒙凝丹",
-    discipline: "alchemy",
-    description: "高階丹方靈石火耗降低，並額外累積丹道熟練；材料 sink 維持原配方。",
-    appliesToTier: "highRealm",
-    unlockRequirement: {
-      minMastery: 24,
-    },
-    switchCost: 500,
-    resetCost: 200,
-    spiritStoneCostMultiplier: 0.9,
-    masteryYieldBonus: 6,
-  },
-  smithing_starfire_tempering: {
-    id: "smithing_starfire_tempering",
-    name: "星火鍛胚",
-    discipline: "smithing",
-    description: "高階器方靈石火耗降低，並額外累積器道熟練；路線材料不被減免。",
-    appliesToTier: "highRealm",
-    unlockRequirement: {
-      minMastery: 30,
-    },
-    switchCost: 500,
-    resetCost: 200,
-    spiritStoneCostMultiplier: 0.9,
-    masteryYieldBonus: 8,
-  },
-};
+export const WORKSHOP_SPECIALIZATIONS: Record<string, WorkshopSpecialization> =
+  WORKSHOP_SPECIALIZATION_NODES;
 
 export const WORKSHOP_RECIPES: Record<string, WorkshopRecipe> = {
   qi_pill: {
@@ -241,43 +209,21 @@ const getActiveWorkshopSpecialization = (
   workshop: WorkshopState,
   recipe: WorkshopRecipe
 ) => {
-  const specializationId = workshop.specializationByDiscipline[recipe.discipline];
-  const specialization = specializationId ? WORKSHOP_SPECIALIZATIONS[specializationId] : null;
-
-  if (!specialization || specialization.discipline !== recipe.discipline) {
-    return null;
-  }
-
-  if (specialization.appliesToTier && specialization.appliesToTier !== recipe.tier) {
-    return null;
-  }
-
-  if (!getWorkshopSpecializationUnlockStatus(workshop, specialization).unlocked) {
-    return null;
-  }
-
-  return specialization;
+  return getWorkshopRecipeSpecializationEffect({
+    workshop,
+    discipline: recipe.discipline,
+    tier: recipe.tier,
+  }).activeNode;
 };
 
 export const getWorkshopSpecializationUnlockStatus = (
   workshop: WorkshopState,
   specialization: WorkshopSpecialization
 ): WorkshopSpecializationUnlockStatus => {
-  const minMastery = specialization.unlockRequirement?.minMastery;
-
-  if (
-    minMastery !== undefined &&
-    workshop.masteryByDiscipline[specialization.discipline] < minMastery
-  ) {
-    return {
-      unlocked: false,
-      reason: `${specialization.discipline === "alchemy" ? "丹道" : "器道"}熟練需達 ${minMastery}`,
-    };
-  }
-
+  const status = getWorkshopSpecializationNodeStatus({ workshop, node: specialization });
   return {
-    unlocked: true,
-    reason: null,
+    unlocked: status.isAvailable,
+    reason: status.lockReason ?? status.conflictReason,
   };
 };
 
@@ -285,17 +231,29 @@ export const getWorkshopRecipeCraftingPlan = (
   recipe: WorkshopRecipe,
   workshop: WorkshopState
 ): WorkshopRecipeCraftingPlan => {
-  const activeSpecialization = getActiveWorkshopSpecialization(workshop, recipe);
-  const spiritStoneCost = activeSpecialization?.spiritStoneCostMultiplier
-    ? Math.ceil(recipe.spiritStoneCost * activeSpecialization.spiritStoneCostMultiplier)
-    : recipe.spiritStoneCost;
+  const specializationEffect = getWorkshopRecipeSpecializationEffect({
+    workshop,
+    discipline: recipe.discipline,
+    tier: recipe.tier,
+  });
+  const activeSpecialization = getActiveWorkshopSpecializationNode(workshop, recipe.discipline);
+  const spiritStoneCost = Math.ceil(
+    recipe.spiritStoneCost * specializationEffect.spiritStoneCostMultiplier
+  );
   const masteryYield =
-    (recipe.masteryYield ?? 1) + (activeSpecialization?.masteryYieldBonus ?? 0);
+    (recipe.masteryYield ?? 1) + specializationEffect.masteryYieldBonus;
 
   return {
     spiritStoneCost,
     masteryYield,
-    activeSpecialization,
+    activeSpecialization:
+      activeSpecialization?.effect &&
+      (!activeSpecialization.effect.appliesToTier ||
+        activeSpecialization.effect.appliesToTier === recipe.tier)
+        ? activeSpecialization
+        : null,
+    qualityCues: specializationEffect.qualityCues,
+    outputCues: specializationEffect.outputCues,
   };
 };
 

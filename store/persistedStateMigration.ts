@@ -19,6 +19,11 @@ import {
 import { createInitialSoulState } from "./slices/soulSlice";
 import { createInitialEncounterState } from "./slices/encounterSlice";
 import { createInitialWorkshopState } from "./slices/workshopSlice";
+import {
+  createInitialWorkshopSpecializationTreeState,
+  getWorkshopSpecializationNode,
+  getWorkshopSpecializationNodesForDiscipline,
+} from "../data/workshopSpecializationTree";
 
 export interface LegacyPersistedState {
   character: unknown;
@@ -328,6 +333,76 @@ const sanitizeWorkshopSpecializationRecord = (value: unknown) => {
   return nextRecord;
 };
 
+const appendWorkshopSpecializationNodeWithPrerequisites = (
+  nodeId: string,
+  unlockedNodeIds: string[]
+) => {
+  const node = getWorkshopSpecializationNode(nodeId);
+  if (!node) {
+    return;
+  }
+
+  node.prerequisiteNodeIds?.forEach((prerequisiteNodeId) => {
+    appendWorkshopSpecializationNodeWithPrerequisites(prerequisiteNodeId, unlockedNodeIds);
+  });
+
+  if (!unlockedNodeIds.includes(node.id)) {
+    unlockedNodeIds.push(node.id);
+  }
+};
+
+const sanitizeWorkshopSpecializationTreeRecord = (
+  treeValue: unknown,
+  legacySpecializationValue: unknown
+): WorkshopState["specializationTreeByDiscipline"] => {
+  const initialTreeState = createInitialWorkshopSpecializationTreeState();
+  const legacySpecializations = sanitizeWorkshopSpecializationRecord(legacySpecializationValue);
+  const nextTreeState: WorkshopState["specializationTreeByDiscipline"] = {
+    alchemy: { ...initialTreeState.alchemy, unlockedNodeIds: [] },
+    smithing: { ...initialTreeState.smithing, unlockedNodeIds: [] },
+  };
+
+  WORKSHOP_DISCIPLINES.forEach((discipline) => {
+    const disciplineNodeIds = new Set(
+      getWorkshopSpecializationNodesForDiscipline(discipline).map((node) => node.id)
+    );
+    const rawDisciplineTree = isRecord(treeValue) && isRecord(treeValue[discipline])
+      ? treeValue[discipline]
+      : undefined;
+    const rawUnlockedNodeIds = rawDisciplineTree?.unlockedNodeIds;
+    const unlockedNodeIds = Array.isArray(rawUnlockedNodeIds)
+      ? rawUnlockedNodeIds.filter(
+          (nodeId): nodeId is string =>
+            typeof nodeId === "string" && disciplineNodeIds.has(nodeId)
+        )
+      : [];
+
+    const rawActiveNodeId = rawDisciplineTree?.activeNodeId;
+    const legacyActiveNodeId = legacySpecializations[discipline];
+    const activeNodeId =
+      typeof rawActiveNodeId === "string" && disciplineNodeIds.has(rawActiveNodeId)
+        ? rawActiveNodeId
+        : typeof legacyActiveNodeId === "string" && disciplineNodeIds.has(legacyActiveNodeId)
+          ? legacyActiveNodeId
+          : null;
+
+    if (activeNodeId) {
+      appendWorkshopSpecializationNodeWithPrerequisites(activeNodeId, unlockedNodeIds);
+    }
+
+    const activeNode = activeNodeId ? getWorkshopSpecializationNode(activeNodeId) : null;
+
+    nextTreeState[discipline] = {
+      unlockedNodeIds,
+      activeNodeId: activeNode && unlockedNodeIds.includes(activeNode.id) ? activeNode.id : null,
+      activeBranchId:
+        activeNode && unlockedNodeIds.includes(activeNode.id) ? activeNode.branchId : null,
+    };
+  });
+
+  return nextTreeState;
+};
+
 const sanitizeCraftedRecipeCounts = (value: unknown) => {
   if (!isRecord(value) || Array.isArray(value)) {
     return {};
@@ -347,6 +422,15 @@ const migratePersistedWorkshopState = (workshop: unknown): WorkshopState => {
     return initialWorkshop;
   }
 
+  const specializationTreeByDiscipline = sanitizeWorkshopSpecializationTreeRecord(
+    workshop.specializationTreeByDiscipline,
+    workshop.specializationByDiscipline
+  );
+  const specializationByDiscipline: WorkshopState["specializationByDiscipline"] = {
+    alchemy: specializationTreeByDiscipline.alchemy.activeNodeId,
+    smithing: specializationTreeByDiscipline.smithing.activeNodeId,
+  };
+
   return {
     ...initialWorkshop,
     ...workshop,
@@ -363,9 +447,8 @@ const migratePersistedWorkshopState = (workshop: unknown): WorkshopState => {
       : initialWorkshop.unlockedRecipes,
     craftedRecipeCounts: sanitizeCraftedRecipeCounts(workshop.craftedRecipeCounts),
     masteryByDiscipline: sanitizeWorkshopNumberRecord(workshop.masteryByDiscipline),
-    specializationByDiscipline: sanitizeWorkshopSpecializationRecord(
-      workshop.specializationByDiscipline
-    ),
+    specializationTreeByDiscipline,
+    specializationByDiscipline,
   };
 };
 

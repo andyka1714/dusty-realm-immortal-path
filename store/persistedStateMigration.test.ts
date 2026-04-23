@@ -182,10 +182,22 @@ describe("persisted state migration", () => {
         alchemy: null,
         smithing: null,
       },
+      specializationTreeByDiscipline: {
+        alchemy: {
+          unlockedNodeIds: [],
+          activeNodeId: null,
+          activeBranchId: null,
+        },
+        smithing: {
+          unlockedNodeIds: [],
+          activeNodeId: null,
+          activeBranchId: null,
+        },
+      },
     });
   });
 
-  it("keeps valid workshop mastery and specialization while sanitizing malformed values", () => {
+  it("migrates legacy workshop specialization selections into a safe tree path", () => {
     const migrated = migratePersistedState(
       createPersistedState({
         workshop: {
@@ -194,7 +206,7 @@ describe("persisted state migration", () => {
             smithing: "bad",
           },
           specializationByDiscipline: {
-            alchemy: "pill_focus",
+            alchemy: "alchemy_hongmeng_condenser",
             smithing: 99,
           },
         },
@@ -207,9 +219,66 @@ describe("persisted state migration", () => {
         smithing: 0,
       },
       specializationByDiscipline: {
-        alchemy: "pill_focus",
+        alchemy: "alchemy_hongmeng_condenser",
         smithing: null,
       },
+      specializationTreeByDiscipline: {
+        alchemy: {
+          unlockedNodeIds: ["alchemy_inner_fire_foundation", "alchemy_hongmeng_condenser"],
+          activeNodeId: "alchemy_hongmeng_condenser",
+          activeBranchId: "alchemy_hongmeng",
+        },
+        smithing: {
+          unlockedNodeIds: [],
+          activeNodeId: null,
+          activeBranchId: null,
+        },
+      },
+    });
+  });
+
+  it("sanitizes malformed workshop tree values and mirrors only valid active nodes", () => {
+    const migrated = migratePersistedState(
+      createPersistedState({
+        workshop: {
+          specializationTreeByDiscipline: {
+            alchemy: {
+              unlockedNodeIds: [
+                "alchemy_inner_fire_foundation",
+                "missing",
+                "alchemy_lifebloom_resonance",
+              ],
+              activeNodeId: "alchemy_lifebloom_resonance",
+              activeBranchId: "wrong",
+            },
+            smithing: {
+              unlockedNodeIds: ["missing"],
+              activeNodeId: "missing",
+            },
+          },
+          specializationByDiscipline: {
+            alchemy: "unknown_flat",
+            smithing: "smithing_starfire_tempering",
+          },
+        },
+      })
+    );
+
+    expect(migrated.workshop.specializationTreeByDiscipline).toMatchObject({
+      alchemy: {
+        unlockedNodeIds: ["alchemy_inner_fire_foundation", "alchemy_lifebloom_resonance"],
+        activeNodeId: "alchemy_lifebloom_resonance",
+        activeBranchId: "alchemy_lifebloom",
+      },
+      smithing: {
+        unlockedNodeIds: ["smithing_core_temper_foundation", "smithing_starfire_tempering"],
+        activeNodeId: "smithing_starfire_tempering",
+        activeBranchId: "smithing_starfire",
+      },
+    });
+    expect(migrated.workshop.specializationByDiscipline).toEqual({
+      alchemy: "alchemy_lifebloom_resonance",
+      smithing: "smithing_starfire_tempering",
     });
   });
 

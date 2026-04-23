@@ -9,13 +9,18 @@ import clsx from 'clsx';
 import { GameHintBubble } from '../components/game/GameHintBubble';
 import { GameSection } from '../components/game/GameSection';
 import {
-  WORKSHOP_SPECIALIZATIONS,
   getUnlockedWorkshopRecipes,
   getWorkshopRecipeCraftingPlan,
-  getWorkshopSpecializationUnlockStatus,
   type WorkshopRecipe,
-  type WorkshopSpecialization,
 } from '../data/workshopRecipes';
+import {
+  WORKSHOP_SPECIALIZATION_BRANCH_LABELS,
+  getWorkshopSpecializationNode,
+  getWorkshopSpecializationNodeStatus,
+  getWorkshopSpecializationNodesForDiscipline,
+  getWorkshopSpecializationResetCost,
+  type WorkshopSpecializationNode,
+} from '../data/workshopSpecializationTree';
 import { getEncounterMaterialSourceCues } from '../data/encounters';
 import { ITEMS } from '../data/items';
 import { craftWorkshopRecipe, selectWorkshopSpecialization } from '../store/actions/workshopActions';
@@ -24,11 +29,6 @@ import { MajorRealmCN, type WorkshopDiscipline } from '../types';
 interface WorkshopProps {
   embedded?: boolean;
 }
-
-const getWorkshopSpecializationsForDiscipline = (discipline: WorkshopDiscipline) =>
-  Object.values(WORKSHOP_SPECIALIZATIONS).filter(
-    (specialization) => specialization.discipline === discipline
-  );
 
 const getDisciplineMasteryLabel = (discipline: WorkshopDiscipline) =>
   discipline === "alchemy" ? "丹道" : "器道";
@@ -42,8 +42,6 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
   const upgradeCost = calculateGatheringUpgradeCost(gatheringLevel);
   const alchemyRecipes = getUnlockedWorkshopRecipes(workshop, "alchemy");
   const smithingRecipes = getUnlockedWorkshopRecipes(workshop, "smithing");
-  const alchemySpecializations = getWorkshopSpecializationsForDiscipline("alchemy");
-  const smithingSpecializations = getWorkshopSpecializationsForDiscipline("smithing");
 
   const handleUpgradeGathering = () => {
      if (spiritStones >= upgradeCost) {
@@ -91,63 +89,120 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
   };
 
   const renderSpecializationPanel = (
-    discipline: WorkshopDiscipline,
-    specializations: WorkshopSpecialization[]
+    discipline: WorkshopDiscipline
   ) => {
-    const activeId = workshop.specializationByDiscipline[discipline];
-    const activeSpecialization = activeId ? WORKSHOP_SPECIALIZATIONS[activeId] : null;
+    const nodes = getWorkshopSpecializationNodesForDiscipline(discipline);
+    const treeState = workshop.specializationTreeByDiscipline[discipline];
+    const activeSpecialization = treeState.activeNodeId
+      ? getWorkshopSpecializationNode(treeState.activeNodeId)
+      : null;
+    const resetCost = getWorkshopSpecializationResetCost(workshop, discipline);
+    const canReset = treeState.unlockedNodeIds.length > 0 && spiritStones >= resetCost;
 
     return (
       <div className="rounded-xl border border-cyan-800/50 bg-cyan-950/15 p-3">
-        <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300">
-          百業專精
-        </div>
-        <div className="mt-1 text-xs text-stone-300">
-          目前專精：{activeSpecialization?.name ?? "尚未選定"}
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300">
+              百業專精樹
+            </div>
+            <div className="mt-1 text-xs text-stone-300">
+              目前節點：{activeSpecialization?.name ?? "尚未選定"}
+            </div>
+            <div className="mt-1 text-[11px] text-stone-500">
+              啟用分支：
+              {treeState.activeBranchId
+                ? WORKSHOP_SPECIALIZATION_BRANCH_LABELS[treeState.activeBranchId] ?? treeState.activeBranchId
+                : "尚未選定"}
+            </div>
+          </div>
+          <button
+            onClick={() =>
+              dispatch(
+                selectWorkshopSpecialization({
+                  discipline,
+                  specializationId: null,
+                })
+              )
+            }
+            disabled={!canReset}
+            className="rounded-lg border border-cyan-800/60 bg-stone-950 px-2 py-1 text-[11px] text-cyan-100 transition hover:border-cyan-500 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            重置 {resetCost} 靈石
+          </button>
         </div>
         <div className="mt-2 grid gap-2">
-          {specializations.map((specialization) => {
-            const isActive = activeId === specialization.id;
-            const unlockStatus = getWorkshopSpecializationUnlockStatus(workshop, specialization);
-            const minMastery = specialization.unlockRequirement?.minMastery;
-            const canAffordSwitch = spiritStones >= (specialization.switchCost ?? 0);
+          {nodes.map((node: WorkshopSpecializationNode) => {
+            const status = getWorkshopSpecializationNodeStatus({
+              workshop,
+              node,
+              majorRealm,
+              spiritStones,
+            });
+            const minMastery = node.unlockRequirement?.minMastery;
+            const minRealm = node.unlockRequirement?.minRealm;
 
             return (
               <button
-                key={specialization.id}
+                key={node.id}
                 onClick={() =>
                   dispatch(
                     selectWorkshopSpecialization({
                       discipline,
-                      specializationId: specialization.id,
+                      specializationId: node.id,
                     })
                   )
                 }
-                disabled={!unlockStatus.unlocked || !canAffordSwitch}
+                disabled={status.isActive || !status.isAvailable}
                 className={clsx(
                   "rounded-lg border px-3 py-2 text-left text-xs transition",
-                  isActive
+                  status.isActive
                     ? "border-cyan-400/60 bg-cyan-900/35 text-cyan-100"
                     : "border-stone-800 bg-stone-950/70 text-stone-400 hover:border-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
                 )}
               >
-                <div className="font-semibold text-stone-100">
-                  可選專精：{specialization.name}
+                <div className="flex flex-wrap items-center gap-2 font-semibold text-stone-100">
+                  <span>{node.name}</span>
+                  <span className="rounded border border-cyan-800/60 px-1.5 py-0.5 text-[10px] text-cyan-300">
+                    {status.actionLabel}
+                  </span>
+                  {status.isUnlocked && (
+                    <span className="rounded border border-emerald-800/60 px-1.5 py-0.5 text-[10px] text-emerald-300">
+                      已解鎖
+                    </span>
+                  )}
                 </div>
                 <div className="mt-1 leading-relaxed text-stone-500">
-                  {specialization.description}
+                  {node.description}
                 </div>
                 <div className="mt-2 grid gap-1 text-stone-400">
                   {minMastery !== undefined && (
                     <div>解鎖條件：{getDisciplineMasteryLabel(discipline)}熟練 {minMastery}</div>
                   )}
-                  <div>切換成本：{specialization.switchCost ?? 0} 靈石</div>
-                  {isActive && <div>重置成本：{specialization.resetCost ?? 0} 靈石</div>}
-                  {!unlockStatus.unlocked && (
-                    <div className="text-rose-300">鎖定原因：{unlockStatus.reason}</div>
+                  {minRealm !== undefined && <div>境界條件：{MajorRealmCN[minRealm]}</div>}
+                  {node.prerequisiteNodeIds && node.prerequisiteNodeIds.length > 0 && (
+                    <div>
+                      前置節點：
+                      {node.prerequisiteNodeIds
+                        .map((nodeId) => getWorkshopSpecializationNode(nodeId)?.name ?? nodeId)
+                        .join("、")}
+                    </div>
                   )}
-                  {unlockStatus.unlocked && !canAffordSwitch && !isActive && (
-                    <div className="text-rose-300">鎖定原因：靈石不足</div>
+                  {node.conflictsWithBranchIds && node.conflictsWithBranchIds.length > 0 && (
+                    <div>
+                      互斥分支：
+                      {node.conflictsWithBranchIds
+                        .map((branchId) => WORKSHOP_SPECIALIZATION_BRANCH_LABELS[branchId] ?? branchId)
+                        .join("、")}
+                    </div>
+                  )}
+                  <div>{status.isUnlocked ? "切換成本" : "解鎖成本"}：{status.requiredCost} 靈石</div>
+                  <div>節點重置成本：{node.resetCost ?? 0} 靈石</div>
+                  {status.lockReason && (
+                    <div className="text-rose-300">鎖定原因：{status.lockReason}</div>
+                  )}
+                  {status.conflictReason && (
+                    <div className="text-rose-300">分支衝突：{status.conflictReason}</div>
                   )}
                 </div>
               </button>
@@ -264,6 +319,16 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
                   </span>
                 </div>
               )}
+              {craftingPlan.qualityCues.map((cue) => (
+                <div key={cue} className="text-cyan-200">
+                  品質專精：{cue}
+                </div>
+              ))}
+              {craftingPlan.outputCues.map((cue) => (
+                <div key={cue} className="text-cyan-200">
+                  副收益提示：{cue}
+                </div>
+              ))}
               {craftingPlan.masteryYield && (
                 <div>
                   {recipe.discipline === "alchemy" ? "丹道" : "器道"}熟練 +{craftingPlan.masteryYield}
@@ -350,7 +415,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
              bodyClassName="space-y-4"
          >
              <p className="text-sm text-stone-500">萃取草木精華，煉製能直接補上修為節奏的丹藥。</p>
-             {renderSpecializationPanel("alchemy", alchemySpecializations)}
+             {renderSpecializationPanel("alchemy")}
              <div className="space-y-3">
                 {alchemyRecipes.map((recipe) => renderRecipeCard(recipe, "煉製", "爐火消耗"))}
              </div>
@@ -362,7 +427,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
              bodyClassName="space-y-4"
          >
              <p className="text-sm text-stone-500">錘鍊礦材與妖獸部件，為當世 build 提供第一批可自製裝備。</p>
-             {renderSpecializationPanel("smithing", smithingSpecializations)}
+             {renderSpecializationPanel("smithing")}
              <div className="space-y-3">
                 {smithingRecipes.map((recipe) => renderRecipeCard(recipe, "鍛造", "鍛台消耗"))}
              </div>

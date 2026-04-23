@@ -7,6 +7,10 @@ import {
   WORKSHOP_SPECIALIZATIONS,
   getWorkshopRecipeCraftingPlan,
 } from "./workshopRecipes";
+import {
+  WORKSHOP_SPECIALIZATION_TREE,
+  createInitialWorkshopSpecializationTreeState,
+} from "./workshopSpecializationTree";
 
 const HIGH_TIER_RECIPE_CASES = [
   {
@@ -126,24 +130,51 @@ describe("workshop recipe data", () => {
       });
   });
 
-  it("publishes first-pass alchemy and smithing specialization effects as data", () => {
+  it("publishes alchemy and smithing specialization trees with prerequisites and branch conflicts", () => {
+    expect(WORKSHOP_SPECIALIZATION_TREE.alchemy.map((node) => node.id)).toEqual([
+      "alchemy_inner_fire_foundation",
+      "alchemy_hongmeng_condenser",
+      "alchemy_lifebloom_resonance",
+    ]);
+    expect(WORKSHOP_SPECIALIZATION_TREE.smithing.map((node) => node.id)).toEqual([
+      "smithing_core_temper_foundation",
+      "smithing_starfire_tempering",
+      "smithing_soulsteel_inscription",
+    ]);
+    expect(WORKSHOP_SPECIALIZATIONS.alchemy_hongmeng_condenser).toMatchObject({
+      prerequisiteNodeIds: ["alchemy_inner_fire_foundation"],
+      conflictsWithBranchIds: ["alchemy_lifebloom"],
+      unlockRequirement: { minMastery: 24 },
+      unlockCost: 500,
+      switchCost: 180,
+      resetCost: 240,
+    });
+    expect(WORKSHOP_SPECIALIZATIONS.smithing_starfire_tempering).toMatchObject({
+      prerequisiteNodeIds: ["smithing_core_temper_foundation"],
+      conflictsWithBranchIds: ["smithing_soulforge"],
+      unlockRequirement: { minMastery: 30 },
+      unlockCost: 500,
+      switchCost: 180,
+      resetCost: 240,
+    });
+  });
+
+  it("keeps first-pass alchemy and smithing specialization effects as recipe-safe data", () => {
     expect(WORKSHOP_SPECIALIZATIONS.alchemy_hongmeng_condenser).toMatchObject({
       discipline: "alchemy",
-      appliesToTier: "highRealm",
-      unlockRequirement: { minMastery: 24 },
-      switchCost: 500,
-      resetCost: 200,
-      spiritStoneCostMultiplier: 0.9,
-      masteryYieldBonus: 6,
+      effect: {
+        appliesToTier: "highRealm",
+        spiritStoneCostMultiplier: 0.9,
+        masteryYieldBonus: 6,
+      },
     });
     expect(WORKSHOP_SPECIALIZATIONS.smithing_starfire_tempering).toMatchObject({
       discipline: "smithing",
-      appliesToTier: "highRealm",
-      unlockRequirement: { minMastery: 30 },
-      switchCost: 500,
-      resetCost: 200,
-      spiritStoneCostMultiplier: 0.9,
-      masteryYieldBonus: 8,
+      effect: {
+        appliesToTier: "highRealm",
+        spiritStoneCostMultiplier: 0.9,
+        masteryYieldBonus: 8,
+      },
     });
     expect(WORKSHOP_SPECIALIZATIONS.alchemy_hongmeng_condenser.description).toContain("材料 sink");
     expect(WORKSHOP_SPECIALIZATIONS.smithing_starfire_tempering.description).toContain("路線材料不被減免");
@@ -160,6 +191,14 @@ describe("workshop recipe data", () => {
         alchemy: 24,
         smithing: 0,
       },
+      specializationTreeByDiscipline: {
+        ...createInitialWorkshopSpecializationTreeState(),
+        alchemy: {
+          unlockedNodeIds: ["alchemy_inner_fire_foundation", "alchemy_hongmeng_condenser"],
+          activeNodeId: "alchemy_hongmeng_condenser",
+          activeBranchId: "alchemy_hongmeng",
+        },
+      },
       specializationByDiscipline: {
         alchemy: "alchemy_hongmeng_condenser",
         smithing: null,
@@ -167,8 +206,14 @@ describe("workshop recipe data", () => {
     });
 
     expect(plan.spiritStoneCost).toBe(216);
-    expect(plan.masteryYield).toBe(30);
+    expect(plan.masteryYield).toBe(32);
     expect(plan.activeSpecialization?.name).toBe("鴻蒙凝丹");
+    expect(plan.qualityCues).toEqual(
+      expect.arrayContaining([
+        "爐火穩定，較容易維持仙品品質。",
+        "鴻蒙丹火降低靈石火耗，不減免核心路線材料。",
+      ])
+    );
     expect(recipe.ingredients).toEqual([
       { itemId: "beast_path_bloodbone", count: 2 },
       { itemId: "mystic_path_starlotus", count: 1 },
@@ -187,6 +232,7 @@ describe("workshop recipe data", () => {
         alchemy: 0,
         smithing: 0,
       },
+      specializationTreeByDiscipline: createInitialWorkshopSpecializationTreeState(),
       specializationByDiscipline: {
         alchemy: "alchemy_hongmeng_condenser",
         smithing: null,

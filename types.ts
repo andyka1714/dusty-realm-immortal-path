@@ -594,12 +594,26 @@ export interface EquipmentState {
 
 export type WorkshopDiscipline = "alchemy" | "smithing";
 
+export interface WorkshopSpecializationDisciplineState {
+  unlockedNodeIds: string[];
+  activeNodeId: string | null;
+  activeBranchId: string | null;
+}
+
 export interface WorkshopState {
   alchemyLevel: number;
   blacksmithLevel: number;
   unlockedRecipes: string[];
   craftedRecipeCounts: Record<string, number>;
   masteryByDiscipline: Record<WorkshopDiscipline, number>;
+  specializationTreeByDiscipline: Record<
+    WorkshopDiscipline,
+    WorkshopSpecializationDisciplineState
+  >;
+  /**
+   * Legacy compatibility mirror for old saves and older selectors.
+   * New rules should read specializationTreeByDiscipline.
+   */
   specializationByDiscipline: Record<WorkshopDiscipline, string | null>;
 }
 

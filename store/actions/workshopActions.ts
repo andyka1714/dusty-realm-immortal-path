@@ -2,15 +2,23 @@ import { Action, ThunkAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 import {
   WORKSHOP_RECIPES,
-  WORKSHOP_SPECIALIZATIONS,
   getWorkshopDisciplineLevel,
   getWorkshopRecipeCraftingPlan,
-  getWorkshopSpecializationUnlockStatus,
 } from "../../data/workshopRecipes";
+import {
+  getWorkshopSpecializationNode,
+  getWorkshopSpecializationNodeStatus,
+  getWorkshopSpecializationResetCost,
+} from "../../data/workshopSpecializationTree";
 import { deductSpiritStones } from "../slices/characterSlice";
 import { addItem, removeItem } from "../slices/inventorySlice";
 import { addLog } from "../slices/logSlice";
-import { recordRecipeCrafted, setWorkshopSpecialization } from "../slices/workshopSlice";
+import {
+  activateWorkshopSpecializationNode,
+  recordRecipeCrafted,
+  resetWorkshopSpecializationTree,
+  unlockWorkshopSpecializationNode,
+} from "../slices/workshopSlice";
 import { MajorRealmCN, type WorkshopDiscipline } from "../../types";
 
 const getStackableItemCount = (state: RootState, itemId: string) =>
@@ -30,15 +38,12 @@ export const selectWorkshopSpecialization = ({
 }): ThunkAction<void, RootState, unknown, Action<string>> =>
   (dispatch, getState) => {
     const state = getState();
-    const currentSpecializationId = state.workshop.specializationByDiscipline[discipline];
+    const currentTreeState = state.workshop.specializationTreeByDiscipline[discipline];
 
     if (specializationId === null) {
-      const currentSpecialization = currentSpecializationId
-        ? WORKSHOP_SPECIALIZATIONS[currentSpecializationId]
-        : null;
-      const resetCost = currentSpecialization?.resetCost ?? 0;
+      const resetCost = getWorkshopSpecializationResetCost(state.workshop, discipline);
 
-      if (!currentSpecializationId) {
+      if (currentTreeState.unlockedNodeIds.length === 0) {
         dispatch(addLog({ message: `${getDisciplineLabel(discipline)}尚未選定專精。`, type: "info" }));
         return;
       }
@@ -49,38 +54,46 @@ export const selectWorkshopSpecialization = ({
       }
 
       dispatch(deductSpiritStones(resetCost));
-      dispatch(setWorkshopSpecialization({ discipline, specializationId: null }));
+      dispatch(resetWorkshopSpecializationTree({ discipline }));
       dispatch(addLog({ message: `已重置${getDisciplineLabel(discipline)}專精。`, type: "success" }));
       return;
     }
 
-    const specialization = WORKSHOP_SPECIALIZATIONS[specializationId];
+    const specialization = getWorkshopSpecializationNode(specializationId);
 
     if (!specialization || specialization.discipline !== discipline) {
       dispatch(addLog({ message: "專精資料不符，無法切換。", type: "danger" }));
       return;
     }
 
-    if (currentSpecializationId === specializationId) {
+    if (currentTreeState.activeNodeId === specializationId) {
       dispatch(addLog({ message: `已選定${getDisciplineLabel(discipline)}專精：${specialization.name}。`, type: "info" }));
       return;
     }
 
-    const unlockStatus = getWorkshopSpecializationUnlockStatus(state.workshop, specialization);
-    if (!unlockStatus.unlocked) {
-      dispatch(addLog({ message: unlockStatus.reason ?? "專精條件不足。", type: "danger" }));
+    const status = getWorkshopSpecializationNodeStatus({
+      workshop: state.workshop,
+      node: specialization,
+      majorRealm: state.character.majorRealm,
+      spiritStones: state.character.spiritStones,
+    });
+    if (!status.isAvailable) {
+      dispatch(addLog({ message: status.lockReason ?? status.conflictReason ?? "專精條件不足。", type: "danger" }));
       return;
     }
 
-    const switchCost = specialization.switchCost ?? 0;
-    if (state.character.spiritStones < switchCost) {
-      dispatch(addLog({ message: `靈石不足，無法切換${getDisciplineLabel(discipline)}專精。`, type: "danger" }));
+    if (status.requiredCost > 0) {
+      dispatch(deductSpiritStones(status.requiredCost));
+    }
+
+    if (status.isUnlocked) {
+      dispatch(activateWorkshopSpecializationNode({ discipline, nodeId: specialization.id }));
+      dispatch(addLog({ message: `已切換${getDisciplineLabel(discipline)}專精：${specialization.name}。`, type: "success" }));
       return;
     }
 
-    dispatch(deductSpiritStones(switchCost));
-    dispatch(setWorkshopSpecialization({ discipline, specializationId }));
-    dispatch(addLog({ message: `已切換${getDisciplineLabel(discipline)}專精：${specialization.name}。`, type: "success" }));
+    dispatch(unlockWorkshopSpecializationNode({ discipline, nodeId: specialization.id }));
+    dispatch(addLog({ message: `已解鎖並啟用${getDisciplineLabel(discipline)}專精：${specialization.name}。`, type: "success" }));
   };
 
 export const craftWorkshopRecipe = (

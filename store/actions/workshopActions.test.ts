@@ -9,6 +9,7 @@ import workshopReducer from "../slices/workshopSlice";
 import logReducer from "../slices/logSlice";
 import { Gender, MajorRealm } from "../../types";
 import { craftWorkshopRecipe, selectWorkshopSpecialization } from "./workshopActions";
+import { createInitialWorkshopSpecializationTreeState } from "../../data/workshopSpecializationTree";
 
 type TestStoreState = {
   character: ReturnType<typeof characterReducer>;
@@ -134,6 +135,14 @@ describe("workshop actions", () => {
           alchemy: 24,
           smithing: 0,
         },
+        specializationTreeByDiscipline: {
+          ...createInitialWorkshopSpecializationTreeState(),
+          alchemy: {
+            unlockedNodeIds: ["alchemy_inner_fire_foundation", "alchemy_hongmeng_condenser"],
+            activeNodeId: "alchemy_hongmeng_condenser",
+            activeBranchId: "alchemy_hongmeng",
+          },
+        },
         specializationByDiscipline: {
           alchemy: "alchemy_hongmeng_condenser",
           smithing: null,
@@ -151,7 +160,7 @@ describe("workshop actions", () => {
     expect(state.inventory.items.find((slot) => slot.itemId === "bt_trib_immortal")?.count).toBe(1);
     expect(state.inventory.items.find((slot) => slot.itemId === "beast_path_bloodbone")).toBeUndefined();
     expect(state.inventory.items.find((slot) => slot.itemId === "mystic_path_starlotus")).toBeUndefined();
-    expect(state.workshop.masteryByDiscipline.alchemy).toBe(54);
+    expect(state.workshop.masteryByDiscipline.alchemy).toBe(56);
     expect(state.character.spiritStones).toBe(784);
     expect(state.logs.logs[0]?.message).toContain("專精：鴻蒙凝丹");
   });
@@ -166,6 +175,14 @@ describe("workshop actions", () => {
         masteryByDiscipline: {
           alchemy: 0,
           smithing: 30,
+        },
+        specializationTreeByDiscipline: {
+          ...createInitialWorkshopSpecializationTreeState(),
+          smithing: {
+            unlockedNodeIds: ["smithing_core_temper_foundation", "smithing_starfire_tempering"],
+            activeNodeId: "smithing_starfire_tempering",
+            activeBranchId: "smithing_starfire",
+          },
         },
         specializationByDiscipline: {
           alchemy: null,
@@ -187,12 +204,12 @@ describe("workshop actions", () => {
     expect(armorSlot?.instance?.templateId).toBe("great_dao_body");
     expect(state.inventory.items.find((slot) => slot.itemId === "beast_path_bloodbone")).toBeUndefined();
     expect(state.inventory.items.find((slot) => slot.itemId === "sword_path_starsteel")).toBeUndefined();
-    expect(state.workshop.masteryByDiscipline.smithing).toBe(68);
+    expect(state.workshop.masteryByDiscipline.smithing).toBe(70);
     expect(state.character.spiritStones).toBe(730);
     expect(state.logs.logs[0]?.message).toContain("專精：星火鍛胚");
   });
 
-  it("blocks specialization selection until mastery requirement is met", () => {
+  it("blocks specialization selection until prerequisite node is unlocked", () => {
     const store = createTestStore({
       character: createCharacterAtRealm(MajorRealm.SpiritSevering, 1000),
       workshop: {
@@ -215,10 +232,36 @@ describe("workshop actions", () => {
 
     expect(state.workshop.specializationByDiscipline.alchemy).toBeNull();
     expect(state.character.spiritStones).toBe(1000);
-    expect(state.logs.logs[0]?.message).toContain("丹道熟練需達 24");
+    expect(state.logs.logs[0]?.message).toContain("需先解鎖");
   });
 
-  it("selects unlocked specialization with switch cost", () => {
+  it("blocks specialization root selection until mastery requirement is met", () => {
+    const store = createTestStore({
+      character: createCharacterAtRealm(MajorRealm.SpiritSevering, 1000),
+      workshop: {
+        ...workshopReducer(undefined, { type: "@@INIT" }),
+        masteryByDiscipline: {
+          alchemy: 0,
+          smithing: 0,
+        },
+      },
+    });
+
+    store.dispatch(
+      selectWorkshopSpecialization({
+        discipline: "alchemy",
+        specializationId: "alchemy_inner_fire_foundation",
+      })
+    );
+
+    const state = store.getState();
+
+    expect(state.workshop.specializationByDiscipline.alchemy).toBeNull();
+    expect(state.character.spiritStones).toBe(1000);
+    expect(state.logs.logs[0]?.message).toContain("丹道熟練需達 8");
+  });
+
+  it("unlocks specialization tree nodes with unlock costs", () => {
     const store = createTestStore({
       character: createCharacterAtRealm(MajorRealm.SpiritSevering, 1000),
       workshop: {
@@ -233,6 +276,12 @@ describe("workshop actions", () => {
     store.dispatch(
       selectWorkshopSpecialization({
         discipline: "alchemy",
+        specializationId: "alchemy_inner_fire_foundation",
+      })
+    );
+    store.dispatch(
+      selectWorkshopSpecialization({
+        discipline: "alchemy",
         specializationId: "alchemy_hongmeng_condenser",
       })
     );
@@ -240,7 +289,94 @@ describe("workshop actions", () => {
     const state = store.getState();
 
     expect(state.workshop.specializationByDiscipline.alchemy).toBe("alchemy_hongmeng_condenser");
-    expect(state.character.spiritStones).toBe(500);
-    expect(state.logs.logs[0]?.message).toContain("已切換丹道專精：鴻蒙凝丹");
+    expect(state.workshop.specializationTreeByDiscipline.alchemy).toMatchObject({
+      unlockedNodeIds: ["alchemy_inner_fire_foundation", "alchemy_hongmeng_condenser"],
+      activeNodeId: "alchemy_hongmeng_condenser",
+      activeBranchId: "alchemy_hongmeng",
+    });
+    expect(state.character.spiritStones).toBe(380);
+    expect(state.logs.logs[0]?.message).toContain("已解鎖並啟用丹道專精：鴻蒙凝丹");
+  });
+
+  it("blocks mutually exclusive specialization branches until reset", () => {
+    const store = createTestStore({
+      character: createCharacterAtRealm(MajorRealm.Tribulation, 1000),
+      workshop: {
+        ...workshopReducer(undefined, { type: "@@INIT" }),
+        masteryByDiscipline: {
+          alchemy: 40,
+          smithing: 0,
+        },
+        specializationTreeByDiscipline: {
+          ...createInitialWorkshopSpecializationTreeState(),
+          alchemy: {
+            unlockedNodeIds: ["alchemy_inner_fire_foundation", "alchemy_hongmeng_condenser"],
+            activeNodeId: "alchemy_hongmeng_condenser",
+            activeBranchId: "alchemy_hongmeng",
+          },
+        },
+        specializationByDiscipline: {
+          alchemy: "alchemy_hongmeng_condenser",
+          smithing: null,
+        },
+      },
+    });
+
+    store.dispatch(
+      selectWorkshopSpecialization({
+        discipline: "alchemy",
+        specializationId: "alchemy_lifebloom_resonance",
+      })
+    );
+
+    const state = store.getState();
+
+    expect(state.workshop.specializationByDiscipline.alchemy).toBe("alchemy_hongmeng_condenser");
+    expect(state.character.spiritStones).toBe(1000);
+    expect(state.logs.logs[0]?.message).toContain("分支互斥");
+  });
+
+  it("resets one discipline specialization tree with accumulated node reset cost", () => {
+    const store = createTestStore({
+      character: createCharacterAtRealm(MajorRealm.Tribulation, 1000),
+      workshop: {
+        ...workshopReducer(undefined, { type: "@@INIT" }),
+        masteryByDiscipline: {
+          alchemy: 40,
+          smithing: 0,
+        },
+        specializationTreeByDiscipline: {
+          ...createInitialWorkshopSpecializationTreeState(),
+          alchemy: {
+            unlockedNodeIds: ["alchemy_inner_fire_foundation", "alchemy_hongmeng_condenser"],
+            activeNodeId: "alchemy_hongmeng_condenser",
+            activeBranchId: "alchemy_hongmeng",
+          },
+        },
+        specializationByDiscipline: {
+          alchemy: "alchemy_hongmeng_condenser",
+          smithing: null,
+        },
+      },
+    });
+
+    store.dispatch(
+      selectWorkshopSpecialization({
+        discipline: "alchemy",
+        specializationId: null,
+      })
+    );
+
+    const state = store.getState();
+
+    expect(state.workshop.specializationTreeByDiscipline.alchemy).toEqual({
+      unlockedNodeIds: [],
+      activeNodeId: null,
+      activeBranchId: null,
+    });
+    expect(state.workshop.specializationByDiscipline.alchemy).toBeNull();
+    expect(state.workshop.masteryByDiscipline.alchemy).toBe(40);
+    expect(state.character.spiritStones).toBe(640);
+    expect(state.logs.logs[0]?.message).toContain("已重置丹道專精");
   });
 });
