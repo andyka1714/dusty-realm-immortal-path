@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { MajorRealm } from "../../types";
 import { getEncounterEventById } from "../encounters";
+import { WORKSHOP_RECIPES } from "../workshopRecipes";
 import {
   getHighRealmCultivationSpec,
   HIGH_REALM_PROGRESSION_REALMS,
@@ -31,5 +33,22 @@ describe("high realm loop support regression", () => {
         }
       );
     }
+  });
+
+  it("grounds emperor workshop support in high-tier recipes", () => {
+    const emperorSupport = getHighRealmLoopSupportProfile(MajorRealm.ImmortalEmperor);
+    const highTierRecipes = Object.values(WORKSHOP_RECIPES).filter(
+      (recipe) => recipe.tier === "highRealm"
+    );
+    const highTierOutputIds = highTierRecipes.flatMap((recipe) =>
+      recipe.outputs.map((output) => output.itemId)
+    );
+
+    expect(highTierRecipes.length).toBeGreaterThanOrEqual(2);
+    expect(
+      emperorSupport.pill.itemIds.some((itemId) => highTierOutputIds.includes(itemId))
+    ).toBe(true);
+    expect(highTierOutputIds).toContain("bt_immortal_emperor");
+    expect(highTierOutputIds).toContain("origin_sword");
   });
 });

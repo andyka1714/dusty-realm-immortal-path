@@ -70,4 +70,4 @@
 - `sync-base-spec-persistence-truth` 已完成，正式收口 base specs、persisted state migration 與正式 UI / loop 基線真相
 - `update-reincarnation-build-planner` 已完成，正式收口 `主動坐化`、進階 perk / heirloom planner 與第二批輪迴 build 分化
 - `update-encounter-risk-reward-depth` 已完成，正式收口 encounter selector、風險收益 cue 與 route-specific event pool 深化
-- `update-high-tier-workshop-depth` 已開案，承接 `high-tier workshop depth`：高階丹方 / 器方、品質分化、專精與材料 sink
+- `update-high-tier-workshop-depth` 已完成，正式收口第一批高階丹方 / 器方、route-specific 材料 sink、熟練度 state、migration 與 Workshop UI cue

@@ -1,6 +1,6 @@
 # 洞府百業 (Workshop)
 
-目前 `聚靈陣 / 煉丹 / 煉器` 三個卡片已統一吃 `GameSection` 的內層框體語言，不再各自維護獨立 card chrome。`add-workshop-and-event-loops` 第一批也已把 `煉丹 / 煉器` 從 placeholder 推進成正式可操作 slice。
+目前 `聚靈陣 / 煉丹 / 煉器` 三個卡片已統一吃 `GameSection` 的內層框體語言，不再各自維護獨立 card chrome。`add-workshop-and-event-loops` 第一批也已把 `煉丹 / 煉器` 從 placeholder 推進成正式可操作 slice，而 `update-high-tier-workshop-depth` 已把第一批高階 recipe、材料 sink、熟練度與 UI cue 接進主流程。
 
 ## 1. 聚靈陣 (Spirit Array)
 - **功能**: 提升基礎修煉速率。
@@ -10,16 +10,39 @@
 ## 2. 煉丹 (Alchemy)
 - **第一批正式丹方**:
   - `聚氣丹`: 消耗 `聚靈草 x2 + 25 靈石`，產出 `聚氣丹 x1`
+- **高階丹方**:
+  - `九轉鴻蒙丹`: 消耗 `縹緲星魂蓮 / 萬獸血骨殘材 / 聚靈草` 與爐火靈石，產出 `鴻蒙本源`
 - **用途**: `聚氣丹` 可直接補修為，是輪迴後前期修煉節奏的第一個百業入口。
-- **目前定位**: 先提供穩定、低階、可重複投入的修為補給，不追求一次做完整高階丹系。
+- **目前定位**: 低階丹方提供修為補給，高階丹方承接宗門 / 世界後段材料，讓丹藥乘區不只停在 audit table。
 
 ## 3. 煉器 (Smithing)
 - **第一批正式配方**:
   - `鏽鐵劍重鑄`: 消耗 `玄鐵礦 x2 + 妖狼牙 x1 + 35 靈石`，產出 `鏽鐵劍`
+- **高階器方**:
+  - `萬古帝劍鍛造`: 消耗 `凌霄劍星鋼 / 萬獸血骨殘材 / 玄鐵礦` 與鍛台靈石，產出 `起源之劍`
 - **用途**: 讓玩家可透過材料與洞府投入，直接為當世 build 補第一件可自製裝備。
-- **目前定位**: 先驗證材料 -> 裝備實例的正式 loop，之後再擴更多裝備線與品質差異。
+- **目前定位**: 低階器方驗證材料 -> 裝備實例，高階器方開始承接 route-specific 材料與終盤 build 裝備追求。
 
-## 4. 事件與奇遇承接
+## 4. 熟練度、品質與鎖定 cue
+
+Workshop state 已正式記錄：
+
+- `masteryByDiscipline`
+- `specializationByDiscipline`
+- `craftedRecipeCounts`
+
+高階 recipe card 會顯示：
+
+- recipe tier / 境界需求
+- route tags
+- 材料擁有量與來源提示
+- 產出與品質提示
+- `丹道 / 器道` 熟練度收益
+- 境界、百業等級、靈石或材料不足時的鎖定原因
+
+舊存檔若缺少熟練度或專精欄位，migration 會補上安全預設值。
+
+## 5. 事件與奇遇承接
 
 `add-workshop-and-event-loops` 第一批也已開始把時間流逝中的遭遇，從純 log 推進成正式可選擇事件：
 
@@ -39,11 +62,18 @@
 
 這些事件的目的不是只補 flavor，而是讓 `丹藥 / 材料 / 修為` 真正形成循環。
 
-## 5. 尚未完成的部分
+`expand-sect-world-late-progression` 之後，三宗 `化神三界戰場` 里程碑也會給出：
+
+- `凌霄劍星鋼`
+- `縹緲星魂蓮`
+- `萬獸血骨殘材`
+
+這些材料已接進高階 Workshop recipe，讓宗門 / 世界後段 reward 能反向供料給百業。
+
+## 6. 尚未完成的部分
 
 目前仍未完成的是：
 
-- 高階丹方與高階煉器線
-- 百業成功率 / 品質 / 專精分支
-- 高境界 multiplier 與 `balanceAudit` 的完整 regression 對齊
-- 更多 route-specific event / encounter pool
+- 更多高階丹方與器方的擴量
+- 專精效果的實際加成分支
+- 更多 route-specific world / encounter material source

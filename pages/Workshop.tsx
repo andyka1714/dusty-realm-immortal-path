@@ -8,9 +8,10 @@ import { Hammer, ArrowUpCircle, Flame } from 'lucide-react';
 import clsx from 'clsx';
 import { GameHintBubble } from '../components/game/GameHintBubble';
 import { GameSection } from '../components/game/GameSection';
-import { getUnlockedWorkshopRecipes } from '../data/workshopRecipes';
+import { getUnlockedWorkshopRecipes, type WorkshopRecipe } from '../data/workshopRecipes';
 import { ITEMS } from '../data/items';
 import { craftWorkshopRecipe } from '../store/actions/workshopActions';
+import { MajorRealmCN } from '../types';
 
 interface WorkshopProps {
   embedded?: boolean;
@@ -18,7 +19,7 @@ interface WorkshopProps {
 
 export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { spiritStones, gatheringLevel } = useSelector((state: RootState) => state.character);
+  const { spiritStones, gatheringLevel, majorRealm } = useSelector((state: RootState) => state.character);
   const inventory = useSelector((state: RootState) => state.inventory.items);
   const workshop = useSelector((state: RootState) => state.workshop);
 
@@ -41,6 +42,118 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
     inventory
       .filter((slot) => slot.itemId === itemId && !slot.instanceId)
       .reduce((total, slot) => total + slot.count, 0);
+
+  const getRecipeLockReason = (recipe: WorkshopRecipe): string | null => {
+    const disciplineLevel = recipe.discipline === "alchemy" ? workshop.alchemyLevel : workshop.blacksmithLevel;
+    const missingIngredient = recipe.ingredients.find(
+      (ingredient) => getOwnedCount(ingredient.itemId) < ingredient.count
+    );
+
+    if (recipe.minRealm !== undefined && majorRealm < recipe.minRealm) {
+      return `未達境界：${MajorRealmCN[recipe.minRealm]}`;
+    }
+
+    if (disciplineLevel < recipe.requiredLevel) {
+      return `${recipe.discipline === "alchemy" ? "煉丹爐" : "煉器台"}需 Lv.${recipe.requiredLevel}`;
+    }
+
+    if (spiritStones < recipe.spiritStoneCost) {
+      return `靈石不足：${spiritStones.toLocaleString()}/${recipe.spiritStoneCost.toLocaleString()}`;
+    }
+
+    if (missingIngredient) {
+      const item = ITEMS[missingIngredient.itemId];
+      return `缺少材料：${item?.name ?? missingIngredient.itemId}`;
+    }
+
+    return null;
+  };
+
+  const renderRecipeCard = (recipe: WorkshopRecipe, actionLabel: string, costLabel: string) => {
+    const lockReason = getRecipeLockReason(recipe);
+    const disciplineMastery = workshop.masteryByDiscipline[recipe.discipline];
+    const outputLabels = recipe.outputs
+      .map((output) => ITEMS[output.itemId]?.name ?? output.itemId)
+      .join("、");
+
+    return (
+      <div
+        key={recipe.id}
+        className={clsx(
+          "rounded-xl border bg-stone-950/70 p-4",
+          recipe.tier === "highRealm" ? "border-amber-700/70" : "border-stone-800"
+        )}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="text-base font-semibold text-stone-100">{recipe.name}</div>
+              {recipe.tier === "highRealm" && (
+                <span className="rounded-full border border-amber-500/40 bg-amber-950/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">
+                  高階
+                </span>
+              )}
+              {recipe.minRealm !== undefined && (
+                <span className="rounded-full border border-cyan-500/30 bg-cyan-950/30 px-2 py-0.5 text-[10px] font-semibold text-cyan-200">
+                  境界需求：{MajorRealmCN[recipe.minRealm]}
+                </span>
+              )}
+            </div>
+            <div className="mt-1 text-sm text-stone-500">{recipe.description}</div>
+
+            {recipe.routeTags && recipe.routeTags.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {recipe.routeTags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded border border-stone-700 bg-stone-900 px-2 py-0.5 text-[10px] text-stone-300"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-3 text-xs text-stone-400">
+              材料：
+              {recipe.ingredients.map((ingredient) => {
+                const item = ITEMS[ingredient.itemId];
+                const owned = getOwnedCount(ingredient.itemId);
+                return (
+                  <span key={ingredient.itemId} className="ml-2 inline-flex items-center gap-1">
+                    <span>{item?.name ?? ingredient.itemId}</span>
+                    <span className={owned >= ingredient.count ? "text-emerald-400" : "text-rose-300"}>
+                      {owned}/{ingredient.count}
+                    </span>
+                  </span>
+                );
+              })}
+            </div>
+            <div className="mt-2 text-xs text-amber-300">{costLabel}：{recipe.spiritStoneCost} 靈石</div>
+            <div className="mt-2 grid gap-1 text-xs text-stone-500">
+              {outputLabels && <div>產出：{outputLabels}</div>}
+              {recipe.qualityHint && <div>品質：{recipe.qualityHint}</div>}
+              {recipe.sourceHint && <div>來源：{recipe.sourceHint}</div>}
+              {recipe.masteryYield && (
+                <div>
+                  {recipe.discipline === "alchemy" ? "丹道" : "器道"}熟練 +{recipe.masteryYield}
+                  <span className="ml-2 text-stone-600">目前 {disciplineMastery}</span>
+                </div>
+              )}
+              {lockReason && <div className="text-rose-300">鎖定原因：{lockReason}</div>}
+            </div>
+          </div>
+          <button
+            onClick={() => dispatch(craftWorkshopRecipe(recipe.id))}
+            disabled={Boolean(lockReason)}
+            className="rounded-lg border border-stone-700 bg-stone-900 px-3 py-2 text-sm text-stone-200 transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {actionLabel}
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div
@@ -108,44 +221,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
          >
              <p className="text-sm text-stone-500">萃取草木精華，煉製能直接補上修為節奏的丹藥。</p>
              <div className="space-y-3">
-                {alchemyRecipes.map((recipe) => {
-                  const canCraftRecipe =
-                    spiritStones >= recipe.spiritStoneCost &&
-                    recipe.ingredients.every((ingredient) => getOwnedCount(ingredient.itemId) >= ingredient.count);
-                  return (
-                    <div key={recipe.id} className="rounded-xl border border-stone-800 bg-stone-950/70 p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <div className="text-base font-semibold text-stone-100">{recipe.name}</div>
-                          <div className="mt-1 text-sm text-stone-500">{recipe.description}</div>
-                          <div className="mt-3 text-xs text-stone-400">
-                            材料：
-                            {recipe.ingredients.map((ingredient) => {
-                              const item = ITEMS[ingredient.itemId];
-                              const owned = getOwnedCount(ingredient.itemId);
-                              return (
-                                <span key={ingredient.itemId} className="ml-2 inline-flex items-center gap-1">
-                                  <span>{item?.name ?? ingredient.itemId}</span>
-                                  <span className={owned >= ingredient.count ? "text-emerald-400" : "text-rose-300"}>
-                                    {owned}/{ingredient.count}
-                                  </span>
-                                </span>
-                              );
-                            })}
-                          </div>
-                          <div className="mt-2 text-xs text-amber-300">爐火消耗：{recipe.spiritStoneCost} 靈石</div>
-                        </div>
-                        <button
-                          onClick={() => dispatch(craftWorkshopRecipe(recipe.id))}
-                          disabled={!canCraftRecipe}
-                          className="rounded-lg border border-stone-700 bg-stone-900 px-3 py-2 text-sm text-stone-200 transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          煉製
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
+                {alchemyRecipes.map((recipe) => renderRecipeCard(recipe, "煉製", "爐火消耗"))}
              </div>
          </GameSection>
          
@@ -156,44 +232,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
          >
              <p className="text-sm text-stone-500">錘鍊礦材與妖獸部件，為當世 build 提供第一批可自製裝備。</p>
              <div className="space-y-3">
-                {smithingRecipes.map((recipe) => {
-                  const canCraftRecipe =
-                    spiritStones >= recipe.spiritStoneCost &&
-                    recipe.ingredients.every((ingredient) => getOwnedCount(ingredient.itemId) >= ingredient.count);
-                  return (
-                    <div key={recipe.id} className="rounded-xl border border-stone-800 bg-stone-950/70 p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <div className="text-base font-semibold text-stone-100">{recipe.name}</div>
-                          <div className="mt-1 text-sm text-stone-500">{recipe.description}</div>
-                          <div className="mt-3 text-xs text-stone-400">
-                            材料：
-                            {recipe.ingredients.map((ingredient) => {
-                              const item = ITEMS[ingredient.itemId];
-                              const owned = getOwnedCount(ingredient.itemId);
-                              return (
-                                <span key={ingredient.itemId} className="ml-2 inline-flex items-center gap-1">
-                                  <span>{item?.name ?? ingredient.itemId}</span>
-                                  <span className={owned >= ingredient.count ? "text-emerald-400" : "text-rose-300"}>
-                                    {owned}/{ingredient.count}
-                                  </span>
-                                </span>
-                              );
-                            })}
-                          </div>
-                          <div className="mt-2 text-xs text-amber-300">鍛台消耗：{recipe.spiritStoneCost} 靈石</div>
-                        </div>
-                        <button
-                          onClick={() => dispatch(craftWorkshopRecipe(recipe.id))}
-                          disabled={!canCraftRecipe}
-                          className="rounded-lg border border-stone-700 bg-stone-900 px-3 py-2 text-sm text-stone-200 transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          鍛造
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
+                {smithingRecipes.map((recipe) => renderRecipeCard(recipe, "鍛造", "鍛台消耗"))}
              </div>
          </GameSection>
       </div>
