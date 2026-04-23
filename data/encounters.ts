@@ -615,6 +615,153 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
       },
     ],
   }),
+  sword_void_starsteel_vein: createSingleRealmEncounterEvent({
+    id: "sword_void_starsteel_vein",
+    title: "裂虛劍星礦脈",
+    description: "煉虛亂流偶爾會沖開凌霄劍宗舊礦脈，只有真正走完後段劍宗任務的劍修能辨識其中星鋼。",
+    realm: MajorRealm.VoidRefining,
+    selector: {
+      weight: 5,
+      eligibleProfessions: [ProfessionType.Sword],
+      requiredCompletedQuestIds: ["sect_sword_task_04"],
+    },
+    presentation: {
+      categoryLabel: "煉虛百業材料",
+      routeLabel: "凌霄劍宗",
+    },
+    choices: [
+      {
+        id: "extract_starsteel",
+        label: "鑿取星鋼",
+        description: "以劍意定住礦脈裂口，鑿下一小段可回爐的劍心星鋼。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "凌霄劍星鋼 x1" },
+            { kind: "benefit", label: "煉器專精材料" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "sword_path_starsteel", count: 1 }],
+          logMessage: "你從裂虛礦脈中鑿出一段凌霄劍星鋼，足以支撐下一輪高階器方。",
+        },
+      },
+      {
+        id: "temper_void_edge",
+        label: "借礦脈淬鋒",
+        description: "不取礦材，改讓礦脈裂隙磨去劍意中的雜質。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "劍意淬鍊" },
+            { kind: "benefit", label: "煉虛修為" },
+          ],
+        },
+        reward: {
+          experience: 320000,
+          logMessage: "你借裂虛礦脈淬鍊劍意，煉虛期的鋒勢更穩了幾分。",
+        },
+      },
+    ],
+  }),
+  beast_tribulation_bloodbone_den: createSingleRealmEncounterEvent({
+    id: "beast_tribulation_bloodbone_den",
+    title: "劫骨獸巢",
+    description: "渡劫雷火劈開一座萬獸山莊舊獸巢，巢底殘留的血骨仍帶著可入爐的鍛體壓力。",
+    realm: MajorRealm.Tribulation,
+    selector: {
+      weight: 5,
+      eligibleProfessions: [ProfessionType.Body],
+      requiredCompletedQuestIds: ["sect_beast_task_04"],
+    },
+    presentation: {
+      categoryLabel: "渡劫百業材料",
+      routeLabel: "萬獸山莊",
+    },
+    choices: [
+      {
+        id: "collect_bloodbone",
+        label: "剝取血骨",
+        description: "頂著殘雷深入巢底，剝取仍能承受帝兵火候的血骨殘材。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "resource", label: "萬獸血骨殘材 x1" },
+            { kind: "risk", label: "殘雷獸巢" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "beast_path_bloodbone", count: 1 }],
+          logMessage: "你從劫骨獸巢中取回一份萬獸血骨殘材，體修器方終於有了後續來源。",
+        },
+      },
+      {
+        id: "endure_bone_thunder",
+        label: "借殘雷鍛體",
+        description: "不取材料，改讓巢底殘雷反覆打磨肉身底盤。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "高壓鍛體" },
+            { kind: "benefit", label: "渡劫修為" },
+          ],
+        },
+        reward: {
+          experience: 1480000,
+          logMessage: "你在獸巢殘雷中硬撐許久，肉身對渡劫雷火的適應更深了一層。",
+        },
+      },
+    ],
+  }),
+  mystic_immortal_starlotus_tide: createSingleRealmEncounterEvent({
+    id: "mystic_immortal_starlotus_tide",
+    title: "仙潮星蓮灘",
+    description: "仙人邊境的潮汐偶爾會把縹緲仙宮星砂推上岸，只有法修能在退潮前辨出可入丹的星魂蓮。",
+    realm: MajorRealm.Immortal,
+    selector: {
+      weight: 5,
+      eligibleProfessions: [ProfessionType.Mage],
+      requiredCompletedQuestIds: ["sect_mystic_task_04"],
+    },
+    presentation: {
+      categoryLabel: "仙人百業材料",
+      routeLabel: "縹緲仙宮",
+    },
+    choices: [
+      {
+        id: "gather_starlotus",
+        label: "採集星魂蓮",
+        description: "以神識鎖住退潮節點，採下一株仍保有星砂靈機的星魂蓮。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "縹緲星魂蓮 x1" },
+            { kind: "benefit", label: "煉丹專精材料" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "mystic_path_starlotus", count: 1 }],
+          logMessage: "你趁仙潮退去前採下一株縹緲星魂蓮，讓高階丹方不再只靠一次性前哨供料。",
+        },
+      },
+      {
+        id: "read_tide_pattern",
+        label: "推演仙潮",
+        description: "不急著採蓮，先把仙潮星圖推演成後續術式節奏。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "仙潮推演" },
+            { kind: "benefit", label: "仙人修為" },
+          ],
+        },
+        reward: {
+          experience: 2180000,
+          logMessage: "你以神識推演仙潮星圖，仙人期的法修節奏因此更穩。",
+        },
+      },
+    ],
+  }),
   sword_sect_patrol_cache: createSingleRealmEncounterEvent({
     id: "sword_sect_patrol_cache",
     title: "巡山暗匣",

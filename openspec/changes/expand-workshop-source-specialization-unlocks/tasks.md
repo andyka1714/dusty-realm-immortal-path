@@ -1,7 +1,7 @@
 ## 1. Route-specific material source
-- [ ] 1.1 盤點 `凌霄劍星鋼 / 縹緲星魂蓮 / 萬獸血骨殘材` 現有 source 與缺口
-- [ ] 1.2 補第二批世界 / encounter material source，維持 route label、境界條件與 profession 差異
-- [ ] 1.3 補 source regression，確認材料來源可追蹤且不退化成無條件通用掉落
+- [x] 1.1 盤點 `凌霄劍星鋼 / 縹緲星魂蓮 / 萬獸血骨殘材` 現有 source 與缺口
+- [x] 1.2 補第二批世界 / encounter material source，維持 route label、境界條件與 profession 差異
+- [x] 1.3 補 source regression，確認材料來源可追蹤且不退化成無條件通用掉落
 
 ## 2. Specialization unlock / switch gating
 - [ ] 2.1 為 `Alchemy / Smithing` 專精定義 unlock requirement 與 switch / reset cost 資料
