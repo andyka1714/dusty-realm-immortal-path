@@ -7,9 +7,9 @@
 
 ## 2. 世界里程碑與 route-specific encounter
 
-- [ ] 2.1 補後段世界 / 宗門 milestone encounter，使用 profession 與 completed quest gating
-- [ ] 2.2 補 route-specific reward / material cue，避免後段內容只剩通用靈石或修為
-- [ ] 2.3 確認新增內容不改變玩家 / 怪物 / NPC 的文字 token 表現決策
+- [x] 2.1 補後段世界 / 宗門 milestone encounter，使用 profession 與 completed quest gating
+- [x] 2.2 補 route-specific reward / material cue，避免後段內容只剩通用靈石或修為
+- [x] 2.3 確認新增內容不改變玩家 / 怪物 / NPC 的文字 token 表現決策
 
 ## 3. 測試、文件與驗證
 

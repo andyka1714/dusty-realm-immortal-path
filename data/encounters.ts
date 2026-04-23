@@ -468,6 +468,153 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
       },
     ],
   }),
+  sword_sect_huashen_bastion: createSingleRealmEncounterEvent({
+    id: "sword_sect_huashen_bastion",
+    title: "劍宗三界前哨",
+    description: "化神三界戰場開啟前，凌霄劍宗在外域留下的劍台仍能替真正走完任務鏈的劍修補上一段承接。",
+    realm: MajorRealm.SpiritSevering,
+    selector: {
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Sword],
+      requiredCompletedQuestIds: ["sect_sword_task_04"],
+    },
+    presentation: {
+      categoryLabel: "化神三界戰場里程碑",
+      routeLabel: "凌霄劍宗",
+    },
+    choices: [
+      {
+        id: "claim_sword_bastion_core",
+        label: "取走劍台殘核",
+        description: "把前哨劍台上封存的殘核收下，補進劍宗後段的修行與鍛材周轉。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "凌霄劍宗前哨殘核" },
+            { kind: "benefit", label: "化神承接" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "iron_ore", count: 2 }],
+          logMessage: "你從凌霄劍宗的化神前哨取下殘核與礦材，讓三界戰場前的劍宗承接更扎實。",
+        },
+      },
+      {
+        id: "study_sword_bastion",
+        label: "參悟劍台餘勢",
+        description: "不急著搬走資材，先把劍台殘留的鋒勢化成更穩的修為。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "凌霄劍宗鋒勢" },
+            { kind: "benefit", label: "劍修修為" },
+          ],
+        },
+        reward: {
+          experience: 182000,
+          logMessage: "你在劍台前靜坐，將化神三界戰場前的劍勢餘波轉成一段穩定修為。",
+        },
+      },
+    ],
+  }),
+  beast_sect_huashen_bastion: createSingleRealmEncounterEvent({
+    id: "beast_sect_huashen_bastion",
+    title: "獸莊三界前哨",
+    description: "萬獸山莊在化神戰場邊線埋下的血骨前哨仍在運轉，只有完成最後任務的體修才能把它接上。",
+    realm: MajorRealm.SpiritSevering,
+    selector: {
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Body],
+      requiredCompletedQuestIds: ["sect_beast_task_04"],
+    },
+    presentation: {
+      categoryLabel: "化神三界戰場里程碑",
+      routeLabel: "萬獸山莊",
+    },
+    choices: [
+      {
+        id: "claim_beast_bastion_cache",
+        label: "收走獸骨殘材",
+        description: "把前哨裡剩下的獸骨與血髓帶走，替體修後段補足可用材料。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "萬獸山莊血骨殘材" },
+            { kind: "benefit", label: "肉身承接" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "wolf_fang", count: 2 }],
+          logMessage: "你從萬獸山莊的化神前哨帶走獸骨與血髓，讓體修前往三界戰場時不再空手。",
+        },
+      },
+      {
+        id: "temper_beast_body",
+        label: "以血骨鍛體",
+        description: "直接承接前哨殘威，把肉身磨成更耐打的三界戰場底盤。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "萬獸山莊高壓鍛體" },
+            { kind: "benefit", label: "體修修為" },
+          ],
+        },
+        reward: {
+          experience: 176000,
+          logMessage: "你借萬獸山莊前哨殘威鍛體，將化神前的肉身底盤推得更穩更硬。",
+        },
+      },
+    ],
+  }),
+  mystic_sect_huashen_bastion: createSingleRealmEncounterEvent({
+    id: "mystic_sect_huashen_bastion",
+    title: "仙宮三界前哨",
+    description: "縹緲仙宮把一座星砂前哨留在化神戰場外圍，能否啟用只看你是否完成最後一段宗門任務。",
+    realm: MajorRealm.SpiritSevering,
+    selector: {
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Mage],
+      requiredCompletedQuestIds: ["sect_mystic_task_04"],
+    },
+    presentation: {
+      categoryLabel: "化神三界戰場里程碑",
+      routeLabel: "縹緲仙宮",
+    },
+    choices: [
+      {
+        id: "claim_mystic_bastion_cache",
+        label: "取走星砂秘材",
+        description: "將前哨封存的星砂與草料收起來，讓法修在三界戰場前仍有可用素材。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "縹緲仙宮星砂秘材" },
+            { kind: "benefit", label: "化神承接" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "spirit_herb", count: 2 }],
+          logMessage: "你從縹緲仙宮的化神前哨收下星砂與靈草，替法修接上三界戰場的節奏。",
+        },
+      },
+      {
+        id: "read_mystic_bastion_star_map",
+        label: "讀取星砂圖卷",
+        description: "不先搬走素材，改把圖卷中的星砂推演成更直接的術式節奏。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "縹緲仙宮星圖" },
+            { kind: "benefit", label: "法修修為" },
+          ],
+        },
+        reward: {
+          experience: 188000,
+          logMessage: "你讀完星砂圖卷，將化神三界戰場前的推演節奏直接化為修為。",
+        },
+      },
+    ],
+  }),
   sword_sect_patrol_cache: createSingleRealmEncounterEvent({
     id: "sword_sect_patrol_cache",
     title: "巡山暗匣",
