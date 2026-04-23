@@ -45,6 +45,29 @@ export interface AdventureTerrainTile {
   detailKind: AdventureTerrainDetailKind;
 }
 
+export type AdventureTerrainRenderMotifKind =
+  | "baseTexture"
+  | "corridorEdges"
+  | "landmarkSigil"
+  | "hazardVeins"
+  | "portalThreshold"
+  | "arenaRunes"
+  | "waterBands"
+  | "poiPavers";
+
+export type AdventureTerrainRenderMotifOrientation =
+  | "horizontal"
+  | "vertical"
+  | "diagonal"
+  | "cross";
+
+export interface AdventureTerrainRenderMotif {
+  kind: AdventureTerrainRenderMotifKind;
+  orientation: AdventureTerrainRenderMotifOrientation;
+  color: number;
+  alpha: number;
+}
+
 interface AdventureTerrainPaletteConfig extends AdventureTerrainPalette {
   waterChance: number;
   accentChance: number;
@@ -556,6 +579,113 @@ const getPaletteConfig = (theme: string): AdventureTerrainPaletteConfig =>
 
 const resolveAdventureTerrainSkeletonId = (mapId: string, theme: string) =>
   TERRAIN_SKELETON_IDS[mapId] ?? `${theme.toLowerCase()}-procedural-field`;
+
+const resolveSkeletonOrientation = (
+  skeletonId: string
+): AdventureTerrainRenderMotifOrientation => {
+  if (
+    skeletonId.includes("river") ||
+    skeletonId.includes("rift") ||
+    skeletonId.includes("spine") ||
+    skeletonId.includes("stair") ||
+    skeletonId.includes("axis") ||
+    skeletonId.includes("cliff") ||
+    skeletonId.includes("canyon") ||
+    skeletonId.includes("pool")
+  ) {
+    return "vertical";
+  }
+  if (
+    skeletonId.includes("bridge") ||
+    skeletonId.includes("road") ||
+    skeletonId.includes("trail") ||
+    skeletonId.includes("corridor") ||
+    skeletonId.includes("field") ||
+    skeletonId.includes("sea") ||
+    skeletonId.includes("front") ||
+    skeletonId.includes("ring")
+  ) {
+    return "horizontal";
+  }
+  if (
+    skeletonId.includes("void") ||
+    skeletonId.includes("broken") ||
+    skeletonId.includes("ghost")
+  ) {
+    return "diagonal";
+  }
+  return "cross";
+};
+
+export const resolveAdventureTerrainRenderMotif = (
+  tile: AdventureTerrainTile
+): AdventureTerrainRenderMotif => {
+  const skeletonOrientation = resolveSkeletonOrientation(tile.skeletonId);
+
+  if (tile.semanticRole === "portalClearing") {
+    return {
+      kind: "portalThreshold",
+      orientation: skeletonOrientation,
+      color: tile.detailColor,
+      alpha: 0.34,
+    };
+  }
+  if (tile.semanticRole === "bossArena") {
+    return {
+      kind: "arenaRunes",
+      orientation: "cross",
+      color: tile.detailColor,
+      alpha: 0.38,
+    };
+  }
+  if (tile.semanticRole === "poi") {
+    return {
+      kind: "poiPavers",
+      orientation: skeletonOrientation,
+      color: tile.detailColor,
+      alpha: 0.26,
+    };
+  }
+  if (tile.semanticRole === "hazard") {
+    return {
+      kind: "hazardVeins",
+      orientation: skeletonOrientation,
+      color: tile.detailColor,
+      alpha: 0.34,
+    };
+  }
+  if (tile.semanticRole === "landmark") {
+    return {
+      kind: "landmarkSigil",
+      orientation: "cross",
+      color: tile.detailColor,
+      alpha: 0.32,
+    };
+  }
+  if (tile.semanticRole === "path") {
+    return {
+      kind: "corridorEdges",
+      orientation: skeletonOrientation,
+      color: tile.detailColor,
+      alpha: 0.22,
+    };
+  }
+  if (tile.semanticRole === "water") {
+    return {
+      kind: "waterBands",
+      orientation: tile.skeletonId.includes("pool") ? "cross" : skeletonOrientation,
+      color: tile.detailColor,
+      alpha: 0.24,
+    };
+  }
+
+  return {
+    kind: "baseTexture",
+    orientation: skeletonOrientation,
+    color: tile.detailColor,
+    alpha: 0.14,
+  };
+};
 
 const clampPoint = (value: number, max: number) => Math.max(0, Math.min(value, max));
 

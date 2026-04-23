@@ -351,6 +351,8 @@ prototype 不要求：
 - `淬體潭 / 獸王谷 / 熔岩煉獄 / 蠻荒祖廟` 這批同屬 `West` 的代表地圖，也應拆出血潭、獸巢、熔岩脈與祖廟軸線幾種 landmark，讓體修主線不只剩褐色荒地噪聲
 - prototype 內的 entity token 實驗只保留在驗證入口，不直接推進到主流程
 - `update-pixel-map-production-polish` 的第一輪已把上述背景骨架收斂為可測的 `skeletonId` 與 `semanticRole`，後續若加地圖，應先補 terrain helper / test，而不是直接改 actor layer
+- `update-pixel-terrain-landmark-polish` 的 Phase 4 在正式 `AdventureStage` terrain layer 加上 role-aware render motif：`path` 會依 `skeletonId` 顯示 corridor edge，`landmark` 顯示 sigil，`hazard` 顯示裂紋 / 脈絡，`portalClearing` 顯示背景門檻，`bossArena` 顯示地面 rune corner，`poi` 顯示鋪地點位，`water` 顯示水帶。這些 motif 只畫在背景 terrain layer，不改玩家、怪物、NPC、portal marker、HUD 或 combat overlay。
+- Phase 4 驗證以 `adventureTerrainPixelization` 的 table-driven representative route / theme regression 與 actor-token guard 為主；目前 repo 沒有既有 `tests/visual` / Playwright screenshot regression 結構可直接延伸，因此不為這條 change 新建過重視覺矩陣。若後續要補 screenshot，應先建立共用 visual harness，再挑桌機 / 手機各一張代表地圖。
 
 ---
 

@@ -11,6 +11,7 @@ import { getVisualEffectPresentation } from '../../utils/visualEffectPresentatio
 import type { WorldCombatStagePresentation } from '../../utils/worldCombatPresentation';
 import {
   buildAdventureTerrainTiles,
+  resolveAdventureTerrainRenderMotif,
   type AdventureTerrainTile,
   resolveAdventureTerrainPalette,
 } from '../../utils/adventureTerrainPixelization';
@@ -63,28 +64,88 @@ const drawAdventureTerrainTile = ({
   graphics.drawRect(px, py, cellSize, cellSize);
   graphics.endFill();
 
-  if (tile.detailKind === 'none') return;
+  if (tile.detailKind !== 'none') {
+      graphics.beginFill(tile.detailColor, tile.kind === 'path' ? 0.18 : 0.24);
 
-  graphics.beginFill(tile.detailColor, tile.kind === 'path' ? 0.18 : 0.24);
+      if (tile.detailKind === 'bars') {
+          graphics.drawRect(px + cellSize * 0.18, py + cellSize * 0.18, cellSize * 0.08, cellSize * 0.42);
+          graphics.drawRect(px + cellSize * 0.44, py + cellSize * 0.14, cellSize * 0.08, cellSize * 0.5);
+          graphics.drawRect(px + cellSize * 0.7, py + cellSize * 0.22, cellSize * 0.08, cellSize * 0.36);
+      } else if (tile.detailKind === 'dots') {
+          graphics.drawRect(px + cellSize * 0.28, py + cellSize * 0.26, cellSize * 0.1, cellSize * 0.1);
+          graphics.drawRect(px + cellSize * 0.6, py + cellSize * 0.54, cellSize * 0.1, cellSize * 0.1);
+      } else if (tile.detailKind === 'ripples') {
+          graphics.drawRect(px + cellSize * 0.18, py + cellSize * 0.26, cellSize * 0.22, cellSize * 0.05);
+          graphics.drawRect(px + cellSize * 0.48, py + cellSize * 0.52, cellSize * 0.24, cellSize * 0.05);
+      } else if (tile.detailKind === 'cracks') {
+          graphics.drawRect(px + cellSize * 0.22, py + cellSize * 0.3, cellSize * 0.36, cellSize * 0.05);
+          graphics.drawRect(px + cellSize * 0.5, py + cellSize * 0.48, cellSize * 0.2, cellSize * 0.05);
+          graphics.drawRect(px + cellSize * 0.62, py + cellSize * 0.44, cellSize * 0.05, cellSize * 0.18);
+      } else if (tile.detailKind === 'glyph') {
+          graphics.drawRect(px + cellSize * 0.28, py + cellSize * 0.2, cellSize * 0.14, cellSize * 0.14);
+          graphics.drawRect(px + cellSize * 0.58, py + cellSize * 0.58, cellSize * 0.14, cellSize * 0.14);
+          graphics.drawRect(px + cellSize * 0.58, py + cellSize * 0.2, cellSize * 0.08, cellSize * 0.32);
+      }
 
-  if (tile.detailKind === 'bars') {
-      graphics.drawRect(px + cellSize * 0.18, py + cellSize * 0.18, cellSize * 0.08, cellSize * 0.42);
-      graphics.drawRect(px + cellSize * 0.44, py + cellSize * 0.14, cellSize * 0.08, cellSize * 0.5);
-      graphics.drawRect(px + cellSize * 0.7, py + cellSize * 0.22, cellSize * 0.08, cellSize * 0.36);
-  } else if (tile.detailKind === 'dots') {
-      graphics.drawRect(px + cellSize * 0.28, py + cellSize * 0.26, cellSize * 0.1, cellSize * 0.1);
-      graphics.drawRect(px + cellSize * 0.6, py + cellSize * 0.54, cellSize * 0.1, cellSize * 0.1);
-  } else if (tile.detailKind === 'ripples') {
-      graphics.drawRect(px + cellSize * 0.18, py + cellSize * 0.26, cellSize * 0.22, cellSize * 0.05);
-      graphics.drawRect(px + cellSize * 0.48, py + cellSize * 0.52, cellSize * 0.24, cellSize * 0.05);
-  } else if (tile.detailKind === 'cracks') {
-      graphics.drawRect(px + cellSize * 0.22, py + cellSize * 0.3, cellSize * 0.36, cellSize * 0.05);
-      graphics.drawRect(px + cellSize * 0.5, py + cellSize * 0.48, cellSize * 0.2, cellSize * 0.05);
-      graphics.drawRect(px + cellSize * 0.62, py + cellSize * 0.44, cellSize * 0.05, cellSize * 0.18);
-  } else if (tile.detailKind === 'glyph') {
-      graphics.drawRect(px + cellSize * 0.28, py + cellSize * 0.2, cellSize * 0.14, cellSize * 0.14);
-      graphics.drawRect(px + cellSize * 0.58, py + cellSize * 0.58, cellSize * 0.14, cellSize * 0.14);
-      graphics.drawRect(px + cellSize * 0.58, py + cellSize * 0.2, cellSize * 0.08, cellSize * 0.32);
+      graphics.endFill();
+  }
+
+  const motif = resolveAdventureTerrainRenderMotif(tile);
+  if (motif.kind === 'baseTexture') return;
+
+  graphics.beginFill(motif.color, motif.alpha);
+
+  if (motif.kind === 'corridorEdges') {
+      if (motif.orientation === 'vertical' || motif.orientation === 'cross') {
+          graphics.drawRect(px + cellSize * 0.12, py + cellSize * 0.18, cellSize * 0.06, cellSize * 0.64);
+          graphics.drawRect(px + cellSize * 0.82, py + cellSize * 0.18, cellSize * 0.06, cellSize * 0.64);
+      }
+      if (motif.orientation === 'horizontal' || motif.orientation === 'cross') {
+          graphics.drawRect(px + cellSize * 0.18, py + cellSize * 0.12, cellSize * 0.64, cellSize * 0.06);
+          graphics.drawRect(px + cellSize * 0.18, py + cellSize * 0.82, cellSize * 0.64, cellSize * 0.06);
+      }
+  } else if (motif.kind === 'landmarkSigil') {
+      graphics.drawRect(px + cellSize * 0.42, py + cellSize * 0.2, cellSize * 0.16, cellSize * 0.6);
+      graphics.drawRect(px + cellSize * 0.2, py + cellSize * 0.42, cellSize * 0.6, cellSize * 0.16);
+      graphics.drawRect(px + cellSize * 0.38, py + cellSize * 0.38, cellSize * 0.24, cellSize * 0.24);
+  } else if (motif.kind === 'hazardVeins') {
+      if (motif.orientation === 'horizontal') {
+          graphics.drawRect(px + cellSize * 0.12, py + cellSize * 0.36, cellSize * 0.76, cellSize * 0.08);
+          graphics.drawRect(px + cellSize * 0.28, py + cellSize * 0.58, cellSize * 0.5, cellSize * 0.08);
+      } else if (motif.orientation === 'vertical') {
+          graphics.drawRect(px + cellSize * 0.36, py + cellSize * 0.12, cellSize * 0.08, cellSize * 0.76);
+          graphics.drawRect(px + cellSize * 0.58, py + cellSize * 0.28, cellSize * 0.08, cellSize * 0.5);
+      } else {
+          graphics.drawRect(px + cellSize * 0.22, py + cellSize * 0.22, cellSize * 0.38, cellSize * 0.08);
+          graphics.drawRect(px + cellSize * 0.42, py + cellSize * 0.42, cellSize * 0.38, cellSize * 0.08);
+          graphics.drawRect(px + cellSize * 0.32, py + cellSize * 0.58, cellSize * 0.3, cellSize * 0.08);
+      }
+  } else if (motif.kind === 'portalThreshold') {
+      graphics.drawRect(px + cellSize * 0.18, py + cellSize * 0.18, cellSize * 0.64, cellSize * 0.08);
+      graphics.drawRect(px + cellSize * 0.18, py + cellSize * 0.74, cellSize * 0.64, cellSize * 0.08);
+      graphics.drawRect(px + cellSize * 0.18, py + cellSize * 0.18, cellSize * 0.08, cellSize * 0.64);
+      graphics.drawRect(px + cellSize * 0.74, py + cellSize * 0.18, cellSize * 0.08, cellSize * 0.64);
+  } else if (motif.kind === 'arenaRunes') {
+      graphics.drawRect(px + cellSize * 0.16, py + cellSize * 0.16, cellSize * 0.26, cellSize * 0.08);
+      graphics.drawRect(px + cellSize * 0.16, py + cellSize * 0.16, cellSize * 0.08, cellSize * 0.26);
+      graphics.drawRect(px + cellSize * 0.58, py + cellSize * 0.16, cellSize * 0.26, cellSize * 0.08);
+      graphics.drawRect(px + cellSize * 0.76, py + cellSize * 0.16, cellSize * 0.08, cellSize * 0.26);
+      graphics.drawRect(px + cellSize * 0.16, py + cellSize * 0.76, cellSize * 0.26, cellSize * 0.08);
+      graphics.drawRect(px + cellSize * 0.16, py + cellSize * 0.58, cellSize * 0.08, cellSize * 0.26);
+      graphics.drawRect(px + cellSize * 0.58, py + cellSize * 0.76, cellSize * 0.26, cellSize * 0.08);
+      graphics.drawRect(px + cellSize * 0.76, py + cellSize * 0.58, cellSize * 0.08, cellSize * 0.26);
+  } else if (motif.kind === 'waterBands') {
+      graphics.drawRect(px + cellSize * 0.14, py + cellSize * 0.3, cellSize * 0.34, cellSize * 0.06);
+      graphics.drawRect(px + cellSize * 0.52, py + cellSize * 0.52, cellSize * 0.34, cellSize * 0.06);
+      if (motif.orientation === 'cross') {
+          graphics.drawRect(px + cellSize * 0.3, py + cellSize * 0.14, cellSize * 0.06, cellSize * 0.34);
+          graphics.drawRect(px + cellSize * 0.62, py + cellSize * 0.52, cellSize * 0.06, cellSize * 0.34);
+      }
+  } else if (motif.kind === 'poiPavers') {
+      graphics.drawRect(px + cellSize * 0.2, py + cellSize * 0.2, cellSize * 0.18, cellSize * 0.18);
+      graphics.drawRect(px + cellSize * 0.62, py + cellSize * 0.2, cellSize * 0.18, cellSize * 0.18);
+      graphics.drawRect(px + cellSize * 0.2, py + cellSize * 0.62, cellSize * 0.18, cellSize * 0.18);
+      graphics.drawRect(px + cellSize * 0.62, py + cellSize * 0.62, cellSize * 0.18, cellSize * 0.18);
   }
 
   graphics.endFill();

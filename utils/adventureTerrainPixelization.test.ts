@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { MAPS } from "../data/maps";
 import {
   buildAdventureTerrainTiles,
+  resolveAdventureTerrainRenderMotif,
   resolveAdventureTerrainPalette,
 } from "./adventureTerrainPixelization";
 
@@ -239,6 +240,129 @@ describe("adventureTerrainPixelization", () => {
     expect(new Set(skeletonIds).size).toBe(representativeRoutes.length);
     representativeRoutes.flat().forEach((tile) => {
       expect(Object.keys(tile).every((key) => terrainOnlyKeys.has(key))).toBe(true);
+    });
+  });
+
+  it.each([
+    {
+      name: "east spirit field corridor reads as irrigation path",
+      mapId: "20",
+      theme: "East",
+      sample: { x: 6, y: 6 },
+      expectedSkeletonId: "east-spirit-field",
+      expectedRole: "path",
+      expectedMotif: "corridorEdges",
+      expectedOrientation: "horizontal",
+    },
+    {
+      name: "lake meadow boss spawn reads as terrain arena",
+      mapId: "22",
+      theme: "East",
+      sample: { x: 6, y: 6 },
+      bossSpawn: { x: 6, y: 6 },
+      expectedSkeletonId: "east-lake-meadow",
+      expectedRole: "bossArena",
+      expectedMotif: "arenaRunes",
+      expectedOrientation: "cross",
+    },
+    {
+      name: "thunder pool center reads as hazardous pool",
+      mapId: "161",
+      theme: "Thunder",
+      sample: { x: 6, y: 6 },
+      expectedSkeletonId: "thunder-pool",
+      expectedRole: "water",
+      expectedMotif: "waterBands",
+      expectedOrientation: "cross",
+    },
+    {
+      name: "void time river accent reads as hazardous rift",
+      mapId: "130",
+      theme: "Void",
+      sample: { x: 4, y: 6 },
+      expectedSkeletonId: "void-time-river",
+      expectedRole: "hazard",
+      expectedMotif: "hazardVeins",
+      expectedOrientation: "vertical",
+    },
+    {
+      name: "ultimate origin palace center reads as landmark sigil",
+      mapId: "180",
+      theme: "Ultimate",
+      sample: { x: 6, y: 6 },
+      expectedSkeletonId: "ultimate-origin-palace",
+      expectedRole: "landmark",
+      expectedMotif: "landmarkSigil",
+      expectedOrientation: "cross",
+    },
+  ])(
+    "resolves role-aware terrain render motifs for $name",
+    ({
+      mapId,
+      theme,
+      sample,
+      bossSpawn,
+      expectedSkeletonId,
+      expectedRole,
+      expectedMotif,
+      expectedOrientation,
+    }) => {
+      const tiles = buildAdventureTerrainTiles({
+        mapId,
+        theme,
+        width: 12,
+        height: 12,
+        portals: [],
+        npcs: [],
+        bossSpawn,
+      });
+      const tile = tiles.find((candidate) => candidate.x === sample.x && candidate.y === sample.y);
+
+      expect(tile?.skeletonId).toBe(expectedSkeletonId);
+      expect(tile?.semanticRole).toBe(expectedRole);
+      expect(resolveAdventureTerrainRenderMotif(tile!)).toMatchObject({
+        kind: expectedMotif,
+        orientation: expectedOrientation,
+      });
+    }
+  );
+
+  it("uses portal and poi semantic motifs without adding actor token fields to terrain", () => {
+    const tiles = buildAdventureTerrainTiles({
+      mapId: "20",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [
+        {
+          x: 6,
+          y: 0,
+          targetMapId: "0",
+          targetX: 0,
+          targetY: 0,
+          label: "前往 [仙緣鎮]",
+          dir: "West",
+        },
+      ],
+      npcs: [{ x: 3, y: 6 }],
+    });
+    const portalTile = tiles.find((tile) => tile.x === 6 && tile.y === 0)!;
+    const poiTile = tiles.find((tile) => tile.x === 3 && tile.y === 6)!;
+    const forbiddenActorKeys = new Set([
+      "actorToken",
+      "tokenLabel",
+      "spriteId",
+      "monsterName",
+      "npcSymbol",
+      "portalMarker",
+      "hudCue",
+      "combatOverlay",
+    ]);
+
+    expect(resolveAdventureTerrainRenderMotif(portalTile).kind).toBe("portalThreshold");
+    expect(resolveAdventureTerrainRenderMotif(poiTile).kind).toBe("poiPavers");
+    tiles.forEach((tile) => {
+      expect(Object.keys(tile).some((key) => forbiddenActorKeys.has(key))).toBe(false);
     });
   });
 
