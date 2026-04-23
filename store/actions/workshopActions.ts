@@ -5,6 +5,7 @@ import { deductSpiritStones } from "../slices/characterSlice";
 import { addItem, removeItem } from "../slices/inventorySlice";
 import { addLog } from "../slices/logSlice";
 import { recordRecipeCrafted } from "../slices/workshopSlice";
+import { MajorRealmCN } from "../../types";
 
 const getStackableItemCount = (state: RootState, itemId: string) =>
   state.inventory.items
@@ -25,6 +26,16 @@ export const craftWorkshopRecipe = (
 
     if (!state.workshop.unlockedRecipes.includes(recipeId)) {
       dispatch(addLog({ message: `尚未掌握【${recipe.name}】的配方。`, type: "danger" }));
+      return;
+    }
+
+    if (recipe.minRealm !== undefined && state.character.majorRealm < recipe.minRealm) {
+      dispatch(
+        addLog({
+          message: `境界不足，需達${MajorRealmCN[recipe.minRealm]}後才能施作【${recipe.name}】。`,
+          type: "danger",
+        })
+      );
       return;
     }
 
@@ -70,10 +81,16 @@ export const craftWorkshopRecipe = (
         })
       );
     });
-    dispatch(recordRecipeCrafted(recipeId));
+    dispatch(
+      recordRecipeCrafted({
+        recipeId,
+        discipline: recipe.discipline,
+        masteryYield: recipe.masteryYield ?? 1,
+      })
+    );
     dispatch(
       addLog({
-        message: `百業運轉成功，已完成【${recipe.name}】。`,
+        message: `百業運轉成功，已完成【${recipe.name}】，${recipe.discipline === "alchemy" ? "丹道" : "器道"}熟練 +${recipe.masteryYield ?? 1}。`,
         type: "success",
       })
     );

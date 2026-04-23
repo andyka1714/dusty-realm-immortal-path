@@ -1,6 +1,6 @@
-import { MajorRealm, ItemQuality, type WorkshopState } from "../types";
+import { MajorRealm, ItemQuality, type WorkshopDiscipline, type WorkshopState } from "../types";
 
-export type WorkshopRecipeDiscipline = "alchemy" | "smithing";
+export type WorkshopRecipeDiscipline = WorkshopDiscipline;
 export type WorkshopRecipeTier = "basic" | "advanced" | "highRealm";
 
 export interface WorkshopRecipe {

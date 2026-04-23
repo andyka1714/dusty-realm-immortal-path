@@ -592,11 +592,15 @@ export interface EquipmentState {
 
 // --- Workshop ---
 
+export type WorkshopDiscipline = "alchemy" | "smithing";
+
 export interface WorkshopState {
   alchemyLevel: number;
   blacksmithLevel: number;
   unlockedRecipes: string[];
   craftedRecipeCounts: Record<string, number>;
+  masteryByDiscipline: Record<WorkshopDiscipline, number>;
+  specializationByDiscipline: Record<WorkshopDiscipline, string | null>;
 }
 
 export interface PendingEncounter {

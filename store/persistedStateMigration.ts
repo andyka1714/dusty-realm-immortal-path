@@ -1,4 +1,11 @@
-import { EncounterState, InventorySlot, ItemInstance, SoulState } from "../types";
+import {
+  EncounterState,
+  InventorySlot,
+  ItemInstance,
+  SoulState,
+  WorkshopDiscipline,
+  WorkshopState,
+} from "../types";
 import {
   isSkillManualLikeItemId,
   resolveFormalSkillManualItemId,
@@ -11,6 +18,7 @@ import {
 } from "../utils/reincarnation";
 import { createInitialSoulState } from "./slices/soulSlice";
 import { createInitialEncounterState } from "./slices/encounterSlice";
+import { createInitialWorkshopState } from "./slices/workshopSlice";
 
 export interface LegacyPersistedState {
   character: unknown;
@@ -31,6 +39,7 @@ export interface PersistedSaveEnvelope {
 export type PersistedState = LegacyPersistedState | PersistedSaveEnvelope;
 
 export interface HydratedPersistedState extends LegacyPersistedState {
+  workshop: WorkshopState;
   soul: SoulState;
   encounter: EncounterState;
 }
@@ -40,6 +49,12 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
+
+const isNonNegativeInteger = (value: unknown): value is number =>
+  Number.isInteger(value) && typeof value === "number" && value >= 0;
+
+const isPositiveInteger = (value: unknown): value is number =>
+  Number.isInteger(value) && typeof value === "number" && value >= 1;
 
 const migratePersistedItemId = (itemId: string): string | null => {
   const migratedManualId = resolveFormalSkillManualItemId(itemId);
@@ -272,6 +287,88 @@ const migratePersistedEncounterState = (encounter: unknown): EncounterState => {
   };
 };
 
+const WORKSHOP_DISCIPLINES: WorkshopDiscipline[] = ["alchemy", "smithing"];
+
+const sanitizeWorkshopNumberRecord = (value: unknown) => {
+  const initialWorkshop = createInitialWorkshopState();
+  const nextRecord: WorkshopState["masteryByDiscipline"] = {
+    ...initialWorkshop.masteryByDiscipline,
+  };
+  if (!isRecord(value)) {
+    return nextRecord;
+  }
+
+  WORKSHOP_DISCIPLINES.forEach((discipline) => {
+    if (isNonNegativeInteger(value[discipline])) {
+      nextRecord[discipline] = value[discipline];
+    }
+  });
+
+  return nextRecord;
+};
+
+const sanitizeWorkshopSpecializationRecord = (value: unknown) => {
+  const initialWorkshop = createInitialWorkshopState();
+  const nextRecord: WorkshopState["specializationByDiscipline"] = {
+    ...initialWorkshop.specializationByDiscipline,
+  };
+  if (!isRecord(value)) {
+    return nextRecord;
+  }
+
+  WORKSHOP_DISCIPLINES.forEach((discipline) => {
+    const specializationId = value[discipline];
+    if (typeof specializationId === "string") {
+      nextRecord[discipline] = specializationId;
+    } else if (specializationId === null) {
+      nextRecord[discipline] = null;
+    }
+  });
+
+  return nextRecord;
+};
+
+const sanitizeCraftedRecipeCounts = (value: unknown) => {
+  if (!isRecord(value) || Array.isArray(value)) {
+    return {};
+  }
+
+  return Object.entries(value).reduce<Record<string, number>>((counts, [recipeId, count]) => {
+    if (isNonNegativeInteger(count)) {
+      counts[recipeId] = count;
+    }
+    return counts;
+  }, {});
+};
+
+const migratePersistedWorkshopState = (workshop: unknown): WorkshopState => {
+  const initialWorkshop = createInitialWorkshopState();
+  if (!isRecord(workshop)) {
+    return initialWorkshop;
+  }
+
+  return {
+    ...initialWorkshop,
+    ...workshop,
+    alchemyLevel: isPositiveInteger(workshop.alchemyLevel)
+      ? workshop.alchemyLevel
+      : initialWorkshop.alchemyLevel,
+    blacksmithLevel: isPositiveInteger(workshop.blacksmithLevel)
+      ? workshop.blacksmithLevel
+      : initialWorkshop.blacksmithLevel,
+    unlockedRecipes: Array.isArray(workshop.unlockedRecipes)
+      ? workshop.unlockedRecipes.filter(
+          (recipeId): recipeId is string => typeof recipeId === "string"
+        )
+      : initialWorkshop.unlockedRecipes,
+    craftedRecipeCounts: sanitizeCraftedRecipeCounts(workshop.craftedRecipeCounts),
+    masteryByDiscipline: sanitizeWorkshopNumberRecord(workshop.masteryByDiscipline),
+    specializationByDiscipline: sanitizeWorkshopSpecializationRecord(
+      workshop.specializationByDiscipline
+    ),
+  };
+};
+
 const isPersistedSaveEnvelope = (
   state: PersistedState
 ): state is PersistedSaveEnvelope =>
@@ -286,6 +383,7 @@ export const migratePersistedState = (
     ...current,
     character: migratePersistedCharacterState(current.character),
     inventory: migratePersistedInventoryState(current.inventory),
+    workshop: migratePersistedWorkshopState(current.workshop),
     soul: migratePersistedSoulState(
       isPersistedSaveEnvelope(state) ? state.soul : undefined
     ),

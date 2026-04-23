@@ -152,6 +152,93 @@ describe("persisted state migration", () => {
     });
   });
 
+  it("migrates legacy workshop state with high-tier mastery defaults", () => {
+    const migrated = migratePersistedState(
+      createPersistedState({
+        workshop: {
+          alchemyLevel: 8,
+          blacksmithLevel: 7,
+          unlockedRecipes: ["qi_pill", "immortal_emperor_breakthrough_pill", 42],
+          craftedRecipeCounts: {
+            qi_pill: 3,
+            broken_recipe: "bad",
+          },
+        },
+      })
+    );
+
+    expect(migrated.workshop).toMatchObject({
+      alchemyLevel: 8,
+      blacksmithLevel: 7,
+      unlockedRecipes: ["qi_pill", "immortal_emperor_breakthrough_pill"],
+      craftedRecipeCounts: {
+        qi_pill: 3,
+      },
+      masteryByDiscipline: {
+        alchemy: 0,
+        smithing: 0,
+      },
+      specializationByDiscipline: {
+        alchemy: null,
+        smithing: null,
+      },
+    });
+  });
+
+  it("keeps valid workshop mastery and specialization while sanitizing malformed values", () => {
+    const migrated = migratePersistedState(
+      createPersistedState({
+        workshop: {
+          masteryByDiscipline: {
+            alchemy: 28,
+            smithing: "bad",
+          },
+          specializationByDiscipline: {
+            alchemy: "pill_focus",
+            smithing: 99,
+          },
+        },
+      })
+    );
+
+    expect(migrated.workshop).toMatchObject({
+      masteryByDiscipline: {
+        alchemy: 28,
+        smithing: 0,
+      },
+      specializationByDiscipline: {
+        alchemy: "pill_focus",
+        smithing: null,
+      },
+    });
+  });
+
+  it("rejects malformed workshop arrays and invalid numeric fields", () => {
+    const migrated = migratePersistedState(
+      createPersistedState({
+        workshop: {
+          alchemyLevel: -2,
+          blacksmithLevel: 2.5,
+          craftedRecipeCounts: [1, 2],
+          masteryByDiscipline: {
+            alchemy: -1,
+            smithing: 1.5,
+          },
+        },
+      })
+    );
+
+    expect(migrated.workshop).toMatchObject({
+      alchemyLevel: 1,
+      blacksmithLevel: 1,
+      craftedRecipeCounts: {},
+      masteryByDiscipline: {
+        alchemy: 0,
+        smithing: 0,
+      },
+    });
+  });
+
   it("bootstraps advanced planner perks from lifetime milestones even when older saves do not list them", () => {
     const migrated = migratePersistedState({
       schemaVersion: 2,
