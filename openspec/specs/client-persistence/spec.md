@@ -2,36 +2,41 @@
 
 ## Purpose
 定義目前正式使用的 LocalStorage 存檔結構、離線收益規則與輪迴相關 schema migration。
-
 ## Requirements
-
 ### Requirement: 版本化存檔封裝 (Versioned Save Envelope)
 系統必須 (MUST) 以版本化存檔封裝在 LocalStorage 中儲存 current run 與 soul progression，而不是只存單層 Redux root state。
 
 #### Scenario: 序列化 current 與 soul
 - **WHEN** 系統序列化存檔
 - **THEN** 存檔物件必須包含 `schemaVersion`
-- **AND** 必須包含 `current` 區塊，承接 `character / logs / adventure / inventory / workshop / quest`
+- **AND** 必須包含 `current` 區塊，承接 `character / logs / adventure / inventory / workshop / quest / encounter`
 - **AND** 必須包含 `soul` 區塊，承接功德、Lifetime Stats、魂印解鎖、遺珍倉庫與輪迴暫存資訊
 
 #### Scenario: 輪迴僅重置 current run
 - **WHEN** 玩家完成輪迴並開始新一世
 - **THEN** 存檔必須重建新的 `current` 區塊
 - **AND** 同一份存檔內的 `soul` 區塊必須保留並寫入最新功德、魂印與遺珍狀態
+- **AND** 不得把上一世的 `adventure / inventory / workshop / quest / encounter` 狀態殘留到新一世
 
 ### Requirement: 存檔版本遷移 (Save Schema Migration)
-系統必須 (MUST) 能將舊版單層 LocalStorage 存檔遷移到新的版本化 soul/current schema。
+系統必須 (MUST) 能將 legacy LocalStorage 存檔與 retired skill/manual 資料遷移到正式版本化 schema。
 
 #### Scenario: 載入 legacy raw save
 - **WHEN** LocalStorage 中仍是舊版 raw root state
 - **THEN** 系統必須將其視為 legacy current run
-- **AND** 自動補上預設 `soul` state 與新版 schemaVersion
+- **AND** 自動補上預設 `soul` state、預設 `encounter` state 與新版 schemaVersion
 - **AND** 不得因缺少新版欄位而讓遊戲無法讀檔
 
-#### Scenario: 遷移後保存
-- **WHEN** legacy save 成功載入
-- **THEN** 後續保存必須寫回新版 versioned envelope
-- **AND** 不得再持續以舊 schema 覆寫存檔
+#### Scenario: retired skill 與 manual 正式遷移
+- **WHEN** 舊存檔內仍含 retired skill id、legacy manual item id 或 manual-like 無效殘值
+- **THEN** 系統必須將可映射項目正規化到 formal core skill / manual id
+- **AND** 對無法映射的 manual-like 殘值必須安全丟棄
+- **AND** 不得把 retired skill 或壞掉的 manual id 直接帶進新版 current run
+
+#### Scenario: encounter hydration 與保存
+- **WHEN** 存檔中包含 `encounter.pendingEvent` 或 `resolvedEventIds`
+- **THEN** 系統必須只接受合法 shape 的 pending event 與已解決事件清單
+- **AND** 後續保存必須繼續使用正式 versioned envelope，而不是退回 legacy shape
 
 ### Requirement: 離線收益計算 (Offline Logic)
 系統必須 (MUST) 在讀取存檔時計算 current run 的離線收益，且不得對 soul-only 狀態錯誤發放修為。
@@ -44,3 +49,68 @@
 #### Scenario: 處於輪迴流程中
 - **WHEN** 玩家處於死亡總結或輪迴大殿、尚未開始新一世
 - **THEN** 系統不得對尚未建立的新 current run 發放修為
+
+### Requirement: 支撐型養成與事件狀態持久化
+系統必須 (MUST) 持久化 Workshop 與 event loop 所需的當世狀態，避免重新整理後遺失進度。
+
+#### Scenario: Workshop current run 狀態保存
+- **WHEN** 玩家更新聚靈陣、煉丹、煉器或 recipe 進度
+- **THEN** 對應的 Workshop state 必須保存於 current run
+- **AND** 重新載入後不得丟失當世百業進度
+
+#### Scenario: event 流程狀態保存
+- **WHEN** 玩家正處於待處理的 event / encounter 流程
+- **THEN** 系統必須保存必要的事件上下文與可恢復狀態
+- **AND** 不得因重新載入而跳過、重複或破壞該次事件結果
+
+### Requirement: 舊存檔技能資料遷移
+系統必須 (MUST) 在載入舊存檔時，把 `transition / legacy` 技能與秘卷引用遷移為 formal core 視角，再交給 Redux store 使用。
+
+#### Scenario: 載入舊存檔時正規化角色技能
+- **WHEN** 應用程式從 LocalStorage 載入舊存檔
+- **THEN** `character.skills` 中的 retired skill id 必須在 hydrate 前映射為 formal core replacement
+- **AND** hydrate 後的 `character.skills` 不得再保留 retired skill id
+
+#### Scenario: 載入舊存檔時升級舊秘卷物品
+- **WHEN** 舊存檔背包中仍包含 retired 技能秘卷
+- **THEN** 系統必須把該 item 轉成對應的正式秘卷 item
+- **AND** 若找不到有效的正式秘卷對應，該 retired item 不得以壞資料形式繼續進入 store
+
+#### Scenario: 遷移流程必須可重複執行而不污染存檔
+- **WHEN** 同一份已遷移過的存檔再次被載入
+- **THEN** 遷移流程必須維持相同結果
+- **AND** 不得重複插入技能、重複生成秘卷或把 formal core skill 再次改寫成其他 id
+
+### Requirement: 高階 Workshop 狀態遷移
+系統必須 (MUST) 讓新增的 Workshop mastery、specialization 或 high-tier recipe 狀態安全寫入 current run，並能從舊存檔補齊預設值。
+
+#### Scenario: 新版存檔保留高階百業進度
+- **WHEN** 玩家完成高階 recipe、累積 mastery 或設定百業專精
+- **THEN** 存檔的 `current.workshop` 必須保留對應進度
+- **AND** 重新載入後不得遺失已解鎖 recipe、craft counts、mastery 或 specialization
+
+#### Scenario: legacy workshop state 補齊新欄位
+- **WHEN** 舊存檔的 `current.workshop` 只有 `alchemyLevel / blacksmithLevel / unlockedRecipes / craftedRecipeCounts`
+- **THEN** migration 必須補上 high-tier workshop 所需的新欄位預設值
+- **AND** 不得因欄位缺失讓讀檔、輪迴或 Workshop UI 崩潰
+
+### Requirement: 輪迴 planner 演進式存檔承接
+系統必須 (MUST) 讓既有 `soul` save 能安全承接擴充後的 planner catalog，而不是因第二批 perk / 遺珍規則而失效。
+
+#### Scenario: 舊版 soul save 載入新版 planner
+- **WHEN** 玩家載入尚未包含新版 planner 欄位或進階 perk catalog 的舊存檔
+- **THEN** 系統必須自動補上 baseline planner 預設值與可用 perk 狀態
+- **AND** 不得因缺少新版欄位而無法讀檔
+
+#### Scenario: 清理過期或超限選擇
+- **WHEN** 舊存檔內的 `rebirthConfig` 與新版 slot / perk 規則不相容
+- **THEN** 系統必須保留仍合法的選擇並清理超限項目
+- **AND** 不得讓無效 planner 配置直接進入下一世
+
+### Requirement: Workshop 專精樹存檔遷移
+系統必須 (MUST) 將舊版 Workshop 專精欄位安全遷移到專精樹 state，不得破壞既有 current run。
+
+#### Scenario: 舊存檔缺少專精樹 state
+- **WHEN** 載入只有扁平 `specializationByDiscipline` 或缺少專精欄位的舊存檔
+- **THEN** migration 必須補上合法的專精樹預設 state
+- **AND** 若舊存檔已有可相容的 active specialization，必須盡可能保留其效果或映射到對應節點
