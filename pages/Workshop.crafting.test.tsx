@@ -99,22 +99,27 @@ describe("Workshop crafting UI", () => {
         "qi_pill",
         "novice_sword_reforge",
         "immortal_ascension_elixir",
+        "star_lotus_hongmeng_pill",
         "great_dao_body_forge",
       ],
       masteryByDiscipline: {
-        alchemy: 24,
+        alchemy: 72,
         smithing: 4,
       },
       specializationTreeByDiscipline: {
         ...createInitialWorkshopSpecializationTreeState(),
         alchemy: {
-          unlockedNodeIds: ["alchemy_inner_fire_foundation", "alchemy_hongmeng_condenser"],
-          activeNodeId: "alchemy_hongmeng_condenser",
+          unlockedNodeIds: [
+            "alchemy_inner_fire_foundation",
+            "alchemy_hongmeng_condenser",
+            "alchemy_hongmeng_star_lotus_crown",
+          ],
+          activeNodeId: "alchemy_hongmeng_star_lotus_crown",
           activeBranchId: "alchemy_hongmeng",
         },
       },
       specializationByDiscipline: {
-        alchemy: "alchemy_hongmeng_condenser",
+        alchemy: "alchemy_hongmeng_star_lotus_crown",
         smithing: null,
       },
     };
@@ -127,23 +132,32 @@ describe("Workshop crafting UI", () => {
     );
 
     expect(markup).toContain("百業專精樹");
-    expect(markup).toContain("目前節點：鴻蒙凝丹");
+    expect(markup).toContain("目前節點：星蓮鴻蒙冠火");
     expect(markup).toContain("啟用分支：鴻蒙凝丹");
+    expect(markup).toContain("熟練里程碑：3/3");
+    expect(markup).toContain("終盤專精葉");
     expect(markup).toContain("目前節點：尚未選定");
     expect(markup).toContain("星火鍛胚");
+    expect(markup).toContain("星鋼冠火");
     expect(markup).toContain("解鎖條件：丹道熟練 24");
+    expect(markup).toContain("解鎖條件：丹道熟練 72");
     expect(markup).toContain("前置節點：內火定基");
+    expect(markup).toContain("前置節點：鴻蒙凝丹");
     expect(markup).toContain("互斥分支：萬獸生息");
-    expect(markup).toContain("重置 360 靈石");
+    expect(markup).toContain("重置 1140 靈石");
     expect(markup).toContain("節點重置成本：240 靈石");
+    expect(markup).toContain("專精效果：高階配方");
+    expect(markup).toContain("熟練收益 +14");
+    expect(markup).toContain("星魂蓮冠火穩住終盤丹品");
     expect(markup).toContain("鎖定原因：需先解鎖「爐心定鍛」");
-    expect(markup).toContain("專精影響：鴻蒙凝丹");
+    expect(markup).toContain("專精影響：星蓮鴻蒙冠火");
     expect(markup).toContain("品質專精：爐火穩定");
     expect(markup).toContain("爐火消耗：216 靈石");
     expect(markup).toContain("原消耗 240");
-    expect(markup).toContain("丹道熟練 +32");
+    expect(markup).toContain("丹道熟練 +60");
     expect(markup).toContain("材料來源：萬獸血骨殘材");
-    expect(markup).toContain("渡劫百業材料");
+    expect(markup).toContain("來源線索：縹緲星魂蓮");
+    expect(markup).toContain("仙人百業材料");
     expect(markup).toContain("材料 sink 維持原配方");
     expect(markup).not.toContain("pixel-sprite");
   });

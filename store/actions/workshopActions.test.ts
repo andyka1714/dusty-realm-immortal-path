@@ -298,6 +298,113 @@ describe("workshop actions", () => {
     expect(state.logs.logs[0]?.message).toContain("已解鎖並啟用丹道專精：鴻蒙凝丹");
   });
 
+  it("unlocks second-layer alchemy leaf and crafts new route-sink recipe without material discounts", () => {
+    const store = createTestStore({
+      character: createCharacterAtRealm(MajorRealm.Immortal, 2000),
+      workshop: {
+        ...workshopReducer(undefined, { type: "@@INIT" }),
+        alchemyLevel: 8,
+        unlockedRecipes: ["qi_pill", "novice_sword_reforge", "star_lotus_hongmeng_pill"],
+        masteryByDiscipline: {
+          alchemy: 72,
+          smithing: 0,
+        },
+        specializationTreeByDiscipline: {
+          ...createInitialWorkshopSpecializationTreeState(),
+          alchemy: {
+            unlockedNodeIds: ["alchemy_inner_fire_foundation", "alchemy_hongmeng_condenser"],
+            activeNodeId: "alchemy_hongmeng_condenser",
+            activeBranchId: "alchemy_hongmeng",
+          },
+        },
+        specializationByDiscipline: {
+          alchemy: "alchemy_hongmeng_condenser",
+          smithing: null,
+        },
+      },
+    });
+    store.dispatch(addItem({ itemId: "mystic_path_starlotus", count: 3 }));
+    store.dispatch(addItem({ itemId: "sword_path_starsteel", count: 1 }));
+    store.dispatch(addItem({ itemId: "beast_path_bloodbone", count: 1 }));
+    store.dispatch(addItem({ itemId: "spirit_herb", count: 10 }));
+
+    store.dispatch(
+      selectWorkshopSpecialization({
+        discipline: "alchemy",
+        specializationId: "alchemy_hongmeng_star_lotus_crown",
+      })
+    );
+    store.dispatch(craftWorkshopRecipe("star_lotus_hongmeng_pill"));
+
+    const state = store.getState();
+
+    expect(state.workshop.specializationByDiscipline.alchemy).toBe(
+      "alchemy_hongmeng_star_lotus_crown"
+    );
+    expect(state.inventory.items.find((slot) => slot.itemId === "bt_immortal_emperor")?.count).toBe(1);
+    expect(state.inventory.items.find((slot) => slot.itemId === "mystic_path_starlotus")).toBeUndefined();
+    expect(state.inventory.items.find((slot) => slot.itemId === "sword_path_starsteel")).toBeUndefined();
+    expect(state.inventory.items.find((slot) => slot.itemId === "beast_path_bloodbone")).toBeUndefined();
+    expect(state.workshop.masteryByDiscipline.alchemy).toBe(132);
+    expect(state.character.spiritStones).toBe(887);
+    expect(state.logs.logs[0]?.message).toContain("專精：星蓮鴻蒙冠火");
+  });
+
+  it("unlocks second-layer smithing leaf and preserves starsteel/bloodbone route sinks", () => {
+    const store = createTestStore({
+      character: createCharacterAtRealm(MajorRealm.Immortal, 2200),
+      workshop: {
+        ...workshopReducer(undefined, { type: "@@INIT" }),
+        blacksmithLevel: 8,
+        unlockedRecipes: ["qi_pill", "novice_sword_reforge", "starsteel_bloodbone_sword_forge"],
+        masteryByDiscipline: {
+          alchemy: 0,
+          smithing: 76,
+        },
+        specializationTreeByDiscipline: {
+          ...createInitialWorkshopSpecializationTreeState(),
+          smithing: {
+            unlockedNodeIds: ["smithing_core_temper_foundation", "smithing_starfire_tempering"],
+            activeNodeId: "smithing_starfire_tempering",
+            activeBranchId: "smithing_starfire",
+          },
+        },
+        specializationByDiscipline: {
+          alchemy: null,
+          smithing: "smithing_starfire_tempering",
+        },
+      },
+    });
+    store.dispatch(addItem({ itemId: "sword_path_starsteel", count: 3 }));
+    store.dispatch(addItem({ itemId: "beast_path_bloodbone", count: 2 }));
+    store.dispatch(addItem({ itemId: "mystic_path_starlotus", count: 1 }));
+    store.dispatch(addItem({ itemId: "iron_ore", count: 8 }));
+
+    store.dispatch(
+      selectWorkshopSpecialization({
+        discipline: "smithing",
+        specializationId: "smithing_starfire_starsteel_crown",
+      })
+    );
+    store.dispatch(craftWorkshopRecipe("starsteel_bloodbone_sword_forge"));
+
+    const state = store.getState();
+    const swordSlot = state.inventory.items.find(
+      (slot) => slot.itemId === "origin_sword" && slot.instanceId
+    );
+
+    expect(state.workshop.specializationByDiscipline.smithing).toBe(
+      "smithing_starfire_starsteel_crown"
+    );
+    expect(swordSlot?.instance?.templateId).toBe("origin_sword");
+    expect(state.inventory.items.find((slot) => slot.itemId === "sword_path_starsteel")).toBeUndefined();
+    expect(state.inventory.items.find((slot) => slot.itemId === "beast_path_bloodbone")).toBeUndefined();
+    expect(state.inventory.items.find((slot) => slot.itemId === "mystic_path_starlotus")).toBeUndefined();
+    expect(state.workshop.masteryByDiscipline.smithing).toBe(140);
+    expect(state.character.spiritStones).toBe(1020);
+    expect(state.logs.logs[0]?.message).toContain("專精：星鋼冠火");
+  });
+
   it("blocks mutually exclusive specialization branches until reset", () => {
     const store = createTestStore({
       character: createCharacterAtRealm(MajorRealm.Tribulation, 1000),

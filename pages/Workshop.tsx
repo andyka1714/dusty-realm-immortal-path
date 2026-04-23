@@ -15,6 +15,7 @@ import {
 } from '../data/workshopRecipes';
 import {
   WORKSHOP_SPECIALIZATION_BRANCH_LABELS,
+  getWorkshopMasteryMilestoneStatuses,
   getWorkshopSpecializationNode,
   getWorkshopSpecializationNodeStatus,
   getWorkshopSpecializationNodesForDiscipline,
@@ -32,6 +33,27 @@ interface WorkshopProps {
 
 const getDisciplineMasteryLabel = (discipline: WorkshopDiscipline) =>
   discipline === "alchemy" ? "丹道" : "器道";
+
+const getRecipeTierLabel = (tier?: WorkshopRecipe["tier"]) =>
+  tier === "highRealm" ? "高階配方" : tier === "advanced" ? "進階配方" : "全部配方";
+
+const getSpecializationEffectRows = (node: WorkshopSpecializationNode) => {
+  const effect = node.effect;
+
+  if (!effect) {
+    return [];
+  }
+
+  return [
+    `專精效果：${getRecipeTierLabel(effect.appliesToTier)}`,
+    effect.spiritStoneCostMultiplier !== undefined
+      ? `靈石消耗 x${effect.spiritStoneCostMultiplier}`
+      : null,
+    effect.masteryYieldBonus ? `熟練收益 +${effect.masteryYieldBonus}` : null,
+    effect.qualityCue ? `品質：${effect.qualityCue}` : null,
+    effect.outputCue ? `副收益：${effect.outputCue}` : null,
+  ].filter((row): row is string => Boolean(row));
+};
 
 export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -96,6 +118,8 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
     const activeSpecialization = treeState.activeNodeId
       ? getWorkshopSpecializationNode(treeState.activeNodeId)
       : null;
+    const milestoneStatuses = getWorkshopMasteryMilestoneStatuses(workshop, discipline);
+    const reachedMilestoneCount = milestoneStatuses.filter((status) => status.isReached).length;
     const resetCost = getWorkshopSpecializationResetCost(workshop, discipline);
     const canReset = treeState.unlockedNodeIds.length > 0 && spiritStones >= resetCost;
 
@@ -115,6 +139,9 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
                 ? WORKSHOP_SPECIALIZATION_BRANCH_LABELS[treeState.activeBranchId] ?? treeState.activeBranchId
                 : "尚未選定"}
             </div>
+            <div className="mt-1 text-[11px] text-stone-500">
+              熟練里程碑：{reachedMilestoneCount}/{milestoneStatuses.length}
+            </div>
           </div>
           <button
             onClick={() =>
@@ -131,6 +158,17 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
             重置 {resetCost} 靈石
           </button>
         </div>
+        <div className="mt-2 grid gap-1 rounded-lg border border-cyan-900/50 bg-stone-950/50 p-2 text-[11px] text-stone-400">
+          {milestoneStatuses.map((status) => (
+            <div
+              key={status.milestone.id}
+              className={status.isReached ? "text-cyan-200" : "text-stone-500"}
+            >
+              {status.isReached ? "已達成" : `尚差 ${status.remainingMastery}`}：
+              {status.milestone.name} · {status.milestone.cue}
+            </div>
+          ))}
+        </div>
         <div className="mt-2 grid gap-2">
           {nodes.map((node: WorkshopSpecializationNode) => {
             const status = getWorkshopSpecializationNodeStatus({
@@ -141,6 +179,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
             });
             const minMastery = node.unlockRequirement?.minMastery;
             const minRealm = node.unlockRequirement?.minRealm;
+            const effectRows = getSpecializationEffectRows(node);
 
             return (
               <button
@@ -198,6 +237,9 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
                   )}
                   <div>{status.isUnlocked ? "切換成本" : "解鎖成本"}：{status.requiredCost} 靈石</div>
                   <div>節點重置成本：{node.resetCost ?? 0} 靈石</div>
+                  {effectRows.map((row) => (
+                    <div key={row}>{row}</div>
+                  ))}
                   {status.lockReason && (
                     <div className="text-rose-300">鎖定原因：{status.lockReason}</div>
                   )}
@@ -306,6 +348,9 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
               {outputLabels && <div>產出：{outputLabels}</div>}
               {recipe.qualityHint && <div>品質：{recipe.qualityHint}</div>}
               {recipe.sourceHint && <div>來源：{recipe.sourceHint}</div>}
+              {recipe.tier === "highRealm" && recipe.sourceHint && (
+                <div>來源線索：{recipe.sourceHint}</div>
+              )}
               {materialSourceRows.map((source) => (
                 <div key={source.itemId}>
                   材料來源：{source.itemName}：{source.sourceText}

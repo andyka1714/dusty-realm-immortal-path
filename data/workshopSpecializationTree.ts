@@ -55,6 +55,21 @@ export interface WorkshopRecipeSpecializationEffect {
   outputCues: string[];
 }
 
+export interface WorkshopMasteryMilestone {
+  id: string;
+  discipline: WorkshopDiscipline;
+  name: string;
+  requiredMastery: number;
+  cue: string;
+}
+
+export interface WorkshopMasteryMilestoneStatus {
+  milestone: WorkshopMasteryMilestone;
+  isReached: boolean;
+  currentMastery: number;
+  remainingMastery: number;
+}
+
 const DISCIPLINE_LABELS: Record<WorkshopDiscipline, string> = {
   alchemy: "丹道",
   smithing: "器道",
@@ -67,6 +82,58 @@ export const WORKSHOP_SPECIALIZATION_BRANCH_LABELS: Record<string, string> = {
   smithing_foundation: "煉器根基",
   smithing_starfire: "星火鍛胚",
   smithing_soulforge: "魂鋼銘紋",
+};
+
+export const WORKSHOP_MASTERY_MILESTONES: Record<
+  WorkshopDiscipline,
+  WorkshopMasteryMilestone[]
+> = {
+  alchemy: [
+    {
+      id: "alchemy_stable_fire",
+      discipline: "alchemy",
+      name: "內火穩定",
+      requiredMastery: 8,
+      cue: "開啟丹道根基節點，讓高階丹方開始回饋熟練。",
+    },
+    {
+      id: "alchemy_branch_form",
+      discipline: "alchemy",
+      name: "分支成形",
+      requiredMastery: 24,
+      cue: "可進入鴻蒙凝丹路線，將熟練與高階材料 sink 綁在一起。",
+    },
+    {
+      id: "alchemy_high_realm_leaf",
+      discipline: "alchemy",
+      name: "終盤專精葉",
+      requiredMastery: 72,
+      cue: "可觸發仙人後的二層丹道 leaf，強化終盤丹方熟練與品質提示。",
+    },
+  ],
+  smithing: [
+    {
+      id: "smithing_stable_forge",
+      discipline: "smithing",
+      name: "爐心穩定",
+      requiredMastery: 10,
+      cue: "開啟器道根基節點，讓高階器方開始回饋熟練。",
+    },
+    {
+      id: "smithing_branch_form",
+      discipline: "smithing",
+      name: "分支成形",
+      requiredMastery: 30,
+      cue: "可進入星火鍛胚路線，讓終盤鍛造明確消耗 route-specific 材料。",
+    },
+    {
+      id: "smithing_high_realm_leaf",
+      discipline: "smithing",
+      name: "終盤專精葉",
+      requiredMastery: 76,
+      cue: "可觸發仙人後的二層器道 leaf，強化終盤帝兵熟練與副收益提示。",
+    },
+  ],
 };
 
 export const WORKSHOP_SPECIALIZATION_TREE: Record<
@@ -131,6 +198,26 @@ export const WORKSHOP_SPECIALIZATION_TREE: Record<
         outputCue: "有機會衍生藥渣、丹香等副收益；主產出與核心材料不變。",
       },
     },
+    {
+      id: "alchemy_hongmeng_star_lotus_crown",
+      name: "星蓮鴻蒙冠火",
+      discipline: "alchemy",
+      branchId: "alchemy_hongmeng",
+      tier: 2,
+      description: "以星魂蓮冠住鴻蒙丹火，讓仙人後丹方熟練與品質提示再深化；路線材料仍依原配方完整消耗。",
+      prerequisiteNodeIds: ["alchemy_hongmeng_condenser"],
+      conflictsWithBranchIds: ["alchemy_lifebloom"],
+      unlockRequirement: { minMastery: 72, minRealm: MajorRealm.Immortal },
+      unlockCost: 780,
+      switchCost: 260,
+      resetCost: 780,
+      effect: {
+        appliesToTier: "highRealm",
+        masteryYieldBonus: 14,
+        qualityCue: "星魂蓮冠火穩住終盤丹品，但不替代路線材料。",
+        outputCue: "收丹時標記星蓮火候，主產出與路線材料消耗不變。",
+      },
+    },
   ],
   smithing: [
     {
@@ -190,6 +277,26 @@ export const WORKSHOP_SPECIALIZATION_TREE: Record<
         outputCue: "有機會產生銘紋殘片等副收益；主產出與核心材料不變。",
       },
     },
+    {
+      id: "smithing_starfire_starsteel_crown",
+      name: "星鋼冠火",
+      discipline: "smithing",
+      branchId: "smithing_starfire",
+      tier: 2,
+      description: "以凌霄星鋼承接星火鍛胚，讓仙人後帝兵鍛造取得更高熟練與副收益 cue；路線材料不折抵。",
+      prerequisiteNodeIds: ["smithing_starfire_tempering"],
+      conflictsWithBranchIds: ["smithing_soulforge"],
+      unlockRequirement: { minMastery: 76, minRealm: MajorRealm.Immortal },
+      unlockCost: 820,
+      switchCost: 280,
+      resetCost: 820,
+      effect: {
+        appliesToTier: "highRealm",
+        masteryYieldBonus: 16,
+        qualityCue: "星鋼冠火讓終盤器胚火候更穩。",
+        outputCue: "星鋼碎火會標記副收益機會，路線材料照配方完整消耗。",
+      },
+    },
   ],
 };
 
@@ -219,6 +326,20 @@ export const createInitialWorkshopSpecializationTreeState = (): Record<
 export const getWorkshopSpecializationNodesForDiscipline = (
   discipline: WorkshopDiscipline
 ) => WORKSHOP_SPECIALIZATION_TREE[discipline];
+
+export const getWorkshopMasteryMilestoneStatuses = (
+  workshop: WorkshopState,
+  discipline: WorkshopDiscipline
+): WorkshopMasteryMilestoneStatus[] => {
+  const currentMastery = workshop.masteryByDiscipline[discipline];
+
+  return WORKSHOP_MASTERY_MILESTONES[discipline].map((milestone) => ({
+    milestone,
+    isReached: currentMastery >= milestone.requiredMastery,
+    currentMastery,
+    remainingMastery: Math.max(0, milestone.requiredMastery - currentMastery),
+  }));
+};
 
 export const getWorkshopSpecializationNode = (nodeId: string) =>
   WORKSHOP_SPECIALIZATION_NODES[nodeId] ?? null;

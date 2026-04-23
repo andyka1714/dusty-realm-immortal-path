@@ -10,6 +10,7 @@ import {
 import {
   WORKSHOP_SPECIALIZATION_TREE,
   createInitialWorkshopSpecializationTreeState,
+  getWorkshopMasteryMilestoneStatuses,
 } from "./workshopSpecializationTree";
 
 const HIGH_TIER_RECIPE_CASES = [
@@ -61,6 +62,22 @@ const HIGH_TIER_RECIPE_CASES = [
     expectedRouteTags: ["仙帝", "縹緲仙宮", "歸墟裂界"],
     expectedSourceHint: "縹緲仙宮星砂秘材",
   },
+  {
+    id: "star_lotus_hongmeng_pill",
+    discipline: "alchemy",
+    outputItemId: "bt_immortal_emperor",
+    expectedMinRealm: MajorRealm.Immortal,
+    expectedRouteTags: ["仙帝", "縹緲仙宮", "鴻蒙丹火"],
+    expectedSourceHint: "縹緲星魂蓮",
+  },
+  {
+    id: "starsteel_bloodbone_sword_forge",
+    discipline: "smithing",
+    outputItemId: "origin_sword",
+    expectedMinRealm: MajorRealm.Immortal,
+    expectedRouteTags: ["仙帝", "凌霄劍宗", "萬獸山莊"],
+    expectedSourceHint: "凌霄劍星鋼",
+  },
 ] as const;
 
 const ROUTE_SPECIFIC_MATERIAL_IDS = new Set([
@@ -91,9 +108,9 @@ describe("workshop recipe data", () => {
       (recipe) => recipe.tier === "highRealm"
     );
 
-    expect(highTierRecipes).toHaveLength(6);
-    expect(highTierRecipes.filter((recipe) => recipe.discipline === "alchemy")).toHaveLength(3);
-    expect(highTierRecipes.filter((recipe) => recipe.discipline === "smithing")).toHaveLength(3);
+    expect(highTierRecipes).toHaveLength(8);
+    expect(highTierRecipes.filter((recipe) => recipe.discipline === "alchemy")).toHaveLength(4);
+    expect(highTierRecipes.filter((recipe) => recipe.discipline === "smithing")).toHaveLength(4);
   });
 
   it("keeps all high-tier recipe ingredients and outputs anchored to real items", () => {
@@ -135,11 +152,13 @@ describe("workshop recipe data", () => {
       "alchemy_inner_fire_foundation",
       "alchemy_hongmeng_condenser",
       "alchemy_lifebloom_resonance",
+      "alchemy_hongmeng_star_lotus_crown",
     ]);
     expect(WORKSHOP_SPECIALIZATION_TREE.smithing.map((node) => node.id)).toEqual([
       "smithing_core_temper_foundation",
       "smithing_starfire_tempering",
       "smithing_soulsteel_inscription",
+      "smithing_starfire_starsteel_crown",
     ]);
     expect(WORKSHOP_SPECIALIZATIONS.alchemy_hongmeng_condenser).toMatchObject({
       prerequisiteNodeIds: ["alchemy_inner_fire_foundation"],
@@ -156,6 +175,67 @@ describe("workshop recipe data", () => {
       unlockCost: 500,
       switchCost: 180,
       resetCost: 240,
+    });
+  });
+
+  it("publishes second-layer specialization leaves with higher mastery gates and high-realm cues", () => {
+    expect(WORKSHOP_SPECIALIZATIONS.alchemy_hongmeng_star_lotus_crown).toMatchObject({
+      discipline: "alchemy",
+      tier: 2,
+      prerequisiteNodeIds: ["alchemy_hongmeng_condenser"],
+      unlockRequirement: { minMastery: 72, minRealm: MajorRealm.Immortal },
+      effect: {
+        appliesToTier: "highRealm",
+        masteryYieldBonus: 14,
+      },
+    });
+    expect(WORKSHOP_SPECIALIZATIONS.alchemy_hongmeng_star_lotus_crown.effect?.qualityCue).toContain(
+      "星魂蓮"
+    );
+    expect(WORKSHOP_SPECIALIZATIONS.smithing_starfire_starsteel_crown).toMatchObject({
+      discipline: "smithing",
+      tier: 2,
+      prerequisiteNodeIds: ["smithing_starfire_tempering"],
+      unlockRequirement: { minMastery: 76, minRealm: MajorRealm.Immortal },
+      effect: {
+        appliesToTier: "highRealm",
+        masteryYieldBonus: 16,
+      },
+    });
+    expect(WORKSHOP_SPECIALIZATIONS.smithing_starfire_starsteel_crown.effect?.outputCue).toContain(
+      "路線材料"
+    );
+  });
+
+  it("derives mastery milestone statuses from existing mastery without new state", () => {
+    const milestones = getWorkshopMasteryMilestoneStatuses(
+      {
+        alchemyLevel: 8,
+        blacksmithLevel: 8,
+        unlockedRecipes: [],
+        craftedRecipeCounts: {},
+        masteryByDiscipline: {
+          alchemy: 74,
+          smithing: 0,
+        },
+        specializationTreeByDiscipline: createInitialWorkshopSpecializationTreeState(),
+        specializationByDiscipline: {
+          alchemy: null,
+          smithing: null,
+        },
+      },
+      "alchemy"
+    );
+
+    expect(milestones.map((status) => status.milestone.id)).toEqual([
+      "alchemy_stable_fire",
+      "alchemy_branch_form",
+      "alchemy_high_realm_leaf",
+    ]);
+    expect(milestones.map((status) => status.isReached)).toEqual([true, true, true]);
+    expect(milestones.at(-1)).toMatchObject({
+      currentMastery: 74,
+      remainingMastery: 0,
     });
   });
 
@@ -218,6 +298,48 @@ describe("workshop recipe data", () => {
       { itemId: "beast_path_bloodbone", count: 2 },
       { itemId: "mystic_path_starlotus", count: 1 },
       { itemId: "spirit_herb", count: 8 },
+    ]);
+  });
+
+  it("stacks second-layer leaf effects while leaving route-specific ingredient requirements intact", () => {
+    const recipe = WORKSHOP_RECIPES.star_lotus_hongmeng_pill;
+    const plan = getWorkshopRecipeCraftingPlan(recipe, {
+      alchemyLevel: 8,
+      blacksmithLevel: 8,
+      unlockedRecipes: [recipe.id],
+      craftedRecipeCounts: {},
+      masteryByDiscipline: {
+        alchemy: 72,
+        smithing: 0,
+      },
+      specializationTreeByDiscipline: {
+        ...createInitialWorkshopSpecializationTreeState(),
+        alchemy: {
+          unlockedNodeIds: [
+            "alchemy_inner_fire_foundation",
+            "alchemy_hongmeng_condenser",
+            "alchemy_hongmeng_star_lotus_crown",
+          ],
+          activeNodeId: "alchemy_hongmeng_star_lotus_crown",
+          activeBranchId: "alchemy_hongmeng",
+        },
+      },
+      specializationByDiscipline: {
+        alchemy: "alchemy_hongmeng_star_lotus_crown",
+        smithing: null,
+      },
+    });
+
+    expect(plan.masteryYield).toBe(60);
+    expect(plan.activeSpecialization?.name).toBe("星蓮鴻蒙冠火");
+    expect(plan.qualityCues).toEqual(
+      expect.arrayContaining(["星魂蓮冠火穩住終盤丹品，但不替代路線材料。"])
+    );
+    expect(recipe.ingredients).toEqual([
+      { itemId: "mystic_path_starlotus", count: 3 },
+      { itemId: "sword_path_starsteel", count: 1 },
+      { itemId: "beast_path_bloodbone", count: 1 },
+      { itemId: "spirit_herb", count: 10 },
     ]);
   });
 
