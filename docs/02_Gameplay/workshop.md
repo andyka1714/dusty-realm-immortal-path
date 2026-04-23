@@ -1,6 +1,6 @@
 # 洞府百業 (Workshop)
 
-目前 `聚靈陣 / 煉丹 / 煉器` 三個卡片已統一吃 `GameSection` 的內層框體語言，不再各自維護獨立 card chrome。`add-workshop-and-event-loops` 第一批也已把 `煉丹 / 煉器` 從 placeholder 推進成正式可操作 slice，`update-high-tier-workshop-depth` 已把第一批高階 recipe、材料 sink、熟練度與 UI cue 接進主流程，而 `update-workshop-specialization-expansion` 已補上第二批中高階 / 終盤 recipe 與第一批專精效果。
+目前 `聚靈陣 / 煉丹 / 煉器` 三個卡片已統一吃 `GameSection` 的內層框體語言，不再各自維護獨立 card chrome。`add-workshop-and-event-loops` 第一批也已把 `煉丹 / 煉器` 從 placeholder 推進成正式可操作 slice，`update-high-tier-workshop-depth` 已把第一批高階 recipe、材料 sink、熟練度與 UI cue 接進主流程，`update-workshop-specialization-expansion` 已補上第二批中高階 / 終盤 recipe 與第一批專精效果，而 `expand-workshop-source-specialization-unlocks` 已把材料來源與專精解鎖 / 切換成本正式化。
 
 ## 1. 聚靈陣 (Spirit Array)
 - **功能**: 提升基礎修煉速率。
@@ -15,7 +15,7 @@
   - `九轉鴻蒙丹`: 消耗 `縹緲星魂蓮 / 萬獸血骨殘材 / 聚靈草` 與爐火靈石，產出 `鴻蒙本源`
   - `萬獸飛昇液`: 消耗 `萬獸血骨殘材 / 縹緲星魂蓮 / 聚靈草`，產出 `飛昇仙引`
 - **用途**: `聚氣丹` 可直接補修為，是輪迴後前期修煉節奏的第一個百業入口。
-- **專精**: `鴻蒙凝丹` 會降低高階丹方靈石火耗並提高丹道熟練，但不減免 route-specific 材料。
+- **專精**: `鴻蒙凝丹` 需 `丹道熟練 24` 才能解鎖，切換成本為 `500 靈石`，重置成本為 `200 靈石`。效果會降低高階丹方靈石火耗並提高丹道熟練，但不減免 route-specific 材料。
 - **目前定位**: 低階丹方提供修為補給，高階丹方承接宗門 / 世界後段材料，讓丹藥乘區不只停在 audit table。
 
 ## 3. 煉器 (Smithing)
@@ -26,7 +26,7 @@
   - `大道真身鑄胚`: 消耗 `萬獸血骨殘材 / 凌霄劍星鋼 / 玄鐵礦`，產出 `大道真身`
   - `至高法杖鍛造`: 消耗 `縹緲星魂蓮 / 凌霄劍星鋼 / 玄鐵礦`，產出 `至高法則杖`
 - **用途**: 讓玩家可透過材料與洞府投入，直接為當世 build 補第一件可自製裝備。
-- **專精**: `星火鍛胚` 會降低高階器方靈石火耗並提高器道熟練，但不減免 route-specific 材料。
+- **專精**: `星火鍛胚` 需 `器道熟練 30` 才能解鎖，切換成本為 `500 靈石`，重置成本為 `200 靈石`。效果會降低高階器方靈石火耗並提高器道熟練，但不減免 route-specific 材料。
 - **目前定位**: 低階器方驗證材料 -> 裝備實例，高階器方開始承接 route-specific 材料與終盤 build 裝備追求。
 
 ## 4. 熟練度、品質與鎖定 cue
@@ -43,8 +43,9 @@ Workshop state 已正式記錄：
 - route tags
 - 材料擁有量與來源提示
 - 產出與品質提示
-- 目前專精、可選專精與 recipe 受專精影響的 cue
+- 目前專精、可選專精、解鎖條件、鎖定原因、切換 / 重置成本與 recipe 受專精影響的 cue
 - `丹道 / 器道` 熟練度收益與專精後的調整值
+- route-specific 材料來源 cue，對應到實際 encounter 的 route / category
 - 境界、百業等級、靈石或材料不足時的鎖定原因
 
 舊存檔若缺少熟練度或專精欄位，migration 會補上安全預設值。
@@ -77,10 +78,17 @@ Workshop state 已正式記錄：
 
 這些材料已接進高階 Workshop recipe，讓宗門 / 世界後段 reward 能反向供料給百業。
 
+`expand-workshop-source-specialization-unlocks` 之後，這三種材料也有第二批 route-specific encounter source：
+
+- `裂虛劍星礦脈`: 凌霄劍宗 / 煉虛百業材料，提供 `凌霄劍星鋼`
+- `劫骨獸巢`: 萬獸山莊 / 渡劫百業材料，提供 `萬獸血骨殘材`
+- `仙潮星蓮灘`: 縹緲仙宮 / 仙人百業材料，提供 `縹緲星魂蓮`
+
+這些來源都仍保留 profession 與 `task_04` gating，不會退化成無條件通用掉落。
+
 ## 6. 後續可擴充部分
 
-目前第二批 recipe 與第一批專精效果已完成，後續若要再擴充，重點會是：
+目前第二批 recipe、第一批專精效果、材料來源 cue 與專精解鎖 / 切換成本都已完成，後續若要再擴充，重點會是：
 
-- 更多 route-specific world / encounter material source
 - 更多職業 / 宗門專屬 recipe 分支
-- 更細的專精選擇成本、重置成本或專精解鎖條件
+- 更細的專精樹、專精重置懲罰或跨路線專精互斥

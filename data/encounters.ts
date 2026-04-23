@@ -1117,6 +1117,31 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
 
 export const getEncounterEventById = (eventId: string) => ENCOUNTER_EVENTS[eventId];
 
+export interface EncounterMaterialSourceCue {
+  eventId: string;
+  title: string;
+  categoryLabel?: string;
+  routeLabel?: string;
+  minRealm: MajorRealm;
+  maxRealm: MajorRealm;
+}
+
+export const getEncounterMaterialSourceCues = (itemId: string): EncounterMaterialSourceCue[] =>
+  Object.values(ENCOUNTER_EVENTS)
+    .filter((event) =>
+      event.choices.some((choice) =>
+        choice.reward.items?.some((rewardItem) => rewardItem.itemId === itemId)
+      )
+    )
+    .map((event) => ({
+      eventId: event.id,
+      title: event.title,
+      categoryLabel: event.presentation?.categoryLabel,
+      routeLabel: event.presentation?.routeLabel,
+      minRealm: event.minRealm,
+      maxRealm: event.maxRealm,
+    }));
+
 const isEncounterEligible = (
   event: EncounterEvent,
   context: EncounterSelectorContext

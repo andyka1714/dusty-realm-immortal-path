@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { MajorRealm, ProfessionType } from "../types";
-import { ENCOUNTER_EVENTS, getAvailableEncounterEvents, pickEncounterEvent } from "./encounters";
+import {
+  ENCOUNTER_EVENTS,
+  getAvailableEncounterEvents,
+  getEncounterMaterialSourceCues,
+  pickEncounterEvent,
+} from "./encounters";
 
 const LATE_SECT_MILESTONE_CASES = [
   {
@@ -246,6 +251,22 @@ describe("encounter selector", () => {
           (event) => event.id === testCase.eventId
         )
       ).toBe(false);
+    });
+  });
+
+  it("publishes material source cues for Workshop recipe UI", () => {
+    SECONDARY_WORKSHOP_MATERIAL_SOURCE_CASES.forEach((testCase) => {
+      const sourceCues = getEncounterMaterialSourceCues(testCase.rewardItemId);
+
+      expect(sourceCues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            eventId: testCase.eventId,
+            routeLabel: testCase.routeLabel,
+            categoryLabel: expect.stringContaining(testCase.categoryLabel),
+          }),
+        ])
+      );
     });
   });
 });

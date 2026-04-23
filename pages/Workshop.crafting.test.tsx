@@ -121,10 +121,16 @@ describe("Workshop crafting UI", () => {
     expect(markup).toContain("目前專精：鴻蒙凝丹");
     expect(markup).toContain("目前專精：尚未選定");
     expect(markup).toContain("可選專精：星火鍛胚");
+    expect(markup).toContain("解鎖條件：丹道熟練 24");
+    expect(markup).toContain("切換成本：500 靈石");
+    expect(markup).toContain("重置成本：200 靈石");
+    expect(markup).toContain("鎖定原因：器道熟練需達 30");
     expect(markup).toContain("專精影響：鴻蒙凝丹");
     expect(markup).toContain("爐火消耗：216 靈石");
     expect(markup).toContain("原消耗 240");
     expect(markup).toContain("丹道熟練 +30");
+    expect(markup).toContain("材料來源：萬獸血骨殘材");
+    expect(markup).toContain("渡劫百業材料");
     expect(markup).toContain("材料 sink 維持原配方");
     expect(markup).not.toContain("pixel-sprite");
   });

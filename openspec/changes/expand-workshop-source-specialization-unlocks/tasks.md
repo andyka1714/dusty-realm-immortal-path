@@ -9,7 +9,7 @@
 - [x] 2.3 補 regression，確認專精效果仍不減免 route-specific material sink
 
 ## 3. UI、文件與驗證
-- [ ] 3.1 更新 `pages/Workshop.tsx`，顯示專精 unlock、鎖定原因、切換成本與材料來源 cue
-- [ ] 3.2 補 Workshop UI / encounter / action tests
-- [ ] 3.3 更新 `docs/02_Gameplay/workshop.md` 與優先級追蹤文件
-- [ ] 3.4 驗證 `openspec validate expand-workshop-source-specialization-unlocks --strict`、targeted tests、`npm run typecheck` 與 `npm run build`
+- [x] 3.1 更新 `pages/Workshop.tsx`，顯示專精 unlock、鎖定原因、切換成本與材料來源 cue
+- [x] 3.2 補 Workshop UI / encounter / action tests
+- [x] 3.3 更新 `docs/02_Gameplay/workshop.md` 與優先級追蹤文件
+- [x] 3.4 驗證 `openspec validate expand-workshop-source-specialization-unlocks --strict`、targeted tests、`npm run typecheck` 與 `npm run build`

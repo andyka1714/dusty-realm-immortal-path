@@ -12,9 +12,11 @@ import {
   WORKSHOP_SPECIALIZATIONS,
   getUnlockedWorkshopRecipes,
   getWorkshopRecipeCraftingPlan,
+  getWorkshopSpecializationUnlockStatus,
   type WorkshopRecipe,
   type WorkshopSpecialization,
 } from '../data/workshopRecipes';
+import { getEncounterMaterialSourceCues } from '../data/encounters';
 import { ITEMS } from '../data/items';
 import { craftWorkshopRecipe, selectWorkshopSpecialization } from '../store/actions/workshopActions';
 import { MajorRealmCN, type WorkshopDiscipline } from '../types';
@@ -27,6 +29,9 @@ const getWorkshopSpecializationsForDiscipline = (discipline: WorkshopDiscipline)
   Object.values(WORKSHOP_SPECIALIZATIONS).filter(
     (specialization) => specialization.discipline === discipline
   );
+
+const getDisciplineMasteryLabel = (discipline: WorkshopDiscipline) =>
+  discipline === "alchemy" ? "丹道" : "器道";
 
 export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -103,6 +108,9 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
         <div className="mt-2 grid gap-2">
           {specializations.map((specialization) => {
             const isActive = activeId === specialization.id;
+            const unlockStatus = getWorkshopSpecializationUnlockStatus(workshop, specialization);
+            const minMastery = specialization.unlockRequirement?.minMastery;
+            const canAffordSwitch = spiritStones >= (specialization.switchCost ?? 0);
 
             return (
               <button
@@ -115,11 +123,12 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
                     })
                   )
                 }
+                disabled={!unlockStatus.unlocked || !canAffordSwitch}
                 className={clsx(
                   "rounded-lg border px-3 py-2 text-left text-xs transition",
                   isActive
                     ? "border-cyan-400/60 bg-cyan-900/35 text-cyan-100"
-                    : "border-stone-800 bg-stone-950/70 text-stone-400 hover:border-cyan-700"
+                    : "border-stone-800 bg-stone-950/70 text-stone-400 hover:border-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
                 )}
               >
                 <div className="font-semibold text-stone-100">
@@ -127,6 +136,19 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
                 </div>
                 <div className="mt-1 leading-relaxed text-stone-500">
                   {specialization.description}
+                </div>
+                <div className="mt-2 grid gap-1 text-stone-400">
+                  {minMastery !== undefined && (
+                    <div>解鎖條件：{getDisciplineMasteryLabel(discipline)}熟練 {minMastery}</div>
+                  )}
+                  <div>切換成本：{specialization.switchCost ?? 0} 靈石</div>
+                  {isActive && <div>重置成本：{specialization.resetCost ?? 0} 靈石</div>}
+                  {!unlockStatus.unlocked && (
+                    <div className="text-rose-300">鎖定原因：{unlockStatus.reason}</div>
+                  )}
+                  {unlockStatus.unlocked && !canAffordSwitch && !isActive && (
+                    <div className="text-rose-300">鎖定原因：靈石不足</div>
+                  )}
                 </div>
               </button>
             );
@@ -144,6 +166,25 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
       .map((output) => ITEMS[output.itemId]?.name ?? output.itemId)
       .join("、");
     const baseMasteryYield = recipe.masteryYield ?? 1;
+    const materialSourceRows = recipe.ingredients.flatMap((ingredient) => {
+      const item = ITEMS[ingredient.itemId];
+      const sourceCues = getEncounterMaterialSourceCues(ingredient.itemId);
+
+      if (sourceCues.length === 0) {
+        return [];
+      }
+
+      return [{
+        itemId: ingredient.itemId,
+        itemName: item?.name ?? ingredient.itemId,
+        sourceText: sourceCues
+          .slice(0, 3)
+          .map((source) =>
+            `${source.routeLabel ?? source.title} / ${source.categoryLabel ?? MajorRealmCN[source.minRealm]}`
+          )
+          .join("、"),
+      }];
+    });
 
     return (
       <div
@@ -210,6 +251,11 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
               {outputLabels && <div>產出：{outputLabels}</div>}
               {recipe.qualityHint && <div>品質：{recipe.qualityHint}</div>}
               {recipe.sourceHint && <div>來源：{recipe.sourceHint}</div>}
+              {materialSourceRows.map((source) => (
+                <div key={source.itemId}>
+                  材料來源：{source.itemName}：{source.sourceText}
+                </div>
+              ))}
               {craftingPlan.activeSpecialization && (
                 <div className="rounded-lg border border-cyan-800/50 bg-cyan-950/20 px-2 py-1 text-cyan-200">
                   專精影響：{craftingPlan.activeSpecialization.name}
