@@ -4,9 +4,9 @@
 - [x] 1.3 補 representative regression，確認主要 theme 不只換 palette，也有可追蹤背景骨架
 
 ## 2. 地圖可讀性 polish
-- [ ] 2.1 強化 path、water、hazard、POI、portal clearing 與 Boss arena 的 terrain 語意
-- [ ] 2.2 補 route-specific landmark coverage，特別是 `North / East / West / Spirit / Void / Immortal / Ultimate`
-- [ ] 2.3 確認 pixel terrain polish 不改玩家、怪物、NPC、portal marker、combat overlay 與 HUD 的 entity rendering
+- [x] 2.1 強化 path、water、hazard、POI、portal clearing 與 Boss arena 的 terrain 語意
+- [x] 2.2 補 route-specific landmark coverage，特別是 `North / East / West / Spirit / Void / Immortal / Ultimate`
+- [x] 2.3 確認 pixel terrain polish 不改玩家、怪物、NPC、portal marker、combat overlay 與 HUD 的 entity rendering
 
 ## 3. 文件、review 與驗證
 - [ ] 3.1 更新 `docs/04_UI/pixel_art_bible.md`，把 production terrain 規格與 actor-token 邊界寫回正式文件

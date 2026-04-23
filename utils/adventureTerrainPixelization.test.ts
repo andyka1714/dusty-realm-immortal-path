@@ -95,6 +95,153 @@ describe("adventureTerrainPixelization", () => {
     );
   });
 
+  it("distinguishes readable production roles beyond legacy tile kind", () => {
+    const spiritField = buildAdventureTerrainTiles({
+      mapId: "20",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [
+        {
+          x: 6,
+          y: 0,
+          targetMapId: "0",
+          targetX: 0,
+          targetY: 0,
+          label: "前往 [仙緣鎮]",
+          dir: "West",
+        },
+      ],
+      npcs: [{ x: 3, y: 6 }],
+    });
+    const lakeMeadow = buildAdventureTerrainTiles({
+      mapId: "22",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const lavaInferno = buildAdventureTerrainTiles({
+      mapId: "71",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const timeRiver = buildAdventureTerrainTiles({
+      mapId: "130",
+      theme: "Void",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const bossArena = buildAdventureTerrainTiles({
+      mapId: "22",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+      bossSpawn: { x: 6, y: 6 },
+    });
+
+    expect(spiritField.find((tile) => tile.x === 6 && tile.y === 0)?.semanticRole).toBe(
+      "portalClearing"
+    );
+    expect(spiritField.find((tile) => tile.x === 3 && tile.y === 6)?.semanticRole).toBe("poi");
+    expect(spiritField.find((tile) => tile.x === 6 && tile.y === 6)?.semanticRole).toBe("path");
+    expect(lakeMeadow.find((tile) => tile.x === 6 && tile.y === 3)?.semanticRole).toBe("water");
+    expect(lavaInferno.find((tile) => tile.x === 6 && tile.y === 6)?.kind).toBe("water");
+    expect(lavaInferno.find((tile) => tile.x === 6 && tile.y === 6)?.semanticRole).toBe(
+      "hazard"
+    );
+    expect(timeRiver.find((tile) => tile.x === 4 && tile.y === 6)?.kind).toBe("accent");
+    expect(timeRiver.find((tile) => tile.x === 4 && tile.y === 6)?.semanticRole).toBe("hazard");
+    expect(bossArena.find((tile) => tile.x === 6 && tile.y === 6)?.semanticRole).toBe(
+      "bossArena"
+    );
+  });
+
+  it("keeps route skeleton metadata distinct without leaking actor-token data into terrain", () => {
+    const representativeRoutes = [
+      buildAdventureTerrainTiles({
+        mapId: "1",
+        theme: "North",
+        width: 12,
+        height: 12,
+        portals: [],
+        npcs: [],
+      }),
+      buildAdventureTerrainTiles({
+        mapId: "20",
+        theme: "East",
+        width: 12,
+        height: 12,
+        portals: [],
+        npcs: [],
+      }),
+      buildAdventureTerrainTiles({
+        mapId: "10",
+        theme: "West",
+        width: 12,
+        height: 12,
+        portals: [],
+        npcs: [],
+      }),
+      buildAdventureTerrainTiles({
+        mapId: "140",
+        theme: "Spirit",
+        width: 12,
+        height: 12,
+        portals: [],
+        npcs: [],
+      }),
+      buildAdventureTerrainTiles({
+        mapId: "130",
+        theme: "Void",
+        width: 12,
+        height: 12,
+        portals: [],
+        npcs: [],
+      }),
+      buildAdventureTerrainTiles({
+        mapId: "170",
+        theme: "Immortal",
+        width: 12,
+        height: 12,
+        portals: [],
+        npcs: [],
+      }),
+      buildAdventureTerrainTiles({
+        mapId: "180",
+        theme: "Ultimate",
+        width: 12,
+        height: 12,
+        portals: [],
+        npcs: [],
+      }),
+    ];
+    const skeletonIds = representativeRoutes.map((tiles) => tiles[0].skeletonId);
+    const terrainOnlyKeys = new Set([
+      "x",
+      "y",
+      "kind",
+      "semanticRole",
+      "skeletonId",
+      "fillColor",
+      "detailColor",
+      "detailKind",
+    ]);
+
+    expect(new Set(skeletonIds).size).toBe(representativeRoutes.length);
+    representativeRoutes.flat().forEach((tile) => {
+      expect(Object.keys(tile).every((key) => terrainOnlyKeys.has(key))).toBe(true);
+    });
+  });
+
   it("builds structured corridors and plazas for center and sect safe maps", () => {
     const centerTown = buildAdventureTerrainTiles({
       mapId: "0",

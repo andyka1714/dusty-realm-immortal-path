@@ -491,6 +491,18 @@ const TERRAIN_SKELETON_IDS: Record<string, string> = {
   "182": "ultimate-returning-rift",
 };
 
+const HAZARD_WATER_SKELETON_IDS = new Set([
+  "west-flame-wastes",
+  "west-lava-inferno",
+  "dark-tribulation-front",
+  "void-time-river",
+  "void-broken-realm",
+  "east-void-rift",
+  "ultimate-returning-rift",
+]);
+
+const HAZARD_ACCENT_THEMES = new Set(["Thunder", "Dark", "Void"]);
+
 const hashNoise = (seed: number, x: number, y: number, salt: number) => {
   const value = Math.sin((x + 1) * 12.9898 + (y + 1) * 78.233 + seed * 0.173 + salt * 19.19);
   return value - Math.floor(value);
@@ -1200,6 +1212,7 @@ const resolveSemanticRoleForTile = ({
   y,
   kind,
   theme,
+  skeletonId,
   portals,
   npcs,
   plazaZones,
@@ -1210,6 +1223,7 @@ const resolveSemanticRoleForTile = ({
   y: number;
   kind: AdventureTerrainTileKind;
   theme: string;
+  skeletonId: string;
   portals: Portal[];
   npcs: Pick<NPC, "x" | "y">[];
   plazaZones: TerrainZone[];
@@ -1234,8 +1248,9 @@ const resolveSemanticRoleForTile = ({
   }
 
   if (kind === "path") return "path";
+  if (kind === "water" && HAZARD_WATER_SKELETON_IDS.has(skeletonId)) return "hazard";
   if (kind === "water") return "water";
-  if (kind === "accent" && (theme === "Thunder" || theme === "Dark")) return "hazard";
+  if (kind === "accent" && HAZARD_ACCENT_THEMES.has(theme)) return "hazard";
   if (kind === "accent") return "landmark";
   if (kind === "alt") return "variation";
   return "ground";
@@ -1294,6 +1309,7 @@ export const buildAdventureTerrainTiles = ({
         y,
         kind,
         theme,
+        skeletonId,
         portals,
         npcs,
         plazaZones,
