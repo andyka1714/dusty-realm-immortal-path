@@ -19,6 +19,7 @@ export type AdventureTerrainSemanticRole =
   | "ground"
   | "variation"
   | "landmark"
+  | "resourceNode"
   | "water"
   | "path"
   | "hazard"
@@ -49,6 +50,7 @@ export type AdventureTerrainRenderMotifKind =
   | "baseTexture"
   | "corridorEdges"
   | "landmarkSigil"
+  | "resourceCluster"
   | "hazardVeins"
   | "portalThreshold"
   | "arenaRunes"
@@ -67,6 +69,28 @@ export interface AdventureTerrainRenderMotif {
   color: number;
   alpha: number;
 }
+
+export const ADVENTURE_TERRAIN_TILE_ALLOWED_KEYS = [
+  "x",
+  "y",
+  "kind",
+  "semanticRole",
+  "skeletonId",
+  "fillColor",
+  "detailColor",
+  "detailKind",
+] as const;
+
+export const ADVENTURE_TERRAIN_FORBIDDEN_ACTOR_KEYS = [
+  "actorToken",
+  "tokenLabel",
+  "spriteId",
+  "monsterName",
+  "npcSymbol",
+  "portalMarker",
+  "hudCue",
+  "combatOverlay",
+] as const;
 
 interface AdventureTerrainPaletteConfig extends AdventureTerrainPalette {
   waterChance: number;
@@ -662,6 +686,14 @@ export const resolveAdventureTerrainRenderMotif = (
       alpha: 0.32,
     };
   }
+  if (tile.semanticRole === "resourceNode") {
+    return {
+      kind: "resourceCluster",
+      orientation: skeletonOrientation,
+      color: tile.detailColor,
+      alpha: 0.36,
+    };
+  }
   if (tile.semanticRole === "path") {
     return {
       kind: "corridorEdges",
@@ -711,6 +743,15 @@ const pushVerticalLine = (
   for (let y = fromY; y <= toY; y += 1) {
     zones.push({ x, y, radius: 0, kind });
   }
+};
+
+const markResourceNodes = (
+  zones: ForcedTerrainZone[],
+  points: Array<{ x: number; y: number }>
+) => {
+  points.forEach(({ x, y }) => {
+    zones.push({ x, y, radius: 0, kind: "accent", semanticRole: "resourceNode" });
+  });
 };
 
 const buildOrthogonalRoute = (
@@ -984,6 +1025,10 @@ const buildThemeMacroZones = ({
       forcedZones.push({ x: centerX + 2, y: centerY - 2, radius: 0, kind: "accent" });
       forcedZones.push({ x: centerX - 2, y: centerY + 2, radius: 0, kind: "water" });
       forcedZones.push({ x: centerX + 2, y: centerY + 2, radius: 0, kind: "water" });
+      markResourceNodes(forcedZones, [
+        { x: centerX - 2, y: centerY - 2 },
+        { x: centerX + 2, y: centerY - 2 },
+      ]);
     } else if (mapId === "110") {
       pushHorizontalLine(forcedZones, centerY, 2, width - 3, "water");
       forcedZones.push({ x: centerX, y: centerY - 2, radius: 0, kind: "accent" });
@@ -1074,6 +1119,10 @@ const buildThemeMacroZones = ({
       forcedZones.push({ x: centerX + 2, y: centerY - 2, radius: 0, kind: "accent" });
       forcedZones.push({ x: centerX - 2, y: centerY + 2, radius: 0, kind: "path" });
       forcedZones.push({ x: centerX + 2, y: centerY + 2, radius: 0, kind: "path" });
+      markResourceNodes(forcedZones, [
+        { x: centerX - 2, y: centerY - 2 },
+        { x: centerX + 2, y: centerY - 2 },
+      ]);
     } else if (mapId === "70") {
       pushVerticalLine(forcedZones, centerX, 2, height - 3, "accent");
       forcedZones.push({ x: centerX - 2, y: centerY, radius: 0, kind: "path" });
@@ -1157,6 +1206,12 @@ const buildThemeMacroZones = ({
       forcedZones.push({ x: centerX + 2, y: centerY - 2, radius: 0, kind: "accent" });
       forcedZones.push({ x: centerX - 2, y: centerY + 2, radius: 0, kind: "accent" });
       forcedZones.push({ x: centerX + 2, y: centerY + 2, radius: 0, kind: "accent" });
+      markResourceNodes(forcedZones, [
+        { x: centerX - 2, y: centerY - 2 },
+        { x: centerX + 2, y: centerY - 2 },
+        { x: centerX - 2, y: centerY + 2 },
+        { x: centerX + 2, y: centerY + 2 },
+      ]);
     } else if (mapId === "142") {
       pushVerticalLine(forcedZones, centerX, 2, height - 3, "path");
       forcedZones.push({ x: centerX - 2, y: centerY, radius: 0, kind: "accent" });
@@ -1240,6 +1295,12 @@ const buildThemeMacroZones = ({
       forcedZones.push({ x: centerX + 1, y: centerY - 1, radius: 0, kind: "accent" });
       forcedZones.push({ x: centerX - 1, y: centerY + 1, radius: 0, kind: "accent" });
       forcedZones.push({ x: centerX + 1, y: centerY + 1, radius: 0, kind: "accent" });
+      markResourceNodes(forcedZones, [
+        { x: centerX - 1, y: centerY - 1 },
+        { x: centerX + 1, y: centerY - 1 },
+        { x: centerX - 1, y: centerY + 1 },
+        { x: centerX + 1, y: centerY + 1 },
+      ]);
     } else {
       forcedZones.push({ x: centerX, y: centerY, radius: 0, kind: "path" });
       forcedZones.push({ x: centerX - 1, y: centerY - 1, radius: 0, kind: "accent" });
@@ -1464,4 +1525,23 @@ export const buildAdventureTerrainTiles = ({
   }
 
   return tiles;
+};
+
+export const assertAdventureTerrainTilesAreSafeForOfficialStage = (
+  tiles: AdventureTerrainTile[]
+) => {
+  const allowedKeys = new Set<string>(ADVENTURE_TERRAIN_TILE_ALLOWED_KEYS);
+  const forbiddenKeys = new Set<string>(ADVENTURE_TERRAIN_FORBIDDEN_ACTOR_KEYS);
+
+  tiles.forEach((tile) => {
+    const invalidKey = Object.keys(tile).find(
+      (key) => !allowedKeys.has(key) || forbiddenKeys.has(key)
+    );
+
+    if (invalidKey) {
+      throw new Error(
+        `Adventure terrain helper must remain terrain-only for official stage; found forbidden key "${invalidKey}".`
+      );
+    }
+  });
 };

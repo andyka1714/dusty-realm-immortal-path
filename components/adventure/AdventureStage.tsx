@@ -10,6 +10,7 @@ import { current } from '@reduxjs/toolkit';
 import { getVisualEffectPresentation } from '../../utils/visualEffectPresentation';
 import type { WorldCombatStagePresentation } from '../../utils/worldCombatPresentation';
 import {
+  assertAdventureTerrainTilesAreSafeForOfficialStage,
   buildAdventureTerrainTiles,
   resolveAdventureTerrainRenderMotif,
   type AdventureTerrainTile,
@@ -108,6 +109,12 @@ const drawAdventureTerrainTile = ({
       graphics.drawRect(px + cellSize * 0.42, py + cellSize * 0.2, cellSize * 0.16, cellSize * 0.6);
       graphics.drawRect(px + cellSize * 0.2, py + cellSize * 0.42, cellSize * 0.6, cellSize * 0.16);
       graphics.drawRect(px + cellSize * 0.38, py + cellSize * 0.38, cellSize * 0.24, cellSize * 0.24);
+  } else if (motif.kind === 'resourceCluster') {
+      graphics.drawRect(px + cellSize * 0.24, py + cellSize * 0.24, cellSize * 0.12, cellSize * 0.12);
+      graphics.drawRect(px + cellSize * 0.64, py + cellSize * 0.26, cellSize * 0.12, cellSize * 0.12);
+      graphics.drawRect(px + cellSize * 0.46, py + cellSize * 0.46, cellSize * 0.14, cellSize * 0.14);
+      graphics.drawRect(px + cellSize * 0.26, py + cellSize * 0.64, cellSize * 0.12, cellSize * 0.12);
+      graphics.drawRect(px + cellSize * 0.64, py + cellSize * 0.64, cellSize * 0.12, cellSize * 0.12);
   } else if (motif.kind === 'hazardVeins') {
       if (motif.orientation === 'horizontal') {
           graphics.drawRect(px + cellSize * 0.12, py + cellSize * 0.36, cellSize * 0.76, cellSize * 0.08);
@@ -669,6 +676,7 @@ export default function AdventureStage({
               npcs: mapData.npcs,
               bossSpawn: mapData.bossSpawn
           });
+          assertAdventureTerrainTilesAreSafeForOfficialStage(terrainTiles);
 
           terrainLayer.clear();
           terrainLayer.beginFill(terrainPalette.backgroundColor);

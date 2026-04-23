@@ -190,13 +190,14 @@ prototype 場景分成：
 
 ### 6.4 正式 terrain semantic 規格
 
-`update-pixel-map-production-polish` 已把正式 `AdventureStage` 的 terrain metadata 從單純 `kind` 推進成 production semantic：
+`update-pixel-map-production-v2` 已把正式 `AdventureStage` 的 terrain metadata 從單純 `kind` 推進成 production semantic：
 
 - 每個 terrain tile 仍保留 legacy `kind`：`base / alt / accent / water / path`
 - 每個 terrain tile 另外帶 `semanticRole`，目前正式角色包含：
   - `ground`
   - `variation`
   - `landmark`
+  - `resourceNode`
   - `water`
   - `path`
   - `hazard`
@@ -205,8 +206,9 @@ prototype 場景分成：
   - `poi`
 - 每個 terrain tile 另外帶 `skeletonId`，用來追蹤 map-specific 背景骨架，例如 `east-spirit-field`、`void-time-river`、`ultimate-origin-palace`
 - `kind` 與 `semanticRole` 不必一對一；例如 `熔岩煉獄` 可以仍用 `kind: water` 畫出熔岩流，但 production semantic 必須標成 `hazard`
-- `portalClearing / bossArena / poi` 的 semantic role 優先於一般 path / water / landmark，避免傳送門、Boss 場域與 NPC 周邊被普通地板語意吞掉
-- terrain metadata 不包含 actor token、sprite id、角色文字、怪物名字或 NPC 呈現資料；角色層仍由正式 `AdventureStage` entity rendering 負責
+- `portalClearing / bossArena / poi / resourceNode` 的 semantic role 優先於一般 path / water / landmark，避免傳送門、Boss 場域、採集熱點與 NPC 周邊被普通地板語意吞掉
+- `resourceNode` 只代表背景層的材料熱點，例如 `藥圃、龍血結晶、靈核、歸墟碎片`；它不是 actor，也不會把玩家 / 怪物 / NPC 改成 sprite
+- terrain metadata 不包含 actor token、sprite id、角色文字、怪物名字或 NPC 呈現資料；正式 `AdventureStage` 也會在 render 前做 terrain-only runtime guard，角色層仍由既有 entity rendering 負責
 
 ---
 
@@ -350,8 +352,8 @@ prototype 不要求：
 - `盤古脊 / 龍血池` 這批 `West` 元嬰 companion 地圖，也應拆出脊骨中軸與龍血池心兩種骨架，讓蠻荒祖廟前的高段體修路線仍有輪廓差異
 - `淬體潭 / 獸王谷 / 熔岩煉獄 / 蠻荒祖廟` 這批同屬 `West` 的代表地圖，也應拆出血潭、獸巢、熔岩脈與祖廟軸線幾種 landmark，讓體修主線不只剩褐色荒地噪聲
 - prototype 內的 entity token 實驗只保留在驗證入口，不直接推進到主流程
-- `update-pixel-map-production-polish` 的第一輪已把上述背景骨架收斂為可測的 `skeletonId` 與 `semanticRole`，後續若加地圖，應先補 terrain helper / test，而不是直接改 actor layer
-- `update-pixel-terrain-landmark-polish` 的 Phase 4 在正式 `AdventureStage` terrain layer 加上 role-aware render motif：`path` 會依 `skeletonId` 顯示 corridor edge，`landmark` 顯示 sigil，`hazard` 顯示裂紋 / 脈絡，`portalClearing` 顯示背景門檻，`bossArena` 顯示地面 rune corner，`poi` 顯示鋪地點位，`water` 顯示水帶。這些 motif 只畫在背景 terrain layer，不改玩家、怪物、NPC、portal marker、HUD 或 combat overlay。
+- `update-pixel-map-production-v2` 已把上述背景骨架收斂為可測的 `skeletonId` 與 `semanticRole`，後續若加地圖，應先補 terrain helper / test，而不是直接改 actor layer
+- `update-pixel-map-production-v2` 也在正式 `AdventureStage` terrain layer 加上 role-aware render motif：`path` 會依 `skeletonId` 顯示 corridor edge，`landmark` 顯示 sigil，`resourceNode` 顯示材料叢聚，`hazard` 顯示裂紋 / 脈絡，`portalClearing` 顯示背景門檻，`bossArena` 顯示地面 rune corner，`poi` 顯示鋪地點位，`water` 顯示水帶。這些 motif 只畫在背景 terrain layer，不改玩家、怪物、NPC、portal marker、HUD 或 combat overlay。
 - Phase 4 驗證以 `adventureTerrainPixelization` 的 table-driven representative route / theme regression 與 actor-token guard 為主；目前 repo 沒有既有 `tests/visual` / Playwright screenshot regression 結構可直接延伸，因此不為這條 change 新建過重視覺矩陣。若後續要補 screenshot，應先建立共用 visual harness，再挑桌機 / 手機各一張代表地圖。
 
 ---

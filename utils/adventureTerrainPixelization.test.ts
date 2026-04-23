@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { MAPS } from "../data/maps";
 import {
+  ADVENTURE_TERRAIN_FORBIDDEN_ACTOR_KEYS,
+  ADVENTURE_TERRAIN_TILE_ALLOWED_KEYS,
+  assertAdventureTerrainTilesAreSafeForOfficialStage,
   buildAdventureTerrainTiles,
   resolveAdventureTerrainRenderMotif,
   resolveAdventureTerrainPalette,
@@ -363,6 +366,137 @@ describe("adventureTerrainPixelization", () => {
     expect(resolveAdventureTerrainRenderMotif(poiTile).kind).toBe("poiPavers");
     tiles.forEach((tile) => {
       expect(Object.keys(tile).some((key) => forbiddenActorKeys.has(key))).toBe(false);
+    });
+  });
+
+  it("adds deterministic resource-node semantics for route-specific material hotspots", () => {
+    const herbValley = buildAdventureTerrainTiles({
+      mapId: "25",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const dragonBloodPool = buildAdventureTerrainTiles({
+      mapId: "101",
+      theme: "West",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const spiritCore = buildAdventureTerrainTiles({
+      mapId: "141",
+      theme: "Spirit",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const returningRift = buildAdventureTerrainTiles({
+      mapId: "182",
+      theme: "Ultimate",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(herbValley.find((tile) => tile.x === 4 && tile.y === 4)?.semanticRole).toBe(
+      "resourceNode"
+    );
+    expect(dragonBloodPool.find((tile) => tile.x === 4 && tile.y === 4)?.semanticRole).toBe(
+      "resourceNode"
+    );
+    expect(spiritCore.find((tile) => tile.x === 4 && tile.y === 4)?.semanticRole).toBe(
+      "resourceNode"
+    );
+    expect(returningRift.find((tile) => tile.x === 5 && tile.y === 5)?.semanticRole).toBe(
+      "resourceNode"
+    );
+
+    expect(
+      resolveAdventureTerrainRenderMotif(
+        herbValley.find((tile) => tile.x === 4 && tile.y === 4)!
+      ).kind
+    ).toBe("resourceCluster");
+    expect(
+      resolveAdventureTerrainRenderMotif(
+        returningRift.find((tile) => tile.x === 5 && tile.y === 5)!
+      ).kind
+    ).toBe("resourceCluster");
+  });
+
+  it("exports a runtime-safe terrain whitelist and rejects actor-like payload on official stage", () => {
+    const tiles = buildAdventureTerrainTiles({
+      mapId: "20",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+
+    expect(ADVENTURE_TERRAIN_TILE_ALLOWED_KEYS).toEqual([
+      "x",
+      "y",
+      "kind",
+      "semanticRole",
+      "skeletonId",
+      "fillColor",
+      "detailColor",
+      "detailKind",
+    ]);
+    expect(ADVENTURE_TERRAIN_FORBIDDEN_ACTOR_KEYS).toEqual([
+      "actorToken",
+      "tokenLabel",
+      "spriteId",
+      "monsterName",
+      "npcSymbol",
+      "portalMarker",
+      "hudCue",
+      "combatOverlay",
+    ]);
+
+    expect(() => assertAdventureTerrainTilesAreSafeForOfficialStage(tiles)).not.toThrow();
+    expect(() =>
+      assertAdventureTerrainTilesAreSafeForOfficialStage([
+        {
+          ...tiles[0],
+          actorToken: "我",
+        } as typeof tiles[number] & { actorToken: string },
+      ])
+    ).toThrow(/terrain-only/i);
+  });
+
+  it("keeps representative terrain palettes readable against official combat overlays", () => {
+    const representativeThemes = [
+      "North",
+      "East",
+      "West",
+      "Spirit",
+      "Void",
+      "Immortal",
+      "Ultimate",
+    ] as const;
+    const overlayColors = [0x4ade80, 0xf87171, 0x60a5fa, 0x38bdf8, 0xfb7185];
+
+    const getChannel = (color: number, shift: number) => (color >> shift) & 0xff;
+    const luminance = (color: number) =>
+      0.2126 * getChannel(color, 16) +
+      0.7152 * getChannel(color, 8) +
+      0.0722 * getChannel(color, 0);
+
+    representativeThemes.forEach((theme) => {
+      const palette = resolveAdventureTerrainPalette(theme);
+      const backgroundLuma = luminance(palette.backgroundColor);
+      const detailLuma = luminance(palette.detailColor);
+
+      expect(Math.abs(detailLuma - backgroundLuma)).toBeGreaterThan(72);
+      overlayColors.forEach((overlayColor) => {
+        expect(Math.abs(luminance(overlayColor) - backgroundLuma)).toBeGreaterThan(48);
+      });
     });
   });
 
