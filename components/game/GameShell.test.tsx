@@ -66,7 +66,7 @@ const createMarkup = (withPendingEncounter = false) => {
       encounter: withPendingEncounter
         ? {
             pendingEvent: {
-              eventId: "herb_garden",
+              eventId: "fusion_sword_skyforge_oath",
               year: 11,
             },
             resolvedEventIds: [],
@@ -95,13 +95,13 @@ describe("GameShell", () => {
   it("renders the pending encounter content when a formal event is waiting", () => {
     const markup = createMarkup(true);
 
-    expect(markup).toContain("荒山藥圃");
-    expect(markup).toContain("山野機緣");
-    expect(markup).toContain('data-modal-eyebrow="山野機緣"');
+    expect(markup).toContain("合體劍爐誓");
+    expect(markup).toContain("合體宗門回響");
+    expect(markup).toContain('data-modal-eyebrow="劍脈續響"');
     expect(markup).toContain("Encounter · 11 歲");
-    expect(markup).toContain("採摘靈草");
-    expect(markup).toContain("凝神觀想");
-    expect(markup).toContain("聚靈草 x2");
-    expect(markup).toContain("煉丹材料");
+    expect(markup).toContain("鍛成劍爐");
+    expect(markup).toContain("封印劍火");
+    expect(markup).toContain("劍修");
+    expect(markup).toContain("凌霄劍宗後段承接");
   });
 });

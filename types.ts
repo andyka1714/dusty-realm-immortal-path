@@ -204,6 +204,7 @@ export interface SoulState {
   lifetimeStats: SoulLifetimeStats;
   unlockedPerkIds: string[];
   heirloomVault: HeirloomCandidate[];
+  worldMemoryTags: string[];
   pendingLifeReview: LifeReviewSummary | null;
   rebirthConfig: RebirthConfig;
 }
@@ -617,9 +618,18 @@ export interface WorkshopState {
   specializationByDiscipline: Record<WorkshopDiscipline, string | null>;
 }
 
+export interface EncounterPresentationCue {
+  chainLabel?: string;
+  memoryCue?: string;
+  routeLabel?: string;
+  professionLabel?: string;
+  sectLabel?: string;
+}
+
 export interface PendingEncounter {
   eventId: string;
   year: number;
+  presentationCue?: EncounterPresentationCue;
 }
 
 export interface EncounterState {

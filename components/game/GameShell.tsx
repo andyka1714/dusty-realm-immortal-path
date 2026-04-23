@@ -103,7 +103,10 @@ export const GameShell: React.FC = () => {
     ? getEncounterEventById(pendingEncounter.eventId)
     : null;
   const pendingEncounterEyebrow =
-    pendingEncounterEvent?.presentation?.categoryLabel ?? "FATED ENCOUNTER";
+    pendingEncounter?.presentationCue?.chainLabel ??
+    pendingEncounterEvent?.presentation?.chainLabel ??
+    pendingEncounterEvent?.presentation?.categoryLabel ??
+    "FATED ENCOUNTER";
 
   return (
     <div className="relative h-[100dvh] w-screen overflow-hidden bg-black font-serif text-stone-100">

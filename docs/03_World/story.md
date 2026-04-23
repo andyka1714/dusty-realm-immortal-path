@@ -73,6 +73,8 @@
 
 這一段仍沿用既有 Quest、NPC、Map 與 Encounter data，不新增分支任務引擎。路線差異靠 prerequisite quest、profession gating、NPC 對話、encounter routeLabel 與 cue tags 表現。
 
+`expand-encounter-chain-world-memory` 之後，這些三宗回響不再只是獨立事件。合體與大乘後段 encounter 可以用 `requiredResolvedEventIds` 接續前一段遭遇，也可以讀取 `soul.worldMemoryTags` 判斷玩家是否曾留下劍令、血旗或星牒記憶。這讓後段世界章能保留路線後果，而不需要新增第二套 quest engine。
+
 ### 3.7 合體期 (Fusion) - 身神合一
 - **成功**：元神與肉身徹底融合，不分彼此。肉身即是元神，元神即是肉身，滴血重生不再是傳說，舉手投足間皆具備毀天滅地之能。
 - **失敗**：融合過程中，肉身無法承受元神的強大威壓，寸寸崩裂。你不得不強行終止融合，重塑肉身，修為遭受重創。

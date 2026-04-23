@@ -230,6 +230,15 @@ const migratePersistedSoulState = (soul: unknown): SoulState => {
       ...initialSoul.rebirthConfig,
       ...(isRecord(soul.rebirthConfig) ? soul.rebirthConfig : {}),
     },
+    worldMemoryTags: Array.isArray(soul.worldMemoryTags)
+      ? Array.from(
+          new Set(
+            soul.worldMemoryTags.filter(
+              (tag): tag is string => typeof tag === "string" && tag.length > 0
+            )
+          )
+        )
+      : initialSoul.worldMemoryTags,
   };
 
   const unlockedPerkIds = getAvailableReincarnationPerks(
@@ -267,6 +276,23 @@ const migratePersistedSoulState = (soul: unknown): SoulState => {
   return nextSoul;
 };
 
+const sanitizeEncounterPresentationCue = (value: unknown) => {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const nextCue: Record<string, string> = {};
+  ["chainLabel", "memoryCue", "routeLabel", "professionLabel", "sectLabel"].forEach(
+    (key) => {
+      if (typeof value[key] === "string" && value[key].length > 0) {
+        nextCue[key] = value[key];
+      }
+    }
+  );
+
+  return Object.keys(nextCue).length > 0 ? nextCue : undefined;
+};
+
 const migratePersistedEncounterState = (encounter: unknown): EncounterState => {
   const initialEncounter = createInitialEncounterState();
   if (!isRecord(encounter)) {
@@ -282,6 +308,9 @@ const migratePersistedEncounterState = (encounter: unknown): EncounterState => {
       ? {
           eventId: encounter.pendingEvent.eventId,
           year: encounter.pendingEvent.year,
+          presentationCue: sanitizeEncounterPresentationCue(
+            encounter.pendingEvent.presentationCue
+          ),
         }
       : null,
     resolvedEventIds: Array.isArray(encounter.resolvedEventIds)

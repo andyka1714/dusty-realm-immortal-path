@@ -5,8 +5,24 @@ import { addLog } from '../slices/logSlice';
 import { AGE_FLAVOR_TEXTS, EPIPHANY_LOGS, STAT_NAMES, LIFESPAN_WARNINGS } from '../../data/age_content';
 import { BaseAttributes, MajorRealm } from '../../types';
 import { DAYS_PER_YEAR } from '../../constants';
-import { pickEncounterEvent } from '../../data/encounters';
+import { getEncounterPreviewCue, pickEncounterEvent } from '../../data/encounters';
 import { setPendingEncounter } from '../slices/encounterSlice';
+
+const buildEncounterSelectorContext = (state: RootState) => {
+    const nextState = state as RootState & {
+        soul?: {
+            worldMemoryTags?: string[];
+        };
+    };
+
+    return {
+        majorRealm: nextState.character.majorRealm,
+        profession: nextState.character.profession,
+        completedQuestIds: nextState.quest.completedQuests,
+        resolvedEventIds: nextState.encounter.resolvedEventIds,
+        worldMemoryTags: nextState.soul?.worldMemoryTags ?? [],
+    };
+};
 
 // Thunk action to check for time-based events (Yearly + Lifespan Warnings)
 export const checkTimeEvents = (): ThunkAction<void, RootState, unknown, Action<string>> => 
@@ -114,14 +130,18 @@ const processSingleYear = (dispatch: any, getState: () => RootState, year: numbe
         if (!encounterState.pendingEvent) {
             const encounterRoll = Math.random();
             if (encounterRoll < 0.05) {
-                const encounter = pickEncounterEvent({
-                    majorRealm: realm,
-                    profession: state.character.profession,
-                    completedQuestIds: state.quest.completedQuests,
-                    resolvedEventIds: encounterState.resolvedEventIds,
-                }, Math.random());
+                const encounter = pickEncounterEvent(
+                    buildEncounterSelectorContext(state),
+                    Math.random()
+                );
                 if (encounter) {
-                    dispatch(setPendingEncounter({ eventId: encounter.id, year }));
+                    dispatch(
+                        setPendingEncounter({
+                            eventId: encounter.id,
+                            year,
+                            presentationCue: getEncounterPreviewCue(encounter),
+                        })
+                    );
                     dispatch(addLog({
                         message: `【${year}歲】你誤入一段機緣：【${encounter.title}】`,
                         type: 'info'

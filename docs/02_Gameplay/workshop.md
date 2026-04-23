@@ -104,6 +104,13 @@ Workshop state 已正式記錄：
 - `合體 / 大乘` 補上三宗 route-specific 可重複事件，仍使用既有 profession 與 `sect_*_task_04` gating，不新增 encounter engine 或存檔欄位。
 - 新增事件都保留 `categoryLabel / routeLabel / cue tags`，選項會在 pending panel 前置顯示材料、穩定收益、宗門路線或風險提示。
 
+`expand-encounter-chain-world-memory` 則把這批事件從「單次或可重複事件」正式推進成 chain-aware encounter：
+
+- `EncounterEvent` 現在可透過 `requiredResolvedEventIds` 與 `requiredWorldMemoryTags` 接續前置事件或跨輪迴記憶。
+- chain metadata 會記錄 `chainId / step / worldMemoryTags`，選項結算後會把穩定 world memory 寫入 `soul.worldMemoryTags`。
+- `PendingEncounterPanel` 與 `GameShell` 會顯示 chain label、memory cue、profession / sect cue 與選項後果提示。
+- 這條線只讓 Workshop / Sect 讀穩定 key 與 route cue，不在此處重做百業或宗門任務引擎。
+
 ## 6. 後續可擴充部分
 
 目前第二批 recipe、第一批專精效果、材料來源 cue、專精解鎖 / 切換成本與可重置分支樹都已完成，後續若要再擴充，重點會是：

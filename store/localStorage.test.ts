@@ -56,6 +56,7 @@ describe("loadState", () => {
     ).toEqual({
       [getSkillManualId("b_ma_active")]: 1,
     });
+    expect(loaded?.soul.worldMemoryTags).toEqual([]);
     expect((loaded?.inventory as { items?: Array<{ itemId: string; count: number }> }).items).toEqual(
       [{ itemId: getSkillManualId("b_ma_active"), count: 2 }]
     );
@@ -96,6 +97,7 @@ describe("loadState", () => {
             totalDeaths: 4,
             totalReincarnations: 3,
           },
+          worldMemoryTags: ["route:sword:soul-sheath"],
         },
       })
     );
@@ -106,11 +108,13 @@ describe("loadState", () => {
     expect(loaded?.soul).toMatchObject({
       totalMerit: 512,
       flowStep: "hall",
+      worldMemoryTags: ["route:sword:soul-sheath"],
     });
     expect(loaded?.encounter).toMatchObject({
       pendingEvent: {
         eventId: "herb_garden",
         year: 11,
+        presentationCue: undefined,
       },
       resolvedEventIds: ["wandering_smith"],
     });
@@ -140,6 +144,7 @@ describe("loadState", () => {
           totalDeaths: 0,
           totalReincarnations: 0,
         },
+        worldMemoryTags: ["route:sword:soul-sheath"],
       },
     } as never);
 
@@ -149,6 +154,7 @@ describe("loadState", () => {
     expect(parsed.current.character.isInitialized).toBe(true);
     expect(parsed.current.encounter.pendingEvent.eventId).toBe("herb_garden");
     expect(parsed.soul.totalMerit).toBe(80);
+    expect(parsed.soul.worldMemoryTags).toEqual(["route:sword:soul-sheath"]);
   });
 
   it("drops malformed encounter payloads when hydrating a versioned envelope", () => {

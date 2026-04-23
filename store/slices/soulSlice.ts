@@ -29,6 +29,7 @@ export const createInitialSoulState = (): SoulState => ({
     totalReincarnations: 0,
   }).map((perk) => perk.id),
   heirloomVault: [],
+  worldMemoryTags: [],
   pendingLifeReview: null,
   rebirthConfig: {
     selectedPerkIds: [],
@@ -137,6 +138,17 @@ const soulSlice = createSlice({
         selectedHeirloomIds: [],
       };
     },
+    addWorldMemoryTags: (state, action: PayloadAction<string[]>) => {
+      action.payload.forEach((tag) => {
+        if (typeof tag !== "string" || tag.length === 0) {
+          return;
+        }
+
+        if (!state.worldMemoryTags.includes(tag)) {
+          state.worldMemoryTags.push(tag);
+        }
+      });
+    },
     clearReincarnationFlow: (state) => {
       state.flowStep = "inactive";
       state.pendingLifeReview = null;
@@ -156,6 +168,7 @@ export const {
   setRebirthSpiritRootOverride,
   finalizeRebirth,
   clearReincarnationFlow,
+  addWorldMemoryTags,
 } = soulSlice.actions;
 
 export default soulSlice.reducer;

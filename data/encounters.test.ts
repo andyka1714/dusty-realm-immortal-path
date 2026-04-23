@@ -5,6 +5,7 @@ import {
   type EncounterEvent,
   getAvailableEncounterEvents,
   getEncounterMaterialSourceCues,
+  getEncounterPreviewCue,
   pickEncounterEvent,
 } from "./encounters";
 
@@ -117,6 +118,61 @@ const PHASE_ONE_ROUTE_COVERAGE_REALMS = [
   MajorRealm.Mahayana,
 ] as const;
 
+const buildRouteMemoryContext = (
+  profession: ProfessionType,
+  realm: MajorRealm
+): Pick<Parameters<typeof getAvailableEncounterEvents>[0], "resolvedEventIds" | "worldMemoryTags"> => {
+  if (profession === ProfessionType.Sword) {
+    if (realm >= MajorRealm.Mahayana) {
+      return {
+        resolvedEventIds: ["nascent_sword_soul_sheath", "fusion_sword_skyforge_oath"],
+        worldMemoryTags: ["route:sword:soul-sheath", "route:sword:skyforge"],
+      };
+    }
+
+    if (realm >= MajorRealm.Fusion) {
+      return {
+        resolvedEventIds: ["nascent_sword_soul_sheath"],
+        worldMemoryTags: ["route:sword:soul-sheath"],
+      };
+    }
+  }
+
+  if (profession === ProfessionType.Body) {
+    if (realm >= MajorRealm.Mahayana) {
+      return {
+        resolvedEventIds: ["nascent_body_blooddrum", "fusion_beast_lawbody_trial"],
+        worldMemoryTags: ["route:body:blooddrum", "route:body:lawbody"],
+      };
+    }
+
+    if (realm >= MajorRealm.Fusion) {
+      return {
+        resolvedEventIds: ["nascent_body_blooddrum"],
+        worldMemoryTags: ["route:body:blooddrum"],
+      };
+    }
+  }
+
+  if (profession === ProfessionType.Mage) {
+    if (realm >= MajorRealm.Mahayana) {
+      return {
+        resolvedEventIds: ["nascent_mage_soul_lantern", "fusion_mystic_constellation_court"],
+        worldMemoryTags: ["route:mage:lantern", "route:mage:constellation"],
+      };
+    }
+
+    if (realm >= MajorRealm.Fusion) {
+      return {
+        resolvedEventIds: ["nascent_mage_soul_lantern"],
+        worldMemoryTags: ["route:mage:lantern"],
+      };
+    }
+  }
+
+  return { resolvedEventIds: [], worldMemoryTags: [] };
+};
+
 const hasChoiceCueTags = (event: EncounterEvent) =>
   event.choices.some((choice) => (choice.cue?.tags?.length ?? 0) > 0);
 
@@ -192,6 +248,40 @@ describe("encounter selector", () => {
         )
       ).toBe(false);
     });
+  });
+
+  it("keeps chain follow-up events locked until starter resolution and world memory exist", () => {
+    const lockedContext = {
+      majorRealm: MajorRealm.Fusion,
+      profession: ProfessionType.Sword,
+      completedQuestIds: ["sect_sword_task_04"],
+      resolvedEventIds: [],
+      worldMemoryTags: [],
+    };
+    const starterResolvedOnlyContext = {
+      ...lockedContext,
+      resolvedEventIds: ["nascent_sword_soul_sheath"],
+    };
+    const fullyUnlockedContext = {
+      ...starterResolvedOnlyContext,
+      worldMemoryTags: ["route:sword:soul-sheath"],
+    };
+
+    expect(
+      getAvailableEncounterEvents(lockedContext).some(
+        (event) => event.id === "fusion_sword_skyforge_oath"
+      )
+    ).toBe(false);
+    expect(
+      getAvailableEncounterEvents(starterResolvedOnlyContext).some(
+        (event) => event.id === "fusion_sword_skyforge_oath"
+      )
+    ).toBe(false);
+    expect(
+      getAvailableEncounterEvents(fullyUnlockedContext).some(
+        (event) => event.id === "fusion_sword_skyforge_oath"
+      )
+    ).toBe(true);
   });
 
   it("defines explicit route labels and route-specific cue tags for the late sect milestones", () => {
@@ -357,11 +447,13 @@ describe("encounter selector", () => {
   it("keeps profession and route recognizable cues across Phase 1 realms", () => {
     PHASE_ONE_ROUTE_COVERAGE_CASES.forEach((testCase) => {
       PHASE_ONE_ROUTE_COVERAGE_REALMS.forEach((realm) => {
+        const memoryContext = buildRouteMemoryContext(testCase.profession, realm);
         const available = getAvailableEncounterEvents({
           majorRealm: realm,
           profession: testCase.profession,
           completedQuestIds: [...FULL_LATE_SECT_QUEST_IDS],
-          resolvedEventIds: [],
+          resolvedEventIds: memoryContext.resolvedEventIds,
+          worldMemoryTags: memoryContext.worldMemoryTags,
         });
         const routeEvents = available.filter(
           (event) =>
@@ -401,6 +493,18 @@ describe("encounter selector", () => {
       expect(rewardBearingChoices.length, `${eventId} missing concrete rewards`).toBe(
         event.choices.length
       );
+    });
+  });
+
+  it("publishes stable preview cues for chain-aware encounters", () => {
+    const cue = getEncounterPreviewCue(ENCOUNTER_EVENTS.fusion_sword_skyforge_oath);
+
+    expect(cue).toMatchObject({
+      chainLabel: "劍脈續響",
+      memoryCue: "合體劍爐會延續前一段元嬰劍鞘留下的路線記憶。",
+      routeLabel: "凌霄劍宗",
+      professionLabel: "劍修",
+      sectLabel: "凌霄劍宗後段承接",
     });
   });
 });

@@ -76,6 +76,7 @@ describe("persisted state migration", () => {
         totalDeaths: 3,
       },
     });
+    expect(migrated.soul.worldMemoryTags).toEqual([]);
     expect(migrated.encounter).toMatchObject({
       pendingEvent: null,
       resolvedEventIds: [],
@@ -150,6 +151,44 @@ describe("persisted state migration", () => {
       pendingEvent: null,
       resolvedEventIds: ["wandering_smith"],
     });
+  });
+
+  it("sanitizes valid pending cue payloads and world memory tags", () => {
+    const migrated = migratePersistedState({
+      schemaVersion: 2,
+      current: createPersistedState({
+        encounter: {
+          pendingEvent: {
+            eventId: "herb_garden",
+            year: 11,
+            presentationCue: {
+              chainLabel: "劍脈回聲",
+              memoryCue: "劍鞘共鳴會留下記憶",
+              routeLabel: "凌霄劍宗",
+              professionLabel: 42,
+              sectLabel: "劍宗前置回響",
+            },
+          },
+          resolvedEventIds: ["wandering_smith"],
+        },
+      }),
+      soul: {
+        totalMerit: 20,
+        worldMemoryTags: ["route:sword:soul-sheath", 42, ""],
+      },
+    } as PersistedState);
+
+    expect(migrated.encounter.pendingEvent).toMatchObject({
+      eventId: "herb_garden",
+      year: 11,
+      presentationCue: {
+        chainLabel: "劍脈回聲",
+        memoryCue: "劍鞘共鳴會留下記憶",
+        routeLabel: "凌霄劍宗",
+        sectLabel: "劍宗前置回響",
+      },
+    });
+    expect(migrated.soul.worldMemoryTags).toEqual(["route:sword:soul-sheath"]);
   });
 
   it("migrates legacy workshop state with high-tier mastery defaults", () => {

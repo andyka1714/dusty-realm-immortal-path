@@ -3,11 +3,12 @@ import { RootState } from "../store";
 import { addSpiritStones, gainExperience } from "../slices/characterSlice";
 import { addItem } from "../slices/inventorySlice";
 import { addLog } from "../slices/logSlice";
+import { addWorldMemoryTags } from "../slices/soulSlice";
 import {
   clearPendingEncounter,
   markEncounterResolved,
 } from "../slices/encounterSlice";
-import { getEncounterChoice } from "../../data/encounters";
+import { getEncounterChoice, getEncounterEventById } from "../../data/encounters";
 
 export const resolvePendingEncounterChoice = (
   choiceId: string
@@ -25,6 +26,7 @@ export const resolvePendingEncounterChoice = (
     }
 
     const { reward } = choice;
+    const event = getEncounterEventById(encounter.pendingEvent.eventId);
     if (reward.experience) {
       dispatch(gainExperience(reward.experience));
     }
@@ -36,6 +38,9 @@ export const resolvePendingEncounterChoice = (
     });
 
     dispatch(addLog({ message: reward.logMessage, type: "info" }));
+    if (event?.chain?.worldMemoryTags?.length) {
+      dispatch(addWorldMemoryTags(event.chain.worldMemoryTags));
+    }
     dispatch(markEncounterResolved(encounter.pendingEvent.eventId));
     dispatch(clearPendingEncounter());
   };
