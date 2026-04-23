@@ -73,3 +73,4 @@
 - `update-high-tier-workshop-depth` 已完成，正式收口第一批高階丹方 / 器方、route-specific 材料 sink、熟練度 state、migration 與 Workshop UI cue
 - `update-pixel-map-production-polish` 已完成，正式收口 pixel terrain 的 production semantic / skeleton 規格化；範圍只包含地圖背景、tile、biome、path、POI、landmark 與效能 budget，不改玩家 / 怪物 / NPC 文字 token 呈現
 - `update-workshop-specialization-expansion` 已完成，正式收口第二批 Workshop recipe 擴量、專精效果實際加成與 UI cue
+- `expand-workshop-source-specialization-unlocks` 已開案，承接 route-specific material source 擴充與 Workshop specialization unlock / switch gating
