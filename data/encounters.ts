@@ -1598,6 +1598,180 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
       },
     ],
   }),
+  sword_world_endless_sea_oath: createSingleRealmEncounterEvent({
+    id: "sword_world_endless_sea_oath",
+    title: "界海劍潮回聲",
+    description: "聖城劍令抵達無盡海後，海潮開始反覆沖刷凌霄劍宗的後段劍痕，替宗門路線留下合體後續。",
+    realm: MajorRealm.Fusion,
+    selector: {
+      weight: 4,
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Sword],
+      requiredCompletedQuestIds: ["sect_sword_world_chapter_02"],
+    },
+    presentation: {
+      categoryLabel: "合體後段世界章節里程碑",
+      routeLabel: "凌霄劍宗",
+      chainLabel: "劍令入海",
+      memoryCue: "無盡海會記住聖城劍令，後續劍宗事件可讀取這段宗門路線記憶。",
+      sectLabel: "凌霄劍宗後段承接",
+    },
+    chain: {
+      chainId: "sect-world-sword-route",
+      step: 2,
+      worldMemoryTags: ["sect:sword:world-chapter-02"],
+    },
+    choices: [
+      {
+        id: "answer_sea_edge",
+        label: "應和劍潮",
+        description: "以本命劍意應和無盡海潮，讓合體後段的劍宗路線不再只是任務交付。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "凌霄劍宗世界章節" },
+            { kind: "benefit", label: "合體劍修修為" },
+          ],
+        },
+        reward: {
+          experience: 585000,
+          logMessage: "你應和界海劍潮，聖城劍令在無盡海裡留下可追蹤的凌霄劍宗後段記憶。",
+        },
+      },
+      {
+        id: "collect_sea_starsteel",
+        label: "凝取界海星鋼",
+        description: "把被海潮淬過的劍痕凝成星鋼，留作後續百業材料來源。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "凌霄劍星鋼 x1" },
+            { kind: "benefit", label: "世界章節材料" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "sword_path_starsteel", count: 1 }],
+          logMessage: "你凝下界海星鋼，讓凌霄劍宗的後段世界章節能繼續反向供料給百業。",
+        },
+      },
+    ],
+  }),
+  beast_world_endless_sea_oath: createSingleRealmEncounterEvent({
+    id: "beast_world_endless_sea_oath",
+    title: "界海血潮回聲",
+    description: "血潮印沉入無盡海後，萬獸山莊的肉身路線開始被海壓反覆校準，留下合體後續。",
+    realm: MajorRealm.Fusion,
+    selector: {
+      weight: 4,
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Body],
+      requiredCompletedQuestIds: ["sect_beast_world_chapter_02"],
+    },
+    presentation: {
+      categoryLabel: "合體後段世界章節里程碑",
+      routeLabel: "萬獸山莊",
+      chainLabel: "血印入海",
+      memoryCue: "無盡海會記住血潮印，後續體修事件可讀取這段宗門路線記憶。",
+      sectLabel: "萬獸山莊後段承接",
+    },
+    chain: {
+      chainId: "sect-world-beast-route",
+      step: 2,
+      worldMemoryTags: ["sect:beast:world-chapter-02"],
+    },
+    choices: [
+      {
+        id: "withstand_sea_pressure",
+        label: "承受海壓",
+        description: "以肉身硬抗界海回撞，把血潮印的壓力轉成合體後段修為。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "萬獸山莊世界章節" },
+            { kind: "benefit", label: "合體體修修為" },
+          ],
+        },
+        reward: {
+          experience: 570000,
+          logMessage: "你在界海血潮中硬撐到血印沉穩，萬獸山莊後段路線被海壓重新釘牢。",
+        },
+      },
+      {
+        id: "claim_sea_bloodbone",
+        label: "剝取界海血骨",
+        description: "從血潮印下剝取被海壓淬過的血骨，作為後續器方材料。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "resource", label: "萬獸血骨殘材 x1" },
+            { kind: "risk", label: "世界章節材料" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "beast_path_bloodbone", count: 1 }],
+          logMessage: "你取回界海血骨，讓萬獸山莊的後段世界章節能繼續支撐體修鍛材。",
+        },
+      },
+    ],
+  }),
+  mystic_world_endless_sea_oath: createSingleRealmEncounterEvent({
+    id: "mystic_world_endless_sea_oath",
+    title: "界海星潮回聲",
+    description: "星潮牒落入無盡海後，縹緲仙宮的神識路線在海霧中重排，替法修留下合體後續。",
+    realm: MajorRealm.Fusion,
+    selector: {
+      weight: 4,
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Mage],
+      requiredCompletedQuestIds: ["sect_mystic_world_chapter_02"],
+    },
+    presentation: {
+      categoryLabel: "合體後段世界章節里程碑",
+      routeLabel: "縹緲仙宮",
+      chainLabel: "星牒入海",
+      memoryCue: "無盡海會記住星潮牒，後續法修事件可讀取這段宗門路線記憶。",
+      sectLabel: "縹緲仙宮後段承接",
+    },
+    chain: {
+      chainId: "sect-world-mystic-route",
+      step: 2,
+      worldMemoryTags: ["sect:mystic:world-chapter-02"],
+    },
+    choices: [
+      {
+        id: "read_sea_star_chart",
+        label: "讀取海天星位",
+        description: "順著星潮牒在海霧中重排的星位，把合體後段術式推成可追蹤章節。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "縹緲仙宮世界章節" },
+            { kind: "benefit", label: "合體法修修為" },
+          ],
+        },
+        reward: {
+          experience: 598000,
+          logMessage: "你讀完界海星潮，縹緲仙宮的後段宗門路線在海霧中留下穩定記憶。",
+        },
+      },
+      {
+        id: "gather_sea_starlotus",
+        label: "凝取界海星蓮",
+        description: "把星潮牒外溢的海霧星砂凝成星魂蓮，留給後續丹方。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "縹緲星魂蓮 x1" },
+            { kind: "benefit", label: "世界章節材料" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "mystic_path_starlotus", count: 1 }],
+          logMessage: "你凝下界海星蓮，讓縹緲仙宮的後段世界章節能接回高階丹方來源。",
+        },
+      },
+    ],
+  }),
   fusion_law_forge: createSingleRealmEncounterEvent({
     id: "fusion_law_forge",
     title: "法相熔坊",

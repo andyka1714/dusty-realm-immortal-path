@@ -628,5 +628,95 @@ export const QUESTS: Record<string, Quest> = {
                 '往後時光長河若浮起星砂圖卷，那便是仙宮世界章節留給你的回聲。'
             ]
         }
+    },
+    'sect_sword_world_chapter_02': {
+        id: 'sect_sword_world_chapter_02',
+        type: QuestType.Main,
+        title: '後段世界章節：聖城鑄劍潮',
+        description: '凌霄劍宗在萬法聖城（140）重整宗門路線，要你把聖城劍令送往無盡海（150），接續合體後的後段世界章節。',
+        giverId: 'world_sword_sacred_city_envoy',
+        submitNpcId: 'world_sword_endless_sea_witness',
+        prerequisiteQuestId: 'sect_sword_world_chapter_01',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.Fusion },
+            { type: 'dialogue', targetNpcId: 'world_sword_endless_sea_witness' }
+        ],
+        rewards: [
+            { exp: 368000, spiritStones: 15200 },
+            { items: [{ itemId: 'sword_path_starsteel', count: 2 }] }
+        ],
+        dialogue: {
+            start: [
+                '凌霄劍宗的宗門路線已從時光長河推到萬法聖城（140），但聖城只是後段世界章節的門檻。',
+                '帶著這枚聖城劍令北上無盡海（150），讓海潮替你的劍意刻出下一段世界路標。'
+            ],
+            progress: [
+                '萬法聖城（140）的法度會收束劍光，無盡海（150）的潮線會試出劍脊是否仍直。'
+            ],
+            complete: [
+                '劍令入海，凌霄劍宗的後段世界章節已從萬法聖城（140）接到無盡海（150）。',
+                '這批星鋼不是散材，而是宗門路線留給你往更深海域鑄劍的憑證。'
+            ]
+        }
+    },
+    'sect_beast_world_chapter_02': {
+        id: 'sect_beast_world_chapter_02',
+        type: QuestType.Main,
+        title: '後段世界章節：聖城血潮印',
+        description: '萬獸山莊在萬法聖城（140）校準宗門路線，要你扛著血潮印抵達無盡海（150），把肉身章節推入大乘前線。',
+        giverId: 'world_beast_sacred_city_envoy',
+        submitNpcId: 'world_beast_endless_sea_witness',
+        prerequisiteQuestId: 'sect_beast_world_chapter_01',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.Fusion },
+            { type: 'dialogue', targetNpcId: 'world_beast_endless_sea_witness' }
+        ],
+        rewards: [
+            { exp: 360000, spiritStones: 15600 },
+            { items: [{ itemId: 'beast_path_bloodbone', count: 2 }] }
+        ],
+        dialogue: {
+            start: [
+                '萬獸山莊的宗門路線到了萬法聖城（140）不能停，城規只會驗出你的氣血是否夠穩。',
+                '扛著血潮印去無盡海（150），讓海壓把後段世界章節壓進你的骨節。'
+            ],
+            progress: [
+                '萬法聖城（140）會量你的肉身根基，無盡海（150）會用浪峰逼你把血脈重新釘牢。'
+            ],
+            complete: [
+                '血潮印落在無盡海（150），萬獸山莊從萬法聖城（140）延出的後段世界章節沒有斷。',
+                '這些血骨是宗門路線的海壓記號，往後每一次鍛體都要記住這股潮聲。'
+            ]
+        }
+    },
+    'sect_mystic_world_chapter_02': {
+        id: 'sect_mystic_world_chapter_02',
+        type: QuestType.Main,
+        title: '後段世界章節：聖城星潮牒',
+        description: '縹緲仙宮在萬法聖城（140）重排宗門路線，要你把星潮牒送到無盡海（150），讓神識章節接上更後段世界。',
+        giverId: 'world_mystic_sacred_city_envoy',
+        submitNpcId: 'world_mystic_endless_sea_witness',
+        prerequisiteQuestId: 'sect_mystic_world_chapter_01',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.Fusion },
+            { type: 'dialogue', targetNpcId: 'world_mystic_endless_sea_witness' }
+        ],
+        rewards: [
+            { exp: 376000, spiritStones: 14800 },
+            { items: [{ itemId: 'mystic_path_starlotus', count: 2 }] }
+        ],
+        dialogue: {
+            start: [
+                '縹緲仙宮的宗門路線已在萬法聖城（140）重新排星，但後段世界章節需要海天同證。',
+                '把星潮牒帶到無盡海（150），用潮汐替你的神識刻下下一層星位。'
+            ],
+            progress: [
+                '萬法聖城（140）的萬靈法度會校準星牒，無盡海（150）的海霧會驗出神識是否散亂。'
+            ],
+            complete: [
+                '星潮牒在無盡海（150）展開，縹緲仙宮自萬法聖城（140）延伸的後段世界章節已經成形。',
+                '這些星蓮是宗門路線的潮汐回聲，往後推演術式時別把海霧當成雜訊。'
+            ]
+        }
     }
 };

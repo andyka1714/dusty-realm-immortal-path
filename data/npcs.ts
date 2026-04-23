@@ -365,8 +365,97 @@ export const VOID_RIVER_NPCS: NPC[] = [
     }
 ];
 
+export const SACRED_CITY_NPCS: NPC[] = [
+    {
+        id: 'world_sword_sacred_city_envoy',
+        name: '聖城劍令使',
+        symbol: '劍',
+        type: NPCType.Quest,
+        x: 72,
+        y: 70,
+        description: '凌霄劍宗派到萬法聖城的劍令使，替劍修確認合體後的宗門路線。',
+        questIds: ['sect_sword_world_chapter_02'],
+        dialogue: [
+            '凌霄劍宗在萬法聖城（140）的劍令已成，但後段世界章節要走到無盡海（150）才算接上。',
+            '若你已完成第一段世界章節，就帶著聖城劍令北上，讓宗門路線被海潮記住。'
+        ]
+    },
+    {
+        id: 'world_beast_sacred_city_envoy',
+        name: '聖城血潮使',
+        symbol: '血',
+        type: NPCType.Quest,
+        x: 80,
+        y: 74,
+        description: '萬獸山莊留在萬法聖城的血潮使，替體修標出前往界海的肉身路。',
+        questIds: ['sect_beast_world_chapter_02'],
+        dialogue: [
+            '萬獸山莊的宗門路線在萬法聖城（140）只完成一半，後段世界章節要進無盡海（150）受壓。',
+            '完成第一段世界章節後，把血潮印扛出去，別讓城規把你的氣血磨平。'
+        ]
+    },
+    {
+        id: 'world_mystic_sacred_city_envoy',
+        name: '聖城星潮使',
+        symbol: '星',
+        type: NPCType.Quest,
+        x: 88,
+        y: 70,
+        description: '縹緲仙宮駐守萬法聖城的星潮使，替法修校準通往海天的神識路標。',
+        questIds: ['sect_mystic_world_chapter_02'],
+        dialogue: [
+            '縹緲仙宮在萬法聖城（140）重排星位，但後段世界章節必須送到無盡海（150）才能穩住。',
+            '若你的第一段世界章節已完成，就帶星潮牒北上，讓宗門路線跟上海霧的節奏。'
+        ]
+    }
+];
+
+export const ENDLESS_SEA_NPCS: NPC[] = [
+    {
+        id: 'world_sword_endless_sea_witness',
+        name: '界海劍潮守',
+        symbol: '潮',
+        type: NPCType.Quest,
+        x: 86,
+        y: 94,
+        description: '立在無盡海潮線上的劍修，替凌霄劍宗確認聖城劍令是否抵達界海。',
+        dialogue: [
+            '凌霄劍宗的聖城劍令已從萬法聖城（140）抵達無盡海（150），後段世界章節終於聽見潮聲。',
+            '宗門路線到這裡不再只是劍痕，而是能被海天反覆淬鍊的鋒線。'
+        ]
+    },
+    {
+        id: 'world_beast_endless_sea_witness',
+        name: '界海血骨守',
+        symbol: '骨',
+        type: NPCType.Quest,
+        x: 94,
+        y: 100,
+        description: '守在無盡海礁骨旁的體修，替萬獸山莊確認血潮印是否承住海壓。',
+        dialogue: [
+            '萬獸山莊的血潮印從萬法聖城（140）壓到無盡海（150），後段世界章節已把氣血釘進潮線。',
+            '宗門路線走到這裡，就要讓每一次鍛體都能承受界海的回撞。'
+        ]
+    },
+    {
+        id: 'world_mystic_endless_sea_witness',
+        name: '界海星蓮守',
+        symbol: '蓮',
+        type: NPCType.Quest,
+        x: 102,
+        y: 94,
+        description: '在無盡海霧中守星蓮的仙宮修士，替縹緲仙宮確認星潮牒是否成章。',
+        dialogue: [
+            '縹緲仙宮的星潮牒自萬法聖城（140）落到無盡海（150），後段世界章節已經映出海天星位。',
+            '宗門路線到此才會知道，神識不是離開潮霧，而是在潮霧中找到可重複的星軌。'
+        ]
+    }
+];
+
 export const WORLD_STORY_NPCS: NPC[] = [
     ...TRI_REALM_BATTLEFIELD_NPCS,
     ...FALLEN_ABYSS_NPCS,
-    ...VOID_RIVER_NPCS
+    ...VOID_RIVER_NPCS,
+    ...SACRED_CITY_NPCS,
+    ...ENDLESS_SEA_NPCS
 ];
