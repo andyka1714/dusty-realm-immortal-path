@@ -314,3 +314,48 @@ Workshop 介面必須 (MUST) 讓玩家看懂專精解鎖條件、目前可否切
 - **WHEN** 玩家符合 reset 成本並確認 reset
 - **THEN** 介面必須能觸發對應 reset action
 - **AND** reset 後必須清楚顯示可重新選擇的專精狀態
+
+### Requirement: 事件鏈與世界記憶提示
+介面必須 (MUST) 讓玩家在 encounter 選擇前看懂該事件是否延續過去結果，或是否會留下後續記憶。
+
+#### Scenario: Pending encounter 顯示 chain cue
+- **WHEN** pending encounter 屬於事件鏈或引用世界記憶
+- **THEN** 面板必須顯示可讀的 chain、route 或 consequence cue
+- **AND** 不得只顯示內部事件 id 或要求玩家猜測後續影響
+
+### Requirement: 宗門世界章節可發現性 v2
+介面必須 (MUST) 讓玩家透過 NPC、Quest modal 或 pending encounter 看見 route chapter 的入口、進度與結果 cue。
+
+#### Scenario: 章節入口顯示下一步
+- **WHEN** 玩家符合 route chapter 條件
+- **THEN** 介面必須顯示可互動的 NPC、quest 或 encounter 入口
+- **AND** 玩家不得只能靠文件推測下一步去哪裡
+
+### Requirement: Workshop v2 決策 cue
+Workshop 介面必須 (MUST) 顯示 mastery milestone、specialization leaf、route-specific sink 與產出差異，讓玩家能理解中後期製作決策。
+
+#### Scenario: Recipe card 顯示 v2 cue
+- **WHEN** 玩家查看 v2 高階 recipe
+- **THEN** 介面必須顯示 routeTags、sourceHint、mastery milestone 或 specialization effect cue
+- **AND** 不得只用 disabled button 或純文字成本隱藏核心差異
+
+### Requirement: 輪迴 build preview v2
+輪迴大殿介面必須 (MUST) 顯示下一世 build identity、主要限制與預期收益。
+
+#### Scenario: Preview 顯示 build 身分
+- **WHEN** 玩家調整 perk、魂印或遺珍配置
+- **THEN** 介面必須更新下一世 build cue
+- **AND** 若配置非法，必須顯示功德、slot、前置或互斥原因
+
+### Requirement: 像素地圖 production v2
+系統必須 (MUST) 讓正式 `AdventureStage` 的 terrain/background 擁有可擴充的 biome、special terrain、landmark 與 route skeleton 語言，同時維持 actor token 不變。
+
+#### Scenario: 地圖背景提供更清楚的 production language
+- **WHEN** 玩家進入不同 biome 或 route skeleton 的地圖
+- **THEN** 背景必須能透過 tile、landmark、special terrain 或 route motif 表現差異
+- **AND** 不得退回只有通用方塊與格線
+
+#### Scenario: Actor token 維持文字遊戲表現
+- **WHEN** 像素地圖 production v2 套用到正式 Adventure
+- **THEN** 玩家、NPC、怪物與角色 token 必須維持既有文字呈現
+- **AND** 不得導入 prototype 用 pixel sprite 取代 actor token

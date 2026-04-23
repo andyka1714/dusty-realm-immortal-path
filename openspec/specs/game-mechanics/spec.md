@@ -450,3 +450,68 @@
 - **WHEN** 專精效果套用到高階 recipe
 - **THEN** 系統可以調整靈石成本、熟練收益、品質或副產物
 - **AND** 不得直接免除 recipe 的核心 route-specific 材料需求
+
+### Requirement: 事件鏈與世界記憶
+系統必須 (MUST) 讓正式 encounter 能記錄可被後續內容讀取的事件鏈與世界記憶，而不是只做單次 reward 結算。
+
+#### Scenario: 事件結果形成後續記憶
+- **WHEN** 玩家解決帶有 chain 或 memory tag 的 encounter
+- **THEN** 系統必須保存該結果供後續 selector、宗門章節或 Workshop source 判斷
+- **AND** 不得只依賴不可追蹤的純文字日誌
+
+#### Scenario: 事件鏈依前置結果展開
+- **WHEN** 後續 encounter 需要前置 chain step 或 world memory
+- **THEN** selector 必須檢查對應條件後才允許該事件出現
+- **AND** 若條件不成立，必須改派其他合法事件或不生成 pending event
+
+### Requirement: 宗門世界路線章節 v2
+系統必須 (MUST) 讓三宗後段內容延伸為可追蹤的跨地圖 route chapter，而不是只停在單次任務節點。
+
+#### Scenario: 三宗章節保留路線差異
+- **WHEN** 玩家推進不同宗門的後段章節
+- **THEN** 任務、NPC、encounter 或 reward cue 必須保留該宗門路線辨識
+- **AND** 不得讓三宗章節只剩同模板換名
+
+#### Scenario: 章節結果能餵給後續系統
+- **WHEN** 玩家完成 route chapter 的重要節點
+- **THEN** 系統必須能提供可被 encounter memory、Workshop source 或後續 quest 讀取的結果
+- **AND** 不得只寫入不可查詢的日誌文字
+
+### Requirement: Workshop 經濟與專精深化 v2
+系統必須 (MUST) 讓 Workshop mastery、specialization leaf 與 route-specific material sink 形成中後期決策，而不是只提供扁平 recipe 製作。
+
+#### Scenario: Mastery milestone 影響高階製作
+- **WHEN** 玩家累積指定 discipline 的 mastery
+- **THEN** 系統必須提供可驗證的 milestone、專精 leaf 或 recipe effect
+- **AND** 不得只把 mastery 當成無回饋數值
+
+#### Scenario: 專精效果不跳過材料 sink
+- **WHEN** 玩家使用 specialization craft 高階 recipe
+- **THEN** 專精可以影響品質、靈石、副產物或 mastery
+- **AND** 不得繞過 recipe 指定的 route-specific 材料消耗
+
+### Requirement: 輪迴 build diversity v2
+系統必須 (MUST) 讓輪迴配置提供可辨識的下一世 build 方向，而不是只提供泛用數值加成。
+
+#### Scenario: 下一世 build 具有策略辨識
+- **WHEN** 玩家在輪迴大殿選擇 perk、魂印或遺珍
+- **THEN** 系統必須能形成可辨識的 build identity
+- **AND** 不得讓所有合法配置只剩相同的泛用成長倍率
+
+#### Scenario: 跨世資訊不污染 current run
+- **WHEN** 輪迴 v2 使用 lifetime stats 或 world memory 作為 planner 參考
+- **THEN** 系統必須只讀取合法的 soul / memory 摘要
+- **AND** 不得把上一世背包、任務或地圖狀態帶入新一世
+
+### Requirement: Base spec truth release gate
+系統必須 (MUST) 讓完成的正式功能回寫 base specs 與 tracking docs，避免實作完成但規格真相停留在舊狀態。
+
+#### Scenario: 功能 change 完成
+- **WHEN** 任一 OpenSpec change 的實作、測試與文件完成
+- **THEN** 該 change 必須更新對應 tasks 為完成狀態
+- **AND** 封存前必須確認 base specs 已吸收正式行為或明確使用 `--skip-specs` 的理由
+
+#### Scenario: 後續主線選擇
+- **WHEN** 一條主線完成並準備選下一條 backlog
+- **THEN** 必須先檢查 `openspec list`、base specs 與 tracking docs
+- **AND** 不得只依賴舊審計文字判斷下一步

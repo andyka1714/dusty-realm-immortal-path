@@ -114,3 +114,55 @@
 - **WHEN** 載入只有扁平 `specializationByDiscipline` 或缺少專精欄位的舊存檔
 - **THEN** migration 必須補上合法的專精樹預設 state
 - **AND** 若舊存檔已有可相容的 active specialization，必須盡可能保留其效果或映射到對應節點
+
+### Requirement: 事件鏈與世界記憶持久化
+系統必須 (MUST) 在 current run 中安全保存 encounter chain 與 world memory state，並能從舊存檔補齊預設值。
+
+#### Scenario: 舊存檔補齊事件記憶 state
+- **WHEN** 載入尚未包含 world memory 欄位的舊存檔
+- **THEN** migration 必須補上合法預設值
+- **AND** 不得破壞既有 pending encounter 或 resolved event ids
+
+#### Scenario: 無效記憶資料被清理
+- **WHEN** 存檔包含 shape 不合法的 chain 或 memory payload
+- **THEN** hydration 必須安全清理或忽略該資料
+- **AND** 不得因此讓遊戲無法讀檔
+
+### Requirement: Workshop v2 state 相容 gate
+系統必須 (MUST) 在 Workshop v2 變更中明確判斷是否需要新增 persisted state，若新增則必須提供 migration。
+
+#### Scenario: 不新增 state 時維持舊存檔相容
+- **WHEN** Workshop v2 只擴 recipe、tree definition、mastery milestone 或 UI cue
+- **THEN** 舊存檔必須能沿用現有 Workshop state 正常載入
+- **AND** 不得要求新 migration 才能使用既有 current run
+
+#### Scenario: 新增 persisted state 時補 migration
+- **WHEN** Workshop v2 新增 recipe provenance、craft queue 或 mastery history 等 persisted field
+- **THEN** migration 必須為舊存檔補上合法預設值
+- **AND** 必須有 regression 防止讀檔崩潰
+
+### Requirement: 輪迴 build diversity 存檔承接
+系統必須 (MUST) 讓舊版 soul save 能安全載入輪迴 v2 catalog，並清理不合法 planner 配置。
+
+#### Scenario: 舊 soul save 載入 v2 catalog
+- **WHEN** 玩家載入不含 v2 perk、魂印或 planner 欄位的舊存檔
+- **THEN** migration 必須補上合法預設值
+- **AND** 不得讓 Reincarnation Hall 因欄位缺失崩潰
+
+#### Scenario: 不合法配置被清理
+- **WHEN** 舊存檔內的 rebirth config 不符合 v2 slot、互斥或 cost 規則
+- **THEN** 系統必須保留合法選擇並清理不合法項目
+- **AND** 不得允許非法配置開始新一世
+
+### Requirement: Persistence migration release gate
+系統必須 (MUST) 在任何改動 persisted state 的正式 change 中定義 migration、hydration 與 regression gate。
+
+#### Scenario: Change 新增 persisted state
+- **WHEN** 新功能新增 current run、soul、encounter、workshop 或其他 LocalStorage 欄位
+- **THEN** 該 change 必須提供舊存檔預設值補齊或清理策略
+- **AND** 必須有 regression 證明舊存檔不會因缺欄位崩潰
+
+#### Scenario: Change 不新增 persisted state
+- **WHEN** 新功能只改資料表、UI cue 或 deterministic helper
+- **THEN** tasks 必須明確記錄不需要 migration 的理由
+- **AND** 不得在未宣告的情況下偷渡新 persisted field
