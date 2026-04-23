@@ -80,4 +80,52 @@ describe("Workshop crafting UI", () => {
     expect(markup).toContain("鎖定原因：未達境界：化神");
     expect(markup).not.toContain("pixel-sprite");
   });
+
+  it("renders workshop specialization state and affected recipe cues", () => {
+    const character = {
+      ...characterReducer(
+        undefined,
+        initializeCharacter({ name: "韓立", gender: Gender.Male })
+      ),
+      majorRealm: MajorRealm.Tribulation,
+      spiritStones: 999,
+    };
+    const workshop = {
+      ...workshopReducer(undefined, { type: "@@INIT" }),
+      alchemyLevel: 8,
+      blacksmithLevel: 8,
+      unlockedRecipes: [
+        "qi_pill",
+        "novice_sword_reforge",
+        "immortal_ascension_elixir",
+        "great_dao_body_forge",
+      ],
+      masteryByDiscipline: {
+        alchemy: 12,
+        smithing: 4,
+      },
+      specializationByDiscipline: {
+        alchemy: "alchemy_hongmeng_condenser",
+        smithing: null,
+      },
+    };
+    const store = createWorkshopStore({ character, workshop });
+
+    const markup = renderToStaticMarkup(
+      <Provider store={store}>
+        <Workshop />
+      </Provider>
+    );
+
+    expect(markup).toContain("百業專精");
+    expect(markup).toContain("目前專精：鴻蒙凝丹");
+    expect(markup).toContain("目前專精：尚未選定");
+    expect(markup).toContain("可選專精：星火鍛胚");
+    expect(markup).toContain("專精影響：鴻蒙凝丹");
+    expect(markup).toContain("爐火消耗：216 靈石");
+    expect(markup).toContain("原消耗 240");
+    expect(markup).toContain("丹道熟練 +30");
+    expect(markup).toContain("材料 sink 維持原配方");
+    expect(markup).not.toContain("pixel-sprite");
+  });
 });

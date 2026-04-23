@@ -8,14 +8,26 @@ import { Hammer, ArrowUpCircle, Flame } from 'lucide-react';
 import clsx from 'clsx';
 import { GameHintBubble } from '../components/game/GameHintBubble';
 import { GameSection } from '../components/game/GameSection';
-import { getUnlockedWorkshopRecipes, type WorkshopRecipe } from '../data/workshopRecipes';
+import {
+  WORKSHOP_SPECIALIZATIONS,
+  getUnlockedWorkshopRecipes,
+  getWorkshopRecipeCraftingPlan,
+  type WorkshopRecipe,
+  type WorkshopSpecialization,
+} from '../data/workshopRecipes';
 import { ITEMS } from '../data/items';
 import { craftWorkshopRecipe } from '../store/actions/workshopActions';
-import { MajorRealmCN } from '../types';
+import { setWorkshopSpecialization } from '../store/slices/workshopSlice';
+import { MajorRealmCN, type WorkshopDiscipline } from '../types';
 
 interface WorkshopProps {
   embedded?: boolean;
 }
+
+const getWorkshopSpecializationsForDiscipline = (discipline: WorkshopDiscipline) =>
+  Object.values(WORKSHOP_SPECIALIZATIONS).filter(
+    (specialization) => specialization.discipline === discipline
+  );
 
 export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -26,6 +38,8 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
   const upgradeCost = calculateGatheringUpgradeCost(gatheringLevel);
   const alchemyRecipes = getUnlockedWorkshopRecipes(workshop, "alchemy");
   const smithingRecipes = getUnlockedWorkshopRecipes(workshop, "smithing");
+  const alchemySpecializations = getWorkshopSpecializationsForDiscipline("alchemy");
+  const smithingSpecializations = getWorkshopSpecializationsForDiscipline("smithing");
 
   const handleUpgradeGathering = () => {
      if (spiritStones >= upgradeCost) {
@@ -43,7 +57,10 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
       .filter((slot) => slot.itemId === itemId && !slot.instanceId)
       .reduce((total, slot) => total + slot.count, 0);
 
-  const getRecipeLockReason = (recipe: WorkshopRecipe): string | null => {
+  const getRecipeLockReason = (
+    recipe: WorkshopRecipe,
+    spiritStoneCost: number
+  ): string | null => {
     const disciplineLevel = recipe.discipline === "alchemy" ? workshop.alchemyLevel : workshop.blacksmithLevel;
     const missingIngredient = recipe.ingredients.find(
       (ingredient) => getOwnedCount(ingredient.itemId) < ingredient.count
@@ -57,8 +74,8 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
       return `${recipe.discipline === "alchemy" ? "煉丹爐" : "煉器台"}需 Lv.${recipe.requiredLevel}`;
     }
 
-    if (spiritStones < recipe.spiritStoneCost) {
-      return `靈石不足：${spiritStones.toLocaleString()}/${recipe.spiritStoneCost.toLocaleString()}`;
+    if (spiritStones < spiritStoneCost) {
+      return `靈石不足：${spiritStones.toLocaleString()}/${spiritStoneCost.toLocaleString()}`;
     }
 
     if (missingIngredient) {
@@ -69,12 +86,65 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
     return null;
   };
 
+  const renderSpecializationPanel = (
+    discipline: WorkshopDiscipline,
+    specializations: WorkshopSpecialization[]
+  ) => {
+    const activeId = workshop.specializationByDiscipline[discipline];
+    const activeSpecialization = activeId ? WORKSHOP_SPECIALIZATIONS[activeId] : null;
+
+    return (
+      <div className="rounded-xl border border-cyan-800/50 bg-cyan-950/15 p-3">
+        <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300">
+          百業專精
+        </div>
+        <div className="mt-1 text-xs text-stone-300">
+          目前專精：{activeSpecialization?.name ?? "尚未選定"}
+        </div>
+        <div className="mt-2 grid gap-2">
+          {specializations.map((specialization) => {
+            const isActive = activeId === specialization.id;
+
+            return (
+              <button
+                key={specialization.id}
+                onClick={() =>
+                  dispatch(
+                    setWorkshopSpecialization({
+                      discipline,
+                      specializationId: specialization.id,
+                    })
+                  )
+                }
+                className={clsx(
+                  "rounded-lg border px-3 py-2 text-left text-xs transition",
+                  isActive
+                    ? "border-cyan-400/60 bg-cyan-900/35 text-cyan-100"
+                    : "border-stone-800 bg-stone-950/70 text-stone-400 hover:border-cyan-700"
+                )}
+              >
+                <div className="font-semibold text-stone-100">
+                  可選專精：{specialization.name}
+                </div>
+                <div className="mt-1 leading-relaxed text-stone-500">
+                  {specialization.description}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   const renderRecipeCard = (recipe: WorkshopRecipe, actionLabel: string, costLabel: string) => {
-    const lockReason = getRecipeLockReason(recipe);
+    const craftingPlan = getWorkshopRecipeCraftingPlan(recipe, workshop);
+    const lockReason = getRecipeLockReason(recipe, craftingPlan.spiritStoneCost);
     const disciplineMastery = workshop.masteryByDiscipline[recipe.discipline];
     const outputLabels = recipe.outputs
       .map((output) => ITEMS[output.itemId]?.name ?? output.itemId)
       .join("、");
+    const baseMasteryYield = recipe.masteryYield ?? 1;
 
     return (
       <div
@@ -129,14 +199,29 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
                 );
               })}
             </div>
-            <div className="mt-2 text-xs text-amber-300">{costLabel}：{recipe.spiritStoneCost} 靈石</div>
+            <div className="mt-2 text-xs text-amber-300">
+              {costLabel}：{craftingPlan.spiritStoneCost} 靈石
+              {craftingPlan.spiritStoneCost !== recipe.spiritStoneCost && (
+                <span className="ml-2 text-stone-500">
+                  原消耗 {recipe.spiritStoneCost}
+                </span>
+              )}
+            </div>
             <div className="mt-2 grid gap-1 text-xs text-stone-500">
               {outputLabels && <div>產出：{outputLabels}</div>}
               {recipe.qualityHint && <div>品質：{recipe.qualityHint}</div>}
               {recipe.sourceHint && <div>來源：{recipe.sourceHint}</div>}
-              {recipe.masteryYield && (
+              {craftingPlan.activeSpecialization && (
+                <div className="rounded-lg border border-cyan-800/50 bg-cyan-950/20 px-2 py-1 text-cyan-200">
+                  專精影響：{craftingPlan.activeSpecialization.name}
+                  <span className="ml-2 text-cyan-300">
+                    熟練 +{baseMasteryYield}→+{craftingPlan.masteryYield}
+                  </span>
+                </div>
+              )}
+              {craftingPlan.masteryYield && (
                 <div>
-                  {recipe.discipline === "alchemy" ? "丹道" : "器道"}熟練 +{recipe.masteryYield}
+                  {recipe.discipline === "alchemy" ? "丹道" : "器道"}熟練 +{craftingPlan.masteryYield}
                   <span className="ml-2 text-stone-600">目前 {disciplineMastery}</span>
                 </div>
               )}
@@ -220,6 +305,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
              bodyClassName="space-y-4"
          >
              <p className="text-sm text-stone-500">萃取草木精華，煉製能直接補上修為節奏的丹藥。</p>
+             {renderSpecializationPanel("alchemy", alchemySpecializations)}
              <div className="space-y-3">
                 {alchemyRecipes.map((recipe) => renderRecipeCard(recipe, "煉製", "爐火消耗"))}
              </div>
@@ -231,6 +317,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
              bodyClassName="space-y-4"
          >
              <p className="text-sm text-stone-500">錘鍊礦材與妖獸部件，為當世 build 提供第一批可自製裝備。</p>
+             {renderSpecializationPanel("smithing", smithingSpecializations)}
              <div className="space-y-3">
                 {smithingRecipes.map((recipe) => renderRecipeCard(recipe, "鍛造", "鍛台消耗"))}
              </div>

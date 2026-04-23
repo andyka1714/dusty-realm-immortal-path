@@ -9,7 +9,7 @@
 - [x] 2.3 補專精效果與 craft 結果 regression
 
 ## 3. UI、文件與驗證
-- [ ] 3.1 更新 `pages/Workshop.tsx`，顯示目前專精、可選專精與 recipe 受影響 cue
-- [ ] 3.2 補 Workshop UI / recipe data / action tests
-- [ ] 3.3 更新 `docs/02_Gameplay/workshop.md` 與優先級追蹤文件
-- [ ] 3.4 驗證 `openspec validate update-workshop-specialization-expansion --strict`、targeted tests、`npm run typecheck` 與 `npm run build`
+- [x] 3.1 更新 `pages/Workshop.tsx`，顯示目前專精、可選專精與 recipe 受影響 cue
+- [x] 3.2 補 Workshop UI / recipe data / action tests
+- [x] 3.3 更新 `docs/02_Gameplay/workshop.md` 與優先級追蹤文件
+- [x] 3.4 驗證 `openspec validate update-workshop-specialization-expansion --strict`、targeted tests、`npm run typecheck` 與 `npm run build`
