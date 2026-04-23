@@ -38,6 +38,11 @@ describe("encounter selector", () => {
     expect(available.map((event) => event.id)).not.toContain("sword_sect_patrol_cache");
   });
 
+  it("defines explicit route labels for existing sect and profession specific events", () => {
+    expect(ENCOUNTER_EVENTS.sword_sect_patrol_cache.presentation?.routeLabel).toBe("凌霄劍宗");
+    expect(ENCOUNTER_EVENTS.mage_ink_resonance.presentation?.routeLabel).toBe("法修");
+  });
+
   it("keeps the late sect milestones locked until the matching task_04 quest is complete", () => {
     LATE_SECT_MILESTONE_CASES.forEach((testCase) => {
       const missingQuestContext = {
