@@ -16,8 +16,7 @@ import {
   type WorkshopSpecialization,
 } from '../data/workshopRecipes';
 import { ITEMS } from '../data/items';
-import { craftWorkshopRecipe } from '../store/actions/workshopActions';
-import { setWorkshopSpecialization } from '../store/slices/workshopSlice';
+import { craftWorkshopRecipe, selectWorkshopSpecialization } from '../store/actions/workshopActions';
 import { MajorRealmCN, type WorkshopDiscipline } from '../types';
 
 interface WorkshopProps {
@@ -110,7 +109,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
                 key={specialization.id}
                 onClick={() =>
                   dispatch(
-                    setWorkshopSpecialization({
+                    selectWorkshopSpecialization({
                       discipline,
                       specializationId: specialization.id,
                     })

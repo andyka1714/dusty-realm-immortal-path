@@ -101,7 +101,7 @@ describe("Workshop crafting UI", () => {
         "great_dao_body_forge",
       ],
       masteryByDiscipline: {
-        alchemy: 12,
+        alchemy: 24,
         smithing: 4,
       },
       specializationByDiscipline: {

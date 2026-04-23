@@ -130,12 +130,18 @@ describe("workshop recipe data", () => {
     expect(WORKSHOP_SPECIALIZATIONS.alchemy_hongmeng_condenser).toMatchObject({
       discipline: "alchemy",
       appliesToTier: "highRealm",
+      unlockRequirement: { minMastery: 24 },
+      switchCost: 500,
+      resetCost: 200,
       spiritStoneCostMultiplier: 0.9,
       masteryYieldBonus: 6,
     });
     expect(WORKSHOP_SPECIALIZATIONS.smithing_starfire_tempering).toMatchObject({
       discipline: "smithing",
       appliesToTier: "highRealm",
+      unlockRequirement: { minMastery: 30 },
+      switchCost: 500,
+      resetCost: 200,
       spiritStoneCostMultiplier: 0.9,
       masteryYieldBonus: 8,
     });
@@ -151,7 +157,7 @@ describe("workshop recipe data", () => {
       unlockedRecipes: [recipe.id],
       craftedRecipeCounts: {},
       masteryByDiscipline: {
-        alchemy: 0,
+        alchemy: 24,
         smithing: 0,
       },
       specializationByDiscipline: {
@@ -168,6 +174,28 @@ describe("workshop recipe data", () => {
       { itemId: "mystic_path_starlotus", count: 1 },
       { itemId: "spirit_herb", count: 8 },
     ]);
+  });
+
+  it("does not apply specialization craft effects before its mastery requirement is met", () => {
+    const recipe = WORKSHOP_RECIPES.immortal_ascension_elixir;
+    const plan = getWorkshopRecipeCraftingPlan(recipe, {
+      alchemyLevel: 8,
+      blacksmithLevel: 8,
+      unlockedRecipes: [recipe.id],
+      craftedRecipeCounts: {},
+      masteryByDiscipline: {
+        alchemy: 0,
+        smithing: 0,
+      },
+      specializationByDiscipline: {
+        alchemy: "alchemy_hongmeng_condenser",
+        smithing: null,
+      },
+    });
+
+    expect(plan.spiritStoneCost).toBe(240);
+    expect(plan.masteryYield).toBe(24);
+    expect(plan.activeSpecialization).toBeNull();
   });
 
   it("does not lose the low-tier starter recipe shape", () => {

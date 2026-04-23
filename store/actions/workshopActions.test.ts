@@ -8,7 +8,7 @@ import inventoryReducer, { addItem } from "../slices/inventorySlice";
 import workshopReducer from "../slices/workshopSlice";
 import logReducer from "../slices/logSlice";
 import { Gender, MajorRealm } from "../../types";
-import { craftWorkshopRecipe } from "./workshopActions";
+import { craftWorkshopRecipe, selectWorkshopSpecialization } from "./workshopActions";
 
 type TestStoreState = {
   character: ReturnType<typeof characterReducer>;
@@ -130,6 +130,10 @@ describe("workshop actions", () => {
         ...workshopReducer(undefined, { type: "@@INIT" }),
         alchemyLevel: 8,
         unlockedRecipes: ["qi_pill", "novice_sword_reforge", "immortal_ascension_elixir"],
+        masteryByDiscipline: {
+          alchemy: 24,
+          smithing: 0,
+        },
         specializationByDiscipline: {
           alchemy: "alchemy_hongmeng_condenser",
           smithing: null,
@@ -147,7 +151,7 @@ describe("workshop actions", () => {
     expect(state.inventory.items.find((slot) => slot.itemId === "bt_trib_immortal")?.count).toBe(1);
     expect(state.inventory.items.find((slot) => slot.itemId === "beast_path_bloodbone")).toBeUndefined();
     expect(state.inventory.items.find((slot) => slot.itemId === "mystic_path_starlotus")).toBeUndefined();
-    expect(state.workshop.masteryByDiscipline.alchemy).toBe(30);
+    expect(state.workshop.masteryByDiscipline.alchemy).toBe(54);
     expect(state.character.spiritStones).toBe(784);
     expect(state.logs.logs[0]?.message).toContain("專精：鴻蒙凝丹");
   });
@@ -159,6 +163,10 @@ describe("workshop actions", () => {
         ...workshopReducer(undefined, { type: "@@INIT" }),
         blacksmithLevel: 8,
         unlockedRecipes: ["qi_pill", "novice_sword_reforge", "great_dao_body_forge"],
+        masteryByDiscipline: {
+          alchemy: 0,
+          smithing: 30,
+        },
         specializationByDiscipline: {
           alchemy: null,
           smithing: "smithing_starfire_tempering",
@@ -179,8 +187,60 @@ describe("workshop actions", () => {
     expect(armorSlot?.instance?.templateId).toBe("great_dao_body");
     expect(state.inventory.items.find((slot) => slot.itemId === "beast_path_bloodbone")).toBeUndefined();
     expect(state.inventory.items.find((slot) => slot.itemId === "sword_path_starsteel")).toBeUndefined();
-    expect(state.workshop.masteryByDiscipline.smithing).toBe(38);
+    expect(state.workshop.masteryByDiscipline.smithing).toBe(68);
     expect(state.character.spiritStones).toBe(730);
     expect(state.logs.logs[0]?.message).toContain("專精：星火鍛胚");
+  });
+
+  it("blocks specialization selection until mastery requirement is met", () => {
+    const store = createTestStore({
+      character: createCharacterAtRealm(MajorRealm.SpiritSevering, 1000),
+      workshop: {
+        ...workshopReducer(undefined, { type: "@@INIT" }),
+        masteryByDiscipline: {
+          alchemy: 0,
+          smithing: 0,
+        },
+      },
+    });
+
+    store.dispatch(
+      selectWorkshopSpecialization({
+        discipline: "alchemy",
+        specializationId: "alchemy_hongmeng_condenser",
+      })
+    );
+
+    const state = store.getState();
+
+    expect(state.workshop.specializationByDiscipline.alchemy).toBeNull();
+    expect(state.character.spiritStones).toBe(1000);
+    expect(state.logs.logs[0]?.message).toContain("丹道熟練需達 24");
+  });
+
+  it("selects unlocked specialization with switch cost", () => {
+    const store = createTestStore({
+      character: createCharacterAtRealm(MajorRealm.SpiritSevering, 1000),
+      workshop: {
+        ...workshopReducer(undefined, { type: "@@INIT" }),
+        masteryByDiscipline: {
+          alchemy: 24,
+          smithing: 0,
+        },
+      },
+    });
+
+    store.dispatch(
+      selectWorkshopSpecialization({
+        discipline: "alchemy",
+        specializationId: "alchemy_hongmeng_condenser",
+      })
+    );
+
+    const state = store.getState();
+
+    expect(state.workshop.specializationByDiscipline.alchemy).toBe("alchemy_hongmeng_condenser");
+    expect(state.character.spiritStones).toBe(500);
+    expect(state.logs.logs[0]?.message).toContain("已切換丹道專精：鴻蒙凝丹");
   });
 });

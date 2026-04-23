@@ -33,8 +33,18 @@ export interface WorkshopSpecialization {
   discipline: WorkshopRecipeDiscipline;
   description: string;
   appliesToTier?: WorkshopRecipeTier;
+  unlockRequirement?: {
+    minMastery?: number;
+  };
+  switchCost?: number;
+  resetCost?: number;
   spiritStoneCostMultiplier?: number;
   masteryYieldBonus?: number;
+}
+
+export interface WorkshopSpecializationUnlockStatus {
+  unlocked: boolean;
+  reason: string | null;
 }
 
 export interface WorkshopRecipeCraftingPlan {
@@ -50,6 +60,11 @@ export const WORKSHOP_SPECIALIZATIONS: Record<string, WorkshopSpecialization> = 
     discipline: "alchemy",
     description: "高階丹方靈石火耗降低，並額外累積丹道熟練；材料 sink 維持原配方。",
     appliesToTier: "highRealm",
+    unlockRequirement: {
+      minMastery: 24,
+    },
+    switchCost: 500,
+    resetCost: 200,
     spiritStoneCostMultiplier: 0.9,
     masteryYieldBonus: 6,
   },
@@ -59,6 +74,11 @@ export const WORKSHOP_SPECIALIZATIONS: Record<string, WorkshopSpecialization> = 
     discipline: "smithing",
     description: "高階器方靈石火耗降低，並額外累積器道熟練；路線材料不被減免。",
     appliesToTier: "highRealm",
+    unlockRequirement: {
+      minMastery: 30,
+    },
+    switchCost: 500,
+    resetCost: 200,
     spiritStoneCostMultiplier: 0.9,
     masteryYieldBonus: 8,
   },
@@ -232,7 +252,33 @@ const getActiveWorkshopSpecialization = (
     return null;
   }
 
+  if (!getWorkshopSpecializationUnlockStatus(workshop, specialization).unlocked) {
+    return null;
+  }
+
   return specialization;
+};
+
+export const getWorkshopSpecializationUnlockStatus = (
+  workshop: WorkshopState,
+  specialization: WorkshopSpecialization
+): WorkshopSpecializationUnlockStatus => {
+  const minMastery = specialization.unlockRequirement?.minMastery;
+
+  if (
+    minMastery !== undefined &&
+    workshop.masteryByDiscipline[specialization.discipline] < minMastery
+  ) {
+    return {
+      unlocked: false,
+      reason: `${specialization.discipline === "alchemy" ? "丹道" : "器道"}熟練需達 ${minMastery}`,
+    };
+  }
+
+  return {
+    unlocked: true,
+    reason: null,
+  };
 };
 
 export const getWorkshopRecipeCraftingPlan = (
