@@ -1,18 +1,28 @@
 # 宗門後段與世界里程碑
 
-`expand-sect-world-late-progression` 已完成，這一輪正式把三宗 `元嬰+` 後段任務、宗門 hub NPC 與 world milestone encounter 接回同一條路線。
+`expand-sect-world-late-progression` 已完成，`expand-sect-world-story-branches` Phase 2 進一步把三宗 `task_04` 後的路線接成可追蹤的世界章節。
 
 ## 已落地內容
 
 - 三宗 `task_04` 已接到 `元嬰` / `化神` 里程碑，並沿用既有 `Quest / NPC / Encounter` 結構。
 - 宗門 hub NPC 仍以 questIds / dialogue 承接後段任務，不另開第二套任務框架。
 - route-specific world encounter 已依 profession 與 completed quest gating 解鎖。
+- 三宗新增 post-`task_04` 世界章節任務：
+  - 凌霄劍宗：`sect_sword_world_chapter_01`，由 `三界戰場 (120)` 的 `world_sword_battlefield_envoy` 發起，送到 `時光長河 (130)` 的 `world_sword_void_river_witness`。
+  - 萬獸山莊：`sect_beast_world_chapter_01`，由 `world_beast_battlefield_envoy` 發起，送到 `world_beast_void_river_witness`。
+  - 縹緲仙宮：`sect_mystic_world_chapter_01`，由 `world_mystic_battlefield_envoy` 發起，送到 `world_mystic_void_river_witness`。
+- `隕仙深淵 (121)` 補了三宗 route-local Info NPC，讓玩家在 120 -> 121 -> 130 的路上看得到各路線的中繼文案。
+- 新增三個煉虛世界章節 milestone encounter：
+  - `sword_world_void_river_oath`
+  - `beast_world_void_river_oath`
+  - `mystic_world_void_river_oath`
 
 ## 驗證
 
 - `data/sectLateProgression.test.ts` 覆蓋後段 quest、NPC 與 reward / dialogue 對齊。
 - `data/encounters.test.ts` 覆蓋 late sect milestone 的 route gating、cue tags 與 resolved state 行為。
+- `data/sectWorldStoryBranch.test.ts` 覆蓋 Phase 2 世界章節 quest / NPC / map / encounter 對齊。
 
 ## 下一步
 
-- 下一個可開案主線改為 `high-tier workshop depth`。
+- 若要繼續擴張，下一步應補 130+ 後續章節或更多 map-local NPC，但仍應避免新增第二套 quest engine。

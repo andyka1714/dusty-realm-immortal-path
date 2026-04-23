@@ -540,5 +540,93 @@ export const QUESTS: Record<string, Quest> = {
                 '化神的門檻就在那裡，別再把元嬰當成終點。'
             ]
         }
+    },
+
+    'sect_sword_world_chapter_01': {
+        id: 'sect_sword_world_chapter_01',
+        type: QuestType.Main,
+        title: '世界章：劍令渡河',
+        description: '凌霄劍宗界令使要你從三界戰場（120）穿過隕仙深淵（121），把劍令送到時光長河（130），接上煉虛前的世界章節。',
+        giverId: 'world_sword_battlefield_envoy',
+        submitNpcId: 'world_sword_void_river_witness',
+        prerequisiteQuestId: 'sect_sword_task_04',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.SpiritSevering },
+            { type: 'dialogue', targetNpcId: 'world_sword_void_river_witness' }
+        ],
+        rewards: [
+            { exp: 238000, spiritStones: 9600 }
+        ],
+        dialogue: {
+            start: [
+                '凌霄劍宗的劍不該在三界戰場（120）停住。',
+                '帶著這枚界令穿過隕仙深淵（121），去時光長河（130）找長河劍碑守，讓煉虛節點認得你的劍意。'
+            ],
+            progress: [
+                '隕仙深淵會把劍光折成黑霧，若你還能沿著劍痕往北走，時光長河便會回應你。'
+            ],
+            complete: [
+                '劍令到了，凌霄劍宗從 task_04 到三界戰場、隕仙深淵與煉虛節點的路終於接上。',
+                '往後時光長河裡若有舊劍痕共鳴，你便知道那不是散落材料，而是世界章節留下的路標。'
+            ]
+        }
+    },
+    'sect_beast_world_chapter_01': {
+        id: 'sect_beast_world_chapter_01',
+        type: QuestType.Main,
+        title: '世界章：血旗踏河',
+        description: '萬獸山莊血旗使要你從三界戰場（120）扛旗越過隕仙深淵（121），把血旗釘在時光長河（130）的煉虛節點。',
+        giverId: 'world_beast_battlefield_envoy',
+        submitNpcId: 'world_beast_void_river_witness',
+        prerequisiteQuestId: 'sect_beast_task_04',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.SpiritSevering },
+            { type: 'dialogue', targetNpcId: 'world_beast_void_river_witness' }
+        ],
+        rewards: [
+            { exp: 232000, spiritStones: 9800 }
+        ],
+        dialogue: {
+            start: [
+                '萬獸山莊的血旗不能只插在三界戰場（120）的邊線。',
+                '扛著它穿過隕仙深淵（121），到時光長河（130）找長河血骨守，讓煉虛亂流記住你的肉身節奏。'
+            ],
+            progress: [
+                '隕仙深淵的黑霧會抽空氣血，別退，退了血旗就會倒。'
+            ],
+            complete: [
+                '血旗釘穩了，萬獸山莊從 task_04 到三界戰場、隕仙深淵與煉虛節點的路沒有斷。',
+                '往後時光長河若沖出血骨殘材，你要知道那是山莊世界章節留下的骨標。'
+            ]
+        }
+    },
+    'sect_mystic_world_chapter_01': {
+        id: 'sect_mystic_world_chapter_01',
+        type: QuestType.Main,
+        title: '世界章：星牒入河',
+        description: '縹緲仙宮星牒使要你從三界戰場（120）校準星牒，經隕仙深淵（121）送到時光長河（130），把化神路標推入煉虛。',
+        giverId: 'world_mystic_battlefield_envoy',
+        submitNpcId: 'world_mystic_void_river_witness',
+        prerequisiteQuestId: 'sect_mystic_task_04',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.SpiritSevering },
+            { type: 'dialogue', targetNpcId: 'world_mystic_void_river_witness' }
+        ],
+        rewards: [
+            { exp: 244000, spiritStones: 9400 }
+        ],
+        dialogue: {
+            start: [
+                '縹緲仙宮的星牒在三界戰場（120）已經亮起，但它還缺隕仙深淵（121）與時光長河（130）的兩段星位。',
+                '帶它去找長河星牒守，讓煉虛節點承認你的神識路標。'
+            ],
+            progress: [
+                '隕仙深淵會遮住神識，你要用星牒記住霧線，別讓術式只剩蠻力。'
+            ],
+            complete: [
+                '星牒歸位了，縹緲仙宮從 task_04 到三界戰場、隕仙深淵與煉虛節點的章節終於成形。',
+                '往後時光長河若浮起星砂圖卷，那便是仙宮世界章節留給你的回聲。'
+            ]
+        }
     }
 };

@@ -1036,6 +1036,156 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
       },
     ],
   }),
+  sword_world_void_river_oath: createSingleRealmEncounterEvent({
+    id: "sword_world_void_river_oath",
+    title: "長河劍令回聲",
+    description: "你送入時光長河的劍令在煉虛亂流中回響，替凌霄劍宗路線補上一段世界章節後續。",
+    realm: MajorRealm.VoidRefining,
+    selector: {
+      weight: 4,
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Sword],
+      requiredCompletedQuestIds: ["sect_sword_world_chapter_01"],
+    },
+    presentation: {
+      categoryLabel: "煉虛世界章節里程碑",
+      routeLabel: "凌霄劍宗",
+    },
+    choices: [
+      {
+        id: "answer_sword_writ",
+        label: "應和劍令",
+        description: "以本命劍意應和長河中的界令回聲，讓煉虛路線不再只是材料散點。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "凌霄劍宗世界章節" },
+            { kind: "benefit", label: "煉虛劍修修為" },
+          ],
+        },
+        reward: {
+          experience: 335000,
+          logMessage: "你應和長河劍令，凌霄劍宗的三界戰場後續在煉虛亂流中清晰了一段。",
+        },
+      },
+      {
+        id: "collect_sword_echo",
+        label: "收束劍令殘響",
+        description: "把殘響凝成可回爐的劍心星鋼，留作後續百業材料。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "凌霄劍宗劍令星鋼 x1" },
+            { kind: "benefit", label: "世界章節材料" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "sword_path_starsteel", count: 1 }],
+          logMessage: "你把長河劍令殘響收成劍心星鋼，讓世界章節與宗門百業接到同一條路。",
+        },
+      },
+    ],
+  }),
+  beast_world_void_river_oath: createSingleRealmEncounterEvent({
+    id: "beast_world_void_river_oath",
+    title: "長河血旗回聲",
+    description: "釘入時光長河的血旗在煉虛亂流中鼓動，替萬獸山莊路線留下可追蹤的世界章節後續。",
+    realm: MajorRealm.VoidRefining,
+    selector: {
+      weight: 4,
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Body],
+      requiredCompletedQuestIds: ["sect_beast_world_chapter_01"],
+    },
+    presentation: {
+      categoryLabel: "煉虛世界章節里程碑",
+      routeLabel: "萬獸山莊",
+    },
+    choices: [
+      {
+        id: "raise_blood_banner",
+        label: "再舉血旗",
+        description: "頂住時光亂流再舉血旗，把萬獸山莊的肉身節奏壓入煉虛。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "萬獸山莊世界章節" },
+            { kind: "benefit", label: "煉虛體修修為" },
+          ],
+        },
+        reward: {
+          experience: 326000,
+          logMessage: "你在長河亂流中再舉血旗，萬獸山莊的三界戰場後續被肉身節奏重新釘住。",
+        },
+      },
+      {
+        id: "claim_blood_banner_bone",
+        label: "剝取血旗骨片",
+        description: "從血旗底座剝下一片被長河沖刷過的血骨，作為後續鍛材。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "resource", label: "萬獸山莊血旗骨片 x1" },
+            { kind: "risk", label: "世界章節材料" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "beast_path_bloodbone", count: 1 }],
+          logMessage: "你取下長河血旗骨片，讓世界章節與體修鍛材來源接在一起。",
+        },
+      },
+    ],
+  }),
+  mystic_world_void_river_oath: createSingleRealmEncounterEvent({
+    id: "mystic_world_void_river_oath",
+    title: "長河星牒回聲",
+    description: "送入時光長河的星牒在煉虛亂流中重排星位，替縹緲仙宮路線補上世界章節後續。",
+    realm: MajorRealm.VoidRefining,
+    selector: {
+      weight: 4,
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Mage],
+      requiredCompletedQuestIds: ["sect_mystic_world_chapter_01"],
+    },
+    presentation: {
+      categoryLabel: "煉虛世界章節里程碑",
+      routeLabel: "縹緲仙宮",
+    },
+    choices: [
+      {
+        id: "read_star_writ",
+        label: "讀取星牒回聲",
+        description: "順著長河中重排的星位推演術式，讓煉虛節點成為可辨識的章節出口。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "縹緲仙宮世界章節" },
+            { kind: "benefit", label: "煉虛法修修為" },
+          ],
+        },
+        reward: {
+          experience: 342000,
+          logMessage: "你讀完長河星牒回聲，縹緲仙宮的三界戰場後續終於推入煉虛章法。",
+        },
+      },
+      {
+        id: "gather_star_writ_sand",
+        label: "凝取星牒砂",
+        description: "把星牒外溢的星砂凝成靈蓮藥引，留給後續丹方。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "縹緲仙宮星牒砂 x1" },
+            { kind: "benefit", label: "世界章節材料" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "mystic_path_starlotus", count: 1 }],
+          logMessage: "你凝下長河星牒砂，讓世界章節與法修丹方來源接成同一段路。",
+        },
+      },
+    ],
+  }),
   fusion_sword_skyforge_oath: createSingleRealmEncounterEvent({
     id: "fusion_sword_skyforge_oath",
     title: "合天劍爐盟誓",

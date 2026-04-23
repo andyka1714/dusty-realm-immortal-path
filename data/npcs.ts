@@ -235,3 +235,138 @@ export const MYSTIC_SECT_NPCS: NPC[] = [
         shopId: 'sect_skill_mystic'
     }
 ];
+
+export const TRI_REALM_BATTLEFIELD_NPCS: NPC[] = [
+    {
+        id: 'world_sword_battlefield_envoy',
+        name: '劍宗界令使',
+        symbol: '令',
+        type: NPCType.Quest,
+        x: 70,
+        y: 64,
+        description: '凌霄劍宗派駐三界戰場的界令使，負責確認劍修是否能越過化神戰線。',
+        questIds: ['sect_sword_world_chapter_01'],
+        dialogue: [
+            '三界戰場（120）只是一道門，真正的劍路要穿過隕仙深淵（121）再去時光長河（130）。',
+            '完成劍宗元嬰任務後，帶著你的劍意往北走，別讓戰場把你困成守門人。'
+        ]
+    },
+    {
+        id: 'world_beast_battlefield_envoy',
+        name: '獸莊血旗使',
+        symbol: '旗',
+        type: NPCType.Quest,
+        x: 75,
+        y: 72,
+        description: '萬獸山莊的血旗使，守在三界戰場邊線替體修標出深淵血路。',
+        questIds: ['sect_beast_world_chapter_01'],
+        dialogue: [
+            '三界戰場（120）的血味還不夠深，隕仙深淵（121）才會驗出你的肉身底盤。',
+            '若你已走完獸莊元嬰試煉，就把血旗帶到時光長河（130），讓煉虛路知道你不是過客。'
+        ]
+    },
+    {
+        id: 'world_mystic_battlefield_envoy',
+        name: '仙宮星牒使',
+        symbol: '牒',
+        type: NPCType.Quest,
+        x: 80,
+        y: 64,
+        description: '縹緲仙宮派出的星牒使，記錄三界戰場到煉虛節點的靈機流向。',
+        questIds: ['sect_mystic_world_chapter_01'],
+        dialogue: [
+            '三界戰場（120）的星牒已開，下一頁落在隕仙深淵（121）的霧線之下。',
+            '完成仙宮元嬰任務後，順著星牒去時光長河（130），那裡才有煉虛前的第一個答案。'
+        ]
+    }
+];
+
+export const FALLEN_ABYSS_NPCS: NPC[] = [
+    {
+        id: 'world_sword_abyss_witness',
+        name: '深淵劍痕客',
+        symbol: '痕',
+        type: NPCType.Info,
+        x: 72,
+        y: 78,
+        description: '守著隕仙深淵劍痕的散修，能辨識凌霄劍意是否仍然筆直。',
+        dialogue: [
+            '隕仙深淵（121）的黑霧會折斷猶豫的劍，凌霄劍宗的人若要過去，劍心不能停在戰場。',
+            '往北去時光長河（130）前，先記住這裡的裂痕，它會提醒你煉虛不是逃離，而是定住虛空。'
+        ]
+    },
+    {
+        id: 'world_beast_abyss_witness',
+        name: '深淵骨鼓客',
+        symbol: '鼓',
+        type: NPCType.Info,
+        x: 78,
+        y: 78,
+        description: '在隕仙深淵敲骨鼓的萬獸山莊舊識，用鼓聲測試體修氣血。',
+        dialogue: [
+            '隕仙深淵（121）吃的是怯意，萬獸山莊弟子若氣血散了，還沒到煉虛就會被黑霧拖空。',
+            '扛住這面骨鼓，再往時光長河（130）去，把肉身節奏帶進煉虛。'
+        ]
+    },
+    {
+        id: 'world_mystic_abyss_witness',
+        name: '深淵觀星客',
+        symbol: '星',
+        type: NPCType.Info,
+        x: 84,
+        y: 78,
+        description: '在隕仙深淵霧線下觀星的仙宮修士，替法修校準神識路標。',
+        dialogue: [
+            '隕仙深淵（121）的霧會遮住神識，縹緲仙宮弟子要用星位記路，不能只靠靈力硬探。',
+            '星線北折便是時光長河（130），到那裡再把化神所得推成煉虛章法。'
+        ]
+    }
+];
+
+export const VOID_RIVER_NPCS: NPC[] = [
+    {
+        id: 'world_sword_void_river_witness',
+        name: '長河劍碑守',
+        symbol: '碑',
+        type: NPCType.Quest,
+        x: 78,
+        y: 84,
+        description: '守著時光長河劍碑的老修士，替凌霄劍宗確認煉虛前的劍路是否接上。',
+        dialogue: [
+            '你從三界戰場（120）穿過隕仙深淵（121），還能把凌霄劍宗的劍意帶到時光長河（130），這條世界章節才算接上。',
+            '往後煉虛節點會反覆撕開舊劍痕，記得用它們校準你的本命劍。'
+        ]
+    },
+    {
+        id: 'world_beast_void_river_witness',
+        name: '長河血骨守',
+        symbol: '骨',
+        type: NPCType.Quest,
+        x: 84,
+        y: 84,
+        description: '守在時光長河血骨樁旁的體修，替萬獸山莊確認肉身路是否能踏入煉虛。',
+        dialogue: [
+            '你把萬獸山莊的血旗從三界戰場（120）扛過隕仙深淵（121），又送到時光長河（130），肉身路沒有斷。',
+            '煉虛會拆散氣血與時間，你要用骨樁把每一次呼吸重新釘回身體。'
+        ]
+    },
+    {
+        id: 'world_mystic_void_river_witness',
+        name: '長河星牒守',
+        symbol: '河',
+        type: NPCType.Quest,
+        x: 90,
+        y: 84,
+        description: '守著時光長河星牒的仙宮修士，替法修把化神路標整理成煉虛章法。',
+        dialogue: [
+            '你讓縹緲仙宮的星牒穿過三界戰場（120）與隕仙深淵（121），最後落在時光長河（130），神識路標已成。',
+            '煉虛不是把術法變大，而是讓每道術式都能在虛空裡找到回聲。'
+        ]
+    }
+];
+
+export const WORLD_STORY_NPCS: NPC[] = [
+    ...TRI_REALM_BATTLEFIELD_NPCS,
+    ...FALLEN_ABYSS_NPCS,
+    ...VOID_RIVER_NPCS
+];

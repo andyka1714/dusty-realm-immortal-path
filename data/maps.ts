@@ -1,6 +1,14 @@
 import { MapData, MajorRealm, ElementType, Enemy, EnemyRank } from '../types';
 import { BESTIARY } from './enemies';
-import { VILLAGE_NPCS, SWORD_SECT_NPCS, BEAST_SECT_NPCS, MYSTIC_SECT_NPCS } from './npcs';
+import {
+    BEAST_SECT_NPCS,
+    FALLEN_ABYSS_NPCS,
+    MYSTIC_SECT_NPCS,
+    SWORD_SECT_NPCS,
+    TRI_REALM_BATTLEFIELD_NPCS,
+    VILLAGE_NPCS,
+    VOID_RIVER_NPCS
+} from './npcs';
 
 // Raw Map Data Interface
 interface RawPortal {
@@ -733,10 +741,13 @@ export const MAPS: MapData[] = RAW_MAPS_V60.map((raw, index) => {
         worldX: worldX,
         worldY: worldY,
         portals: portals,
-        npcs: id === 0 ? VILLAGE_NPCS : 
-             id === 4 ? SWORD_SECT_NPCS : 
+        npcs: id === 0 ? VILLAGE_NPCS :
+             id === 4 ? SWORD_SECT_NPCS :
              id === 13 ? BEAST_SECT_NPCS :
-             id === 23 ? MYSTIC_SECT_NPCS : [],
+             id === 23 ? MYSTIC_SECT_NPCS :
+             id === 120 ? TRI_REALM_BATTLEFIELD_NPCS :
+             id === 121 ? FALLEN_ABYSS_NPCS :
+             id === 130 ? VOID_RIVER_NPCS : [],
         bossSpawn: bossSpawn,
         enemies: enemies,
         dropRateMultiplier: 1 + (index * 0.05)
