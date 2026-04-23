@@ -71,4 +71,4 @@
 - `update-reincarnation-build-planner` 已完成，正式收口 `主動坐化`、進階 perk / heirloom planner 與第二批輪迴 build 分化
 - `update-encounter-risk-reward-depth` 已完成，正式收口 encounter selector、風險收益 cue 與 route-specific event pool 深化
 - `update-high-tier-workshop-depth` 已完成，正式收口第一批高階丹方 / 器方、route-specific 材料 sink、熟練度 state、migration 與 Workshop UI cue
-- `update-pixel-map-production-polish` 已開案，承接 pixel terrain 的 production 規格化；範圍只包含地圖背景、tile、biome、path、POI、landmark 與效能 budget，不改玩家 / 怪物 / NPC 文字 token 呈現
+- `update-pixel-map-production-polish` 已完成，正式收口 pixel terrain 的 production semantic / skeleton 規格化；範圍只包含地圖背景、tile、biome、path、POI、landmark 與效能 budget，不改玩家 / 怪物 / NPC 文字 token 呈現

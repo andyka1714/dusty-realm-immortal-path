@@ -188,6 +188,26 @@ prototype 場景分成：
 - 大型障礙可有 baked shadow
 - prototype 不做動態光影
 
+### 6.4 正式 terrain semantic 規格
+
+`update-pixel-map-production-polish` 已把正式 `AdventureStage` 的 terrain metadata 從單純 `kind` 推進成 production semantic：
+
+- 每個 terrain tile 仍保留 legacy `kind`：`base / alt / accent / water / path`
+- 每個 terrain tile 另外帶 `semanticRole`，目前正式角色包含：
+  - `ground`
+  - `variation`
+  - `landmark`
+  - `water`
+  - `path`
+  - `hazard`
+  - `portalClearing`
+  - `bossArena`
+  - `poi`
+- 每個 terrain tile 另外帶 `skeletonId`，用來追蹤 map-specific 背景骨架，例如 `east-spirit-field`、`void-time-river`、`ultimate-origin-palace`
+- `kind` 與 `semanticRole` 不必一對一；例如 `熔岩煉獄` 可以仍用 `kind: water` 畫出熔岩流，但 production semantic 必須標成 `hazard`
+- `portalClearing / bossArena / poi` 的 semantic role 優先於一般 path / water / landmark，避免傳送門、Boss 場域與 NPC 周邊被普通地板語意吞掉
+- terrain metadata 不包含 actor token、sprite id、角色文字、怪物名字或 NPC 呈現資料；角色層仍由正式 `AdventureStage` entity rendering 負責
+
 ---
 
 ## 7. VFX 與戰鬥 cue 規格
@@ -280,15 +300,17 @@ prototype 不要求：
 - `?pixel-prototype-preview=1` 已成為固定驗證入口，並可再用 `pixel-prototype-mode=desktop|mobile` 強制切到對應平台排版
 - Safari 實測已確認 `Desktop 3x` 與 `Mobile 2x` 都能顯示代表地圖、Target HUD 與 performance panel
 - 目前 representative vertical slice 的實測值可穩定落在 `BOOT 14-16ms / 400ms`，且 `FPS` 明顯高於桌機 `55` 與手機 `45` 的驗收線
+- 正式 terrain helper 已有 `semanticRole / skeletonId` regression，覆蓋 path、water、hazard、POI、portal clearing、Boss arena 與 route-specific skeleton
+- 正式 terrain metadata 已有 guard，避免把 actor token / pixel sprite 欄位混進地圖背景資料
 
 ### 10.5 仍待補的驗證
 
-- 若進入下一條 `pixel-art full rollout`，才需要補更多地圖、更多怪物密度與更長時間運行下的實機 profile
-- 目前 vertical slice 已不再缺第一輪 web / mobile / budget 驗證，而是缺是否值得擴張成正式 art direction 的決策
+- 若後續要進第二輪 pixel map production，才需要補更長時間運行下的實機 profile 與更細的 theme-specific visual QA
+- 目前 vertical slice 與第一輪正式 terrain production polish 都已成立，下一步不應回頭改 actor token，而是視需要補更多 map skeleton / tileset asset quality
 
 ### 10.6 正式整合的收斂方向
 
-若下一步要把像素風接回正式 `AdventureStage`，目前已鎖定的方向是：
+正式 `AdventureStage` 已採用以下方向：
 
 - 只像素化正式主畫面的 terrain / background layer
 - 玩家、NPC、怪物與戰鬥中的文字 avatar 維持現狀，不改成 prototype 的文字 token 牌
@@ -328,6 +350,7 @@ prototype 不要求：
 - `盤古脊 / 龍血池` 這批 `West` 元嬰 companion 地圖，也應拆出脊骨中軸與龍血池心兩種骨架，讓蠻荒祖廟前的高段體修路線仍有輪廓差異
 - `淬體潭 / 獸王谷 / 熔岩煉獄 / 蠻荒祖廟` 這批同屬 `West` 的代表地圖，也應拆出血潭、獸巢、熔岩脈與祖廟軸線幾種 landmark，讓體修主線不只剩褐色荒地噪聲
 - prototype 內的 entity token 實驗只保留在驗證入口，不直接推進到主流程
+- `update-pixel-map-production-polish` 的第一輪已把上述背景骨架收斂為可測的 `skeletonId` 與 `semanticRole`，後續若加地圖，應先補 terrain helper / test，而不是直接改 actor layer
 
 ---
 

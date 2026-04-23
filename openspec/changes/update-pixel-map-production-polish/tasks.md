@@ -9,7 +9,7 @@
 - [x] 2.3 確認 pixel terrain polish 不改玩家、怪物、NPC、portal marker、combat overlay 與 HUD 的 entity rendering
 
 ## 3. 文件、review 與驗證
-- [ ] 3.1 更新 `docs/04_UI/pixel_art_bible.md`，把 production terrain 規格與 actor-token 邊界寫回正式文件
-- [ ] 3.2 更新 `docs/06_Balance_Audit/16_下一輪執行優先級Checklist.md` 與 `17_下一階段主線整合與優先級建議.md`
-- [ ] 3.3 驗證 `npm test -- utils/adventureTerrainPixelization.test.ts`、`npm run typecheck`、`npm run build`
-- [ ] 3.4 驗證 `openspec validate update-pixel-map-production-polish --strict`
+- [x] 3.1 更新 `docs/04_UI/pixel_art_bible.md`，把 production terrain 規格與 actor-token 邊界寫回正式文件
+- [x] 3.2 更新 `docs/06_Balance_Audit/16_下一輪執行優先級Checklist.md` 與 `17_下一階段主線整合與優先級建議.md`
+- [x] 3.3 驗證 `npm test -- utils/adventureTerrainPixelization.test.ts`、`npm run typecheck`、`npm run build`
+- [x] 3.4 驗證 `openspec validate update-pixel-map-production-polish --strict`
