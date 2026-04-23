@@ -42,6 +42,59 @@ describe("adventureTerrainPixelization", () => {
     expect(new Set(first.map((tile) => tile.kind)).size).toBeGreaterThan(2);
   });
 
+  it("exposes production semantic roles and named skeletons for representative terrain", () => {
+    const portalRoute = buildAdventureTerrainTiles({
+      mapId: "20",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [
+        {
+          x: 6,
+          y: 0,
+          targetMapId: "0",
+          targetX: 0,
+          targetY: 0,
+          label: "前往 [仙緣鎮]",
+          dir: "West",
+        },
+      ],
+      npcs: [{ x: 3, y: 6 }],
+    });
+    const thunderPool = buildAdventureTerrainTiles({
+      mapId: "161",
+      theme: "Thunder",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+    });
+    const bossArena = buildAdventureTerrainTiles({
+      mapId: "22",
+      theme: "East",
+      width: 12,
+      height: 12,
+      portals: [],
+      npcs: [],
+      bossSpawn: { x: 6, y: 6 },
+    });
+
+    expect(new Set(portalRoute.map((tile) => tile.skeletonId))).toEqual(
+      new Set(["east-spirit-field"])
+    );
+    expect(portalRoute.find((tile) => tile.x === 6 && tile.y === 0)?.semanticRole).toBe(
+      "portalClearing"
+    );
+    expect(portalRoute.find((tile) => tile.x === 3 && tile.y === 6)?.semanticRole).toBe("poi");
+    expect(thunderPool.find((tile) => tile.x === 6 && tile.y === 2)?.semanticRole).toBe(
+      "hazard"
+    );
+    expect(thunderPool.find((tile) => tile.x === 6 && tile.y === 6)?.semanticRole).toBe("water");
+    expect(bossArena.find((tile) => tile.x === 6 && tile.y === 6)?.semanticRole).toBe(
+      "bossArena"
+    );
+  });
+
   it("builds structured corridors and plazas for center and sect safe maps", () => {
     const centerTown = buildAdventureTerrainTiles({
       mapId: "0",

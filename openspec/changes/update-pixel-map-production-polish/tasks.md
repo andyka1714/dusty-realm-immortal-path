@@ -1,7 +1,7 @@
 ## 1. Terrain production 規格
-- [ ] 1.1 盤點既有 `adventureTerrainPixelization` helper 與 terrain tests，整理目前已有的 biome / route coverage
-- [ ] 1.2 定義正式 biome palette、tile semantic role 與 named skeleton / landmark 規格
-- [ ] 1.3 補 representative regression，確認主要 theme 不只換 palette，也有可追蹤背景骨架
+- [x] 1.1 盤點既有 `adventureTerrainPixelization` helper 與 terrain tests，整理目前已有的 biome / route coverage
+- [x] 1.2 定義正式 biome palette、tile semantic role 與 named skeleton / landmark 規格
+- [x] 1.3 補 representative regression，確認主要 theme 不只換 palette，也有可追蹤背景骨架
 
 ## 2. 地圖可讀性 polish
 - [ ] 2.1 強化 path、water、hazard、POI、portal clearing 與 Boss arena 的 terrain 語意

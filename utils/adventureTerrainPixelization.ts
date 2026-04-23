@@ -15,6 +15,17 @@ export type AdventureTerrainDetailKind =
   | "cracks"
   | "glyph";
 
+export type AdventureTerrainSemanticRole =
+  | "ground"
+  | "variation"
+  | "landmark"
+  | "water"
+  | "path"
+  | "hazard"
+  | "portalClearing"
+  | "bossArena"
+  | "poi";
+
 export interface AdventureTerrainPalette {
   theme: string;
   backgroundColor: number;
@@ -27,6 +38,8 @@ export interface AdventureTerrainTile {
   x: number;
   y: number;
   kind: AdventureTerrainTileKind;
+  semanticRole: AdventureTerrainSemanticRole;
+  skeletonId: string;
   fillColor: number;
   detailColor: number;
   detailKind: AdventureTerrainDetailKind;
@@ -58,6 +71,11 @@ interface TerrainZone {
 
 interface ForcedTerrainZone extends TerrainZone {
   kind: AdventureTerrainTileKind;
+  semanticRole?: AdventureTerrainSemanticRole;
+}
+
+interface SemanticTerrainZone extends TerrainZone {
+  semanticRole: AdventureTerrainSemanticRole;
 }
 
 const DEFAULT_PALETTE: AdventureTerrainPaletteConfig = {
@@ -400,6 +418,79 @@ const TERRAIN_PALETTES: Record<string, AdventureTerrainPaletteConfig> = {
   },
 };
 
+const TERRAIN_SKELETON_IDS: Record<string, string> = {
+  "0": "center-origin-market",
+  "1": "north-barren-trail",
+  "2": "north-sword-pass",
+  "3": "north-mountain-foot",
+  "4": "sect-sword-axis",
+  "5": "north-sword-trial",
+  "6": "north-hidden-sword-valley",
+  "7": "north-sword-mound",
+  "10": "west-forest-road",
+  "11": "west-hunter-trail",
+  "12": "west-valley-gate",
+  "13": "sect-beast-courtyard",
+  "14": "west-body-pool",
+  "15": "west-beast-forest",
+  "16": "west-beast-valley",
+  "20": "east-spirit-field",
+  "21": "east-mist-marsh",
+  "22": "east-lake-meadow",
+  "23": "sect-mystic-lake",
+  "24": "east-trial-maze",
+  "25": "east-herb-valley",
+  "26": "east-spirit-lake",
+  "30": "north-snowline-road",
+  "31": "north-ice-canyon",
+  "32": "north-lightning-cliff",
+  "40": "west-beast-nest",
+  "41": "west-man-eater-jungle",
+  "42": "west-flame-wastes",
+  "50": "east-dark-forest",
+  "51": "east-miasma-bog",
+  "52": "east-thunder-marsh",
+  "60": "north-gale-layer",
+  "61": "north-floating-isles",
+  "62": "north-chain-bridge",
+  "70": "west-gravity-mountain",
+  "71": "west-lava-inferno",
+  "72": "west-poison-pit",
+  "80": "east-storm-sea",
+  "81": "east-immortal-island",
+  "82": "east-mirage-sea",
+  "90": "north-frozen-cave",
+  "91": "north-aurora-realm",
+  "92": "north-sword-wall",
+  "100": "west-giant-spine",
+  "101": "west-dragon-blood-pool",
+  "102": "west-ancestor-temple",
+  "110": "east-soul-sea",
+  "111": "east-ghost-domain",
+  "112": "east-void-rift",
+  "120": "center-three-realms-battlefield",
+  "121": "center-fallen-abyss",
+  "122": "center-star-bridge",
+  "130": "void-time-river",
+  "131": "void-broken-realm",
+  "132": "void-corridor",
+  "140": "spirit-sacred-city",
+  "141": "spirit-core",
+  "142": "spirit-altar",
+  "150": "sea-endless-tides",
+  "151": "sky-ascension-stair",
+  "152": "sea-lone-beacon",
+  "160": "dark-tribulation-front",
+  "161": "thunder-pool",
+  "162": "thunder-corridor",
+  "170": "immortal-ascension-hall",
+  "171": "immortal-heaven-palace",
+  "172": "immortal-celestial-prison",
+  "180": "ultimate-origin-palace",
+  "181": "ultimate-outer-ring",
+  "182": "ultimate-returning-rift",
+};
+
 const hashNoise = (seed: number, x: number, y: number, salt: number) => {
   const value = Math.sin((x + 1) * 12.9898 + (y + 1) * 78.233 + seed * 0.173 + salt * 19.19);
   return value - Math.floor(value);
@@ -431,8 +522,28 @@ const resolveForcedKind = (
   return null;
 };
 
+const resolveForcedSemanticRole = (
+  x: number,
+  y: number,
+  zones: ForcedTerrainZone[]
+): AdventureTerrainSemanticRole | null => {
+  for (const zone of zones) {
+    if (
+      zone.semanticRole &&
+      Math.abs(zone.x - x) <= zone.radius &&
+      Math.abs(zone.y - y) <= zone.radius
+    ) {
+      return zone.semanticRole;
+    }
+  }
+  return null;
+};
+
 const getPaletteConfig = (theme: string): AdventureTerrainPaletteConfig =>
   TERRAIN_PALETTES[theme] ?? DEFAULT_PALETTE;
+
+const resolveAdventureTerrainSkeletonId = (mapId: string, theme: string) =>
+  TERRAIN_SKELETON_IDS[mapId] ?? `${theme.toLowerCase()}-procedural-field`;
 
 const clampPoint = (value: number, max: number) => Math.max(0, Math.min(value, max));
 
@@ -1014,7 +1125,9 @@ const buildBossArenaZones = ({
 
   const centerX = clampPoint(bossSpawn.x, width - 1);
   const centerY = clampPoint(bossSpawn.y, height - 1);
-  const forcedZones: ForcedTerrainZone[] = [{ x: centerX, y: centerY, radius: 1, kind: "path" }];
+  const forcedZones: ForcedTerrainZone[] = [
+    { x: centerX, y: centerY, radius: 1, kind: "path", semanticRole: "bossArena" },
+  ];
 
   pushHorizontalLine(
     forcedZones,
@@ -1031,7 +1144,7 @@ const buildBossArenaZones = ({
     "accent"
   );
 
-  return forcedZones;
+  return forcedZones.map((zone) => ({ ...zone, semanticRole: "bossArena" as const }));
 };
 
 export const resolveAdventureTerrainPalette = (theme: string): AdventureTerrainPalette => {
@@ -1082,6 +1195,52 @@ const resolveTileKind = ({
   return "base";
 };
 
+const resolveSemanticRoleForTile = ({
+  x,
+  y,
+  kind,
+  theme,
+  portals,
+  npcs,
+  plazaZones,
+  semanticZones,
+  forcedZones,
+}: {
+  x: number;
+  y: number;
+  kind: AdventureTerrainTileKind;
+  theme: string;
+  portals: Portal[];
+  npcs: Pick<NPC, "x" | "y">[];
+  plazaZones: TerrainZone[];
+  semanticZones: SemanticTerrainZone[];
+  forcedZones: ForcedTerrainZone[];
+}): AdventureTerrainSemanticRole => {
+  if (isInsideZone(x, y, semanticZones)) {
+    return semanticZones.find(
+      (zone) => Math.abs(zone.x - x) <= zone.radius && Math.abs(zone.y - y) <= zone.radius
+    )!.semanticRole;
+  }
+  if (isNearPoint(x, y, portals, 1)) {
+    return "portalClearing";
+  }
+  if (isNearPoint(x, y, npcs, 1) || isInsideZone(x, y, plazaZones)) {
+    return "poi";
+  }
+
+  const forcedRole = resolveForcedSemanticRole(x, y, forcedZones);
+  if (forcedRole) {
+    return forcedRole;
+  }
+
+  if (kind === "path") return "path";
+  if (kind === "water") return "water";
+  if (kind === "accent" && (theme === "Thunder" || theme === "Dark")) return "hazard";
+  if (kind === "accent") return "landmark";
+  if (kind === "alt") return "variation";
+  return "ground";
+};
+
 export const buildAdventureTerrainTiles = ({
   mapId,
   theme,
@@ -1111,6 +1270,10 @@ export const buildAdventureTerrainTiles = ({
     width,
     height,
   });
+  const semanticZones: SemanticTerrainZone[] = bossArenaZones
+    .filter((zone) => zone.semanticRole)
+    .map((zone) => ({ x: zone.x, y: zone.y, radius: zone.radius, semanticRole: zone.semanticRole! }));
+  const skeletonId = resolveAdventureTerrainSkeletonId(mapId, theme);
 
   const tiles: AdventureTerrainTile[] = [];
 
@@ -1126,6 +1289,17 @@ export const buildAdventureTerrainTiles = ({
         forcedZones: [...bossArenaZones, ...forcedZones],
       });
       const detailNoise = hashNoise(seed, x, y, 5);
+      const semanticRole = resolveSemanticRoleForTile({
+        x,
+        y,
+        kind,
+        theme,
+        portals,
+        npcs,
+        plazaZones,
+        semanticZones,
+        forcedZones,
+      });
       const showDetail =
         kind !== "path" && detailNoise < palette.detailChance
           ? true
@@ -1134,6 +1308,8 @@ export const buildAdventureTerrainTiles = ({
         x,
         y,
         kind,
+        semanticRole,
+        skeletonId,
         fillColor: palette.fillColors[kind],
         detailColor: palette.detailColor,
         detailKind: showDetail ? palette.detailKinds[kind] : "none",
