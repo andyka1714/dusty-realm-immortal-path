@@ -1,7 +1,7 @@
 ## 1. Recipe 擴量
-- [ ] 1.1 盤點現有高階 recipe、route-specific material 與缺口
-- [ ] 1.2 補第二批中高階 / 終盤丹方與器方，至少覆蓋 `alchemy` 與 `smithing`
-- [ ] 1.3 確認新 recipe 的材料來源、route tags、品質提示與 mastery yield 都可追蹤
+- [x] 1.1 盤點現有高階 recipe、route-specific material 與缺口
+- [x] 1.2 補第二批中高階 / 終盤丹方與器方，至少覆蓋 `alchemy` 與 `smithing`
+- [x] 1.3 確認新 recipe 的材料來源、route tags、品質提示與 mastery yield 都可追蹤
 
 ## 2. 專精效果
 - [ ] 2.1 定義第一批 `alchemy / smithing` specialization effect 資料
