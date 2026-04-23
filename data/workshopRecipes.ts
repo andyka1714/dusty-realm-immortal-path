@@ -27,6 +27,43 @@ export interface WorkshopRecipe {
   }>;
 }
 
+export interface WorkshopSpecialization {
+  id: string;
+  name: string;
+  discipline: WorkshopRecipeDiscipline;
+  description: string;
+  appliesToTier?: WorkshopRecipeTier;
+  spiritStoneCostMultiplier?: number;
+  masteryYieldBonus?: number;
+}
+
+export interface WorkshopRecipeCraftingPlan {
+  spiritStoneCost: number;
+  masteryYield: number;
+  activeSpecialization: WorkshopSpecialization | null;
+}
+
+export const WORKSHOP_SPECIALIZATIONS: Record<string, WorkshopSpecialization> = {
+  alchemy_hongmeng_condenser: {
+    id: "alchemy_hongmeng_condenser",
+    name: "鴻蒙凝丹",
+    discipline: "alchemy",
+    description: "高階丹方靈石火耗降低，並額外累積丹道熟練；材料 sink 維持原配方。",
+    appliesToTier: "highRealm",
+    spiritStoneCostMultiplier: 0.9,
+    masteryYieldBonus: 6,
+  },
+  smithing_starfire_tempering: {
+    id: "smithing_starfire_tempering",
+    name: "星火鍛胚",
+    discipline: "smithing",
+    description: "高階器方靈石火耗降低，並額外累積器道熟練；路線材料不被減免。",
+    appliesToTier: "highRealm",
+    spiritStoneCostMultiplier: 0.9,
+    masteryYieldBonus: 8,
+  },
+};
+
 export const WORKSHOP_RECIPES: Record<string, WorkshopRecipe> = {
   qi_pill: {
     id: "qi_pill",
@@ -179,6 +216,42 @@ export const getWorkshopDisciplineLevel = (
   workshop: WorkshopState,
   discipline: WorkshopRecipeDiscipline
 ) => (discipline === "alchemy" ? workshop.alchemyLevel : workshop.blacksmithLevel);
+
+const getActiveWorkshopSpecialization = (
+  workshop: WorkshopState,
+  recipe: WorkshopRecipe
+) => {
+  const specializationId = workshop.specializationByDiscipline[recipe.discipline];
+  const specialization = specializationId ? WORKSHOP_SPECIALIZATIONS[specializationId] : null;
+
+  if (!specialization || specialization.discipline !== recipe.discipline) {
+    return null;
+  }
+
+  if (specialization.appliesToTier && specialization.appliesToTier !== recipe.tier) {
+    return null;
+  }
+
+  return specialization;
+};
+
+export const getWorkshopRecipeCraftingPlan = (
+  recipe: WorkshopRecipe,
+  workshop: WorkshopState
+): WorkshopRecipeCraftingPlan => {
+  const activeSpecialization = getActiveWorkshopSpecialization(workshop, recipe);
+  const spiritStoneCost = activeSpecialization?.spiritStoneCostMultiplier
+    ? Math.ceil(recipe.spiritStoneCost * activeSpecialization.spiritStoneCostMultiplier)
+    : recipe.spiritStoneCost;
+  const masteryYield =
+    (recipe.masteryYield ?? 1) + (activeSpecialization?.masteryYieldBonus ?? 0);
+
+  return {
+    spiritStoneCost,
+    masteryYield,
+    activeSpecialization,
+  };
+};
 
 export const getUnlockedWorkshopRecipes = (
   workshop: WorkshopState,

@@ -122,4 +122,65 @@ describe("workshop actions", () => {
     expect(state.workshop.masteryByDiscipline.alchemy).toBe(0);
     expect(state.logs.logs[0]?.message).toContain("境界不足");
   });
+
+  it("applies alchemy specialization to cost and mastery without bypassing route material sinks", () => {
+    const store = createTestStore({
+      character: createCharacterAtRealm(MajorRealm.Tribulation, 1000),
+      workshop: {
+        ...workshopReducer(undefined, { type: "@@INIT" }),
+        alchemyLevel: 8,
+        unlockedRecipes: ["qi_pill", "novice_sword_reforge", "immortal_ascension_elixir"],
+        specializationByDiscipline: {
+          alchemy: "alchemy_hongmeng_condenser",
+          smithing: null,
+        },
+      },
+    });
+    store.dispatch(addItem({ itemId: "beast_path_bloodbone", count: 2 }));
+    store.dispatch(addItem({ itemId: "mystic_path_starlotus", count: 1 }));
+    store.dispatch(addItem({ itemId: "spirit_herb", count: 8 }));
+
+    store.dispatch(craftWorkshopRecipe("immortal_ascension_elixir"));
+
+    const state = store.getState();
+
+    expect(state.inventory.items.find((slot) => slot.itemId === "bt_trib_immortal")?.count).toBe(1);
+    expect(state.inventory.items.find((slot) => slot.itemId === "beast_path_bloodbone")).toBeUndefined();
+    expect(state.inventory.items.find((slot) => slot.itemId === "mystic_path_starlotus")).toBeUndefined();
+    expect(state.workshop.masteryByDiscipline.alchemy).toBe(30);
+    expect(state.character.spiritStones).toBe(784);
+    expect(state.logs.logs[0]?.message).toContain("專精：鴻蒙凝丹");
+  });
+
+  it("applies smithing specialization while preserving final-route ingredient requirements", () => {
+    const store = createTestStore({
+      character: createCharacterAtRealm(MajorRealm.Immortal, 1000),
+      workshop: {
+        ...workshopReducer(undefined, { type: "@@INIT" }),
+        blacksmithLevel: 8,
+        unlockedRecipes: ["qi_pill", "novice_sword_reforge", "great_dao_body_forge"],
+        specializationByDiscipline: {
+          alchemy: null,
+          smithing: "smithing_starfire_tempering",
+        },
+      },
+    });
+    store.dispatch(addItem({ itemId: "beast_path_bloodbone", count: 3 }));
+    store.dispatch(addItem({ itemId: "sword_path_starsteel", count: 1 }));
+    store.dispatch(addItem({ itemId: "iron_ore", count: 6 }));
+
+    store.dispatch(craftWorkshopRecipe("great_dao_body_forge"));
+
+    const state = store.getState();
+    const armorSlot = state.inventory.items.find(
+      (slot) => slot.itemId === "great_dao_body" && slot.instanceId
+    );
+
+    expect(armorSlot?.instance?.templateId).toBe("great_dao_body");
+    expect(state.inventory.items.find((slot) => slot.itemId === "beast_path_bloodbone")).toBeUndefined();
+    expect(state.inventory.items.find((slot) => slot.itemId === "sword_path_starsteel")).toBeUndefined();
+    expect(state.workshop.masteryByDiscipline.smithing).toBe(38);
+    expect(state.character.spiritStones).toBe(730);
+    expect(state.logs.logs[0]?.message).toContain("專精：星火鍛胚");
+  });
 });

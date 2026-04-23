@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 import { MajorRealm } from "../types";
 import { ITEMS } from "./items";
 import { MATERIAL_ITEMS } from "./items/materials";
-import { WORKSHOP_RECIPES } from "./workshopRecipes";
+import {
+  WORKSHOP_RECIPES,
+  WORKSHOP_SPECIALIZATIONS,
+  getWorkshopRecipeCraftingPlan,
+} from "./workshopRecipes";
 
 const HIGH_TIER_RECIPE_CASES = [
   {
@@ -120,6 +124,50 @@ describe("workshop recipe data", () => {
           `${recipe.id} should consume at least one route-specific material`
         ).toBe(true);
       });
+  });
+
+  it("publishes first-pass alchemy and smithing specialization effects as data", () => {
+    expect(WORKSHOP_SPECIALIZATIONS.alchemy_hongmeng_condenser).toMatchObject({
+      discipline: "alchemy",
+      appliesToTier: "highRealm",
+      spiritStoneCostMultiplier: 0.9,
+      masteryYieldBonus: 6,
+    });
+    expect(WORKSHOP_SPECIALIZATIONS.smithing_starfire_tempering).toMatchObject({
+      discipline: "smithing",
+      appliesToTier: "highRealm",
+      spiritStoneCostMultiplier: 0.9,
+      masteryYieldBonus: 8,
+    });
+    expect(WORKSHOP_SPECIALIZATIONS.alchemy_hongmeng_condenser.description).toContain("材料 sink");
+    expect(WORKSHOP_SPECIALIZATIONS.smithing_starfire_tempering.description).toContain("路線材料不被減免");
+  });
+
+  it("calculates specialization craft plan without mutating ingredient requirements", () => {
+    const recipe = WORKSHOP_RECIPES.immortal_ascension_elixir;
+    const plan = getWorkshopRecipeCraftingPlan(recipe, {
+      alchemyLevel: 8,
+      blacksmithLevel: 8,
+      unlockedRecipes: [recipe.id],
+      craftedRecipeCounts: {},
+      masteryByDiscipline: {
+        alchemy: 0,
+        smithing: 0,
+      },
+      specializationByDiscipline: {
+        alchemy: "alchemy_hongmeng_condenser",
+        smithing: null,
+      },
+    });
+
+    expect(plan.spiritStoneCost).toBe(216);
+    expect(plan.masteryYield).toBe(30);
+    expect(plan.activeSpecialization?.name).toBe("鴻蒙凝丹");
+    expect(recipe.ingredients).toEqual([
+      { itemId: "beast_path_bloodbone", count: 2 },
+      { itemId: "mystic_path_starlotus", count: 1 },
+      { itemId: "spirit_herb", count: 8 },
+    ]);
   });
 
   it("does not lose the low-tier starter recipe shape", () => {

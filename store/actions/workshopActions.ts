@@ -1,6 +1,10 @@
 import { Action, ThunkAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
-import { WORKSHOP_RECIPES, getWorkshopDisciplineLevel } from "../../data/workshopRecipes";
+import {
+  WORKSHOP_RECIPES,
+  getWorkshopDisciplineLevel,
+  getWorkshopRecipeCraftingPlan,
+} from "../../data/workshopRecipes";
 import { deductSpiritStones } from "../slices/characterSlice";
 import { addItem, removeItem } from "../slices/inventorySlice";
 import { addLog } from "../slices/logSlice";
@@ -51,7 +55,9 @@ export const craftWorkshopRecipe = (
       return;
     }
 
-    if (state.character.spiritStones < recipe.spiritStoneCost) {
+    const craftingPlan = getWorkshopRecipeCraftingPlan(recipe, state.workshop);
+
+    if (state.character.spiritStones < craftingPlan.spiritStoneCost) {
       dispatch(addLog({ message: `靈石不足，無法完成【${recipe.name}】。`, type: "danger" }));
       return;
     }
@@ -68,7 +74,7 @@ export const craftWorkshopRecipe = (
       return;
     }
 
-    dispatch(deductSpiritStones(recipe.spiritStoneCost));
+    dispatch(deductSpiritStones(craftingPlan.spiritStoneCost));
     recipe.ingredients.forEach((ingredient) => {
       dispatch(removeItem({ itemId: ingredient.itemId, count: ingredient.count }));
     });
@@ -85,12 +91,15 @@ export const craftWorkshopRecipe = (
       recordRecipeCrafted({
         recipeId,
         discipline: recipe.discipline,
-        masteryYield: recipe.masteryYield ?? 1,
+        masteryYield: craftingPlan.masteryYield,
       })
     );
+    const specializationCue = craftingPlan.activeSpecialization
+      ? `，專精：${craftingPlan.activeSpecialization.name}`
+      : "";
     dispatch(
       addLog({
-        message: `百業運轉成功，已完成【${recipe.name}】，${recipe.discipline === "alchemy" ? "丹道" : "器道"}熟練 +${recipe.masteryYield ?? 1}。`,
+        message: `百業運轉成功，已完成【${recipe.name}】，${recipe.discipline === "alchemy" ? "丹道" : "器道"}熟練 +${craftingPlan.masteryYield}${specializationCue}。`,
         type: "success",
       })
     );
