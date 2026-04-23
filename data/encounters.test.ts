@@ -9,6 +9,7 @@ const LATE_SECT_MILESTONE_CASES = [
     completedQuestId: "sect_sword_task_04",
     routeLabel: "凌霄劍宗",
     cueLabels: ["凌霄劍宗前哨殘核", "凌霄劍宗鋒勢"],
+    rewardItemId: "sword_path_starsteel",
   },
   {
     eventId: "beast_sect_huashen_bastion",
@@ -16,6 +17,7 @@ const LATE_SECT_MILESTONE_CASES = [
     completedQuestId: "sect_beast_task_04",
     routeLabel: "萬獸山莊",
     cueLabels: ["萬獸山莊血骨殘材", "萬獸山莊高壓鍛體"],
+    rewardItemId: "beast_path_bloodbone",
   },
   {
     eventId: "mystic_sect_huashen_bastion",
@@ -23,6 +25,7 @@ const LATE_SECT_MILESTONE_CASES = [
     completedQuestId: "sect_mystic_task_04",
     routeLabel: "縹緲仙宮",
     cueLabels: ["縹緲仙宮星砂秘材", "縹緲仙宮星圖"],
+    rewardItemId: "mystic_path_starlotus",
   },
 ] as const;
 
@@ -102,6 +105,17 @@ describe("encounter selector", () => {
       testCase.cueLabels.forEach((cueLabel) => {
         expect(cueLabels).toContain(cueLabel);
       });
+    });
+  });
+
+  it("feeds late sect milestone materials into high-tier workshop sinks", () => {
+    LATE_SECT_MILESTONE_CASES.forEach((testCase) => {
+      const event = ENCOUNTER_EVENTS[testCase.eventId];
+      const rewardItemIds = event.choices.flatMap((choice) =>
+        choice.reward.items?.map((item) => item.itemId) ?? []
+      );
+
+      expect(rewardItemIds).toContain(testCase.rewardItemId);
     });
   });
 

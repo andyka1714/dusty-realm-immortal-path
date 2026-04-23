@@ -495,8 +495,8 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
           ],
         },
         reward: {
-          items: [{ itemId: "iron_ore", count: 2 }],
-          logMessage: "你從凌霄劍宗的化神前哨取下殘核與礦材，讓三界戰場前的劍宗承接更扎實。",
+          items: [{ itemId: "sword_path_starsteel", count: 2 }],
+          logMessage: "你從凌霄劍宗的化神前哨取下劍心星鋼，讓三界戰場前的劍宗鍛材承接更扎實。",
         },
       },
       {
@@ -544,8 +544,8 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
           ],
         },
         reward: {
-          items: [{ itemId: "wolf_fang", count: 2 }],
-          logMessage: "你從萬獸山莊的化神前哨帶走獸骨與血髓，讓體修前往三界戰場時不再空手。",
+          items: [{ itemId: "beast_path_bloodbone", count: 2 }],
+          logMessage: "你從萬獸山莊的化神前哨帶走血骨殘材，讓體修前往三界戰場時不再空手。",
         },
       },
       {
@@ -593,8 +593,8 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
           ],
         },
         reward: {
-          items: [{ itemId: "spirit_herb", count: 2 }],
-          logMessage: "你從縹緲仙宮的化神前哨收下星砂與靈草，替法修接上三界戰場的節奏。",
+          items: [{ itemId: "mystic_path_starlotus", count: 2 }],
+          logMessage: "你從縹緲仙宮的化神前哨收下星魂靈蓮，替法修接上三界戰場的節奏。",
         },
       },
       {

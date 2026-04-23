@@ -1,4 +1,4 @@
-import { Item, ItemCategory, ItemQuality, MaterialType } from '../../types';
+import { Item, ItemCategory, ItemQuality, MaterialType, MajorRealm } from '../../types';
 
 export const MATERIAL_ITEMS: Record<string, Item> = {
   // --- Materials ---
@@ -17,5 +17,38 @@ export const MATERIAL_ITEMS: Record<string, Item> = {
   'spirit_herb': { 
     id: 'spirit_herb', name: '聚靈草', category: ItemCategory.Material, subType: MaterialType.Herb,
     description: '煉製聚氣丹的主材。', price: 8, quality: ItemQuality.Low, maxStack: 999 
+  },
+  'sword_path_starsteel': {
+    id: 'sword_path_starsteel',
+    name: '凌霄劍星鋼',
+    category: ItemCategory.Material,
+    subType: MaterialType.Ore,
+    description: '凌霄劍宗前哨殘核熔出的劍心星鋼。',
+    price: 25000,
+    quality: ItemQuality.Immortal,
+    maxStack: 999,
+    minRealm: MajorRealm.SpiritSevering,
+  },
+  'mystic_path_starlotus': {
+    id: 'mystic_path_starlotus',
+    name: '縹緲星魂蓮',
+    category: ItemCategory.Material,
+    subType: MaterialType.Herb,
+    description: '縹緲仙宮星砂秘材孕出的凝神靈蓮。',
+    price: 24000,
+    quality: ItemQuality.Immortal,
+    maxStack: 999,
+    minRealm: MajorRealm.SpiritSevering,
+  },
+  'beast_path_bloodbone': {
+    id: 'beast_path_bloodbone',
+    name: '萬獸血骨殘材',
+    category: ItemCategory.Material,
+    subType: MaterialType.MonsterPart,
+    description: '萬獸山莊高壓鍛體後剝離的血骨殘材。',
+    price: 22000,
+    quality: ItemQuality.Immortal,
+    maxStack: 999,
+    minRealm: MajorRealm.SpiritSevering,
   },
 };

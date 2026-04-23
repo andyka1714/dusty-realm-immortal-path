@@ -1,7 +1,7 @@
 ## 1. 高階 recipe 與材料 sink
-- [ ] 1.1 盤點目前 `WORKSHOP_RECIPES`、高境界 consumables / equipment 與 route-specific material source 缺口
-- [ ] 1.2 擴充 `WorkshopRecipe` metadata，補 recipe tier、境界需求、route tags、品質提示與 mastery yield
-- [ ] 1.3 補第一批 `化神 -> 仙帝` 代表性高階丹方 / 器方與對應材料 sink
+- [x] 1.1 盤點目前 `WORKSHOP_RECIPES`、高境界 consumables / equipment 與 route-specific material source 缺口
+- [x] 1.2 擴充 `WorkshopRecipe` metadata，補 recipe tier、境界需求、route tags、品質提示與 mastery yield
+- [x] 1.3 補第一批 `化神 -> 仙帝` 代表性高階丹方 / 器方與對應材料 sink
 
 ## 2. 專精、品質與 persistence
 - [ ] 2.1 擴充 `WorkshopState`，補 `masteryByDiscipline` 與 `specializationByDiscipline`
