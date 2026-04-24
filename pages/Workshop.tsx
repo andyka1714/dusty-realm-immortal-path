@@ -26,6 +26,7 @@ import { getEncounterMaterialSourceCues } from '../data/encounters';
 import { ITEMS } from '../data/items';
 import { craftWorkshopRecipe, selectWorkshopSpecialization } from '../store/actions/workshopActions';
 import { MajorRealmCN, type WorkshopDiscipline } from '../types';
+import { Button } from '../components/ui/button';
 
 interface WorkshopProps {
   embedded?: boolean;
@@ -143,7 +144,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
               熟練里程碑：{reachedMilestoneCount}/{milestoneStatuses.length}
             </div>
           </div>
-          <button
+          <Button
             onClick={() =>
               dispatch(
                 selectWorkshopSpecialization({
@@ -153,10 +154,12 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
               )
             }
             disabled={!canReset}
-            className="rounded-lg border border-cyan-800/60 bg-stone-950 px-2 py-1 text-[11px] text-cyan-100 transition hover:border-cyan-500 disabled:cursor-not-allowed disabled:opacity-50"
+            variant="selection"
+            size="sm"
+            className="h-auto border-cyan-800/60 bg-stone-950 px-2 py-1 text-[11px] text-cyan-100 hover:border-cyan-500"
           >
             重置 {resetCost} 靈石
-          </button>
+          </Button>
         </div>
         <div className="mt-2 grid gap-1 rounded-lg border border-cyan-900/50 bg-stone-950/50 p-2 text-[11px] text-stone-400">
           {milestoneStatuses.map((status) => (
@@ -182,7 +185,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
             const effectRows = getSpecializationEffectRows(node);
 
             return (
-              <button
+              <Button
                 key={node.id}
                 onClick={() =>
                   dispatch(
@@ -193,8 +196,9 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
                   )
                 }
                 disabled={status.isActive || !status.isAvailable}
+                variant="selection"
                 className={clsx(
-                  "rounded-lg border px-3 py-2 text-left text-xs transition",
+                  "h-auto w-full flex-col items-start justify-start rounded-lg px-3 py-2 text-left text-xs transition",
                   status.isActive
                     ? "border-cyan-400/60 bg-cyan-900/35 text-cyan-100"
                     : "border-stone-800 bg-stone-950/70 text-stone-400 hover:border-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
@@ -247,7 +251,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
                     <div className="text-rose-300">分支衝突：{status.conflictReason}</div>
                   )}
                 </div>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -383,13 +387,14 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
               {lockReason && <div className="text-rose-300">鎖定原因：{lockReason}</div>}
             </div>
           </div>
-          <button
+          <Button
             onClick={() => dispatch(craftWorkshopRecipe(recipe.id))}
             disabled={Boolean(lockReason)}
-            className="rounded-lg border border-stone-700 bg-stone-900 px-3 py-2 text-sm text-stone-200 transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50"
+            variant={lockReason ? "stone" : "amber"}
+            className="self-start"
           >
             {actionLabel}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -421,7 +426,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
             </div>
 
             <p className="text-sm text-stone-500 mb-6">匯聚天地靈氣，提升修煉速度。</p>
-            
+
             <div className="flex justify-between items-end mb-4">
                <div>
                   <div className="text-stone-400 text-xs uppercase">目前等級</div>
@@ -434,15 +439,16 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
             </div>
 
             <div className="relative group/btn w-full">
-                <button 
+                <Button
                    onClick={handleUpgradeGathering}
                    disabled={!canAfford}
-                   className="w-full bg-stone-800 hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed text-stone-200 py-3 rounded-lg border border-stone-700 transition-all flex items-center justify-center gap-2"
+                   className="w-full"
+                   variant={canAfford ? "primary" : "stone"}
                 >
                    <ArrowUpCircle size={16} className={canAfford ? "text-amber-500" : "text-stone-600"} />
                    <span>升級</span>
-                </button>
-                
+                </Button>
+
                 {/* Tooltip */}
                 <GameHintBubble eyebrow="CRAFT FLOW" className="bottom-full left-1/2 mb-2 -translate-x-1/2 group-hover/btn:opacity-100">
                    <div className={canAfford ? "text-emerald-400" : "text-red-400"}>
@@ -465,7 +471,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
                 {alchemyRecipes.map((recipe) => renderRecipeCard(recipe, "煉製", "爐火消耗"))}
              </div>
          </GameSection>
-         
+
          <GameSection
              eyebrow="FORGE ALTAR"
              title={`煉器台 · Lv.${workshop.blacksmithLevel}`}

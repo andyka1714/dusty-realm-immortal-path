@@ -6,6 +6,8 @@ import { Gender, SpiritRootId, BaseAttributes } from '../types';
 import { SPIRIT_ROOT_DETAILS, DAYS_PER_YEAR } from '../constants';
 import clsx from 'clsx';
 import { Sparkles, ArrowRight, Activity, Sword, Dna } from 'lucide-react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
 
 const PROLOGUE_TEXT = [
     "大荒曆一〇二六年，春。",
@@ -19,19 +21,19 @@ const PROLOGUE_DELAY = 1500; // ms between lines
 
 export const IntroSequence: React.FC = () => {
     const dispatch = useDispatch();
-    
+
     // Stages: 0:Prologue, 1:Identity, 2:Awakening(Stone), 3:Destiny(Result)
     const [stage, setStage] = useState(0);
     const [visibleLines, setVisibleLines] = useState<number>(0);
-    
+
     // Identity State
     const [name, setName] = useState('');
     const [gender, setGender] = useState<Gender>(Gender.Male);
-    
+
     // Awakening State
     const [isShaking, setIsShaking] = useState(false);
     const [showFlash, setShowFlash] = useState(false);
-    
+
     // Destiny State (Pre-generated results)
     const [generatedStats, setGeneratedStats] = useState<{
         spiritRootId: SpiritRootId;
@@ -66,13 +68,13 @@ export const IntroSequence: React.FC = () => {
 
     const handleStoneClick = () => {
         if (isShaking) return;
-        
+
         // Generate stats immediately on click so we can match the effect color
         const attributes = generateInitialStats();
         const spiritRootId = generateSpiritRoot();
         const lifespan = calculateInitialLifespan(attributes.physique);
         setGeneratedStats({ attributes, spiritRootId, lifespan });
-        
+
         setIsShaking(true);
 
         // Sequence: Shake -> Flash -> Result
@@ -88,7 +90,7 @@ export const IntroSequence: React.FC = () => {
 
     const handleEmbark = () => {
         if (!generatedStats) return;
-        
+
         dispatch(clearLogs());
         dispatch(initializeCharacter({
             name,
@@ -97,9 +99,9 @@ export const IntroSequence: React.FC = () => {
             attributes: generatedStats.attributes,
             lifespan: generatedStats.lifespan
         }));
-        
+
         const rootData = SPIRIT_ROOT_DETAILS[generatedStats.spiritRootId];
-        
+
         // Add initial flavor logs
         dispatch(addLog({ message: `大荒曆一〇二六年，${name} 通過青雲宗試煉，正式踏入仙途。`, type: 'info' }));
         dispatch(addLog({ message: `經檢測，你身具【${rootData.name}】。${rootData.destiny}：${rootData.description}`, type: 'gain' }));
@@ -120,49 +122,57 @@ export const IntroSequence: React.FC = () => {
             <div className="text-stone-400 space-y-2 mb-8">
                  <p className="fade-in-text">{PROLOGUE_TEXT[PROLOGUE_TEXT.length - 1]}</p>
             </div>
-            
+
             <div className="bg-stone-900/50 p-6 rounded-xl border border-stone-800 space-y-6">
-                <input 
-                    type="text" 
+                <Input
+                    type="text"
                     placeholder="請道友留下名諱"
-                    className="w-full bg-stone-950 border-b border-stone-700 p-3 text-center text-xl text-stone-100 placeholder-stone-600 focus:border-amber-500 outline-none transition-colors"
+                    className="border-b border-stone-700 bg-stone-950 text-center text-xl"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     autoFocus
+                    data-testid="intro-name-input"
                 />
-                
+
                 <div className="flex justify-center gap-4">
-                     <button 
+                     <Button
                         onClick={() => setGender(Gender.Male)}
                         className={clsx(
-                            "px-6 py-2 rounded-full border transition-all font-serif",
-                            gender === Gender.Male 
-                                ? "bg-stone-800 border-blue-500 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.2)]" 
+                            "rounded-full px-6 py-2 font-serif",
+                            gender === Gender.Male
+                                ? "bg-stone-800 border-blue-500 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.2)]"
                                 : "border-stone-700 text-stone-600 hover:border-stone-500"
                         )}
+                        variant="selection"
+                        size="sm"
+                        data-testid="intro-gender-male"
                      >
                         男兒身
-                     </button>
-                     <button 
+                     </Button>
+                     <Button
                         onClick={() => setGender(Gender.Female)}
                         className={clsx(
-                            "px-6 py-2 rounded-full border transition-all font-serif",
-                            gender === Gender.Female 
-                                ? "bg-stone-800 border-pink-500 text-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.2)]" 
+                            "rounded-full px-6 py-2 font-serif",
+                            gender === Gender.Female
+                                ? "bg-stone-800 border-pink-500 text-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.2)]"
                                 : "border-stone-700 text-stone-600 hover:border-stone-500"
                         )}
+                        variant="selection"
+                        size="sm"
+                        data-testid="intro-gender-female"
                      >
                         女兒身
-                     </button>
+                     </Button>
                 </div>
 
-                <button 
+                <Button
                     onClick={handleIdentitySubmit}
                     disabled={!name.trim()}
-                    className="w-full mt-4 bg-amber-900/50 hover:bg-amber-800/50 text-amber-200 py-3 rounded border border-amber-800 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="mt-4 w-full"
+                    variant="primary"
                 >
                     確認
-                </button>
+                </Button>
             </div>
         </div>
     );
@@ -176,13 +186,13 @@ export const IntroSequence: React.FC = () => {
         if (isShaking && generatedStats) {
             const rootData = SPIRIT_ROOT_DETAILS[generatedStats.spiritRootId];
             // During shake, use the target color but intense blur
-            glowStyle = `w-64 h-64 blur-xl ${rootData.glowClass.split(' ')[1]}/30`; 
+            glowStyle = `w-64 h-64 blur-xl ${rootData.glowClass.split(' ')[1]}/30`;
         }
 
         return (
             <div className="flex flex-col items-center justify-center space-y-12 animate-fade-in h-[60vh]">
                 <p className="text-stone-300 text-lg">仙人微微點頭：『{name}... 很好。過來，將手放在這塊感靈石上。』</p>
-                
+
                 <div className="relative cursor-pointer group" onClick={handleStoneClick}>
                     {/* Glow Effect */}
                     <div className={clsx(
@@ -218,9 +228,9 @@ export const IntroSequence: React.FC = () => {
 
     const renderDestiny = () => {
         if (!generatedStats) return null;
-        
+
         const rootData = SPIRIT_ROOT_DETAILS[generatedStats.spiritRootId];
-        
+
         return (
             <div className="animate-fade-in max-w-2xl mx-auto w-full py-6 md:py-10">
                 <div className="bg-stone-900 border border-stone-800 rounded-xl p-5 md:p-8 relative shadow-2xl space-y-6">
@@ -229,11 +239,11 @@ export const IntroSequence: React.FC = () => {
                         <div className="flex items-center justify-center gap-2 text-stone-500 text-xs md:text-sm uppercase tracking-widest">
                            <Sparkles size={14} /> 天命覺醒 <Sparkles size={14} />
                         </div>
-                        
+
                         <h2 className={clsx("text-3xl md:text-4xl font-bold tracking-wider leading-relaxed", rootData.colorClass)}>
                             {rootData.name}
                         </h2>
-                        
+
                         {/* Dynamic Dialogue - Prominent */}
                         <div className="relative inline-block mt-4 max-w-lg mx-auto">
                            <p className="text-base md:text-lg font-normal text-stone-300 italic leading-relaxed relative z-10 px-4 md:px-6">
@@ -256,17 +266,17 @@ export const IntroSequence: React.FC = () => {
                         <div className="space-y-4">
                             <h4 className="text-stone-500 text-xs font-bold uppercase tracking-widest mb-2 border-b border-stone-800 pb-1">先天屬性</h4>
                             <div className="grid grid-cols-2 gap-3 text-sm">
-                                <StatBox label="體魄" value={generatedStats.attributes.physique} 
+                                <StatBox label="體魄" value={generatedStats.attributes.physique}
                                 bonus={rootData.bonuses.initialStats?.physique} />
-                                <StatBox label="根骨" value={generatedStats.attributes.rootBone} 
+                                <StatBox label="根骨" value={generatedStats.attributes.rootBone}
                                 bonus={rootData.bonuses.initialStats?.rootBone}/>
-                                <StatBox label="神識" value={generatedStats.attributes.insight} 
+                                <StatBox label="神識" value={generatedStats.attributes.insight}
                                 bonus={rootData.bonuses.initialStats?.insight}/>
-                                <StatBox label="悟性" value={generatedStats.attributes.comprehension} 
+                                <StatBox label="悟性" value={generatedStats.attributes.comprehension}
                                 bonus={rootData.bonuses.initialStats?.comprehension}/>
-                                <StatBox label="福緣" value={generatedStats.attributes.fortune} 
+                                <StatBox label="福緣" value={generatedStats.attributes.fortune}
                                 bonus={rootData.bonuses.initialStats?.fortune}/>
-                                <StatBox label="魅力" value={generatedStats.attributes.charm} 
+                                <StatBox label="魅力" value={generatedStats.attributes.charm}
                                 bonus={rootData.bonuses.initialStats?.charm}/>
                             </div>
                             <div className="text-center bg-stone-950 p-2 rounded border border-stone-800 text-stone-400 text-xs font-mono mt-2">
@@ -278,7 +288,7 @@ export const IntroSequence: React.FC = () => {
                         {/* Right: Visual Chart & Tags */}
                         <div className="space-y-4 flex flex-col">
                             <h4 className="text-stone-500 text-xs font-bold uppercase tracking-widest mb-2 border-b border-stone-800 pb-1">資質潛力</h4>
-                            
+
                             {/* Bar Chart */}
                             <div className="space-y-4 flex-1">
                                 <BarChartRow label="修煉效率" value={rootData.weights.cultivation} color="bg-amber-500" icon={Dna} />
@@ -290,7 +300,7 @@ export const IntroSequence: React.FC = () => {
                             <div className="flex flex-wrap gap-2 mt-4 content-end">
                                 {rootData.tags.map((tag, i) => (
                                     <span key={i} className={clsx(
-                                        "px-2 py-1 rounded text-xs border font-bold", 
+                                        "px-2 py-1 rounded text-xs border font-bold",
                                         rootData.colorClass.replace('text-', 'bg-').replace('500', '900/30'), // bg-color-900/30
                                         rootData.colorClass.replace('text-', 'border-').replace('500', '800'), // border-color-800
                                         rootData.colorClass
@@ -304,8 +314,9 @@ export const IntroSequence: React.FC = () => {
 
                     {/* Final Button - Epic Style */}
                     <div className="pt-4">
-                        <button 
+                        <Button
                             onClick={handleEmbark}
+                            variant="selection"
                             className={clsx(
                                 "w-full py-5 relative group overflow-hidden rounded border transition-transform active:scale-[0.98]",
                                 // Background base
@@ -315,23 +326,24 @@ export const IntroSequence: React.FC = () => {
                                 // Flex layout
                                 "flex items-center justify-center gap-4"
                             )}
+                            data-testid="intro-embark"
                         >
                             {/* Animated Background Gradient */}
                             <div className="absolute inset-0 bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 opacity-80 animate-bg-slide z-0"></div>
-                            
+
                             {/* Hover Glow (Element Color) */}
                             <div className={clsx(
-                                "absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500", 
+                                "absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500",
                                 rootData.glowClass.split(' ')[1] // Gets the bg-color-500 part roughly
                             )}></div>
-                            
+
                             {/* Pulse Ring Effect */}
                             <div className="absolute inset-0 border-2 border-white/10 rounded group-hover:border-white/30 transition-colors z-10"></div>
-                            
+
                             {/* Content */}
                             <span className="relative z-20 group-hover:text-white transition-colors drop-shadow-md">逆天而行，開啟仙途</span>
                             <ArrowRight className="relative z-20 group-hover:translate-x-2 transition-transform duration-300" size={24} />
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>

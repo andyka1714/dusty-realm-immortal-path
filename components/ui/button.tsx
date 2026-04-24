@@ -9,12 +9,22 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        primary:
+          "border-amber-500/45 bg-amber-500/18 text-amber-50 shadow-[0_0_0_1px_rgba(245,158,11,0.08)] hover:bg-amber-500/28",
         amber:
           "border-amber-500/40 bg-amber-500/15 text-amber-100 hover:bg-amber-500/25",
         emerald:
           "border-emerald-500/40 bg-emerald-500/15 text-emerald-100 hover:bg-emerald-500/25",
         stone:
           "border-stone-800 bg-stone-900 text-stone-200 hover:bg-stone-800/85",
+        danger:
+          "border-red-500/35 bg-red-500/12 text-red-100 hover:bg-red-500/22",
+        outline:
+          "border-stone-700 bg-transparent text-stone-200 hover:border-amber-600/50 hover:text-amber-100",
+        tab:
+          "border-transparent bg-transparent text-stone-400 hover:bg-stone-900/70 hover:text-stone-100 data-[state=active]:border-amber-600/60 data-[state=active]:bg-amber-500/15 data-[state=active]:text-amber-100",
+        selection:
+          "border-stone-700 bg-stone-950/80 text-stone-200 hover:border-amber-500/40 hover:bg-stone-900",
         ghost:
           "border-transparent bg-transparent text-stone-300 hover:bg-stone-900/60",
       },

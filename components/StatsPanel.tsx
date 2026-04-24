@@ -8,6 +8,7 @@ import { calculatePlayerStats } from '../utils/battleSystem';
 import clsx from 'clsx';
 import { GameTooltip } from './game/GameTooltip';
 import { GameSection } from './game/GameSection';
+import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 
 interface StatsPanelProps {
   embedded?: boolean;
@@ -82,30 +83,12 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
           </span>
         </div>
         
-        <div className="flex gap-1">
-          <button 
-            onClick={() => setActiveTab('basic')}
-            className={clsx(
-              "flex-1 py-2 text-xs md:text-sm font-bold uppercase tracking-wider transition-colors border-b-2",
-              activeTab === 'basic' 
-                ? "text-amber-500 border-amber-500 bg-stone-800/50" 
-                : "text-stone-500 border-transparent hover:text-stone-300 hover:bg-stone-800/30"
-            )}
-          >
-            基礎屬性
-          </button>
-          <button 
-            onClick={() => setActiveTab('combat')}
-            className={clsx(
-              "flex-1 py-2 text-xs md:text-sm font-bold uppercase tracking-wider transition-colors border-b-2",
-              activeTab === 'combat' 
-                ? "text-amber-500 border-amber-500 bg-stone-800/50" 
-                : "text-stone-500 border-transparent hover:text-stone-300 hover:bg-stone-800/30"
-            )}
-          >
-            戰鬥屬性
-          </button>
-        </div>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'basic' | 'combat')}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="basic">基礎屬性</TabsTrigger>
+            <TabsTrigger value="combat">戰鬥屬性</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
       
       {/* Scrollable Content Area */}

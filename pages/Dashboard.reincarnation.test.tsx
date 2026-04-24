@@ -122,5 +122,9 @@ describe("Dashboard reincarnation flow", () => {
     const markup = createAliveDashboardMarkup();
 
     expect(markup).toContain("主動坐化");
+    expect(markup).toContain('data-testid="dashboard-manual-cultivate"');
+    expect(markup).toContain('data-testid="dashboard-start-seclusion"');
+    expect(markup).toContain('data-testid="dashboard-breakthrough"');
+    expect(markup).toContain('data-testid="dashboard-voluntary-reincarnation"');
   });
 });

@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
-import { X } from 'lucide-react';
-import clsx from 'clsx';
+import React from 'react';
 import { GameTitleStack } from './game/GameTitleStack';
 import { GameOrnamentFrame } from './game/GameOrnamentFrame';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog';
+import { Button } from './ui/button';
 
 interface ModalProps {
   isOpen: boolean;
@@ -26,37 +30,35 @@ export const Modal: React.FC<ModalProps> = ({
   actions, 
   size = 'default' 
 }) => {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
-  }, []);
-
-  if (!isOpen || !mounted) return null;
+  if (!isOpen) return null;
 
   // Determine container classes based on size
   const containerClasses = size === 'large'
-    ? "relative w-full h-full md:w-[90vw] md:h-[90vh] md:max-w-[1400px] border-0 md:border md:border-amber-700/20 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.08),transparent_22%),linear-gradient(180deg,rgba(42,31,10,0.9)_0%,rgba(12,12,12,0.94)_18%,rgba(8,8,8,0.98)_100%)] shadow-[0_30px_100px_rgba(0,0,0,0.72)] flex flex-col md:rounded-[28px]"
+    ? "!left-0 !top-0 !h-full !w-full !max-w-none !translate-x-0 !translate-y-0 rounded-none border-0 p-0 md:!left-1/2 md:!top-1/2 md:!h-[90vh] md:!w-[90vw] md:!max-w-[1400px] md:!-translate-x-1/2 md:!-translate-y-1/2 md:rounded-[28px] md:border md:border-amber-700/20"
     : size === 'medium'
-      ? "relative w-full max-w-4xl max-h-[calc(100vh-105px)] md:max-h-[90vh] border border-amber-700/20 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.08),transparent_22%),linear-gradient(180deg,rgba(42,31,10,0.9)_0%,rgba(12,12,12,0.94)_20%,rgba(8,8,8,0.98)_100%)] shadow-[0_30px_100px_rgba(0,0,0,0.72)] flex flex-col rounded-[24px]"
-      : "relative max-w-lg w-full max-h-[calc(100vh-105px)] md:max-h-[90vh] border border-amber-700/20 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.08),transparent_22%),linear-gradient(180deg,rgba(42,31,10,0.9)_0%,rgba(12,12,12,0.94)_20%,rgba(8,8,8,0.98)_100%)] shadow-[0_30px_100px_rgba(0,0,0,0.72)] flex flex-col rounded-[24px]";
+      ? "max-h-[calc(100vh-105px)] sm:max-h-[90vh] sm:max-w-4xl"
+      : "max-h-[calc(100vh-105px)] sm:max-h-[90vh] sm:max-w-lg";
 
-  // Wrapper padding: Remove padding on mobile for large modals to ensure full screen
-  const wrapperClasses = size === 'large'
-    ? "fixed inset-0 z-[5000] flex items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
-    : "fixed inset-0 z-[5000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in";
-
-  const modalContent = (
-    <div className={wrapperClasses}>
-      <div className={containerClasses}>
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) onClose();
+    }}>
+      <DialogContent
+        hideClose
+        aria-describedby={undefined}
+        onPointerDownOutside={(event) => event.preventDefault()}
+        onInteractOutside={(event) => event.preventDefault()}
+        className={`flex flex-col gap-0 overflow-hidden ${containerClasses}`}
+        data-testid="game-modal"
+      >
+        <DialogTitle className="sr-only">{title}</DialogTitle>
         <GameOrnamentFrame
           className={size === 'large' ? "md:rounded-[inherit]" : "rounded-[inherit]"}
           insetClassName={size === 'large' ? "md:rounded-[22px]" : "rounded-[18px]"}
         />
 
         {/* Header */}
-        <div className="relative z-10 flex items-center justify-between border-b border-stone-800/90 p-4 flex-none">
+        <DialogHeader className="relative z-10 flex-row items-center justify-between space-y-0 border-b border-stone-800/90 p-4 text-left">
           <GameTitleStack
             eyebrow={eyebrow}
             title={title}
@@ -69,13 +71,17 @@ export const Modal: React.FC<ModalProps> = ({
             }
             titleClassName="truncate text-xl tracking-[0.16em] text-amber-400"
           />
-          <button 
+          <Button
             onClick={onClose}
-            className="rounded-full border border-stone-700/80 bg-stone-950/78 p-2 text-stone-500 transition-colors hover:border-amber-500 hover:text-stone-200"
+            aria-label="關閉視窗"
+            variant="ghost"
+            size="icon"
+            className="rounded-full border border-stone-700/80 bg-stone-950/78 text-stone-500 hover:border-amber-500 hover:text-stone-200"
+            data-testid="game-modal-close"
           >
-            <X size={24} />
-          </button>
-        </div>
+            ×
+          </Button>
+        </DialogHeader>
 
         {/* Content - Flex grow to fill available space */}
         <div className="relative z-10 p-0 pt-2 md:p-6 md:pt-8 overflow-y-auto text-stone-300 flex-1 bg-stone-950/35">
@@ -88,9 +94,7 @@ export const Modal: React.FC<ModalProps> = ({
             {actions}
           </div>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
-
-  return ReactDOM.createPortal(modalContent, document.body);
 };

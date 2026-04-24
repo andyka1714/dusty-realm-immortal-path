@@ -364,11 +364,14 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
               {buildIdentityOptions.map((identity) => {
                 const active = config.selectedBuildIdentity === identity;
                 return (
-                  <button
+                  <Button
+                    data-testid={`rebirth-build-${identity}`}
                     key={identity}
                     onClick={() => onSelectBuildIdentity?.(identity)}
+                    variant="selection"
+                    size="default"
                     className={clsx(
-                      "rounded-xl border p-4 text-left transition",
+                      "h-auto w-full flex-col items-start justify-start whitespace-normal p-4 text-left transition",
                       active
                         ? "border-cyan-500/50 bg-cyan-500/10"
                         : "border-stone-800 bg-stone-950/80 hover:border-stone-700"
@@ -382,7 +385,7 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
                         ? "不限制職業向遺珍，但無法啟動專精魂印。"
                         : "會限制不相符的職業武器與心法遺珍。"}
                     </div>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -394,11 +397,13 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
               {availableSoulSeals.map((seal) => {
                 const active = config.selectedSealId === seal.id;
                 return (
-                  <button
+                  <Button
+                    data-testid={`rebirth-seal-${seal.id}`}
                     key={seal.id}
                     onClick={() => onSelectSoulSeal?.(seal.id)}
+                    variant="selection"
                     className={clsx(
-                      "rounded-xl border p-4 text-left transition",
+                      "h-auto w-full flex-col items-start justify-start whitespace-normal p-4 text-left transition",
                       active
                         ? "border-violet-500/50 bg-violet-500/10"
                         : "border-stone-800 bg-stone-950/80 hover:border-stone-700"
@@ -409,7 +414,7 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
                       <span className="text-sm text-amber-400">{seal.cost} 功德</span>
                     </div>
                     <p className="mt-2 text-sm text-stone-400">{seal.description}</p>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -449,12 +454,14 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
                   ? getRebirthPerkBlockedReason(perk, config)
                   : undefined;
                 return (
-                  <button
+                  <Button
+                    data-testid={`rebirth-perk-${perk.id}`}
                     key={perk.id}
                     onClick={() => onTogglePerk(perk.id)}
                     disabled={Boolean(blockedReason)}
+                    variant="selection"
                     className={clsx(
-                      "rounded-xl border p-4 text-left transition",
+                      "h-auto w-full flex-col items-start justify-start whitespace-normal p-4 text-left transition",
                       active
                         ? "border-amber-500/50 bg-amber-500/10"
                         : blockedReason
@@ -470,7 +477,7 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
                     {blockedReason && (
                       <p className="mt-3 text-xs text-rose-300/80">{blockedReason}</p>
                     )}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -553,12 +560,14 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
                       ? getRebirthHeirloomBlockedReason(candidate, config)
                       : undefined;
                     return (
-                      <button
+                      <Button
+                        data-testid={`rebirth-heirloom-${candidate.id}`}
                         key={candidate.id}
                         onClick={() => onToggleHeirloom(candidate.id)}
                         disabled={Boolean(blockedReason)}
+                        variant="selection"
                         className={clsx(
-                          "rounded-xl border p-3 text-left transition",
+                          "h-auto w-full flex-col items-start justify-start whitespace-normal p-3 text-left transition",
                           active
                             ? "border-cyan-500/50 bg-cyan-500/10"
                             : blockedReason
@@ -577,7 +586,7 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
                             {blockedReason}
                           </div>
                         )}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -631,6 +640,7 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
             }
             size="lg"
             className="w-full"
+            data-testid="rebirth-confirm"
           >
             投胎轉世
           </Button>

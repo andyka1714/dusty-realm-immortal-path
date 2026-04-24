@@ -39,6 +39,7 @@ import { MAPS } from "../../data/maps";
 import clsx from "clsx";
 import { GameTooltip } from "../game/GameTooltip";
 import { GameHintBubble } from "../game/GameHintBubble";
+import { Button } from "../ui/button";
 
 interface CompendiumModalProps {
   isOpen: boolean;
@@ -202,9 +203,9 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                 <Book className="text-amber-500" />
                 <span className="text-xl font-bold text-stone-200">萬界圖鑑</span>
               </div>
-              <button onClick={onClose} className="md:hidden p-1 text-stone-400">
+              <Button onClick={onClose} className="md:hidden p-1 text-stone-400" variant="ghost" size="icon">
                 <X />
-              </button>
+              </Button>
             </div>
           )}
 
@@ -216,12 +217,14 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
               { id: "skill", label: "功法神通", icon: Scroll },
               { id: "sect", label: "宗門傳承", icon: Shield },
             ].map((tab) => (
-              <button
+              <Button
                 key={tab.id}
                 onClick={() => {
                   setActiveTab(tab.id as TabType);
                   setSelectedId(null);
                 }}
+                variant="tab"
+                size="sm"
                 className={clsx(
                   "flex items-center gap-3 px-4 py-3 rounded-md transition-colors whitespace-nowrap",
                   activeTab === tab.id
@@ -231,7 +234,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
               >
                 <tab.icon size={18} />
                 <span>{tab.label}</span>
-              </button>
+              </Button>
             ))}
           </nav>
         </div>
@@ -241,15 +244,17 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
           {/* Header */}
           {!embedded && (
           <div className="flex justify-end border-b border-stone-800 p-4">
-            <button
+            <Button
               onClick={onClose}
               className={clsx(
                 "p-2 text-stone-400 hover:text-stone-100",
                 embedded ? "hidden" : "hidden md:block"
               )}
+              variant="ghost"
+              size="icon"
             >
               <X />
-            </button>
+            </Button>
           </div>
           )}
 

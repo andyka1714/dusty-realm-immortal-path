@@ -21,6 +21,9 @@ import {
 import { GameHintBubble } from '../components/game/GameHintBubble';
 import { GameTooltip } from '../components/game/GameTooltip';
 import { GameSection } from '../components/game/GameSection';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
 
 interface InventoryProps {
   embedded?: boolean;
@@ -30,10 +33,10 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
   const { items, equipment } = useSelector((state: RootState) => state.inventory);
   const character = useSelector((state: RootState) => state.character);
   const dispatch = useDispatch();
-  
+
   const [filter, setFilter] = useState<'all' | ItemCategory>('all');
   const [selectedSlot, setSelectedSlot] = useState<InventorySlot | null>(null);
-  
+
   // Batch Management State
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState<Set<string>>(new Set());
@@ -148,33 +151,39 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
   const managementActions = (
     <div className="flex gap-2">
       <div className="relative group">
-        <button 
+        <Button
             onClick={() => dispatch(sortItems())}
-            className="p-2 rounded bg-stone-900 border border-stone-800 text-stone-400 hover:text-amber-500 hover:border-amber-900 transition-colors"
+            variant="ghost"
+            size="icon"
+            className="border border-stone-800 bg-stone-900 text-stone-400 hover:border-amber-900 hover:text-amber-500"
+            data-testid="inventory-sort"
         >
             <ArrowUpDown size={18} />
-        </button>
+        </Button>
         <GameHintBubble eyebrow="PACK FLOW" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
           整理
         </GameHintBubble>
       </div>
       <div className="relative group">
-        <button 
+        <Button
             onClick={() => {
                 setIsDeleteMode(!isDeleteMode);
                 setSelectedForDelete(new Set());
                 setSelectedSlot(null);
             }}
+            variant={isDeleteMode ? 'danger' : 'ghost'}
+            size="sm"
             className={clsx(
-                "p-2 rounded border transition-all flex items-center gap-2 text-sm font-bold",
-                isDeleteMode 
-                    ? "bg-red-900/50 border-red-500 text-red-200 animate-pulse" 
+                "transition-all text-sm font-bold",
+                isDeleteMode
+                    ? "bg-red-900/50 border-red-500 text-red-200 animate-pulse"
                     : "bg-stone-900 border-stone-800 text-stone-400 hover:text-stone-200"
             )}
+            data-testid="inventory-toggle-delete-mode"
         >
             {isDeleteMode ? <CheckSquare size={18} /> : <Trash2 size={18} />}
             {isDeleteMode && <span className="hidden md:inline">選擇模式</span>}
-        </button>
+        </Button>
         <GameHintBubble eyebrow="PACK FLOW" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
           批量管理
         </GameHintBubble>
@@ -183,12 +192,14 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
   );
 
   const filterTabs = (
-    <div className="flex bg-stone-900 rounded-lg p-1 md:p-1.5 border border-stone-800 gap-1 overflow-x-auto max-w-full">
-      <FilterButton active={filter === 'all'} onClick={() => setFilter('all')} label="全部" />
-      <FilterButton active={filter === ItemCategory.Equipment} onClick={() => setFilter(ItemCategory.Equipment)} label="裝備" />
-      <FilterButton active={filter === ItemCategory.Consumable} onClick={() => setFilter(ItemCategory.Consumable)} label="丹藥" />
-      <FilterButton active={filter === ItemCategory.Material} onClick={() => setFilter(ItemCategory.Material)} label="材料" />
-    </div>
+    <Tabs value={filter} onValueChange={(value) => setFilter(value as 'all' | ItemCategory)}>
+      <TabsList className="max-w-full">
+        <TabsTrigger value="all" data-testid="inventory-filter-all">全部</TabsTrigger>
+        <TabsTrigger value={ItemCategory.Equipment} data-testid="inventory-filter-equipment">裝備</TabsTrigger>
+        <TabsTrigger value={ItemCategory.Consumable} data-testid="inventory-filter-consumable">丹藥</TabsTrigger>
+        <TabsTrigger value={ItemCategory.Material} data-testid="inventory-filter-material">材料</TabsTrigger>
+      </TabsList>
+    </Tabs>
   );
 
   const equipmentSection = (
@@ -198,9 +209,9 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
       className={clsx("shrink-0", embedded ? "border-t border-stone-800/80" : "")}
       bodyClassName="grid grid-cols-2 gap-2 md:gap-3"
     >
-        <EquipSlot 
-          label="武器" icon={Sword} 
-          instance={getEquippedInstance(EquipmentSlot.Weapon)} 
+        <EquipSlot
+          label="武器" icon={Sword}
+          instance={getEquippedInstance(EquipmentSlot.Weapon)}
           onUnequip={() => dispatch(unequipItem(EquipmentSlot.Weapon))}
           onClick={() => {
              const id = equipment[EquipmentSlot.Weapon];
@@ -208,9 +219,9 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
              if (slot) setSelectedSlot(slot);
           }}
         />
-        <EquipSlot 
-          label="副手" icon={Shield} 
-          instance={getEquippedInstance(EquipmentSlot.Offhand)} 
+        <EquipSlot
+          label="副手" icon={Shield}
+          instance={getEquippedInstance(EquipmentSlot.Offhand)}
           onUnequip={() => dispatch(unequipItem(EquipmentSlot.Offhand))}
           onClick={() => {
              const id = equipment[EquipmentSlot.Offhand];
@@ -218,9 +229,9 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
              if (slot) setSelectedSlot(slot);
           }}
         />
-        <EquipSlot 
-          label="頭部" icon={Crown} 
-          instance={getEquippedInstance(EquipmentSlot.Head)} 
+        <EquipSlot
+          label="頭部" icon={Crown}
+          instance={getEquippedInstance(EquipmentSlot.Head)}
           onUnequip={() => dispatch(unequipItem(EquipmentSlot.Head))}
           onClick={() => {
              const id = equipment[EquipmentSlot.Head];
@@ -228,9 +239,9 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
              if (slot) setSelectedSlot(slot);
           }}
         />
-        <EquipSlot 
-          label="身軀" icon={Shirt} 
-          instance={getEquippedInstance(EquipmentSlot.Body)} 
+        <EquipSlot
+          label="身軀" icon={Shirt}
+          instance={getEquippedInstance(EquipmentSlot.Body)}
           onUnequip={() => dispatch(unequipItem(EquipmentSlot.Body))}
           onClick={() => {
              const id = equipment[EquipmentSlot.Body];
@@ -238,9 +249,9 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
              if (slot) setSelectedSlot(slot);
           }}
         />
-        <EquipSlot 
-          label="腿部" icon={Footprints} 
-          instance={getEquippedInstance(EquipmentSlot.Legs)} 
+        <EquipSlot
+          label="腿部" icon={Footprints}
+          instance={getEquippedInstance(EquipmentSlot.Legs)}
           onUnequip={() => dispatch(unequipItem(EquipmentSlot.Legs))}
           onClick={() => {
              const id = equipment[EquipmentSlot.Legs];
@@ -248,9 +259,9 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
              if (slot) setSelectedSlot(slot);
           }}
         />
-        <EquipSlot 
-          label="飾品" icon={Medal} 
-          instance={getEquippedInstance(EquipmentSlot.Accessory)} 
+        <EquipSlot
+          label="飾品" icon={Medal}
+          instance={getEquippedInstance(EquipmentSlot.Accessory)}
           onUnequip={() => dispatch(unequipItem(EquipmentSlot.Accessory))}
           onClick={() => {
              const id = equipment[EquipmentSlot.Accessory];
@@ -326,7 +337,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
           <h2 className="text-2xl md:text-3xl font-bold text-stone-200 tracking-widest flex items-center gap-2 shrink-0">
             <Package className="w-6 h-6 md:w-8 md:h-8 text-amber-600" /> 行囊空間
           </h2>
-          
+
           <div className="flex gap-2 md:gap-4 items-center flex-wrap">
             {managementActions}
             {filterTabs}
@@ -365,11 +376,11 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
              {filteredItems.map((slot, idx) => {
                const item = ITEMS[slot.itemId];
                if(!item) return null;
-               
+
                const quality = slot.instance?.quality ?? item.quality;
                const isSelected = selectedSlot === slot;
                const equipped = isEquipped(slot.instanceId);
-               
+
                const qualityBorder = getQualityBorderColor(quality);
                const qualityText = getQualityTextColor(quality);
 
@@ -380,12 +391,12 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                const canDelete = !equipped; // Cannot delete equipped items
 
                return (
-                 <div 
+                 <div
                     key={`${slot.itemId}-${idx}`}
                     onClick={() => {
                         if (isDeleteMode) {
-                            if (!canDelete) return; 
-                            
+                            if (!canDelete) return;
+
                             const key = slot.instanceId || slot.itemId;
                             const newSet = new Set(selectedForDelete);
                             if (newSet.has(key)) newSet.delete(key);
@@ -410,9 +421,9 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                     }}
                     className={clsx(
                         "aspect-square border-2 rounded-lg p-2 md:p-3 flex flex-col items-center justify-center relative group transition-all",
-                        isDeleteMode 
-                            ? (isMarkedForDelete 
-                                ? "bg-red-900/20 border-red-500" 
+                        isDeleteMode
+                            ? (isMarkedForDelete
+                                ? "bg-red-900/20 border-red-500"
                                 : (canDelete ? "bg-stone-900 cursor-pointer border-stone-800 hover:border-red-500/50" : "bg-stone-950/50 border-stone-900 opacity-50 cursor-not-allowed"))
                             : (isSelected ? 'border-amber-500 bg-stone-800 cursor-pointer' : `${qualityBorder} bg-stone-900 cursor-pointer hover:brightness-110`),
                         equipped && !isDeleteMode ? 'ring-2 ring-amber-500/50 ring-offset-1 ring-offset-stone-900' : ''
@@ -444,7 +455,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                     {item.category === ItemCategory.Consumable && <FlaskConical className="w-5 h-5 md:w-8 md:h-8 text-emerald-400" />}
                     {item.category === ItemCategory.Material && <CircleDashed className="w-5 h-5 md:w-8 md:h-8 text-stone-600" />}
                     {![ItemCategory.Equipment, ItemCategory.Consumable, ItemCategory.Material].includes(item.category) && <Package className="w-5 h-5 md:w-8 md:h-8 text-stone-600"/>}
-                    
+
                     <span className={`text-[10px] md:text-sm font-medium mt-1 md:mt-2 text-center line-clamp-1 w-full ${qualityText}`}>{item.name}{slot.instance ? (slot.instance.quality >= 2 ? '+' : '') : ''}</span>
                     {item.category !== ItemCategory.Equipment && (
                         <span className="absolute top-1 right-1 bg-stone-950 text-stone-500 text-[9px] md:text-xs px-1 rounded">{slot.count}</span>
@@ -490,73 +501,81 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                     <p className="text-stone-400 text-sm max-w-[200px]">
                         已選擇 <span className="text-red-400 font-bold text-lg">{selectedForDelete.size}</span> 個物品
                     </p>
-                    
+
                     {/* Quick Select Buttons */}
                     <div className="flex flex-col gap-2 w-full px-4">
                         <div className="text-xs text-stone-500 font-bold border-b border-stone-800 pb-1 mb-1">
                             快速選擇 ({filter === 'all' ? '全部類別' : getCategoryName(filter)})
                         </div>
                         <div className="grid grid-cols-2 gap-2">
-                             <button
+                             <Button
                                 onClick={() => {
                                     const toSelect = filteredItems
                                         .filter(slot => !isEquipped(slot.instanceId) && (slot.instance?.quality === ItemQuality.Low || (!slot.instance && ITEMS[slot.itemId]?.quality === ItemQuality.Low)))
                                         .map(slot => slot.instanceId || slot.itemId);
-                                    
+
                                     const newSet = new Set(selectedForDelete);
                                     toSelect.forEach(id => newSet.add(id));
                                     setSelectedForDelete(newSet);
                                 }}
-                                className="text-xs py-1.5 rounded bg-stone-900 border border-stone-700 hover:border-stone-500 text-stone-400"
+                                variant="outline"
+                                size="sm"
+                                className="text-xs"
                              >
                                  全選凡品 (下)
-                             </button>
-                             <button
+                             </Button>
+                             <Button
                                 onClick={() => {
                                     const toSelect = filteredItems
                                         .filter(slot => !isEquipped(slot.instanceId) && (slot.instance?.quality === ItemQuality.Medium || (!slot.instance && ITEMS[slot.itemId]?.quality === ItemQuality.Medium)))
                                         .map(slot => slot.instanceId || slot.itemId);
-                                    
+
                                     const newSet = new Set(selectedForDelete);
                                     toSelect.forEach(id => newSet.add(id));
                                     setSelectedForDelete(newSet);
                                 }}
-                                className="text-xs py-1.5 rounded bg-emerald-950/30 border border-emerald-900 hover:border-emerald-500 text-emerald-600 hover:text-emerald-400"
+                                variant="emerald"
+                                size="sm"
+                                className="text-xs"
                              >
                                  全選靈品 (中)
-                             </button>
-                             <button
+                             </Button>
+                             <Button
                                 onClick={() => {
                                     const toSelect = filteredItems
                                         .filter(slot => !isEquipped(slot.instanceId) && (slot.instance?.quality === ItemQuality.High || (!slot.instance && ITEMS[slot.itemId]?.quality === ItemQuality.High)))
                                         .map(slot => slot.instanceId || slot.itemId);
-                                    
+
                                     const newSet = new Set(selectedForDelete);
                                     toSelect.forEach(id => newSet.add(id));
                                     setSelectedForDelete(newSet);
                                 }}
-                                className="text-xs py-1.5 rounded bg-blue-950/30 border border-blue-900 hover:border-blue-500 text-blue-500 hover:text-blue-400"
+                                variant="selection"
+                                size="sm"
+                                className="border-blue-900 bg-blue-950/30 text-xs text-blue-400 hover:border-blue-500"
                              >
                                  全選仙品 (上)
-                             </button>
-                             <button
+                             </Button>
+                             <Button
                                 onClick={() => {
                                     // Select ALL visible
                                     const toSelect = filteredItems
                                         .filter(slot => !isEquipped(slot.instanceId))
                                         .map(slot => slot.instanceId || slot.itemId);
-                                    
+
                                     const newSet = new Set(selectedForDelete);
                                     toSelect.forEach(id => newSet.add(id));
                                     setSelectedForDelete(newSet);
                                 }}
-                                className="text-xs py-1.5 rounded bg-red-950/30 border border-red-900 hover:border-red-500 text-red-500 hover:text-red-400"
+                                variant="danger"
+                                size="sm"
+                                className="text-xs"
                              >
                                  全選當前頁
-                             </button>
+                             </Button>
                         </div>
                     </div>
-                    <button 
+                    <Button
                         disabled={selectedForDelete.size === 0}
                         onClick={() => {
                             setConfirmModal({
@@ -570,19 +589,23 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                                 }
                             });
                         }}
-                        className="bg-red-700 hover:bg-red-600 disabled:bg-stone-800 disabled:text-stone-600 text-white px-8 py-3 rounded-lg font-bold transition-all shadow-lg flex items-center gap-2 mt-4"
+                        variant="danger"
+                        className="mt-4 px-8 shadow-lg"
+                        data-testid="inventory-bulk-delete-confirm"
                     >
                          確認丟棄
-                    </button>
-                    <button 
+                    </Button>
+                    <Button
                         onClick={() => {
                             setIsDeleteMode(false);
                             setSelectedForDelete(new Set());
                         }}
-                        className="text-stone-500 hover:text-stone-300 text-xs underline"
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs underline"
                     >
                         取消
-                    </button>
+                    </Button>
                 </div>
            ) : (
                selectedSlot && selectedItemDef ? (
@@ -610,7 +633,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                        </div>
                        <span className="text-xs bg-stone-800 px-2 py-1 rounded text-stone-400">{getCategoryName(selectedItemDef.category)}</span>
                     </div>
-                    
+
                     <p className="text-sm text-stone-500 italic mb-4">{selectedItemDef.description}</p>
 
                     {selectedSkill && (
@@ -644,7 +667,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                         </div>
                       </div>
                     )}
-                    
+
                     {/* Stats & Affixes */}
                     {selectedSlot.instance && (
                         <div className="space-y-3 mb-4 bg-stone-950/30 p-2 rounded">
@@ -657,7 +680,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                                         {(() => {
                                             if (selectedItemDef.category !== ItemCategory.Equipment) return null;
                                             if (isEquipped(selectedSlot.instanceId)) return null;
-                                            
+
                                             // Find equipped item for comparison
                                             const equipSlot = (selectedItemDef as any).slot as EquipmentSlot;
                                             const equippedInstanceId = equipment[equipSlot];
@@ -717,7 +740,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                             )}
                         </div>
                     )}
-    
+
                     <div className="border-t border-stone-800 pt-3 mt-auto space-y-2">
                        {/* Consumable Effects */}
                        {selectedItemDef.category === ItemCategory.Consumable && (selectedItemDef as ConsumableItem).effects && (
@@ -755,46 +778,43 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                            )}
                          </div>
                        )}
-                       
+
                        <div className="flex gap-2 mt-3">
                           {selectedItemDef.category === ItemCategory.Equipment && selectedSlot.instance && (
-                            <button 
-                              onClick={() => { 
+                            <Button
+                              onClick={() => {
                                     if(selectedSlot.instanceId) {
                                         const alreadyEquipped = isEquipped(selectedSlot.instanceId);
                                         if (alreadyEquipped) {
                                              const slotKey = (Object.keys(equipment) as EquipmentSlot[]).find(key => equipment[key] === selectedSlot.instanceId);
                                              if (slotKey) dispatch(unequipItem(slotKey));
                                         } else {
-                                            dispatch(equipItem(selectedSlot.instanceId)); 
+                                            dispatch(equipItem(selectedSlot.instanceId));
                                         }
                                     }
                               }}
-                              className={`flex-1 ${isEquipped(selectedSlot.instanceId) ? 'bg-red-900/80 hover:bg-red-800' : 'bg-amber-700 hover:bg-amber-600'} text-stone-100 py-2 rounded text-sm transition-colors`}
+                              variant={isEquipped(selectedSlot.instanceId) ? 'danger' : 'amber'}
+                              className="flex-1"
                             >
                               {isEquipped(selectedSlot.instanceId) ? '卸下' : '裝備'}
-                            </button>
+                            </Button>
                           )}
-                          
+
                           {selectedItemDef.category === ItemCategory.Consumable && (
-                        <button 
-                          className={clsx(
-                            "flex-1 py-2 rounded text-sm transition-colors",
-                            selectedConsumableBlockedReason
-                              ? "bg-stone-800 text-stone-500 cursor-not-allowed"
-                              : "bg-emerald-700 hover:bg-emerald-600 text-stone-100"
-                          )}
+                        <Button
+                          className="flex-1"
+                          variant={selectedConsumableBlockedReason ? 'stone' : 'emerald'}
                           disabled={Boolean(selectedConsumableBlockedReason)}
                           onClick={handleUseSelectedItem}
                         >
                           {selectedSkill ? '參悟' : '服用'}
-                        </button>
+                        </Button>
                       )}
 
                       {/* Single Item Delete Button */}
                       {(selectedSlot.instanceId || selectedSlot.itemId) && (
                           <div className="relative group">
-                            <button 
+                            <Button
                                disabled={selectedSlot.instanceId ? isEquipped(selectedSlot.instanceId) : false}
                                onClick={() => {
                                    // Stackable Item (No instanceId)
@@ -825,15 +845,18 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                                        });
                                    }
                                }}
+                               variant="danger"
+                               size="icon"
                                className={clsx(
-                                   "p-2 rounded border transition-all flex-none",
+                                   "flex-none transition-all",
                                    (selectedSlot.instanceId && isEquipped(selectedSlot.instanceId))
                                        ? "bg-stone-900 border-stone-800 text-stone-600 cursor-not-allowed"
                                        : "bg-red-950/30 border-red-900/50 text-red-500 hover:bg-red-900/80 hover:text-red-200"
                                )}
+                               data-testid="inventory-delete-selected"
                             >
                                <Trash2 size={18} />
-                            </button>
+                            </Button>
                             <GameHintBubble eyebrow="ITEM ACTION" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
                               {selectedSlot.instanceId && isEquipped(selectedSlot.instanceId)
                                 ? '裝備中不可丟棄'
@@ -939,7 +962,7 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
           )}
         </GameTooltip>
       )}
-      
+
       {/* Confirm Modal (Standard) */}
       <Modal
         isOpen={confirmModal.isOpen}
@@ -949,21 +972,22 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
         icon={<AlertTriangle size={18} className="text-red-400" />}
         actions={
             <>
-                <button 
+                <Button
                     onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
-                    className="px-4 py-2 rounded border border-stone-600 text-stone-400 hover:text-stone-200"
+                    variant="outline"
                 >
                     取消
-                </button>
-                <button 
+                </Button>
+                <Button
                     onClick={() => {
                         confirmModal.onConfirm();
                         setConfirmModal({ ...confirmModal, isOpen: false });
                     }}
-                    className="px-4 py-2 rounded bg-red-800 text-stone-100 hover:bg-red-700"
+                    variant="danger"
+                    data-testid="inventory-confirm-modal-accept"
                 >
                     確認
-                </button>
+                </Button>
             </>
         }
       >
@@ -981,13 +1005,13 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
         icon={<Trash2 size={18} className="text-red-400" />}
         actions={
             <>
-                <button 
+                <Button
                     onClick={() => setItemToDelete(null)}
-                    className="px-4 py-2 rounded border border-stone-600 text-stone-400 hover:text-stone-200"
+                    variant="outline"
                 >
                     取消
-                </button>
-                <button 
+                </Button>
+                <Button
                     onClick={() => {
                         if(itemToDelete) {
                             dispatch(removeItem({ itemId: itemToDelete.itemId, count: itemToDelete.count }));
@@ -995,10 +1019,11 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                             setSelectedSlot(null);
                         }
                     }}
-                    className="px-4 py-2 rounded bg-red-800 text-stone-100 hover:bg-red-700"
+                    variant="danger"
+                    data-testid="inventory-quantity-delete-confirm"
                 >
                     確認丟棄
-                </button>
+                </Button>
             </>
         }
       >
@@ -1010,37 +1035,40 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
                 </div>
 
                 <div className="flex items-center gap-4 bg-stone-950 p-2 rounded-lg border border-stone-800">
-                    <button 
+                    <Button
                         onClick={() => setItemToDelete(prev => prev ? ({ ...prev, count: Math.max(1, prev.count - 1) }) : null)}
-                        className="w-10 h-10 rounded bg-stone-900 border border-stone-700 hover:border-amber-500 text-stone-300 flex items-center justify-center font-bold text-xl transition-colors"
+                        variant="outline"
+                        size="icon"
                     >
                         -
-                    </button>
+                    </Button>
                     <div className="w-20 text-center">
-                         <input 
+                         <Input
                             type="number"
                             value={itemToDelete.count}
                             onChange={(e) => {
                                 const val = parseInt(e.target.value) || 0;
                                 setItemToDelete(prev => prev ? ({ ...prev, count: Math.min(prev.max, Math.max(1, val)) }) : null);
                             }}
-                            className="w-full bg-transparent text-center text-xl font-bold text-amber-500 focus:outline-none"
+                            className="h-12 border-transparent bg-transparent text-center text-xl font-bold text-amber-500 focus:border-amber-500"
+                            data-testid="inventory-quantity-input"
                          />
                     </div>
-                    <button 
+                    <Button
                         onClick={() => setItemToDelete(prev => prev ? ({ ...prev, count: Math.min(prev.max, prev.count + 1) }) : null)}
-                        className="w-10 h-10 rounded bg-stone-900 border border-stone-700 hover:border-amber-500 text-stone-300 flex items-center justify-center font-bold text-xl transition-colors"
+                        variant="outline"
+                        size="icon"
                     >
                         +
-                    </button>
+                    </Button>
                 </div>
-                
+
                 <div className="flex gap-2 text-xs text-stone-500">
-                    <button onClick={() => setItemToDelete(prev => prev ? ({ ...prev, count: 1 }) : null)} className="hover:text-amber-500 underline">最小</button>
+                    <Button onClick={() => setItemToDelete(prev => prev ? ({ ...prev, count: 1 }) : null)} variant="ghost" size="sm" className="h-auto px-0 text-xs underline">最小</Button>
                     <span>|</span>
-                    <button onClick={() => setItemToDelete(prev => prev ? ({ ...prev, count: Math.floor(prev.max / 2) }) : null)} className="hover:text-amber-500 underline">一半</button>
+                    <Button onClick={() => setItemToDelete(prev => prev ? ({ ...prev, count: Math.floor(prev.max / 2) }) : null)} variant="ghost" size="sm" className="h-auto px-0 text-xs underline">一半</Button>
                     <span>|</span>
-                    <button onClick={() => setItemToDelete(prev => prev ? ({ ...prev, count: prev.max }) : null)} className="hover:text-amber-500 underline">最大</button>
+                    <Button onClick={() => setItemToDelete(prev => prev ? ({ ...prev, count: prev.max }) : null)} variant="ghost" size="sm" className="h-auto px-0 text-xs underline">最大</Button>
                 </div>
 
                 <div className="text-red-400 text-sm animate-pulse">
@@ -1053,24 +1081,11 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
   );
 };
 
-const FilterButton = ({ active, onClick, label }: { active: boolean, onClick: () => void, label: string }) => (
-    <button
-      onClick={onClick}
-      className={`px-4 py-1.5 rounded text-sm transition-all ${
-        active 
-          ? 'bg-stone-700 text-stone-100 shadow' 
-          : 'text-stone-500 hover:text-stone-300'
-      }`}
-    >
-      {label}
-    </button>
-);
-
 const EquipSlot = ({ label, icon: Icon, instance, onUnequip, onClick }: { label: string, icon: any, instance: ItemInstance | null, onUnequip: () => void, onClick?: () => void }) => {
   const item = instance ? ITEMS[instance.templateId] : null;
 
   return (
-    <div 
+    <div
         onClick={onClick}
         className={`flex items-center gap-2 p-2 md:p-3 bg-stone-900/80 rounded border border-stone-800 relative group h-full transition-colors hover:border-stone-700 ${item ? 'cursor-pointer hover:bg-stone-800/80' : ''}`}
     >
@@ -1084,15 +1099,17 @@ const EquipSlot = ({ label, icon: Icon, instance, onUnequip, onClick }: { label:
          </div>
        </div>
        {item && (
-         <button 
+         <Button
             onClick={(e) => {
                 e.stopPropagation();
                 onUnequip();
-            }} 
-            className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-red-900/90 text-red-100 text-[10px] md:text-xs px-2 py-1 rounded shadow-lg transition-all hover:bg-red-800 z-10 flex items-center gap-1"
+            }}
+            variant="danger"
+            size="sm"
+            className="absolute right-2 top-1/2 z-10 h-auto -translate-y-1/2 gap-1 px-2 py-1 text-[10px] opacity-0 shadow-lg transition-all group-hover:opacity-100 md:text-xs"
          >
            <MinusCircle className="w-3 h-3 md:w-4 md:h-4" /> 卸下
-         </button>
+         </Button>
        )}
     </div>
   );
@@ -1188,7 +1205,7 @@ const getAttributeName = (key: string) => {
         case 'mp': return '真元';
         case 'maxMp': return '真元上限';
         case 'speed': return '速度';
-        
+
         // Advanced Combat Stats
         case 'crit': return '暴擊';
         case 'critDamage': return '暴傷';
@@ -1205,7 +1222,7 @@ const getAttributeName = (key: string) => {
         case 'comprehension': return '悟性';
         case 'fortune': return '福緣';
         case 'charm': return '魅力';
-        
+
         default: return key;
     }
 }

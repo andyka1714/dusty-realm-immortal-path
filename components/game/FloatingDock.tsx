@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { GameHintBubble } from "./GameHintBubble";
+import { Button } from "../ui/button";
 
 export type GamePanelId =
   | "character"
@@ -43,14 +44,17 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
 
           return (
             <div key={item.id} className="group relative">
-              <button
+              <Button
                 onClick={() => onTogglePanel(item.id)}
+                variant="tab"
+                size="sm"
                 className={clsx(
                   "flex min-w-[60px] flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs tracking-widest transition-all",
                   isActive
                     ? "bg-amber-500/15 text-amber-300 shadow-[inset_0_0_0_1px_rgba(245,158,11,0.3)]"
                     : "text-stone-400 hover:bg-stone-800/80 hover:text-stone-100"
                 )}
+                data-testid={`dock-${item.id}`}
               >
                 <div
                   className={clsx(
@@ -63,7 +67,7 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
                   <Icon size={18} />
                 </div>
                 <span>{item.label}</span>
-              </button>
+              </Button>
               <GameHintBubble
                 eyebrow="PANEL SWITCH"
                 className="bottom-full left-1/2 mb-2 -translate-x-1/2"

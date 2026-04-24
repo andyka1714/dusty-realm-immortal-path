@@ -90,3 +90,29 @@
 1. 驗證 `輪迴大殿` 是否真的能在手機與桌面直向殼中完整瀏覽
 2. 找出 Android / mobile-first 畫面有哪些元件還在沿用 desktop-first 寬版假設
 3. 把需要補的 UI 問題整理成下一輪畫面修正清單
+
+## 6. 本輪 shared UI foundation 收口記錄
+
+Change id: `update-shared-ui-foundation-e2e-validation`
+
+本輪已把第一批 shadcn-compatible shared controls 接入高風險互動 flow：
+
+- `Modal / GamePanel` 已改由 shared `Dialog` primitive 承接 overlay、backdrop、focus 與 mobile sheet-like 呈現，並保留明確 close policy
+- `Reincarnation Hall / Dashboard / IntroSequence / Inventory` 已收斂主操作、篩選、輸入、確認與危險操作到 shared `Button / Input / Tabs`
+- `Workshop / Compendium / StatsPanel / FloatingDock / PendingEncounterPanel` 已收斂明顯的 tab、卡片選項與 panel switch 熱區
+- 已新增穩定 selector 與 Playwright browser smoke，覆蓋 `輪迴大殿 / GameShell overlay / Inventory / pending encounter modal`
+
+本輪仍維持：
+
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog
+- 不需要 migration；只調整 UI foundation、互動承接方式與 browser 驗證基線
+- 不把玩家、怪物、NPC token 改成 pixel sprite，也不重做 `AdventureStage` 戰鬥邏輯
+
+驗證基線：
+
+- `openspec validate update-shared-ui-foundation-e2e-validation --strict`
+- `npm test -- components/game/ReincarnationFlow.test.tsx pages/Dashboard.reincarnation.test.tsx components/game/GameShell.test.tsx components/game/PendingEncounterPanel.test.tsx pages/Workshop.crafting.test.tsx store/actions/reincarnationActions.test.ts store/localStorage.test.ts`
+- `npm run typecheck`
+- `npm run build`
+- `npm run test:e2e`
+- `git diff --check`

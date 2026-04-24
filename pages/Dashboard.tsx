@@ -31,6 +31,7 @@ import { GameHintBubble } from '../components/game/GameHintBubble';
 import { ReincarnationFlow } from '../components/game/ReincarnationFlow';
 import { GameSection } from '../components/game/GameSection';
 import { GameTooltip } from '../components/game/GameTooltip';
+import { Button } from '../components/ui/button';
 import { Play, ChevronsUp, Moon, Info, AlertTriangle, Zap, Lock, RefreshCw } from 'lucide-react';
 import { MajorRealm, SpiritRootId, SpiritRootType } from '../types';
 import { calculateSeclusionCost, getBaseCultivationRate, getGatheringMultiplier, getManualCultivateCooldown, getPassiveCultivationRate } from '../utils/cultivation';
@@ -505,10 +506,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
 
                  {/* 1. Manual Cultivate */}
                  <div className="flex-1 relative group">
-                     <button
+                     <Button
                        onClick={handleManualCultivate}
                        disabled={isBreakthroughAvailable || isInSeclusion || manualCooldown > 0}
-                       className="w-full bg-stone-800 hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed text-stone-200 py-4 rounded-lg border border-stone-700 transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden h-[120px]"
+                       variant="stone"
+                       className="h-[120px] w-full flex-col overflow-hidden py-4"
+                       data-testid="dashboard-manual-cultivate"
                      >
                        {manualCooldown > 0 && (
                            <div 
@@ -521,7 +524,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                        <span className="text-[10px] text-stone-500 font-normal">
                            {manualCooldown > 0 ? `${(manualCooldown/1000).toFixed(1)}s` : "日常修煉 (1.0x)"}
                        </span>
-                     </button>
+                     </Button>
                      
                      {/* Tooltip - Shows when disabled */}
                      {(isBreakthroughAvailable || isInSeclusion) && (
@@ -533,9 +536,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
 
                  {/* 2. Seclusion */}
                  <div className="flex-1 relative group">
-                     <button
+                     <Button
                        onClick={handleSeclusion}
                        disabled={isBreakthroughAvailable || isInSeclusion || (!isInSeclusion && !canAffordSeclusion)}
+                       variant="stone"
+                       data-testid="dashboard-start-seclusion"
                        className={`w-full py-4 rounded-lg border transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed h-[120px]
                          ${isInSeclusion 
                                 ? "bg-amber-900/30 border-amber-500/50 text-amber-200 shadow-[inset_0_0_20px_rgba(245,158,11,0.2)]" 
@@ -553,7 +558,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                              style={{ width: `${(timeLeft / (SECLUSION_DURATION_MS/1000)) * 100}%` }}
                            ></div>
                        )}
-                     </button>
+                     </Button>
 
                      {/* Tooltip - Shows when disabled */}
                      {(isBreakthroughAvailable || isInSeclusion || !canAffordSeclusion) && (
@@ -562,9 +567,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                          </GameHintBubble>
                      )}
                  </div>
-              <button
+              <Button
                 onClick={handleBreakthroughClick}
                 disabled={!isBreakthroughAvailable}
+                variant="selection"
+                data-testid="dashboard-breakthrough"
                 className={`col-span-2 md:col-span-1 group relative outline-none w-full
                   ${isBreakthroughAvailable ? "cursor-pointer" : "cursor-not-allowed"}
                 `}
@@ -585,12 +592,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                 <GameHintBubble eyebrow="BREAKTHROUGH" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
                   {isMajorBreakthrough ? "衝擊大境界" : "突破小境界"}
                 </GameHintBubble>
-              </button>
+              </Button>
               <div className="flex-1 relative group">
-                <button
+                <Button
                   onClick={handleVoluntaryReincarnation}
                   disabled={!canVoluntarilyReincarnate}
-                  className="w-full bg-stone-800 hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed text-stone-200 py-4 rounded-lg border border-stone-700 transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden h-[120px]"
+                  variant="stone"
+                  className="h-[120px] w-full flex-col overflow-hidden py-4"
+                  data-testid="dashboard-voluntary-reincarnation"
                 >
                   <RefreshCw
                     size={20}
@@ -602,7 +611,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                   <span className="text-[10px] text-stone-500 font-normal">
                     {canVoluntarilyReincarnate ? "結算本世並重開下一輪" : "築基後開放"}
                   </span>
-                </button>
+                </Button>
                 {!canVoluntarilyReincarnate && (
                   <GameHintBubble
                     eyebrow="REINCARNATION"
@@ -728,24 +737,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
             </div>
 
             <div className="flex gap-3 pt-2">
-               <button 
+               <Button
                  onClick={() => setIsBreakthroughModalOpen(false)}
-                 className="flex-1 py-3 rounded border border-stone-600 text-stone-400 hover:bg-stone-800 transition-colors"
+                 variant="outline"
+                 className="flex-1"
+                 data-testid="dashboard-breakthrough-cancel"
                >
                  暫緩
-               </button>
-               <button 
+               </Button>
+               <Button
                  onClick={confirmBreakthrough}
                  disabled={isMajorBreakthrough && requiredItemId && !hasItem}
-                 className={`flex-1 py-3 rounded font-bold shadow-lg transition-all
-                    ${isMajorBreakthrough && requiredItemId && !hasItem 
-                        ? 'bg-stone-800 text-stone-600 cursor-not-allowed'
-                        : 'bg-amber-700 hover:bg-amber-600 text-stone-100'
-                    }
-                 `}
+                 variant={isMajorBreakthrough && requiredItemId && !hasItem ? "stone" : "primary"}
+                 className="flex-1 font-bold shadow-lg"
+                 data-testid="dashboard-breakthrough-confirm"
                >
                  開始突破
-               </button>
+               </Button>
             </div>
          </div>
       </Modal>

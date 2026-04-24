@@ -2,6 +2,7 @@ import React from "react";
 import { Sparkles } from "lucide-react";
 import { EncounterEvent, getEncounterPreviewCue } from "../../data/encounters";
 import { PendingEncounter } from "../../types";
+import { Button } from "../ui/button";
 
 const cueToneLabels = {
   steady: "穩定",
@@ -82,10 +83,12 @@ export const PendingEncounterPanel: React.FC<PendingEncounterPanelProps> = ({
 
       <div className="space-y-3">
         {event.choices.map((choice) => (
-          <button
+          <Button
             key={choice.id}
             onClick={() => onChoose(choice.id)}
-            className="w-full rounded-2xl border border-stone-800 bg-stone-950/75 p-4 text-left transition hover:border-amber-500/35 hover:bg-stone-900"
+            variant="selection"
+            className="h-auto w-full flex-col items-start justify-start rounded-2xl border border-stone-800 bg-stone-950/75 p-4 text-left transition hover:border-amber-500/35 hover:bg-stone-900"
+            data-testid={`pending-encounter-choice-${choice.id}`}
           >
             <div className="text-base font-medium text-stone-100">{choice.label}</div>
             <div className="mt-2 text-sm text-stone-400">{choice.description}</div>
@@ -104,7 +107,7 @@ export const PendingEncounterPanel: React.FC<PendingEncounterPanelProps> = ({
                 ))}
               </div>
             )}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
