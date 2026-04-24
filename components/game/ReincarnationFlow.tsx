@@ -32,6 +32,21 @@ import {
   getRebirthPerkBlockedReason,
   REINCARNATION_BUILD_IDENTITY_LABELS,
 } from "../../utils/reincarnation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+
+const SCREEN_SHELL_CLASS =
+  "min-h-dvh w-full overflow-y-auto px-3 py-4 sm:px-4 sm:py-5 md:px-6 md:py-6";
+const PANEL_SHELL_CLASS =
+  "mx-auto w-full max-w-[560px] rounded-[28px] border border-stone-800 bg-stone-950/95 p-4 shadow-2xl sm:p-5 md:p-6";
+const SECTION_SURFACE_CLASS =
+  "rounded-2xl border border-stone-800 bg-stone-900/70 p-4 sm:p-5";
+const INHERIT_PREVIOUS_SPIRIT_ROOT_VALUE = "__inherit_previous_spirit_root__";
 
 const getCauseLabel = (cause: LifeReviewSummary["cause"]) => {
   switch (cause) {
@@ -96,10 +111,10 @@ const LifeReviewScreen: React.FC<LifeReviewScreenProps> = ({
   lifetimeStats,
   onEnterHall,
 }) => (
-  <div className="mx-auto flex h-full w-full max-w-5xl items-center justify-center p-6">
-    <div className="w-full rounded-[28px] border border-stone-800 bg-stone-950/95 p-8 shadow-2xl md:p-10">
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_320px]">
-        <section className="space-y-6">
+  <div className={SCREEN_SHELL_CLASS}>
+    <div className={PANEL_SHELL_CLASS}>
+      <div className="space-y-4 sm:space-y-5">
+        <section className={SECTION_SURFACE_CLASS}>
           <div className="flex items-center gap-4">
             <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 text-amber-400">
               <ScrollText size={28} />
@@ -111,103 +126,96 @@ const LifeReviewScreen: React.FC<LifeReviewScreenProps> = ({
               <h1 className="text-3xl font-bold text-stone-100">本世結算</h1>
             </div>
           </div>
-
-          <div className="rounded-2xl border border-stone-800 bg-stone-900/70 p-5 text-stone-300">
-            <p className="text-sm leading-7 text-stone-300">
-              <span className="font-semibold text-amber-400">
-                {getCauseLabel(summary.cause)}
-              </span>
-              ，享年 {summary.ageYears} 歲，最高境界抵達{" "}
-              <span className="font-semibold text-stone-100">
-                {REALM_NAMES[summary.highestRealm]}
-              </span>
-              。
-            </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4">
-                <div className="text-xs text-stone-500">境界功德</div>
-                <div className="mt-2 text-2xl font-semibold text-amber-400">
-                  {summary.realmMerit}
-                </div>
-              </div>
-              <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4">
-                <div className="text-xs text-stone-500">歲月功德</div>
-                <div className="mt-2 text-2xl font-semibold text-amber-400">
-                  {summary.ageMerit}
-                </div>
-              </div>
-              <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4">
-                <div className="text-xs text-stone-500">本世新增</div>
-                <div className="mt-2 text-2xl font-semibold text-emerald-400">
-                  +{summary.totalMeritGained}
-                </div>
+          <p className="mt-4 text-sm leading-7 text-stone-300">
+            <span className="font-semibold text-amber-400">
+              {getCauseLabel(summary.cause)}
+            </span>
+            ，享年 {summary.ageYears} 歲，最高境界抵達{" "}
+            <span className="font-semibold text-stone-100">
+              {REALM_NAMES[summary.highestRealm]}
+            </span>
+            。
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4">
+              <div className="text-xs text-stone-500">境界功德</div>
+              <div className="mt-2 text-2xl font-semibold text-amber-400">
+                {summary.realmMerit}
               </div>
             </div>
-          </div>
-
-          <div className="rounded-2xl border border-stone-800 bg-stone-900/60 p-5">
-            <div className="mb-4 flex items-center gap-3">
-              <Gem className="text-cyan-400" size={18} />
-              <h2 className="text-lg font-semibold text-stone-100">可繼承遺珍</h2>
-            </div>
-            {summary.eligibleHeirlooms.length > 0 ? (
-              <div className="grid gap-3 md:grid-cols-2">
-                {summary.eligibleHeirlooms.map((candidate) => (
-                  <div
-                    key={candidate.id}
-                    className="rounded-xl border border-stone-800 bg-stone-950/75 p-4"
-                  >
-                    <div className="text-sm font-medium text-stone-100">
-                      {candidate.label}
-                    </div>
-                    <div className="mt-1 text-xs text-stone-500">
-                      {candidate.sourceType === "equipment" ? "裝備遺珍" : "功法手札"}
-                    </div>
-                  </div>
-                ))}
+            <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4">
+              <div className="text-xs text-stone-500">歲月功德</div>
+              <div className="mt-2 text-2xl font-semibold text-amber-400">
+                {summary.ageMerit}
               </div>
-            ) : (
-              <p className="text-sm text-stone-500">
-                本世沒有可帶入下一輪的遺珍，進入輪迴後只能依靠功德重新塑基。
-              </p>
-            )}
+            </div>
+            <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4">
+              <div className="text-xs text-stone-500">本世新增</div>
+              <div className="mt-2 text-2xl font-semibold text-emerald-400">
+                +{summary.totalMeritGained}
+              </div>
+            </div>
           </div>
         </section>
 
-        <aside className="space-y-5 rounded-2xl border border-stone-800 bg-stone-900/70 p-5">
+        <section className={SECTION_SURFACE_CLASS}>
           <div className="flex items-center gap-3">
             <Shield className="text-violet-400" size={18} />
             <h2 className="text-lg font-semibold text-stone-100">魂印紀錄</h2>
           </div>
-          <div className="space-y-3 text-sm">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl border border-stone-800 bg-stone-950/75 p-4">
               <div className="text-stone-500">累積功德</div>
               <div className="mt-2 text-2xl font-semibold text-amber-400">
                 {totalMerit}
               </div>
             </div>
-            <div className="rounded-xl border border-stone-800 bg-stone-950/75 p-4 text-stone-300">
+            <div className="rounded-xl border border-stone-800 bg-stone-950/75 p-4 text-sm text-stone-300">
               <div>歷劫次數：{lifetimeStats.totalDeaths}</div>
-              <div className="mt-2">
-                輪迴次數：{lifetimeStats.totalReincarnations}
-              </div>
+              <div className="mt-2">輪迴次數：{lifetimeStats.totalReincarnations}</div>
               <div className="mt-2">
                 最高境界：{REALM_NAMES[lifetimeStats.highestRealmEver]}
               </div>
-              <div className="mt-2">
-                最高壽數：{lifetimeStats.highestAgeYears} 歲
-              </div>
+              <div className="mt-2">最高壽數：{lifetimeStats.highestAgeYears} 歲</div>
             </div>
           </div>
+        </section>
 
-          <button
-            onClick={onEnterHall}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/15 px-4 py-3 font-medium text-amber-200 transition hover:bg-amber-500/25"
-          >
-            <Sparkles size={18} />
-            進入輪迴大殿
-          </button>
-        </aside>
+        <section className={SECTION_SURFACE_CLASS}>
+          <div className="mb-4 flex items-center gap-3">
+            <Gem className="text-cyan-400" size={18} />
+            <h2 className="text-lg font-semibold text-stone-100">可繼承遺珍</h2>
+          </div>
+          {summary.eligibleHeirlooms.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {summary.eligibleHeirlooms.map((candidate) => (
+                <div
+                  key={candidate.id}
+                  className="rounded-xl border border-stone-800 bg-stone-950/75 p-4"
+                >
+                  <div className="text-sm font-medium text-stone-100">
+                    {candidate.label}
+                  </div>
+                  <div className="mt-1 text-xs text-stone-500">
+                    {candidate.sourceType === "equipment" ? "裝備遺珍" : "功法手札"}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-stone-500">
+              本世沒有可帶入下一輪的遺珍，進入輪迴後只能依靠功德重新塑基。
+            </p>
+          )}
+        </section>
+
+        <button
+          onClick={onEnterHall}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/15 px-4 py-3 font-medium text-amber-200 transition hover:bg-amber-500/25"
+        >
+          <Sparkles size={18} />
+          進入輪迴大殿
+        </button>
       </div>
     </div>
   </div>
@@ -274,10 +282,10 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
   ];
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-center p-6">
-      <div className="w-full rounded-[28px] border border-stone-800 bg-stone-950/95 p-8 shadow-2xl md:p-10">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.45fr)_360px]">
-          <section className="space-y-6">
+    <div className={SCREEN_SHELL_CLASS}>
+      <div className={PANEL_SHELL_CLASS}>
+        <div className="space-y-4 sm:space-y-5">
+          <section className={SECTION_SURFACE_CLASS}>
             <div className="flex items-center gap-4">
               <div className="rounded-2xl border border-violet-500/30 bg-violet-500/10 p-3 text-violet-300">
                 <RefreshCw size={28} />
@@ -289,298 +297,318 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
                 <h1 className="text-3xl font-bold text-stone-100">輪迴大殿</h1>
               </div>
             </div>
-
-            <div className="rounded-2xl border border-stone-800 bg-stone-900/70 p-5">
-              <div className="mb-3 text-sm font-medium text-stone-200">
-                Build Identity
-              </div>
-              <div className="grid gap-3 md:grid-cols-4">
-                {buildIdentityOptions.map((identity) => {
-                  const active = config.selectedBuildIdentity === identity;
-                  return (
-                    <button
-                      key={identity}
-                      onClick={() => onSelectBuildIdentity?.(identity)}
-                      className={clsx(
-                        "rounded-xl border p-4 text-left transition",
-                        active
-                          ? "border-cyan-500/50 bg-cyan-500/10"
-                          : "border-stone-800 bg-stone-950/80 hover:border-stone-700"
-                      )}
-                    >
-                      <div className="text-sm font-medium text-stone-100">
-                        {REINCARNATION_BUILD_IDENTITY_LABELS[identity]}
-                      </div>
-                      <div className="mt-2 text-xs text-stone-500">
-                        {identity === "balanced"
-                          ? "不限制職業向遺珍，但無法啟動專精魂印。"
-                          : "會限制不相符的職業武器與心法遺珍。"}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="grid gap-4 xl:grid-cols-2">
-              <div className="rounded-2xl border border-stone-800 bg-stone-900/70 p-5">
-                <div className="mb-3 text-sm font-medium text-stone-200">本命魂印</div>
-                <div className="grid gap-3">
-                  {availableSoulSeals.map((seal) => {
-                    const active = config.selectedSealId === seal.id;
-                    return (
-                      <button
-                        key={seal.id}
-                        onClick={() => onSelectSoulSeal?.(seal.id)}
-                        className={clsx(
-                          "rounded-xl border p-4 text-left transition",
-                          active
-                            ? "border-violet-500/50 bg-violet-500/10"
-                            : "border-stone-800 bg-stone-950/80 hover:border-stone-700"
-                        )}
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="font-medium text-stone-100">{seal.name}</span>
-                          <span className="text-sm text-amber-400">{seal.cost} 功德</span>
-                        </div>
-                        <p className="mt-2 text-sm text-stone-400">{seal.description}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-                {lockedSoulSeals.length > 0 && (
-                  <div className="mt-5 space-y-3">
-                    <div className="text-sm font-medium text-stone-500">尚未成形的魂印</div>
-                    <div className="grid gap-3">
-                      {lockedSoulSeals.map((seal) => (
-                        <div
-                          key={seal.id}
-                          className="rounded-xl border border-stone-800 bg-stone-950/45 p-4 opacity-75"
-                        >
-                          <div className="flex items-center justify-between gap-3">
-                            <span className="font-medium text-stone-300">{seal.name}</span>
-                            <span className="text-sm text-stone-600">{seal.cost} 功德</span>
-                          </div>
-                          <p className="mt-2 text-sm text-stone-500">{seal.description}</p>
-                          <p className="mt-3 text-xs text-amber-300/80">
-                            {getUnlockLabel({
-                              ...seal.unlockRequirement,
-                              requiredWorldMemoryTags: seal.requiredWorldMemoryTags,
-                            })}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="rounded-2xl border border-stone-800 bg-stone-900/70 p-5">
-                <div className="mb-3 text-sm font-medium text-stone-200">魂印加護</div>
-                <div className="grid gap-3">
-                  {unlockedPerks.map((perk) => {
-                    const active = config.selectedPerkIds.includes(perk.id);
-                    const blockedReason = !active
-                      ? getRebirthPerkBlockedReason(perk, config)
-                      : undefined;
-                    return (
-                      <button
-                        key={perk.id}
-                        onClick={() => onTogglePerk(perk.id)}
-                        disabled={Boolean(blockedReason)}
-                        className={clsx(
-                          "rounded-xl border p-4 text-left transition",
-                          active
-                            ? "border-amber-500/50 bg-amber-500/10"
-                            : blockedReason
-                              ? "cursor-not-allowed border-stone-800 bg-stone-950/60"
-                              : "border-stone-800 bg-stone-950/80 hover:border-stone-700"
-                        )}
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="font-medium text-stone-100">{perk.name}</span>
-                          <span className="text-sm text-amber-400">{perk.cost} 功德</span>
-                        </div>
-                        <p className="mt-2 text-sm text-stone-400">{perk.description}</p>
-                        {blockedReason && (
-                          <p className="mt-3 text-xs text-rose-300/80">{blockedReason}</p>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-                {lockedPerks.length > 0 && (
-                  <div className="mt-5 space-y-3">
-                    <div className="text-sm font-medium text-stone-500">尚未悟透</div>
-                    <div className="grid gap-3">
-                      {lockedPerks.map((perk) => (
-                        <div
-                          key={perk.id}
-                          className="rounded-xl border border-stone-800 bg-stone-950/45 p-4 opacity-75"
-                        >
-                          <div className="flex items-center justify-between gap-3">
-                            <span className="font-medium text-stone-300">{perk.name}</span>
-                            <span className="text-sm text-stone-600">{perk.cost} 功德</span>
-                          </div>
-                          <p className="mt-2 text-sm text-stone-500">{perk.description}</p>
-                          <p className="mt-3 text-xs text-amber-300/80">
-                            {getUnlockLabel({
-                              ...perk.unlockRequirement,
-                              requiredWorldMemoryTags: perk.requiredWorldMemoryTags,
-                            })}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-stone-800 bg-stone-900/70 p-5">
-              <div className="mb-3 text-sm font-medium text-stone-200">遺珍與命格</div>
-              <div className="grid gap-5 xl:grid-cols-[220px_minmax(0,1fr)]">
-                <div>
-                  <label
-                    htmlFor="spirit-root-override"
-                    className="mb-2 block text-sm text-stone-400"
-                  >
-                    先天根骨
-                  </label>
-                  <select
-                    id="spirit-root-override"
-                    value={config.spiritRootOverride ?? ""}
-                    onChange={(event) =>
-                      onSelectSpiritRoot(
-                        event.target.value
-                          ? (event.target.value as SpiritRootId)
-                          : undefined
-                      )
-                    }
-                    className="w-full rounded-xl border border-stone-700 bg-stone-950 px-3 py-3 text-sm text-stone-100 outline-none transition focus:border-amber-500"
-                  >
-                    <option value="">承接前世靈根</option>
-                    {Object.entries(SPIRIT_ROOT_DETAILS).map(([spiritRootId, detail]) => (
-                      <option key={spiritRootId} value={spiritRootId}>
-                        {detail.name}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="mt-2 text-xs text-stone-500">
-                    改寫靈根需額外消耗 100 功德。
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="text-sm text-stone-400">
-                    可攜遺珍（限 {heirloomSlotCount} 件）
-                  </div>
-                  {summary.eligibleHeirlooms.length > 0 ? (
-                    <div className="grid gap-2 md:grid-cols-2">
-                      {summary.eligibleHeirlooms.map((candidate) => {
-                        const active = config.selectedHeirloomIds.includes(candidate.id);
-                        const blockedReason = !active
-                          ? getRebirthHeirloomBlockedReason(candidate, config)
-                          : undefined;
-                        return (
-                          <button
-                            key={candidate.id}
-                            onClick={() => onToggleHeirloom(candidate.id)}
-                            disabled={Boolean(blockedReason)}
-                            className={clsx(
-                              "rounded-xl border p-3 text-left transition",
-                              active
-                                ? "border-cyan-500/50 bg-cyan-500/10"
-                                : blockedReason
-                                  ? "cursor-not-allowed border-stone-800 bg-stone-950/60"
-                                  : "border-stone-800 bg-stone-950/80 hover:border-stone-700"
-                            )}
-                          >
-                            <div className="text-sm font-medium text-stone-100">
-                              {candidate.label}
-                            </div>
-                            <div className="mt-1 text-xs text-stone-500">
-                              {candidate.sourceType === "equipment"
-                                ? "裝備遺珍"
-                                : "功法手札"}
-                            </div>
-                            {blockedReason && (
-                              <div className="mt-2 text-xs text-rose-300/80">
-                                {blockedReason}
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-stone-500">本世沒有可攜遺珍。</p>
-                  )}
-                </div>
-              </div>
-            </div>
+            <p className="mt-4 text-sm leading-7 text-stone-400">
+              先定下一世的修途傾向，再配置魂印、加護、遺珍與先天靈根。這裡調整的是開局偏好與可承接資源，
+              <span className="font-medium text-stone-200">不會直接把下一世職業鎖死</span>；
+              你重生後仍然會從村莊起步，再依正式流程決定要走哪條路。此頁面會維持單欄直向閱讀，手機與桌面都共用同一組滾動邏輯。
+            </p>
           </section>
 
-          <aside className="space-y-5 rounded-2xl border border-stone-800 bg-stone-900/70 p-5">
+          <section className={SECTION_SURFACE_CLASS}>
             <div className="flex items-center gap-3">
               <Skull className="text-stone-500" size={18} />
               <h2 className="text-lg font-semibold text-stone-100">下一世配置</h2>
             </div>
 
-            <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4 text-sm text-stone-300">
-              <div className="text-stone-500">Build Identity</div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4 text-sm text-stone-300">
+                <div className="text-stone-500">現有功德</div>
+                <div className="mt-2 text-2xl font-semibold text-amber-400">{totalMerit}</div>
+              </div>
+              <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4 text-sm text-stone-300">
+                <div className="text-stone-500">本次花費</div>
+                <div
+                  className={clsx(
+                    "mt-2 text-2xl font-semibold",
+                    canAfford ? "text-stone-100" : "text-rose-300"
+                  )}
+                >
+                  {totalCost}
+                </div>
+              </div>
+              <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4 text-sm text-stone-300">
+                <div className="text-stone-500">剩餘功德</div>
+                <div className="mt-2 text-2xl font-semibold text-emerald-400">
+                  {Math.max(0, totalMerit - totalCost)}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-xl border border-stone-800 bg-stone-950/80 p-4 text-sm text-stone-300">
+              <div className="text-stone-500">轉世傾向</div>
               <div className="mt-2 text-lg font-semibold text-cyan-200">
                 {preview.identityTitle}
               </div>
               <div className="mt-2 text-sm text-stone-400">{preview.identityCue}</div>
-            </div>
-
-            <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4 text-sm text-stone-300">
-              <div className="flex items-center justify-between">
-                <span>現有功德</span>
-                <span className="font-semibold text-amber-400">{totalMerit}</span>
-              </div>
-              <div className="mt-2 flex items-center justify-between">
-                <span>本次花費</span>
-                <span className={clsx("font-semibold", canAfford ? "text-stone-100" : "text-rose-300")}>
-                  {totalCost}
-                </span>
-              </div>
-              <div className="mt-2 flex items-center justify-between">
-                <span>剩餘功德</span>
-                <span className="font-semibold text-emerald-400">
-                  {Math.max(0, totalMerit - totalCost)}
-                </span>
-              </div>
               {preview.issueLines.map((line) => (
-                <div key={line} className="mt-3 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
+                <div
+                  key={line}
+                  className="mt-3 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200"
+                >
                   {line}
                 </div>
               ))}
             </div>
+          </section>
 
-            <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4 text-sm text-stone-300">
-              <div className="text-stone-500">本世基底</div>
-              <div className="mt-2">死因：{getCauseLabel(summary.cause)}</div>
-              <div className="mt-2">最高境界：{REALM_NAMES[summary.highestRealm]}</div>
-              <div className="mt-2">壽數：{summary.ageYears} 歲</div>
+          <section className={SECTION_SURFACE_CLASS}>
+            <div className="mb-2 text-sm font-medium text-stone-200">轉世傾向</div>
+            <p className="mb-4 text-xs leading-6 text-stone-500">
+              選這裡是在決定下一世優先承接哪一條 build 的遺珍、魂印與屬性加成。
+              不選專精就維持均衡開局；選了劍修 / 體修 / 法修，也只是讓開局偏向那一系，之後仍可在村莊與任務流程中重新決定正式職業路徑。
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {buildIdentityOptions.map((identity) => {
+                const active = config.selectedBuildIdentity === identity;
+                return (
+                  <button
+                    key={identity}
+                    onClick={() => onSelectBuildIdentity?.(identity)}
+                    className={clsx(
+                      "rounded-xl border p-4 text-left transition",
+                      active
+                        ? "border-cyan-500/50 bg-cyan-500/10"
+                        : "border-stone-800 bg-stone-950/80 hover:border-stone-700"
+                    )}
+                  >
+                    <div className="text-sm font-medium text-stone-100">
+                      {REINCARNATION_BUILD_IDENTITY_LABELS[identity]}
+                    </div>
+                    <div className="mt-2 text-xs leading-6 text-stone-500">
+                      {identity === "balanced"
+                        ? "不限制職業向遺珍，但無法啟動專精魂印。"
+                        : "會限制不相符的職業武器與心法遺珍。"}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
+          </section>
 
-            <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4 text-sm text-stone-300">
-              <div className="text-stone-500">加成預覽</div>
-              {statBonuses.length > 0 ? (
-                <div className="mt-2 space-y-1">
-                  {statBonuses.map((line) => (
-                    <div key={line}>{line}</div>
+          <section className={SECTION_SURFACE_CLASS}>
+            <div className="mb-3 text-sm font-medium text-stone-200">本命魂印</div>
+            <div className="grid gap-3">
+              {availableSoulSeals.map((seal) => {
+                const active = config.selectedSealId === seal.id;
+                return (
+                  <button
+                    key={seal.id}
+                    onClick={() => onSelectSoulSeal?.(seal.id)}
+                    className={clsx(
+                      "rounded-xl border p-4 text-left transition",
+                      active
+                        ? "border-violet-500/50 bg-violet-500/10"
+                        : "border-stone-800 bg-stone-950/80 hover:border-stone-700"
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-medium text-stone-100">{seal.name}</span>
+                      <span className="text-sm text-amber-400">{seal.cost} 功德</span>
+                    </div>
+                    <p className="mt-2 text-sm text-stone-400">{seal.description}</p>
+                  </button>
+                );
+              })}
+            </div>
+            {lockedSoulSeals.length > 0 && (
+              <div className="mt-5 space-y-3">
+                <div className="text-sm font-medium text-stone-500">尚未成形的魂印</div>
+                <div className="grid gap-3">
+                  {lockedSoulSeals.map((seal) => (
+                    <div
+                      key={seal.id}
+                      className="rounded-xl border border-stone-800 bg-stone-950/45 p-4 opacity-75"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-medium text-stone-300">{seal.name}</span>
+                        <span className="text-sm text-stone-600">{seal.cost} 功德</span>
+                      </div>
+                      <p className="mt-2 text-sm text-stone-500">{seal.description}</p>
+                      <p className="mt-3 text-xs text-amber-300/80">
+                        {getUnlockLabel({
+                          ...seal.unlockRequirement,
+                          requiredWorldMemoryTags: seal.requiredWorldMemoryTags,
+                        })}
+                      </p>
+                    </div>
                   ))}
                 </div>
-              ) : (
-                <div className="mt-2 text-stone-500">尚未選擇屬性類魂印。</div>
-              )}
-              <div className="mt-3">初始靈石 +{spiritStoneBonus}</div>
+              </div>
+            )}
+          </section>
+
+          <section className={SECTION_SURFACE_CLASS}>
+            <div className="mb-3 text-sm font-medium text-stone-200">魂印加護</div>
+            <div className="grid gap-3">
+              {unlockedPerks.map((perk) => {
+                const active = config.selectedPerkIds.includes(perk.id);
+                const blockedReason = !active
+                  ? getRebirthPerkBlockedReason(perk, config)
+                  : undefined;
+                return (
+                  <button
+                    key={perk.id}
+                    onClick={() => onTogglePerk(perk.id)}
+                    disabled={Boolean(blockedReason)}
+                    className={clsx(
+                      "rounded-xl border p-4 text-left transition",
+                      active
+                        ? "border-amber-500/50 bg-amber-500/10"
+                        : blockedReason
+                          ? "cursor-not-allowed border-stone-800 bg-stone-950/60"
+                          : "border-stone-800 bg-stone-950/80 hover:border-stone-700"
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-medium text-stone-100">{perk.name}</span>
+                      <span className="text-sm text-amber-400">{perk.cost} 功德</span>
+                    </div>
+                    <p className="mt-2 text-sm text-stone-400">{perk.description}</p>
+                    {blockedReason && (
+                      <p className="mt-3 text-xs text-rose-300/80">{blockedReason}</p>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            {lockedPerks.length > 0 && (
+              <div className="mt-5 space-y-3">
+                <div className="text-sm font-medium text-stone-500">尚未悟透</div>
+                <div className="grid gap-3">
+                  {lockedPerks.map((perk) => (
+                    <div
+                      key={perk.id}
+                      className="rounded-xl border border-stone-800 bg-stone-950/45 p-4 opacity-75"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-medium text-stone-300">{perk.name}</span>
+                        <span className="text-sm text-stone-600">{perk.cost} 功德</span>
+                      </div>
+                      <p className="mt-2 text-sm text-stone-500">{perk.description}</p>
+                      <p className="mt-3 text-xs text-amber-300/80">
+                        {getUnlockLabel({
+                          ...perk.unlockRequirement,
+                          requiredWorldMemoryTags: perk.requiredWorldMemoryTags,
+                        })}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+
+          <section className={SECTION_SURFACE_CLASS}>
+            <div className="mb-3 text-sm font-medium text-stone-200">遺珍與命格</div>
+            <div>
+              <label
+                htmlFor="spirit-root-override"
+                className="mb-2 block text-sm text-stone-400"
+              >
+                先天靈根
+              </label>
+              <Select
+                value={
+                  config.spiritRootOverride ?? INHERIT_PREVIOUS_SPIRIT_ROOT_VALUE
+                }
+                onValueChange={(value) =>
+                  onSelectSpiritRoot(
+                    value === INHERIT_PREVIOUS_SPIRIT_ROOT_VALUE
+                      ? undefined
+                      : (value as SpiritRootId)
+                  )
+                }
+              >
+                <SelectTrigger id="spirit-root-override" aria-label="先天靈根">
+                  <SelectValue placeholder="承接前世靈根" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={INHERIT_PREVIOUS_SPIRIT_ROOT_VALUE}>
+                    承接前世靈根
+                  </SelectItem>
+                  {Object.entries(SPIRIT_ROOT_DETAILS).map(([spiritRootId, detail]) => (
+                    <SelectItem key={spiritRootId} value={spiritRootId}>
+                      {detail.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="mt-2 text-xs leading-6 text-stone-500">
+                預設會
+                <span className="text-stone-300">承接前世靈根</span>，不會重新抽取。
+                若你想直接指定下一世的先天靈根，可以在這裡改寫，會額外消耗 100 功德。
+              </p>
             </div>
 
-            <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4 text-sm text-stone-300">
+            <div className="mt-5 space-y-2">
+              <div className="text-sm text-stone-400">可攜遺珍（限 {heirloomSlotCount} 件）</div>
+              {summary.eligibleHeirlooms.length > 0 ? (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {summary.eligibleHeirlooms.map((candidate) => {
+                    const active = config.selectedHeirloomIds.includes(candidate.id);
+                    const blockedReason = !active
+                      ? getRebirthHeirloomBlockedReason(candidate, config)
+                      : undefined;
+                    return (
+                      <button
+                        key={candidate.id}
+                        onClick={() => onToggleHeirloom(candidate.id)}
+                        disabled={Boolean(blockedReason)}
+                        className={clsx(
+                          "rounded-xl border p-3 text-left transition",
+                          active
+                            ? "border-cyan-500/50 bg-cyan-500/10"
+                            : blockedReason
+                              ? "cursor-not-allowed border-stone-800 bg-stone-950/60"
+                              : "border-stone-800 bg-stone-950/80 hover:border-stone-700"
+                        )}
+                      >
+                        <div className="text-sm font-medium text-stone-100">
+                          {candidate.label}
+                        </div>
+                        <div className="mt-1 text-xs text-stone-500">
+                          {candidate.sourceType === "equipment" ? "裝備遺珍" : "功法手札"}
+                        </div>
+                        {blockedReason && (
+                          <div className="mt-2 text-xs text-rose-300/80">
+                            {blockedReason}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-stone-500">本世沒有可攜遺珍。</p>
+              )}
+            </div>
+          </section>
+
+          <section className={SECTION_SURFACE_CLASS}>
+            <div className="text-sm font-medium text-stone-200">本世基底與加成預覽</div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4 text-sm text-stone-300">
+                <div className="text-stone-500">本世基底</div>
+                <div className="mt-2">死因：{getCauseLabel(summary.cause)}</div>
+                <div className="mt-2">最高境界：{REALM_NAMES[summary.highestRealm]}</div>
+                <div className="mt-2">壽數：{summary.ageYears} 歲</div>
+                <div className="mt-2">輪迴次數：{lifetimeStats.totalReincarnations}</div>
+              </div>
+              <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4 text-sm text-stone-300">
+                <div className="text-stone-500">加成預覽</div>
+                {statBonuses.length > 0 ? (
+                  <div className="mt-2 space-y-1">
+                    {statBonuses.map((line) => (
+                      <div key={line}>{line}</div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-2 text-stone-500">尚未選擇屬性類魂印。</div>
+                )}
+                <div className="mt-3">初始靈石 +{spiritStoneBonus}</div>
+              </div>
+            </div>
+            <div className="mt-4 rounded-xl border border-stone-800 bg-stone-950/80 p-4 text-sm text-stone-300">
               <div className="text-stone-500">限制與提示</div>
               <div className="mt-2 space-y-2">
                 {preview.constraintLines.map((line) => (
@@ -590,20 +618,20 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
                 ))}
               </div>
             </div>
+          </section>
 
-            <button
-              onClick={onConfirm}
-              disabled={!canAfford || preview.issueLines.length > 0}
-              className={clsx(
-                "w-full rounded-xl border px-4 py-3 font-medium transition",
-                canAfford && preview.issueLines.length === 0
-                  ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-100 hover:bg-emerald-500/25"
-                  : "cursor-not-allowed border-stone-800 bg-stone-900 text-stone-500"
-              )}
-            >
-              投胎轉世
-            </button>
-          </aside>
+          <button
+            onClick={onConfirm}
+            disabled={!canAfford || preview.issueLines.length > 0}
+            className={clsx(
+              "w-full rounded-xl border px-4 py-3 font-medium transition",
+              canAfford && preview.issueLines.length === 0
+                ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-100 hover:bg-emerald-500/25"
+                : "cursor-not-allowed border-stone-800 bg-stone-900 text-stone-500"
+            )}
+          >
+            投胎轉世
+          </button>
         </div>
       </div>
     </div>

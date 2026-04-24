@@ -190,4 +190,47 @@ describe("ReincarnationFlow", () => {
     expect(markup).toContain("與當前劍修流派不符");
     expect(markup).toContain("與當前劍修流派互斥");
   });
+
+  it("uses a mobile-first single-column shell so the hall can scroll within the viewport", () => {
+    const lifetimeStats = createLifetimeStats(MajorRealm.GoldenCore);
+
+    const markup = renderToStaticMarkup(
+      <ReincarnationFlow
+        flowStep="hall"
+        summary={{
+          cause: "lifespan",
+          ageYears: 410,
+          highestRealm: MajorRealm.GoldenCore,
+          realmMerit: 320,
+          ageMerit: 180,
+          totalMeritGained: 500,
+          eligibleHeirlooms: [],
+        }}
+        totalMerit={500}
+        lifetimeStats={lifetimeStats}
+        worldMemoryTags={[]}
+        unlockedPerks={getAvailableReincarnationPerks({
+          lifetimeStats,
+          worldMemoryTags: [],
+        })}
+        config={{
+          plannerVersion: 2,
+          selectedBuildIdentity: "balanced",
+          selectedPerkIds: [],
+          selectedHeirloomIds: [],
+        }}
+        onEnterHall={() => undefined}
+        onSelectBuildIdentity={() => undefined}
+        onSelectSoulSeal={() => undefined}
+        onTogglePerk={() => undefined}
+        onToggleHeirloom={() => undefined}
+        onSelectSpiritRoot={() => undefined}
+        onConfirm={() => undefined}
+      />
+    );
+
+    expect(markup).toContain("min-h-dvh");
+    expect(markup).toContain("max-w-[560px]");
+    expect(markup).toContain("單欄直向閱讀");
+  });
 });
