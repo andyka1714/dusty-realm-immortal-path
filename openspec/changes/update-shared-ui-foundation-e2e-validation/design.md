@@ -13,6 +13,7 @@
 - Goals:
   - 建立正式 shared UI foundation 第一波，讓高風險互動 flow 共享同一套語意
   - 先收斂 `Reincarnation Hall`、`GameShell overlay` 與 `Inventory`
+  - 全量盤點 app source，讓殘留 raw controls 收斂到 shared primitives
   - 建立最小可用的 browser/e2e 驗證基線
 - Non-Goals:
   - 不全面重寫所有頁面的視覺語言
@@ -27,6 +28,7 @@
   - 富內容說明走 `HoverCard` 或 `Popover`
 - `button` 不做單一樣式；維持遊戲語義 variants，例如 `primary / danger / ghost / icon / tab / action-card`
 - browser/e2e 第一波只覆蓋最高風險流程，並補必要的穩定 selector，不追求一次覆蓋全站
+- app source 以 guard test 禁止直接新增 lowercase native `button/input/select/textarea`，shared primitive 本體集中保留 native element
 
 ## Risks / Trade-offs
 
@@ -42,5 +44,6 @@
 1. 建立 OpenSpec change 與 shared primitive
 2. 收斂 overlay / tabs / input / button variants
 3. 替換 `Reincarnation Hall`、`GameShell overlay`、`Inventory`、`IntroSequence`
-4. 補 browser/e2e smoke 與 tracking docs
-5. 完整驗證後提交
+4. 全量掃描並補收 `Sidebar`、`Adventure`、`ShopPanel`、`QuestModal` 殘留 raw controls
+5. 補 browser/e2e smoke、native control guard 與 tracking docs
+6. 完整驗證後提交

@@ -100,17 +100,22 @@ Change id: `update-shared-ui-foundation-e2e-validation`
 - `Modal / GamePanel` 已改由 shared `Dialog` primitive 承接 overlay、backdrop、focus 與 mobile sheet-like 呈現，並保留明確 close policy
 - `Reincarnation Hall / Dashboard / IntroSequence / Inventory` 已收斂主操作、篩選、輸入、確認與危險操作到 shared `Button / Input / Tabs`
 - `Workshop / Compendium / StatsPanel / FloatingDock / PendingEncounterPanel` 已收斂明顯的 tab、卡片選項與 panel switch 熱區
+- `Sidebar / Adventure / ShopPanel / QuestModal` 已完成剩餘 raw control sweep，app source 不再直接宣告 lowercase native `button/input/select/textarea`
 - 已新增穩定 selector 與 Playwright browser smoke，覆蓋 `輪迴大殿 / GameShell overlay / Inventory / pending encounter modal`
+- `npm test` 已排除 Playwright e2e specs，避免 Vitest 誤載 `@playwright/test` 檔案
 
 本輪仍維持：
 
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog
 - 不需要 migration；只調整 UI foundation、互動承接方式與 browser 驗證基線
 - 不把玩家、怪物、NPC token 改成 pixel sprite，也不重做 `AdventureStage` 戰鬥邏輯
+- native control guard 只限制 app source；`components/ui` primitive 本體仍集中持有必要 native element
 
 驗證基線：
 
 - `openspec validate update-shared-ui-foundation-e2e-validation --strict`
+- `npm test -- tests/sharedUiNativeControls.test.ts`
+- `npm test`
 - `npm test -- components/game/ReincarnationFlow.test.tsx pages/Dashboard.reincarnation.test.tsx components/game/GameShell.test.tsx components/game/PendingEncounterPanel.test.tsx pages/Workshop.crafting.test.tsx store/actions/reincarnationActions.test.ts store/localStorage.test.ts`
 - `npm run typecheck`
 - `npm run build`

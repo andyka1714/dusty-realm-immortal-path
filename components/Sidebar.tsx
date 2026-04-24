@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { GameHintBubble } from "./game/GameHintBubble";
+import { Button } from "./ui/button";
 
 interface SidebarProps {
   activeTab: string;
@@ -86,12 +87,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
 
           {/* Mobile Close Button */}
-          <button
+          <Button
             className="md:hidden text-stone-500 hover:text-stone-200"
             onClick={() => setIsMobileOpen(false)}
+            variant="ghost"
+            size="icon"
+            data-testid="sidebar-mobile-close"
           >
             <X size={24} />
-          </button>
+          </Button>
         </div>
 
         {/* Navigation Items */}
@@ -102,12 +106,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             const isDisabled = item.id === "adventure" && isInSeclusion;
 
             return (
-              <button
+              <Button
                 key={item.id}
                 onClick={() => !isDisabled && setActiveTab(item.id)}
                 disabled={isDisabled}
+                variant="ghost"
+                size="sm"
                 className={clsx(
-                  "w-full flex items-center rounded-lg transition-all duration-200 border group relative",
+                  "h-auto w-full flex items-center rounded-lg transition-all duration-200 border group relative",
                   isCollapsed
                     ? "justify-center px-2 py-3"
                     : "px-4 py-3 space-x-3",
@@ -115,8 +121,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     ? "bg-stone-800 border-amber-600/50 text-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.1)]"
                     : isDisabled
                       ? "border-transparent text-stone-600 cursor-not-allowed bg-stone-950/50"
-                      : "border-transparent text-stone-400 hover:bg-stone-800/50 hover:text-stone-200"
+                    : "border-transparent text-stone-400 hover:bg-stone-800/50 hover:text-stone-200"
                 )}
+                data-testid={`sidebar-nav-${item.id}`}
               >
                 <div className="relative">
                   {isDisabled ? <Lock size={20} /> : <Icon size={20} />}
@@ -153,20 +160,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {item.label}
                   </GameHintBubble>
                 )}
-              </button>
+              </Button>
             );
           })}
         </nav>
 
         {/* Compendium Button */}
         <div className="px-3 pb-2">
-          <button
+          <Button
             onClick={onOpenCompendium}
+            variant="ghost"
+            size="sm"
             className={clsx(
-              "w-full flex items-center rounded-lg transition-all duration-200 border group relative",
+              "h-auto w-full flex items-center rounded-lg transition-all duration-200 border group relative",
               isCollapsed ? "justify-center px-2 py-3" : "px-4 py-3 space-x-3",
               "border-stone-800 text-stone-400 hover:bg-stone-800 hover:text-amber-500 hover:border-amber-900/30"
             )}
+            data-testid="sidebar-compendium"
           >
             <div className="relative">
               <Book size={20} />
@@ -185,15 +195,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 萬界圖鑑
               </GameHintBubble>
             )}
-          </button>
+          </Button>
         </div>
 
         {/* Footer / Toggle Button */}
         <div className="p-4 border-t border-stone-800 flex flex-col gap-4">
           {/* Desktop Collapse Toggle */}
-          <button
+          <Button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden md:flex w-full items-center justify-center p-2 rounded hover:bg-stone-800 text-stone-500 transition-colors"
+            variant="ghost"
+            size="sm"
+            className="hidden h-auto w-full items-center justify-center p-2 text-stone-500 transition-colors hover:bg-stone-800 md:flex"
+            data-testid="sidebar-collapse-toggle"
           >
             <span className="sr-only">{isCollapsed ? "展開選單" : "收合選單"}</span>
             {isCollapsed ? (
@@ -201,7 +214,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             ) : (
               <ChevronLeft size={20} />
             )}
-          </button>
+          </Button>
 
           <div
             className={clsx(

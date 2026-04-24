@@ -21,6 +21,7 @@ import clsx from 'clsx';
 import { Modal } from '../Modal';
 import { GameTooltip } from '../game/GameTooltip';
 import { GameSection } from '../game/GameSection';
+import { Button } from '../ui/button';
 import { getFormalSkill } from '../../data/skills';
 import {
     getSkillManualAcquisitionTierLabel,
@@ -289,17 +290,20 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                                         {formatSpiritStone(price)}
                                         <Coins size={12} />
                                     </div>
-                                    <button 
+                                    <Button
                                         onClick={() => handleBuy(shopItem)}
                                         disabled={!canAfford || isJustPurchased}
+                                        variant={isJustPurchased ? "emerald" : canAfford ? "amber" : "stone"}
+                                        size="sm"
                                         className={clsx(
-                                            "px-4 py-1.5 rounded flex items-center justify-center gap-1 font-bold text-sm border transition-all w-full active:scale-95 min-w-[60px]",
+                                            "min-w-[60px] w-full px-4 py-1.5 text-sm font-bold active:scale-95",
                                             isJustPurchased
                                                 ? "bg-emerald-900/30 border-emerald-600 text-emerald-400 scale-105"
                                                 : canAfford 
                                                     ? "bg-amber-900/20 border-amber-800 text-amber-500 hover:bg-amber-900/40 hover:border-amber-500 hover:shadow-[0_0_8px_rgba(245,158,11,0.3)]" 
                                                     : "bg-stone-950 border-stone-800 text-stone-600 cursor-not-allowed grayscale"
                                         )}
+                                        data-testid={`shop-buy-${shopItem.itemId}`}
                                     >
                                         {isJustPurchased ? (
                                             <>
@@ -309,7 +313,7 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                                         ) : (
                                             "購買"
                                         )}
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
                         );

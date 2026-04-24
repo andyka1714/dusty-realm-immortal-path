@@ -12,6 +12,7 @@ import { addVisualEffect } from '../../store/slices/adventureSlice'; // Import a
 import { Modal } from '../Modal';
 import { GameSection } from '../game/GameSection';
 import { GameTooltip } from '../game/GameTooltip';
+import { Button } from '../ui/button';
 import { getFormalSkill } from '../../data/skills';
 import { resolveQuestReadinessAtNpc } from '../../utils/questProgress';
 import {
@@ -323,12 +324,14 @@ export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
             icon={<ScrollText size={18} />}
             size="small"
             actions={
-                <button 
-                    onClick={isLastLine ? handleAction : handleNextLine} 
-                    className={`px-6 py-2 rounded border transition-all ${actionClass}`}
+                <Button
+                    onClick={isLastLine ? handleAction : handleNextLine}
+                    variant="selection"
+                    className={`px-6 py-2 transition-all ${actionClass}`}
+                    data-testid="quest-modal-primary-action"
                 >
                     {actionLabel}
-                </button>
+                </Button>
             }
         >
             <div className="flex flex-col gap-4">

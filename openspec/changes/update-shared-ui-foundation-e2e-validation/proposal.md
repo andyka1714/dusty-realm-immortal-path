@@ -15,6 +15,7 @@
 
 - 建立正式可重用的 shared UI foundation 第一波：`dialog/sheet`、`tooltip` 系列、`tabs`、`input` 與擴充後的 `button` variants
 - 先替換最高風險 flow：`Reincarnation Hall`、`GameShell overlay`、`Inventory` 與 `IntroSequence`
+- 全量盤點 app source，補收 `Sidebar`、`Adventure`、`ShopPanel`、`QuestModal` 殘留 raw controls，並以 guard test 防止回歸
 - 補穩定 selector 與 browser/e2e harness，至少覆蓋 `輪迴大殿 / GameShell overlay / Inventory`
 - 同步更新 Android / mobile-first UI 驗證追蹤文件
 
@@ -31,9 +32,15 @@
   - `pages/Dashboard.tsx`
   - `pages/Inventory.tsx`
   - `components/IntroSequence.tsx`
+  - `components/Sidebar.tsx`
+  - `pages/Adventure.tsx`
+  - `components/adventure/ShopPanel.tsx`
+  - `components/adventure/QuestModal.tsx`
   - `pages/Workshop.tsx`
   - `components/Compendium/CompendiumModal.tsx`
+  - `vite.config.ts`
   - browser/e2e config and tests
+  - native control guard test
   - `docs/06_Balance_Audit/20_Android_UI驗證與下一階段Priority追蹤.md`
 
 ## Persisted State / Migration

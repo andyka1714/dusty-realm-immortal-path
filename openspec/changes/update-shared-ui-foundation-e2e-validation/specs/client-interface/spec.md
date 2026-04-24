@@ -12,6 +12,11 @@
 - **THEN** 它們必須維持既有遊戲世界觀的深色、五行與戰鬥語義
 - **AND** 不得直接套用與正式遊戲風格衝突的預設 component 外觀
 
+#### Scenario: App source 不再繞過 shared primitives
+- **WHEN** 團隊盤點 `components`、`pages` 與 app shell source
+- **THEN** app source 不得直接宣告 lowercase native `button`、`input`、`select` 或 `textarea`
+- **AND** native element 必須集中在 `components/ui` shared primitive 本體或等價 foundation 層
+
 ### Requirement: 高風險 UI flow 的正式瀏覽器驗證
 系統必須 (MUST) 為高風險互動流程提供正式的 browser/e2e smoke 驗證，而不是只依賴靜態 markup 或 reducer regression。
 

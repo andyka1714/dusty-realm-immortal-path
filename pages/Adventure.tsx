@@ -35,6 +35,8 @@ import { QuestModal } from '../components/adventure/QuestModal';
 import { GameHintBubble } from '../components/game/GameHintBubble';
 import { GameSection } from '../components/game/GameSection';
 import { GameTooltip } from '../components/game/GameTooltip';
+import { Button } from '../components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { SHOPS } from '../data/shops';
 import { getEnemyEngagementRange, getGridDistance, getPlayerEngagementRange } from '../utils/worldCombat';
 import { getLearnedSkillEngagementRange } from '../utils/skillRealtime';
@@ -1387,9 +1389,11 @@ export const Adventure: React.FC<AdventureProps> = ({
         
         {/* Top Right Mini-Map */}
         <div className="absolute right-4 top-4 z-20 flex flex-col items-end gap-2">
-            <button 
+            <Button
               onClick={() => { setIsMapModalOpen(true); setMapTab('area'); }}
+              variant="ghost"
               className="bg-black/90 border border-stone-600 p-1 w-24 h-24 md:w-32 md:h-32 rounded shadow-lg backdrop-blur relative overflow-hidden group hover:border-amber-500 transition-colors"
+              data-testid="adventure-minimap-open"
             >
                  <div className="w-full h-full relative opacity-80">
                       <div className="absolute w-1.5 h-1.5 bg-green-500 rounded-full z-20 shadow-[0_0_5px_green]" style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}></div>
@@ -1416,16 +1420,18 @@ export const Adventure: React.FC<AdventureProps> = ({
                  <div className="absolute bottom-0 right-0 bg-stone-900/80 text-[9px] px-1 text-stone-400 border-tl rounded font-mono">
                      {playerPosition.x},{playerPosition.y}
                  </div>
-            </button>
+            </Button>
              <div className="flex flex-col items-end gap-1">
                  <div className="flex items-center gap-2">
-                     <button
+                     <Button
                         onClick={() =>
                           setStageRenderMode((currentMode) =>
                             currentMode === 'pixel_prototype' ? 'official' : 'pixel_prototype'
                           )
                         }
                         disabled={!canPreviewPixelPrototype}
+                        variant="ghost"
+                        size="icon"
                         className={clsx(
                             "h-8 w-8 flex items-center justify-center rounded backdrop-blur border transition-all group relative",
                             activeStageRenderMode === 'pixel_prototype'
@@ -1434,6 +1440,7 @@ export const Adventure: React.FC<AdventureProps> = ({
                                   ? "bg-black/50 border-stone-800 text-stone-500 hover:text-stone-200 hover:border-stone-600"
                                   : "bg-black/30 border-stone-900 text-stone-700 cursor-not-allowed opacity-70"
                         )}
+                        data-testid="adventure-pixel-prototype-toggle"
                      >
                          <Sparkles size={16} />
                          
@@ -1447,15 +1454,18 @@ export const Adventure: React.FC<AdventureProps> = ({
                                 : "切換到像素風 vertical slice 原型"
                               : "目前只在東郊靈田開放像素原型預覽"}
                          </GameHintBubble>
-                     </button>
-                     <button
+                     </Button>
+                     <Button
                         onClick={() => setIsAutoBattling(!isAutoBattling)}
+                        variant="ghost"
+                        size="icon"
                         className={clsx(
                             "h-8 w-8 flex items-center justify-center rounded backdrop-blur border transition-all group relative",
                             isAutoBattling 
                                 ? "bg-red-900/80 border-red-500 text-red-200 shadow-[0_0_10px_rgba(220,38,38,0.5)] animate-pulse" 
                                 : "bg-black/50 border-stone-800 text-stone-500 hover:text-stone-300 hover:border-stone-600"
                         )}
+                        data-testid="adventure-auto-battle-toggle"
                      >
                          <Swords size={16} />
                          
@@ -1465,7 +1475,7 @@ export const Adventure: React.FC<AdventureProps> = ({
                          >
                             {isAutoBattling ? "停止掛機" : "自動戰鬥"}
                          </GameHintBubble>
-                     </button>
+                     </Button>
                      <div className="h-8 flex items-center text-stone-400 text-xs bg-black/50 px-3 rounded backdrop-blur border border-stone-800 font-bold tracking-wider">
                         {mapData?.name}
                      </div>
@@ -2030,7 +2040,7 @@ export const Adventure: React.FC<AdventureProps> = ({
                         className="min-w-[min(92vw,44rem)] shadow-[0_0_30px_rgba(0,0,0,0.55)] backdrop-blur"
                         bodyClassName="grid grid-cols-2 gap-2 p-3 md:grid-cols-4"
                     >
-                        <button
+                        <Button
                             onClick={() => {
                                 if (targetedMonster && canEngageTarget) {
                                     runPlayerWorldAction(false);
@@ -2038,12 +2048,14 @@ export const Adventure: React.FC<AdventureProps> = ({
                                 }
                             }}
                             disabled={!targetedMonster || !canEngageTarget}
+                            variant="selection"
                             className={clsx(
-                                "min-w-24 rounded-xl border px-3 py-2 text-left transition-colors",
+                                "h-auto min-w-24 flex-col items-stretch justify-start whitespace-normal rounded-xl border px-3 py-2 text-left transition-colors",
                                 targetedMonster && canEngageTarget
                                   ? "border-red-700 bg-red-950/50 text-red-200 hover:bg-red-900/60"
                                   : "cursor-not-allowed border-stone-800 bg-stone-950/60 text-stone-500"
                             )}
+                            data-testid="adventure-command-basic-attack"
                         >
                             <div className="flex items-center justify-between gap-3">
                                 <span className="text-sm font-bold">普攻</span>
@@ -2056,9 +2068,9 @@ export const Adventure: React.FC<AdventureProps> = ({
                                     : '目標尚未進入距離'
                                   : '未鎖定目標'}
                             </div>
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
                             onClick={() => {
                                 if (targetedMonster && canEngageTarget) {
                                     runPlayerWorldAction(true);
@@ -2066,12 +2078,14 @@ export const Adventure: React.FC<AdventureProps> = ({
                                 }
                             }}
                             disabled={!primaryActiveSkill || !targetedMonster || !canEngageTarget}
+                            variant="selection"
                             className={clsx(
-                                "min-w-36 rounded-xl border px-3 py-2 text-left transition-colors",
+                                "h-auto min-w-36 flex-col items-stretch justify-start whitespace-normal rounded-xl border px-3 py-2 text-left transition-colors",
                                 primaryActiveSkill && targetedMonster && canEngageTarget
                                   ? "border-amber-700 bg-amber-950/45 text-amber-200 hover:bg-amber-900/60"
                                   : "cursor-not-allowed border-stone-800 bg-stone-950/60 text-stone-500"
                             )}
+                            data-testid="adventure-command-active-skill"
                         >
                             <div className="flex items-center justify-between gap-3">
                                 <span className="truncate text-sm font-bold">
@@ -2082,37 +2096,41 @@ export const Adventure: React.FC<AdventureProps> = ({
                             <div className="mt-1 text-[11px] text-stone-400">
                                 {primaryActiveSkill ? '直接施放主修術式' : '尚未習得主動術式'}
                             </div>
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
                             onClick={() => setIsAutoBattling((prev) => !prev)}
+                            variant="selection"
                             className={clsx(
-                                "min-w-24 rounded-xl border px-3 py-2 text-left transition-colors",
+                                "h-auto min-w-24 flex-col items-stretch justify-start whitespace-normal rounded-xl border px-3 py-2 text-left transition-colors",
                                 isAutoBattling
                                   ? "border-emerald-700 bg-emerald-950/45 text-emerald-200 hover:bg-emerald-900/60"
                                   : "border-stone-700 bg-stone-950/60 text-stone-300 hover:bg-stone-900/70"
                             )}
+                            data-testid="adventure-command-auto-battle"
                         >
                             <div className="flex items-center justify-between gap-3">
                                 <span className="text-sm font-bold">{isAutoBattling ? '掛機中' : '掛機'}</span>
                                 <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">R</span>
                             </div>
                             <div className="mt-1 text-[11px] text-stone-400">自動尋敵與追擊</div>
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
                             onClick={() => {
                                 setIsMapModalOpen(true);
                                 setMapTab('area');
                             }}
-                            className="min-w-24 rounded-xl border border-stone-700 bg-stone-950/60 px-3 py-2 text-left text-stone-300 transition-colors hover:bg-stone-900/70"
+                            variant="selection"
+                            className="h-auto min-w-24 flex-col items-stretch justify-start whitespace-normal rounded-xl border border-stone-700 bg-stone-950/60 px-3 py-2 text-left text-stone-300 transition-colors hover:bg-stone-900/70"
+                            data-testid="adventure-command-map"
                         >
                             <div className="flex items-center justify-between gap-3">
                                 <span className="text-sm font-bold">地圖</span>
                                 <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">M</span>
                             </div>
                             <div className="mt-1 text-[11px] text-stone-400">展開地區 / 世界地圖</div>
-                        </button>
+                        </Button>
                     </GameSection>
                 </div>
             </div>
@@ -2189,25 +2207,40 @@ export const Adventure: React.FC<AdventureProps> = ({
           icon={<MapIcon size={18} className="text-amber-500" />}
           size="large"
           actions={
-             <button onClick={() => setIsMapModalOpen(false)} className="px-4 py-2 bg-stone-800 text-stone-300 rounded hover:bg-stone-700 border border-stone-700">關閉</button>
+             <Button
+               onClick={() => setIsMapModalOpen(false)}
+               variant="stone"
+               size="sm"
+               data-testid="adventure-map-modal-close"
+             >
+               關閉
+             </Button>
           }
         >
             <div className="flex flex-col h-full">
                 {/* Tabs */}
-                <div className="flex border-b border-stone-800 mb-0 flex-none bg-stone-900 md:bg-transparent px-4 md:px-0 pt-2 md:pt-0">
-                    <button 
-                        onClick={() => setMapTab('area')}
-                        className={clsx("flex-1 py-3 flex items-center justify-center gap-2 transition-colors border-b-2", mapTab === 'area' ? "text-amber-500 border-amber-500 bg-amber-900/10" : "text-stone-500 border-transparent hover:text-stone-300")}
-                    >
-                        <Target size={16} /> 區域地圖
-                    </button>
-                    <button 
-                        onClick={() => setMapTab('world')}
-                        className={clsx("flex-1 py-3 flex items-center justify-center gap-2 transition-colors border-b-2", mapTab === 'world' ? "text-amber-500 border-amber-500 bg-amber-900/10" : "text-stone-500 border-transparent hover:text-stone-300")}
-                    >
-                        <Globe size={16} /> 世界地圖
-                    </button>
-                </div>
+                <Tabs
+                    value={mapTab}
+                    onValueChange={(value) => setMapTab(value as 'area' | 'world')}
+                    className="mb-0 flex-none border-b border-stone-800 bg-stone-900 px-4 pt-2 md:bg-transparent md:px-0 md:pt-0"
+                >
+                    <TabsList className="grid min-h-0 w-full grid-cols-2 rounded-none border-0 border-stone-800 bg-transparent p-0">
+                        <TabsTrigger
+                            value="area"
+                            className="rounded-none border-x-0 border-t-0 py-3"
+                            data-testid="adventure-map-tab-area"
+                        >
+                            <Target size={16} /> 區域地圖
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="world"
+                            className="rounded-none border-x-0 border-t-0 py-3"
+                            data-testid="adventure-map-tab-world"
+                        >
+                            <Globe size={16} /> 世界地圖
+                        </TabsTrigger>
+                    </TabsList>
+                </Tabs>
 
                 <div className="flex-1 overflow-hidden relative bg-stone-950 md:rounded md:border border-stone-800">
                     {mapTab === 'area' && mapData && (

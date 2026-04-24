@@ -7,6 +7,7 @@
 - [x] 2.2 收斂 `Modal / GamePanel / GameShell overlay` 的 shared overlay 行為
 - [x] 2.3 收斂 `Inventory` 與 `IntroSequence` 的 raw controls
 - [x] 2.4 視情況延伸到 `Workshop`、`Compendium` 等明顯熱區
+- [x] 2.5 全量盤點 app source，補收 `Sidebar`、`Adventure`、`ShopPanel`、`QuestModal` 殘留 raw controls
 
 ## 3. Browser 驗證基線
 - [x] 3.1 建立正式 browser/e2e harness 與穩定 selector
@@ -19,3 +20,5 @@
 - [x] 4.3 驗證 `npm run build`
 - [x] 4.4 驗證 browser/e2e smoke
 - [x] 4.5 更新 tasks 與 tracking docs，明確記錄本次 change 不需要 migration
+- [x] 4.6 新增 native control guard test，防止 app source 再繞過 shared UI primitives
+- [x] 4.7 分離 Vitest 與 Playwright spec 掃描範圍，讓 `npm test` 不誤載 e2e specs

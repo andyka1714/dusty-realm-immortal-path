@@ -1,5 +1,5 @@
 import path from 'path';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
@@ -8,6 +8,9 @@ export default defineConfig({
     host: '0.0.0.0',
   },
   plugins: [react()],
+  test: {
+    exclude: ['**/node_modules/**', '**/dist/**', '**/tests/e2e/**'],
+  },
   build: {
     rollupOptions: {
       output: {
