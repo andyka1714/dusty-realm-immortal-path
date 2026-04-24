@@ -39,6 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { Button } from "../ui/button";
 
 const SCREEN_SHELL_CLASS =
   "min-h-dvh w-full overflow-y-auto px-3 py-4 sm:px-4 sm:py-5 md:px-6 md:py-6";
@@ -209,13 +210,15 @@ const LifeReviewScreen: React.FC<LifeReviewScreenProps> = ({
           )}
         </section>
 
-        <button
+        <Button
           onClick={onEnterHall}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/15 px-4 py-3 font-medium text-amber-200 transition hover:bg-amber-500/25"
+          variant="amber"
+          size="lg"
+          className="w-full"
         >
           <Sparkles size={18} />
           進入輪迴大殿
-        </button>
+        </Button>
       </div>
     </div>
   </div>
@@ -620,18 +623,17 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
             </div>
           </section>
 
-          <button
+          <Button
             onClick={onConfirm}
             disabled={!canAfford || preview.issueLines.length > 0}
-            className={clsx(
-              "w-full rounded-xl border px-4 py-3 font-medium transition",
-              canAfford && preview.issueLines.length === 0
-                ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-100 hover:bg-emerald-500/25"
-                : "cursor-not-allowed border-stone-800 bg-stone-900 text-stone-500"
-            )}
+            variant={
+              canAfford && preview.issueLines.length === 0 ? "emerald" : "stone"
+            }
+            size="lg"
+            className="w-full"
           >
             投胎轉世
-          </button>
+          </Button>
         </div>
       </div>
     </div>

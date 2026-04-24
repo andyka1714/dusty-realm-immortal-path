@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  body {
+    font-family: "Noto Serif TC", serif;
+    background-color: #1c1917;
+    color: #e7e5e4;
+  }
+}
