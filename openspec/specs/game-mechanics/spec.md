@@ -149,17 +149,32 @@
 - **AND** 這些 cue 必須對應現有 live combat archetype，而不是脫離 battle core 另外命名
 
 ### Requirement: 事件內容庫覆蓋率
-系統必須 (MUST) 讓正式 encounter pool 在中後期境界段維持可追蹤的內容覆蓋率，避免某些境界或路線只剩少量一次性事件。
+系統必須 (MUST) 讓正式 encounter pool 在中後期與終盤境界段維持可追蹤的內容覆蓋率，避免某些境界或路線只剩少量一次性事件。
 
 #### Scenario: 中後期境界保有最低事件覆蓋
 - **WHEN** 系統載入 encounter pool
-- **THEN** `元嬰 / 化神 / 煉虛 / 合體 / 大乘 / 渡劫` 等主要中後期階段必須有可被 regression 驗證的事件覆蓋
+- **THEN** `元嬰 / 化神 / 煉虛 / 合體 / 大乘 / 渡劫 / 仙人 / 仙帝` 等主要中後期與終盤階段必須有可被 regression 驗證的事件覆蓋
 - **AND** 不得讓任一主要階段只依賴單一 one-time 事件支撐
 
 #### Scenario: 路線事件保有辨識度
 - **WHEN** 玩家以不同職業、宗門或世界路線觸發 encounter
 - **THEN** 事件必須提供可辨識的 `routeLabel`、`categoryLabel`、cue tag、材料來源或 reward 差異
 - **AND** 不得把所有 route-specific event 退化成同模板純數值收益
+
+#### Scenario: 高境界 coverage floor 包含仙人與仙帝
+- **WHEN** 系統載入 `化神 -> 仙帝` encounter pool
+- **THEN** 每個高境界必須保有最低事件量與可重複事件量
+- **AND** `仙人 / 仙帝` 不得被排除在 coverage regression 之外
+
+#### Scenario: 終盤 route-specific event 可重複出現
+- **WHEN** 玩家到達 `仙帝` 且已完成對應宗門後段路線
+- **THEN** encounter selector 必須能提供對應職業 / 宗門的 route-specific 終盤事件
+- **AND** 該事件必須不是 `once_per_run`，避免終盤內容密度只靠一次性 milestone
+
+#### Scenario: 既有高境界事件保留可讀 cue
+- **WHEN** 高境界通用 encounter 進入 pending flow
+- **THEN** 事件必須提供 `categoryLabel / routeLabel` 與每個 choice 的 cue tags
+- **AND** 玩家不得只能從長描述猜測成本、收益、材料或風險
 
 ### Requirement: 宗門與世界後段內容延伸
 系統必須 (MUST) 讓宗門與世界內容在 `金丹` 後繼續承接玩家路線，至少延伸到 `元嬰` 里程碑，而不是在中期任務後斷線。
@@ -515,3 +530,11 @@
 - **WHEN** 一條主線完成並準備選下一條 backlog
 - **THEN** 必須先檢查 `openspec list`、base specs 與 tracking docs
 - **AND** 不得只依賴舊審計文字判斷下一步
+
+### Requirement: Encounter v3 不改 persisted state
+系統必須 (MUST) 在擴張 encounter 內容密度時維持現有存檔 shape，不因新增事件內容而要求 migration。
+
+#### Scenario: 新事件只使用既有 event metadata
+- **WHEN** 新增 v3 encounter event
+- **THEN** 事件必須使用現有 `selector / presentation / choices / chain` metadata
+- **AND** 不得新增 `EncounterState`、`PendingEncounter` 或 LocalStorage envelope 欄位
