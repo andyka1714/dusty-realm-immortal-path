@@ -121,3 +121,8 @@ Change id: `update-shared-ui-foundation-e2e-validation`
 - `npm run build`
 - `npm run test:e2e`
 - `git diff --check`
+
+Archive 記錄：
+
+- `2026-04-26` 已以 `openspec archive update-shared-ui-foundation-e2e-validation --skip-specs --yes` 歸檔。
+- 使用 `--skip-specs` 的理由：`client-interface` base spec 已吸收本輪正式行為，本次 archive 僅移動 completed change，不需要再次修改 base spec。
