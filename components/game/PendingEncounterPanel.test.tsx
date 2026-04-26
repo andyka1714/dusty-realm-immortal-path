@@ -25,4 +25,20 @@ describe("PendingEncounterPanel", () => {
     expect(markup).toContain("封印劍火");
     expect(markup).toContain("劍脈續響");
   });
+
+  it("renders v3 emperor route event cues without relying on long description only", () => {
+    const markup = renderToStaticMarkup(
+      <PendingEncounterPanel
+        event={ENCOUNTER_EVENTS.sword_emperor_heaven_sunder_oath}
+        pending={{ eventId: "sword_emperor_heaven_sunder_oath", year: 990 }}
+        onChoose={() => undefined}
+      />
+    );
+
+    expect(markup).toContain("仙帝終盤路線");
+    expect(markup).toContain("凌霄劍宗");
+    expect(markup).toContain("凌霄劍宗帝境");
+    expect(markup).toContain("凌霄劍星鋼 x2");
+    expect(markup).toContain("高風險");
+  });
 });

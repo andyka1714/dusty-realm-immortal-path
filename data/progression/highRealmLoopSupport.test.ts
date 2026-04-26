@@ -51,4 +51,19 @@ describe("high realm loop support regression", () => {
     expect(highTierOutputIds).toContain("bt_immortal_emperor");
     expect(highTierOutputIds).toContain("origin_sword");
   });
+
+  it("tracks v3 emperor route encounters as explicit loop support", () => {
+    const emperorSupport = getHighRealmLoopSupportProfile(MajorRealm.ImmortalEmperor);
+
+    expect(emperorSupport.encounter.eventIds).toEqual(
+      expect.arrayContaining([
+        "sword_emperor_heaven_sunder_oath",
+        "beast_emperor_worldblood_hunt",
+        "mystic_emperor_star_throne_decree",
+      ])
+    );
+    emperorSupport.encounter.eventIds.forEach((eventId) => {
+      expect(getEncounterEventById(eventId), `${eventId} should exist`).toBeTruthy();
+    });
+  });
 });

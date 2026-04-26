@@ -112,6 +112,13 @@ Workshop state 已正式記錄：
 - `合體 / 大乘` 補上三宗 route-specific 可重複事件，仍使用既有 profession 與 `sect_*_task_04` gating，不新增 encounter engine 或存檔欄位。
 - 新增事件都保留 `categoryLabel / routeLabel / cue tags`，選項會在 pending panel 前置顯示材料、穩定收益、宗門路線或風險提示。
 
+`expand-encounter-content-density-v3` 把這條線延伸到 `仙人 / 仙帝`：
+
+- coverage regression 現在納入 `仙人 / 仙帝`，不再只驗到 `渡劫`。
+- `仙人` 補上凌霄劍宗與萬獸山莊材料來源，和既有縹緲仙宮星魂蓮來源一起承接三路高階材料。
+- `仙帝` 補上 `斬天帝劍盟 / 萬獸帝血獵 / 星座帝詔庭` 三條可重複 route-specific encounter，仍沿用 profession 與 `sect_*_task_04` gating，不改存檔欄位。
+- 高境界通用 encounter 會補齊 `categoryLabel / routeLabel / choice cue tags`，讓 pending panel 不再只靠長描述表達收益或風險。
+
 `expand-encounter-chain-world-memory` 則把這批事件從「單次或可重複事件」正式推進成 chain-aware encounter：
 
 - `EncounterEvent` 現在可透過 `requiredResolvedEventIds` 與 `requiredWorldMemoryTags` 接續前置事件或跨輪迴記憶。

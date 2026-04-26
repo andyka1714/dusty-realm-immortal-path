@@ -41,6 +41,15 @@
 - 強化 route-specific 事件差異，不只靠同一批 flavor text 輪播
 - 讓事件系統真正成為內容密度來源，而不是只有結構存在
 
+2026-04-26 執行狀態：
+
+- 已開案並實作 `expand-encounter-content-density-v3`。
+- coverage floor 已延伸到 `仙人 / 仙帝`。
+- `仙人` 補凌霄劍宗 / 萬獸山莊 route material source，與既有縹緲仙宮 source 對齊。
+- `仙帝` 補三宗 route-specific 可重複 encounter：`斬天帝劍盟 / 萬獸帝血獵 / 星座帝詔庭`。
+- 高境界通用 encounter 已補 presentation / choice cue metadata，pending panel 可直接顯示類型、路線、收益與風險。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog；不需要 migration。
+
 ### Priority 2. `expand-sect-world-late-content-v3`
 
 目標：

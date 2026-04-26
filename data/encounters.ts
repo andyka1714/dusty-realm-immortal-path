@@ -1,5 +1,6 @@
 import {
   MajorRealm,
+  MajorRealmCN,
   ProfessionType,
   type EncounterPresentationCue,
   type PendingEncounter,
@@ -95,6 +96,107 @@ const createSingleRealmEncounterEvent = (
   };
 };
 
+const ENCOUNTER_ITEM_CUE_LABELS: Record<string, string> = {
+  spirit_herb: "聚靈草",
+  iron_ore: "玄鐵礦",
+  wolf_fang: "妖狼牙",
+  bt_spirit_void: "太虛破障丹",
+  bt_void_fusion: "萬法歸一髓",
+  bt_fusion_maha: "天道感悟果",
+  bt_maha_trib: "九轉渡劫丹",
+  bt_trib_immortal: "飛昇仙引",
+  bt_immortal_emperor: "鴻蒙本源",
+  sword_path_starsteel: "凌霄劍星鋼",
+  beast_path_bloodbone: "萬獸血骨殘材",
+  mystic_path_starlotus: "縹緲星魂蓮",
+  emperor_crown: "帝冠",
+};
+
+const HIGH_REALM_EVENT_CUE_FLOOR = MajorRealm.SpiritSevering;
+
+const resolveDefaultHighRealmPresentation = (
+  event: EncounterEvent
+): EncounterEventPresentation | undefined => {
+  if (event.maxRealm < HIGH_REALM_EVENT_CUE_FLOOR) {
+    return event.presentation;
+  }
+
+  const realmLabel =
+    event.minRealm === event.maxRealm
+      ? MajorRealmCN[event.minRealm]
+      : `${MajorRealmCN[event.minRealm]}-${MajorRealmCN[event.maxRealm]}`;
+
+  return {
+    categoryLabel: event.presentation?.categoryLabel ?? `${realmLabel}通用機緣`,
+    routeLabel: event.presentation?.routeLabel ?? event.title,
+    chainLabel: event.presentation?.chainLabel,
+    memoryCue: event.presentation?.memoryCue,
+    sectLabel: event.presentation?.sectLabel,
+  };
+};
+
+const resolveDefaultChoiceCue = (
+  event: EncounterEvent,
+  choice: EncounterChoice
+): EncounterChoiceCue | undefined => {
+  if (choice.cue || event.maxRealm < HIGH_REALM_EVENT_CUE_FLOOR) {
+    return choice.cue;
+  }
+
+  const tags: EncounterChoiceCue["tags"] = [];
+
+  choice.reward.items?.forEach((item) => {
+    tags.push({
+      kind: "resource",
+      label: `${ENCOUNTER_ITEM_CUE_LABELS[item.itemId] ?? item.itemId} x${item.count}`,
+    });
+  });
+
+  if (choice.reward.spiritStones !== undefined) {
+    tags.push({
+      kind: choice.reward.spiritStones < 0 ? "cost" : "resource",
+      label:
+        choice.reward.spiritStones < 0
+          ? `耗費靈石 ${Math.abs(choice.reward.spiritStones)}`
+          : `靈石 +${choice.reward.spiritStones}`,
+    });
+  }
+
+  if (choice.reward.experience !== undefined) {
+    tags.push({ kind: "benefit", label: "修為收益" });
+  }
+
+  if (tags.length === 0) {
+    tags.push({ kind: "benefit", label: "事件收益" });
+  }
+
+  const riskyText = `${choice.label}${choice.description}${choice.reward.logMessage}`;
+  const tone: EncounterChoiceCue["tone"] =
+    choice.reward.spiritStones !== undefined && choice.reward.spiritStones < 0
+      ? "costly"
+      : /高壓|殘雷|雷|硬|劫|搶|裂界/.test(riskyText)
+        ? "risky"
+        : "steady";
+
+  return { tone, tags };
+};
+
+const normalizeEncounterEvent = (event: EncounterEvent): EncounterEvent => ({
+  ...event,
+  presentation: resolveDefaultHighRealmPresentation(event),
+  choices: event.choices.map((choice) => ({
+    ...choice,
+    cue: resolveDefaultChoiceCue(event, choice),
+  })),
+});
+
+const normalizeEncounterEvents = (
+  events: Record<string, EncounterEvent>
+): Record<string, EncounterEvent> =>
+  Object.fromEntries(
+    Object.entries(events).map(([eventId, event]) => [eventId, normalizeEncounterEvent(event)])
+  );
+
 export const getEncounterPreviewCue = (
   event: EncounterEvent
 ): EncounterPresentationCue => ({
@@ -110,7 +212,7 @@ export const getEncounterPreviewCue = (
     (event.selector?.requiredCompletedQuestIds?.length ? "宗門前置已完成" : undefined),
 });
 
-export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
+const RAW_ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
   herb_garden: {
     id: "herb_garden",
     title: "荒山藥圃",
@@ -1359,6 +1461,104 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
       },
     ],
   }),
+  sword_immortal_skyforge_tribute: createSingleRealmEncounterEvent({
+    id: "sword_immortal_skyforge_tribute",
+    title: "仙闕劍爐貢",
+    description: "仙闕外的劍爐只在凌霄劍宗門人抵達仙人境後短暫開火，爐中星鋼可回補終盤器方。",
+    realm: MajorRealm.Immortal,
+    selector: {
+      weight: 4,
+      eligibleProfessions: [ProfessionType.Sword],
+      requiredCompletedQuestIds: ["sect_sword_task_04"],
+    },
+    presentation: {
+      categoryLabel: "仙人路線材料",
+      routeLabel: "凌霄劍宗",
+    },
+    choices: [
+      {
+        id: "claim_skyforge_starsteel",
+        label: "接下劍爐貢",
+        description: "以本命劍意穩住仙闕劍爐，取出可回爐的星鋼。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "凌霄劍星鋼 x1" },
+            { kind: "benefit", label: "仙人器方材料" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "sword_path_starsteel", count: 1 }],
+          logMessage: "你接下仙闕劍爐貢，凌霄劍星鋼的終盤來源又穩了一條。",
+        },
+      },
+      {
+        id: "temper_immortal_edge",
+        label: "借爐淬鋒",
+        description: "不取材料，讓劍爐仙火替你的劍勢削去浮躁。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "仙人劍勢" },
+            { kind: "benefit", label: "修為收益" },
+          ],
+        },
+        reward: {
+          experience: 2240000,
+          logMessage: "你借仙闕劍爐淬鋒，仙人境的劍勢與洞府節奏更容易合拍。",
+        },
+      },
+    ],
+  }),
+  beast_immortal_bloodbone_altar: createSingleRealmEncounterEvent({
+    id: "beast_immortal_bloodbone_altar",
+    title: "仙獸血骨壇",
+    description: "萬獸山莊在仙人邊境留下血骨壇，只有體修能把壇中壓力轉成可用鍛材。",
+    realm: MajorRealm.Immortal,
+    selector: {
+      weight: 4,
+      eligibleProfessions: [ProfessionType.Body],
+      requiredCompletedQuestIds: ["sect_beast_task_04"],
+    },
+    presentation: {
+      categoryLabel: "仙人路線材料",
+      routeLabel: "萬獸山莊",
+    },
+    choices: [
+      {
+        id: "open_bloodbone_altar",
+        label: "開壇取骨",
+        description: "頂住血骨壇的反噬，把能入爐的殘材剝出來。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "resource", label: "萬獸血骨殘材 x1" },
+            { kind: "risk", label: "仙獸壇反噬" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "beast_path_bloodbone", count: 1 }],
+          logMessage: "你從仙獸血骨壇取回殘材，體修終盤器方又多了一處可追蹤來源。",
+        },
+      },
+      {
+        id: "endure_altar_pressure",
+        label: "以壇壓身",
+        description: "暫不取材，改把血骨壇壓力導入肉身。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "高壓鍛體" },
+            { kind: "benefit", label: "仙人體修" },
+          ],
+        },
+        reward: {
+          experience: 2140000,
+          logMessage: "你承下血骨壇壓力，仙人境肉身不再只靠閉關硬磨。",
+        },
+      },
+    ],
+  }),
   sword_sect_patrol_cache: createSingleRealmEncounterEvent({
     id: "sword_sect_patrol_cache",
     title: "巡山暗匣",
@@ -2034,7 +2234,160 @@ export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
       },
     ],
   }),
+  sword_emperor_heaven_sunder_oath: createSingleRealmEncounterEvent({
+    id: "sword_emperor_heaven_sunder_oath",
+    title: "斬天帝劍盟",
+    description: "凌霄劍宗的終盤劍盟在帝境裂界邊緣重開，劍修可選擇搶資材或立下更高階的帝劍節奏。",
+    realm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 5,
+      eligibleProfessions: [ProfessionType.Sword],
+      requiredCompletedQuestIds: ["sect_sword_task_04"],
+    },
+    presentation: {
+      categoryLabel: "仙帝終盤路線",
+      routeLabel: "凌霄劍宗",
+      sectLabel: "凌霄劍宗帝境承接",
+    },
+    choices: [
+      {
+        id: "claim_heaven_sunder_starsteel",
+        label: "奪取斬天星鋼",
+        description: "趁帝劍盟尚未散去，取走最適合終盤器方的星鋼。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "凌霄劍宗帝境" },
+            { kind: "resource", label: "凌霄劍星鋼 x2" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "sword_path_starsteel", count: 2 }],
+          logMessage: "你從斬天帝劍盟中奪回兩段凌霄劍星鋼，終盤器方不再只靠通用寶潮。",
+        },
+      },
+      {
+        id: "engrave_heaven_sunder_oath",
+        label: "刻下帝劍盟誓",
+        description: "不取材料，改把帝劍盟的節奏刻進神魂。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "帝劍節奏" },
+            { kind: "benefit", label: "仙帝劍修" },
+          ],
+        },
+        reward: {
+          experience: 3840000,
+          logMessage: "你刻下斬天帝劍盟誓，凌霄劍宗的仙帝路線變得更有辨識度。",
+        },
+      },
+    ],
+  }),
+  beast_emperor_worldblood_hunt: createSingleRealmEncounterEvent({
+    id: "beast_emperor_worldblood_hunt",
+    title: "萬獸帝血獵",
+    description: "萬獸山莊的帝血獵場在裂界深處展開，體修必須在高壓追獵與資材回收間取捨。",
+    realm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 5,
+      eligibleProfessions: [ProfessionType.Body],
+      requiredCompletedQuestIds: ["sect_beast_task_04"],
+    },
+    presentation: {
+      categoryLabel: "仙帝終盤路線",
+      routeLabel: "萬獸山莊",
+      sectLabel: "萬獸山莊帝境承接",
+    },
+    choices: [
+      {
+        id: "harvest_worldblood_bones",
+        label: "剝取帝血骨",
+        description: "追上裂界中墜落的帝血獸骨，剝下最適合終盤鍛體的殘材。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "萬獸山莊帝境" },
+            { kind: "resource", label: "萬獸血骨殘材 x2" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "beast_path_bloodbone", count: 2 }],
+          logMessage: "你在帝血獵場剝下兩份萬獸血骨殘材，體修終盤材料來源終於不再抽象。",
+        },
+      },
+      {
+        id: "survive_worldblood_hunt",
+        label: "硬撐帝血獵",
+        description: "放棄剝材，專心承受帝血獵場的追壓，把它化成肉身底盤。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "高壓鍛體" },
+            { kind: "benefit", label: "仙帝體修" },
+          ],
+        },
+        reward: {
+          experience: 3720000,
+          logMessage: "你硬撐完帝血獵場，萬獸山莊的仙帝肉身路線有了真正的高壓節點。",
+        },
+      },
+    ],
+  }),
+  mystic_emperor_star_throne_decree: createSingleRealmEncounterEvent({
+    id: "mystic_emperor_star_throne_decree",
+    title: "星座帝詔庭",
+    description: "縹緲仙宮的星座帝詔庭在鴻蒙邊界浮現，法修可從詔庭裡取星蓮，也可直接推演帝境術式。",
+    realm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 5,
+      eligibleProfessions: [ProfessionType.Mage],
+      requiredCompletedQuestIds: ["sect_mystic_task_04"],
+    },
+    presentation: {
+      categoryLabel: "仙帝終盤路線",
+      routeLabel: "縹緲仙宮",
+      sectLabel: "縹緲仙宮帝境承接",
+    },
+    choices: [
+      {
+        id: "gather_star_throne_lotus",
+        label: "採下帝詔星蓮",
+        description: "以神識穩住帝詔庭的星位，採下仍帶鴻蒙氣的星魂蓮。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "縹緲仙宮帝境" },
+            { kind: "resource", label: "縹緲星魂蓮 x2" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "mystic_path_starlotus", count: 2 }],
+          logMessage: "你從星座帝詔庭採下兩株縹緲星魂蓮，法修終盤丹方終於有了穩定回路。",
+        },
+      },
+      {
+        id: "read_star_throne_decree",
+        label: "解讀帝詔星位",
+        description: "不採蓮，直接解讀帝詔庭的星位排列。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "帝境術式" },
+            { kind: "benefit", label: "仙帝法修" },
+          ],
+        },
+        reward: {
+          experience: 3920000,
+          logMessage: "你解讀帝詔星位，縹緲仙宮的仙帝法修路線不再只靠通用帝旨支撐。",
+        },
+      },
+    ],
+  }),
 };
+
+export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> =
+  normalizeEncounterEvents(RAW_ENCOUNTER_EVENTS);
 
 export const getEncounterEventById = (eventId: string) => ENCOUNTER_EVENTS[eventId];
 

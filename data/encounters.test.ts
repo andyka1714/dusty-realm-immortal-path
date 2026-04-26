@@ -89,6 +89,18 @@ const MIDDLE_LATE_REALM_COVERAGE_THRESHOLDS = [
   { realm: MajorRealm.Fusion, minEvents: 5, minRepeatableEvents: 2 },
   { realm: MajorRealm.Mahayana, minEvents: 5, minRepeatableEvents: 2 },
   { realm: MajorRealm.Tribulation, minEvents: 3, minRepeatableEvents: 2 },
+  { realm: MajorRealm.Immortal, minEvents: 4, minRepeatableEvents: 3 },
+  { realm: MajorRealm.ImmortalEmperor, minEvents: 5, minRepeatableEvents: 5 },
+] as const;
+
+const HIGH_REALM_CUE_REALMS = [
+  MajorRealm.SpiritSevering,
+  MajorRealm.VoidRefining,
+  MajorRealm.Fusion,
+  MajorRealm.Mahayana,
+  MajorRealm.Tribulation,
+  MajorRealm.Immortal,
+  MajorRealm.ImmortalEmperor,
 ] as const;
 
 const FULL_LATE_SECT_QUEST_IDS = [
@@ -116,6 +128,36 @@ const PHASE_ONE_ROUTE_COVERAGE_REALMS = [
   MajorRealm.NascentSoul,
   MajorRealm.Fusion,
   MajorRealm.Mahayana,
+] as const;
+
+const V3_EMPEROR_ROUTE_EVENT_CASES = [
+  {
+    eventId: "sword_emperor_heaven_sunder_oath",
+    profession: ProfessionType.Sword,
+    completedQuestId: "sect_sword_task_04",
+    routeLabel: "凌霄劍宗",
+    categoryLabel: "仙帝終盤路線",
+    cueLabels: ["凌霄劍宗帝境", "凌霄劍星鋼 x2"],
+    rewardItemId: "sword_path_starsteel",
+  },
+  {
+    eventId: "beast_emperor_worldblood_hunt",
+    profession: ProfessionType.Body,
+    completedQuestId: "sect_beast_task_04",
+    routeLabel: "萬獸山莊",
+    categoryLabel: "仙帝終盤路線",
+    cueLabels: ["萬獸山莊帝境", "萬獸血骨殘材 x2"],
+    rewardItemId: "beast_path_bloodbone",
+  },
+  {
+    eventId: "mystic_emperor_star_throne_decree",
+    profession: ProfessionType.Mage,
+    completedQuestId: "sect_mystic_task_04",
+    routeLabel: "縹緲仙宮",
+    categoryLabel: "仙帝終盤路線",
+    cueLabels: ["縹緲仙宮帝境", "縹緲星魂蓮 x2"],
+    rewardItemId: "mystic_path_starlotus",
+  },
 ] as const;
 
 const buildRouteMemoryContext = (
@@ -441,6 +483,72 @@ describe("encounter selector", () => {
         coverage.oneTimeEvents.length,
         `${threshold.realm} should not only have one-time events`
       ).toBeLessThan(coverage.events.length);
+    });
+  });
+
+  it("keeps all high-realm encounters readable through presentation and choice cues", () => {
+    const highRealmEvents = Object.values(ENCOUNTER_EVENTS).filter((event) =>
+      HIGH_REALM_CUE_REALMS.some(
+        (realm) => realm >= event.minRealm && realm <= event.maxRealm
+      )
+    );
+
+    highRealmEvents.forEach((event) => {
+      expect(event.presentation?.categoryLabel, `${event.id} missing categoryLabel`).toBeTruthy();
+      expect(event.presentation?.routeLabel, `${event.id} missing routeLabel`).toBeTruthy();
+      event.choices.forEach((choice) => {
+        expect(choice.cue?.tags?.length, `${event.id}.${choice.id} missing cue tags`).toBeGreaterThan(
+          0
+        );
+      });
+    });
+  });
+
+  it("adds repeatable emperor route events with profession gates and concrete rewards", () => {
+    V3_EMPEROR_ROUTE_EVENT_CASES.forEach((testCase) => {
+      const event = ENCOUNTER_EVENTS[testCase.eventId];
+
+      expect(event, `${testCase.eventId} should exist`).toBeDefined();
+      expect(event.minRealm).toBe(MajorRealm.ImmortalEmperor);
+      expect(event.maxRealm).toBe(MajorRealm.ImmortalEmperor);
+      expect(event.selector?.repeatPolicy).not.toBe("once_per_run");
+      expect(event.selector?.eligibleProfessions).toEqual([testCase.profession]);
+      expect(event.selector?.requiredCompletedQuestIds).toEqual([testCase.completedQuestId]);
+      expect(event.presentation?.routeLabel).toBe(testCase.routeLabel);
+      expect(event.presentation?.categoryLabel).toContain(testCase.categoryLabel);
+
+      const rewardItemIds = event.choices.flatMap((choice) =>
+        choice.reward.items?.map((item) => item.itemId) ?? []
+      );
+      const cueLabels = event.choices.flatMap((choice) =>
+        choice.cue?.tags?.map((tag) => tag.label) ?? []
+      );
+
+      expect(rewardItemIds).toContain(testCase.rewardItemId);
+      testCase.cueLabels.forEach((cueLabel) => expect(cueLabels).toContain(cueLabel));
+
+      const matchingContext = {
+        majorRealm: MajorRealm.ImmortalEmperor,
+        profession: testCase.profession,
+        completedQuestIds: [testCase.completedQuestId],
+        resolvedEventIds: [],
+      };
+      const wrongProfessionContext = {
+        ...matchingContext,
+        profession:
+          testCase.profession === ProfessionType.Sword
+            ? ProfessionType.Body
+            : ProfessionType.Sword,
+      };
+
+      expect(
+        getAvailableEncounterEvents(matchingContext).some((available) => available.id === event.id)
+      ).toBe(true);
+      expect(
+        getAvailableEncounterEvents(wrongProfessionContext).some(
+          (available) => available.id === event.id
+        )
+      ).toBe(false);
     });
   });
 

@@ -1,5 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { createRequire } from "node:module";
 
 import adventureReducer from "../../store/slices/adventureSlice";
 import characterReducer, {
@@ -15,6 +16,15 @@ import type { PersistedSaveEnvelope } from "../../store/persistedStateMigration"
 import { BESTIARY } from "../../data/enemies";
 import { Gender, MajorRealm, SpiritRootId } from "../../types";
 import { getAvailableReincarnationPerks } from "../../utils/reincarnation";
+
+const require = createRequire(import.meta.url);
+const { PNG } = require("playwright-core/lib/utilsBundle") as {
+  PNG: {
+    sync: {
+      read: (buffer: Buffer) => { data: Uint8Array; width: number; height: number };
+    };
+  };
+};
 
 const SAVE_KEY = "dusty-realm-save-v1";
 
@@ -81,10 +91,44 @@ const expectWithinBox = async (child: Locator, parent: Locator) => {
   );
 };
 
+const expectWithinViewport = async (locator: Locator, page: Page) => {
+  await expect(locator).toBeVisible();
+  const box = await locator.boundingBox();
+  const viewport = page.viewportSize();
+  expect(box).not.toBeNull();
+  expect(viewport).not.toBeNull();
+  if (!box || !viewport) return;
+
+  expect(box.x).toBeGreaterThanOrEqual(-1);
+  expect(box.y).toBeGreaterThanOrEqual(-1);
+  expect(box.x + box.width).toBeLessThanOrEqual(viewport.width + 1);
+  expect(box.y + Math.min(box.height, viewport.height)).toBeLessThanOrEqual(
+    viewport.height + 1
+  );
+};
+
+const expectCanvasHasNonBlackPixels = async (canvas: Locator) => {
+  const image = PNG.sync.read(await canvas.screenshot({ type: "png" }));
+  let nonBlack = 0;
+  for (let index = 0; index < image.data.length; index += 4) {
+    const alpha = image.data[index + 3];
+    const brightness = image.data[index] + image.data[index + 1] + image.data[index + 2];
+    if (alpha > 0 && brightness > 24) {
+      nonBlack += 1;
+    }
+  }
+  const sample = { nonBlack, total: image.width * image.height };
+
+  expect(sample.total).toBeGreaterThan(0);
+  expect(sample.nonBlack).toBeGreaterThan(sample.total * 0.05);
+};
+
 const createActiveRunSave = ({
   withPendingEncounter = false,
+  pendingEventId = "fusion_sword_skyforge_oath",
 }: {
   withPendingEncounter?: boolean;
+  pendingEventId?: string;
 } = {}) => {
   const store = configureStore({ reducer: rootReducer });
 
@@ -121,7 +165,7 @@ const createActiveRunSave = ({
     encounter: withPendingEncounter
       ? {
           pendingEvent: {
-            eventId: "fusion_sword_skyforge_oath",
+            eventId: pendingEventId,
             year: 42,
           },
           resolvedEventIds: [],
@@ -352,6 +396,35 @@ test("workshop and compendium embedded panels avoid horizontal overflow", async 
   await expectNoHorizontalOverflow(compendiumPanel);
 });
 
+test("mobile workshop and compendium panels stay inside the viewport", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await installSave(page, createActiveRunSave());
+
+  await page.goto("/");
+
+  await page.getByTestId("dock-workshop").click();
+  const workshopPanel = page.getByTestId("game-shell-panel");
+  await expectWithinViewport(workshopPanel, page);
+  await expectNoHorizontalOverflow(page.getByTestId("workshop-panel"));
+  await expect(page.getByTestId("workshop-grid")).toBeVisible();
+  await page.getByTestId("workshop-recipe-card-qi_pill").scrollIntoViewIfNeeded();
+  await expect(page.getByTestId("workshop-recipe-card-qi_pill")).toBeVisible();
+
+  await page.getByTestId("game-shell-panel-close").click();
+  await expect(workshopPanel).toBeHidden();
+
+  await page.getByTestId("dock-compendium").click();
+  const compendiumShell = page.getByTestId("game-shell-panel");
+  await expectWithinViewport(compendiumShell, page);
+  await page.getByTestId("compendium-tab-map").click();
+  await expectNoHorizontalOverflow(page.getByTestId("compendium-panel"));
+  await expect(page.getByTestId("compendium-map-list")).toBeVisible();
+  await page.getByTestId("compendium-map-detail").scrollIntoViewIfNeeded();
+  await expect(page.getByTestId("compendium-map-detail")).toBeVisible();
+});
+
 test("area and world map modal render visible map surfaces", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await installSave(page, createWildCombatRunSave());
@@ -392,6 +465,25 @@ test("area and world map modal render visible map surfaces", async ({ page }) =>
   await expect(page.getByTestId("adventure-world-map-scroll")).toBeVisible();
 });
 
+test("adventure canvas and mobile map modal keep visible non-black surfaces", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await installSave(page, createWildCombatRunSave());
+
+  await page.goto("/");
+
+  const canvas = page.getByTestId("adventure-stage").locator("canvas");
+  await expect(canvas).toBeVisible();
+  await expectCanvasHasNonBlackPixels(canvas);
+
+  await page.getByTestId("adventure-minimap-open").click();
+  const modal = page.getByTestId("game-modal");
+  await expectWithinViewport(modal, page);
+  await expectNoHorizontalOverflow(page.getByTestId("adventure-map-modal-content"));
+  await expect(page.getByTestId("adventure-area-map-surface")).toBeVisible();
+});
+
 test("safe village state hides world-combat shortcuts", async ({ page }) => {
   await installSave(page, createVillageRunSave());
 
@@ -415,6 +507,31 @@ test("pending encounter modal keeps choice selectors inside the shared dialog sh
   ).toBeVisible();
   await page.getByTestId("game-modal-close").click();
   await expect(page.getByTestId("game-modal")).toBeHidden();
+});
+
+test("mobile pending encounter modal exposes v3 route cues without overflow", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await installSave(
+    page,
+    createActiveRunSave({
+      withPendingEncounter: true,
+      pendingEventId: "sword_emperor_heaven_sunder_oath",
+    })
+  );
+
+  await page.goto("/");
+
+  const modal = page.getByTestId("game-modal");
+  await expectWithinViewport(modal, page);
+  await expectNoHorizontalOverflow(modal);
+  await expect(modal.getByText("仙帝終盤路線").first()).toBeVisible();
+  await expect(modal.getByText("凌霄劍宗帝境", { exact: true })).toBeVisible();
+  await expect(modal.getByText("凌霄劍星鋼 x2")).toBeVisible();
+  await expect(
+    page.getByTestId("pending-encounter-choice-claim_heaven_sunder_starsteel")
+  ).toBeVisible();
 });
 
 test("clicking an adjacent monster starts world combat without waiting for auto battle", async ({
