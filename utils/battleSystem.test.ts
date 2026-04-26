@@ -771,6 +771,62 @@ describe("battle system balance", () => {
         "controller-enemy:execute:special",
       ]);
 
+      const clickedTargetWindow = runWorldCombatControllerStep({
+        now: 2200,
+        distance: 1,
+        playerEngagementRange: 2,
+        playerActionReadyAt: 2000,
+        playerSkillReadyAt: 999999,
+        primaryActiveSkill: undefined,
+        isAutoBattling: false,
+        worldCombatTargetId: "enemy-1",
+        targetedMonsterInstanceId: "enemy-1",
+        enemyEngagementRange: 1,
+        enemyActionReadyAt: 2000,
+        enemySpecialReadyAt: 999999,
+        playerAction: {
+          canExecute: () => true,
+          target: { instanceId: "enemy-1", name: "木人" },
+          resolveStrike: (chosenSkill) => ({
+            executionTimeMs: 0,
+            skillId: chosenSkill?.id ?? "basic",
+          }),
+          applyCastEffect: ({ strike }) =>
+            calls.push(`clicked-player:cast:${strike.skillId}`),
+          applyPreview: ({ strike }) =>
+            calls.push(`clicked-player:preview:${strike.skillId}`),
+          execute: ({ strike }) =>
+            calls.push(`clicked-player:execute:${strike.skillId}`),
+        },
+        enemyAction: {
+          resolveStrike: (canUseSpecial) => ({
+            executionTimeMs: 0,
+            mode: canUseSpecial ? "special" : "basic",
+          }),
+          applyCastEffect: ({ strike }) =>
+            calls.push(`clicked-enemy:cast:${strike.mode}`),
+          applyPreview: ({ strike }) =>
+            calls.push(`clicked-enemy:preview:${strike.mode}`),
+          execute: ({ strike }) =>
+            calls.push(`clicked-enemy:execute:${strike.mode}`),
+        },
+      });
+
+      expect(clickedTargetWindow).toEqual({
+        engagedTargetId: "enemy-1",
+        shouldPlayerAct: true,
+        usePlayerSkill: false,
+        shouldEnemyAct: true,
+      });
+      expect(calls.slice(-6)).toEqual([
+        "clicked-player:cast:basic",
+        "clicked-player:preview:basic",
+        "clicked-player:execute:basic",
+        "clicked-enemy:cast:basic",
+        "clicked-enemy:preview:basic",
+        "clicked-enemy:execute:basic",
+      ]);
+
       const controllerFrameAutoTarget = runWorldCombatControllerFrame({
         autoTarget: {
           isAutoBattling: true,

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/store';
@@ -42,6 +42,10 @@ import { getEnemyEngagementRange, getGridDistance, getPlayerEngagementRange } fr
 import { getLearnedSkillEngagementRange } from '../utils/skillRealtime';
 import { normalizeLearnedSkills } from '../data/skills';
 import {
+  resolveAdventureCombatUiState,
+  resolveWorldCombatTargetSelection,
+} from '../utils/adventureCombatUiState';
+import {
   resolveWorldCombatStatusCues,
   resolveWorldCombatTargetPresentation,
   type WorldCombatCueIconKey,
@@ -61,6 +65,7 @@ import {
   useBattleResultLifecycleEffect,
   useWorldCombatControllerEffect,
 } from '../hooks/useAdventureBattleEffects';
+import { resolveAdventureTerrainPalette } from '../utils/adventureTerrainPixelization';
 
 
 // --- VISUAL CONFIG ---
@@ -70,6 +75,8 @@ const GRID_SCALE_X = 140;
 const GRID_SCALE_Y = 120; 
 const NODE_WIDTH = 100;
 const NODE_HEIGHT = 70;
+
+const toHexColor = (value: number) => `#${value.toString(16).padStart(6, '0')}`;
 
 type CombatCueRenderable = {
   key: string;
@@ -448,8 +455,12 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     });
 
     return (
-        <div className="relative w-full h-full bg-stone-950 overflow-hidden">
-            <div ref={scrollContainerRef} className="w-full h-full overflow-auto bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] bg-stone-950 custom-scrollbar relative">
+        <div className="relative h-full w-full overflow-hidden bg-stone-950" data-testid="adventure-world-map">
+            <div
+              ref={scrollContainerRef}
+              className="custom-scrollbar relative h-full w-full overflow-auto bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] bg-stone-950"
+              data-testid="adventure-world-map-scroll"
+            >
                 <div style={{ width: canvasWidth, height: canvasHeight, position: 'relative', margin: '0 auto' }}>
                     <svg width={canvasWidth} height={canvasHeight} className="absolute inset-0 pointer-events-none z-0">
                         {connections}
@@ -673,6 +684,22 @@ export const Adventure: React.FC<AdventureProps> = ({
       pixelWidth: 600,
       pixelHeight: 600
   });
+
+  const applyGridMetrics = (nextMetrics: typeof gridMetrics) => {
+    setGridMetrics((previousMetrics) => {
+      if (
+        previousMetrics.cols === nextMetrics.cols &&
+        previousMetrics.rows === nextMetrics.rows &&
+        previousMetrics.cellSize === nextMetrics.cellSize &&
+        previousMetrics.pixelWidth === nextMetrics.pixelWidth &&
+        previousMetrics.pixelHeight === nextMetrics.pixelHeight
+      ) {
+        return previousMetrics;
+      }
+
+      return nextMetrics;
+    });
+  };
   
   // Detect Resize and Update Viewport
   useLayoutEffect(() => {
@@ -707,7 +734,7 @@ export const Adventure: React.FC<AdventureProps> = ({
             if (rows * finalCellSize < height) rows += 2;
 
             // Result: Width is exact, Height is >= container
-            setGridMetrics({ 
+            applyGridMetrics({
                 cols, 
                 rows, 
                 cellSize: finalCellSize, 
@@ -736,7 +763,7 @@ export const Adventure: React.FC<AdventureProps> = ({
             // Calculate integer cell size to fit
             const finalCellSize = Math.floor(Math.min(width / cols, height / rows));
 
-            setGridMetrics({ 
+            applyGridMetrics({
                 cols, 
                 rows, 
                 cellSize: finalCellSize, 
@@ -761,6 +788,38 @@ export const Adventure: React.FC<AdventureProps> = ({
   }, [currentMapId, dispatch]);
 
   const mapData = MAPS.find(m => m.id === currentMapId);
+  const areaMapSurfaceStyle = useMemo<React.CSSProperties>(() => {
+    if (!mapData) return {};
+
+    const palette = resolveAdventureTerrainPalette(mapData.theme);
+    const base = toHexColor(palette.fillColors.base);
+    const alt = toHexColor(palette.fillColors.alt);
+    const accent = toHexColor(palette.fillColors.accent);
+    const path = toHexColor(palette.fillColors.path);
+    const water = toHexColor(palette.fillColors.water);
+    const grid = toHexColor(palette.gridColor);
+
+    return {
+      backgroundColor: base,
+      backgroundImage: [
+        `linear-gradient(90deg, ${grid}55 1px, transparent 1px)`,
+        `linear-gradient(${grid}55 1px, transparent 1px)`,
+        `radial-gradient(circle at 18% 22%, ${accent} 0 5%, transparent 6%)`,
+        `radial-gradient(circle at 78% 72%, ${water} 0 7%, transparent 8%)`,
+        `linear-gradient(135deg, transparent 0 42%, ${path}88 43% 48%, transparent 49%)`,
+        `linear-gradient(180deg, ${alt}99, ${base})`,
+      ].join(", "),
+      backgroundSize: "5% 5%, 5% 5%, 100% 100%, 100% 100%, 100% 100%, 100% 100%",
+    };
+  }, [mapData]);
+  const hasCombatEncounters = Boolean(mapData?.enemies.length);
+  const combatUiState = resolveAdventureCombatUiState({
+    hasCombatEncounters,
+    isInSeclusion: character.isInSeclusion,
+    showIntro,
+    isBattling,
+    isMapModalOpen,
+  });
   const canPreviewPixelPrototype = mapData?.id === PIXEL_PROTOTYPE_MAP_ID;
   const activeStageRenderMode = resolveAdventureStageRenderMode({
     requestedMode: stageRenderMode,
@@ -1326,13 +1385,6 @@ export const Adventure: React.FC<AdventureProps> = ({
       
       // 1. Check Monster
       const targetMonster = activeMonsters.find(m => m.x === targetX && m.y === targetY);
-      
-      // Auto-Battle Override
-      if (isAutoBattling) {
-           if (!targetMonster || (targetMonster && targetMonster.instanceId !== targetMonsterId)) {
-               setIsAutoBattling(false);
-           }
-      }
 
       // 2. Check NPC
       const targetNPC = mapData.npcs && mapData.npcs.find(n => n.x === targetX && n.y === targetY);
@@ -1346,13 +1398,29 @@ export const Adventure: React.FC<AdventureProps> = ({
       }
 
       if (targetMonster) {
-          setTargetMonsterId(targetMonster.instanceId);
+          const targetSelection = resolveWorldCombatTargetSelection({
+              clickedMonsterInstanceId: targetMonster.instanceId,
+              isAutoBattling,
+          });
+          setTargetMonsterId(targetSelection.nextTargetMonsterId);
+          setWorldCombatTargetId(targetSelection.nextWorldCombatTargetId);
+          if (targetSelection.nextIsAutoBattling !== isAutoBattling) {
+              setIsAutoBattling(targetSelection.nextIsAutoBattling);
+          }
           if (getGridDistance(playerPosition, targetMonster) <= playerEngagementRange) {
-              setAutoMovePath([]);
+              setAutoMovePath((prev) => (prev.length > 0 ? [] : prev));
               return;
           }
       } else {
-          setTargetMonsterId(null);
+          const targetSelection = resolveWorldCombatTargetSelection({
+              clickedMonsterInstanceId: null,
+              isAutoBattling,
+          });
+          setTargetMonsterId(targetSelection.nextTargetMonsterId);
+          setWorldCombatTargetId(targetSelection.nextWorldCombatTargetId);
+          if (targetSelection.nextIsAutoBattling !== isAutoBattling) {
+              setIsAutoBattling(targetSelection.nextIsAutoBattling);
+          }
       }
 
       // Pathfinding
@@ -1455,27 +1523,29 @@ export const Adventure: React.FC<AdventureProps> = ({
                               : "目前只在東郊靈田開放像素原型預覽"}
                          </GameHintBubble>
                      </Button>
-                     <Button
-                        onClick={() => setIsAutoBattling(!isAutoBattling)}
-                        variant="ghost"
-                        size="icon"
-                        className={clsx(
-                            "h-8 w-8 flex items-center justify-center rounded backdrop-blur border transition-all group relative",
-                            isAutoBattling 
-                                ? "bg-red-900/80 border-red-500 text-red-200 shadow-[0_0_10px_rgba(220,38,38,0.5)] animate-pulse" 
-                                : "bg-black/50 border-stone-800 text-stone-500 hover:text-stone-300 hover:border-stone-600"
-                        )}
-                        data-testid="adventure-auto-battle-toggle"
-                     >
-                         <Swords size={16} />
-                         
-                         <GameHintBubble
-                           eyebrow="BATTLE FLOW"
-                           className="left-1/2 top-full mt-1 -translate-x-1/2"
+                     {combatUiState.showTopCombatControls && (
+                         <Button
+                            onClick={() => setIsAutoBattling(!isAutoBattling)}
+                            variant="ghost"
+                            size="icon"
+                            className={clsx(
+                                "h-8 w-8 flex items-center justify-center rounded backdrop-blur border transition-all group relative",
+                                isAutoBattling
+                                    ? "bg-red-900/80 border-red-500 text-red-200 shadow-[0_0_10px_rgba(220,38,38,0.5)] animate-pulse"
+                                    : "bg-black/50 border-stone-800 text-stone-500 hover:text-stone-300 hover:border-stone-600"
+                            )}
+                            data-testid="adventure-auto-battle-toggle"
                          >
-                            {isAutoBattling ? "停止掛機" : "自動戰鬥"}
-                         </GameHintBubble>
-                     </Button>
+                             <Swords size={16} />
+
+                             <GameHintBubble
+                               eyebrow="BATTLE FLOW"
+                               className="left-1/2 top-full mt-1 -translate-x-1/2"
+                             >
+                                {isAutoBattling ? "停止掛機" : "自動戰鬥"}
+                             </GameHintBubble>
+                         </Button>
+                     )}
                      <div className="h-8 flex items-center text-stone-400 text-xs bg-black/50 px-3 rounded backdrop-blur border border-stone-800 font-bold tracking-wider">
                         {mapData?.name}
                      </div>
@@ -1805,7 +1875,7 @@ export const Adventure: React.FC<AdventureProps> = ({
             <div className={clsx(
                 "absolute inset-0 z-50 bg-black pointer-events-none transition-opacity duration-500",
                 isTransitioning ? "opacity-100" : "opacity-0"
-            )}></div>
+            )} data-testid="adventure-transition-overlay"></div>
 
             {/* PixiJS Stage */}
             {gridMetrics.pixelWidth > 0 && mapData && (
@@ -2030,8 +2100,11 @@ export const Adventure: React.FC<AdventureProps> = ({
             document.body
         )}
 
-        {!showIntro && !isBattling && !isMapModalOpen && (
-            <div className="pointer-events-none fixed bottom-4 left-1/2 z-[5001] -translate-x-1/2">
+        {combatUiState.showCombatCommandSurface && (
+            <div
+              className="pointer-events-none fixed bottom-28 left-1/2 z-[3100] -translate-x-1/2"
+              data-testid="adventure-command-surface"
+            >
                 <div className="pointer-events-auto">
                     <GameSection
                         eyebrow="BATTLE COMMAND"
@@ -2217,7 +2290,7 @@ export const Adventure: React.FC<AdventureProps> = ({
              </Button>
           }
         >
-            <div className="flex flex-col h-full">
+            <div className="flex h-full min-h-0 flex-col" data-testid="adventure-map-modal-content">
                 {/* Tabs */}
                 <Tabs
                     value={mapTab}
@@ -2242,9 +2315,12 @@ export const Adventure: React.FC<AdventureProps> = ({
                     </TabsList>
                 </Tabs>
 
-                <div className="flex-1 overflow-hidden relative bg-stone-950 md:rounded md:border border-stone-800">
+                <div className="relative min-h-0 flex-1 overflow-hidden border-stone-800 bg-stone-950 md:rounded md:border">
                     {mapTab === 'area' && mapData && (
-                        <div className="w-full h-full relative overflow-auto p-4 custom-scrollbar flex items-center justify-center bg-stone-950">
+                        <div
+                          className="custom-scrollbar relative flex h-full w-full items-center justify-center overflow-auto bg-stone-950 p-4"
+                          data-testid="adventure-area-map"
+                        >
                            <div 
                              onClick={(e) => {
                                  const rect = e.currentTarget.getBoundingClientRect();
@@ -2260,12 +2336,14 @@ export const Adventure: React.FC<AdventureProps> = ({
                                  handleGridClick(targetX, targetY);
                                  setIsMapModalOpen(false); // Close map on click to move
                              }}
-                             className="relative bg-stone-900 border border-stone-800 shadow-2xl cursor-pointer"
+                             className="relative cursor-pointer overflow-hidden border border-stone-800 shadow-2xl"
+                             data-testid="adventure-area-map-surface"
                              style={{ 
                                  width: '100%', 
                                  maxWidth: '800px', // Slightly larger max width for big screen
                                  aspectRatio: `${mapData.width} / ${mapData.height}`,
-                                 minWidth: '300px'
+                                 minWidth: '300px',
+                                 ...areaMapSurfaceStyle,
                              }}
                            >
                               {/* Background Grid Lines */}
@@ -2288,7 +2366,9 @@ export const Adventure: React.FC<AdventureProps> = ({
                               ))}
 
                               {/* Player */}
-                              <div className="absolute w-2 h-2 md:w-3 md:h-3 bg-green-500 rounded-full shadow-[0_0_10px_green] z-20 animate-pulse"
+                              <div
+                                className="absolute z-20 h-2 w-2 animate-pulse rounded-full bg-green-500 shadow-[0_0_10px_green] md:h-3 md:w-3"
+                                data-testid="adventure-area-map-player"
                                 style={{ left: `${(playerPosition.x / mapData.width) * 100}%`, top: `${(playerPosition.y / mapData.height) * 100}%`, transform: 'translate(-50%, -50%)' }}
                               >
                                  <div className="absolute -inset-2 bg-green-500/20 rounded-full animate-ping"></div>

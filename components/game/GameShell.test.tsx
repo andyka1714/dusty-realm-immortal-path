@@ -19,16 +19,19 @@ vi.mock("../Modal", () => ({
     isOpen,
     title,
     eyebrow,
+    actions,
     children,
   }: {
     isOpen: boolean;
     title: string;
     eyebrow?: string;
+    actions?: React.ReactNode;
     children: React.ReactNode;
   }) =>
     isOpen ? (
       <section data-modal-title={title} data-modal-eyebrow={eyebrow}>
         {children}
+        {actions}
       </section>
     ) : null,
 }));
@@ -96,11 +99,13 @@ describe("GameShell", () => {
     const markup = createMarkup(true);
 
     expect(markup).toContain("合體劍爐誓");
+    expect(markup).toContain('data-modal-title="機緣遭遇"');
     expect(markup).toContain("合體宗門回響");
     expect(markup).toContain('data-modal-eyebrow="劍脈續響"');
-    expect(markup).toContain("Encounter · 11 歲");
+    expect(markup).toContain("機緣遭遇 · 11 歲");
     expect(markup).toContain("鍛成劍爐");
     expect(markup).toContain("封印劍火");
+    expect(markup).toContain("暫且離開");
     expect(markup).toContain("劍修");
     expect(markup).toContain("凌霄劍宗後段承接");
   });

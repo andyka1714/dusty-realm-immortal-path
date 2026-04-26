@@ -165,11 +165,12 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
   const content = (
       <div
         className={clsx(
-          "relative flex h-full w-full overflow-hidden flex-col md:flex-row",
+          "relative flex h-full min-h-0 w-full overflow-hidden flex-col md:flex-row",
           embedded
             ? "bg-transparent"
             : "rounded-[24px] border border-stone-700 bg-stone-900 shadow-2xl"
         )}
+        data-testid="compendium-panel"
       >
         {/* Tooltip Portal (Quick implementation inside) */}
         {tooltip && tooltip.visible && (
@@ -219,6 +220,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
             ].map((tab) => (
               <Button
                 key={tab.id}
+                data-testid={`compendium-tab-${tab.id}`}
                 onClick={() => {
                   setActiveTab(tab.id as TabType);
                   setSelectedId(null);
@@ -240,7 +242,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
         </div>
 
         {/* Content Area */}
-        <div className={clsx("min-w-0 flex-1", embedded ? "bg-transparent" : "flex flex-col bg-stone-900/50")}>
+        <div className={clsx("flex min-h-0 min-w-0 flex-1 flex-col", embedded ? "bg-transparent" : "bg-stone-900/50")}>
           {/* Header */}
           {!embedded && (
           <div className="flex justify-end border-b border-stone-800 p-4">
@@ -261,7 +263,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
           <div
             className={clsx(
               "scrollbar-thin scrollbar-thumb-stone-700 scrollbar-track-transparent",
-              embedded ? "h-full overflow-auto p-6 md:p-8" : "flex-1 overflow-auto p-6"
+              embedded ? "min-h-0 flex-1 overflow-auto p-4 md:p-8" : "min-h-0 flex-1 overflow-auto p-6"
             )}
           >
             {/* --- Realm Tab --- */}
@@ -296,10 +298,16 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
 
             {/* --- Map & Monster Tab --- */}
             {activeTab === "map" && (
-              <div className="flex h-full gap-4">
+              <div
+                className="flex min-h-[420px] flex-col gap-4 lg:h-full lg:flex-row"
+                data-testid="compendium-map-layout"
+              >
                 {/* List */}
-                <div className="w-1/3 border-r border-stone-800 pr-4 overflow-y-auto">
-                  <h3 className="text-lg font-bold text-stone-300 mb-4 sticky top-0 bg-stone-900/90 py-2">
+                <div
+                  className="max-h-64 overflow-y-auto border-b border-stone-800 pb-4 lg:max-h-none lg:w-1/3 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-4"
+                  data-testid="compendium-map-list"
+                >
+                  <h3 className="sticky top-0 mb-4 bg-stone-950/95 py-2 text-lg font-bold text-stone-300">
                     地圖列表
                   </h3>
                   {MAPS.sort((a, b) => a.minRealm - b.minRealm).map((map) => (
@@ -323,7 +331,10 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                   ))}
                 </div>
                 {/* Detail */}
-                <div className="flex-1 overflow-y-auto">
+                <div
+                  className="min-h-[240px] flex-1 overflow-y-auto"
+                  data-testid="compendium-map-detail"
+                >
                   {selectedId ? (
                     <div>
                       {(() => {

@@ -1194,5 +1194,5 @@ export default function AdventureStage({
       };
   }, [width, height, cellSize, mapData?.id]); 
 
-  return <div ref={containerRef} />;
+  return <div ref={containerRef} data-testid="adventure-stage" />;
 }

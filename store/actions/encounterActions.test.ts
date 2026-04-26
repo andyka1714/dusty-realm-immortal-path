@@ -6,7 +6,10 @@ import logReducer from "../slices/logSlice";
 import encounterReducer, { setPendingEncounter } from "../slices/encounterSlice";
 import soulReducer from "../slices/soulSlice";
 import { Gender } from "../../types";
-import { resolvePendingEncounterChoice } from "./encounterActions";
+import {
+  dismissPendingEncounter,
+  resolvePendingEncounterChoice,
+} from "./encounterActions";
 
 describe("encounter actions", () => {
   it("resolves a pending encounter choice into concrete rewards and clears the pending event", () => {
@@ -93,6 +96,35 @@ describe("encounter actions", () => {
     expect(state.soul.worldMemoryTags).toContain("route:sword:soul-sheath");
     expect(state.encounter.resolvedEventIds).toContain("nascent_sword_soul_sheath");
     expect(state.encounter.pendingEvent).toBeNull();
+  });
+
+  it("dismisses a pending encounter without rewards or chain progress", () => {
+    const store = configureStore({
+      reducer: {
+        character: characterReducer,
+        inventory: inventoryReducer,
+        logs: logReducer,
+        encounter: encounterReducer,
+        soul: soulReducer,
+      },
+    });
+
+    store.dispatch(initializeCharacter({ name: "韓立", gender: Gender.Male }));
+    store.dispatch(
+      setPendingEncounter({
+        eventId: "herb_garden",
+        year: 11,
+      })
+    );
+
+    store.dispatch(dismissPendingEncounter());
+
+    const state = store.getState();
+
+    expect(state.encounter.pendingEvent).toBeNull();
+    expect(state.encounter.resolvedEventIds).toEqual([]);
+    expect(state.inventory.items).toEqual([]);
+    expect(state.logs.logs[0]?.message).toContain("暫且離開");
   });
 
   it("ignores invalid choices without mutating encounter or memory state", () => {

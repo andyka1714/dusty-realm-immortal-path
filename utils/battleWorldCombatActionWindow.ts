@@ -32,8 +32,9 @@ export const resolveWorldCombatActionWindow = ({
 }): WorldCombatActionWindow => {
   const engagedTargetId =
     worldCombatTargetId ?? (isAutoBattling ? targetedMonsterInstanceId : null);
+  const isEngagedWithTarget = engagedTargetId === targetedMonsterInstanceId;
   const shouldPlayerAct =
-    isAutoBattling &&
+    isEngagedWithTarget &&
     distance <= playerEngagementRange &&
     now >= playerActionReadyAt;
   const usePlayerSkill = hasPrimaryActiveSkill && now >= playerSkillReadyAt;

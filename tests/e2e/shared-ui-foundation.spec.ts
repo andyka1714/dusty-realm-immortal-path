@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 
 import adventureReducer from "../../store/slices/adventureSlice";
@@ -12,6 +12,7 @@ import questReducer from "../../store/slices/questSlice";
 import soulReducer, { createInitialSoulState } from "../../store/slices/soulSlice";
 import workshopReducer from "../../store/slices/workshopSlice";
 import type { PersistedSaveEnvelope } from "../../store/persistedStateMigration";
+import { BESTIARY } from "../../data/enemies";
 import { Gender, MajorRealm, SpiritRootId } from "../../types";
 import { getAvailableReincarnationPerks } from "../../utils/reincarnation";
 
@@ -52,6 +53,31 @@ const installSave = async (page: Page, save: PersistedSaveEnvelope) => {
       window.localStorage.setItem(key, value);
     },
     { key: SAVE_KEY, value: JSON.stringify(save) }
+  );
+};
+
+const expectNoHorizontalOverflow = async (locator: Locator) => {
+  await expect(locator).toBeVisible();
+  const hasNoOverflow = await locator.evaluate(
+    (element) => element.scrollWidth <= element.clientWidth + 1
+  );
+  expect(hasNoOverflow).toBe(true);
+};
+
+const expectWithinBox = async (child: Locator, parent: Locator) => {
+  const childBox = await child.boundingBox();
+  const parentBox = await parent.boundingBox();
+  expect(childBox).not.toBeNull();
+  expect(parentBox).not.toBeNull();
+  if (!childBox || !parentBox) return;
+
+  expect(childBox.x).toBeGreaterThanOrEqual(parentBox.x - 1);
+  expect(childBox.y).toBeGreaterThanOrEqual(parentBox.y - 1);
+  expect(childBox.x + childBox.width).toBeLessThanOrEqual(
+    parentBox.x + parentBox.width + 1
+  );
+  expect(childBox.y + childBox.height).toBeLessThanOrEqual(
+    parentBox.y + parentBox.height + 1
   );
 };
 
@@ -102,6 +128,70 @@ const createActiveRunSave = ({
         }
       : state.encounter,
   });
+};
+
+const createVillageRunSave = () => {
+  const save = createActiveRunSave();
+  const adventure = save.current.adventure as RootFixtureState["adventure"];
+
+  return {
+    ...save,
+    current: {
+      ...save.current,
+      adventure: {
+        ...adventure,
+        currentMapId: "0",
+        playerPosition: { x: 20, y: 20 },
+        visitedCells: { "20,20": true },
+        activeMonsters: [],
+        mapHistory: { "0": true },
+      },
+    },
+  };
+};
+
+const createWildCombatRunSave = () => {
+  const save = createActiveRunSave();
+  const adventure = save.current.adventure as RootFixtureState["adventure"];
+  const enemy = BESTIARY.m1_c1;
+  const now = Date.now();
+
+  return {
+    ...save,
+    current: {
+      ...save.current,
+      adventure: {
+        ...adventure,
+        currentMapId: "1",
+        playerPosition: { x: 20, y: 20 },
+        visitedCells: { "20,20": true, "19,20": true },
+        mapHistory: { "1": true },
+        activeMonsters: [
+          {
+            instanceId: "e2e-wild-dog",
+            templateId: enemy.id,
+            name: enemy.name,
+            symbol: enemy.symbol,
+            x: 19,
+            y: 20,
+            spawnX: 19,
+            spawnY: 20,
+            currentHp: enemy.maxHp,
+            rank: enemy.rank,
+            nextMoveTime: now + 60_000,
+          },
+        ],
+        isBattling: false,
+        currentEnemy: null,
+        currentEnemyInstanceId: null,
+        battleLogs: [],
+        lastBattleResult: null,
+        lastCommonSpawnTime: now,
+        lastEliteSpawnTime: now,
+        lastBossSpawnCheckTime: now,
+      },
+    },
+  };
 };
 
 const createReincarnationHallSave = () => {
@@ -190,6 +280,128 @@ test("game shell overlay exposes inventory shared controls", async ({ page }) =>
   await expect(page.getByTestId("game-shell-panel")).toBeHidden();
 });
 
+test("character panel keeps dashboard panes and stat tooltip anchored", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await installSave(page, createActiveRunSave());
+
+  await page.goto("/");
+
+  await page.getByTestId("dock-character").click();
+
+  const panel = page.getByTestId("game-shell-panel");
+  const dashboard = page.getByTestId("dashboard-character-panel");
+  const logPanel = page.getByTestId("dashboard-log-panel");
+  const statsPanel = page.getByTestId("stats-panel");
+  const spiritRootRow = page.getByTestId("stats-row-spirit-root");
+
+  await expect(panel).toBeVisible();
+  await expect(dashboard).toBeVisible();
+  await expectWithinBox(logPanel, panel);
+  await expectWithinBox(statsPanel, panel);
+  await expectNoHorizontalOverflow(dashboard);
+
+  await spiritRootRow.hover();
+  const tooltip = page.getByTestId("game-tooltip");
+  await expect(tooltip).toBeVisible();
+
+  const tooltipBox = await tooltip.boundingBox();
+  const rowBox = await spiritRootRow.boundingBox();
+  expect(tooltipBox).not.toBeNull();
+  expect(rowBox).not.toBeNull();
+  if (tooltipBox && rowBox) {
+    expect(tooltipBox.x).toBeGreaterThanOrEqual(0);
+    expect(tooltipBox.y).toBeGreaterThanOrEqual(0);
+    expect(tooltipBox.x + tooltipBox.width).toBeLessThanOrEqual(1440);
+    expect(tooltipBox.y + tooltipBox.height).toBeLessThanOrEqual(1000);
+
+    const horizontalGap =
+      tooltipBox.x >= rowBox.x + rowBox.width
+        ? tooltipBox.x - (rowBox.x + rowBox.width)
+        : rowBox.x - (tooltipBox.x + tooltipBox.width);
+    expect(horizontalGap).toBeLessThanOrEqual(36);
+  }
+});
+
+test("workshop and compendium embedded panels avoid horizontal overflow", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await installSave(page, createActiveRunSave());
+
+  await page.goto("/");
+
+  await page.getByTestId("dock-workshop").click();
+  const workshopPanel = page.getByTestId("workshop-panel");
+  await expect(workshopPanel).toBeVisible();
+  await expect(page.getByTestId("workshop-grid")).toBeVisible();
+  await expect(page.getByTestId("workshop-specialization-alchemy")).toBeVisible();
+  await expectNoHorizontalOverflow(workshopPanel);
+
+  await page.getByTestId("game-shell-panel-close").click();
+  await expect(page.getByTestId("game-shell-panel")).toBeHidden();
+
+  await page.getByTestId("dock-compendium").click();
+  const compendiumPanel = page.getByTestId("compendium-panel");
+  await expect(compendiumPanel).toBeVisible();
+  await page.getByTestId("compendium-tab-map").click();
+  await expect(page.getByTestId("compendium-map-layout")).toBeVisible();
+  await expect(page.getByTestId("compendium-map-list")).toBeVisible();
+  await expect(page.getByTestId("compendium-map-detail")).toBeVisible();
+  await expectNoHorizontalOverflow(compendiumPanel);
+});
+
+test("area and world map modal render visible map surfaces", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await installSave(page, createWildCombatRunSave());
+
+  await page.goto("/");
+
+  await page.getByTestId("adventure-minimap-open").click();
+
+  const modal = page.getByTestId("game-modal");
+  const areaMap = page.getByTestId("adventure-area-map");
+  const surface = page.getByTestId("adventure-area-map-surface");
+
+  await expect(modal).toBeVisible();
+  await expect(page.getByTestId("adventure-map-modal-content")).toBeVisible();
+  await expect(areaMap).toBeVisible();
+  await expect(surface).toBeVisible();
+  await expect(page.getByTestId("adventure-area-map-player")).toBeVisible();
+
+  const surfaceBox = await surface.boundingBox();
+  expect(surfaceBox).not.toBeNull();
+  if (surfaceBox) {
+    expect(surfaceBox.width).toBeGreaterThan(300);
+    expect(surfaceBox.height).toBeGreaterThan(300);
+  }
+
+  const surfacePaint = await surface.evaluate((element) => {
+    const style = window.getComputedStyle(element);
+    return {
+      backgroundColor: style.backgroundColor,
+      backgroundImage: style.backgroundImage,
+    };
+  });
+  expect(surfacePaint.backgroundColor).not.toBe("rgb(0, 0, 0)");
+  expect(surfacePaint.backgroundImage).not.toBe("none");
+
+  await page.getByTestId("adventure-map-tab-world").click();
+  await expect(page.getByTestId("adventure-world-map")).toBeVisible();
+  await expect(page.getByTestId("adventure-world-map-scroll")).toBeVisible();
+});
+
+test("safe village state hides world-combat shortcuts", async ({ page }) => {
+  await installSave(page, createVillageRunSave());
+
+  await page.goto("/");
+
+  await expect(page.getByText("城鎮中")).toBeVisible();
+  await expect(page.getByTestId("adventure-command-basic-attack")).toBeHidden();
+  await expect(page.getByTestId("adventure-command-auto-battle")).toBeHidden();
+});
+
 test("pending encounter modal keeps choice selectors inside the shared dialog shell", async ({
   page,
 }) => {
@@ -201,4 +413,37 @@ test("pending encounter modal keeps choice selectors inside the shared dialog sh
   await expect(
     page.getByTestId("pending-encounter-choice-temper_skyforge")
   ).toBeVisible();
+  await page.getByTestId("game-modal-close").click();
+  await expect(page.getByTestId("game-modal")).toBeHidden();
+});
+
+test("clicking an adjacent monster starts world combat without waiting for auto battle", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await installSave(page, createWildCombatRunSave());
+
+  await page.goto("/");
+
+  const canvas = page.getByTestId("adventure-stage").locator("canvas");
+  await expect(canvas).toBeVisible();
+  await expect(page.getByText("歷練中")).toBeVisible();
+  await expect(page.getByTestId("adventure-command-basic-attack")).toContainText(
+    "未鎖定目標"
+  );
+  await expect(page.getByTestId("adventure-command-surface")).toBeVisible();
+
+  const box = await canvas.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) return;
+
+  await page.mouse.click(box.x + box.width / 2 - 40, box.y + box.height / 2);
+
+  await expect(page.getByText("荒徑野狗").first()).toBeVisible();
+  await expect(page.getByTestId("adventure-command-basic-attack")).toContainText(
+    "直接在場景內出手"
+  );
+  await expect(page.getByText(/造成\s+\d+\s+點傷害/).first()).toBeVisible({
+    timeout: 2000,
+  });
 });

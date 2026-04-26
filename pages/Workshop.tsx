@@ -125,7 +125,10 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
     const canReset = treeState.unlockedNodeIds.length > 0 && spiritStones >= resetCost;
 
     return (
-      <div className="rounded-xl border border-cyan-800/50 bg-cyan-950/15 p-3">
+      <div
+        className="rounded-xl border border-cyan-800/50 bg-cyan-950/15 p-3"
+        data-testid={`workshop-specialization-${discipline}`}
+      >
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-300">
@@ -290,12 +293,13 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
     return (
       <div
         key={recipe.id}
+        data-testid={`workshop-recipe-card-${recipe.id}`}
         className={clsx(
           "rounded-xl border bg-stone-950/70 p-4",
           recipe.tier === "highRealm" ? "border-amber-700/70" : "border-stone-800"
         )}
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 flex-col items-stretch justify-between gap-4 sm:flex-row sm:items-start">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <div className="text-base font-semibold text-stone-100">{recipe.name}</div>
@@ -391,7 +395,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
             onClick={() => dispatch(craftWorkshopRecipe(recipe.id))}
             disabled={Boolean(lockReason)}
             variant={lockReason ? "stone" : "amber"}
-            className="self-start"
+            className="w-full shrink-0 self-start sm:w-auto"
           >
             {actionLabel}
           </Button>
@@ -403,9 +407,10 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
   return (
     <div
       className={clsx(
-        "flex h-full min-h-0 flex-col gap-6",
+        "flex h-full min-h-0 min-w-0 flex-col gap-6",
         embedded ? "overflow-y-auto p-5 md:p-6" : "overflow-y-auto p-6"
       )}
+      data-testid="workshop-panel"
     >
       {!embedded && (
         <h2 className="text-2xl font-bold text-stone-200 tracking-widest flex items-center gap-2">
@@ -413,7 +418,10 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
         </h2>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div
+        className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(220px,0.72fr)_minmax(360px,1fr)_minmax(360px,1fr)]"
+        data-testid="workshop-grid"
+      >
          {/* Gathering Array */}
          <GameSection
             eyebrow="CAVE ARRAY"

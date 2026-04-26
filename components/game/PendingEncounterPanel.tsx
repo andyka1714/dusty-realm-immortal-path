@@ -39,12 +39,15 @@ export const PendingEncounterPanel: React.FC<PendingEncounterPanelProps> = ({
           </div>
           <div>
             <div className="text-xs uppercase tracking-[0.34em] text-stone-500">
-              Encounter · {pending.year} 歲
+              機緣遭遇 · {pending.year} 歲
             </div>
             <div className="mt-1 text-xl font-semibold text-stone-100">{event.title}</div>
           </div>
         </div>
         <p className="mt-4 text-sm leading-7 text-stone-300">{event.description}</p>
+        <p className="mt-2 text-xs leading-6 text-stone-500">
+          此事來得突然，須當場擇一應對；若暫且離開，將不會取得此段機緣的收穫。
+        </p>
         <div className="mt-4 flex flex-wrap gap-2">
           {event.presentation?.categoryLabel && (
             <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[11px] tracking-[0.22em] text-amber-100">

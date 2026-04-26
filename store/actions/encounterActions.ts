@@ -44,3 +44,25 @@ export const resolvePendingEncounterChoice = (
     dispatch(markEncounterResolved(encounter.pendingEvent.eventId));
     dispatch(clearPendingEncounter());
   };
+
+export const dismissPendingEncounter = (): ThunkAction<
+  void,
+  RootState,
+  unknown,
+  Action<string>
+> =>
+  (dispatch, getState) => {
+    const pending = getState().encounter.pendingEvent;
+    if (!pending) return;
+
+    const event = getEncounterEventById(pending.eventId);
+    dispatch(
+      addLog({
+        message: event
+          ? `你暫且離開【${event.title}】，沒有收取這段機緣。`
+          : "你暫且離開這段機緣。",
+        type: "info",
+      })
+    );
+    dispatch(clearPendingEncounter());
+  };

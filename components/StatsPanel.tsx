@@ -35,12 +35,29 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
   // Tooltip Handlers
   const handleMouseEnter = (e: React.MouseEvent, data: { label: string, desc: string, subDesc?: string, highlightColor?: string }) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    // Position tooltip to the right of the element, or below if space is tight
-    // Default: Bottom-Center of element
-    // Fixed position relative to viewport
+    const viewportPadding = 16;
+    const gap = 12;
+    const tooltipWidth = window.innerWidth >= 768 ? 320 : 256;
+    const tooltipHeight = 180;
+    const preferredRight = rect.right + gap;
+    const preferredLeft = rect.left - tooltipWidth - gap;
+    const hasRoomOnRight = preferredRight + tooltipWidth <= window.innerWidth - viewportPadding;
+    const nextX = hasRoomOnRight
+      ? preferredRight
+      : Math.max(viewportPadding, preferredLeft);
+    const centeredTop = rect.top + rect.height / 2 - tooltipHeight / 2;
+    const maxTop = Math.max(
+      viewportPadding,
+      window.innerHeight - tooltipHeight - viewportPadding
+    );
+    const nextY = Math.min(
+      Math.max(viewportPadding, centeredTop),
+      maxTop
+    );
+
     setTooltip({
-      x: rect.left + (rect.width / 2),
-      y: rect.bottom + 5,
+      x: nextX,
+      y: nextY,
       ...data
     });
   };
@@ -49,11 +66,12 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
     setTooltip(null);
   };
   
-  const StatRow = ({ icon: Icon, label, value, desc, subDesc, highlightColor }: any) => (
+  const StatRow = ({ icon: Icon, label, value, desc, subDesc, highlightColor, testId }: any) => (
     <div 
       className="flex items-center justify-between p-2 hover:bg-stone-800 rounded transition-colors cursor-help"
       onMouseEnter={(e) => handleMouseEnter(e, { label, desc, subDesc, highlightColor })}
       onMouseLeave={handleMouseLeave}
+      data-testid={testId}
     >
       <div className="flex items-center gap-3">
         <div className="p-1.5 md:p-2 bg-stone-950 rounded border border-stone-700 text-stone-400">
@@ -68,11 +86,12 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
   return (
     <div
       className={clsx(
-        "relative flex flex-col",
+        "relative flex min-h-0 flex-col",
         embedded
-          ? "overflow-visible rounded-none border-0 bg-transparent"
+          ? "h-full overflow-visible rounded-none border-0 bg-transparent"
           : "h-full overflow-hidden rounded-lg border border-stone-800 bg-stone-900"
       )}
+      data-testid="stats-panel"
     >
       {/* Header & Tabs */}
       <div className={clsx("z-10 border-b border-stone-800 p-4 pb-0", embedded ? "bg-transparent" : "bg-stone-900")}>
@@ -95,7 +114,7 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
       <div
         className={clsx(
           "custom-scrollbar space-y-4 p-4",
-          embedded ? "overflow-visible px-4 pb-2 pt-4" : "flex-1 overflow-y-auto"
+          embedded ? "min-h-0 flex-1 overflow-y-auto px-4 pb-2 pt-4" : "flex-1 overflow-y-auto"
         )}
       >
         
@@ -134,7 +153,7 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
 
             <GameSection title="靈根與本命" eyebrow="CHARACTER CORE" bodyClassName="space-y-1">
               <StatRow icon={Dna} label="靈根" value={rootDetails.name} highlightColor={rootDetails.colorClass}
-                desc={`【${rootDetails.destiny}】${rootDetails.description}`} subDesc={`加成：${rootDetails.statsDescription}`} />
+                desc={`【${rootDetails.destiny}】${rootDetails.description}`} subDesc={`加成：${rootDetails.statsDescription}`} testId="stats-row-spirit-root" />
               
               <StatRow icon={User} label="體魄" value={attributes.physique} 
                 desc="影響「初始壽元上限」、「氣血上限」與「物理防禦」。" subDesc={`基礎值 + 裝備(${equipmentStats.physique||0})`} />
@@ -240,7 +259,7 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
           className="animate-in fade-in duration-200 zoom-in-95"
           style={{ 
             top: tooltip.y, 
-            left: Math.min(tooltip.x - 128, window.innerWidth - 300), // Adjusted collision for wider tooltip
+            left: tooltip.x,
           }}
         >
           <div>{tooltip.desc}</div>

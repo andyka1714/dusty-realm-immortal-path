@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect } from 'react';
+import { MutableRefObject, useCallback, useEffect, useRef } from 'react';
 import { AppDispatch } from '../store/store';
 import { addVisualEffect, closeBattleReport, resolveBattle } from '../store/slices/adventureSlice';
 import { addLog } from '../store/slices/logSlice';
@@ -60,53 +60,8 @@ export const useWorldCombatControllerEffect = ({
   runPlayerWorldAction,
   runEnemyWorldAction,
 }: UseWorldCombatControllerEffectParams) => {
-  useEffect(() => {
-    if (showIntro || isBattling) return;
-
-    const interval = setInterval(() => {
-      const controllerFrame = runWorldCombatControllerFrame({
-        autoTarget: {
-          isAutoBattling,
-          isBattling,
-          hasTargetMonster: Boolean(targetMonsterId),
-          showIntro,
-          targets: activeMonsters,
-          getId: (monster) => monster.instanceId,
-          getDistance: (monster) => getGridDistance(playerPosition, monster),
-        },
-        combatStep:
-          targetedMonster && targetedMonsterTemplate
-            ? {
-                distance: getGridDistance(playerPosition, targetedMonster),
-                playerEngagementRange,
-                playerActionReadyAt,
-                playerSkillReadyAt,
-                primaryActiveSkill,
-                isAutoBattling,
-                worldCombatTargetId,
-                targetedMonsterInstanceId: targetedMonster.instanceId,
-                enemyEngagementRange: getEnemyEngagementRange(targetedMonsterTemplate),
-                enemyActionReadyAt:
-                  enemyActionReadyAtById[targetedMonster.instanceId] ?? 0,
-                enemySpecialReadyAt:
-                  enemySpecialReadyAtById[targetedMonster.instanceId] ?? 0,
-                playerAction: {
-                  run: runPlayerWorldAction,
-                },
-                enemyAction: {
-                  run: runEnemyWorldAction,
-                },
-              }
-            : undefined,
-      });
-
-      if (controllerFrame.nextTargetMonsterId) {
-        setTargetMonsterId(controllerFrame.nextTargetMonsterId);
-      }
-    }, 120);
-
-    return () => clearInterval(interval);
-  }, [
+  const latestFrameRef = useRef<UseWorldCombatControllerEffectParams | null>(null);
+  latestFrameRef.current = {
     showIntro,
     isBattling,
     isAutoBattling,
@@ -125,6 +80,83 @@ export const useWorldCombatControllerEffect = ({
     setTargetMonsterId,
     runPlayerWorldAction,
     runEnemyWorldAction,
+  };
+
+  const runLatestControllerFrame = useCallback(() => {
+    const latest = latestFrameRef.current;
+    if (!latest || latest.showIntro || latest.isBattling) return;
+
+    const controllerFrame = runWorldCombatControllerFrame<
+      ActiveMonster,
+      typeof latest.primaryActiveSkill,
+      { executionTimeMs: number },
+      { executionTimeMs: number }
+    >({
+      autoTarget: {
+        isAutoBattling: latest.isAutoBattling,
+        isBattling: latest.isBattling,
+        hasTargetMonster: Boolean(latest.targetMonsterId),
+        showIntro: latest.showIntro,
+        targets: latest.activeMonsters,
+        getId: (monster) => monster.instanceId,
+        getDistance: (monster) => getGridDistance(latest.playerPosition, monster),
+      },
+      combatStep:
+        latest.targetedMonster && latest.targetedMonsterTemplate
+          ? {
+              distance: getGridDistance(latest.playerPosition, latest.targetedMonster),
+              playerEngagementRange: latest.playerEngagementRange,
+              playerActionReadyAt: latest.playerActionReadyAt,
+              playerSkillReadyAt: latest.playerSkillReadyAt,
+              primaryActiveSkill: latest.primaryActiveSkill,
+              isAutoBattling: latest.isAutoBattling,
+              worldCombatTargetId: latest.worldCombatTargetId,
+              targetedMonsterInstanceId: latest.targetedMonster.instanceId,
+              enemyEngagementRange: getEnemyEngagementRange(latest.targetedMonsterTemplate),
+              enemyActionReadyAt:
+                latest.enemyActionReadyAtById[latest.targetedMonster.instanceId] ?? 0,
+              enemySpecialReadyAt:
+                latest.enemySpecialReadyAtById[latest.targetedMonster.instanceId] ?? 0,
+              playerAction: {
+                run: latest.runPlayerWorldAction,
+              },
+              enemyAction: {
+                run: latest.runEnemyWorldAction,
+              },
+            }
+          : undefined,
+    });
+
+    if (controllerFrame.nextTargetMonsterId) {
+      latest.setTargetMonsterId(controllerFrame.nextTargetMonsterId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (showIntro || isBattling) return;
+
+    const interval = setInterval(runLatestControllerFrame, 120);
+
+    return () => clearInterval(interval);
+  }, [showIntro, isBattling, runLatestControllerFrame]);
+
+  useEffect(() => {
+    if (showIntro || isBattling) return;
+    runLatestControllerFrame();
+  }, [
+    showIntro,
+    isBattling,
+    isAutoBattling,
+    targetMonsterId,
+    targetedMonster?.instanceId,
+    targetedMonster?.x,
+    targetedMonster?.y,
+    targetedMonsterTemplate?.id,
+    playerPosition.x,
+    playerPosition.y,
+    playerEngagementRange,
+    worldCombatTargetId,
+    runLatestControllerFrame,
   ]);
 };
 
@@ -204,6 +236,22 @@ type UseAutoBattleReplayControllerEffectParams = {
   applyBattleRewardApplicationPlan: (rewardApplicationPlan: any) => void;
   clearReplayTimers: () => void;
 };
+
+const isIdleReplayState = ({
+  displayedLogs,
+  replayQueue,
+  battleSnapshot,
+  isReplayingBattle,
+}: {
+  displayedLogs: any[];
+  replayQueue: any[];
+  battleSnapshot: any;
+  isReplayingBattle: boolean;
+}) =>
+  !isReplayingBattle &&
+  displayedLogs.length === 0 &&
+  replayQueue.length === 0 &&
+  battleSnapshot === null;
 
 export const useAutoBattleReplayControllerEffect = ({
   dispatch,
@@ -290,7 +338,17 @@ export const useAutoBattleReplayControllerEffect = ({
     }
 
     if (replayController.kind === 'transition') {
-      applyBattleReplayState(replayController.replayState);
+      if (
+        !isIdleReplayState({
+          displayedLogs,
+          replayQueue,
+          battleSnapshot,
+          isReplayingBattle,
+        }) ||
+        !isIdleReplayState(replayController.replayState)
+      ) {
+        applyBattleReplayState(replayController.replayState);
+      }
       return;
     }
 

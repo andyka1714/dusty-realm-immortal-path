@@ -5,9 +5,22 @@ import { getRealmLabel } from "../../utils/realm";
 import { formatSpiritStone } from "../../utils/currency";
 import { DAYS_PER_YEAR } from "../../constants";
 import { Sparkles, Timer, Wallet } from "lucide-react";
+import { MAPS } from "../../data/maps";
+import { resolveAdventureCombatUiState } from "../../utils/adventureCombatUiState";
 
 export const GameHUD: React.FC = () => {
-  const { character } = useSelector((state: RootState) => state);
+  const character = useSelector((state: RootState) => state.character);
+  const currentMapId = useSelector(
+    (state: RootState) => state.adventure.currentMapId
+  );
+  const currentMap = MAPS.find((map) => map.id === currentMapId);
+  const combatUiState = resolveAdventureCombatUiState({
+    hasCombatEncounters: Boolean(currentMap?.enemies.length),
+    isInSeclusion: character.isInSeclusion,
+    showIntro: false,
+    isBattling: false,
+    isMapModalOpen: false,
+  });
 
   return (
     <div className="pointer-events-none fixed left-4 top-4 z-[3000] w-[min(360px,calc(100vw-2rem))]">
@@ -22,7 +35,7 @@ export const GameHUD: React.FC = () => {
             </div>
           </div>
           <div className="shrink-0 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs text-amber-300">
-            {character.isInSeclusion ? "閉關中" : "歷練中"}
+            {combatUiState.hudActivityLabel}
           </div>
         </div>
 

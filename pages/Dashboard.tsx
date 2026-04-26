@@ -352,6 +352,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
           ? "grid grid-cols-1 gap-5 overflow-hidden p-5 md:p-6 lg:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1.45fr)_380px]"
           : "flex flex-col gap-6 overflow-y-auto p-4 md:flex-row md:overflow-hidden md:p-6"
       )}
+      data-testid={embedded ? "dashboard-character-panel" : undefined}
     >
       
       {isCriticalLifespan && (
@@ -366,8 +367,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
       <div
         className={clsx(
           "flex min-h-0 flex-col gap-6",
-          embedded ? "pr-1" : "w-full md:flex-1 md:overflow-y-auto"
+          embedded ? "overflow-y-auto pr-1" : "w-full md:flex-1 md:overflow-y-auto"
         )}
+        data-testid={embedded ? "dashboard-left-column" : undefined}
       >
         <div className={clsx("space-y-6", embedded ? "flex h-full min-h-0 flex-col" : "")}>
             <div className={clsx(embedded ? "rounded-[20px] border border-stone-800/80 bg-stone-900/82 p-5 md:p-6" : "")}>
@@ -477,17 +479,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                    </div>
       )}
 
-      {tooltip && (
-        <GameTooltip
-          eyebrow="CULTIVATION NOTES"
-          title={tooltip.title}
-          widthClassName={tooltip.widthClassName}
-          className="animate-in fade-in duration-150 zoom-in-95"
-          style={{ left: tooltip.x, top: tooltip.y }}
-        >
-          {tooltip.content}
-        </GameTooltip>
-      )}
               </div>
               <div className="flex justify-end mt-1 px-1">
                  <span className="text-[10px] text-stone-500 font-mono tracking-wide">
@@ -638,7 +629,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
             </GameSection>
 
             {embedded && (
-              <div className="min-h-0 flex-1 overflow-hidden rounded-[20px] border border-stone-800/80 bg-stone-900/70">
+              <div
+                className="min-h-0 flex-1 overflow-hidden rounded-[20px] border border-stone-800/80 bg-stone-900/70"
+                data-testid="dashboard-log-panel"
+              >
                 <LogPanel embedded />
               </div>
             )}
@@ -648,8 +642,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
       <div
         className={clsx(
           "relative z-30 flex min-h-0 flex-col gap-6",
-          embedded ? "overflow-y-auto pr-1" : "w-full md:w-80 lg:w-96"
+          embedded ? "overflow-hidden pr-1" : "w-full md:w-80 lg:w-96"
         )}
+        data-testid={embedded ? "dashboard-stats-column" : undefined}
       >
          {embedded ? (
            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto rounded-[20px] border border-stone-800/80 bg-stone-900/68">
@@ -666,6 +661,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
            </>
          )}
       </div>
+
+      {tooltip && (
+        <GameTooltip
+          eyebrow="CULTIVATION NOTES"
+          title={tooltip.title}
+          widthClassName={tooltip.widthClassName}
+          className="animate-in fade-in duration-150 zoom-in-95"
+          style={{ left: tooltip.x, top: tooltip.y }}
+        >
+          {tooltip.content}
+        </GameTooltip>
+      )}
 
       {/* Breakthrough Confirmation Modal */}
       <Modal

@@ -30,6 +30,7 @@ export const LogPanel: React.FC<LogPanelProps> = ({ embedded = false }) => {
           ? "h-full min-h-0 rounded-none border-0 bg-transparent p-0"
           : "h-64 rounded-lg border border-stone-800 bg-stone-900 p-4 md:h-full"
       )}
+      data-testid="log-panel"
     >
       <h3 className={clsx("text-stone-300 font-bold tracking-widest", embedded ? "mb-3 px-4 pt-4" : "mb-3 border-b border-stone-800 pb-2")}>
         修煉日誌

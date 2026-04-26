@@ -9,7 +9,11 @@ import { PendingEncounterPanel } from "./PendingEncounterPanel";
 import { AppDispatch, RootState } from "../../store/store";
 import { checkTimeEvents } from "../../store/actions/timeActions";
 import { getEncounterEventById } from "../../data/encounters";
-import { resolvePendingEncounterChoice } from "../../store/actions/encounterActions";
+import {
+  dismissPendingEncounter,
+  resolvePendingEncounterChoice,
+} from "../../store/actions/encounterActions";
+import { Button } from "../ui/button";
 
 const Adventure = lazy(() =>
   import("../../pages/Adventure").then((module) => ({
@@ -89,6 +93,9 @@ export const GameShell: React.FC = () => {
   const handleTogglePanel = (panel: GamePanelId) => {
     setActivePanel((current) => (current === panel ? null : panel));
   };
+  const handleDismissPendingEncounter = () => {
+    dispatch(dismissPendingEncounter());
+  };
 
   const isCompendiumOpen = activePanel === "compendium";
 
@@ -151,10 +158,20 @@ export const GameShell: React.FC = () => {
 
         <Modal
           isOpen={Boolean(pendingEncounter && pendingEncounterEvent)}
-          onClose={() => undefined}
-          title={pendingEncounterEvent?.title ?? "機緣乍現"}
+          onClose={handleDismissPendingEncounter}
+          title="機緣遭遇"
           eyebrow={pendingEncounterEyebrow}
           size="medium"
+          actions={
+            <Button
+              onClick={handleDismissPendingEncounter}
+              variant="stone"
+              size="sm"
+              data-testid="pending-encounter-dismiss"
+            >
+              暫且離開
+            </Button>
+          }
         >
           {pendingEncounter && pendingEncounterEvent && (
             <PendingEncounterPanel
