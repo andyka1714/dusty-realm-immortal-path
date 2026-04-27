@@ -407,6 +407,7 @@ test("workshop and compendium embedded panels avoid horizontal overflow", async 
   await expect(page.getByTestId("compendium-map-detail")).toBeVisible();
 
   await page.getByTestId("compendium-tab-item").click();
+  await expect(page.getByTestId("compendium-item-header")).toBeVisible();
   const itemHeading = page.getByTestId("compendium-item-realm-heading-0");
   const firstItemCard = page.getByTestId("compendium-item-card-novice_sword");
   await firstItemCard.scrollIntoViewIfNeeded();
@@ -420,6 +421,7 @@ test("workshop and compendium embedded panels avoid horizontal overflow", async 
   );
 
   await page.getByTestId("compendium-tab-skill").click();
+  await expect(page.getByTestId("compendium-skill-summary")).toContainText("劍修功法");
   await expect(page.getByTestId("compendium-skill-profession-sword")).toBeVisible();
   await expect(page.getByTestId("compendium-skill-realm-1")).toBeVisible();
   await expect(page.getByText("疾風三疊")).toBeVisible();
@@ -431,10 +433,16 @@ test("workshop and compendium embedded panels avoid horizontal overflow", async 
   await expect(page.getByTestId("compendium-sect-route-source-sword")).toContainText(
     "sect:sword:world-chapter-03"
   );
+  await expect(page.getByTestId("compendium-sect-endgame-source-sword")).toContainText(
+    "sect:sword:endgame-loop-v4"
+  );
   await page.getByTestId("compendium-sect-tab-body").click();
   await expect(page.getByTestId("compendium-sect-panel-body")).toBeVisible();
   await expect(page.getByTestId("compendium-sect-route-source-body")).toContainText(
     "萬獸血骨殘材"
+  );
+  await expect(page.getByTestId("compendium-sect-endgame-source-body")).toContainText(
+    "sect:beast:endgame-loop-v4"
   );
   await expectNoHorizontalOverflow(compendiumPanel);
 });
@@ -462,6 +470,7 @@ test("mobile workshop and compendium panels stay inside the viewport", async ({
   const compendiumShell = page.getByTestId("game-shell-panel");
   await expectWithinViewport(compendiumShell, page);
   await page.getByTestId("compendium-tab-item").click();
+  await expect(page.getByTestId("compendium-item-header")).toBeVisible();
   await expectNoHorizontalOverflow(page.getByTestId("compendium-panel"));
   await page.getByTestId("compendium-item-card-novice_sword").scrollIntoViewIfNeeded();
   await expect(page.getByTestId("compendium-item-card-novice_sword")).toBeVisible();
@@ -470,6 +479,7 @@ test("mobile workshop and compendium panels stay inside the viewport", async ({
     "來源追蹤"
   );
   await page.getByTestId("compendium-tab-skill").click();
+  await expect(page.getByTestId("compendium-skill-summary")).toContainText("劍修功法");
   await expect(page.getByTestId("compendium-skill-profession-sword")).toBeVisible();
   await expect(page.getByText("凡界藏經閣、宗門入門試煉")).toBeVisible();
   await expectNoHorizontalOverflow(page.getByTestId("compendium-panel"));
@@ -478,6 +488,9 @@ test("mobile workshop and compendium panels stay inside the viewport", async ({
   await expect(page.getByTestId("compendium-sect-panel-sword")).toBeVisible();
   await expect(page.getByTestId("compendium-sect-route-source-sword")).toContainText(
     "凌霄劍星鋼"
+  );
+  await expect(page.getByTestId("compendium-sect-endgame-source-sword")).toContainText(
+    "sect:sword:endgame-loop-v4"
   );
   await expectNoHorizontalOverflow(page.getByTestId("compendium-panel"));
 });

@@ -199,7 +199,9 @@ const sectConfigs: Array<{
   routeSourceSummary: {
     material: string;
     worldMemoryTag: string;
+    endgameMemoryTag: string;
     usage: string;
+    endgameUsage: string;
   };
 }> = [
   {
@@ -216,7 +218,10 @@ const sectConfigs: Array<{
     routeSourceSummary: {
       material: "凌霄劍星鋼",
       worldMemoryTag: "sect:sword:world-chapter-03",
+      endgameMemoryTag: "sect:sword:endgame-loop-v4",
       usage: "v3 aftermath 反覆供應星鋼，Workshop 帝劍與輪迴仙誓劍胎會讀取這條路線記憶。",
+      endgameUsage:
+        "v4 終盤閉環會讀取斬天輪迴劍印與歸墟三道帝冕，確認劍修仙帝路線完成。",
     },
   },
   {
@@ -233,7 +238,10 @@ const sectConfigs: Array<{
     routeSourceSummary: {
       material: "萬獸血骨殘材",
       worldMemoryTag: "sect:beast:world-chapter-03",
+      endgameMemoryTag: "sect:beast:endgame-loop-v4",
       usage: "v3 aftermath 反覆供應血骨殘材，Workshop 體修帝兵與輪迴不滅血印會讀取這條路線記憶。",
+      endgameUsage:
+        "v4 終盤閉環會讀取萬獸不滅血印與歸墟三道帝冕，確認體修仙帝路線完成。",
     },
   },
   {
@@ -250,7 +258,10 @@ const sectConfigs: Array<{
     routeSourceSummary: {
       material: "縹緲星魂蓮",
       worldMemoryTag: "sect:mystic:world-chapter-03",
+      endgameMemoryTag: "sect:mystic:endgame-loop-v4",
       usage: "v3 aftermath 反覆凝出星魂蓮，Workshop 法修丹器與輪迴仙宮星命會讀取這條路線記憶。",
+      endgameUsage:
+        "v4 終盤閉環會讀取仙宮星命輪與歸墟三道帝冕，確認法修仙帝路線完成。",
     },
   },
 ];
@@ -308,6 +319,10 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
   const activeSectSkills = FORMAL_CORE_SKILLS_BY_PROFESSION[activeSect.profession];
   const activeSectSkillGroups = groupSkillsByRealm(activeSectSkills);
   const activeSectNpcs = MAPS.find((map) => map.id === activeSect.mapId)?.npcs || [];
+  const activeSkillCount = activeSkillGroups.reduce(
+    (total, group) => total + group.skills.length,
+    0
+  );
 
   // Helper: Get Drops for Enemy
   const getEnemyDrops = (enemyId: string): Item[] => {
@@ -663,7 +678,25 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
 
             {/* --- Item Tab (Grouped by Realm) --- */}
             {activeTab === "item" && (
-              <div className="space-y-12" data-testid="compendium-item-grid">
+              <div className="space-y-8" data-testid="compendium-item-grid">
+                <div
+                  className="rounded-lg border border-stone-800 bg-stone-950/60 p-4"
+                  data-testid="compendium-item-header"
+                >
+                  <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                    <div>
+                      <h2 className="text-xl font-bold text-amber-400">
+                        神兵法寶
+                      </h2>
+                      <p className="mt-1 text-sm text-stone-500">
+                        依境界檢視正式物品、來源追蹤與 Workshop sink，不使用 sticky 標題遮住卡片。
+                      </p>
+                    </div>
+                    <span className="rounded border border-amber-900/40 bg-amber-950/20 px-3 py-1 text-xs text-amber-200">
+                      {Object.keys(allItems).length} 件物品
+                    </span>
+                  </div>
+                </div>
                 {Object.values(MajorRealm)
                   .filter((r) => typeof r === "number")
                   .map((realmId) => {
@@ -862,6 +895,18 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                   ))}
                 </div>
 
+                <div
+                  className="rounded-lg border border-indigo-900/40 bg-indigo-950/20 p-4"
+                  data-testid="compendium-skill-summary"
+                >
+                  <div className="text-sm font-bold text-indigo-100">
+                    {getProfessionLabel(activeSkillProfession)}功法
+                  </div>
+                  <div className="mt-1 text-xs text-stone-400">
+                    {activeSkillCount} 本正式功法，依 {activeSkillGroups.length} 個境界分段顯示，並保留藏經閣、精英、首領與古修傳承來源 cue。
+                  </div>
+                </div>
+
                 {activeSkillGroups.length === 0 ? (
                   <div className="rounded border border-stone-800 bg-stone-900/60 p-4 text-sm text-stone-500">
                     目前沒有此分類的正式功法。
@@ -1046,6 +1091,20 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                         </div>
                         <div className="mt-1 text-stone-400">
                           {activeSect.routeSourceSummary.usage}
+                        </div>
+                      </div>
+                      <div
+                        className="rounded border border-violet-900/40 bg-violet-950/20 px-3 py-2 text-xs text-violet-200"
+                        data-testid={`compendium-sect-endgame-source-${activeSect.id}`}
+                      >
+                        <div className="font-bold text-violet-100">
+                          終盤閉環
+                        </div>
+                        <div className="mt-1 text-violet-300/80">
+                          {activeSect.routeSourceSummary.endgameMemoryTag}
+                        </div>
+                        <div className="mt-1 text-stone-400">
+                          {activeSect.routeSourceSummary.endgameUsage}
                         </div>
                       </div>
                       {activeSect.chapterCues.map((cue) => (

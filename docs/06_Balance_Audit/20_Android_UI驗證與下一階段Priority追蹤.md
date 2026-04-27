@@ -366,3 +366,20 @@ Change id: `expand-endgame-loop-v4`
 - 不新增 persisted schema。
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；v4 只新增 encounter / recipe / reincarnation catalog entry 與 UI derived copy，記憶沿用 `resolvedEventIds`、`soul.worldMemoryTags`、既有 inventory / Workshop state 與 rebirth config。
+
+## 19. Compendium route browsing v4 收口記錄
+
+Change id: `refactor-compendium-route-browsing-v4`
+
+本輪把舊有圖鑑 taxonomy 與 source tracing 接上 `endgame-loop-v4` 後的宗門路線瀏覽需求：
+
+- `神兵法寶` 增加非 sticky 的 tab summary header，明確標示依境界檢視正式物品、來源追蹤與 Workshop sink，避免 realm heading 在 scroll 時遮住第一張 item card。
+- `功法神通` 保留 `通用 / 劍修 / 體修 / 法修` tabs，並新增當前職業功法數與境界分段摘要，讓 formal core skills 不只靠長列表掃描。
+- `宗門傳承` 的單宗頁除了 v3 `sect:*:world-chapter-03` route material source，也顯示 v4 `sect:*:endgame-loop-v4` 終盤閉環 source，連到對應魂印與 `歸墟三道帝冕` 用途。
+- Playwright smoke 已新增 desktop / mobile selector，覆蓋 item header、skill summary、sect v4 endgame source 與既有 no-overflow / no-cover checks。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；Compendium v4 只從既有 `ITEMS`、skill registry、sect config、source tracing helper、world memory tag 與 endgame catalog cue 推導 UI 摘要。

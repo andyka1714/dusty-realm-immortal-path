@@ -17,13 +17,20 @@ describe("CompendiumModal taxonomy layout", () => {
   it("renders item realm headings without sticky overlap classes", () => {
     const markup = renderCompendium({ initialTab: "item" });
 
+    expect(markup).toContain('data-testid="compendium-item-header"');
+    expect(markup).toContain("神兵法寶");
+    expect(markup).toContain("依境界檢視正式物品");
     expect(markup).toContain('data-testid="compendium-item-grid"');
     expect(markup).toContain('data-testid="compendium-item-realm-heading-0"');
     expect(markup).toContain("凡人期");
     expect(markup).toContain("鏽鐵劍");
-    expect(markup).not.toContain(
-      'data-testid="compendium-item-realm-heading-0" class="text-xl font-bold text-amber-500 border-l-4 border-amber-600 pl-3 sticky top-0'
+    const headingStart = markup.indexOf(
+      'data-testid="compendium-item-realm-heading-0"'
     );
+    const headingEnd = markup.indexOf("凡人期", headingStart);
+    const headingMarkup = markup.slice(headingStart, headingEnd);
+    expect(headingMarkup).not.toContain("sticky");
+    expect(headingMarkup).not.toContain("top-0");
   });
 
   it("groups skills by profession and realm instead of rendering a flat mixed grid", () => {
@@ -34,6 +41,9 @@ describe("CompendiumModal taxonomy layout", () => {
 
     expect(markup).toContain('data-testid="compendium-skill-profession-sword"');
     expect(markup).toContain('data-testid="compendium-skill-profession-body"');
+    expect(markup).toContain('data-testid="compendium-skill-summary"');
+    expect(markup).toContain("劍修功法");
+    expect(markup).toContain("境界分段");
     expect(markup).toContain('data-testid="compendium-skill-realm-1"');
     expect(markup).toContain("疾風三疊");
     expect(markup).toContain("來源：藏經閣");
@@ -72,8 +82,11 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).toContain("傳承功法");
     expect(markup).toContain("章節線索");
     expect(markup).toContain('data-testid="compendium-sect-route-source-sword"');
+    expect(markup).toContain('data-testid="compendium-sect-endgame-source-sword"');
     expect(markup).toContain("sect:sword:world-chapter-03");
+    expect(markup).toContain("sect:sword:endgame-loop-v4");
     expect(markup).toContain("輪迴仙誓劍胎");
+    expect(markup).toContain("斬天輪迴劍印");
     expect(markup).toContain("萬法聖城");
     expect(markup).not.toContain('data-testid="compendium-sect-panel-body"');
     expect(markup).not.toContain("汲取萬獸精血");
