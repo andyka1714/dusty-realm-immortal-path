@@ -353,7 +353,9 @@ test("character panel keeps dashboard panes and stat tooltip anchored", async ({
   const statsPanel = page.getByTestId("stats-panel");
   const spiritRootRow = page.getByTestId("stats-row-spirit-root");
   const manualCultivate = page.getByTestId("dashboard-manual-cultivate");
+  const seclusion = page.getByTestId("dashboard-start-seclusion");
   const breakthrough = page.getByTestId("dashboard-breakthrough");
+  const voluntaryReincarnation = page.getByTestId("dashboard-voluntary-reincarnation");
 
   await expect(panel).toBeVisible();
   await expect(dashboard).toBeVisible();
@@ -370,12 +372,23 @@ test("character panel keeps dashboard panes and stat tooltip anchored", async ({
   }
 
   const manualBox = await manualCultivate.boundingBox();
+  const seclusionBox = await seclusion.boundingBox();
   const breakthroughBox = await breakthrough.boundingBox();
+  const voluntaryBox = await voluntaryReincarnation.boundingBox();
   expect(manualBox).not.toBeNull();
+  expect(seclusionBox).not.toBeNull();
   expect(breakthroughBox).not.toBeNull();
-  if (manualBox && breakthroughBox) {
+  expect(voluntaryBox).not.toBeNull();
+  if (manualBox && seclusionBox && breakthroughBox && voluntaryBox) {
+    const actionBoxes = [manualBox, seclusionBox, breakthroughBox, voluntaryBox];
+    const rowY = manualBox.y;
+    actionBoxes.forEach((box) => {
+      expect(Math.abs(box.y - rowY)).toBeLessThanOrEqual(4);
+      expect(Math.abs(box.height - manualBox.height)).toBeLessThanOrEqual(4);
+    });
     expect(Math.abs(breakthroughBox.height - manualBox.height)).toBeLessThanOrEqual(4);
     expect(breakthroughBox.y).toBeGreaterThanOrEqual(manualBox.y - 1);
+    expect(voluntaryBox.x).toBeGreaterThan(breakthroughBox.x + breakthroughBox.width - 8);
   }
 
   await spiritRootRow.hover();

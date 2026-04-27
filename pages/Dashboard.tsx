@@ -492,7 +492,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
               title="修行抉擇"
               eyebrow="CULTIVATION ACTIONS"
               className={clsx(embedded ? "" : "relative z-20 hover:z-50 transition-all duration-200")}
-              bodyClassName="grid grid-cols-2 gap-4 md:grid-cols-3"
+              bodyClassName="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
             >
 
                  {/* 1. Manual Cultivate */}
@@ -563,7 +563,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                 disabled={!isBreakthroughAvailable}
                 variant="selection"
                 data-testid="dashboard-breakthrough"
-                className={`col-span-2 h-[120px] w-full flex-col overflow-hidden py-4 md:col-span-1 group relative outline-none
+                className={`h-[120px] w-full flex-col overflow-hidden py-4 group relative outline-none
                   ${isBreakthroughAvailable ? "cursor-pointer" : "cursor-not-allowed"}
                 `}
               >

@@ -428,6 +428,7 @@ Change id: direct bugfix `fix(dashboard): stabilize cultivation panel layout`
 - `境界突破` 按鈕外層仍使用共用 Button 預設高度，內層卻是 120px 高，導致按鈕內容溢出並看起來跑到右側疊住其他控制。
 - embedded Dashboard 左欄的 `修煉日誌` 容器被 flex 壓到只剩 2px 高，玩家只能看到標題，看不到「暫無消息」或後續日誌內容。
 - Playwright regression 已補在 `character panel keeps dashboard panes and stat tooltip anchored`，同時檢查日誌 panel 高度、日誌內容可讀、突破按鈕高度與運功按鈕一致。
+- 後續補修 `修行抉擇` grid：桌面改為四欄並取消 `境界突破` 跨欄，避免四個 action 變成 `3 + 1` 換行，導致 `本世收束 / 主動坐化` 在 panel 內被擠到不可見區域；同一個 Playwright regression 現在檢查四個 action 同列且第 4 個按鈕位於突破按鈕右側。
 
 本輪仍維持：
 
