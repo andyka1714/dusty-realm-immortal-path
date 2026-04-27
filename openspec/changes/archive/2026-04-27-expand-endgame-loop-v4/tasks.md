@@ -23,4 +23,4 @@
 - [x] 4.1 更新 gameplay / balance tracking 文件，記錄 v4 scope 與不需要 migration
 - [x] 4.2 跑 targeted unit tests、Playwright smoke、typecheck、build、OpenSpec validate 與 `git diff --check`
 - [x] 4.3 完成後更新 tasks 狀態並提交 implementation checkpoint
-- [ ] 4.4 Archive OpenSpec，驗證並提交 archive checkpoint
+- [x] 4.4 Archive OpenSpec，驗證並提交 archive checkpoint
