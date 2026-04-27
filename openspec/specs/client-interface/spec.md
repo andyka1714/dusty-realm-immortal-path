@@ -292,6 +292,11 @@ Workshop 介面必須 (MUST) 讓玩家看懂專精解鎖條件、目前可否切
 - **THEN** 系統必須能追蹤主要 tile semantic，例如 ground、path、water、hazard、POI、portal clearing 或 Boss arena
 - **AND** 不得只用隨機雜訊或單純 palette replacement 取代地圖語意
 
+#### Scenario: visual QA 摘要可驗證
+- **WHEN** 測試或工具檢查代表地圖的 terrain/background
+- **THEN** 系統必須輸出或可推導 palette、semantic role、skeleton、motif 與 forbidden actor-token 狀態
+- **AND** QA 摘要必須可被 regression 驗證，避免 pixel terrain 退回黑畫面或單一 floorplan
+
 #### Scenario: route-specific landmark 可讀
 - **WHEN** 玩家進入不同路線或同 theme 的不同代表地圖
 - **THEN** 背景層必須提供可辨識的 route-specific skeleton 或 landmark

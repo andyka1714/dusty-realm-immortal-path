@@ -188,6 +188,11 @@
 - **THEN** 系統必須沿用既有 item / skill / quest id 與 LocalStorage envelope
 - **AND** 不得新增新的 persisted source registry、玩家圖鑑進度欄位或 hydrate migration
 
+#### Scenario: Pixel map visual QA v3 不新增 persisted state
+- **WHEN** pixel map visual QA v3 只新增 terrain QA helper、regression、Playwright smoke 或文件
+- **THEN** 系統必須沿用既有 map metadata、Adventure runtime 與 LocalStorage envelope
+- **AND** 不得新增新的 persisted map visual state、actor sprite state 或 hydrate migration
+
 #### Scenario: Encounter aftermath v3 不新增 persisted state
 - **WHEN** encounter aftermath v3 只新增 catalog event、selector gate、presentation cue 或 choice reward
 - **THEN** 系統必須沿用既有 `soul.worldMemoryTags` 與 `resolvedEventIds`

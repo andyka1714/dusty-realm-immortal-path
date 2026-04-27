@@ -5,6 +5,7 @@ import {
   ADVENTURE_TERRAIN_TILE_ALLOWED_KEYS,
   assertAdventureTerrainTilesAreSafeForOfficialStage,
   buildAdventureTerrainTiles,
+  getAdventureTerrainVisualQaReport,
   resolveAdventureTerrainRenderMotif,
   resolveAdventureTerrainPalette,
 } from "./adventureTerrainPixelization";
@@ -468,6 +469,81 @@ describe("adventureTerrainPixelization", () => {
         } as typeof tiles[number] & { actorToken: string },
       ])
     ).toThrow(/terrain-only/i);
+  });
+
+  it("builds visual QA reports for representative production maps", () => {
+    const representativeMaps = [
+      {
+        mapId: "0",
+        theme: "Center",
+        portals: [
+          {
+            x: 6,
+            y: 0,
+            targetMapId: "1",
+            targetX: 0,
+            targetY: 0,
+            label: "前往 [北郊荒徑]",
+            dir: "North",
+          },
+        ],
+        npcs: [{ x: 6, y: 6 }],
+      },
+      { mapId: "20", theme: "East", portals: map20?.portals ?? [], npcs: [{ x: 3, y: 6 }] },
+      { mapId: "71", theme: "West", portals: [], npcs: [] },
+      { mapId: "130", theme: "Void", portals: [], npcs: [] },
+      { mapId: "161", theme: "Thunder", portals: [], npcs: [] },
+      { mapId: "170", theme: "Immortal", portals: [], npcs: [] },
+      { mapId: "180", theme: "Ultimate", portals: [], npcs: [], bossSpawn: { x: 6, y: 6 } },
+    ];
+
+    const reports = representativeMaps.map((entry) => {
+      const tiles = buildAdventureTerrainTiles({
+        mapId: entry.mapId,
+        theme: entry.theme,
+        width: 12,
+        height: 12,
+        portals: entry.portals,
+        npcs: entry.npcs,
+        bossSpawn: entry.bossSpawn,
+      });
+      return getAdventureTerrainVisualQaReport({
+        mapId: entry.mapId,
+        theme: entry.theme,
+        tiles,
+      });
+    });
+
+    expect(reports.every((report) => report.tileCount === 144)).toBe(true);
+    expect(reports.every((report) => report.paletteTheme === report.theme)).toBe(true);
+    expect(reports.every((report) => report.skeletonIds.length > 0)).toBe(true);
+    expect(reports.every((report) => report.semanticRoles.length > 0)).toBe(true);
+    expect(reports.every((report) => report.motifKinds.length > 0)).toBe(true);
+    expect(reports.every((report) => !report.hasForbiddenActorKeys)).toBe(true);
+
+    const allRoles = new Set(reports.flatMap((report) => report.semanticRoles));
+    const allMotifs = new Set(reports.flatMap((report) => report.motifKinds));
+    expect(Array.from(allRoles)).toEqual(
+      expect.arrayContaining([
+        "path",
+        "water",
+        "hazard",
+        "portalClearing",
+        "bossArena",
+        "poi",
+      ])
+    );
+    expect(Array.from(allMotifs)).toEqual(
+      expect.arrayContaining([
+        "corridorEdges",
+        "waterBands",
+        "hazardVeins",
+        "portalThreshold",
+        "arenaRunes",
+        "poiPavers",
+      ])
+    );
+    expect(new Set(reports.flatMap((report) => report.skeletonIds)).size).toBeGreaterThan(4);
   });
 
   it("keeps representative terrain palettes readable against official combat overlays", () => {

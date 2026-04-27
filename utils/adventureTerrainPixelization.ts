@@ -70,6 +70,17 @@ export interface AdventureTerrainRenderMotif {
   alpha: number;
 }
 
+export interface AdventureTerrainVisualQaReport {
+  mapId: string;
+  theme: string;
+  paletteTheme: string;
+  tileCount: number;
+  semanticRoles: AdventureTerrainSemanticRole[];
+  skeletonIds: string[];
+  motifKinds: AdventureTerrainRenderMotifKind[];
+  hasForbiddenActorKeys: boolean;
+}
+
 export const ADVENTURE_TERRAIN_TILE_ALLOWED_KEYS = [
   "x",
   "y",
@@ -1544,4 +1555,32 @@ export const assertAdventureTerrainTilesAreSafeForOfficialStage = (
       );
     }
   });
+};
+
+export const getAdventureTerrainVisualQaReport = ({
+  mapId,
+  theme,
+  tiles,
+}: {
+  mapId: string;
+  theme: string;
+  tiles: AdventureTerrainTile[];
+}): AdventureTerrainVisualQaReport => {
+  const forbiddenKeys = new Set<string>(ADVENTURE_TERRAIN_FORBIDDEN_ACTOR_KEYS);
+  const palette = resolveAdventureTerrainPalette(theme);
+
+  return {
+    mapId,
+    theme,
+    paletteTheme: palette.theme,
+    tileCount: tiles.length,
+    semanticRoles: Array.from(new Set(tiles.map((tile) => tile.semanticRole))).sort(),
+    skeletonIds: Array.from(new Set(tiles.map((tile) => tile.skeletonId))).sort(),
+    motifKinds: Array.from(
+      new Set(tiles.map((tile) => resolveAdventureTerrainRenderMotif(tile).kind))
+    ).sort(),
+    hasForbiddenActorKeys: tiles.some((tile) =>
+      Object.keys(tile).some((key) => forbiddenKeys.has(key))
+    ),
+  };
 };

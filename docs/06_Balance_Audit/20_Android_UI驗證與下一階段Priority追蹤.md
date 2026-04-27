@@ -278,3 +278,19 @@ Change id: `update-compendium-source-tracing-v2`
 - 不新增 persisted schema。
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；source tracing 只讀既有 `Enemy.drops`、`SHOPS`、`WORKSHOP_RECIPES`、encounter rewards / cues 與 skill manual metadata。
+
+## 14. Pixel map visual QA v3 收口記錄
+
+Change id: `update-pixel-map-visual-qa-v3`
+
+本輪把已落地的正式 pixel terrain 推進到可回歸的 visual QA 摘要，而不是新增另一套 renderer：
+
+- `getAdventureTerrainVisualQaReport` 會回傳 map/theme、paletteTheme、tileCount、semanticRoles、skeletonIds、motifKinds 與 forbidden actor-token 狀態。
+- representative maps regression 覆蓋 `path / water / hazard / portalClearing / bossArena / poi` 與 `corridorEdges / waterBands / hazardVeins / portalThreshold / arenaRunes / poiPavers`。
+- 仍沿用現有 Playwright smoke 驗證 desktop / mobile canvas 非黑、map modal 無水平溢出與正式 HUD / actor token 可讀性。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；visual QA 只讀 terrain tiles、map theme 與既有 Adventure runtime，不新增 actor sprite state 或 map visual state。
