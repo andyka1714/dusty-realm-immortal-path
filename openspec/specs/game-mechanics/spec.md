@@ -453,7 +453,7 @@
 - **AND** 不得繞過 `Life Review` 或直接跳到新角色初始化
 
 ### Requirement: 技能書來源層級與學習限制
-系統必須 (MUST) 為正式 `core` 技能書提供明確的 acquisition tier、來源對應、圖鑑可讀來源與學習限制。
+系統必須 (MUST) 為正式 `core` 技能書提供明確的 acquisition tier、具體取得 route、圖鑑可讀來源與學習限制。
 
 #### Scenario: 正式技能書帶有 acquisition tier 與來源 metadata
 - **WHEN** 系統根據正式 `core` 技能生成技能書
@@ -461,9 +461,16 @@
 - **AND** 每本技能書都必須帶有至少一個正式來源類型
 - **AND** 每本技能書都必須帶有職業 / 境界 / 前置技能限制 metadata
 
+#### Scenario: 正式技能書可推導具體取得 route
+- **WHEN** 系統建立正式 `core` 技能書 routing
+- **THEN** 每本 formal core manual 都必須能推導至少一個具體 route，例如商店 id、敵人 id、宗門試煉或傳承殿
+- **AND** route 不得指向 retired manual、missing item 或不存在的商店 / 敵人
+- **AND** routing helper 必須從既有 `SHOPS`、`BESTIARY` 與 skill manual metadata 推導，不得另建手寫平行表
+
 #### Scenario: 圖鑑可讀取技能書來源
 - **WHEN** 圖鑑顯示正式 core skill 或其秘卷
 - **THEN** 系統必須能從既有 skill manual metadata 推導商店、宗門試煉、精英掉落、Boss 掉落或傳承來源
+- **AND** 若商店或敵人資料能定位具體名稱，圖鑑必須顯示具體來源名稱
 - **AND** 不得為圖鑑另建一套會和正式 skill manual registry 脫節的來源資料
 
 #### Scenario: 宗門試煉與正式技能池保持同步
@@ -478,8 +485,8 @@
 
 #### Scenario: 退場技能不再混入正式技能書取得池
 - **WHEN** 系統建立正式技能書來源與學習資料
-- **THEN** `transition / legacy` 技能不得重新出現在正式技能書來源 registry
-- **AND** 舊技能若仍被引用，必須映射到正式核心替代技能
+- **THEN** `transition / legacy` 技能不得出現在 shop、elite、boss 或 inheritance formal source pool
+- **AND** 若舊 manual id 仍存在於存檔或舊資料，必須先映射到正式 replacement manual
 
 ### Requirement: 物品與材料來源可追蹤
 系統必須 (MUST) 讓正式物品、材料與秘卷可由既有 catalog、掉落、商店、Workshop recipe 或 encounter reward 推導來源與用途。
