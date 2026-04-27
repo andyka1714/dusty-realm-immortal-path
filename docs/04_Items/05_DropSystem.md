@@ -135,3 +135,10 @@ FinalStats = (BaseStats * QualityMultiplier) + AffixStats
 1.  **實例化背包 (Inventory Instancing)**: 背包需支援存儲具有唯一 ID (`uuid`) 的物品實例，而非僅存儲數量。
 2.  **動態屬性生成 (Dynamic Stats)**: 獲得物品時，需即時運算品質與隨機詞條，並寫入實例數據中。
 3.  **裝備比較**: 提示介面需能顯示從「背包物品」替換「身上裝備」的數值變化差異。
+
+## 7. 補給掉落方向
+
+- 低階 common / elite 可少量提供 `heal_pill`，用來支撐 Adventure 即時戰鬥的早期續航。
+- 中期補給不應只依賴 `heal_pill`；後續掉落表或 route reward 應逐步接入 `greater_heal_pill` 與 `revitalizing_pill`。
+- 高階恢復品應更多來自 Workshop 或 route-specific source，避免一般怪物掉落直接取代製作與宗門路線價值。
+- 本輪只補 catalog、商店與 runtime 使用語意；既有 enemy drop table 不在本輪擴寫，避免把掉落平衡與補給語意混成同一個不可驗證範圍。

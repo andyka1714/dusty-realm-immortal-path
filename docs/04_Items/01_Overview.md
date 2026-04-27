@@ -49,3 +49,13 @@ interface BaseItem {
 *   **Attack Attributes**: 攻擊力, 暴擊率, 暴擊傷害, 屬性傷害加成 (金木水火土)
 *   **Defense Attributes**: 生命值 (HP), 護甲 (Def), 閃避率, 減傷率, 回血速度
 *   **Special Attributes**: 幸運, 悟性, 神識, 速度, 採集效率
+
+## 5. 商店與補給閉環
+
+- `general_store_mortal` 不再是空商店，凡人期可直接購買 `qi_pill / heal_pill`，並有少量 `foundation_pill` 作為突破前補給。
+- 基礎消耗品來源分為：
+  - 商店常備：`qi_pill`、`heal_pill`
+  - 中期補給資料：`greater_heal_pill`、`revitalizing_pill`
+  - 突破輔助：`foundation_pill` 與各境界突破素材
+- 商店商品必須能在 `ITEMS` catalog 中找到；消耗品必須帶有可讀 effect，避免只有名稱沒有用途。
+- 本版沒有新增 persisted combat resource，也沒有變更 LocalStorage schema；不需要 migration。

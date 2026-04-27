@@ -165,3 +165,22 @@ Archive 記錄：
 
 - `2026-04-27` 已以 `openspec archive update-compendium-taxonomy-and-layout --skip-specs --yes` 歸檔。
 - 使用 `--skip-specs` 的理由：`client-interface` base spec 已在實作 commit 吸收圖鑑分類與瀏覽可讀性 requirement，本次 archive 僅移動 completed change。
+
+## 8. 物品經濟與戰鬥補給閉環收口記錄
+
+Change id: `update-item-economy-combat-supplies`
+
+本輪已收斂早期商店與補給品使用語意：
+
+- `general_store_mortal` 已提供 `qi_pill / heal_pill`，並少量提供 `foundation_pill`。
+- 新增中期補給資料 `greater_heal_pill` 與 `revitalizing_pill`，避免恢復品 catalog 只剩單一回春丹。
+- `heal_hp / heal_mp / full_restore` 已抽成 `utils/consumableEffects.ts` runtime bridge；角色永久效果仍留在 `characterSlice.consumeItem`。
+- Inventory 會在沒有對應 resource 或氣血已滿時阻擋恢復品，並顯示不可用原因。
+- Adventure 即時戰鬥面板可使用背包恢復品回復目前可見的 `worldPlayerHp`。
+
+本輪仍維持：
+
+- 不新增 persisted combat resource。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration。
+- `heal_mp` 尚無正式 MP runtime resource，因此只能顯示不可用原因，不會消耗道具。

@@ -24,18 +24,33 @@ import { GameSection } from '../components/game/GameSection';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
+import {
+  getConsumableRecoveryBlockedReason,
+  hasRecoveryEffect,
+  type ConsumableRuntimeResources,
+} from '../utils/consumableEffects';
 
 interface InventoryProps {
   embedded?: boolean;
+  initialSelectedItemId?: string;
+  combatResourceContext?: ConsumableRuntimeResources;
 }
 
-export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
+export const Inventory: React.FC<InventoryProps> = ({
+  embedded = false,
+  initialSelectedItemId,
+  combatResourceContext = {},
+}) => {
   const { items, equipment } = useSelector((state: RootState) => state.inventory);
   const character = useSelector((state: RootState) => state.character);
   const dispatch = useDispatch();
 
   const [filter, setFilter] = useState<'all' | ItemCategory>('all');
-  const [selectedSlot, setSelectedSlot] = useState<InventorySlot | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<InventorySlot | null>(() =>
+    initialSelectedItemId
+      ? items.find((slot) => slot.itemId === initialSelectedItemId) ?? null
+      : null
+  );
 
   // Batch Management State
   const [isDeleteMode, setIsDeleteMode] = useState(false);
@@ -88,6 +103,13 @@ export const Inventory: React.FC<InventoryProps> = ({ embedded = false }) => {
     );
 
     if (!manualEffect?.skillId) {
+      if (hasRecoveryEffect(item.effects)) {
+        return getConsumableRecoveryBlockedReason(
+          item.effects,
+          combatResourceContext
+        );
+      }
+
       return null;
     }
 

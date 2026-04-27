@@ -59,7 +59,11 @@ export const SHOPS: Record<string, ShopData> = {
         id: 'general_store_mortal',
         name: '珍寶閣分號',
         description: '王掌櫃經營的雜貨舖，童叟無欺。',
-        items: []
+        items: [
+            { itemId: 'qi_pill' },
+            { itemId: 'heal_pill' },
+            { itemId: 'foundation_pill', stock: 1 }
+        ]
     },
 
     // 2. Village Blacksmith (Mortal Only)

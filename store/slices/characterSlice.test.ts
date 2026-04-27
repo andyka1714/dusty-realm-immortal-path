@@ -200,4 +200,21 @@ describe("character skill acquisition rules", () => {
     expect(learned.skills).toContain("b_ma_active");
     expect(learned.skills).not.toContain("b_ie_active");
   });
+
+  it("does not count runtime-only recovery effects as consumed character effects", () => {
+    const base = reducer(undefined, { type: "test/init" });
+
+    const next = reducer(
+      {
+        ...base,
+        itemConsumption: {},
+      },
+      consumeItem({
+        itemId: "heal_pill",
+        effects: [{ type: "heal_hp", value: 50 }],
+      })
+    );
+
+    expect(next.itemConsumption.heal_pill).toBeUndefined();
+  });
 });

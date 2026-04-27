@@ -374,6 +374,24 @@ Workshop 介面必須 (MUST) 顯示 mastery milestone、specialization leaf、ro
 - **THEN** 介面必須更新下一世 build cue
 - **AND** 若配置非法，必須顯示功德、slot、前置或互斥原因
 
+### Requirement: 補給品購買與使用可讀性
+介面必須 (MUST) 讓玩家在商店與背包中看懂補給品的價格、效果、可用狀態與不可用原因。
+
+#### Scenario: 商店顯示補給品效果
+- **WHEN** 玩家在 ShopPanel 查看消耗品或補給品
+- **THEN** 介面必須顯示價格、庫存限制與主要 effect
+- **AND** 不得只顯示名稱讓玩家猜測用途
+
+#### Scenario: 背包使用補給前顯示可用狀態
+- **WHEN** 玩家在 Inventory 選中恢復品或補給品
+- **THEN** 介面必須顯示該道具目前是否可用
+- **AND** 若不可用，必須顯示原因，例如未受傷、沒有可恢復資源、境界不符或效果尚未支援
+
+#### Scenario: 使用後可見資源變化
+- **WHEN** 玩家成功使用補給品
+- **THEN** 介面必須讓玩家看見對應資源或狀態變化
+- **AND** 不得只扣除道具而沒有任何可見回饋
+
 ### Requirement: 像素地圖 production v2
 系統必須 (MUST) 讓正式 `AdventureStage` 的 terrain/background 擁有可擴充的 biome、special terrain、landmark 與 route skeleton 語言，同時維持 actor token 不變。
 

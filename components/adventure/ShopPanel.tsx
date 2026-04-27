@@ -27,6 +27,7 @@ import {
     getSkillManualAcquisitionTierLabel,
     getSkillManualSourceLabels,
 } from '../../data/items/manuals';
+import { hasRecoveryEffect } from '../../utils/consumableEffects';
 
 
 // Helper for attribute names (Moved from Inventory to be shared concept ideally, but kept here for now)
@@ -213,6 +214,9 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                         const qualityBorder = getQualityBorderColor(item.quality);
                         const qualityText = getQualityTextColor(item.quality);
                         const qualityName = getQualityName(item.quality);
+                        const consumable = item.category === ItemCategory.Consumable
+                          ? item as ConsumableItem
+                          : null;
                         
                         // Determine Realm Name
                         const realmName = item.minRealm !== undefined
@@ -281,6 +285,33 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                                         </h4>
                                     </div>
                                     <p className="text-xs text-stone-500 truncate mt-1">{item.description}</p>
+                                    {consumable && (
+                                        <div className="mt-2 flex flex-wrap gap-1.5 text-[11px]">
+                                            {consumable.effects.map((effect, effectIndex) => (
+                                                <span
+                                                    key={`${effect.type}-${effectIndex}`}
+                                                    className={clsx(
+                                                        "rounded-full border px-2 py-0.5",
+                                                        hasRecoveryEffect([effect])
+                                                            ? "border-emerald-900/60 bg-emerald-950/35 text-emerald-200"
+                                                            : "border-stone-800 bg-stone-950/60 text-stone-400"
+                                                    )}
+                                                >
+                                                    {effect.type === 'full_restore' && '完全恢復狀態'}
+                                                    {effect.type === 'heal_hp' && `恢復氣血 ${effect.value}`}
+                                                    {effect.type === 'heal_mp' && `恢復真元 ${effect.value}`}
+                                                    {effect.type === 'gain_exp' && `修為 +${effect.value}`}
+                                                    {effect.type === 'lifespan' && `壽元 +${effect.value}`}
+                                                    {effect.type === 'breakthrough_chance' && `突破 +${effect.value}%`}
+                                                    {effect.type === 'learn_skill' && '功法秘卷'}
+                                                    {effect.type === 'buff_stat' && `屬性 +${effect.value}`}
+                                                </span>
+                                            ))}
+                                            <span className="rounded-full border border-amber-900/50 bg-amber-950/25 px-2 py-0.5 text-amber-200">
+                                                {shopItem.stock === undefined ? '常備' : `庫存 ${shopItem.stock}`}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Buy Action */}

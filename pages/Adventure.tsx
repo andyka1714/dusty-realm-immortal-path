@@ -7,6 +7,7 @@ import { MAPS } from '../data/maps';
 import { ITEMS } from '../data/items';
 import { QUESTS } from '../data/quests';
 import { enterMap, movePlayer, tickMonsters, applyWorldDamageToMonster, cancelBattle, markMapVisited } from '../store/slices/adventureSlice';
+import { removeItem } from '../store/slices/inventorySlice';
 import {
   clearAllCombatTimers,
   clearCombatTimerBucket,
@@ -23,7 +24,7 @@ import {
 import { addLog } from '../store/slices/logSlice';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move, Swords, Flame, Droplets, Shield, ShieldOff, Zap, Snowflake, Sparkles } from 'lucide-react';
 import { parseBattleLog } from '../utils/logParser';
-import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory, NPC, NPCType, ProfessionType, ActiveMonster, Enemy } from '../types';
+import { EnemyRank, Coordinate, MapData, MajorRealm, ElementType, ItemCategory, NPC, NPCType, ProfessionType, ActiveMonster, Enemy, ConsumableItem } from '../types';
 import { MOVEMENT_SPEEDS, REALM_NAMES, ELEMENT_COLORS, ELEMENT_NAMES } from '../constants';
 import clsx from 'clsx';
 import { Modal } from '../components/Modal';
@@ -66,6 +67,11 @@ import {
   useWorldCombatControllerEffect,
 } from '../hooks/useAdventureBattleEffects';
 import { resolveAdventureTerrainPalette } from '../utils/adventureTerrainPixelization';
+import {
+  applyConsumableRecoveryEffects,
+  getConsumableRecoveryBlockedReason,
+  hasRecoveryEffect,
+} from '../utils/consumableEffects';
 
 
 // --- VISUAL CONFIG ---
@@ -601,7 +607,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   const dispatch = useDispatch();
   const character = useSelector((state: RootState) => state.character);
   const { attributes, majorRealm, spiritRootId, isInitialized, profession } = character;
-  const { equipmentStats } = useSelector((state: RootState) => state.inventory);
+  const { equipmentStats, items: inventoryItems } = useSelector((state: RootState) => state.inventory);
   const { 
     currentMapId, playerPosition, activeMonsters, visitedCells, 
     mapHistory, isBattling, currentEnemy, currentEnemyInstanceId, battleLogs, lastBattleResult 
@@ -888,6 +894,56 @@ export const Adventure: React.FC<AdventureProps> = ({
           recentMessage: worldLastCombatMessage,
         })
       : null;
+  const combatSupplySlot = inventoryItems.find((slot) => {
+    const item = ITEMS[slot.itemId];
+    return (
+      item?.category === ItemCategory.Consumable &&
+      hasRecoveryEffect((item as ConsumableItem).effects)
+    );
+  });
+  const combatSupply = combatSupplySlot
+    ? ITEMS[combatSupplySlot.itemId] as ConsumableItem
+    : null;
+  const combatSupplyBlockedReason = combatSupply
+    ? getConsumableRecoveryBlockedReason(combatSupply.effects, {
+        hp: { current: worldPlayerHp, max: playerStats.maxHp },
+      })
+    : "沒有可用補給";
+
+  const useCombatSupply = () => {
+    if (!combatSupply || !combatSupplySlot || combatSupplyBlockedReason) {
+      if (combatSupplyBlockedReason) {
+        dispatch(addLog({
+          message: `補給無法使用：${combatSupplyBlockedReason}。`,
+          type: 'warning-low',
+        }));
+      }
+      return;
+    }
+
+    const recovery = applyConsumableRecoveryEffects(combatSupply.effects, {
+      hp: { current: worldPlayerHp, max: playerStats.maxHp },
+    });
+
+    if (recovery.appliedEffects <= 0 || !recovery.hp) {
+      dispatch(addLog({
+        message: `補給無法使用：沒有可恢復的戰鬥資源。`,
+        type: 'warning-low',
+      }));
+      return;
+    }
+
+    setWorldPlayerHp(recovery.hp.current);
+    dispatch(removeItem({
+      itemId: combatSupplySlot.itemId,
+      count: 1,
+      instanceId: combatSupplySlot.instanceId,
+    }));
+    dispatch(addLog({
+      message: `你服用了 [${combatSupply.name}]，氣血恢復至 ${Math.floor(recovery.hp.current)} / ${playerStats.maxHp}。`,
+      type: 'gain',
+    }));
+  };
 
   useEffect(() => {
     if (!targetedMonster || isBattling || showIntro) {
@@ -1698,6 +1754,21 @@ export const Adventure: React.FC<AdventureProps> = ({
                             <div className="mt-2 flex items-center justify-between text-[11px] text-stone-400">
                                 <span>氣血 {Math.floor(worldPlayerHp)} / {playerStats.maxHp}</span>
                                 <span>{worldPlayerShield > 0 ? `護盾 ${Math.floor(worldPlayerShield)}` : '無護盾'}</span>
+                            </div>
+                            <div className="mt-3 flex items-center gap-2">
+                                <Button
+                                    onClick={useCombatSupply}
+                                    disabled={!combatSupply || Boolean(combatSupplyBlockedReason)}
+                                    variant={combatSupply && !combatSupplyBlockedReason ? "emerald" : "stone"}
+                                    size="sm"
+                                    className="min-w-0 flex-1 text-xs"
+                                    data-testid="adventure-use-combat-supply"
+                                >
+                                    {combatSupply ? `服用 ${combatSupply.name}` : '無補給'}
+                                </Button>
+                                <span className="min-w-0 flex-1 text-[11px] text-stone-500">
+                                    {combatSupplyBlockedReason ?? `剩餘 ${combatSupplySlot?.count ?? 0}`}
+                                </span>
                             </div>
                             <div className="mt-2">
                                 {worldCombatPresentation
