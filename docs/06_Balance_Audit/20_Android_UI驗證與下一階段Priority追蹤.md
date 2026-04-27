@@ -311,3 +311,21 @@ Change id: `expand-map-local-content-density-v3`
 - 不新增 persisted schema。
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；map-local v3 只擴充靜態 `NPC` / `Quest` / `MAPS` catalog，既有存檔會自然以未接取 quest 顯示新增內容。
+
+## 16. Client build performance budget 收口記錄
+
+Change id: `refactor-client-build-performance-budget`
+
+本輪把長期存在的 Vite chunk size warning 收成可追蹤 budget，而不是把 warning 留在每次 build output：
+
+- `vite.config.ts` 設定明確 `chunkSizeWarningLimit: 550`，目前最大正式 chunk `pixi` 約 `485.92 kB`，低於 budget。
+- `pixi.js-legacy` 被分到 `pixi-preview`，避免 preview-only runtime 和正式 `pixi` chunk 混在同一個 budget 裡。
+- `index.tsx` 不再靜態 import `AdventurePixelPrototypePreview`；pixel prototype preview 只在 query 開啟時透過 lazy import 載入。
+- `tests/buildPerformanceBudget.test.ts` 驗證 Vite budget、Pixi manual chunk 分類與入口 lazy boundary。
+- `npm run build` 仍保留正式 Adventure / GameShell lazy panels，但不再輸出 chunk size warning。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；build budget 與 lazy boundary 只影響編譯輸出和載入策略，不改玩家存檔。

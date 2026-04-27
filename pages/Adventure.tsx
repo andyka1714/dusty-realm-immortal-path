@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useLayoutEffect, useMemo } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useRef, useLayoutEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/store';
@@ -30,7 +30,6 @@ import clsx from 'clsx';
 import { Modal } from '../components/Modal';
 import { setProfession } from '@/store/slices/characterSlice';
 import AdventureStage from '../components/adventure/AdventureStage';
-import { AdventurePixelStagePrototype } from '../components/adventure/AdventurePixelStagePrototype';
 import ShopPanel from '../components/adventure/ShopPanel';
 import { QuestModal } from '../components/adventure/QuestModal';
 import { GameHintBubble } from '../components/game/GameHintBubble';
@@ -72,6 +71,12 @@ import {
   getConsumableRecoveryBlockedReason,
   hasRecoveryEffect,
 } from '../utils/consumableEffects';
+
+const AdventurePixelStagePrototype = lazy(() =>
+  import('../components/adventure/AdventurePixelStagePrototype').then((module) => ({
+    default: module.AdventurePixelStagePrototype,
+  }))
+);
 
 
 // --- VISUAL CONFIG ---
@@ -1951,6 +1956,7 @@ export const Adventure: React.FC<AdventureProps> = ({
             {/* PixiJS Stage */}
             {gridMetrics.pixelWidth > 0 && mapData && (
                  activeStageRenderMode === 'pixel_prototype' ? (
+                   <Suspense fallback={<div className="h-full w-full bg-stone-950" />}>
                      <AdventurePixelStagePrototype
                         key={`${currentMapId}-pixel-prototype`}
                         mapData={mapData}
@@ -1964,6 +1970,7 @@ export const Adventure: React.FC<AdventureProps> = ({
                         onTileClick={handleGridClick}
                         onPlayerArrive={handlePlayerArrive}
                      />
+                   </Suspense>
                  ) : (
                      <AdventureStage
                         key={currentMapId} // Force Remount on Map Change to prevent visual drift

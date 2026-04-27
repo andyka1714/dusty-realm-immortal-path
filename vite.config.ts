@@ -12,9 +12,14 @@ export default defineConfig({
     exclude: ['**/node_modules/**', '**/dist/**', '**/tests/e2e/**'],
   },
   build: {
+    chunkSizeWarningLimit: 550,
     rollupOptions: {
       output: {
         manualChunks(id) {
+          if (id.includes('pixi.js-legacy')) {
+            return 'pixi-preview';
+          }
+
           if (id.includes('pixi.js')) {
             return 'pixi';
           }
