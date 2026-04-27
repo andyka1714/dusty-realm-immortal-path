@@ -401,3 +401,20 @@ Change id: `complete-supply-economy-and-consumables-v4`
 - 不新增 persisted schema。
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；補給 v4 只讀既有 `ITEMS`、`SHOPS`、inventory slots、character state 與當前可見 combat runtime resource。
+
+## 21. 技能書商店與掉落 routing v4 收口記錄
+
+Change id: `refine-shop-manual-drop-routing-v4`
+
+本輪把 formal core 技能書的取得路徑從抽象 source tier 推進到可被圖鑑直接顯示的 concrete route：
+
+- 新增 `data/skillManualRouting.ts`，從既有 skill metadata、`SHOPS` 與 `BESTIARY` 推導 `manualId -> routes`，不新增手寫圖鑑來源表。
+- `data/skillManualRouting.test.ts` 驗證所有 formal core manual 都有至少一條具體 route，且 route label 來自正式商店、敵人掉落、宗門試煉或傳承殿。
+- `Compendium` skill source tracing 現在除了原本的 `藏經閣 / 精英掉落 / 首領核心 / 古修傳承` 摘要，也會附上具體 route chips，例如 `藏經閣`、`宗門入門試煉`、具體敵人掉落或 `古修傳承殿`。
+- 既有 `skillBookCoverage` 與 `skillPoolRegistry` regression 繼續確認 `transition / legacy` 技能不會混入 formal source pool。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；routing v4 只讀既有 `Skill` metadata、manual item id、商店 catalog 與敵人 drop catalog。

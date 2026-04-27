@@ -7,6 +7,10 @@ import {
 } from "../../data/items/manuals";
 import { SHOPS } from "../../data/shops";
 import {
+  buildSkillManualRouteTrace,
+  type SkillManualConcreteRoute,
+} from "../../data/skillManualRouting";
+import {
   WORKSHOP_RECIPES,
   type WorkshopRecipe,
   type WorkshopRecipeDiscipline,
@@ -85,6 +89,7 @@ export interface CompendiumSkillSourceTrace {
   manualId: string;
   manualSources: SkillManualSourceEntry[];
   manualSourceLabels: string[];
+  routes: SkillManualConcreteRoute[];
   sources: CompendiumSourceChip[];
 }
 
@@ -264,6 +269,7 @@ export const buildCompendiumSkillSourceTrace = (
   const manualSources = getSkillManualSources(skill);
   const manualSourceLabels = manualSources.map((source) => source.label);
   const formalSourceLabel = getFormalSourceLabel(skill.formalSourceTier);
+  const routeTrace = buildSkillManualRouteTrace(skill);
 
   return {
     skillId: skill.id,
@@ -274,12 +280,19 @@ export const buildCompendiumSkillSourceTrace = (
     manualId: getSkillManualId(skill.id),
     manualSources,
     manualSourceLabels,
+    routes: routeTrace.routes,
     sources: [
       {
         kind: "skill_manual",
         label: `${formalSourceLabel}：${manualSourceLabels.join("、")}`,
         tags: manualSources.map((source) => source.type),
       },
+      ...routeTrace.routes.map((route) => ({
+        kind: "skill_manual" as const,
+        label: route.label,
+        detail: route.detail,
+        tags: route.tags,
+      })),
     ],
   };
 };

@@ -34,6 +34,7 @@
   - 主動 / 被動分類
   - 主要取得來源（商店 / 精英 / Boss / 傳承）
 - 技能書來源已整理成正式 registry，後續背包、圖鑑與文件都應共用同一份來源資料，不再分散在描述文字中
+- 技能書 routing v4 會從 formal skill metadata、`SHOPS` 與 `BESTIARY` 推導具體 route；圖鑑顯示功法來源時應優先使用這個 helper，而不是另外手寫商店或掉落說明。
 - 技能池也已有正式 registry，包含：
   - `poolStatus`
   - `formalRole`

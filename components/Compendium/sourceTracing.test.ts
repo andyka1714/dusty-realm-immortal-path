@@ -92,5 +92,20 @@ describe("Compendium source tracing helpers", () => {
     expect(trace.profession).toBe(ProfessionType.Body);
     expect(trace.manualId).toBe("manual_b_f_active");
     expect(trace.manualSourceLabels).toEqual(["同境界 Boss"]);
+    expect(trace.sources.map((source) => source.label).join("\n")).toContain("掉落");
+    expect(trace.routes.some((route) => route.type === "drop")).toBe(true);
+  });
+
+  it("shows concrete shop and inheritance route names for skill manuals", () => {
+    const shopTrace = buildCompendiumSkillSourceTrace("s_q_active");
+    const inheritanceTrace = buildCompendiumSkillSourceTrace("s_tr_active");
+
+    expect(shopTrace.sources.map((source) => source.label).join("\n")).toContain(
+      "藏經閣"
+    );
+    expect(shopTrace.routes.map((route) => route.label)).toContain("宗門入門試煉");
+    expect(inheritanceTrace.sources.map((source) => source.label).join("\n")).toContain(
+      "古修傳承殿"
+    );
   });
 });
