@@ -329,3 +329,21 @@ Change id: `refactor-client-build-performance-budget`
 - 不新增 persisted schema。
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；build budget 與 lazy boundary 只影響編譯輸出和載入策略，不改玩家存檔。
+
+## 17. Content authoring audit tools 收口記錄
+
+Change id: `establish-content-authoring-audit-tools`
+
+本輪建立集中式內容 authoring audit，作為後續 `expand-endgame-loop-v4` 前的資料防線：
+
+- `data/contentAuthoringAudit.ts` 提供 catalog-wide helper，檢查 quest、encounter、shop、enemy drops、Workshop recipe 的 item reference 是否存在於正式 `ITEMS`。
+- 同一個 helper 也檢查 map NPC `questIds`、quest `giverId`、`submitNpcId` 與 dialogue target 是否對得上正式 NPC / quest catalog。
+- `auditRouteMaterialSourceCoverage` 針對 `凌霄劍星鋼 / 萬獸血骨殘材 / 縹緲星魂蓮` 檢查 source、Workshop sink 與圖鑑 source tracing。
+- 新增 `data/contentAuthoringAudit.test.ts`，讓內容擴量時 reference 斷線能直接在 unit test 被抓到。
+- 本輪 audit 實際抓出 `m31_e1 / m32_e1` 掉落已退休且不存在的 `manual_s_f_passive`；已移除這兩個無效 drop，避免圖鑑與掉落流程指向不存在物品。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；authoring audit 是 deterministic test/helper，只讀現有 catalog。

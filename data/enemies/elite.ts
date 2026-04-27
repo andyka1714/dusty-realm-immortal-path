@@ -1969,8 +1969,6 @@ const ELITE_SKILL_DROPS: Record<string, string[]> = {
   m25_e1: [getSkillManualId("m_q_passive")],
   m26_e1: [getSkillManualId("m_q_passive")],
 
-  m31_e1: [getSkillManualId("s_f_passive")],
-  m32_e1: [getSkillManualId("s_f_passive")],
   m41_e1: [getSkillManualId("b_f_passive")],
   m42_e1: [getSkillManualId("b_f_passive")],
   m51_e1: [getSkillManualId("m_f_passive")],
