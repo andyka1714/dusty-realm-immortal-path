@@ -437,6 +437,12 @@
 - **THEN** 系統必須解鎖對應的進階 planner 條目
 - **AND** 玩家不應在第一輪就無條件取得所有高階輪迴配置
 
+#### Scenario: v3 route memory 解鎖高階本命魂印
+- **WHEN** 玩家完成三宗 v3 world chapter 並取得 `sect:sword:world-chapter-03`、`sect:beast:world-chapter-03` 或 `sect:mystic:world-chapter-03`
+- **THEN** 輪迴 planner 必須能以既有 `soul.worldMemoryTags` 解鎖對應的高階劍修、體修或法修本命魂印
+- **AND** 本命魂印必須維持對應 build lane 與 heirloom compatibility 限制
+- **AND** 不得為相同 route memory 新增另一套 persisted unlock state
+
 ### Requirement: 主動坐化沿用正式結算語意
 系統必須 (MUST) 讓 `主動坐化` 與死亡型輪迴共用同一套結算與 rebirth pipeline。
 
@@ -557,6 +563,11 @@
 - **WHEN** 輪迴 v2 使用 lifetime stats 或 world memory 作為 planner 參考
 - **THEN** 系統必須只讀取合法的 soul / memory 摘要
 - **AND** 不得把上一世背包、任務或地圖狀態帶入新一世
+
+#### Scenario: v3 輪迴 hook 沿用既有 soul 記憶
+- **WHEN** 輪迴 planner 判斷三宗 v3 route seal 是否可用
+- **THEN** 系統必須只讀既有 `soul.worldMemoryTags` 與既有 `rebirthConfig`
+- **AND** 不得新增新的 soul schema、current run schema 或 migration
 
 ### Requirement: Base spec truth release gate
 系統必須 (MUST) 讓完成的正式功能回寫 base specs 與 tracking docs，避免實作完成但規格真相停留在舊狀態。

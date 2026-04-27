@@ -9,6 +9,7 @@ import soulReducer, {
   toggleRebirthPerk,
   toggleSelectedHeirloom,
   setRebirthSpiritRootOverride,
+  addWorldMemoryTags,
 } from "./soulSlice";
 import {
   DEFAULT_REINCARNATION_PERKS,
@@ -235,5 +236,69 @@ describe("soulSlice", () => {
     expect(sealed.rebirthConfig.selectedSealId).toBe("seal_sword_edge");
     expect(switchedToMage.rebirthConfig.selectedSealId).toBeUndefined();
     expect(switchedToMage.rebirthConfig.selectedHeirloomIds).toEqual([]);
+  });
+
+  it("selects v3 soul seals from chapter 03 memories and drops them when identity changes", () => {
+    const reviewed = soulReducer(
+      {
+        ...soulReducer(undefined, { type: "@@INIT" }),
+        worldMemoryTags: ["sect:beast:world-chapter-03"],
+      },
+      startLifeReview({
+        cause: "battle",
+        ageYears: 3000,
+        highestRealm: MajorRealm.Immortal,
+        realmMerit: 10000000,
+        ageMerit: 1500,
+        totalMeritGained: 10001500,
+        eligibleHeirlooms: [],
+      })
+    );
+    const hall = soulReducer(reviewed, enterReincarnationHall());
+    const body = soulReducer(hall, setRebirthBuildIdentity("body"));
+    const sealed = soulReducer(
+      body,
+      setRebirthSoulSeal("seal_body_immortal_blood")
+    );
+    const switchedToSword = soulReducer(sealed, setRebirthBuildIdentity("sword"));
+
+    expect(sealed.rebirthConfig.selectedSealId).toBe(
+      "seal_body_immortal_blood"
+    );
+    expect(switchedToSword.rebirthConfig.selectedSealId).toBeUndefined();
+  });
+
+  it("keeps selected v3 soul seals sanitized when the required memory is absent", () => {
+    const reviewed = soulReducer(
+      undefined,
+      startLifeReview({
+        cause: "battle",
+        ageYears: 3000,
+        highestRealm: MajorRealm.Immortal,
+        realmMerit: 10000000,
+        ageMerit: 1500,
+        totalMeritGained: 10001500,
+        eligibleHeirlooms: [],
+      })
+    );
+    const hall = soulReducer(reviewed, enterReincarnationHall());
+    const sword = soulReducer(hall, setRebirthBuildIdentity("sword"));
+    const rejected = soulReducer(
+      sword,
+      setRebirthSoulSeal("seal_sword_immortal_oath")
+    );
+    const withMemory = soulReducer(
+      rejected,
+      addWorldMemoryTags(["sect:sword:world-chapter-03"])
+    );
+    const accepted = soulReducer(
+      withMemory,
+      setRebirthSoulSeal("seal_sword_immortal_oath")
+    );
+
+    expect(rejected.rebirthConfig.selectedSealId).toBeUndefined();
+    expect(accepted.rebirthConfig.selectedSealId).toBe(
+      "seal_sword_immortal_oath"
+    );
   });
 });

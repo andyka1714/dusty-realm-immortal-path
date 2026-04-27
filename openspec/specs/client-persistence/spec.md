@@ -159,6 +159,12 @@
 - **THEN** 系統必須保留合法選擇並清理不合法項目
 - **AND** 不得允許非法配置開始新一世
 
+#### Scenario: v3 route-memory 本命魂印不新增 persisted schema
+- **WHEN** 輪迴 v3 catalog 新增讀取 `sect:*:world-chapter-03` 的本命魂印
+- **THEN** 舊存檔必須沿用既有 `soul.worldMemoryTags` 與 `rebirthConfig` 判斷可用性與 selected seal sanitize
+- **AND** 不得新增新的 `soul` 欄位、current run 欄位或 LocalStorage envelope 欄位
+- **AND** 不需要 migration 或 hydrate sanitize，只需沿用既有 planner sanitize 清理不可用 `selectedSealId`
+
 ### Requirement: Persistence migration release gate
 系統必須 (MUST) 在任何改動 persisted state 的正式 change 中定義 migration、hydration 與 regression gate。
 
@@ -171,6 +177,11 @@
 - **WHEN** 新功能只改資料表、UI cue 或 deterministic helper
 - **THEN** tasks 必須明確記錄不需要 migration 的理由
 - **AND** 不得在未宣告的情況下偷渡新 persisted field
+
+#### Scenario: Reincarnation route memory v3 不新增 persisted state
+- **WHEN** Reincarnation route memory v3 只新增本命魂印 catalog、planner gate 或 UI cue
+- **THEN** 系統必須沿用既有 `soul.worldMemoryTags` 與 `rebirthConfig`
+- **AND** 不需要新增 migration 或 LocalStorage hydration 邏輯
 
 #### Scenario: Encounter aftermath v3 不新增 persisted state
 - **WHEN** encounter aftermath v3 只新增 catalog event、selector gate、presentation cue 或 choice reward

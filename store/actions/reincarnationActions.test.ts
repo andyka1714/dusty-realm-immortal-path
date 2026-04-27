@@ -203,4 +203,36 @@ describe("reincarnation actions", () => {
     expect(state.character.attributes.rootBone).toBeGreaterThan(10);
     expect(state.character.attributes.comprehension).toBeGreaterThan(10);
   });
+
+  it("carries v3 route-memory soul seal bonuses into the next life", () => {
+    const seeded = createReincarnationReadyStore();
+    const store = createTestStore({
+      ...seeded.getState(),
+      soul: {
+        ...seeded.getState().soul,
+        worldMemoryTags: ["sect:mystic:world-chapter-03"],
+      },
+      character: {
+        ...seeded.getState().character,
+        majorRealm: MajorRealm.Immortal,
+      },
+    });
+
+    store.dispatch(startLifeReviewFromCurrentRun("lifespan"));
+    store.dispatch(enterReincarnationHall());
+    store.dispatch(setRebirthBuildIdentity("mage"));
+    store.dispatch(setRebirthSoulSeal("seal_mage_immortal_star"));
+
+    expect(store.getState().soul.rebirthConfig.selectedSealId).toBe(
+      "seal_mage_immortal_star"
+    );
+
+    store.dispatch(completeRebirthFromHall());
+
+    const state = store.getState();
+
+    expect(state.character.attributes.insight).toBeGreaterThan(10);
+    expect(state.character.attributes.comprehension).toBeGreaterThan(10);
+    expect(state.soul.flowStep).toBe("inactive");
+  });
 });

@@ -17,6 +17,7 @@ import {
   calculateRealmMerit,
   getAvailableReincarnationPerks,
   getAvailableReincarnationSoulSeals,
+  getRebirthBuildPreview,
   getRebirthConfigCost,
   getRebirthConfigHeirloomSlotCount,
   sanitizeRebirthConfig,
@@ -141,6 +142,85 @@ describe("reincarnation utils", () => {
     ).not.toContain("seal_sword_edge");
   });
 
+  it("unlocks v3 route-memory soul seals only from chapter 03 memories at Immortal realm", () => {
+    const v3Seals = [
+      {
+        id: "seal_sword_immortal_oath",
+        lane: "sword",
+        tag: "sect:sword:world-chapter-03",
+      },
+      {
+        id: "seal_body_immortal_blood",
+        lane: "body",
+        tag: "sect:beast:world-chapter-03",
+      },
+      {
+        id: "seal_mage_immortal_star",
+        lane: "mage",
+        tag: "sect:mystic:world-chapter-03",
+      },
+    ] as const;
+
+    v3Seals.forEach(({ id, lane, tag }) => {
+      const seal = DEFAULT_REINCARNATION_SOUL_SEALS.find(
+        (entry) => entry.id === id
+      );
+      expect(seal).toMatchObject({
+        id,
+        lane,
+        unlockRequirement: { minHighestRealm: MajorRealm.Immortal },
+        requiredWorldMemoryTags: [tag],
+      });
+      expect(seal?.identityTitle).toBeTruthy();
+      expect(seal?.identityCue).toBeTruthy();
+      expect(seal?.heirloomHint).toBeTruthy();
+      expect(
+        Boolean(seal?.statBonuses && Object.keys(seal.statBonuses).length > 0) ||
+          Boolean(seal?.spiritStoneBonus)
+      ).toBe(true);
+
+      expect(
+        getAvailableReincarnationSoulSeals(
+          createPlannerContext({
+            lifetimeStats: {
+              highestRealmEver: MajorRealm.Immortal,
+              highestAgeYears: 3000,
+              totalDeaths: 6,
+              totalReincarnations: 3,
+            },
+            worldMemoryTags: [tag],
+          })
+        ).map((availableSeal) => availableSeal.id)
+      ).toContain(id);
+      expect(
+        getAvailableReincarnationSoulSeals(
+          createPlannerContext({
+            lifetimeStats: {
+              highestRealmEver: MajorRealm.Immortal,
+              highestAgeYears: 3000,
+              totalDeaths: 6,
+              totalReincarnations: 3,
+            },
+            worldMemoryTags: [],
+          })
+        ).map((availableSeal) => availableSeal.id)
+      ).not.toContain(id);
+      expect(
+        getAvailableReincarnationSoulSeals(
+          createPlannerContext({
+            lifetimeStats: {
+              highestRealmEver: MajorRealm.Tribulation,
+              highestAgeYears: 2600,
+              totalDeaths: 5,
+              totalReincarnations: 2,
+            },
+            worldMemoryTags: [tag],
+          })
+        ).map((availableSeal) => availableSeal.id)
+      ).not.toContain(id);
+    });
+  });
+
   it("derives heirloom slot count from the selected planner perks", () => {
     expect(
       getRebirthConfigHeirloomSlotCount({
@@ -241,5 +321,74 @@ describe("reincarnation utils", () => {
       "sword_manual",
       "novice_sword",
     ]);
+  });
+
+  it("sanitizes selected v3 soul seals when chapter 03 memory is missing", () => {
+    const withMemory = sanitizeRebirthConfig({
+      config: {
+        plannerVersion: 2,
+        selectedBuildIdentity: "sword",
+        selectedSealId: "seal_sword_immortal_oath",
+        selectedPerkIds: [],
+        selectedHeirloomIds: [],
+      },
+      totalMerit: 1000,
+      plannerContext: createPlannerContext({
+        lifetimeStats: {
+          highestRealmEver: MajorRealm.Immortal,
+          highestAgeYears: 3000,
+          totalDeaths: 6,
+          totalReincarnations: 3,
+        },
+        worldMemoryTags: ["sect:sword:world-chapter-03"],
+      }),
+    });
+    const withoutMemory = sanitizeRebirthConfig({
+      config: {
+        plannerVersion: 2,
+        selectedBuildIdentity: "sword",
+        selectedSealId: "seal_sword_immortal_oath",
+        selectedPerkIds: [],
+        selectedHeirloomIds: [],
+      },
+      totalMerit: 1000,
+      plannerContext: createPlannerContext({
+        lifetimeStats: {
+          highestRealmEver: MajorRealm.Immortal,
+          highestAgeYears: 3000,
+          totalDeaths: 6,
+          totalReincarnations: 3,
+        },
+        worldMemoryTags: [],
+      }),
+    });
+
+    expect(withMemory.selectedSealId).toBe("seal_sword_immortal_oath");
+    expect(withoutMemory.selectedSealId).toBeUndefined();
+  });
+
+  it("surfaces v3 route memory as a build identity hint in the preview helper", () => {
+    const preview = getRebirthBuildPreview({
+      config: {
+        plannerVersion: 2,
+        selectedBuildIdentity: "balanced",
+        selectedPerkIds: [],
+        selectedHeirloomIds: [],
+      },
+      totalMerit: 1000,
+      plannerContext: createPlannerContext({
+        lifetimeStats: {
+          highestRealmEver: MajorRealm.Immortal,
+          highestAgeYears: 3000,
+          totalDeaths: 6,
+          totalReincarnations: 3,
+        },
+        worldMemoryTags: ["sect:mystic:world-chapter-03"],
+      }),
+    });
+
+    expect(preview.constraintLines).toContain(
+      "前世記憶提示：仙宮星圖已入魂，可解鎖更高階的法修轉世規劃。"
+    );
   });
 });

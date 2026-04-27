@@ -122,6 +122,9 @@ interface PersistedEnvelopeV2 {
 - `劍脈轉世`
 - `戰軀轉世`
 - `玄燈轉世`
+- `仙誓劍胎`
+- `不滅血印`
+- `仙宮星命`
 
 本命魂印會額外提供：
 
@@ -129,10 +132,25 @@ interface PersistedEnvelopeV2 {
 - 一組固定 stat / 起手資源 bonus
 - 更明確的遺珍限制說明
 
-這三個魂印目前都需要：
+前三個 v2 route-memory 魂印目前都需要：
 
 - 至少曾抵達 `金丹`
 - 對應的 route / world memory 已被寫入 `soul.worldMemoryTags`
+
+v3 route memory 進一步追加三個仙人期本命魂印：
+
+- `seal_sword_immortal_oath / 仙誓劍胎`：需要 `sect:sword:world-chapter-03`，承接凌霄劍宗仙誓，提供劍修高階開局 cue 與根骨 / 悟性收益。
+- `seal_body_immortal_blood / 不滅血印`：需要 `sect:beast:world-chapter-03`，承接萬獸山莊帝血戰意，提供體修高階開局 cue 與體魄 / 福緣收益。
+- `seal_mage_immortal_star / 仙宮星命`：需要 `sect:mystic:world-chapter-03`，承接縹緲仙宮星命，提供法修高階開局 cue、神識 / 悟性收益與初始靈石。
+
+輪迴 Hall 會在可用與鎖定的本命魂印卡片上顯示：
+
+- machine-readable route memory source，例如 `sect:sword:world-chapter-03`
+- 下一世 build identity cue
+- 預期收益
+- 鎖定時缺少哪個 `sect:*:world-chapter-03` world memory
+
+這批 v3 hook 只讀既有 `soul.worldMemoryTags` 與既有 `rebirthConfig.selectedSealId`。它不新增 `soul`、`current` 或 LocalStorage envelope 欄位，因此不需要 migration 或 hydrate sanitize。
 
 ### D. 靈根改寫
 
@@ -187,7 +205,6 @@ interface PersistedEnvelopeV2 {
 
 以下仍屬後續批次，而不是目前已完成內容：
 
-- 更大的魂印 / 本命魂印 catalog
 - 輪迴 build identity 直接影響 NPC / 劇情 / 世界反應
 - 更高上限的多格遺珍繼承與更深的 heirloom quality rule
 - 財富繼承百分比

@@ -54,14 +54,29 @@ const MEMORY_ROUTE_LABELS: Array<{
     label: "劍脈殘響仍在，可解鎖更深的劍修轉世規劃。",
   },
   {
+    tags: ["sect:sword:world-chapter-03"],
+    lane: "sword",
+    label: "凌霄仙誓已入魂，可解鎖更高階的劍修轉世規劃。",
+  },
+  {
     tags: ["route:body:blooddrum", "sect:beast:world-chapter-02"],
     lane: "body",
     label: "戰軀殘響仍在，可解鎖更深的體修轉世規劃。",
   },
   {
+    tags: ["sect:beast:world-chapter-03"],
+    lane: "body",
+    label: "萬獸不滅血印已入魂，可解鎖更高階的體修轉世規劃。",
+  },
+  {
     tags: ["route:mage:lantern", "sect:mystic:world-chapter-02"],
     lane: "mage",
     label: "玄燈殘響仍在，可解鎖更深的法修轉世規劃。",
+  },
+  {
+    tags: ["sect:mystic:world-chapter-03"],
+    lane: "mage",
+    label: "仙宮星圖已入魂，可解鎖更高階的法修轉世規劃。",
   },
 ];
 

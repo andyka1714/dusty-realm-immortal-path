@@ -13,6 +13,7 @@ import {
   LifeReviewSummary,
   ReincarnationBuildIdentity,
   ReincarnationPerk,
+  ReincarnationSoulSeal,
   RebirthConfig,
   SoulLifetimeStats,
   SpiritRootId,
@@ -80,10 +81,12 @@ const getUnlockLabel = ({
   minHighestRealm,
   minReincarnations,
   requiredWorldMemoryTags,
+  currentWorldMemoryTags = [],
 }: {
   minHighestRealm?: number;
   minReincarnations?: number;
   requiredWorldMemoryTags?: string[];
+  currentWorldMemoryTags?: string[];
 }) => {
   const labels: string[] = [];
   if (minHighestRealm !== undefined) {
@@ -93,10 +96,31 @@ const getUnlockLabel = ({
     labels.push(`完成${minReincarnations}次輪迴後解鎖`);
   }
   if (requiredWorldMemoryTags?.length) {
-    labels.push("需留下對應 route/world memory");
+    const missingTags = requiredWorldMemoryTags.filter(
+      (tag) => !currentWorldMemoryTags.includes(tag)
+    );
+    labels.push(
+      missingTags.length > 0
+        ? `缺少 route memory：${missingTags.join("、")}`
+        : `route memory：${requiredWorldMemoryTags.join("、")}`
+    );
   }
 
   return labels.length > 0 ? labels.join(" / ") : "已可參悟";
+};
+
+const getRouteMemorySourceLabel = (requiredWorldMemoryTags?: string[]) =>
+  requiredWorldMemoryTags?.length
+    ? `route memory：${requiredWorldMemoryTags.join("、")}`
+    : undefined;
+
+const getSoulSealBenefitLabel = (seal: ReincarnationSoulSeal) => {
+  const bonuses = formatAttributeBonuses(seal.statBonuses ?? {});
+  if (seal.spiritStoneBonus) {
+    bonuses.push(`初始靈石 +${seal.spiritStoneBonus}`);
+  }
+
+  return bonuses.length > 0 ? `預期收益：${bonuses.join("、")}` : undefined;
 };
 
 interface LifeReviewScreenProps {
@@ -396,6 +420,10 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
             <div className="grid gap-3">
               {availableSoulSeals.map((seal) => {
                 const active = config.selectedSealId === seal.id;
+                const routeMemorySource = getRouteMemorySourceLabel(
+                  seal.requiredWorldMemoryTags
+                );
+                const benefitLabel = getSoulSealBenefitLabel(seal);
                 return (
                   <Button
                     data-testid={`rebirth-seal-${seal.id}`}
@@ -409,11 +437,24 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
                         : "border-stone-800 bg-stone-950/80 hover:border-stone-700"
                     )}
                   >
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex w-full items-center justify-between gap-3">
                       <span className="font-medium text-stone-100">{seal.name}</span>
                       <span className="text-sm text-amber-400">{seal.cost} 功德</span>
                     </div>
                     <p className="mt-2 text-sm text-stone-400">{seal.description}</p>
+                    {routeMemorySource && (
+                      <p className="mt-3 text-xs text-cyan-300/80">
+                        {routeMemorySource}
+                      </p>
+                    )}
+                    <p className="mt-2 text-xs leading-5 text-stone-400">
+                      {seal.identityCue}
+                    </p>
+                    {benefitLabel && (
+                      <p className="mt-2 text-xs text-emerald-300/80">
+                        {benefitLabel}
+                      </p>
+                    )}
                   </Button>
                 );
               })}
@@ -422,24 +463,44 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
               <div className="mt-5 space-y-3">
                 <div className="text-sm font-medium text-stone-500">尚未成形的魂印</div>
                 <div className="grid gap-3">
-                  {lockedSoulSeals.map((seal) => (
-                    <div
-                      key={seal.id}
-                      className="rounded-xl border border-stone-800 bg-stone-950/45 p-4 opacity-75"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="font-medium text-stone-300">{seal.name}</span>
-                        <span className="text-sm text-stone-600">{seal.cost} 功德</span>
+                  {lockedSoulSeals.map((seal) => {
+                    const routeMemorySource = getRouteMemorySourceLabel(
+                      seal.requiredWorldMemoryTags
+                    );
+                    const benefitLabel = getSoulSealBenefitLabel(seal);
+                    return (
+                      <div
+                        key={seal.id}
+                        className="rounded-xl border border-stone-800 bg-stone-950/45 p-4 opacity-75"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="font-medium text-stone-300">{seal.name}</span>
+                          <span className="text-sm text-stone-600">{seal.cost} 功德</span>
+                        </div>
+                        <p className="mt-2 text-sm text-stone-500">{seal.description}</p>
+                        {routeMemorySource && (
+                          <p className="mt-3 text-xs text-cyan-300/70">
+                            {routeMemorySource}
+                          </p>
+                        )}
+                        <p className="mt-2 text-xs leading-5 text-stone-500">
+                          {seal.identityCue}
+                        </p>
+                        {benefitLabel && (
+                          <p className="mt-2 text-xs text-emerald-300/70">
+                            {benefitLabel}
+                          </p>
+                        )}
+                        <p className="mt-3 text-xs text-amber-300/80">
+                          {getUnlockLabel({
+                            ...seal.unlockRequirement,
+                            requiredWorldMemoryTags: seal.requiredWorldMemoryTags,
+                            currentWorldMemoryTags: worldMemoryTags,
+                          })}
+                        </p>
                       </div>
-                      <p className="mt-2 text-sm text-stone-500">{seal.description}</p>
-                      <p className="mt-3 text-xs text-amber-300/80">
-                        {getUnlockLabel({
-                          ...seal.unlockRequirement,
-                          requiredWorldMemoryTags: seal.requiredWorldMemoryTags,
-                        })}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}

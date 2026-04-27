@@ -243,3 +243,21 @@ Change id: `expand-encounter-route-aftermath-v3`
 - 不新增 persisted schema。
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；aftermath 只讀既有 `soul.worldMemoryTags`、resolved event state 與 encounter catalog metadata。
+
+## 12. Reincarnation route memory hooks v3 收口記錄
+
+Change id: `expand-route-memory-reincarnation-hooks-v3`
+
+本輪把三宗 v3 world memory tag 回接到 Reincarnation Hall 的本命魂印卡片與 build preview 語意：
+
+- `seal_sword_immortal_oath / 仙誓劍胎` 讀取 `sect:sword:world-chapter-03`，顯示凌霄劍宗仙誓的 route memory source、劍修 identity cue 與根骨 / 悟性收益。
+- `seal_body_immortal_blood / 不滅血印` 讀取 `sect:beast:world-chapter-03`，顯示萬獸山莊帝血 route memory source、體修 identity cue 與體魄 / 福緣收益。
+- `seal_mage_immortal_star / 仙宮星命` 讀取 `sect:mystic:world-chapter-03`，顯示縹緲仙宮星命 route memory source、法修 identity cue、神識 / 悟性收益與初始靈石。
+- available seal card 會直接顯示 `route memory：sect:*:world-chapter-03`、identity cue 與預期收益。
+- locked seal card 會顯示同一個 route source，並明確列出缺少的 `sect:*:world-chapter-03`。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；Reincarnation v3 route hooks 只讀既有 `soul.worldMemoryTags` 與 `rebirthConfig.selectedSealId`，invalid selected seal 仍沿用既有 planner sanitize。

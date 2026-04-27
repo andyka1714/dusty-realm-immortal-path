@@ -326,6 +326,11 @@ Workshop 介面必須 (MUST) 讓玩家看懂專精解鎖條件、目前可否切
 - **THEN** 介面必須同步顯示可用遺珍格數、已選擇遺珍與起手加成預覽
 - **AND** 若配置超出合法 slot 或功德預算，介面必須阻止確認
 
+#### Scenario: 顯示 v3 route-memory 本命魂印 cue
+- **WHEN** 玩家在 `Reincarnation Hall` 查看承接 `sect:*:world-chapter-03` 的高階本命魂印
+- **THEN** 可用魂印卡片必須顯示 v3 route memory source、下一世 build identity cue 與預期收益
+- **AND** 鎖定魂印卡片必須顯示缺少哪個 `sect:*:world-chapter-03` world memory
+
 ### Requirement: Workshop 專精與 recipe cue
 系統必須 (MUST) 在 Workshop UI 呈現 recipe 擴量與專精效果，讓玩家能理解目前專精、熟練度與高階 recipe 受影響的地方。
 
@@ -393,6 +398,11 @@ Workshop 介面必須 (MUST) 顯示 mastery milestone、specialization leaf、ro
 - **WHEN** 玩家調整 perk、魂印或遺珍配置
 - **THEN** 介面必須更新下一世 build cue
 - **AND** 若配置非法，必須顯示功德、slot、前置或互斥原因
+
+#### Scenario: Preview 承接 v3 route memory
+- **WHEN** 玩家選擇由 `sect:*:world-chapter-03` 解鎖的本命魂印
+- **THEN** 輪迴大殿必須顯示該魂印對應的 route identity、遺珍限制與預期收益
+- **AND** 介面不得要求玩家從內部 seal id 推測該魂印來自哪條宗門世界記憶
 
 ### Requirement: 補給品購買與使用可讀性
 介面必須 (MUST) 讓玩家在商店與背包中看懂補給品的價格、效果、可用狀態與不可用原因。

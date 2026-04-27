@@ -191,6 +191,94 @@ describe("ReincarnationFlow", () => {
     expect(markup).toContain("與當前劍修流派互斥");
   });
 
+  it("shows v3 route memory source, identity cue, and expected benefit on an available soul seal card", () => {
+    const lifetimeStats = createLifetimeStats(MajorRealm.Immortal);
+
+    const markup = renderToStaticMarkup(
+      <ReincarnationFlow
+        flowStep="hall"
+        summary={{
+          cause: "lifespan",
+          ageYears: 1800,
+          highestRealm: MajorRealm.Immortal,
+          realmMerit: 10000000,
+          ageMerit: 900,
+          totalMeritGained: 10000900,
+          eligibleHeirlooms: [],
+        }}
+        totalMerit={10000900}
+        lifetimeStats={lifetimeStats}
+        worldMemoryTags={["sect:sword:world-chapter-03"]}
+        unlockedPerks={getAvailableReincarnationPerks({
+          lifetimeStats,
+          worldMemoryTags: ["sect:sword:world-chapter-03"],
+        })}
+        config={{
+          plannerVersion: 2,
+          selectedBuildIdentity: "sword",
+          selectedPerkIds: [],
+          selectedHeirloomIds: [],
+        }}
+        onEnterHall={() => undefined}
+        onSelectBuildIdentity={() => undefined}
+        onSelectSoulSeal={() => undefined}
+        onTogglePerk={() => undefined}
+        onToggleHeirloom={() => undefined}
+        onSelectSpiritRoot={() => undefined}
+        onConfirm={() => undefined}
+      />
+    );
+
+    expect(markup).toContain('data-testid="rebirth-seal-seal_sword_immortal_oath"');
+    expect(markup).toContain("仙誓劍胎");
+    expect(markup).toContain("route memory：sect:sword:world-chapter-03");
+    expect(markup).toContain("下一世將帶著凌霄劍宗仙誓開局");
+    expect(markup).toContain("預期收益：根骨 +3、悟性 +2");
+  });
+
+  it("shows the missing sect world-chapter-03 reason on a locked v3 soul seal card", () => {
+    const lifetimeStats = createLifetimeStats(MajorRealm.Immortal);
+
+    const markup = renderToStaticMarkup(
+      <ReincarnationFlow
+        flowStep="hall"
+        summary={{
+          cause: "lifespan",
+          ageYears: 1800,
+          highestRealm: MajorRealm.Immortal,
+          realmMerit: 10000000,
+          ageMerit: 900,
+          totalMeritGained: 10000900,
+          eligibleHeirlooms: [],
+        }}
+        totalMerit={10000900}
+        lifetimeStats={lifetimeStats}
+        worldMemoryTags={[]}
+        unlockedPerks={getAvailableReincarnationPerks({
+          lifetimeStats,
+          worldMemoryTags: [],
+        })}
+        config={{
+          plannerVersion: 2,
+          selectedBuildIdentity: "sword",
+          selectedPerkIds: [],
+          selectedHeirloomIds: [],
+        }}
+        onEnterHall={() => undefined}
+        onSelectBuildIdentity={() => undefined}
+        onSelectSoulSeal={() => undefined}
+        onTogglePerk={() => undefined}
+        onToggleHeirloom={() => undefined}
+        onSelectSpiritRoot={() => undefined}
+        onConfirm={() => undefined}
+      />
+    );
+
+    expect(markup).toContain("仙誓劍胎");
+    expect(markup).toContain("缺少 route memory：sect:sword:world-chapter-03");
+    expect(markup).toContain("route memory：sect:sword:world-chapter-03");
+  });
+
   it("uses a mobile-first single-column shell so the hall can scroll within the viewport", () => {
     const lifetimeStats = createLifetimeStats(MajorRealm.GoldenCore);
 
