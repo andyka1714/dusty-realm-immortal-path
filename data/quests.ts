@@ -808,5 +808,167 @@ export const QUESTS: Record<string, Quest> = {
                 '這些星魂蓮是宗門星詔留下的材料憑證，後續仙人境星庭回聲會沿著它們展開。'
             ]
         }
+    },
+    'local_tribulation_cloud_watch': {
+        id: 'local_tribulation_cloud_watch',
+        type: QuestType.Side,
+        title: '劫雲巡候：荒原雲脊',
+        description: '劫雲巡候請你在劫雲荒原（160）確認雷雲走向，理解通用渡劫路線與三宗 route 後段如何共用同一片荒原。',
+        giverId: 'local_tribulation_cloud_scout',
+        submitNpcId: 'local_tribulation_cloud_scout',
+        requirements: [
+            { type: 'dialogue', targetNpcId: 'local_tribulation_cloud_scout' }
+        ],
+        rewards: [
+            { exp: 96000, spiritStones: 3600 }
+        ],
+        dialogue: {
+            start: [
+                '你來得正好。劫雲荒原（160）不是只給宗門使者站崗的地方，通用渡劫修士也得先看懂雲脊。',
+                '凌霄劍宗、萬獸山莊、縹緲仙宮都會從這裡把 route 推向接引仙殿，但雷雲本身會先考所有人。'
+            ],
+            progress: [
+                '看雲脊，不要只看雷光。雲脊偏北時才是通往接引仙殿（170）的穩路。'
+            ],
+            complete: [
+                '你已記住劫雲荒原（160）的雲脊走向。往後不論走哪條宗門 route，都不會只靠地圖名稱猜下一步。',
+                '這片荒原會把通用渡劫壓力與三宗後段章節壓在一起，接下來才輪到材料和 Workshop。'
+            ]
+        }
+    },
+    'local_tribulation_material_clue': {
+        id: 'local_tribulation_material_clue',
+        type: QuestType.Side,
+        title: '雷爐辨材：三路材料',
+        description: '雷爐辨材師請你辨識劫雲荒原（160）的三路宗門材料線索：凌霄劍星鋼、萬獸血骨殘材與縹緲星魂蓮如何進入 Workshop。',
+        giverId: 'local_tribulation_material_diviner',
+        submitNpcId: 'local_tribulation_material_diviner',
+        requirements: [
+            { type: 'dialogue', targetNpcId: 'local_tribulation_material_diviner' }
+        ],
+        rewards: [
+            { exp: 112000, spiritStones: 4200 }
+        ],
+        dialogue: {
+            start: [
+                '劫雲荒原（160）的雷火會把三路材料照亮：凌霄劍星鋼看火星，萬獸血骨殘材看血紋，縹緲星魂蓮看雲隙星砂。',
+                '記住它們不是收藏品。Workshop 高階丹方與器方會反過來消耗這些宗門材料。'
+            ],
+            progress: [
+                '若只知道材料名字，到了爐前還是會斷線；你要知道來源、route 與 Workshop sink 是同一條鏈。'
+            ],
+            complete: [
+                '很好。凌霄劍星鋼、萬獸血骨殘材、縹緲星魂蓮都能在劫雲荒原（160）找到線索。',
+                '往後看見 Workshop recipe 要求這些材料時，你就知道不是憑空消耗，而是從宗門 route 接回來。'
+            ]
+        }
+    },
+    'local_immortal_registry_check': {
+        id: 'local_immortal_registry_check',
+        type: QuestType.Side,
+        title: '仙籍錄事：接引分欄',
+        description: '仙籍錄事請你在接引仙殿（170）確認飛昇身份分欄，理解通用仙籍與宗門 route 記錄如何分開承接。',
+        giverId: 'local_immortal_registry_keeper',
+        submitNpcId: 'local_immortal_registry_keeper',
+        requirements: [
+            { type: 'dialogue', targetNpcId: 'local_immortal_registry_keeper' }
+        ],
+        rewards: [
+            { exp: 144000, spiritStones: 5200 }
+        ],
+        dialogue: {
+            start: [
+                '接引仙殿（170）會先登通用仙籍，再把凌霄劍宗、萬獸山莊、縹緲仙宮的 route 記憶分欄記錄。',
+                '若不分欄，後面的仙人境回聲就會把帝劍、帝血、星詔混成同一個模糊獎勵。'
+            ],
+            progress: [
+                '看案卷上的欄名：通用仙籍管身份，宗門 route 管來源，兩者不能互相替代。'
+            ],
+            complete: [
+                '接引仙殿（170）的分欄已核對。往後帝劍、帝血、星詔都能按各自 route 被 UI 與內容追蹤。',
+                '這樣玩家看到仙殿 NPC 時，不會只知道自己到了仙界，還能知道哪條宗門路線被接上。'
+            ]
+        }
+    },
+    'local_immortal_material_clue': {
+        id: 'local_immortal_material_clue',
+        type: QuestType.Side,
+        title: '仙材案牘：丹方與帝兵',
+        description: '仙材案牘師請你核對接引仙殿（170）的材料案底，確認帝劍、帝血與星詔如何進入高階丹方與帝兵。',
+        giverId: 'local_immortal_material_archivist',
+        submitNpcId: 'local_immortal_material_archivist',
+        requirements: [
+            { type: 'dialogue', targetNpcId: 'local_immortal_material_archivist' }
+        ],
+        rewards: [
+            { exp: 156000, spiritStones: 5800 }
+        ],
+        dialogue: {
+            start: [
+                '帝劍殘痕能入帝兵，帝血骨印能壓肉身器方，星詔牒能穩高階丹方。',
+                '接引仙殿（170）只負責把案底記清，真正的消耗會回到 Workshop。'
+            ],
+            progress: [
+                '高階丹方與帝兵都怕來源不清。案底一亂，材料就會像外掛掉落一樣沒有脈絡。'
+            ],
+            complete: [
+                '案牘已核：帝劍、帝血、星詔各自對上高階丹方與帝兵火候。',
+                '往後看 Workshop sink 時，接引仙殿（170）的材料案底會讓來源與用途保持可讀。'
+            ]
+        }
+    },
+    'local_guixu_rift_chart': {
+        id: 'local_guixu_rift_chart',
+        type: QuestType.Side,
+        title: '歸墟界圖：裂界終盤',
+        description: '歸墟界圖師請你在歸墟裂界（182）標記通用終盤路徑，避免仙帝前夕只剩怪物與 Boss。',
+        giverId: 'local_guixu_rift_cartographer',
+        submitNpcId: 'local_guixu_rift_cartographer',
+        requirements: [
+            { type: 'dialogue', targetNpcId: 'local_guixu_rift_cartographer' }
+        ],
+        rewards: [
+            { exp: 188000, spiritStones: 7600 }
+        ],
+        dialogue: {
+            start: [
+                '歸墟裂界（182）會把凌霄劍宗、萬獸山莊、縹緲仙宮的 route 回聲全壓進終盤裂縫。',
+                '但你先畫通用界圖。沒有地圖骨架，後續終盤內容只會變成到處刷怪。'
+            ],
+            progress: [
+                '裂界風向會在太初外環與鴻蒙道宮之間折返，先記路，再談宗門回聲。'
+            ],
+            complete: [
+                '歸墟裂界（182）的終盤界圖已成。通用路徑、宗門 route 與 Workshop 材料不再各說各話。',
+                '下一步可以把仙帝終盤 loop 接在這張圖上，而不是再開一套新 runtime。'
+            ]
+        }
+    },
+    'local_guixu_material_clue': {
+        id: 'local_guixu_material_clue',
+        type: QuestType.Side,
+        title: '歸墟終盤爐：三材合流',
+        description: '歸墟終盤爐師請你確認歸墟裂界（182）的三材合流：凌霄劍星鋼、萬獸血骨殘材與縹緲星魂蓮如何形成終盤 Workshop sink。',
+        giverId: 'local_guixu_material_forgemaster',
+        submitNpcId: 'local_guixu_material_forgemaster',
+        requirements: [
+            { type: 'dialogue', targetNpcId: 'local_guixu_material_forgemaster' }
+        ],
+        rewards: [
+            { exp: 208000, spiritStones: 8400 }
+        ],
+        dialogue: {
+            start: [
+                '歸墟裂界（182）的終盤爐口會把凌霄劍星鋼、萬獸血骨殘材、縹緲星魂蓮壓在同一個火候裡。',
+                '這不是新材料，而是把三宗 route 的來源與終盤 Workshop sink 接起來。'
+            ],
+            progress: [
+                '缺星鋼，帝兵無骨；缺血骨，肉身器方無壓；缺星魂蓮，仙品丹火收不住。'
+            ],
+            complete: [
+                '三材合流已記入歸墟裂界（182）的終盤爐口：凌霄劍星鋼、萬獸血骨殘材、縹緲星魂蓮各有來源也各有消耗。',
+                '往後擴仙帝 v4 loop 時，Workshop 不必再猜這些材料從哪裡來。'
+            ]
+        }
     }
 };

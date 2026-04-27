@@ -454,6 +454,20 @@ export const ENDLESS_SEA_NPCS: NPC[] = [
 
 export const TRIBULATION_PLAINS_NPCS: NPC[] = [
     {
+        id: 'local_tribulation_cloud_scout',
+        name: '劫雲巡候',
+        symbol: '候',
+        type: NPCType.Quest,
+        x: 74,
+        y: 108,
+        description: '在劫雲荒原（160）巡記雷紋的散修，提醒各路宗門不要只盯著 Boss 忽略雷路變化。',
+        questIds: ['local_tribulation_cloud_watch'],
+        dialogue: [
+            '劫雲荒原（160）每天都在移位，通用修士先看雲脊，再決定要不要穿過天刑迴廊。',
+            '凌霄劍宗、萬獸山莊、縹緲仙宮都會借這片荒原測 route 後段，但雷雲本身不偏任何一宗。'
+        ]
+    },
+    {
         id: 'world_sword_tribulation_envoy',
         name: '劫雲劍盟使',
         symbol: '盟',
@@ -494,10 +508,38 @@ export const TRIBULATION_PLAINS_NPCS: NPC[] = [
             '縹緲仙宮的星潮牒已映過無盡海，v3 後段世界章要從劫雲荒原（160）把星詔送上接引仙殿（170）。',
             '若你已完成界海星潮，就順著劫雲星線北上，別讓海霧之後的星位斷掉。'
         ]
+    },
+    {
+        id: 'local_tribulation_material_diviner',
+        name: '雷爐辨材師',
+        symbol: '材',
+        type: NPCType.Quest,
+        x: 118,
+        y: 116,
+        description: '在劫雲荒原（160）辨識 Workshop 材料線索的工坊修士，能說明雷火如何牽出宗門 route 材料。',
+        questIds: ['local_tribulation_material_clue'],
+        dialogue: [
+            '雷火打下來時，凌霄劍星鋼會先亮，萬獸血骨殘材會滲血，縹緲星魂蓮則會在雲隙裡收光。',
+            '這三種材料不是裝飾；後續 Workshop 高階丹方與器方會把它們全部吃回去。'
+        ]
     }
 ];
 
 export const IMMORTAL_ASCENSION_NPCS: NPC[] = [
+    {
+        id: 'local_immortal_registry_keeper',
+        name: '仙籍錄事',
+        symbol: '錄',
+        type: NPCType.Quest,
+        x: 72,
+        y: 92,
+        description: '在接引仙殿（170）登錄飛昇者來源的錄事，負責把通用仙籍與宗門 route 記錄分開。',
+        questIds: ['local_immortal_registry_check'],
+        dialogue: [
+            '接引仙殿（170）不是終點，只是把凡界、宗門與仙階身份重新登記。',
+            '若你帶著凌霄劍宗、萬獸山莊或縹緲仙宮的 route 記憶上來，仙籍會把它標在不同欄位。'
+        ]
+    },
     {
         id: 'world_sword_immortal_witness',
         name: '接引帝劍守',
@@ -536,6 +578,87 @@ export const IMMORTAL_ASCENSION_NPCS: NPC[] = [
             '縹緲仙宮的星詔已從劫雲荒原（160）落到接引仙殿（170），v3 後段世界章能被仙階觀測。',
             '往後仙人境星庭回聲會沿著這段宗門路線展開，神識材料來源也會更清楚。'
         ]
+    },
+    {
+        id: 'local_immortal_material_archivist',
+        name: '仙材案牘師',
+        symbol: '案',
+        type: NPCType.Quest,
+        x: 126,
+        y: 116,
+        description: '整理接引仙殿（170）仙材案牘的工坊書吏，標出帝劍、帝血與星詔材料如何進入高階丹方與帝兵。',
+        questIds: ['local_immortal_material_clue'],
+        dialogue: [
+            '帝劍殘痕、帝血骨印與星詔牒都會在接引仙殿（170）留下案底，工坊看的是能不能入高階丹方與帝兵火候。',
+            '若只把它們當章節獎勵，後面的 Workshop sink 就會斷；把案牘記清，才知道材料從哪裡來、往哪裡去。'
+        ]
+    }
+];
+
+export const GUIXU_RIFT_NPCS: NPC[] = [
+    {
+        id: 'local_guixu_rift_cartographer',
+        name: '歸墟界圖師',
+        symbol: '圖',
+        type: NPCType.Quest,
+        x: 76,
+        y: 96,
+        description: '在歸墟裂界（182）描摹裂界邊界的界圖師，替仙帝前夕玩家標出通用終盤路徑。',
+        questIds: ['local_guixu_rift_chart'],
+        dialogue: [
+            '歸墟裂界（182）不是只給你刷怪的裂縫，它會把前面所有宗門 route 的殘響壓成終盤線索。',
+            '先看裂界風向，再決定要去太初外環還是鴻蒙道宮；別讓終盤只剩一條直線。'
+        ]
+    },
+    {
+        id: 'local_guixu_sword_echo',
+        name: '歸墟劍星回聲',
+        symbol: '劍',
+        type: NPCType.Info,
+        x: 96,
+        y: 88,
+        description: '歸墟裂界（182）中殘留的凌霄劍宗回聲，提示凌霄劍星鋼仍會被終盤帝兵追溯。',
+        dialogue: [
+            '凌霄劍星鋼在歸墟裂界（182）會被壓成更硬的劍骨，劍修終盤器方會反覆追溯這條 route。'
+        ]
+    },
+    {
+        id: 'local_guixu_beast_echo',
+        name: '歸墟血骨回聲',
+        symbol: '骨',
+        type: NPCType.Info,
+        x: 104,
+        y: 104,
+        description: '歸墟裂界（182）中殘留的萬獸山莊回聲，提示萬獸血骨殘材可承受終盤肉身火候。',
+        dialogue: [
+            '萬獸血骨殘材在歸墟裂界（182）會被反覆壓實，體修終盤器方要的不是名字，是能承壓的骨相。'
+        ]
+    },
+    {
+        id: 'local_guixu_mystic_echo',
+        name: '歸墟星蓮回聲',
+        symbol: '蓮',
+        type: NPCType.Info,
+        x: 112,
+        y: 88,
+        description: '歸墟裂界（182）中殘留的縹緲仙宮回聲，提示縹緲星魂蓮可穩住終盤丹火。',
+        dialogue: [
+            '縹緲星魂蓮在歸墟裂界（182）會吸住碎界星砂，法修終盤丹方需要它把火候收回神識。'
+        ]
+    },
+    {
+        id: 'local_guixu_material_forgemaster',
+        name: '歸墟終盤爐師',
+        symbol: '爐',
+        type: NPCType.Quest,
+        x: 124,
+        y: 112,
+        description: '守著歸墟裂界（182）終盤爐口的 Workshop 爐師，說明凌霄劍星鋼、萬獸血骨殘材與縹緲星魂蓮如何合成終盤 sink。',
+        questIds: ['local_guixu_material_clue'],
+        dialogue: [
+            '終盤爐口不吃空話，只吃凌霄劍星鋼、萬獸血骨殘材與縹緲星魂蓮。',
+            '到了歸墟裂界（182），這三路宗門材料會被壓成終盤 Workshop sink；缺一味，帝兵和仙品丹都會失衡。'
+        ]
     }
 ];
 
@@ -546,5 +669,6 @@ export const WORLD_STORY_NPCS: NPC[] = [
     ...SACRED_CITY_NPCS,
     ...ENDLESS_SEA_NPCS,
     ...TRIBULATION_PLAINS_NPCS,
-    ...IMMORTAL_ASCENSION_NPCS
+    ...IMMORTAL_ASCENSION_NPCS,
+    ...GUIXU_RIFT_NPCS
 ];

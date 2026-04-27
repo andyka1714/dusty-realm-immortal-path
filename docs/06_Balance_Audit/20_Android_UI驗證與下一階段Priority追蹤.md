@@ -294,3 +294,20 @@ Change id: `update-pixel-map-visual-qa-v3`
 - 不新增 persisted schema。
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；visual QA 只讀 terrain tiles、map theme 與既有 Adventure runtime，不新增 actor sprite state 或 map visual state。
+
+## 15. Map local content density v3 收口記錄
+
+Change id: `expand-map-local-content-density-v3`
+
+本輪把後期重點地圖從「有怪物與 world chapter NPC」補到有可讀的本地 clue：
+
+- `劫雲荒原 (160)` 補 `劫雲巡候` 與 `雷爐辨材師`，分別說明通用渡劫雲脊、三宗 route 後段，以及 `凌霄劍星鋼 / 萬獸血骨殘材 / 縹緲星魂蓮` 如何接回 Workshop。
+- `接引仙殿 (170)` 補 `仙籍錄事` 與 `仙材案牘師`，把通用仙籍、宗門 route 分欄、帝劍 / 帝血 / 星詔材料案底與高階丹方 / 帝兵 sink 連起來。
+- `歸墟裂界 (182)` 補 `歸墟界圖師`、三條宗門 route echo 與 `歸墟終盤爐師`，作為仙帝代表地圖的 local hook、route-sensitive hook 與終盤 Workshop material clue。
+- 新增 `data/mapLocalContentDensity.test.ts` 驗證每張代表地圖至少有 local hook、route-sensitive hook、Workshop material clue，並檢查 questIds / giverId / submitNpcId 都對應正式 catalog。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；map-local v3 只擴充靜態 `NPC` / `Quest` / `MAPS` catalog，既有存檔會自然以未接取 quest 顯示新增內容。
