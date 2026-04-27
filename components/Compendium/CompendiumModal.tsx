@@ -22,8 +22,7 @@ import {
   ItemCategory,
   ItemQuality,
 } from "../../types";
-import { EQUIPMENT_ITEMS } from "../../data/items/equipment";
-import { CONSUMABLE_ITEMS } from "../../data/items/consumables"; // Added Consumables
+import { ITEMS } from "../../data/items";
 import {
   FORMAL_CORE_SKILLS_BY_PROFESSION,
   FORMAL_CORE_SKILLS_SORTED,
@@ -36,6 +35,12 @@ import clsx from "clsx";
 import { GameTooltip } from "../game/GameTooltip";
 import { GameHintBubble } from "../game/GameHintBubble";
 import { Button } from "../ui/button";
+import {
+  buildCompendiumItemSourceTrace,
+  buildCompendiumSkillSourceTrace,
+  type CompendiumSourceChip,
+  type CompendiumSourceKind,
+} from "./sourceTracing";
 
 interface CompendiumModalProps {
   isOpen: boolean;
@@ -125,6 +130,49 @@ const getSkillSourceLabel = (source?: Skill["formalSourceTier"]): string => {
   }
 };
 
+const sourceChipClassNames: Record<CompendiumSourceKind, string> = {
+  drop: "border-red-900/40 bg-red-950/30 text-red-300",
+  shop: "border-cyan-900/40 bg-cyan-950/30 text-cyan-300",
+  workshop_output: "border-emerald-900/40 bg-emerald-950/30 text-emerald-300",
+  workshop_sink: "border-amber-900/40 bg-amber-950/30 text-amber-300",
+  encounter_route: "border-violet-900/40 bg-violet-950/30 text-violet-300",
+  skill_manual: "border-indigo-900/40 bg-indigo-950/30 text-indigo-300",
+};
+
+const getVisibleSourceChips = (sources: CompendiumSourceChip[]) => {
+  const visible = sources.slice(0, 5);
+  const hasWorkshopSink = visible.some((source) => source.kind === "workshop_sink");
+  const firstWorkshopSink = sources.find((source) => source.kind === "workshop_sink");
+
+  if (!hasWorkshopSink && firstWorkshopSink) {
+    return [...visible.slice(0, 4), firstWorkshopSink];
+  }
+
+  return visible;
+};
+
+const renderSourceChips = (
+  sources: CompendiumSourceChip[],
+  emptyLabel = "無紀錄"
+) => {
+  if (sources.length === 0) {
+    return <span className="text-[10px] text-stone-700 italic">{emptyLabel}</span>;
+  }
+
+  return getVisibleSourceChips(sources).map((source, index) => (
+    <span
+      key={`${source.kind}-${source.label}-${index}`}
+      className={clsx(
+        "max-w-full rounded border px-1.5 py-0.5 text-[10px] leading-4",
+        sourceChipClassNames[source.kind]
+      )}
+      title={source.detail}
+    >
+      {source.label}
+    </span>
+  ));
+};
+
 const groupSkillsByRealm = (skills: Skill[]) =>
   Object.values(MajorRealm)
     .filter((realm): realm is MajorRealm => typeof realm === "number")
@@ -148,6 +196,11 @@ const sectConfigs: Array<{
   desc: string;
   mapId: string;
   chapterCues: string[];
+  routeSourceSummary: {
+    material: string;
+    worldMemoryTag: string;
+    usage: string;
+  };
 }> = [
   {
     id: "sword",
@@ -160,6 +213,11 @@ const sectConfigs: Array<{
       "萬法聖城到無盡海延伸後段世界章節。",
       "終盤帝劍路線可接續凌霄劍星鋼與仙帝 encounter。",
     ],
+    routeSourceSummary: {
+      material: "凌霄劍星鋼",
+      worldMemoryTag: "sect:sword:world-chapter-03",
+      usage: "v3 aftermath 反覆供應星鋼，Workshop 帝劍與輪迴仙誓劍胎會讀取這條路線記憶。",
+    },
   },
   {
     id: "body",
@@ -172,6 +230,11 @@ const sectConfigs: Array<{
       "萬法聖城到無盡海延伸後段世界章節。",
       "終盤帝血路線可接續萬獸血骨殘材與仙帝 encounter。",
     ],
+    routeSourceSummary: {
+      material: "萬獸血骨殘材",
+      worldMemoryTag: "sect:beast:world-chapter-03",
+      usage: "v3 aftermath 反覆供應血骨殘材，Workshop 體修帝兵與輪迴不滅血印會讀取這條路線記憶。",
+    },
   },
   {
     id: "mage",
@@ -184,6 +247,11 @@ const sectConfigs: Array<{
       "萬法聖城到無盡海延伸後段世界章節。",
       "終盤星詔路線可接續縹緲星魂蓮與仙帝 encounter。",
     ],
+    routeSourceSummary: {
+      material: "縹緲星魂蓮",
+      worldMemoryTag: "sect:mystic:world-chapter-03",
+      usage: "v3 aftermath 反覆凝出星魂蓮，Workshop 法修丹器與輪迴仙宮星命會讀取這條路線記憶。",
+    },
   },
 ];
 
@@ -217,15 +285,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
     []
   );
 
-  // Include Consumables to show Boss Breakthrough Drops
-  const allItems: Record<string, Item> = useMemo(
-    () =>
-      ({ ...EQUIPMENT_ITEMS, ...CONSUMABLE_ITEMS }) as unknown as Record<
-        string,
-        Item
-      >,
-    []
-  );
+  const allItems: Record<string, Item> = useMemo(() => ITEMS, []);
 
   const allSkills: Skill[] = useMemo(() => [...FORMAL_CORE_SKILLS_SORTED], []);
   const activeSkillGroups = useMemo(() => {
@@ -626,12 +686,19 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                           {MajorRealmCN[rId]}期
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {itemsInRealm.map((item) => (
-                            <div
-                              key={item.id}
-                              className="bg-stone-800 p-3 rounded border border-stone-700 group hover:border-amber-500/30 transition-colors"
-                              data-testid={`compendium-item-card-${item.id}`}
-                            >
+                          {itemsInRealm.map((item) => {
+                            const sourceTrace = buildCompendiumItemSourceTrace(item.id);
+                            const overflowCount = Math.max(
+                              0,
+                              sourceTrace.sources.length -
+                                getVisibleSourceChips(sourceTrace.sources).length
+                            );
+                            return (
+                              <div
+                                key={item.id}
+                                className="bg-stone-800 p-3 rounded border border-stone-700 group hover:border-amber-500/30 transition-colors"
+                                data-testid={`compendium-item-card-${item.id}`}
+                              >
                               <div className="flex justify-between">
                                 <span className="font-bold text-stone-200">
                                   {item.name}
@@ -712,65 +779,35 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                                 {item.description}
                               </p>
 
-                              <div className="mt-3 pt-2 border-t border-stone-700/50">
+                              <div
+                                className="mt-3 pt-2 border-t border-stone-700/50"
+                                data-testid={`compendium-item-source-${item.id}`}
+                              >
                                 <span className="text-[10px] text-stone-600 block mb-1">
-                                  掉落來源:
+                                  來源追蹤:
                                 </span>
                                 <div className="flex flex-wrap gap-1">
-                                  {getDroppedBy(item.id).length > 0 ? (
-                                    <>
-                                      {getDroppedBy(item.id)
-                                        .slice(0, 3)
-                                        .map((e) => (
-                                          <span
-                                            key={e.id}
-                                            className={clsx(
-                                              "text-[10px] px-1.5 py-0.5 rounded border",
-                                              e.rank === EnemyRank.Boss
-                                                ? "bg-red-950/40 text-red-400 border-red-900/50"
-                                                : e.rank === EnemyRank.Elite
-                                                  ? "bg-blue-950/40 text-blue-400 border-blue-900/50"
-                                                  : "bg-stone-800 text-stone-400 border-stone-700"
-                                            )}
-                                          >
-                                            {e.name}
-                                          </span>
-                                        ))}
-                                      {getDroppedBy(item.id).length > 3 && (
+                                  {renderSourceChips(sourceTrace.sources)}
+                                  {overflowCount > 0 && (
                                         <span
                                           className="text-[10px] text-stone-500 cursor-help hover:text-stone-300 decoration-dotted underline"
                                           onMouseEnter={(event) => {
                                             const content = (
                                               <div className="flex flex-col gap-1 min-w-[120px]">
-                                                {getDroppedBy(item.id).map(
-                                                  (e) => (
+                                                {sourceTrace.sources.map(
+                                                  (source, index) => (
                                                     <div
-                                                      key={e.id}
-                                                      className="flex items-center gap-2"
+                                                      key={`${source.kind}-${source.label}-${index}`}
+                                                      className="flex flex-col gap-0.5"
                                                     >
-                                                      <span
-                                                        className={clsx(
-                                                          "text-[10px] px-1.5 py-0.5 rounded border min-w-[32px] text-center shrink-0",
-                                                          e.rank ===
-                                                            EnemyRank.Boss
-                                                            ? "bg-red-950/40 text-red-400 border-red-900/50"
-                                                            : e.rank ===
-                                                                EnemyRank.Elite
-                                                              ? "bg-blue-950/40 text-blue-400 border-blue-900/50"
-                                                              : "bg-stone-800 text-stone-400 border-stone-700"
-                                                        )}
-                                                      >
-                                                        {e.rank ===
-                                                        EnemyRank.Boss
-                                                          ? "首領"
-                                                          : e.rank ===
-                                                              EnemyRank.Elite
-                                                            ? "精英"
-                                                            : "普通"}
-                                                      </span>
                                                       <span className="text-stone-200">
-                                                        {e.name}
+                                                        {source.label}
                                                       </span>
+                                                      {source.detail && (
+                                                        <span className="text-stone-500">
+                                                          {source.detail}
+                                                        </span>
+                                                      )}
                                                     </div>
                                                   )
                                                 )}
@@ -780,27 +817,21 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                                               visible: true,
                                               x: event.clientX,
                                               y: event.clientY,
-                                              title: "額外掉落來源",
-                                              footer: `${getDroppedBy(item.id).length} 個來源`,
+                                              title: "完整來源追蹤",
+                                              footer: `${sourceTrace.sources.length} 個來源`,
                                               content: content,
                                             });
                                           }}
                                           onMouseLeave={() => setTooltip(null)}
                                         >
-                                          +{getDroppedBy(item.id).length - 3}{" "}
-                                          更多
+                                          +{overflowCount} 更多
                                         </span>
-                                      )}
-                                    </>
-                                  ) : (
-                                    <span className="text-[10px] text-stone-700 italic">
-                                      無紀錄
-                                    </span>
                                   )}
                                 </div>
                               </div>
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     );
@@ -846,11 +877,13 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                           {MajorRealmCN[group.realm]}期
                         </h3>
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                          {group.skills.map((skill) => (
-                            <div
-                              key={skill.id}
-                              className="rounded border border-stone-700 bg-stone-800 p-4"
-                            >
+                          {group.skills.map((skill) => {
+                            const sourceTrace = buildCompendiumSkillSourceTrace(skill);
+                            return (
+                              <div
+                                key={skill.id}
+                                className="rounded border border-stone-700 bg-stone-800 p-4"
+                              >
                               <div className="flex items-start justify-between gap-3">
                                 <h4 className="font-bold text-indigo-400">
                                   {skill.name}
@@ -862,13 +895,17 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                               <div className="mt-1 text-xs text-stone-500">
                                 {getProfessionLabel(skill.profession)} |{" "}
                                 {MajorRealmCN[skill.minRealm]} | 來源：
-                                {getSkillSourceLabel(skill.formalSourceTier)}
+                                {sourceTrace.formalSourceLabel}
+                              </div>
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {renderSourceChips(sourceTrace.sources, "未標記")}
                               </div>
                               <p className="mt-2 text-sm text-stone-300">
                                 {skill.description}
                               </p>
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </section>
                     ))}
@@ -959,11 +996,13 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                             {MajorRealmCN[group.realm]}期
                           </h5>
                           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                            {group.skills.map((skill) => (
-                              <div
-                                key={skill.id}
-                                className="rounded border border-stone-800 bg-stone-900 p-3"
-                              >
+                            {group.skills.map((skill) => {
+                              const sourceTrace = buildCompendiumSkillSourceTrace(skill);
+                              return (
+                                <div
+                                  key={skill.id}
+                                  className="rounded border border-stone-800 bg-stone-900 p-3"
+                                >
                                 <div className="flex justify-between gap-3">
                                   <span className="font-bold text-stone-200">
                                     {skill.name}
@@ -973,13 +1012,17 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                                   </span>
                                 </div>
                                 <div className="mt-1 text-[11px] text-stone-600">
-                                  來源：{getSkillSourceLabel(skill.formalSourceTier)}
+                                  來源：{sourceTrace.formalSourceLabel}
+                                </div>
+                                <div className="mt-2 flex flex-wrap gap-1">
+                                  {renderSourceChips(sourceTrace.sources, "未標記")}
                                 </div>
                                 <p className="mt-1 text-xs text-stone-500">
                                   {skill.description}
                                 </p>
                               </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </section>
                       ))}
@@ -991,6 +1034,20 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                       <MapIcon size={18} /> 章節線索
                     </h4>
                     <div className="grid gap-2">
+                      <div
+                        className="rounded border border-amber-900/40 bg-amber-950/20 px-3 py-2 text-xs text-amber-200"
+                        data-testid={`compendium-sect-route-source-${activeSect.id}`}
+                      >
+                        <div className="font-bold text-amber-100">
+                          {activeSect.routeSourceSummary.material}
+                        </div>
+                        <div className="mt-1 text-amber-300/80">
+                          {activeSect.routeSourceSummary.worldMemoryTag}
+                        </div>
+                        <div className="mt-1 text-stone-400">
+                          {activeSect.routeSourceSummary.usage}
+                        </div>
+                      </div>
                       {activeSect.chapterCues.map((cue) => (
                         <div
                           key={cue}

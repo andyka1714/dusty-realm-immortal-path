@@ -40,6 +40,25 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).not.toContain("裂地重拳");
   });
 
+  it("surfaces item source tracing for route materials", () => {
+    const markup = renderCompendium({ initialTab: "item" });
+
+    expect(markup).toContain('data-testid="compendium-item-source-sword_path_starsteel"');
+    expect(markup).toContain("來源追蹤");
+    expect(markup).toContain("sect:sword:world-chapter-03");
+    expect(markup).toContain("Workshop sink：萬古帝劍鍛造");
+    expect(markup).toContain("repeatable aftermath");
+  });
+
+  it("surfaces manual source labels on skill cards", () => {
+    const markup = renderCompendium({
+      initialTab: "skill",
+      initialSkillProfession: "Sword",
+    });
+
+    expect(markup).toContain("藏經閣：凡界藏經閣、宗門入門試煉");
+  });
+
   it("focuses the sect tab on one sect with nested chapter cues", () => {
     const markup = renderCompendium({
       initialTab: "sect",
@@ -52,6 +71,9 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).toContain("宗門人物");
     expect(markup).toContain("傳承功法");
     expect(markup).toContain("章節線索");
+    expect(markup).toContain('data-testid="compendium-sect-route-source-sword"');
+    expect(markup).toContain("sect:sword:world-chapter-03");
+    expect(markup).toContain("輪迴仙誓劍胎");
     expect(markup).toContain("萬法聖城");
     expect(markup).not.toContain('data-testid="compendium-sect-panel-body"');
     expect(markup).not.toContain("汲取萬獸精血");

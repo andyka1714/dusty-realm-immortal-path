@@ -38,4 +38,7 @@
 - `功法神通` 已改為 `通用 / 劍修 / 體修 / 法修` 的內層分類，並在每個分類內按境界分組，避免 formal core 技能全量平鋪。
 - `功法神通` 卡片現在直接顯示主動 / 被動、境界、職業與來源層級，例如藏經閣、精英掉落、首領核心或古修傳承。
 - `宗門傳承` 已改為三宗聚焦 tabs；同一時間只顯示一宗的人物、傳承功法與章節線索，行動版不再一次展開三宗長頁。
+- `神兵法寶` 的來源資訊會從既有 catalog 推導：敵人掉落、商店、Workshop 產物、Workshop sink、encounter route cue 與宗門 world memory 會統一收斂到 `來源追蹤`。
+- `凌霄劍星鋼 / 萬獸血骨殘材 / 縹緲星魂蓮` 這類 route-specific material 必須在圖鑑卡片上顯示對應宗門、`sect:*:world-chapter-03` 與至少一個 Workshop sink，避免玩家只能看到抽象描述。
+- `功法神通` 與 `宗門傳承` 的 skill card 除了 formal source tier，也應顯示秘卷來源 labels，例如凡界藏經閣、宗門入門試煉、同境界精英、同境界 Boss 或古修傳承。
 - 這次變更只調整圖鑑瀏覽與 layout，不新增 item / skill / quest id，也不改 LocalStorage schema；不需要 migration。

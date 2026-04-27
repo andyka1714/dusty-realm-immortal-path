@@ -261,3 +261,20 @@ Change id: `expand-route-memory-reincarnation-hooks-v3`
 - 不新增 persisted schema。
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；Reincarnation v3 route hooks 只讀既有 `soul.worldMemoryTags` 與 `rebirthConfig.selectedSealId`，invalid selected seal 仍沿用既有 planner sanitize。
+
+## 13. Compendium source tracing v2 收口記錄
+
+Change id: `update-compendium-source-tracing-v2`
+
+本輪把已完成的圖鑑 taxonomy 接上來源追蹤層，目標不是新增資料，而是讓既有資料能回答「從哪裡來、用到哪裡去」：
+
+- `神兵法寶` 的 item card 會把敵人掉落、商店、Workshop output / sink、encounter route cue 與 world memory cue 收斂到 `來源追蹤`。
+- `凌霄劍星鋼 / 萬獸血骨殘材 / 縹緲星魂蓮` 需要顯示對應宗門、`sect:*:world-chapter-03`、v3 aftermath / encounter source 與 high-tier Workshop sink。
+- `功法神通` 與 `宗門傳承` 的 skill card 除了 formal source tier，也要顯示技能秘卷來源 labels，避免只留下內部來源層級。
+- `宗門傳承` 的單宗頁面需要補 route source summary，讓 route material、world memory、encounter / Workshop / Reincarnation hook 可被同一頁掃到。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；source tracing 只讀既有 `Enemy.drops`、`SHOPS`、`WORKSHOP_RECIPES`、encounter rewards / cues 與 skill manual metadata。

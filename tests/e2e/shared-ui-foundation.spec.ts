@@ -411,18 +411,31 @@ test("workshop and compendium embedded panels avoid horizontal overflow", async 
   const firstItemCard = page.getByTestId("compendium-item-card-novice_sword");
   await firstItemCard.scrollIntoViewIfNeeded();
   await expectDoesNotCover(itemHeading, firstItemCard);
+  await page.getByTestId("compendium-item-card-sword_path_starsteel").scrollIntoViewIfNeeded();
+  await expect(page.getByTestId("compendium-item-source-sword_path_starsteel")).toContainText(
+    "sect:sword:world-chapter-03"
+  );
+  await expect(page.getByTestId("compendium-item-source-sword_path_starsteel")).toContainText(
+    "Workshop sink"
+  );
 
   await page.getByTestId("compendium-tab-skill").click();
   await expect(page.getByTestId("compendium-skill-profession-sword")).toBeVisible();
   await expect(page.getByTestId("compendium-skill-realm-1")).toBeVisible();
   await expect(page.getByText("疾風三疊")).toBeVisible();
+  await expect(page.getByText("凡界藏經閣、宗門入門試煉")).toBeVisible();
 
   await page.getByTestId("compendium-tab-sect").click();
   await expect(page.getByTestId("compendium-sect-panel-sword")).toBeVisible();
   await expect(page.getByText("章節線索")).toBeVisible();
+  await expect(page.getByTestId("compendium-sect-route-source-sword")).toContainText(
+    "sect:sword:world-chapter-03"
+  );
   await page.getByTestId("compendium-sect-tab-body").click();
   await expect(page.getByTestId("compendium-sect-panel-body")).toBeVisible();
-  await expect(page.getByText("萬獸血骨殘材")).toBeVisible();
+  await expect(page.getByTestId("compendium-sect-route-source-body")).toContainText(
+    "萬獸血骨殘材"
+  );
   await expectNoHorizontalOverflow(compendiumPanel);
 });
 
@@ -452,12 +465,20 @@ test("mobile workshop and compendium panels stay inside the viewport", async ({
   await expectNoHorizontalOverflow(page.getByTestId("compendium-panel"));
   await page.getByTestId("compendium-item-card-novice_sword").scrollIntoViewIfNeeded();
   await expect(page.getByTestId("compendium-item-card-novice_sword")).toBeVisible();
+  await page.getByTestId("compendium-item-card-sword_path_starsteel").scrollIntoViewIfNeeded();
+  await expect(page.getByTestId("compendium-item-source-sword_path_starsteel")).toContainText(
+    "來源追蹤"
+  );
   await page.getByTestId("compendium-tab-skill").click();
   await expect(page.getByTestId("compendium-skill-profession-sword")).toBeVisible();
+  await expect(page.getByText("凡界藏經閣、宗門入門試煉")).toBeVisible();
   await expectNoHorizontalOverflow(page.getByTestId("compendium-panel"));
   await page.getByTestId("compendium-tab-sect").click();
   await expect(page.getByTestId("compendium-sect-tab-sword")).toBeVisible();
   await expect(page.getByTestId("compendium-sect-panel-sword")).toBeVisible();
+  await expect(page.getByTestId("compendium-sect-route-source-sword")).toContainText(
+    "凌霄劍星鋼"
+  );
   await expectNoHorizontalOverflow(page.getByTestId("compendium-panel"));
 });
 

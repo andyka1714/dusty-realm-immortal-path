@@ -183,6 +183,11 @@
 - **THEN** 系統必須沿用既有 `soul.worldMemoryTags` 與 `rebirthConfig`
 - **AND** 不需要新增 migration 或 LocalStorage hydration 邏輯
 
+#### Scenario: Compendium source tracing v2 不新增 persisted state
+- **WHEN** 圖鑑來源追蹤只從既有 catalog、drop table、shop、Workshop recipe、encounter reward 或 skill manual metadata 推導
+- **THEN** 系統必須沿用既有 item / skill / quest id 與 LocalStorage envelope
+- **AND** 不得新增新的 persisted source registry、玩家圖鑑進度欄位或 hydrate migration
+
 #### Scenario: Encounter aftermath v3 不新增 persisted state
 - **WHEN** encounter aftermath v3 只新增 catalog event、selector gate、presentation cue 或 choice reward
 - **THEN** 系統必須沿用既有 `soul.worldMemoryTags` 與 `resolvedEventIds`
