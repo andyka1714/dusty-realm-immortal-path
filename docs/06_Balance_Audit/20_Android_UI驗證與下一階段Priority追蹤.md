@@ -160,3 +160,8 @@ Change id: `update-compendium-taxonomy-and-layout`
 - `npm run typecheck`
 - `npm run build`
 - `git diff --check`
+
+Archive 記錄：
+
+- `2026-04-27` 已以 `openspec archive update-compendium-taxonomy-and-layout --skip-specs --yes` 歸檔。
+- 使用 `--skip-specs` 的理由：`client-interface` base spec 已在實作 commit 吸收圖鑑分類與瀏覽可讀性 requirement，本次 archive 僅移動 completed change。
