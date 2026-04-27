@@ -9,19 +9,15 @@ import {
   Skull,
   Database,
   User,
-  Info,
 } from "lucide-react";
 import {
   MajorRealm,
   MajorRealmCN,
   ProfessionType,
-  ElementType,
   EnemyRank,
-  MapData,
   Item,
   Enemy,
   Skill,
-  NPC,
   NPCType,
   ItemCategory,
   ItemQuality,
@@ -45,9 +41,13 @@ interface CompendiumModalProps {
   isOpen: boolean;
   onClose: () => void;
   embedded?: boolean;
+  initialTab?: TabType;
+  initialSkillProfession?: ProfessionType;
+  initialSectId?: SectId;
 }
 
 type TabType = "realm" | "map" | "item" | "skill" | "sect";
+type SectId = "sword" | "body" | "mage";
 
 const getSkillTypeLabel = (type: Skill["type"]): string =>
   type === "Active" ? "主動" : "被動";
@@ -110,13 +110,96 @@ const getItemSubtypeLabel = (item: Item): string => {
   return "其他";
 };
 
+const getSkillSourceLabel = (source?: Skill["formalSourceTier"]): string => {
+  switch (source) {
+    case "shop":
+      return "藏經閣";
+    case "elite":
+      return "精英掉落";
+    case "boss":
+      return "首領核心";
+    case "inheritance":
+      return "古修傳承";
+    default:
+      return "未標記";
+  }
+};
+
+const groupSkillsByRealm = (skills: Skill[]) =>
+  Object.values(MajorRealm)
+    .filter((realm): realm is MajorRealm => typeof realm === "number")
+    .map((realm) => ({
+      realm,
+      skills: skills.filter((skill) => skill.minRealm === realm),
+    }))
+    .filter((group) => group.skills.length > 0);
+
+const skillProfessionTabs = [
+  { id: ProfessionType.None, label: "通用" },
+  { id: ProfessionType.Sword, label: "劍修" },
+  { id: ProfessionType.Body, label: "體修" },
+  { id: ProfessionType.Mage, label: "法修" },
+];
+
+const sectConfigs: Array<{
+  id: SectId;
+  profession: ProfessionType;
+  name: string;
+  desc: string;
+  mapId: string;
+  chapterCues: string[];
+}> = [
+  {
+    id: "sword",
+    profession: ProfessionType.Sword,
+    name: "凌霄劍宗",
+    desc: "修煉劍道，以攻代守。追求極致的攻擊力與暴擊。",
+    mapId: "4",
+    chapterCues: [
+      "三界戰場與時光長河承接 task_04 後的劍令章節。",
+      "萬法聖城到無盡海延伸後段世界章節。",
+      "終盤帝劍路線可接續凌霄劍星鋼與仙帝 encounter。",
+    ],
+  },
+  {
+    id: "body",
+    profession: ProfessionType.Body,
+    name: "萬獸山莊",
+    desc: "修煉肉身，力大無窮。擁有超高的防禦與生命回復能力。",
+    mapId: "13",
+    chapterCues: [
+      "三界戰場與時光長河承接 task_04 後的血旗章節。",
+      "萬法聖城到無盡海延伸後段世界章節。",
+      "終盤帝血路線可接續萬獸血骨殘材與仙帝 encounter。",
+    ],
+  },
+  {
+    id: "mage",
+    profession: ProfessionType.Mage,
+    name: "縹緲仙宮",
+    desc: "修煉法術，掌控天地。擅長群體傷害與控制法術。",
+    mapId: "23",
+    chapterCues: [
+      "三界戰場與時光長河承接 task_04 後的星牒章節。",
+      "萬法聖城到無盡海延伸後段世界章節。",
+      "終盤星詔路線可接續縹緲星魂蓮與仙帝 encounter。",
+    ],
+  },
+];
+
 export const CompendiumModal: React.FC<CompendiumModalProps> = ({
   isOpen,
   onClose,
   embedded = false,
+  initialTab = "realm",
+  initialSkillProfession = ProfessionType.Sword,
+  initialSectId = "sword",
 }) => {
-  const [activeTab, setActiveTab] = useState<TabType>("realm");
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [selectedId, setSelectedId] = useState<string | null>(null); // For detailed view
+  const [activeSkillProfession, setActiveSkillProfession] =
+    useState<ProfessionType>(initialSkillProfession);
+  const [activeSectId, setActiveSectId] = useState<SectId>(initialSectId);
 
   // Tooltip state for Item Drop Source
   const [tooltip, setTooltip] = useState<{
@@ -145,6 +228,26 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
   );
 
   const allSkills: Skill[] = useMemo(() => [...FORMAL_CORE_SKILLS_SORTED], []);
+  const activeSkillGroups = useMemo(() => {
+    if (activeSkillProfession === ProfessionType.None) {
+      return groupSkillsByRealm(
+        allSkills.filter(
+          (skill) =>
+            !skill.profession || skill.profession === ProfessionType.None
+        )
+      );
+    }
+
+    return groupSkillsByRealm(
+      allSkills.filter((skill) => skill.profession === activeSkillProfession)
+    );
+  }, [activeSkillProfession, allSkills]);
+
+  const activeSect =
+    sectConfigs.find((sect) => sect.id === activeSectId) ?? sectConfigs[0];
+  const activeSectSkills = FORMAL_CORE_SKILLS_BY_PROFESSION[activeSect.profession];
+  const activeSectSkillGroups = groupSkillsByRealm(activeSectSkills);
+  const activeSectNpcs = MAPS.find((map) => map.id === activeSect.mapId)?.npcs || [];
 
   // Helper: Get Drops for Enemy
   const getEnemyDrops = (enemyId: string): Item[] => {
@@ -500,7 +603,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
 
             {/* --- Item Tab (Grouped by Realm) --- */}
             {activeTab === "item" && (
-              <div className="space-y-12">
+              <div className="space-y-12" data-testid="compendium-item-grid">
                 {Object.values(MajorRealm)
                   .filter((r) => typeof r === "number")
                   .map((realmId) => {
@@ -516,7 +619,10 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
 
                     return (
                       <div key={rId} className="space-y-4">
-                        <h3 className="text-xl font-bold text-amber-500 border-l-4 border-amber-600 pl-3 sticky top-0 bg-stone-900/95 py-2 z-10">
+                        <h3
+                          className="border-l-4 border-amber-600 bg-stone-900/70 py-2 pl-3 text-xl font-bold text-amber-500"
+                          data-testid={`compendium-item-realm-heading-${rId}`}
+                        >
                           {MajorRealmCN[rId]}期
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -524,6 +630,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                             <div
                               key={item.id}
                               className="bg-stone-800 p-3 rounded border border-stone-700 group hover:border-amber-500/30 transition-colors"
+                              data-testid={`compendium-item-card-${item.id}`}
                             >
                               <div className="flex justify-between">
                                 <span className="font-bold text-stone-200">
@@ -703,132 +810,198 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
 
             {/* --- Skill Tab --- */}
             {activeTab === "skill" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {allSkills.map((skill) => (
-                  <div
-                    key={skill.id}
-                    className="bg-stone-800 p-4 rounded border border-stone-700"
-                  >
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-bold text-indigo-400">
-                        {skill.name}
-                      </h4>
-                      <span className="text-xs px-2 py-0.5 rounded bg-stone-700 text-stone-300">
-                        {getSkillTypeLabel(skill.type)}
-                      </span>
-                    </div>
-                    <div className="text-xs text-stone-500 mt-1 mb-2">
-                      {getProfessionLabel(skill.profession)} |{" "}
-                      {MajorRealmCN[skill.minRealm]}
-                    </div>
-                    <p className="text-sm text-stone-300">
-                      {skill.description}
-                    </p>
+              <div className="space-y-6" data-testid="compendium-skill-layout">
+                <div className="flex gap-2 overflow-x-auto rounded-xl border border-stone-800 bg-stone-950/70 p-1">
+                  {skillProfessionTabs.map((tab) => (
+                    <Button
+                      key={tab.id}
+                      data-testid={`compendium-skill-profession-${tab.id.toLowerCase()}`}
+                      onClick={() => setActiveSkillProfession(tab.id)}
+                      variant="tab"
+                      size="sm"
+                      className={clsx(
+                        "shrink-0",
+                        activeSkillProfession === tab.id
+                          ? "border-amber-600/60 bg-amber-500/15 text-amber-100"
+                          : "text-stone-400"
+                      )}
+                    >
+                      {tab.label}
+                    </Button>
+                  ))}
+                </div>
+
+                {activeSkillGroups.length === 0 ? (
+                  <div className="rounded border border-stone-800 bg-stone-900/60 p-4 text-sm text-stone-500">
+                    目前沒有此分類的正式功法。
                   </div>
-                ))}
+                ) : (
+                  <div className="space-y-8">
+                    {activeSkillGroups.map((group) => (
+                      <section key={group.realm} className="space-y-3">
+                        <h3
+                          className="border-l-4 border-indigo-600 bg-stone-900/70 py-2 pl-3 text-lg font-bold text-indigo-300"
+                          data-testid={`compendium-skill-realm-${group.realm}`}
+                        >
+                          {MajorRealmCN[group.realm]}期
+                        </h3>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                          {group.skills.map((skill) => (
+                            <div
+                              key={skill.id}
+                              className="rounded border border-stone-700 bg-stone-800 p-4"
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <h4 className="font-bold text-indigo-400">
+                                  {skill.name}
+                                </h4>
+                                <span className="shrink-0 rounded bg-stone-700 px-2 py-0.5 text-xs text-stone-300">
+                                  {getSkillTypeLabel(skill.type)}
+                                </span>
+                              </div>
+                              <div className="mt-1 text-xs text-stone-500">
+                                {getProfessionLabel(skill.profession)} |{" "}
+                                {MajorRealmCN[skill.minRealm]} | 來源：
+                                {getSkillSourceLabel(skill.formalSourceTier)}
+                              </div>
+                              <p className="mt-2 text-sm text-stone-300">
+                                {skill.description}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
             {/* --- Sect Tab --- */}
             {activeTab === "sect" && (
-              <div className="space-y-8">
-                {[
-                  {
-                    id: "sword",
-                    name: "凌霄劍宗",
-                    desc: "修煉劍道，以攻代守。追求極致的攻擊力與暴擊。",
-                    skills: FORMAL_CORE_SKILLS_BY_PROFESSION[ProfessionType.Sword],
-                    npcs: MAPS.find((m) => m.id === "4")?.npcs || [],
-                  },
-                  {
-                    id: "body",
-                    name: "萬壽山莊",
-                    desc: "修煉肉身，力大無窮。擁有超高的防禦與生命回復能力。",
-                    skills: FORMAL_CORE_SKILLS_BY_PROFESSION[ProfessionType.Body],
-                    npcs: MAPS.find((m) => m.id === "13")?.npcs || [],
-                  },
-                  {
-                    id: "mage",
-                    name: "縹緲星宮",
-                    desc: "修煉法術，掌控天地。擅長群體傷害與控制法術。",
-                    skills: FORMAL_CORE_SKILLS_BY_PROFESSION[ProfessionType.Mage],
-                    npcs: MAPS.find((m) => m.id === "23")?.npcs || [],
-                  },
-                ].map((sect) => (
-                  <div
-                    key={sect.id}
-                    className="bg-stone-800/50 p-6 rounded-lg border border-stone-700"
-                  >
-                    <div className="md:flex justify-between items-start mb-6">
-                      <div>
-                        <h2 className="text-3xl font-bold text-amber-500 mb-2">
-                          {sect.name}
-                        </h2>
-                        <p className="text-stone-400 text-lg">{sect.desc}</p>
-                      </div>
-                    </div>
+              <div className="space-y-6" data-testid="compendium-sect-layout">
+                <div className="flex gap-2 overflow-x-auto rounded-xl border border-stone-800 bg-stone-950/70 p-1">
+                  {sectConfigs.map((sect) => (
+                    <Button
+                      key={sect.id}
+                      data-testid={`compendium-sect-tab-${sect.id}`}
+                      onClick={() => setActiveSectId(sect.id)}
+                      variant="tab"
+                      size="sm"
+                      className={clsx(
+                        "shrink-0",
+                        activeSectId === sect.id
+                          ? "border-amber-600/60 bg-amber-500/15 text-amber-100"
+                          : "text-stone-400"
+                      )}
+                    >
+                      {sect.name}
+                    </Button>
+                  ))}
+                </div>
 
-                    {/* Sect NPCs */}
-                    <div className="mb-8 p-4 bg-stone-900/50 rounded border border-stone-800">
-                      <h4 className="font-bold text-stone-300 mb-3 flex items-center gap-2">
-                        <User size={18} /> 宗門人物
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {sect.npcs.map((npc) => (
-                          <div key={npc.id} className="flex gap-3 items-center">
-                            <div className="w-8 h-8 rounded bg-stone-800 flex items-center justify-center border border-stone-700 text-stone-500 font-bold text-xs">
-                              {npc.symbol}
-                            </div>
-                            <div>
-                              <div className="text-stone-200 font-bold text-sm">
-                                {npc.name}
-                                <span className="ml-2 text-[10px] text-stone-500 bg-stone-900 px-1 rounded border border-stone-800">
-                                  {npc.type === NPCType.Shop
-                                    ? "商舖"
-                                    : npc.type === NPCType.Quest
-                                      ? "任務"
-                                      : "人物"}
-                                </span>
-                              </div>
-                              <div className="text-xs text-stone-500">
-                                {npc.description}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                        {sect.npcs.length === 0 && (
-                          <span className="text-stone-600 text-xs">
-                            暫無人物資訊
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                <div
+                  className="rounded-lg border border-stone-700 bg-stone-800/50 p-5 md:p-6"
+                  data-testid={`compendium-sect-panel-${activeSect.id}`}
+                >
+                  <div className="mb-6">
+                    <h2 className="mb-2 text-2xl font-bold text-amber-500 md:text-3xl">
+                      {activeSect.name}
+                    </h2>
+                    <p className="text-base text-stone-400 md:text-lg">
+                      {activeSect.desc}
+                    </p>
+                  </div>
 
-                    <h4 className="font-bold text-stone-300 mb-4 flex items-center gap-2">
-                      <Scroll size={18} /> 傳承功法
+                  <div className="mb-8 rounded border border-stone-800 bg-stone-900/50 p-4">
+                    <h4 className="mb-3 flex items-center gap-2 font-bold text-stone-300">
+                      <User size={18} /> 宗門人物
                     </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {sect.skills.map((skill) => (
-                          <div
-                            key={skill.id}
-                            className="bg-stone-900 p-3 rounded border border-stone-800"
-                          >
-                            <div className="flex justify-between">
-                              <span className="font-bold text-stone-200">
-                                {skill.name}
-                              </span>
-                              <span className="text-xs text-stone-500">
-                                {MajorRealmCN[skill.minRealm]}
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {activeSectNpcs.map((npc) => (
+                        <div key={npc.id} className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-stone-700 bg-stone-800 text-xs font-bold text-stone-500">
+                            {npc.symbol}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-sm font-bold text-stone-200">
+                              {npc.name}
+                              <span className="ml-2 rounded border border-stone-800 bg-stone-900 px-1 text-[10px] text-stone-500">
+                                {npc.type === NPCType.Shop
+                                  ? "商舖"
+                                  : npc.type === NPCType.Quest
+                                    ? "任務"
+                                    : "人物"}
                               </span>
                             </div>
-                            <p className="text-xs text-stone-500 mt-1">
-                              {skill.description}
-                            </p>
+                            <div className="text-xs text-stone-500">
+                              {npc.description}
+                            </div>
                           </div>
-                        ))}
+                        </div>
+                      ))}
+                      {activeSectNpcs.length === 0 && (
+                        <span className="text-xs text-stone-600">
+                          暫無人物資訊
+                        </span>
+                      )}
                     </div>
                   </div>
-                ))}
+
+                  <div className="mb-8">
+                    <h4 className="mb-4 flex items-center gap-2 font-bold text-stone-300">
+                      <Scroll size={18} /> 傳承功法
+                    </h4>
+                    <div className="space-y-5">
+                      {activeSectSkillGroups.map((group) => (
+                        <section key={group.realm} className="space-y-3">
+                          <h5 className="border-l-4 border-amber-700 bg-stone-900/70 py-2 pl-3 text-sm font-bold text-amber-300">
+                            {MajorRealmCN[group.realm]}期
+                          </h5>
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            {group.skills.map((skill) => (
+                              <div
+                                key={skill.id}
+                                className="rounded border border-stone-800 bg-stone-900 p-3"
+                              >
+                                <div className="flex justify-between gap-3">
+                                  <span className="font-bold text-stone-200">
+                                    {skill.name}
+                                  </span>
+                                  <span className="shrink-0 text-xs text-stone-500">
+                                    {getSkillTypeLabel(skill.type)}
+                                  </span>
+                                </div>
+                                <div className="mt-1 text-[11px] text-stone-600">
+                                  來源：{getSkillSourceLabel(skill.formalSourceTier)}
+                                </div>
+                                <p className="mt-1 text-xs text-stone-500">
+                                  {skill.description}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </section>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded border border-stone-800 bg-stone-950/50 p-4">
+                    <h4 className="mb-3 flex items-center gap-2 font-bold text-stone-300">
+                      <MapIcon size={18} /> 章節線索
+                    </h4>
+                    <div className="grid gap-2">
+                      {activeSect.chapterCues.map((cue) => (
+                        <div
+                          key={cue}
+                          className="rounded border border-stone-800 bg-stone-900/70 px-3 py-2 text-xs text-stone-400"
+                        >
+                          {cue}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>

@@ -107,6 +107,18 @@ const expectWithinViewport = async (locator: Locator, page: Page) => {
   );
 };
 
+const expectDoesNotCover = async (topLocator: Locator, lowerLocator: Locator) => {
+  await expect(topLocator).toBeVisible();
+  await expect(lowerLocator).toBeVisible();
+  const topBox = await topLocator.boundingBox();
+  const lowerBox = await lowerLocator.boundingBox();
+  expect(topBox).not.toBeNull();
+  expect(lowerBox).not.toBeNull();
+  if (!topBox || !lowerBox) return;
+
+  expect(topBox.y + topBox.height).toBeLessThanOrEqual(lowerBox.y + 1);
+};
+
 const expectCanvasHasNonBlackPixels = async (canvas: Locator) => {
   const image = PNG.sync.read(await canvas.screenshot({ type: "png" }));
   let nonBlack = 0;
@@ -393,6 +405,24 @@ test("workshop and compendium embedded panels avoid horizontal overflow", async 
   await expect(page.getByTestId("compendium-map-layout")).toBeVisible();
   await expect(page.getByTestId("compendium-map-list")).toBeVisible();
   await expect(page.getByTestId("compendium-map-detail")).toBeVisible();
+
+  await page.getByTestId("compendium-tab-item").click();
+  const itemHeading = page.getByTestId("compendium-item-realm-heading-0");
+  const firstItemCard = page.getByTestId("compendium-item-card-novice_sword");
+  await firstItemCard.scrollIntoViewIfNeeded();
+  await expectDoesNotCover(itemHeading, firstItemCard);
+
+  await page.getByTestId("compendium-tab-skill").click();
+  await expect(page.getByTestId("compendium-skill-profession-sword")).toBeVisible();
+  await expect(page.getByTestId("compendium-skill-realm-1")).toBeVisible();
+  await expect(page.getByText("疾風三疊")).toBeVisible();
+
+  await page.getByTestId("compendium-tab-sect").click();
+  await expect(page.getByTestId("compendium-sect-panel-sword")).toBeVisible();
+  await expect(page.getByText("章節線索")).toBeVisible();
+  await page.getByTestId("compendium-sect-tab-body").click();
+  await expect(page.getByTestId("compendium-sect-panel-body")).toBeVisible();
+  await expect(page.getByText("萬獸血骨殘材")).toBeVisible();
   await expectNoHorizontalOverflow(compendiumPanel);
 });
 
@@ -418,11 +448,17 @@ test("mobile workshop and compendium panels stay inside the viewport", async ({
   await page.getByTestId("dock-compendium").click();
   const compendiumShell = page.getByTestId("game-shell-panel");
   await expectWithinViewport(compendiumShell, page);
-  await page.getByTestId("compendium-tab-map").click();
+  await page.getByTestId("compendium-tab-item").click();
   await expectNoHorizontalOverflow(page.getByTestId("compendium-panel"));
-  await expect(page.getByTestId("compendium-map-list")).toBeVisible();
-  await page.getByTestId("compendium-map-detail").scrollIntoViewIfNeeded();
-  await expect(page.getByTestId("compendium-map-detail")).toBeVisible();
+  await page.getByTestId("compendium-item-card-novice_sword").scrollIntoViewIfNeeded();
+  await expect(page.getByTestId("compendium-item-card-novice_sword")).toBeVisible();
+  await page.getByTestId("compendium-tab-skill").click();
+  await expect(page.getByTestId("compendium-skill-profession-sword")).toBeVisible();
+  await expectNoHorizontalOverflow(page.getByTestId("compendium-panel"));
+  await page.getByTestId("compendium-tab-sect").click();
+  await expect(page.getByTestId("compendium-sect-tab-sword")).toBeVisible();
+  await expect(page.getByTestId("compendium-sect-panel-sword")).toBeVisible();
+  await expectNoHorizontalOverflow(page.getByTestId("compendium-panel"));
 });
 
 test("area and world map modal render visible map surfaces", async ({ page }) => {

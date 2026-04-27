@@ -135,3 +135,28 @@ Archive 記錄：
 
 - `2026-04-26` 已以 `openspec archive update-shared-ui-foundation-e2e-validation --skip-specs --yes` 歸檔。
 - 使用 `--skip-specs` 的理由：`client-interface` base spec 已吸收本輪正式行為，本次 archive 僅移動 completed change，不需要再次修改 base spec。
+
+## 7. 圖鑑分類與瀏覽版面收口記錄
+
+Change id: `update-compendium-taxonomy-and-layout`
+
+本輪已把使用者回報的三個圖鑑資訊架構問題收斂：
+
+- `神兵法寶` 不再使用會遮住 item card 的 sticky realm heading，第一張卡片在 desktop / mobile 都可直接讀取。
+- `功法神通` 改為 `通用 / 劍修 / 體修 / 法修` 內層分類，並依境界分組顯示 formal core skills。
+- `宗門傳承` 改為三宗 tabs；單一宗門頁面內分成 `宗門人物 / 傳承功法 / 章節線索`，避免一次展開三宗造成 mobile 長頁掃描成本。
+
+本輪仍維持：
+
+- 不新增 item / skill / quest / NPC 資料。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；這條 change 只調整圖鑑 layout、分類與 browser smoke coverage。
+
+驗證基線：
+
+- `openspec validate update-compendium-taxonomy-and-layout --strict`
+- `npm test -- components/Compendium/CompendiumModal.test.tsx`
+- `npm run test:e2e -- tests/e2e/shared-ui-foundation.spec.ts --project=chromium`
+- `npm run typecheck`
+- `npm run build`
+- `git diff --check`
