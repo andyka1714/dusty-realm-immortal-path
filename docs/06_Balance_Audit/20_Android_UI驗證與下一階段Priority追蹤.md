@@ -184,3 +184,8 @@ Change id: `update-item-economy-combat-supplies`
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration。
 - `heal_mp` 尚無正式 MP runtime resource，因此只能顯示不可用原因，不會消耗道具。
+
+Archive 記錄：
+
+- `2026-04-27` 已以 `openspec archive update-item-economy-combat-supplies --skip-specs --yes` 歸檔。
+- 使用 `--skip-specs` 的理由：`game-mechanics` 與 `client-interface` base specs 已在實作 commit 吸收補給閉環 requirement，本次 archive 僅移動 completed change。
