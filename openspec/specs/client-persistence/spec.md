@@ -171,3 +171,8 @@
 - **WHEN** 新功能只改資料表、UI cue 或 deterministic helper
 - **THEN** tasks 必須明確記錄不需要 migration 的理由
 - **AND** 不得在未宣告的情況下偷渡新 persisted field
+
+#### Scenario: Encounter aftermath v3 不新增 persisted state
+- **WHEN** encounter aftermath v3 只新增 catalog event、selector gate、presentation cue 或 choice reward
+- **THEN** 系統必須沿用既有 `soul.worldMemoryTags` 與 `resolvedEventIds`
+- **AND** 不需要新增 migration 或 hydration sanitize

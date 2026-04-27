@@ -226,3 +226,20 @@ Change id: `update-workshop-route-source-specialization-v3`
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；v3 Workshop route source 只讀既有 recipe metadata、route material、`soul.worldMemoryTags` 與 Workshop mastery / specialization tree state。
 - 完成後以獨立 archive commit 收口；若 base specs 已在 implementation commit 回寫，archive 使用 `--skip-specs`。
+
+## 11. Encounter route aftermath v3 收口記錄
+
+Change id: `expand-encounter-route-aftermath-v3`
+
+本輪目標是把三宗 v3 milestone 後的 `sect:*:world-chapter-03` world memory 接成 repeatable aftermath，而不是讓 `sword_world_immortal_sword_oath / beast_world_immortal_blood_oath / mystic_world_immortal_star_oath` 成為一次性終點：
+
+- aftermath event 應讀取對應 `sect:sword:world-chapter-03`、`sect:beast:world-chapter-03`、`sect:mystic:world-chapter-03`，缺記憶時不進 selector。
+- aftermath 不得是 `once_per_run`，需支撐 v3 章節後續密度。
+- pending panel 需顯示 `routeLabel`、`categoryLabel`、`chainLabel`、`memoryCue` 與 choice cue tags，讓玩家能辨識穩定收益、材料來源或高風險收益。
+- Workshop sink 仍只消耗既有 route material；aftermath 是 source cue，不新增 Workshop recipe 或第二套 source runtime。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；aftermath 只讀既有 `soul.worldMemoryTags`、resolved event state 與 encounter catalog metadata。

@@ -160,6 +160,39 @@ const V3_EMPEROR_ROUTE_EVENT_CASES = [
   },
 ] as const;
 
+const V3_WORLD_AFTERMATH_EVENT_CASES = [
+  {
+    eventId: "sword_immortal_afterglow_starsteel",
+    profession: ProfessionType.Sword,
+    worldMemoryTag: "sect:sword:world-chapter-03",
+    routeLabel: "凌霄劍宗",
+    categoryLabel: "仙人 v3 路線餘波",
+    chainLabel: "帝劍餘波",
+    sourceCueLabel: "凌霄劍星鋼 x1",
+    rewardItemId: "sword_path_starsteel",
+  },
+  {
+    eventId: "beast_immortal_afterglow_bloodbone",
+    profession: ProfessionType.Body,
+    worldMemoryTag: "sect:beast:world-chapter-03",
+    routeLabel: "萬獸山莊",
+    categoryLabel: "仙人 v3 路線餘波",
+    chainLabel: "帝血餘波",
+    sourceCueLabel: "萬獸血骨殘材 x1",
+    rewardItemId: "beast_path_bloodbone",
+  },
+  {
+    eventId: "mystic_immortal_afterglow_starlotus",
+    profession: ProfessionType.Mage,
+    worldMemoryTag: "sect:mystic:world-chapter-03",
+    routeLabel: "縹緲仙宮",
+    categoryLabel: "仙人 v3 路線餘波",
+    chainLabel: "星詔餘波",
+    sourceCueLabel: "縹緲星魂蓮 x1",
+    rewardItemId: "mystic_path_starlotus",
+  },
+] as const;
+
 const buildRouteMemoryContext = (
   profession: ProfessionType,
   realm: MajorRealm
@@ -549,6 +582,93 @@ describe("encounter selector", () => {
           (available) => available.id === event.id
         )
       ).toBe(false);
+    });
+  });
+
+  it("adds repeatable v3 aftermath events unlocked by matching world memory", () => {
+    V3_WORLD_AFTERMATH_EVENT_CASES.forEach((testCase) => {
+      const event = ENCOUNTER_EVENTS[testCase.eventId];
+
+      expect(event, `${testCase.eventId} should exist`).toBeDefined();
+      expect(event.minRealm).toBe(MajorRealm.Immortal);
+      expect(event.maxRealm).toBe(MajorRealm.ImmortalEmperor);
+      expect(event.selector?.repeatPolicy).not.toBe("once_per_run");
+      expect(event.selector?.eligibleProfessions).toEqual([testCase.profession]);
+      expect(event.selector?.requiredWorldMemoryTags).toEqual([testCase.worldMemoryTag]);
+      expect(event.presentation?.routeLabel).toBe(testCase.routeLabel);
+      expect(event.presentation?.categoryLabel).toContain(testCase.categoryLabel);
+      expect(event.presentation?.chainLabel).toBe(testCase.chainLabel);
+      expect(event.presentation?.memoryCue).toContain("v3");
+
+      const rewardItemIds = event.choices.flatMap((choice) =>
+        choice.reward.items?.map((item) => item.itemId) ?? []
+      );
+      const cueLabels = event.choices.flatMap((choice) =>
+        choice.cue?.tags?.map((tag) => tag.label) ?? []
+      );
+
+      expect(rewardItemIds).toContain(testCase.rewardItemId);
+      expect(cueLabels).toContain(testCase.sourceCueLabel);
+      expect(cueLabels).toEqual(
+        expect.arrayContaining([
+          expect.stringMatching(/穩定收益|材料來源|高風險收益/),
+        ])
+      );
+    });
+  });
+
+  it("keeps v3 aftermath events hidden until matching world memory exists", () => {
+    V3_WORLD_AFTERMATH_EVENT_CASES.forEach((testCase) => {
+      const matchingContext = {
+        majorRealm: MajorRealm.Immortal,
+        profession: testCase.profession,
+        completedQuestIds: [],
+        resolvedEventIds: [testCase.eventId],
+        worldMemoryTags: [testCase.worldMemoryTag],
+      };
+      const missingMemoryContext = {
+        ...matchingContext,
+        worldMemoryTags: [],
+      };
+      const wrongProfessionContext = {
+        ...matchingContext,
+        profession:
+          testCase.profession === ProfessionType.Sword
+            ? ProfessionType.Body
+            : ProfessionType.Sword,
+      };
+
+      expect(
+        getAvailableEncounterEvents(matchingContext).some(
+          (available) => available.id === testCase.eventId
+        )
+      ).toBe(true);
+      expect(
+        getAvailableEncounterEvents(missingMemoryContext).some(
+          (available) => available.id === testCase.eventId
+        )
+      ).toBe(false);
+      expect(
+        getAvailableEncounterEvents(wrongProfessionContext).some(
+          (available) => available.id === testCase.eventId
+        )
+      ).toBe(false);
+    });
+  });
+
+  it("publishes v3 aftermath material source cues", () => {
+    V3_WORLD_AFTERMATH_EVENT_CASES.forEach((testCase) => {
+      const sourceCues = getEncounterMaterialSourceCues(testCase.rewardItemId);
+
+      expect(sourceCues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            eventId: testCase.eventId,
+            routeLabel: testCase.routeLabel,
+            categoryLabel: expect.stringContaining(testCase.categoryLabel),
+          }),
+        ])
+      );
     });
   });
 

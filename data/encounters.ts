@@ -2408,6 +2408,168 @@ const RAW_ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
       },
     ],
   }),
+  sword_immortal_afterglow_starsteel: {
+    id: "sword_immortal_afterglow_starsteel",
+    title: "帝劍餘燼星鋼",
+    description: "接引仙殿記住帝劍殘痕後，凌霄劍宗弟子仍能在餘燼劍縫裡反覆尋回可用星鋼。",
+    minRealm: MajorRealm.Immortal,
+    maxRealm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 4,
+      repeatPolicy: "repeatable",
+      eligibleProfessions: [ProfessionType.Sword],
+      requiredWorldMemoryTags: ["sect:sword:world-chapter-03"],
+    },
+    presentation: {
+      categoryLabel: "仙人 v3 路線餘波",
+      routeLabel: "凌霄劍宗",
+      chainLabel: "帝劍餘波",
+      memoryCue: "帝劍餘燼會讀取 v3 凌霄劍宗世界章節記憶，作為後續仙階與帝境材料來源。",
+      sectLabel: "凌霄劍宗 v3 餘波",
+    },
+    choices: [
+      {
+        id: "salvage_afterglow_starsteel",
+        label: "尋回餘燼星鋼",
+        description: "沿著帝劍殘痕冷卻後留下的劍縫，取回一段仍可入爐的星鋼。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "凌霄劍星鋼 x1" },
+            { kind: "resource", label: "材料來源" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "sword_path_starsteel", count: 1 }],
+          logMessage: "你從帝劍餘燼中尋回一段凌霄劍星鋼，v3 劍宗路線多了一條可重複材料來源。",
+        },
+      },
+      {
+        id: "temper_afterglow_edge",
+        label: "借餘燼淬鋒",
+        description: "不取星鋼，改把餘燼劍意壓進本命劍勢，換成更穩的仙階修行節奏。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "穩定收益" },
+            { kind: "benefit", label: "仙階劍勢" },
+          ],
+        },
+        reward: {
+          experience: 2360000,
+          logMessage: "你借帝劍餘燼淬鋒，凌霄劍宗 v3 餘波轉成穩定修為。",
+        },
+      },
+    ],
+  },
+  beast_immortal_afterglow_bloodbone: {
+    id: "beast_immortal_afterglow_bloodbone",
+    title: "帝血餘獵骨潮",
+    description: "帝血骨印被接引仙殿壓實後，萬獸山莊仍能循著血潮殘跡反覆追獵血骨。",
+    minRealm: MajorRealm.Immortal,
+    maxRealm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 4,
+      repeatPolicy: "repeatable",
+      eligibleProfessions: [ProfessionType.Body],
+      requiredWorldMemoryTags: ["sect:beast:world-chapter-03"],
+    },
+    presentation: {
+      categoryLabel: "仙人 v3 路線餘波",
+      routeLabel: "萬獸山莊",
+      chainLabel: "帝血餘波",
+      memoryCue: "帝血餘獵會讀取 v3 萬獸山莊世界章節記憶，讓肉身路線保留高風險材料回路。",
+      sectLabel: "萬獸山莊 v3 餘波",
+    },
+    choices: [
+      {
+        id: "hunt_afterglow_bloodbone",
+        label: "追剝餘獵血骨",
+        description: "趁血潮尚未完全散去，硬闖餘獵場剝下一段被帝血壓實的血骨。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "resource", label: "萬獸血骨殘材 x1" },
+            { kind: "risk", label: "高風險收益" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "beast_path_bloodbone", count: 1 }],
+          logMessage: "你硬闖帝血餘獵場，剝回一份萬獸血骨殘材，也讓 v3 體修路線保留高壓來源。",
+        },
+      },
+      {
+        id: "endure_afterglow_bloodpulse",
+        label: "承受餘血脈壓",
+        description: "放棄剝材，讓餘獵血壓反覆打磨肉身底盤。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "高風險收益" },
+            { kind: "benefit", label: "肉身底盤" },
+          ],
+        },
+        reward: {
+          experience: 2280000,
+          logMessage: "你承下帝血餘波，萬獸山莊 v3 餘獵轉成肉身修為。",
+        },
+      },
+    ],
+  },
+  mystic_immortal_afterglow_starlotus: {
+    id: "mystic_immortal_afterglow_starlotus",
+    title: "星詔餘光蓮池",
+    description: "星詔牒在接引仙殿展開後，縹緲仙宮仍可從餘光星池中反覆凝出星魂蓮。",
+    minRealm: MajorRealm.Immortal,
+    maxRealm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 4,
+      repeatPolicy: "repeatable",
+      eligibleProfessions: [ProfessionType.Mage],
+      requiredWorldMemoryTags: ["sect:mystic:world-chapter-03"],
+    },
+    presentation: {
+      categoryLabel: "仙人 v3 路線餘波",
+      routeLabel: "縹緲仙宮",
+      chainLabel: "星詔餘波",
+      memoryCue: "星詔餘光會讀取 v3 縹緲仙宮世界章節記憶，讓神識路線延續成穩定材料來源。",
+      sectLabel: "縹緲仙宮 v3 餘波",
+    },
+    choices: [
+      {
+        id: "gather_afterglow_starlotus",
+        label: "凝採餘光星蓮",
+        description: "以神識穩住星詔餘光，在星池邊凝出一株可入丹方的星魂蓮。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "縹緲星魂蓮 x1" },
+            { kind: "resource", label: "材料來源" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "mystic_path_starlotus", count: 1 }],
+          logMessage: "你從星詔餘光裡凝出一株縹緲星魂蓮，v3 法修路線多了一條可重複材料來源。",
+        },
+      },
+      {
+        id: "read_afterglow_star_pattern",
+        label: "解讀餘光星紋",
+        description: "不採星蓮，改把星池排列轉成神識推演。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "穩定收益" },
+            { kind: "benefit", label: "神識推演" },
+          ],
+        },
+        reward: {
+          experience: 2420000,
+          logMessage: "你讀完星詔餘光星紋，縹緲仙宮 v3 餘波轉成穩定神識收益。",
+        },
+      },
+    ],
+  },
   sword_emperor_heaven_sunder_oath: createSingleRealmEncounterEvent({
     id: "sword_emperor_heaven_sunder_oath",
     title: "斬天帝劍盟",

@@ -44,12 +44,20 @@
 - 這批 encounter 寫出 `sect:*:world-chapter-03` world memory tag，並以 `凌霄劍星鋼 / 萬獸血骨殘材 / 縹緲星魂蓮` 作為 route material source cue。
 - 本輪不新增 persisted schema，不需要 migration。
 
+`expand-encounter-route-aftermath-v3` 收口方向是把 `sect:*:world-chapter-03` 從一次性 milestone 延伸成可重複 aftermath：
+
+- aftermath 事件應讀取對應 `sect:sword:world-chapter-03`、`sect:beast:world-chapter-03` 或 `sect:mystic:world-chapter-03`，缺少 world memory 時不得出現在 selector。
+- aftermath 事件必須是 repeatable，不以 `once_per_run` 支撐 v3 後續密度。
+- pending encounter 需保留 `routeLabel / categoryLabel / chainLabel / memoryCue`，choice cue 需讓玩家在選擇前辨識穩定收益、材料來源或高風險收益。
+- 本 change 只新增 catalog event、selector gate、presentation cue 與 choice reward；不新增 persisted schema、不變更 LocalStorage envelope、不需要 migration。
+
 ## 驗證
 
 - `data/sectLateProgression.test.ts` 覆蓋後段 quest、NPC 與 reward / dialogue 對齊。
 - `data/encounters.test.ts` 覆蓋 late sect milestone 的 route gating、cue tags 與 resolved state 行為。
 - `data/sectWorldStoryBranch.test.ts` 覆蓋 Phase 2 / v2 / v3 世界章節 quest / NPC / map / encounter 對齊。
+- `components/game/PendingEncounterPanel.test.tsx` 覆蓋 v3 aftermath 在 pending panel 顯示 route、category、chain、memory 與 choice cue tags。
 
 ## 下一步
 
-- 若要繼續擴張，下一步應把 `chapter_03` 的 world memory tag 接給更多後續 encounter、Workshop source 或輪迴 route perk，但仍應避免新增第二套 quest engine。
+- 若要繼續擴張，下一步應把 `chapter_03` 的 world memory tag 接給更多後續 encounter、Workshop source 或輪迴 route perk，但仍應避免新增第二套 quest engine；若只是讀取既有 `soul.worldMemoryTags`，仍不需要 migration。

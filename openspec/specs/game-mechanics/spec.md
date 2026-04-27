@@ -188,6 +188,12 @@
 - **THEN** encounter selector 必須能提供對應職業 / 宗門的 route-specific 終盤事件
 - **AND** 該事件必須不是 `once_per_run`，避免終盤內容密度只靠一次性 milestone
 
+#### Scenario: v3 route aftermath 延續世界章節記憶
+- **WHEN** 玩家完成三宗 v3 world chapter 並取得 `sect:*:world-chapter-03`
+- **THEN** encounter selector 必須提供對應路線的 repeatable aftermath event
+- **AND** aftermath event 必須讀取對應 world memory tag，缺少記憶時不得出現
+- **AND** aftermath event 不得是 `once_per_run`
+
 #### Scenario: 既有高境界事件保留可讀 cue
 - **WHEN** 高境界通用 encounter 進入 pending flow
 - **THEN** 事件必須提供 `categoryLabel / routeLabel` 與每個 choice 的 cue tags
@@ -216,6 +222,11 @@
 - **WHEN** 系統新增後段宗門與世界內容
 - **THEN** 必須沿用現有 `Quest / NPC / Encounter` 結構
 - **AND** 不得要求新的 persisted state migration 才能讀取舊存檔
+
+#### Scenario: Aftermath 讀取既有 world memory
+- **WHEN** v3 aftermath encounter 需要判斷玩家是否完成對應 route chapter
+- **THEN** 系統必須讀取既有 `soul.worldMemoryTags`
+- **AND** 不得新增重複的 persisted aftermath unlock state
 
 ### Requirement: 宗門後段世界章節承接
 系統必須 (MUST) 讓三宗 `task_04` 之後的故事能接入後段世界章節，而不是只把玩家推到地圖後停止追蹤。

@@ -11,6 +11,17 @@ import {
   resolvePendingEncounterChoice,
 } from "./encounterActions";
 
+const configureEncounterTestStore = () =>
+  configureStore({
+    reducer: {
+      character: characterReducer,
+      inventory: inventoryReducer,
+      logs: logReducer,
+      encounter: encounterReducer,
+      soul: soulReducer,
+    },
+  });
+
 describe("encounter actions", () => {
   it("resolves a pending encounter choice into concrete rewards and clears the pending event", () => {
     const store = configureStore({
@@ -155,4 +166,47 @@ describe("encounter actions", () => {
     expect(state.encounter.resolvedEventIds).toEqual([]);
     expect(state.logs.logs[0]?.type).toBe("danger");
   });
+
+  it.each([
+    {
+      eventId: "sword_immortal_afterglow_starsteel",
+      choiceId: "salvage_afterglow_starsteel",
+      rewardItemId: "sword_path_starsteel",
+    },
+    {
+      eventId: "beast_immortal_afterglow_bloodbone",
+      choiceId: "hunt_afterglow_bloodbone",
+      rewardItemId: "beast_path_bloodbone",
+    },
+    {
+      eventId: "mystic_immortal_afterglow_starlotus",
+      choiceId: "gather_afterglow_starlotus",
+      rewardItemId: "mystic_path_starlotus",
+    },
+  ])(
+    "resolves repeatable v3 aftermath reward and marks $eventId without adding memory state",
+    ({ eventId, choiceId, rewardItemId }) => {
+      const store = configureEncounterTestStore();
+
+      store.dispatch(initializeCharacter({ name: "韓立", gender: Gender.Male }));
+      store.dispatch(
+        setPendingEncounter({
+          eventId,
+          year: 301,
+        })
+      );
+      const soulStateKeysBefore = Object.keys(store.getState().soul).sort();
+
+      store.dispatch(resolvePendingEncounterChoice(choiceId));
+
+      const state = store.getState();
+      const rewardSlot = state.inventory.items.find((slot) => slot.itemId === rewardItemId);
+
+      expect(rewardSlot?.count).toBe(1);
+      expect(state.encounter.resolvedEventIds).toContain(eventId);
+      expect(state.encounter.pendingEvent).toBeNull();
+      expect(state.soul.worldMemoryTags).toEqual([]);
+      expect(Object.keys(state.soul).sort()).toEqual(soulStateKeysBefore);
+    }
+  );
 });

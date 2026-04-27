@@ -223,6 +223,11 @@ Workshop 介面必須 (MUST) 讓玩家看懂專精解鎖條件、目前可否切
 - **THEN** 介面必須顯示該事件的 category、route、profession 或 choice cue
 - **AND** 玩家必須能在選擇前理解該事件偏向穩定收益、材料來源、宗門路線或高風險獎勵
 
+#### Scenario: v3 aftermath 顯示路線與收益 cue
+- **WHEN** v3 aftermath encounter 進入 pending panel
+- **THEN** 介面必須顯示 routeLabel、categoryLabel、chainLabel、memoryCue 與 choice cue tags
+- **AND** 玩家必須能在選擇前辨識穩定收益、材料來源或高風險收益
+
 #### Scenario: Mobile modal 與地圖畫面維持可用
 - **WHEN** 玩家在 mobile viewport 開啟 pending encounter、GameShell panel 或 Adventure map
 - **THEN** modal / panel 不得產生水平溢出或不可達內容

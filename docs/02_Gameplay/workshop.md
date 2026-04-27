@@ -131,6 +131,13 @@ Workshop state 已正式記錄：
 - `PendingEncounterPanel` 與 `GameShell` 會顯示 chain label、memory cue、profession / sect cue 與選項後果提示。
 - 這條線只讓 Workshop / Sect 讀穩定 key 與 route cue，不在此處重做百業或宗門任務引擎。
 
+`expand-encounter-route-aftermath-v3` 會把三宗 v3 milestone 後的 world memory 接成 repeatable route aftermath：
+
+- aftermath 讀取既有 `sect:*:world-chapter-03`，缺少該記憶時不解鎖。
+- aftermath choice 會把 `凌霄劍星鋼 / 萬獸血骨殘材 / 縹緲星魂蓮` 這類 route-specific material source 以 cue tag 顯示，讓 Workshop sink 能反向追溯來源。
+- pending panel 必須顯示 `routeLabel / categoryLabel / chainLabel / memoryCue`，選項顯示穩定收益、材料來源或高風險收益 cue。
+- 本 change 不新增 `current.workshop`、`current.encounter`、`soul` 或 LocalStorage envelope 欄位；只讀既有 `soul.worldMemoryTags` 與 resolved event state，因此不需要 migration 或 hydrate sanitize。
+
 ## 6. 後續可擴充部分
 
 目前第二批 recipe、第一批專精效果、材料來源 cue、專精解鎖 / 切換成本與可重置分支樹都已完成，後續若要再擴充，重點會是：

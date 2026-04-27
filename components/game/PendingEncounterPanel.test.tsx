@@ -41,4 +41,22 @@ describe("PendingEncounterPanel", () => {
     expect(markup).toContain("凌霄劍星鋼 x2");
     expect(markup).toContain("高風險");
   });
+
+  it("renders v3 aftermath route, chain, memory, and choice cue tags", () => {
+    const markup = renderToStaticMarkup(
+      <PendingEncounterPanel
+        event={ENCOUNTER_EVENTS.sword_immortal_afterglow_starsteel}
+        pending={{ eventId: "sword_immortal_afterglow_starsteel", year: 1010 }}
+        onChoose={() => undefined}
+      />
+    );
+
+    expect(markup).toContain("仙人 v3 路線餘波");
+    expect(markup).toContain("凌霄劍宗");
+    expect(markup).toContain("帝劍餘波");
+    expect(markup).toContain("v3 凌霄劍宗世界章節記憶");
+    expect(markup).toContain("穩定");
+    expect(markup).toContain("凌霄劍星鋼 x1");
+    expect(markup).toContain("材料來源");
+  });
 });
