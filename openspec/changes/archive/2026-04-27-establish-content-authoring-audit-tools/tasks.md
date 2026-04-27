@@ -21,4 +21,4 @@
 - [x] 4.1 更新 balance audit / tracking，記錄 audit coverage 與不需要 migration
 - [x] 4.2 跑 targeted tests、typecheck、build、OpenSpec validate、`git diff --check`
 - [x] 4.3 完成後更新 tasks 狀態並提交
-- [ ] 4.4 Archive OpenSpec 並提交 archive checkpoint
+- [x] 4.4 Archive OpenSpec 並提交 archive checkpoint
