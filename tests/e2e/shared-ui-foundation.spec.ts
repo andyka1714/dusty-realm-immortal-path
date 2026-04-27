@@ -349,14 +349,34 @@ test("character panel keeps dashboard panes and stat tooltip anchored", async ({
   const panel = page.getByTestId("game-shell-panel");
   const dashboard = page.getByTestId("dashboard-character-panel");
   const logPanel = page.getByTestId("dashboard-log-panel");
+  const logContent = logPanel.getByTestId("log-panel");
   const statsPanel = page.getByTestId("stats-panel");
   const spiritRootRow = page.getByTestId("stats-row-spirit-root");
+  const manualCultivate = page.getByTestId("dashboard-manual-cultivate");
+  const breakthrough = page.getByTestId("dashboard-breakthrough");
 
   await expect(panel).toBeVisible();
   await expect(dashboard).toBeVisible();
   await expectWithinBox(logPanel, panel);
   await expectWithinBox(statsPanel, panel);
   await expectNoHorizontalOverflow(dashboard);
+  await expect(logContent).toContainText("修煉日誌");
+  await expect(logContent).toContainText("暫無消息");
+
+  const logPanelBox = await logPanel.boundingBox();
+  expect(logPanelBox).not.toBeNull();
+  if (logPanelBox) {
+    expect(logPanelBox.height).toBeGreaterThan(160);
+  }
+
+  const manualBox = await manualCultivate.boundingBox();
+  const breakthroughBox = await breakthrough.boundingBox();
+  expect(manualBox).not.toBeNull();
+  expect(breakthroughBox).not.toBeNull();
+  if (manualBox && breakthroughBox) {
+    expect(Math.abs(breakthroughBox.height - manualBox.height)).toBeLessThanOrEqual(4);
+    expect(breakthroughBox.y).toBeGreaterThanOrEqual(manualBox.y - 1);
+  }
 
   await spiritRootRow.hover();
   const tooltip = page.getByTestId("game-tooltip");

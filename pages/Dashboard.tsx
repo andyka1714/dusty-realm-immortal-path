@@ -563,12 +563,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                 disabled={!isBreakthroughAvailable}
                 variant="selection"
                 data-testid="dashboard-breakthrough"
-                className={`col-span-2 md:col-span-1 group relative outline-none w-full
+                className={`col-span-2 h-[120px] w-full flex-col overflow-hidden py-4 md:col-span-1 group relative outline-none
                   ${isBreakthroughAvailable ? "cursor-pointer" : "cursor-not-allowed"}
                 `}
               >
                 <div className={`
-                    w-full py-4 rounded-lg border transition-all flex flex-col items-center justify-center gap-2 h-[120px]
+                    flex h-full w-full flex-col items-center justify-center gap-2 rounded-lg border transition-all
                     ${isBreakthroughAvailable 
                         ? "bg-gradient-to-br from-amber-700 to-amber-900 border-amber-500 text-amber-100 shadow-[0_0_15px_rgba(245,158,11,0.4)] animate-pulse hover:scale-[1.02]" 
                         : "bg-stone-950 border-stone-800 text-stone-700 opacity-60"
@@ -635,7 +635,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
 
             {embedded && (
               <div
-                className="min-h-0 flex-1 overflow-hidden rounded-[20px] border border-stone-800/80 bg-stone-900/70"
+                className="min-h-[220px] shrink-0 overflow-hidden rounded-[20px] border border-stone-800/80 bg-stone-900/70"
                 data-testid="dashboard-log-panel"
               >
                 <LogPanel embedded />
