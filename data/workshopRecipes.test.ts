@@ -86,6 +86,27 @@ const ROUTE_SPECIFIC_MATERIAL_IDS = new Set([
   "beast_path_bloodbone",
 ]);
 
+const V3_ROUTE_MEMORY_CASES = [
+  {
+    memoryTag: "sect:sword:world-chapter-03",
+    materialId: "sword_path_starsteel",
+    expectedRecipes: ["immortal_emperor_sword_forge", "starsteel_bloodbone_sword_forge"],
+    expectedSpecializationId: "smithing_starfire_starsteel_crown",
+  },
+  {
+    memoryTag: "sect:beast:world-chapter-03",
+    materialId: "beast_path_bloodbone",
+    expectedRecipes: ["immortal_ascension_elixir", "starsteel_bloodbone_sword_forge"],
+    expectedSpecializationId: "alchemy_lifebloom_resonance",
+  },
+  {
+    memoryTag: "sect:mystic:world-chapter-03",
+    materialId: "mystic_path_starlotus",
+    expectedRecipes: ["star_lotus_hongmeng_pill", "supreme_law_staff_forge"],
+    expectedSpecializationId: "alchemy_hongmeng_star_lotus_crown",
+  },
+] as const;
+
 describe("workshop recipe data", () => {
   it("adds representative high-tier alchemy and smithing recipes with planning metadata", () => {
     HIGH_TIER_RECIPE_CASES.forEach((testCase) => {
@@ -147,6 +168,29 @@ describe("workshop recipe data", () => {
       });
   });
 
+  it("maps each v3 sect world memory to high-tier recipe source cues and material sinks", () => {
+    V3_ROUTE_MEMORY_CASES.forEach((testCase) => {
+      const matchingRecipes = Object.values(WORKSHOP_RECIPES).filter((recipe) =>
+        recipe.routeTags?.includes(testCase.memoryTag)
+      );
+
+      expect(
+        matchingRecipes.map((recipe) => recipe.id),
+        `${testCase.memoryTag} should publish high-tier Workshop recipe branches`
+      ).toEqual(expect.arrayContaining([...testCase.expectedRecipes]));
+
+      matchingRecipes.forEach((recipe) => {
+        expect(recipe.tier, `${recipe.id} tier`).toBe("highRealm");
+        expect(recipe.sourceHint, `${recipe.id} source hint`).toContain(testCase.memoryTag);
+        expect(recipe.qualityHint, `${recipe.id} quality hint`).toMatch(/品質|仙品|副收益|熟練/);
+        expect(
+          recipe.ingredients.some((ingredient) => ingredient.itemId === testCase.materialId),
+          `${recipe.id} should consume ${testCase.materialId}`
+        ).toBe(true);
+      });
+    });
+  });
+
   it("publishes alchemy and smithing specialization trees with prerequisites and branch conflicts", () => {
     expect(WORKSHOP_SPECIALIZATION_TREE.alchemy.map((node) => node.id)).toEqual([
       "alchemy_inner_fire_foundation",
@@ -205,6 +249,27 @@ describe("workshop recipe data", () => {
     expect(WORKSHOP_SPECIALIZATIONS.smithing_starfire_starsteel_crown.effect?.outputCue).toContain(
       "路線材料"
     );
+  });
+
+  it("publishes readable specialization cues for v3 route memory sources", () => {
+    V3_ROUTE_MEMORY_CASES.forEach((testCase) => {
+      const specialization = WORKSHOP_SPECIALIZATIONS[testCase.expectedSpecializationId];
+      const readableCue = [
+        specialization.description,
+        specialization.effect?.qualityCue,
+        specialization.effect?.outputCue,
+      ].join(" ");
+
+      expect(readableCue, `${specialization.id} should mention ${testCase.memoryTag}`).toContain(
+        testCase.memoryTag
+      );
+      expect(readableCue, `${specialization.id} should mention ${testCase.materialId}`).toContain(
+        testCase.materialId
+      );
+      expect(readableCue, `${specialization.id} should preserve route material sink`).toContain(
+        "材料"
+      );
+    });
   });
 
   it("derives mastery milestone statuses from existing mastery without new state", () => {

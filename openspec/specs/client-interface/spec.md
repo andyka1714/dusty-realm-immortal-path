@@ -141,6 +141,11 @@ Workshop 介面必須 (MUST) 讓玩家看懂專精解鎖條件、目前可否切
 - **THEN** 介面必須提供來源、route 或 encounter cue
 - **AND** 玩家必須能判斷該材料與哪條世界 / 宗門 / 奇遇路線相關
 
+#### Scenario: v3 route source 顯示於 Workshop recipe 與專精 cue
+- **WHEN** 玩家查看承接 `sect:*:world-chapter-03` 的 high-tier recipe 或 specialization leaf
+- **THEN** Workshop UI 必須顯示 route tag、v3 route source、world chapter cue 與 specialization effect cue
+- **AND** 若玩家尚未具備對應 route memory 或材料，介面必須顯示可理解的缺口原因
+
 ### Requirement: GameShell 內正式功能入口
 系統必須 (MUST) 在正式 `GameShell` 內承接目前已落地的主要功能面板，而不是只保留單一 `Adventure` 畫面。
 
@@ -370,6 +375,11 @@ Workshop 介面必須 (MUST) 顯示 mastery milestone、specialization leaf、ro
 - **WHEN** 玩家查看 v2 高階 recipe
 - **THEN** 介面必須顯示 routeTags、sourceHint、mastery milestone 或 specialization effect cue
 - **AND** 不得只用 disabled button 或純文字成本隱藏核心差異
+
+#### Scenario: Recipe card 顯示 v3 route memory cue
+- **WHEN** 玩家查看承接三宗 v3 world chapter 的 high-tier recipe
+- **THEN** recipe card 必須把人讀 sourceHint 與 machine-readable `sect:*:world-chapter-03` route source 分開呈現
+- **AND** route-specific material sink、specialization impact 與鎖定原因仍必須同卡可讀
 
 ### Requirement: 輪迴 build preview v2
 輪迴大殿介面必須 (MUST) 顯示下一世 build identity、主要限制與預期收益。

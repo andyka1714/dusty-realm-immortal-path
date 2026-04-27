@@ -208,3 +208,21 @@ Change id: `expand-sect-world-late-content-v3`
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration。
 - 不新增第二套 quest engine 或對話樹 runtime。
+
+## 10. Workshop route source 與 specialization v3 收口記錄
+
+Change id: `update-workshop-route-source-specialization-v3`
+
+本輪把三宗 v3 world memory tag 回接到 Workshop UI 與規格真相：
+
+- high-tier recipe card 會顯示 `route tag`、`v3 route source：sect:*:world-chapter-03` 與 `劫雲荒原 / 接引仙殿` world chapter cue。
+- specialization panel 會顯示 leaf 對應的 `專精路線來源` 與品質 / 副收益 cue，讓 `星蓮鴻蒙冠火`、`萬獸生息`、`星鋼冠火` 不只像一般成本折扣。
+- UI 仍保留原本可讀 sourceHint，不把 machine-readable `sect:*` tag 混進人讀材料說明的開頭。
+- recipe material sink 維持原配方；specialization 可以影響靈石、熟練、品質或副收益 cue，但不跳過 `sword_path_starsteel / beast_path_bloodbone / mystic_path_starlotus`。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；v3 Workshop route source 只讀既有 recipe metadata、route material、`soul.worldMemoryTags` 與 Workshop mastery / specialization tree state。
+- 完成後以獨立 archive commit 收口；若 base specs 已在 implementation commit 回寫，archive 使用 `--skip-specs`。

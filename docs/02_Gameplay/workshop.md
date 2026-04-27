@@ -1,6 +1,6 @@
 # 洞府百業 (Workshop)
 
-目前 `聚靈陣 / 煉丹 / 煉器` 三個卡片已統一吃 `GameSection` 的內層框體語言，不再各自維護獨立 card chrome。`add-workshop-and-event-loops` 第一批也已把 `煉丹 / 煉器` 從 placeholder 推進成正式可操作 slice，`update-high-tier-workshop-depth` 已把第一批高階 recipe、材料 sink、熟練度與 UI cue 接進主流程，`update-workshop-specialization-expansion` 已補上第二批中高階 / 終盤 recipe 與第一批專精效果，`expand-workshop-source-specialization-unlocks` 已把材料來源與專精解鎖 / 切換成本正式化，`update-workshop-specialization-tree` 進一步把專精從單一 slot 升級成可重置的分支樹，而 `update-workshop-economy-specialization-v2` 則把 mastery milestone、二層 leaf 與終盤 recipe sink 接成第二輪百業深度。
+目前 `聚靈陣 / 煉丹 / 煉器` 三個卡片已統一吃 `GameSection` 的內層框體語言，不再各自維護獨立 card chrome。`add-workshop-and-event-loops` 第一批也已把 `煉丹 / 煉器` 從 placeholder 推進成正式可操作 slice，`update-high-tier-workshop-depth` 已把第一批高階 recipe、材料 sink、熟練度與 UI cue 接進主流程，`update-workshop-specialization-expansion` 已補上第二批中高階 / 終盤 recipe 與第一批專精效果，`expand-workshop-source-specialization-unlocks` 已把材料來源與專精解鎖 / 切換成本正式化，`update-workshop-specialization-tree` 進一步把專精從單一 slot 升級成可重置的分支樹，`update-workshop-economy-specialization-v2` 則把 mastery milestone、二層 leaf 與終盤 recipe sink 接成第二輪百業深度。`update-workshop-route-source-specialization-v3` 再把三宗 v3 world memory tag 接到 high-tier recipe route source、world chapter cue 與 specialization leaf cue。
 
 ## 1. 聚靈陣 (Spirit Array)
 - **功能**: 提升基礎修煉速率。
@@ -21,6 +21,7 @@
 - `鴻蒙凝丹`: 需先解鎖 `內火定基` 並達 `丹道熟練 24`。效果會降低高階丹方靈石火耗並提高丹道熟練，但不減免 route-specific 材料。
 - `萬獸生息`: 需先解鎖 `內火定基`、達 `丹道熟練 30` 與 `渡劫` 境界。偏向品質 / 副收益 cue 與更高熟練收益。
 - `星蓮鴻蒙冠火`: 需先解鎖 `鴻蒙凝丹`、達 `丹道熟練 72` 與 `仙人` 境界。提供終盤丹方熟練、品質與副收益 cue，但不減免 route-specific 材料。
+- v3 route source: 高階丹方會顯示對應 `sect:beast:world-chapter-03` 或 `sect:mystic:world-chapter-03`，並把 `劫雲荒原 / 接引仙殿` 的世界章節 cue 與 `萬獸山莊 / 縹緲仙宮` route tag 分開呈現。
   - `鴻蒙凝丹` 與 `萬獸生息` 互斥，切換到另一分支前必須先重置丹道專精樹。
 - **目前定位**: 低階丹方提供修為補給，高階丹方承接宗門 / 世界後段材料，讓丹藥乘區不只停在 audit table。
 
@@ -38,6 +39,7 @@
 - `星火鍛胚`: 需先解鎖 `爐心定鍛` 並達 `器道熟練 30`。效果會降低高階器方靈石火耗並提高器道熟練，但不減免 route-specific 材料。
 - `魂鋼銘紋`: 需先解鎖 `爐心定鍛`、達 `器道熟練 36` 與 `仙人` 境界。偏向品質 / 副收益 cue 與更高熟練收益。
 - `星鋼冠火`: 需先解鎖 `星火鍛胚`、達 `器道熟練 76` 與 `仙人` 境界。提供終盤器方熟練、品質與副收益 cue，但不折抵 route-specific 材料。
+- v3 route source: 終盤器方會顯示 `sect:sword:world-chapter-03`、`sect:beast:world-chapter-03` 或 `sect:mystic:world-chapter-03`，讓玩家能從 recipe card 讀出凌霄劍星鋼、萬獸血骨殘材與縹緲星魂蓮分別來自哪條 v3 宗門世界章節。
   - `星火鍛胚` 與 `魂鋼銘紋` 互斥，切換到另一分支前必須先重置器道專精樹。
 - **目前定位**: 低階器方驗證材料 -> 裝備實例，高階器方開始承接 route-specific 材料與終盤 build 裝備追求。
 
@@ -63,11 +65,14 @@ Workshop state 已正式記錄：
 - leaf effect，包括適用 tier、熟練收益、品質 cue 與副收益 cue
 - `丹道 / 器道` 熟練度收益與專精後的調整值
 - route-specific 材料來源 cue，對應到實際 encounter 的 route / category
+- v3 route source cue，包含 `sect:*:world-chapter-03`、route tag、`劫雲荒原 / 接引仙殿` world chapter cue 與 specialization effect cue
 - 境界、百業等級、靈石或材料不足時的鎖定原因
 
 舊存檔若缺少熟練度或專精樹欄位，migration 會補上安全預設值。若舊存檔仍只有扁平 `specializationByDiscipline`，合法舊專精會映射成對應專精樹節點並自動補上必要前置節點；不合法或未知值不會成為 active tree node。
 
 `update-workshop-economy-specialization-v2` 沒有新增 persisted state。`WORKSHOP_MASTERY_MILESTONES` 只從既有 `masteryByDiscipline` 推導狀態，二層 leaf 仍寫在 `specializationTreeByDiscipline / specializationByDiscipline` 既有欄位，所以舊 migration 規則可直接承接。
+
+`update-workshop-route-source-specialization-v3` 也沒有新增 persisted state。v3 route source 只讀 recipe metadata、既有 route material、既有 `soul.worldMemoryTags` 與既有 Workshop mastery / specialization tree state；UI 只把這些來源拆成可讀 cue，不新增 `current.workshop`、`soul` 或 LocalStorage envelope 欄位，因此不需要 migration。
 
 ## 5. 事件與奇遇承接
 

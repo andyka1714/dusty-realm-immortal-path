@@ -38,6 +38,52 @@ const getDisciplineMasteryLabel = (discipline: WorkshopDiscipline) =>
 const getRecipeTierLabel = (tier?: WorkshopRecipe["tier"]) =>
   tier === "highRealm" ? "高階配方" : tier === "advanced" ? "進階配方" : "全部配方";
 
+const V3_ROUTE_SOURCE_CUES = [
+  {
+    itemId: "sword_path_starsteel",
+    routeTag: "凌霄劍宗",
+    routeMemoryTag: "sect:sword:world-chapter-03",
+    worldChapterCue: "劫雲荒原 / 接引仙殿 · 凌霄劍宗 v3 鑄劍殘核",
+  },
+  {
+    itemId: "beast_path_bloodbone",
+    routeTag: "萬獸山莊",
+    routeMemoryTag: "sect:beast:world-chapter-03",
+    worldChapterCue: "劫雲荒原 / 接引仙殿 · 萬獸山莊 v3 血骨試煉",
+  },
+  {
+    itemId: "mystic_path_starlotus",
+    routeTag: "縹緲仙宮",
+    routeMemoryTag: "sect:mystic:world-chapter-03",
+    worldChapterCue: "劫雲荒原 / 接引仙殿 · 縹緲仙宮 v3 星魂蓮詔",
+  },
+] as const;
+
+const SPECIALIZATION_V3_ROUTE_SOURCE_CUES: Record<string, typeof V3_ROUTE_SOURCE_CUES[number]> = {
+  alchemy_hongmeng_star_lotus_crown: V3_ROUTE_SOURCE_CUES[2],
+  alchemy_lifebloom_resonance: V3_ROUTE_SOURCE_CUES[1],
+  smithing_starfire_starsteel_crown: V3_ROUTE_SOURCE_CUES[0],
+  smithing_soulsteel_inscription: V3_ROUTE_SOURCE_CUES[0],
+};
+
+const getRecipeV3RouteSourceCues = (recipe: WorkshopRecipe) => {
+  const ingredientItemIds = new Set(recipe.ingredients.map((ingredient) => ingredient.itemId));
+  const routeTags = new Set(recipe.routeTags ?? []);
+
+  return V3_ROUTE_SOURCE_CUES.filter(
+    (cue) => ingredientItemIds.has(cue.itemId) || routeTags.has(cue.routeTag)
+  );
+};
+
+const getReadableSourceHint = (sourceHint?: string) =>
+  sourceHint?.replace(/^sect:[a-z]+:world-chapter-\d+\s+追溯/, "");
+
+const getReadableV3EffectCue = (cue?: string) =>
+  cue
+    ?.replace(/^sect:mystic:world-chapter-\d+\s+的\s+mystic_path_starlotus\s*/, "星魂蓮")
+    .replace(/^sect:sword:world-chapter-\d+\s+的\s+sword_path_starsteel\s*/, "星鋼")
+    .replace(/^sect:beast:world-chapter-\d+\s+讓\s+beast_path_bloodbone\s*/, "萬獸血骨");
+
 const getSpecializationEffectRows = (node: WorkshopSpecializationNode) => {
   const effect = node.effect;
 
@@ -45,13 +91,20 @@ const getSpecializationEffectRows = (node: WorkshopSpecializationNode) => {
     return [];
   }
 
+  const v3RouteSourceCue = SPECIALIZATION_V3_ROUTE_SOURCE_CUES[node.id];
+  const readableQualityCue = getReadableV3EffectCue(effect.qualityCue);
+
   return [
+    v3RouteSourceCue
+      ? `專精路線來源：${v3RouteSourceCue.routeMemoryTag}`
+      : null,
     `專精效果：${getRecipeTierLabel(effect.appliesToTier)}`,
     effect.spiritStoneCostMultiplier !== undefined
       ? `靈石消耗 x${effect.spiritStoneCostMultiplier}`
       : null,
     effect.masteryYieldBonus ? `熟練收益 +${effect.masteryYieldBonus}` : null,
-    effect.qualityCue ? `品質：${effect.qualityCue}` : null,
+    readableQualityCue ? `品質：${readableQualityCue}` : null,
+    readableQualityCue ? `專精效果 cue：${readableQualityCue}` : null,
     effect.outputCue ? `副收益：${effect.outputCue}` : null,
   ].filter((row): row is string => Boolean(row));
 };
@@ -270,6 +323,8 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
       .map((output) => ITEMS[output.itemId]?.name ?? output.itemId)
       .join("、");
     const baseMasteryYield = recipe.masteryYield ?? 1;
+    const readableSourceHint = getReadableSourceHint(recipe.sourceHint);
+    const v3RouteSourceRows = getRecipeV3RouteSourceCues(recipe);
     const materialSourceRows = recipe.ingredients.flatMap((ingredient) => {
       const item = ITEMS[ingredient.itemId];
       const sourceCues = getEncounterMaterialSourceCues(ingredient.itemId);
@@ -323,7 +378,7 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
                     key={tag}
                     className="rounded border border-stone-700 bg-stone-900 px-2 py-0.5 text-[10px] text-stone-300"
                   >
-                    {tag}
+                    route tag：{tag}
                   </span>
                 ))}
               </div>
@@ -355,10 +410,16 @@ export const Workshop: React.FC<WorkshopProps> = ({ embedded = false }) => {
             <div className="mt-2 grid gap-1 text-xs text-stone-500">
               {outputLabels && <div>產出：{outputLabels}</div>}
               {recipe.qualityHint && <div>品質：{recipe.qualityHint}</div>}
-              {recipe.sourceHint && <div>來源：{recipe.sourceHint}</div>}
-              {recipe.tier === "highRealm" && recipe.sourceHint && (
-                <div>來源線索：{recipe.sourceHint}</div>
+              {readableSourceHint && <div>來源：{readableSourceHint}</div>}
+              {recipe.tier === "highRealm" && readableSourceHint && (
+                <div>來源線索：{readableSourceHint}</div>
               )}
+              {v3RouteSourceRows.map((cue) => (
+                <React.Fragment key={cue.routeMemoryTag}>
+                  <div>v3 route source：{cue.routeMemoryTag}</div>
+                  <div>世界章節：{cue.worldChapterCue}</div>
+                </React.Fragment>
+              ))}
               {materialSourceRows.map((source) => (
                 <div key={source.itemId}>
                   材料來源：{source.itemName}：{source.sourceText}

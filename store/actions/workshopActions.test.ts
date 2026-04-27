@@ -405,6 +405,55 @@ describe("workshop actions", () => {
     expect(state.logs.logs[0]?.message).toContain("專精：星鋼冠火");
   });
 
+  it("does not let v3 route specialization bypass a missing route-specific material sink", () => {
+    const store = createTestStore({
+      character: createCharacterAtRealm(MajorRealm.Immortal, 2200),
+      workshop: {
+        ...workshopReducer(undefined, { type: "@@INIT" }),
+        blacksmithLevel: 8,
+        unlockedRecipes: ["qi_pill", "novice_sword_reforge", "starsteel_bloodbone_sword_forge"],
+        masteryByDiscipline: {
+          alchemy: 0,
+          smithing: 76,
+        },
+        specializationTreeByDiscipline: {
+          ...createInitialWorkshopSpecializationTreeState(),
+          smithing: {
+            unlockedNodeIds: [
+              "smithing_core_temper_foundation",
+              "smithing_starfire_tempering",
+              "smithing_starfire_starsteel_crown",
+            ],
+            activeNodeId: "smithing_starfire_starsteel_crown",
+            activeBranchId: "smithing_starfire",
+          },
+        },
+        specializationByDiscipline: {
+          alchemy: null,
+          smithing: "smithing_starfire_starsteel_crown",
+        },
+      },
+    });
+    store.dispatch(addItem({ itemId: "sword_path_starsteel", count: 3 }));
+    store.dispatch(addItem({ itemId: "mystic_path_starlotus", count: 1 }));
+    store.dispatch(addItem({ itemId: "iron_ore", count: 8 }));
+
+    store.dispatch(craftWorkshopRecipe("starsteel_bloodbone_sword_forge"));
+
+    const state = store.getState();
+
+    expect(
+      state.inventory.items.find((slot) => slot.itemId === "origin_sword" && slot.instanceId)
+    ).toBeUndefined();
+    expect(state.inventory.items.find((slot) => slot.itemId === "sword_path_starsteel")?.count).toBe(3);
+    expect(state.inventory.items.find((slot) => slot.itemId === "mystic_path_starlotus")?.count).toBe(1);
+    expect(state.inventory.items.find((slot) => slot.itemId === "iron_ore")?.count).toBe(8);
+    expect(state.workshop.masteryByDiscipline.smithing).toBe(76);
+    expect(state.character.spiritStones).toBe(2200);
+    expect(state.logs.logs[0]?.message).toContain("材料不足");
+    expect(state.logs.logs[0]?.message).toContain("beast_path_bloodbone");
+  });
+
   it("blocks mutually exclusive specialization branches until reset", () => {
     const store = createTestStore({
       character: createCharacterAtRealm(MajorRealm.Tribulation, 1000),

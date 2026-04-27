@@ -161,4 +161,76 @@ describe("Workshop crafting UI", () => {
     expect(markup).toContain("材料 sink 維持原配方");
     expect(markup).not.toContain("pixel-sprite");
   });
+
+  it("renders v3 route source cues on high-tier recipes and specialization leaves", () => {
+    const character = {
+      ...characterReducer(
+        undefined,
+        initializeCharacter({ name: "韓立", gender: Gender.Male })
+      ),
+      majorRealm: MajorRealm.Immortal,
+      spiritStones: 9999,
+    };
+    const workshop = {
+      ...workshopReducer(undefined, { type: "@@INIT" }),
+      alchemyLevel: 8,
+      blacksmithLevel: 8,
+      unlockedRecipes: [
+        "star_lotus_hongmeng_pill",
+        "starsteel_bloodbone_sword_forge",
+        "great_dao_body_forge",
+      ],
+      masteryByDiscipline: {
+        alchemy: 88,
+        smithing: 92,
+      },
+      specializationTreeByDiscipline: {
+        alchemy: {
+          unlockedNodeIds: [
+            "alchemy_inner_fire_foundation",
+            "alchemy_hongmeng_condenser",
+            "alchemy_hongmeng_star_lotus_crown",
+          ],
+          activeNodeId: "alchemy_hongmeng_star_lotus_crown",
+          activeBranchId: "alchemy_hongmeng",
+        },
+        smithing: {
+          unlockedNodeIds: [
+            "smithing_core_temper_foundation",
+            "smithing_starfire_tempering",
+            "smithing_starfire_starsteel_crown",
+          ],
+          activeNodeId: "smithing_starfire_starsteel_crown",
+          activeBranchId: "smithing_starfire",
+        },
+      },
+      specializationByDiscipline: {
+        alchemy: "alchemy_hongmeng_star_lotus_crown",
+        smithing: "smithing_starfire_starsteel_crown",
+      },
+    };
+    const store = createWorkshopStore({ character, workshop });
+
+    const markup = renderToStaticMarkup(
+      <Provider store={store}>
+        <Workshop />
+      </Provider>
+    );
+
+    expect(markup).toContain("route tag：凌霄劍宗");
+    expect(markup).toContain("route tag：萬獸山莊");
+    expect(markup).toContain("route tag：縹緲仙宮");
+    expect(markup).toContain("v3 route source：sect:sword:world-chapter-03");
+    expect(markup).toContain("v3 route source：sect:beast:world-chapter-03");
+    expect(markup).toContain("v3 route source：sect:mystic:world-chapter-03");
+    expect(markup).toContain("世界章節：劫雲荒原 / 接引仙殿 · 凌霄劍宗 v3 鑄劍殘核");
+    expect(markup).toContain("世界章節：劫雲荒原 / 接引仙殿 · 萬獸山莊 v3 血骨試煉");
+    expect(markup).toContain("世界章節：劫雲荒原 / 接引仙殿 · 縹緲仙宮 v3 星魂蓮詔");
+    expect(markup).toContain("專精路線來源：sect:mystic:world-chapter-03");
+    expect(markup).toContain("專精路線來源：sect:sword:world-chapter-03");
+    expect(markup).toContain("專精效果 cue：星魂蓮冠火穩住終盤丹品，但不替代路線材料。");
+    expect(markup).toContain("專精效果 cue：星鋼冠火讓終盤器胚火候更穩。");
+    expect(markup).toContain("材料 sink 維持原配方");
+    expect(markup).not.toContain("pixel-sprite");
+  });
 });

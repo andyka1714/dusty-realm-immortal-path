@@ -248,6 +248,12 @@
 - **THEN** 專精可以影響靈石成本、熟練收益或 UI cue
 - **AND** 不得減免或跳過 recipe 指定的 route-specific 材料消耗
 
+#### Scenario: v3 route chapter 記憶供應高階百業分支
+- **WHEN** 玩家完成 `sect:sword:world-chapter-03`、`sect:beast:world-chapter-03` 或 `sect:mystic:world-chapter-03`
+- **THEN** Workshop 必須能以 high-tier recipe branch、source hint、route tag 或 specialization cue 承接該 route memory
+- **AND** 對應 recipe 仍必須消耗原本的 `sword_path_starsteel / beast_path_bloodbone / mystic_path_starlotus` route-specific material sink
+- **AND** 不得因承接 v3 route memory 而新增第二套 Workshop persisted state
+
 ### Requirement: 退場技能正式退出玩家成長主線
 系統必須 (MUST) 讓 `transition / legacy` 技能退出正式玩家成長主線，只保留 formal core 技能作為常規學習與顯示對象。
 
