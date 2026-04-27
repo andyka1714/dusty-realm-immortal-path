@@ -347,3 +347,22 @@ Change id: `establish-content-authoring-audit-tools`
 - 不新增 persisted schema。
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；authoring audit 是 deterministic test/helper，只讀現有 catalog。
+
+## 18. Endgame loop v4 收口記錄
+
+Change id: `expand-endgame-loop-v4`
+
+本輪把 `仙帝` 端的 encounter、Workshop、輪迴與主動收束語意接成同一條可追蹤終盤 loop：
+
+- 新增三宗 v4 終盤收束 encounter：`歸墟斬天終局 / 歸墟帝血終局 / 歸墟星詔終局`。
+- v4 encounter 需要對應 `sect:*:world-chapter-03` 與已解過的仙帝 route event，完成後寫入 `sect:*:endgame-loop-v4` world memory tag。
+- 新增 Workshop 終盤 convergence sink `歸墟三道帝冕`，同時消耗 `凌霄劍星鋼 / 萬獸血骨殘材 / 縹緲星魂蓮`，並把三條 `endgame-loop-v4` route tag 與 sourceHint 顯示在 recipe / source tracing。
+- 新增三個 v4 輪迴魂印：`斬天輪迴劍印 / 帝血輪迴骨印 / 星詔輪迴命盤`，以既有 `soul.worldMemoryTags` 解鎖，不新增第二套 unlock state。
+- `主動坐化` 入口與 life review 會顯示 `本世收束 / 飛升/結局回顧 / 主動重開下一世`，讓玩家分辨主動完成本世與死亡懲罰式輪迴。
+- `soulSlice` 的魂印選取改成讀 catalog lane，避免新增 v4 魂印時還要再硬編碼 id。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；v4 只新增 encounter / recipe / reincarnation catalog entry 與 UI derived copy，記憶沿用 `resolvedEventIds`、`soul.worldMemoryTags`、既有 inventory / Workshop state 與 rebirth config。

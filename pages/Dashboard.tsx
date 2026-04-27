@@ -598,9 +598,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                       canVoluntarilyReincarnate ? "text-violet-400" : "text-stone-600"
                     }
                   />
+                  <span className="text-xs font-semibold tracking-[0.18em] text-violet-300">
+                    本世收束
+                  </span>
                   <span className="font-bold tracking-widest">主動坐化</span>
-                  <span className="text-[10px] text-stone-500 font-normal">
-                    {canVoluntarilyReincarnate ? "結算本世並重開下一輪" : "築基後開放"}
+                  <span className="max-w-[9rem] text-center text-[10px] font-normal leading-4 text-stone-500">
+                    {canVoluntarilyReincarnate
+                      ? "飛升/結局回顧後主動重開"
+                      : "築基後開放"}
                   </span>
                 </Button>
                 {!canVoluntarilyReincarnate && (

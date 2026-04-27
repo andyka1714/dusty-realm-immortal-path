@@ -78,6 +78,14 @@ const HIGH_TIER_RECIPE_CASES = [
     expectedRouteTags: ["仙帝", "凌霄劍宗", "萬獸山莊"],
     expectedSourceHint: "凌霄劍星鋼",
   },
+  {
+    id: "guixu_three_paths_convergence_forge",
+    discipline: "smithing",
+    outputItemId: "emperor_crown",
+    expectedMinRealm: MajorRealm.ImmortalEmperor,
+    expectedRouteTags: ["仙帝", "凌霄劍宗", "萬獸山莊", "縹緲仙宮"],
+    expectedSourceHint: "sect:sword:endgame-loop-v4",
+  },
 ] as const;
 
 const ROUTE_SPECIFIC_MATERIAL_IDS = new Set([
@@ -129,9 +137,9 @@ describe("workshop recipe data", () => {
       (recipe) => recipe.tier === "highRealm"
     );
 
-    expect(highTierRecipes).toHaveLength(8);
+    expect(highTierRecipes).toHaveLength(9);
     expect(highTierRecipes.filter((recipe) => recipe.discipline === "alchemy")).toHaveLength(4);
-    expect(highTierRecipes.filter((recipe) => recipe.discipline === "smithing")).toHaveLength(4);
+    expect(highTierRecipes.filter((recipe) => recipe.discipline === "smithing")).toHaveLength(5);
   });
 
   it("keeps all high-tier recipe ingredients and outputs anchored to real items", () => {
@@ -166,6 +174,35 @@ describe("workshop recipe data", () => {
           `${recipe.id} should consume at least one route-specific material`
         ).toBe(true);
       });
+  });
+
+  it("adds a v4 endgame convergence sink that consumes all three route materials", () => {
+    const recipe = WORKSHOP_RECIPES.guixu_three_paths_convergence_forge;
+
+    expect(recipe).toMatchObject({
+      discipline: "smithing",
+      tier: "highRealm",
+      minRealm: MajorRealm.ImmortalEmperor,
+      requiredLevel: 8,
+      outputs: [{ itemId: "emperor_crown", count: 1 }],
+    });
+    expect(recipe.routeTags).toEqual(
+      expect.arrayContaining([
+        "sect:sword:endgame-loop-v4",
+        "sect:beast:endgame-loop-v4",
+        "sect:mystic:endgame-loop-v4",
+      ])
+    );
+    expect(recipe.sourceHint).toContain("sect:sword:endgame-loop-v4");
+    expect(recipe.sourceHint).toContain("sect:beast:endgame-loop-v4");
+    expect(recipe.sourceHint).toContain("sect:mystic:endgame-loop-v4");
+    expect(recipe.ingredients).toEqual(
+      expect.arrayContaining([
+        { itemId: "sword_path_starsteel", count: 2 },
+        { itemId: "beast_path_bloodbone", count: 2 },
+        { itemId: "mystic_path_starlotus", count: 2 },
+      ])
+    );
   });
 
   it("maps each v3 sect world memory to high-tier recipe source cues and material sinks", () => {

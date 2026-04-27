@@ -10,6 +10,7 @@ import {
 import {
   getRebirthConfigCost,
   getAvailableReincarnationPerks,
+  getReincarnationSoulSealById,
   REINCARNATION_PLANNER_VERSION,
   sanitizeRebirthConfig,
 } from "../../utils/reincarnation";
@@ -105,14 +106,10 @@ const soulSlice = createSlice({
       if (state.flowStep !== "hall" || !state.pendingLifeReview) return;
 
       const selectedSeal = action.payload;
-      const selectedBuildIdentity =
-        selectedSeal === "seal_sword_edge"
-          ? "sword"
-          : selectedSeal === "seal_body_forge"
-            ? "body"
-            : selectedSeal === "seal_mage_lantern"
-              ? "mage"
-              : state.rebirthConfig.selectedBuildIdentity;
+      const selectedBuildIdentity = selectedSeal
+        ? getReincarnationSoulSealById(selectedSeal)?.lane ??
+          state.rebirthConfig.selectedBuildIdentity
+        : state.rebirthConfig.selectedBuildIdentity;
 
       state.rebirthConfig = sanitizeRebirthConfig({
         config: {

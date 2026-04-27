@@ -233,4 +233,42 @@ describe("Workshop crafting UI", () => {
     expect(markup).toContain("材料 sink 維持原配方");
     expect(markup).not.toContain("pixel-sprite");
   });
+
+  it("renders v4 endgame convergence recipe cues without adding persisted unlock state", () => {
+    const character = {
+      ...characterReducer(
+        undefined,
+        initializeCharacter({ name: "韓立", gender: Gender.Male })
+      ),
+      majorRealm: MajorRealm.ImmortalEmperor,
+      spiritStones: 9999,
+    };
+    const workshop = {
+      ...workshopReducer(undefined, { type: "@@INIT" }),
+      blacksmithLevel: 8,
+      unlockedRecipes: ["guixu_three_paths_convergence_forge"],
+      masteryByDiscipline: {
+        alchemy: 0,
+        smithing: 100,
+      },
+    };
+    const store = createWorkshopStore({ character, workshop });
+
+    const markup = renderToStaticMarkup(
+      <Provider store={store}>
+        <Workshop />
+      </Provider>
+    );
+
+    expect(markup).toContain("歸墟三道帝冕");
+    expect(markup).toContain("route tag：sect:sword:endgame-loop-v4");
+    expect(markup).toContain("route tag：sect:beast:endgame-loop-v4");
+    expect(markup).toContain("route tag：sect:mystic:endgame-loop-v4");
+    expect(markup).toContain("來源：sect:sword:endgame-loop-v4");
+    expect(markup).toContain("凌霄劍星鋼");
+    expect(markup).toContain("萬獸血骨殘材");
+    expect(markup).toContain("縹緲星魂蓮");
+    expect(markup).toContain("器道熟練 +48");
+    expect(markup).not.toContain("pixel-sprite");
+  });
 });

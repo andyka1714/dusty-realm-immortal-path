@@ -11,6 +11,7 @@ import {
 import { REALM_NAMES, SPIRIT_ROOT_DETAILS } from "../../constants";
 import {
   LifeReviewSummary,
+  MajorRealm,
   ReincarnationBuildIdentity,
   ReincarnationPerk,
   ReincarnationSoulSeal,
@@ -123,6 +124,18 @@ const getSoulSealBenefitLabel = (seal: ReincarnationSoulSeal) => {
   return bonuses.length > 0 ? `預期收益：${bonuses.join("、")}` : undefined;
 };
 
+const getLifeReviewClosureCue = (summary: LifeReviewSummary) => {
+  if (summary.cause !== "voluntary") {
+    return null;
+  }
+
+  if (summary.highestRealm >= MajorRealm.ImmortalEmperor) {
+    return "本世收束：飛升/結局回顧後，主動重開下一世。";
+  }
+
+  return "本世收束：保留本世功德，主動重開下一世。";
+};
+
 interface LifeReviewScreenProps {
   summary: LifeReviewSummary;
   totalMerit: number;
@@ -135,7 +148,10 @@ const LifeReviewScreen: React.FC<LifeReviewScreenProps> = ({
   totalMerit,
   lifetimeStats,
   onEnterHall,
-}) => (
+}) => {
+  const closureCue = getLifeReviewClosureCue(summary);
+
+  return (
   <div className={SCREEN_SHELL_CLASS}>
     <div className={PANEL_SHELL_CLASS}>
       <div className="space-y-4 sm:space-y-5">
@@ -161,6 +177,11 @@ const LifeReviewScreen: React.FC<LifeReviewScreenProps> = ({
             </span>
             。
           </p>
+          {closureCue && (
+            <p className="mt-3 rounded-xl border border-violet-900/40 bg-violet-950/30 px-3 py-2 text-sm leading-6 text-violet-100">
+              {closureCue}
+            </p>
+          )}
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <div className="rounded-xl border border-stone-800 bg-stone-950/80 p-4">
               <div className="text-xs text-stone-500">境界功德</div>
@@ -246,7 +267,8 @@ const LifeReviewScreen: React.FC<LifeReviewScreenProps> = ({
       </div>
     </div>
   </div>
-);
+  );
+};
 
 interface ReincarnationHallScreenProps {
   summary: LifeReviewSummary;

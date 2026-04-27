@@ -301,4 +301,31 @@ describe("soulSlice", () => {
       "seal_sword_immortal_oath"
     );
   });
+
+  it("selects v4 endgame soul seals by their catalog lane instead of hardcoded ids", () => {
+    const reviewed = soulReducer(
+      undefined,
+      startLifeReview({
+        cause: "voluntary",
+        ageYears: 3600,
+        highestRealm: MajorRealm.ImmortalEmperor,
+        realmMerit: 100000000,
+        ageMerit: 1800,
+        totalMeritGained: 100001800,
+        eligibleHeirlooms: [],
+      })
+    );
+    const hall = soulReducer(reviewed, enterReincarnationHall());
+    const withMemory = soulReducer(
+      hall,
+      addWorldMemoryTags(["sect:mystic:endgame-loop-v4"])
+    );
+    const sealed = soulReducer(
+      withMemory,
+      setRebirthSoulSeal("seal_mage_endgame_v4")
+    );
+
+    expect(sealed.rebirthConfig.selectedBuildIdentity).toBe("mage");
+    expect(sealed.rebirthConfig.selectedSealId).toBe("seal_mage_endgame_v4");
+  });
 });

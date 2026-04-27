@@ -138,6 +138,14 @@ Workshop state 已正式記錄：
 - pending panel 必須顯示 `routeLabel / categoryLabel / chainLabel / memoryCue`，選項顯示穩定收益、材料來源或高風險收益 cue。
 - 本 change 不新增 `current.workshop`、`current.encounter`、`soul` 或 LocalStorage envelope 欄位；只讀既有 `soul.worldMemoryTags` 與 resolved event state，因此不需要 migration 或 hydrate sanitize。
 
+`expand-endgame-loop-v4` 把這條線推到仙帝端收束：
+
+- `歸墟斬天終局 / 歸墟帝血終局 / 歸墟星詔終局` 會讀取對應 `sect:*:world-chapter-03` 與仙帝 route event resolution，並寫入 `sect:*:endgame-loop-v4`。
+- `歸墟三道帝冕` 是 v4 終盤 convergence recipe，消耗三種 route-specific material，輸出 `帝冠`，讓三宗終盤路線在 Workshop 形成同一個 high-tier sink。
+- 輪迴大殿新增 `斬天輪迴劍印 / 帝血輪迴骨印 / 星詔輪迴命盤`，只讀 `soul.worldMemoryTags`，不新增 persisted unlock state。
+- `主動坐化` 現在以 `本世收束 / 飛升/結局回顧 / 主動重開下一世` 呈現，語意上和戰死、壽盡後輪迴分開。
+- 本 change 不新增 `current.workshop`、`current.encounter`、`soul` 或 LocalStorage envelope 欄位；只新增 catalog data 與 derived UI copy，因此不需要 migration。
+
 ## 6. 後續可擴充部分
 
 目前第二批 recipe、第一批專精效果、材料來源 cue、專精解鎖 / 切換成本與可重置分支樹都已完成，後續若要再擴充，重點會是：

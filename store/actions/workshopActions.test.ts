@@ -535,4 +535,36 @@ describe("workshop actions", () => {
     expect(state.character.spiritStones).toBe(640);
     expect(state.logs.logs[0]?.message).toContain("已重置丹道專精");
   });
+
+  it("crafts the v4 endgame convergence sink without discounting route materials", () => {
+    const store = createTestStore({
+      character: createCharacterAtRealm(MajorRealm.ImmortalEmperor, 2000),
+      workshop: {
+        ...workshopReducer(undefined, { type: "@@INIT" }),
+        blacksmithLevel: 8,
+        unlockedRecipes: ["guixu_three_paths_convergence_forge"],
+      },
+    });
+    store.dispatch(addItem({ itemId: "sword_path_starsteel", count: 2 }));
+    store.dispatch(addItem({ itemId: "beast_path_bloodbone", count: 2 }));
+    store.dispatch(addItem({ itemId: "mystic_path_starlotus", count: 2 }));
+    store.dispatch(addItem({ itemId: "iron_ore", count: 10 }));
+
+    store.dispatch(craftWorkshopRecipe("guixu_three_paths_convergence_forge"));
+
+    const state = store.getState();
+    const crownSlot = state.inventory.items.find(
+      (slot) => slot.itemId === "emperor_crown" && slot.instanceId
+    );
+
+    expect(crownSlot?.instance?.templateId).toBe("emperor_crown");
+    expect(state.inventory.items.find((slot) => slot.itemId === "sword_path_starsteel")).toBeUndefined();
+    expect(state.inventory.items.find((slot) => slot.itemId === "beast_path_bloodbone")).toBeUndefined();
+    expect(state.inventory.items.find((slot) => slot.itemId === "mystic_path_starlotus")).toBeUndefined();
+    expect(state.inventory.items.find((slot) => slot.itemId === "iron_ore")).toBeUndefined();
+    expect(state.workshop.masteryByDiscipline.smithing).toBe(48);
+    expect(state.workshop.craftedRecipeCounts.guixu_three_paths_convergence_forge).toBe(1);
+    expect(state.character.spiritStones).toBe(1480);
+    expect(state.logs.logs[0]?.message).toContain("歸墟三道帝冕");
+  });
 });

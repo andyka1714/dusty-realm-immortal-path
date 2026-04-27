@@ -193,6 +193,45 @@ const V3_WORLD_AFTERMATH_EVENT_CASES = [
   },
 ] as const;
 
+const V4_ENDGAME_ROUTE_EVENT_CASES = [
+  {
+    eventId: "sword_emperor_v4_heaven_sunder_convergence",
+    prerequisiteEventId: "sword_emperor_heaven_sunder_oath",
+    profession: ProfessionType.Sword,
+    worldMemoryTag: "sect:sword:world-chapter-03",
+    endgameMemoryTag: "sect:sword:endgame-loop-v4",
+    routeLabel: "凌霄劍宗",
+    categoryLabel: "仙帝 v4 終盤收束",
+    chainLabel: "斬天終局",
+    sourceCueLabel: "凌霄劍星鋼 x2",
+    rewardItemId: "sword_path_starsteel",
+  },
+  {
+    eventId: "beast_emperor_v4_worldblood_convergence",
+    prerequisiteEventId: "beast_emperor_worldblood_hunt",
+    profession: ProfessionType.Body,
+    worldMemoryTag: "sect:beast:world-chapter-03",
+    endgameMemoryTag: "sect:beast:endgame-loop-v4",
+    routeLabel: "萬獸山莊",
+    categoryLabel: "仙帝 v4 終盤收束",
+    chainLabel: "帝血終局",
+    sourceCueLabel: "萬獸血骨殘材 x2",
+    rewardItemId: "beast_path_bloodbone",
+  },
+  {
+    eventId: "mystic_emperor_v4_star_throne_convergence",
+    prerequisiteEventId: "mystic_emperor_star_throne_decree",
+    profession: ProfessionType.Mage,
+    worldMemoryTag: "sect:mystic:world-chapter-03",
+    endgameMemoryTag: "sect:mystic:endgame-loop-v4",
+    routeLabel: "縹緲仙宮",
+    categoryLabel: "仙帝 v4 終盤收束",
+    chainLabel: "星詔終局",
+    sourceCueLabel: "縹緲星魂蓮 x2",
+    rewardItemId: "mystic_path_starlotus",
+  },
+] as const;
+
 const buildRouteMemoryContext = (
   profession: ProfessionType,
   realm: MajorRealm
@@ -658,6 +697,84 @@ describe("encounter selector", () => {
 
   it("publishes v3 aftermath material source cues", () => {
     V3_WORLD_AFTERMATH_EVENT_CASES.forEach((testCase) => {
+      const sourceCues = getEncounterMaterialSourceCues(testCase.rewardItemId);
+
+      expect(sourceCues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            eventId: testCase.eventId,
+            routeLabel: testCase.routeLabel,
+            categoryLabel: expect.stringContaining(testCase.categoryLabel),
+          }),
+        ])
+      );
+    });
+  });
+
+  it("adds v4 emperor route convergence events that emit endgame memory", () => {
+    V4_ENDGAME_ROUTE_EVENT_CASES.forEach((testCase) => {
+      const event = ENCOUNTER_EVENTS[testCase.eventId];
+
+      expect(event, `${testCase.eventId} should exist`).toBeDefined();
+      expect(event.minRealm).toBe(MajorRealm.ImmortalEmperor);
+      expect(event.maxRealm).toBe(MajorRealm.ImmortalEmperor);
+      expect(event.selector?.repeatPolicy).toBe("once_per_run");
+      expect(event.selector?.eligibleProfessions).toEqual([testCase.profession]);
+      expect(event.selector?.requiredResolvedEventIds).toEqual([
+        testCase.prerequisiteEventId,
+      ]);
+      expect(event.selector?.requiredWorldMemoryTags).toEqual([testCase.worldMemoryTag]);
+      expect(event.presentation).toMatchObject({
+        routeLabel: testCase.routeLabel,
+        chainLabel: testCase.chainLabel,
+      });
+      expect(event.presentation?.categoryLabel).toContain(testCase.categoryLabel);
+      expect(event.chain?.worldMemoryTags).toEqual([testCase.endgameMemoryTag]);
+
+      const rewardItemIds = event.choices.flatMap((choice) =>
+        choice.reward.items?.map((item) => item.itemId) ?? []
+      );
+      const cueLabels = event.choices.flatMap((choice) =>
+        choice.cue?.tags?.map((tag) => tag.label) ?? []
+      );
+
+      expect(rewardItemIds).toContain(testCase.rewardItemId);
+      expect(cueLabels).toContain(testCase.sourceCueLabel);
+    });
+  });
+
+  it("keeps v4 emperor convergence locked behind the route memory and prerequisite event", () => {
+    V4_ENDGAME_ROUTE_EVENT_CASES.forEach((testCase) => {
+      const matchingContext = {
+        majorRealm: MajorRealm.ImmortalEmperor,
+        profession: testCase.profession,
+        completedQuestIds: [],
+        resolvedEventIds: [testCase.prerequisiteEventId],
+        worldMemoryTags: [testCase.worldMemoryTag],
+      };
+
+      expect(
+        getAvailableEncounterEvents(matchingContext).some(
+          (event) => event.id === testCase.eventId
+        )
+      ).toBe(true);
+      expect(
+        getAvailableEncounterEvents({
+          ...matchingContext,
+          resolvedEventIds: [],
+        }).some((event) => event.id === testCase.eventId)
+      ).toBe(false);
+      expect(
+        getAvailableEncounterEvents({
+          ...matchingContext,
+          worldMemoryTags: [],
+        }).some((event) => event.id === testCase.eventId)
+      ).toBe(false);
+    });
+  });
+
+  it("publishes v4 endgame convergence material source cues", () => {
+    V4_ENDGAME_ROUTE_EVENT_CASES.forEach((testCase) => {
       const sourceCues = getEncounterMaterialSourceCues(testCase.rewardItemId);
 
       expect(sourceCues).toEqual(

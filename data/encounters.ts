@@ -2720,6 +2720,183 @@ const RAW_ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
       },
     ],
   }),
+  sword_emperor_v4_heaven_sunder_convergence: createSingleRealmEncounterEvent({
+    id: "sword_emperor_v4_heaven_sunder_convergence",
+    title: "歸墟斬天終局",
+    description: "斬天帝劍盟的餘誓在歸墟裂界收束，凌霄劍宗弟子可把本世劍路刻成下一世仍能讀取的終盤記憶。",
+    realm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 3,
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Sword],
+      requiredResolvedEventIds: ["sword_emperor_heaven_sunder_oath"],
+      requiredWorldMemoryTags: ["sect:sword:world-chapter-03"],
+    },
+    presentation: {
+      categoryLabel: "仙帝 v4 終盤收束",
+      routeLabel: "凌霄劍宗",
+      chainLabel: "斬天終局",
+      memoryCue: "完成後會留下 sect:sword:endgame-loop-v4，供終盤 Workshop sink 與輪迴魂印讀取。",
+      sectLabel: "凌霄劍宗 v4 收束",
+    },
+    chain: {
+      chainId: "endgame-loop-v4-sword",
+      step: 1,
+      worldMemoryTags: ["sect:sword:endgame-loop-v4"],
+    },
+    choices: [
+      {
+        id: "seal_heaven_sunder_memory",
+        label: "刻下斬天終局",
+        description: "把帝劍盟、接引仙殿與歸墟裂界的劍痕壓成可輪迴讀取的終盤印記。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "v4 終盤記憶" },
+            { kind: "benefit", label: "凌霄劍宗輪迴" },
+          ],
+        },
+        reward: {
+          experience: 5200000,
+          logMessage: "你將斬天終局刻進神魂，凌霄劍宗 v4 終盤記憶已可供下一世承接。",
+        },
+      },
+      {
+        id: "collect_heaven_sunder_convergence_starsteel",
+        label: "收束斬天星鋼",
+        description: "從終局劍痕裡取回最後一批可用星鋼，供三路線終盤爐火收束。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "凌霄劍星鋼 x2" },
+            { kind: "benefit", label: "終盤 Workshop sink" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "sword_path_starsteel", count: 2 }],
+          logMessage: "你收束斬天星鋼，讓凌霄劍宗 v4 終局可回接終盤 Workshop 爐火。",
+        },
+      },
+    ],
+  }),
+  beast_emperor_v4_worldblood_convergence: createSingleRealmEncounterEvent({
+    id: "beast_emperor_v4_worldblood_convergence",
+    title: "歸墟帝血終局",
+    description: "萬獸帝血獵的血壓在歸墟裂界聚成終局骨潮，體修可把這條高壓肉身路線留給下一世。",
+    realm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 3,
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Body],
+      requiredResolvedEventIds: ["beast_emperor_worldblood_hunt"],
+      requiredWorldMemoryTags: ["sect:beast:world-chapter-03"],
+    },
+    presentation: {
+      categoryLabel: "仙帝 v4 終盤收束",
+      routeLabel: "萬獸山莊",
+      chainLabel: "帝血終局",
+      memoryCue: "完成後會留下 sect:beast:endgame-loop-v4，供終盤 Workshop sink 與輪迴魂印讀取。",
+      sectLabel: "萬獸山莊 v4 收束",
+    },
+    chain: {
+      chainId: "endgame-loop-v4-beast",
+      step: 1,
+      worldMemoryTags: ["sect:beast:endgame-loop-v4"],
+    },
+    choices: [
+      {
+        id: "seal_worldblood_memory",
+        label: "封存帝血終局",
+        description: "把帝血獵場的血壓與歸墟骨潮封成下一世仍能承接的肉身記憶。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "v4 終盤記憶" },
+            { kind: "benefit", label: "萬獸山莊輪迴" },
+          ],
+        },
+        reward: {
+          experience: 5060000,
+          logMessage: "你封住帝血終局，萬獸山莊 v4 終盤記憶已成為下一世肉身底盤。",
+        },
+      },
+      {
+        id: "harvest_worldblood_convergence_bone",
+        label: "剝取終局血骨",
+        description: "從歸墟骨潮裡剝下可入終盤爐火的血骨殘材。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "resource", label: "萬獸血骨殘材 x2" },
+            { kind: "risk", label: "終盤 Workshop sink" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "beast_path_bloodbone", count: 2 }],
+          logMessage: "你剝取終局血骨，萬獸山莊 v4 終局材料能回到終盤爐火。",
+        },
+      },
+    ],
+  }),
+  mystic_emperor_v4_star_throne_convergence: createSingleRealmEncounterEvent({
+    id: "mystic_emperor_v4_star_throne_convergence",
+    title: "歸墟星詔終局",
+    description: "星座帝詔庭的星位在歸墟裂界合成最後一張命盤，縹緲仙宮可把本世神識路線留入輪迴。",
+    realm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 3,
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Mage],
+      requiredResolvedEventIds: ["mystic_emperor_star_throne_decree"],
+      requiredWorldMemoryTags: ["sect:mystic:world-chapter-03"],
+    },
+    presentation: {
+      categoryLabel: "仙帝 v4 終盤收束",
+      routeLabel: "縹緲仙宮",
+      chainLabel: "星詔終局",
+      memoryCue: "完成後會留下 sect:mystic:endgame-loop-v4，供終盤 Workshop sink 與輪迴魂印讀取。",
+      sectLabel: "縹緲仙宮 v4 收束",
+    },
+    chain: {
+      chainId: "endgame-loop-v4-mystic",
+      step: 1,
+      worldMemoryTags: ["sect:mystic:endgame-loop-v4"],
+    },
+    choices: [
+      {
+        id: "seal_star_throne_memory",
+        label: "銘定星詔終局",
+        description: "把帝詔庭星位與歸墟命盤合成下一世仍可讀取的神識記憶。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "v4 終盤記憶" },
+            { kind: "benefit", label: "縹緲仙宮輪迴" },
+          ],
+        },
+        reward: {
+          experience: 5340000,
+          logMessage: "你銘定星詔終局，縹緲仙宮 v4 終盤記憶已可照入下一世命盤。",
+        },
+      },
+      {
+        id: "gather_star_throne_convergence_lotus",
+        label: "凝採終局星蓮",
+        description: "從歸墟命盤裡凝出最後一批能壓住終盤爐火的星魂蓮。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "縹緲星魂蓮 x2" },
+            { kind: "benefit", label: "終盤 Workshop sink" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "mystic_path_starlotus", count: 2 }],
+          logMessage: "你凝採終局星蓮，縹緲仙宮 v4 終局材料已能回接終盤 Workshop 爐火。",
+        },
+      },
+    ],
+  }),
 };
 
 export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> =

@@ -279,6 +279,91 @@ describe("ReincarnationFlow", () => {
     expect(markup).toContain("route memory：sect:sword:world-chapter-03");
   });
 
+  it("shows v4 endgame memory source, identity cue, and benefit on an available soul seal card", () => {
+    const lifetimeStats = createLifetimeStats(MajorRealm.ImmortalEmperor);
+
+    const markup = renderToStaticMarkup(
+      <ReincarnationFlow
+        flowStep="hall"
+        summary={{
+          cause: "voluntary",
+          ageYears: 2600,
+          highestRealm: MajorRealm.ImmortalEmperor,
+          realmMerit: 100000000,
+          ageMerit: 1300,
+          totalMeritGained: 100001300,
+          eligibleHeirlooms: [],
+        }}
+        totalMerit={100001300}
+        lifetimeStats={lifetimeStats}
+        worldMemoryTags={["sect:sword:endgame-loop-v4"]}
+        unlockedPerks={getAvailableReincarnationPerks({
+          lifetimeStats,
+          worldMemoryTags: ["sect:sword:endgame-loop-v4"],
+        })}
+        config={{
+          plannerVersion: 2,
+          selectedBuildIdentity: "sword",
+          selectedPerkIds: [],
+          selectedHeirloomIds: [],
+        }}
+        onEnterHall={() => undefined}
+        onSelectBuildIdentity={() => undefined}
+        onSelectSoulSeal={() => undefined}
+        onTogglePerk={() => undefined}
+        onToggleHeirloom={() => undefined}
+        onSelectSpiritRoot={() => undefined}
+        onConfirm={() => undefined}
+      />
+    );
+
+    expect(markup).toContain('data-testid="rebirth-seal-seal_sword_endgame_v4"');
+    expect(markup).toContain("斬天輪迴劍印");
+    expect(markup).toContain("route memory：sect:sword:endgame-loop-v4");
+    expect(markup).toContain("下一世將帶著斬天終局記憶開局");
+    expect(markup).toContain("預期收益：根骨 +4、悟性 +3、福緣 +1");
+  });
+
+  it("shows voluntary endgame closure copy separately from death reincarnation", () => {
+    const lifetimeStats = createLifetimeStats(MajorRealm.ImmortalEmperor);
+
+    const markup = renderToStaticMarkup(
+      <ReincarnationFlow
+        flowStep="life_review"
+        summary={{
+          cause: "voluntary",
+          ageYears: 2600,
+          highestRealm: MajorRealm.ImmortalEmperor,
+          realmMerit: 100000000,
+          ageMerit: 1300,
+          totalMeritGained: 100001300,
+          eligibleHeirlooms: [],
+        }}
+        totalMerit={100001300}
+        lifetimeStats={lifetimeStats}
+        worldMemoryTags={["sect:sword:endgame-loop-v4"]}
+        unlockedPerks={[]}
+        config={{
+          plannerVersion: 2,
+          selectedBuildIdentity: "balanced",
+          selectedPerkIds: [],
+          selectedHeirloomIds: [],
+        }}
+        onEnterHall={() => undefined}
+        onSelectBuildIdentity={() => undefined}
+        onSelectSoulSeal={() => undefined}
+        onTogglePerk={() => undefined}
+        onToggleHeirloom={() => undefined}
+        onSelectSpiritRoot={() => undefined}
+        onConfirm={() => undefined}
+      />
+    );
+
+    expect(markup).toContain("本世收束");
+    expect(markup).toContain("飛升/結局回顧");
+    expect(markup).toContain("主動重開下一世");
+  });
+
   it("uses a mobile-first single-column shell so the hall can scroll within the viewport", () => {
     const lifetimeStats = createLifetimeStats(MajorRealm.GoldenCore);
 

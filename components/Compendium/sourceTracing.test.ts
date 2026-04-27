@@ -52,6 +52,20 @@ describe("Compendium source tracing helpers", () => {
     }
   );
 
+  it("shows the v4 endgame convergence Workshop sink for every route material", () => {
+    routeMaterialCases.forEach(({ itemId }) => {
+      const trace = buildCompendiumItemSourceTrace(itemId);
+
+      expect(
+        trace.workshopSinks.some(
+          (source) =>
+            source.recipeId === "guixu_three_paths_convergence_forge" &&
+            source.sourceHint.includes("endgame-loop-v4")
+        )
+      ).toBe(true);
+    });
+  });
+
   it("derives skill manual labels from the existing manual metadata", () => {
     const activeSword = FORMAL_CORE_SKILL_MAP.s_q_active;
     const passiveSword = FORMAL_CORE_SKILL_MAP.s_q_passive;

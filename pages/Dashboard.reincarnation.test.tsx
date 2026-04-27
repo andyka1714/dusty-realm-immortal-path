@@ -122,6 +122,8 @@ describe("Dashboard reincarnation flow", () => {
     const markup = createAliveDashboardMarkup();
 
     expect(markup).toContain("主動坐化");
+    expect(markup).toContain("本世收束");
+    expect(markup).toContain("飛升/結局回顧後主動重開");
     expect(markup).toContain('data-testid="dashboard-manual-cultivate"');
     expect(markup).toContain('data-testid="dashboard-start-seclusion"');
     expect(markup).toContain('data-testid="dashboard-breakthrough"');
