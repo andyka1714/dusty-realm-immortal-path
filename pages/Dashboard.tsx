@@ -254,6 +254,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
   // Calculations for tooltips
   const currentAgeYearStr = (age / DAYS_PER_YEAR).toFixed(2);
   const maxAgeYearStr = (lifespan / DAYS_PER_YEAR).toFixed(0);
+  const actionButtonClass = "relative h-24 w-full flex-col overflow-hidden rounded-lg py-3 text-center";
+  const actionItemClass = "relative flex min-w-0 flex-1 items-stretch group";
   
   // Correct Calculation matching Redux Store
   const cultivationInput = {
@@ -371,8 +373,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
         )}
         data-testid={embedded ? "dashboard-left-column" : undefined}
       >
-        <div className={clsx("space-y-6", embedded ? "flex h-full min-h-0 flex-col" : "")}>
-            <div className={clsx(embedded ? "rounded-[20px] border border-stone-800/80 bg-stone-900/82 p-5 md:p-6" : "")}>
+        <div className={clsx(embedded ? "flex min-h-max flex-col gap-5" : "space-y-6")}>
+            <div className={clsx(embedded ? "shrink-0 rounded-[20px] border border-stone-800/80 bg-stone-900/82 p-5 md:p-6" : "")}>
             <div className="flex justify-between items-start">
               <div
                 className="cursor-help"
@@ -491,17 +493,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
             <GameSection
               title="修行抉擇"
               eyebrow="CULTIVATION ACTIONS"
-              className={clsx(embedded ? "" : "relative z-20 hover:z-50 transition-all duration-200")}
-              bodyClassName="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+              className={clsx(embedded ? "shrink-0" : "relative z-20 hover:z-50 transition-all duration-200")}
+              bodyClassName="grid grid-cols-1 gap-3 p-3 sm:grid-cols-2 xl:grid-cols-4"
             >
 
                  {/* 1. Manual Cultivate */}
-                 <div className="flex-1 relative group">
+                 <div className={actionItemClass}>
                      <Button
                        onClick={handleManualCultivate}
                        disabled={isBreakthroughAvailable || isInSeclusion || manualCooldown > 0}
                        variant="stone"
-                       className="h-[120px] w-full flex-col overflow-hidden py-4"
+                       className={actionButtonClass}
                        data-testid="dashboard-manual-cultivate"
                      >
                        {manualCooldown > 0 && (
@@ -526,17 +528,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                  </div>
 
                  {/* 2. Seclusion */}
-                 <div className="flex-1 relative group">
+                 <div className={actionItemClass}>
                      <Button
                        onClick={handleSeclusion}
                        disabled={isBreakthroughAvailable || isInSeclusion || (!isInSeclusion && !canAffordSeclusion)}
                        variant="stone"
                        data-testid="dashboard-start-seclusion"
-                       className={`w-full py-4 rounded-lg border transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed h-[120px]
-                         ${isInSeclusion 
-                                ? "bg-amber-900/30 border-amber-500/50 text-amber-200 shadow-[inset_0_0_20px_rgba(245,158,11,0.2)]" 
-                                : "bg-stone-800 hover:bg-stone-700 border-stone-700 text-stone-200"
-                         }`}
+                       className={clsx(
+                         actionButtonClass,
+                         isInSeclusion
+                           ? "border-amber-500/50 bg-amber-900/30 text-amber-200 shadow-[inset_0_0_20px_rgba(245,158,11,0.2)]"
+                           : "border-stone-700 bg-stone-800 text-stone-200 hover:bg-stone-700"
+                       )}
                      >
                        <Moon size={20} className={isInSeclusion ? "text-amber-400 animate-pulse" : "text-indigo-400"} />
                        <span className="font-bold tracking-widest">{isInSeclusion ? "閉關中" : "閉關修煉"}</span>
@@ -558,38 +561,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                          </GameHintBubble>
                      )}
                  </div>
-              <Button
-                onClick={handleBreakthroughClick}
-                disabled={!isBreakthroughAvailable}
-                variant="selection"
-                data-testid="dashboard-breakthrough"
-                className={`h-[120px] w-full flex-col overflow-hidden py-4 group relative outline-none
-                  ${isBreakthroughAvailable ? "cursor-pointer" : "cursor-not-allowed"}
-                `}
-              >
-                <div className={`
-                    flex h-full w-full flex-col items-center justify-center gap-2 rounded-lg border transition-all
-                    ${isBreakthroughAvailable 
-                        ? "bg-gradient-to-br from-amber-700 to-amber-900 border-amber-500 text-amber-100 shadow-[0_0_15px_rgba(245,158,11,0.4)] animate-pulse hover:scale-[1.02]" 
-                        : "bg-stone-950 border-stone-800 text-stone-700 opacity-60"
-                    }
-                `}>
-                    <ChevronsUp size={24} className={isBreakthroughAvailable ? "text-white" : "text-stone-700"} />
-                    <span className="font-bold tracking-widest text-lg">境界突破</span>
-                    <span className="text-[10px] font-normal opacity-80">
-                      {isBreakthroughAvailable ? "瓶頸已至，點擊破境" : "積累修為中..."}
-                    </span>
-                </div>
+              <div className={actionItemClass}>
+                <Button
+                  onClick={handleBreakthroughClick}
+                  disabled={!isBreakthroughAvailable}
+                  variant={isBreakthroughAvailable ? "amber" : "stone"}
+                  data-testid="dashboard-breakthrough"
+                  className={clsx(
+                    actionButtonClass,
+                    "outline-none",
+                    isBreakthroughAvailable
+                      ? "cursor-pointer border-amber-500/70 bg-amber-700/35 text-amber-100 shadow-[0_0_15px_rgba(245,158,11,0.28)] hover:scale-[1.01]"
+                      : "cursor-not-allowed border-stone-800 bg-stone-950 text-stone-600"
+                  )}
+                >
+                  <ChevronsUp size={20} className={isBreakthroughAvailable ? "text-amber-100" : "text-stone-600"} />
+                  <span className="font-bold tracking-widest">境界突破</span>
+                  <span className="text-[10px] font-normal opacity-80">
+                    {isBreakthroughAvailable ? "瓶頸已至，點擊破境" : "積累修為中..."}
+                  </span>
+                </Button>
                 <GameHintBubble eyebrow="BREAKTHROUGH" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
                   {isMajorBreakthrough ? "衝擊大境界" : "突破小境界"}
                 </GameHintBubble>
-              </Button>
-              <div className="flex-1 relative group">
+              </div>
+              <div className={actionItemClass}>
                 <Button
                   onClick={handleVoluntaryReincarnation}
                   disabled={!canVoluntarilyReincarnate}
                   variant="stone"
-                  className="h-[120px] w-full flex-col overflow-hidden py-4"
+                  className={actionButtonClass}
                   data-testid="dashboard-voluntary-reincarnation"
                 >
                   <RefreshCw
@@ -624,8 +625,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
               eyebrow="WAYFARING NOTES"
               titleIcon={<Info size={16} className="text-stone-400" />}
               className={clsx(
-                embedded ? "border-stone-800/80 bg-black/18" : "border-stone-800/50 bg-stone-900/50"
+                embedded ? "shrink-0 border-stone-800/80 bg-black/18" : "border-stone-800/50 bg-stone-900/50"
               )}
+              bodyClassName={embedded ? "p-3" : undefined}
             >
               <p className="text-xs leading-relaxed text-stone-500">
                 <span className="font-bold text-stone-300">修煉指南：</span>

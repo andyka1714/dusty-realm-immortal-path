@@ -352,6 +352,8 @@ test("character panel keeps dashboard panes and stat tooltip anchored", async ({
   const logContent = logPanel.getByTestId("log-panel");
   const statsPanel = page.getByTestId("stats-panel");
   const spiritRootRow = page.getByTestId("stats-row-spirit-root");
+  const actionsSection = page.locator("section").filter({ hasText: "修行抉擇" }).first();
+  const guideSection = page.locator("section").filter({ hasText: "修煉指南" }).first();
   const manualCultivate = page.getByTestId("dashboard-manual-cultivate");
   const seclusion = page.getByTestId("dashboard-start-seclusion");
   const breakthrough = page.getByTestId("dashboard-breakthrough");
@@ -364,6 +366,7 @@ test("character panel keeps dashboard panes and stat tooltip anchored", async ({
   await expectNoHorizontalOverflow(dashboard);
   await expect(logContent).toContainText("修煉日誌");
   await expect(logContent).toContainText("暫無消息");
+  await expect(guideSection).toContainText("閉關雖能大幅提升修為");
 
   const logPanelBox = await logPanel.boundingBox();
   expect(logPanelBox).not.toBeNull();
@@ -375,22 +378,29 @@ test("character panel keeps dashboard panes and stat tooltip anchored", async ({
   const seclusionBox = await seclusion.boundingBox();
   const breakthroughBox = await breakthrough.boundingBox();
   const voluntaryBox = await voluntaryReincarnation.boundingBox();
+  const actionsBox = await actionsSection.boundingBox();
+  const guideBox = await guideSection.boundingBox();
   expect(manualBox).not.toBeNull();
   expect(seclusionBox).not.toBeNull();
   expect(breakthroughBox).not.toBeNull();
   expect(voluntaryBox).not.toBeNull();
-  if (manualBox && seclusionBox && breakthroughBox && voluntaryBox) {
+  expect(actionsBox).not.toBeNull();
+  expect(guideBox).not.toBeNull();
+  if (manualBox && seclusionBox && breakthroughBox && voluntaryBox && actionsBox && guideBox) {
     const actionBoxes = [manualBox, seclusionBox, breakthroughBox, voluntaryBox];
     const rowY = manualBox.y;
     actionBoxes.forEach((box) => {
       expect(Math.abs(box.y - rowY)).toBeLessThanOrEqual(4);
       expect(Math.abs(box.height - manualBox.height)).toBeLessThanOrEqual(4);
+      expect(box.y + box.height).toBeLessThanOrEqual(actionsBox.y + actionsBox.height - 8);
     });
     expect(Math.abs(breakthroughBox.height - manualBox.height)).toBeLessThanOrEqual(4);
     expect(breakthroughBox.y).toBeGreaterThanOrEqual(manualBox.y - 1);
     expect(voluntaryBox.x).toBeGreaterThan(breakthroughBox.x + breakthroughBox.width - 8);
+    expect(guideBox.height).toBeGreaterThanOrEqual(72);
   }
 
+  await spiritRootRow.scrollIntoViewIfNeeded();
   await spiritRootRow.hover();
   const tooltip = page.getByTestId("game-tooltip");
   await expect(tooltip).toBeVisible();
