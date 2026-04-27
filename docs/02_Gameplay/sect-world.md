@@ -30,12 +30,26 @@
   - `mystic_world_endless_sea_oath`
 - 這批 encounter 會保留 route label、風險 / 收益 cue、route material reward cue，並寫出 `sect:*:world-chapter-02` 類 world memory tag，供後續 encounter / Workshop source 讀取。
 
+`expand-sect-world-late-content-v3` 把 route chapter 再推到 `渡劫 -> 仙人`：
+
+- 三宗新增第三段 route chapter quest：
+  - 凌霄劍宗：`sect_sword_world_chapter_03`，由 `劫雲荒原 (160)` 的 `world_sword_tribulation_envoy` 發起，送到 `接引仙殿 (170)` 的 `world_sword_immortal_witness`。
+  - 萬獸山莊：`sect_beast_world_chapter_03`，由 `world_beast_tribulation_envoy` 發起，送到 `world_beast_immortal_witness`。
+  - 縹緲仙宮：`sect_mystic_world_chapter_03`，由 `world_mystic_tribulation_envoy` 發起，送到 `world_mystic_immortal_witness`。
+- `劫雲荒原 (160)` 與 `接引仙殿 (170)` 現在都有 map-local NPC hook，玩家可從任務與 NPC 對話看見下一步。
+- 新增三個仙人期 once-per-run milestone encounter：
+  - `sword_world_immortal_sword_oath`
+  - `beast_world_immortal_blood_oath`
+  - `mystic_world_immortal_star_oath`
+- 這批 encounter 寫出 `sect:*:world-chapter-03` world memory tag，並以 `凌霄劍星鋼 / 萬獸血骨殘材 / 縹緲星魂蓮` 作為 route material source cue。
+- 本輪不新增 persisted schema，不需要 migration。
+
 ## 驗證
 
 - `data/sectLateProgression.test.ts` 覆蓋後段 quest、NPC 與 reward / dialogue 對齊。
 - `data/encounters.test.ts` 覆蓋 late sect milestone 的 route gating、cue tags 與 resolved state 行為。
-- `data/sectWorldStoryBranch.test.ts` 覆蓋 Phase 2 / v2 世界章節 quest / NPC / map / encounter 對齊。
+- `data/sectWorldStoryBranch.test.ts` 覆蓋 Phase 2 / v2 / v3 世界章節 quest / NPC / map / encounter 對齊。
 
 ## 下一步
 
-- 若要繼續擴張，下一步應把 `chapter_02` 的 world memory tag 接給更多後續 encounter、Workshop source 或輪迴 route perk，但仍應避免新增第二套 quest engine。
+- 若要繼續擴張，下一步應把 `chapter_03` 的 world memory tag 接給更多後續 encounter、Workshop source 或輪迴 route perk，但仍應避免新增第二套 quest engine。

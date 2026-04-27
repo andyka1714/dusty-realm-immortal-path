@@ -189,3 +189,22 @@ Archive 記錄：
 
 - `2026-04-27` 已以 `openspec archive update-item-economy-combat-supplies --skip-specs --yes` 歸檔。
 - 使用 `--skip-specs` 的理由：`game-mechanics` 與 `client-interface` base specs 已在實作 commit 吸收補給閉環 requirement，本次 archive 僅移動 completed change。
+
+## 9. 宗門與世界後段內容 v3 收口記錄
+
+Change id: `expand-sect-world-late-content-v3`
+
+本輪把三宗 route chapter 從 `無盡海 (150)` 往後推到 `劫雲荒原 (160)` 與 `接引仙殿 (170)`：
+
+- 凌霄劍宗新增 `sect_sword_world_chapter_03`、`world_sword_tribulation_envoy`、`world_sword_immortal_witness` 與 `sword_world_immortal_sword_oath`。
+- 萬獸山莊新增 `sect_beast_world_chapter_03`、`world_beast_tribulation_envoy`、`world_beast_immortal_witness` 與 `beast_world_immortal_blood_oath`。
+- 縹緲仙宮新增 `sect_mystic_world_chapter_03`、`world_mystic_tribulation_envoy`、`world_mystic_immortal_witness` 與 `mystic_world_immortal_star_oath`。
+- v3 encounter 會保留 routeLabel、categoryLabel、chainLabel、memoryCue、choice cue 與 route material source cue。
+- completion / encounter chain 輸出 `sect:*:world-chapter-03` world memory tag，供後續 encounter、Workshop source 或輪迴 route perk 承接。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration。
+- 不新增第二套 quest engine 或對話樹 runtime。

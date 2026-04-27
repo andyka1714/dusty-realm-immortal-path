@@ -4,9 +4,11 @@ import {
     BEAST_SECT_NPCS,
     FALLEN_ABYSS_NPCS,
     ENDLESS_SEA_NPCS,
+    IMMORTAL_ASCENSION_NPCS,
     MYSTIC_SECT_NPCS,
     SACRED_CITY_NPCS,
     SWORD_SECT_NPCS,
+    TRIBULATION_PLAINS_NPCS,
     TRI_REALM_BATTLEFIELD_NPCS,
     VILLAGE_NPCS,
     VOID_RIVER_NPCS
@@ -751,7 +753,9 @@ export const MAPS: MapData[] = RAW_MAPS_V60.map((raw, index) => {
              id === 121 ? FALLEN_ABYSS_NPCS :
              id === 130 ? VOID_RIVER_NPCS :
              id === 140 ? SACRED_CITY_NPCS :
-             id === 150 ? ENDLESS_SEA_NPCS : [],
+             id === 150 ? ENDLESS_SEA_NPCS :
+             id === 160 ? TRIBULATION_PLAINS_NPCS :
+             id === 170 ? IMMORTAL_ASCENSION_NPCS : [],
         bossSpawn: bossSpawn,
         enemies: enemies,
         dropRateMultiplier: 1 + (index * 0.05)

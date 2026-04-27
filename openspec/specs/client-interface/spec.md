@@ -358,6 +358,11 @@ Workshop 介面必須 (MUST) 讓玩家看懂專精解鎖條件、目前可否切
 - **THEN** 介面必須顯示可互動的 NPC、quest 或 encounter 入口
 - **AND** 玩家不得只能靠文件推測下一步去哪裡
 
+#### Scenario: v3 後段章節顯示 map-local 入口
+- **WHEN** 玩家完成 route chapter v2 並抵達 `劫雲荒原` 或 `接引仙殿`
+- **THEN** 對應宗門 NPC、Quest modal 或 pending encounter 必須顯示 v3 章節路線、route label 與結果 cue
+- **AND** 玩家不得只能靠地圖名稱猜測 `渡劫 -> 仙人` 的宗門承接
+
 ### Requirement: Workshop v2 決策 cue
 Workshop 介面必須 (MUST) 顯示 mastery milestone、specialization leaf、route-specific sink 與產出差異，讓玩家能理解中後期製作決策。
 

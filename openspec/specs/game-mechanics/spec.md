@@ -509,6 +509,12 @@
 - **THEN** 系統必須能提供可被 encounter memory、Workshop source 或後續 quest 讀取的結果
 - **AND** 不得只寫入不可查詢的日誌文字
 
+#### Scenario: v3 章節延伸到渡劫與仙人節點
+- **WHEN** 玩家完成三宗 `chapter_02` 並抵達 `渡劫`
+- **THEN** 系統必須提供對應宗門的 v3 route chapter，並透過 `劫雲荒原 / 接引仙殿` 等 map-local NPC 或 quest hook 顯示下一步
+- **AND** 完成後必須能解鎖對應仙人期 milestone encounter 與 `sect:*:world-chapter-03` 類 world memory tag
+- **AND** 不得因 v3 章節新增 persisted schema 或 migration
+
 ### Requirement: Workshop 經濟與專精深化 v2
 系統必須 (MUST) 讓 Workshop mastery、specialization leaf 與 route-specific material sink 形成中後期決策，而不是只提供扁平 recipe 製作。
 

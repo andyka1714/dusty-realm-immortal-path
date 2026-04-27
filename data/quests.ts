@@ -718,5 +718,95 @@ export const QUESTS: Record<string, Quest> = {
                 '這些星蓮是宗門路線的潮汐回聲，往後推演術式時別把海霧當成雜訊。'
             ]
         }
+    },
+    'sect_sword_world_chapter_03': {
+        id: 'sect_sword_world_chapter_03',
+        type: QuestType.Main,
+        title: 'v3 後段世界章：劫雲帝劍痕',
+        description: '凌霄劍宗在劫雲荒原（160）重開劍盟殘痕，要你把帝劍殘痕送到接引仙殿（170），讓宗門世界章正式跨入仙階。',
+        giverId: 'world_sword_tribulation_envoy',
+        submitNpcId: 'world_sword_immortal_witness',
+        prerequisiteQuestId: 'sect_sword_world_chapter_02',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.Tribulation },
+            { type: 'dialogue', targetNpcId: 'world_sword_immortal_witness' }
+        ],
+        rewards: [
+            { exp: 720000, spiritStones: 28800 },
+            { items: [{ itemId: 'sword_path_starsteel', count: 3 }] }
+        ],
+        dialogue: {
+            start: [
+                '凌霄劍宗的無盡海劍潮已經成形，但 v3 後段世界章不能停在大乘海線。',
+                '從劫雲荒原（160）帶走帝劍殘痕，送往接引仙殿（170），讓仙階也認得這條宗門路線。'
+            ],
+            progress: [
+                '劫雲荒原（160）的雷會逼你放慢劍勢；接引仙殿（170）只承認能穿過雷路仍不偏斜的劍。'
+            ],
+            complete: [
+                '帝劍殘痕入殿，凌霄劍宗的 v3 後段世界章已從劫雲荒原（160）接到接引仙殿（170）。',
+                '這批星鋼是仙階劍路的可追蹤憑證，後續仙人境劍盟回聲會讀取這段記憶。'
+            ]
+        }
+    },
+    'sect_beast_world_chapter_03': {
+        id: 'sect_beast_world_chapter_03',
+        type: QuestType.Main,
+        title: 'v3 後段世界章：劫雲帝血脈',
+        description: '萬獸山莊在劫雲荒原（160）重燃帝血獸脈，要你把帝血骨印送到接引仙殿（170），讓肉身章節進入仙階承接。',
+        giverId: 'world_beast_tribulation_envoy',
+        submitNpcId: 'world_beast_immortal_witness',
+        prerequisiteQuestId: 'sect_beast_world_chapter_02',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.Tribulation },
+            { type: 'dialogue', targetNpcId: 'world_beast_immortal_witness' }
+        ],
+        rewards: [
+            { exp: 704000, spiritStones: 29600 },
+            { items: [{ itemId: 'beast_path_bloodbone', count: 3 }] }
+        ],
+        dialogue: {
+            start: [
+                '萬獸山莊的血潮印已承過無盡海，但 v3 後段世界章要把海壓推入仙階血脈。',
+                '扛著帝血骨印穿過劫雲荒原（160），到接引仙殿（170）讓仙階血臺驗你的肉身路線。'
+            ],
+            progress: [
+                '劫雲荒原（160）會把氣血劈散，接引仙殿（170）會把剩下的骨印壓成仙階路標。'
+            ],
+            complete: [
+                '帝血骨印落在接引仙殿（170），萬獸山莊的 v3 後段世界章已從劫雲荒原（160）跨入仙階。',
+                '這些血骨殘材是宗門肉身路線留下的高壓記號，後續仙人境獸脈回聲會繼續讀取。'
+            ]
+        }
+    },
+    'sect_mystic_world_chapter_03': {
+        id: 'sect_mystic_world_chapter_03',
+        type: QuestType.Main,
+        title: 'v3 後段世界章：劫雲星詔牒',
+        description: '縹緲仙宮在劫雲荒原（160）校準星詔，要你把星詔牒送到接引仙殿（170），讓法修章節可被仙階觀測。',
+        giverId: 'world_mystic_tribulation_envoy',
+        submitNpcId: 'world_mystic_immortal_witness',
+        prerequisiteQuestId: 'sect_mystic_world_chapter_02',
+        requirements: [
+            { type: 'level', minRealm: MajorRealm.Tribulation },
+            { type: 'dialogue', targetNpcId: 'world_mystic_immortal_witness' }
+        ],
+        rewards: [
+            { exp: 736000, spiritStones: 28000 },
+            { items: [{ itemId: 'mystic_path_starlotus', count: 3 }] }
+        ],
+        dialogue: {
+            start: [
+                '縹緲仙宮的界海星潮已定，但 v3 後段世界章必須把星位推過雷路。',
+                '從劫雲荒原（160）帶走星詔牒，送到接引仙殿（170），讓仙階觀測臺承認這條宗門路線。'
+            ],
+            progress: [
+                '劫雲荒原（160）的雷光會打亂星位，接引仙殿（170）的星臺會驗出你的神識是否能重新排星。'
+            ],
+            complete: [
+                '星詔牒在接引仙殿（170）展開，縹緲仙宮的 v3 後段世界章已從劫雲荒原（160）進入仙階。',
+                '這些星魂蓮是宗門星詔留下的材料憑證，後續仙人境星庭回聲會沿著它們展開。'
+            ]
+        }
     }
 };

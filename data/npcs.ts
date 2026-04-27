@@ -452,10 +452,99 @@ export const ENDLESS_SEA_NPCS: NPC[] = [
     }
 ];
 
+export const TRIBULATION_PLAINS_NPCS: NPC[] = [
+    {
+        id: 'world_sword_tribulation_envoy',
+        name: '劫雲劍盟使',
+        symbol: '盟',
+        type: NPCType.Quest,
+        x: 88,
+        y: 92,
+        description: '凌霄劍宗派駐劫雲荒原的劍盟使，替劍修把無盡海後續推向接引仙殿。',
+        questIds: ['sect_sword_world_chapter_03'],
+        dialogue: [
+            '凌霄劍宗的界海劍潮已過，v3 後段世界章要從劫雲荒原（160）往接引仙殿（170）送帝劍殘痕。',
+            '若你已完成無盡海章節，就把劍盟殘痕帶上雷路，讓宗門路線能被仙殿認出。'
+        ]
+    },
+    {
+        id: 'world_beast_tribulation_envoy',
+        name: '劫雲帝血使',
+        symbol: '血',
+        type: NPCType.Quest,
+        x: 98,
+        y: 100,
+        description: '萬獸山莊派駐劫雲荒原的帝血使，測量體修能否把海壓推進仙階。',
+        questIds: ['sect_beast_world_chapter_03'],
+        dialogue: [
+            '萬獸山莊的血潮印已被無盡海壓住，v3 後段世界章要在劫雲荒原（160）重新點燃帝血獸脈。',
+            '帶著帝血骨印去接引仙殿（170），讓仙殿知道這條肉身路不是靠運氣撐上來的。'
+        ]
+    },
+    {
+        id: 'world_mystic_tribulation_envoy',
+        name: '劫雲星詔使',
+        symbol: '詔',
+        type: NPCType.Quest,
+        x: 108,
+        y: 92,
+        description: '縹緲仙宮派駐劫雲荒原的星詔使，替法修把無盡海星潮推入仙殿觀測。',
+        questIds: ['sect_mystic_world_chapter_03'],
+        dialogue: [
+            '縹緲仙宮的星潮牒已映過無盡海，v3 後段世界章要從劫雲荒原（160）把星詔送上接引仙殿（170）。',
+            '若你已完成界海星潮，就順著劫雲星線北上，別讓海霧之後的星位斷掉。'
+        ]
+    }
+];
+
+export const IMMORTAL_ASCENSION_NPCS: NPC[] = [
+    {
+        id: 'world_sword_immortal_witness',
+        name: '接引帝劍守',
+        symbol: '帝',
+        type: NPCType.Quest,
+        x: 88,
+        y: 102,
+        description: '守在接引仙殿劍柱旁的凌霄劍修，替宗門確認帝劍殘痕是否進入仙階。',
+        dialogue: [
+            '凌霄劍宗的帝劍殘痕已從劫雲荒原（160）送到接引仙殿（170），v3 後段世界章終於跨過雷路。',
+            '往後仙人境的劍盟回聲會讀取這段宗門路線，不再只靠通用仙詔推進。'
+        ]
+    },
+    {
+        id: 'world_beast_immortal_witness',
+        name: '接引帝血守',
+        symbol: '脈',
+        type: NPCType.Quest,
+        x: 100,
+        y: 110,
+        description: '守在接引仙殿血脈台旁的萬獸山莊體修，替肉身路線確認帝血獸脈。',
+        dialogue: [
+            '萬獸山莊的帝血骨印已從劫雲荒原（160）抵達接引仙殿（170），v3 後段世界章把海壓推成仙階血脈。',
+            '後續仙人境獸脈回聲會記住這條路，體修不必再只靠通用軍庫補進度。'
+        ]
+    },
+    {
+        id: 'world_mystic_immortal_witness',
+        name: '接引星詔守',
+        symbol: '星',
+        type: NPCType.Quest,
+        x: 112,
+        y: 102,
+        description: '守在接引仙殿星臺上的縹緲仙宮修士，替法修確認星詔是否成章。',
+        dialogue: [
+            '縹緲仙宮的星詔已從劫雲荒原（160）落到接引仙殿（170），v3 後段世界章能被仙階觀測。',
+            '往後仙人境星庭回聲會沿著這段宗門路線展開，神識材料來源也會更清楚。'
+        ]
+    }
+];
+
 export const WORLD_STORY_NPCS: NPC[] = [
     ...TRI_REALM_BATTLEFIELD_NPCS,
     ...FALLEN_ABYSS_NPCS,
     ...VOID_RIVER_NPCS,
     ...SACRED_CITY_NPCS,
-    ...ENDLESS_SEA_NPCS
+    ...ENDLESS_SEA_NPCS,
+    ...TRIBULATION_PLAINS_NPCS,
+    ...IMMORTAL_ASCENSION_NPCS
 ];

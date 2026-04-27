@@ -2234,6 +2234,180 @@ const RAW_ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
       },
     ],
   }),
+  sword_world_immortal_sword_oath: createSingleRealmEncounterEvent({
+    id: "sword_world_immortal_sword_oath",
+    title: "接引帝劍回聲",
+    description: "帝劍殘痕抵達接引仙殿後，凌霄劍宗的仙階劍路在仙人境正式留下 v3 宗門回聲。",
+    realm: MajorRealm.Immortal,
+    selector: {
+      weight: 4,
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Sword],
+      requiredCompletedQuestIds: ["sect_sword_world_chapter_03"],
+    },
+    presentation: {
+      categoryLabel: "仙人 v3 世界章節里程碑",
+      routeLabel: "凌霄劍宗",
+      chainLabel: "帝劍入殿",
+      memoryCue: "接引仙殿會記住帝劍殘痕，後續劍宗事件可讀取這段 v3 宗門路線記憶。",
+      sectLabel: "凌霄劍宗仙階承接",
+    },
+    chain: {
+      chainId: "sect-world-sword-route",
+      step: 3,
+      worldMemoryTags: ["sect:sword:world-chapter-03"],
+    },
+    choices: [
+      {
+        id: "answer_immortal_sword_echo",
+        label: "應和帝劍回聲",
+        description: "以本命劍意回應接引仙殿的帝劍殘痕，把仙人境劍路定成可追蹤章節。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "凌霄劍宗世界章節" },
+            { kind: "benefit", label: "仙人劍修" },
+          ],
+        },
+        reward: {
+          experience: 1260000,
+          logMessage: "你應和接引帝劍回聲，凌霄劍宗的 v3 仙階路線在仙殿中留下穩定記憶。",
+        },
+      },
+      {
+        id: "collect_immortal_starsteel",
+        label: "凝取接引星鋼",
+        description: "把帝劍殘痕外溢的劍光凝成星鋼，回補仙人與終盤器方材料。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "凌霄劍星鋼 x2" },
+            { kind: "benefit", label: "凌霄劍宗" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "sword_path_starsteel", count: 2 }],
+          logMessage: "你凝下接引星鋼，讓凌霄劍宗 v3 世界章節能繼續供應高階器方。",
+        },
+      },
+    ],
+  }),
+  beast_world_immortal_blood_oath: createSingleRealmEncounterEvent({
+    id: "beast_world_immortal_blood_oath",
+    title: "接引帝血回聲",
+    description: "帝血骨印在接引仙殿中被仙階血臺壓實，萬獸山莊的肉身路線留下 v3 宗門回聲。",
+    realm: MajorRealm.Immortal,
+    selector: {
+      weight: 4,
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Body],
+      requiredCompletedQuestIds: ["sect_beast_world_chapter_03"],
+    },
+    presentation: {
+      categoryLabel: "仙人 v3 世界章節里程碑",
+      routeLabel: "萬獸山莊",
+      chainLabel: "帝血入殿",
+      memoryCue: "接引仙殿會記住帝血骨印，後續體修事件可讀取這段 v3 宗門路線記憶。",
+      sectLabel: "萬獸山莊仙階承接",
+    },
+    chain: {
+      chainId: "sect-world-beast-route",
+      step: 3,
+      worldMemoryTags: ["sect:beast:world-chapter-03"],
+    },
+    choices: [
+      {
+        id: "withstand_immortal_blood_echo",
+        label: "承受帝血回聲",
+        description: "以肉身承受仙殿血臺回壓，把帝血骨印的節奏推成仙人境底盤。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "萬獸山莊世界章節" },
+            { kind: "benefit", label: "仙人體修" },
+          ],
+        },
+        reward: {
+          experience: 1210000,
+          logMessage: "你硬撐接引帝血回聲，萬獸山莊的 v3 仙階肉身路線被血臺重新釘牢。",
+        },
+      },
+      {
+        id: "claim_immortal_bloodbone",
+        label: "剝取接引血骨",
+        description: "從帝血骨印下剝取被仙階血臺壓實的血骨，留給後續鍛體與器方。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "resource", label: "萬獸血骨殘材 x2" },
+            { kind: "risk", label: "萬獸山莊" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "beast_path_bloodbone", count: 2 }],
+          logMessage: "你取回接引血骨，讓萬獸山莊 v3 世界章節接回高階鍛材來源。",
+        },
+      },
+    ],
+  }),
+  mystic_world_immortal_star_oath: createSingleRealmEncounterEvent({
+    id: "mystic_world_immortal_star_oath",
+    title: "接引星詔回聲",
+    description: "星詔牒在接引仙殿星臺展開，縹緲仙宮的神識路線留下 v3 仙階宗門回聲。",
+    realm: MajorRealm.Immortal,
+    selector: {
+      weight: 4,
+      repeatPolicy: "once_per_run",
+      eligibleProfessions: [ProfessionType.Mage],
+      requiredCompletedQuestIds: ["sect_mystic_world_chapter_03"],
+    },
+    presentation: {
+      categoryLabel: "仙人 v3 世界章節里程碑",
+      routeLabel: "縹緲仙宮",
+      chainLabel: "星詔入殿",
+      memoryCue: "接引仙殿會記住星詔牒，後續法修事件可讀取這段 v3 宗門路線記憶。",
+      sectLabel: "縹緲仙宮仙階承接",
+    },
+    chain: {
+      chainId: "sect-world-mystic-route",
+      step: 3,
+      worldMemoryTags: ["sect:mystic:world-chapter-03"],
+    },
+    choices: [
+      {
+        id: "read_immortal_star_decree",
+        label: "讀取星詔回聲",
+        description: "順著星詔牒在仙殿星臺中展開的星位，把仙人境術式推成可追蹤章節。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "縹緲仙宮世界章節" },
+            { kind: "benefit", label: "仙人法修" },
+          ],
+        },
+        reward: {
+          experience: 1320000,
+          logMessage: "你讀完接引星詔回聲，縹緲仙宮的 v3 仙階神識路線在星臺上定型。",
+        },
+      },
+      {
+        id: "gather_immortal_starlotus",
+        label: "凝取接引星蓮",
+        description: "把星詔牒外溢的仙階星砂凝成星魂蓮，留給後續丹方與術式推演。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "縹緲星魂蓮 x2" },
+            { kind: "benefit", label: "縹緲仙宮" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "mystic_path_starlotus", count: 2 }],
+          logMessage: "你凝下接引星蓮，讓縹緲仙宮 v3 世界章節能反向支撐高階丹方。",
+        },
+      },
+    ],
+  }),
   sword_emperor_heaven_sunder_oath: createSingleRealmEncounterEvent({
     id: "sword_emperor_heaven_sunder_oath",
     title: "斬天帝劍盟",
