@@ -25,17 +25,18 @@ const createInventoryStore = (preloadedState?: Partial<TestStoreState>) =>
   });
 
 const renderInventory = (
-  props: Partial<React.ComponentProps<typeof Inventory>> = {}
+  props: Partial<React.ComponentProps<typeof Inventory>> = {},
+  itemId = "heal_pill"
 ) => {
   const inventory = {
     ...inventoryReducer(undefined, { type: "@@INIT" }),
-    items: [{ itemId: "heal_pill", count: 2 }],
+    items: [{ itemId, count: 2 }],
   };
   const store = createInventoryStore({ inventory });
 
   return renderToStaticMarkup(
     <Provider store={store}>
-      <Inventory embedded initialSelectedItemId="heal_pill" {...props} />
+      <Inventory embedded initialSelectedItemId={itemId} {...props} />
     </Provider>
   );
 };
@@ -54,9 +55,27 @@ describe("Inventory combat supplies", () => {
       combatResourceContext: {
         hp: { current: 40, max: 120 },
       },
+      onUseRecoveryConsumable: () => true,
     });
 
     expect(markup).toContain("回春丹");
     expect(markup).not.toContain("目前無法使用");
+  });
+
+  it("blocks recovery pills when no runtime recovery handler is provided", () => {
+    const markup = renderInventory({
+      combatResourceContext: {
+        hp: { current: 40, max: 120 },
+      },
+    });
+
+    expect(markup).toContain("目前無法使用：目前沒有可套用補給的戰鬥流程");
+  });
+
+  it("shows non-recovery consumable effects with the shared readable labels", () => {
+    const markup = renderInventory({}, "foundation_pill");
+
+    expect(markup).toContain("築基輔助丹");
+    expect(markup).toContain("突破機率: +10%");
   });
 });

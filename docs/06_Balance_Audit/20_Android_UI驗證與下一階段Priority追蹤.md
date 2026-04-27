@@ -383,3 +383,21 @@ Change id: `refactor-compendium-route-browsing-v4`
 - 不新增 persisted schema。
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；Compendium v4 只從既有 `ITEMS`、skill registry、sect config、source tracing helper、world memory tag 與 endgame catalog cue 推導 UI 摘要。
+
+## 20. 補給經濟與 consumable runtime v4 收口記錄
+
+Change id: `complete-supply-economy-and-consumables-v4`
+
+本輪把已存在的商店補給與恢復品流程補成可被 regression 守住的 runtime contract：
+
+- `data/shops.test.ts` 擴大為所有正式商店都必須非空，且每個 shop item id 都要存在於 `ITEMS`，實際補上 `sect_skill_sword` 等宗門藏經閣的正式基礎秘卷來源。
+- `heal_hp / heal_mp / full_restore` helper 補齊 MP、雙資源 full restore、缺資源阻擋與已滿資源阻擋 regression。
+- Inventory recovery consumable 必須同時有可恢復 resource 與 runtime recovery handler 才能服用；沒有 handler 時會顯示不可用原因，不會扣道具。
+- Shop / Inventory 改用共用 consumable effect label，`breakthrough_chance` 在背包不再顯示空白效果列。
+- `characterSlice.consumeItem` 仍只處理壽元、修為、屬性與技能學習等角色成長效果，`heal_hp / heal_mp / full_restore` 不會被算進角色消耗次數。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；補給 v4 只讀既有 `ITEMS`、`SHOPS`、inventory slots、character state 與當前可見 combat runtime resource。

@@ -26,6 +26,38 @@ export const hasRecoveryEffect = (effects: readonly ConsumableEffect[]) =>
   hasEffect(effects, "heal_mp") ||
   hasEffect(effects, "full_restore");
 
+export const formatConsumableEffectLabel = (
+  effect: ConsumableEffect,
+  options: { skillName?: string; useColon?: boolean } = {}
+) => {
+  const separator = options.useColon ? ": " : " ";
+
+  switch (effect.type) {
+    case "full_restore":
+      return "完全恢復狀態";
+    case "heal_hp":
+      return `恢復氣血${separator}${effect.value}`;
+    case "heal_mp":
+      return `恢復真元${separator}${effect.value}`;
+    case "gain_exp":
+      return `修為 +${effect.value}`;
+    case "buff_stat":
+      return effect.stat
+        ? `提升${effect.stat}: +${effect.value}`
+        : `屬性 +${effect.value}`;
+    case "lifespan":
+      return `壽元 +${effect.value}`;
+    case "breakthrough_chance":
+      return `突破機率: +${effect.value}%`;
+    case "learn_skill":
+      return options.skillName
+        ? `參悟後習得：【${options.skillName}】`
+        : "功法秘卷";
+    default:
+      return "";
+  }
+};
+
 export const getConsumableRecoveryBlockedReason = (
   effects: readonly ConsumableEffect[],
   resources: ConsumableRuntimeResources

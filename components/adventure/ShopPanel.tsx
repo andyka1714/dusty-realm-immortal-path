@@ -27,7 +27,10 @@ import {
     getSkillManualAcquisitionTierLabel,
     getSkillManualSourceLabels,
 } from '../../data/items/manuals';
-import { hasRecoveryEffect } from '../../utils/consumableEffects';
+import {
+    formatConsumableEffectLabel,
+    hasRecoveryEffect,
+} from '../../utils/consumableEffects';
 
 
 // Helper for attribute names (Moved from Inventory to be shared concept ideally, but kept here for now)
@@ -297,14 +300,7 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                                                             : "border-stone-800 bg-stone-950/60 text-stone-400"
                                                     )}
                                                 >
-                                                    {effect.type === 'full_restore' && '完全恢復狀態'}
-                                                    {effect.type === 'heal_hp' && `恢復氣血 ${effect.value}`}
-                                                    {effect.type === 'heal_mp' && `恢復真元 ${effect.value}`}
-                                                    {effect.type === 'gain_exp' && `修為 +${effect.value}`}
-                                                    {effect.type === 'lifespan' && `壽元 +${effect.value}`}
-                                                    {effect.type === 'breakthrough_chance' && `突破 +${effect.value}%`}
-                                                    {effect.type === 'learn_skill' && '功法秘卷'}
-                                                    {effect.type === 'buff_stat' && `屬性 +${effect.value}`}
+                                                    {formatConsumableEffectLabel(effect)}
                                                 </span>
                                             ))}
                                             <span className="rounded-full border border-amber-900/50 bg-amber-950/25 px-2 py-0.5 text-amber-200">
@@ -435,11 +431,9 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                                      <div className="mt-2 space-y-1 text-xs text-stone-400">
                                         {(item as any).effects.map((effect: any, i: number) => (
                                             <div key={i}>
-                                                {effect.type === 'full_restore' && '完全恢復狀態'}
-                                                {effect.type === 'heal_hp' && `恢復氣血: ${effect.value}`}
-                                                {effect.type === 'heal_mp' && `恢復真元: ${effect.value}`}
-                                                {effect.type === 'buff_stat' && `提升${effect.stat}: +${effect.value}`}
-                                                {effect.type === 'breakthrough_chance' && `突破機率: +${effect.value}%`}
+                                                {formatConsumableEffectLabel(effect, {
+                                                    useColon: true,
+                                                })}
                                             </div>
                                         ))}
                                         {(() => {

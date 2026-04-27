@@ -19,6 +19,14 @@ describe("consumable recovery effects", () => {
     );
   });
 
+  it("blocks MP recovery when true essence is already full", () => {
+    expect(
+      getConsumableRecoveryBlockedReason(healMp, {
+        mp: { current: 80, max: 80 },
+      })
+    ).toBe("真元已滿");
+  });
+
   it("blocks HP recovery when the player is already full", () => {
     expect(
       getConsumableRecoveryBlockedReason(healHp, {
@@ -38,12 +46,23 @@ describe("consumable recovery effects", () => {
     });
 
     expect(
+      applyConsumableRecoveryEffects(healMp, {
+        mp: { current: 20, max: 80 },
+      })
+    ).toMatchObject({
+      appliedEffects: 1,
+      mp: { current: 50, max: 80 },
+    });
+
+    expect(
       applyConsumableRecoveryEffects(fullRestore, {
         hp: { current: 40, max: 120 },
+        mp: { current: 20, max: 80 },
       })
     ).toMatchObject({
       appliedEffects: 1,
       hp: { current: 120, max: 120 },
+      mp: { current: 80, max: 80 },
     });
   });
 });

@@ -4,6 +4,19 @@ import { ITEMS } from "./items";
 import { ConsumableItem, ItemCategory } from "../types";
 
 describe("shop supply catalog", () => {
+  it("keeps every formal shop stocked with valid catalog items", () => {
+    for (const shop of Object.values(SHOPS)) {
+      expect(shop.items.length, `${shop.id} should not be empty`).toBeGreaterThan(0);
+
+      for (const shopItem of shop.items) {
+        expect(
+          ITEMS[shopItem.itemId],
+          `${shop.id} references missing item ${shopItem.itemId}`
+        ).toBeDefined();
+      }
+    }
+  });
+
   it("keeps the mortal general store stocked with readable basic supplies", () => {
     const generalStore = SHOPS.general_store_mortal;
 

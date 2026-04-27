@@ -25,6 +25,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
 import {
+  formatConsumableEffectLabel,
   getConsumableRecoveryBlockedReason,
   hasRecoveryEffect,
   type ConsumableRuntimeResources,
@@ -34,12 +35,17 @@ interface InventoryProps {
   embedded?: boolean;
   initialSelectedItemId?: string;
   combatResourceContext?: ConsumableRuntimeResources;
+  onUseRecoveryConsumable?: (payload: {
+    slot: InventorySlot;
+    item: ConsumableItem;
+  }) => boolean;
 }
 
 export const Inventory: React.FC<InventoryProps> = ({
   embedded = false,
   initialSelectedItemId,
   combatResourceContext = {},
+  onUseRecoveryConsumable,
 }) => {
   const { items, equipment } = useSelector((state: RootState) => state.inventory);
   const character = useSelector((state: RootState) => state.character);
@@ -104,10 +110,17 @@ export const Inventory: React.FC<InventoryProps> = ({
 
     if (!manualEffect?.skillId) {
       if (hasRecoveryEffect(item.effects)) {
-        return getConsumableRecoveryBlockedReason(
+        const recoveryBlockedReason = getConsumableRecoveryBlockedReason(
           item.effects,
           combatResourceContext
         );
+        if (recoveryBlockedReason) {
+          return recoveryBlockedReason;
+        }
+
+        if (!onUseRecoveryConsumable) {
+          return '目前沒有可套用補給的戰鬥流程';
+        }
       }
 
       return null;
@@ -306,6 +319,23 @@ export const Inventory: React.FC<InventoryProps> = ({
         message: `[${consumable.name}] 無法使用：${blockedReason}。`,
         type: 'warning-low',
       }));
+      return;
+    }
+
+    if (hasRecoveryEffect(consumable.effects)) {
+      const didUseRecovery = onUseRecoveryConsumable?.({
+        slot: selectedSlot,
+        item: consumable,
+      });
+
+      if (!didUseRecovery) {
+        dispatch(addLog({
+          message: `[${consumable.name}] 無法使用：目前沒有可套用補給的戰鬥流程。`,
+          type: 'warning-low',
+        }));
+      } else if (!selectedSlot.instanceId && selectedSlot.count <= 1) {
+        setSelectedSlot(null);
+      }
       return;
     }
 
@@ -769,13 +799,10 @@ export const Inventory: React.FC<InventoryProps> = ({
                          <div className="text-xs text-stone-400 space-y-1">
                            {(selectedItemDef as ConsumableItem).effects.map((effect, idx) => (
                                <div key={idx}>
-                                   {effect.type === 'full_restore' && '完全恢復狀態'}
-                                   {effect.type === 'heal_hp' && `恢復氣血: ${effect.value}`}
-                                   {effect.type === 'heal_mp' && `恢復真元: ${effect.value}`}
-                                   {effect.type === 'buff_stat' && `提升${effect.stat}: +${effect.value}`}
-                                   {effect.type === 'gain_exp' && `直接獲得修為: ${effect.value}`}
-                                   {effect.type === 'lifespan' && `增加壽元: ${effect.value}`}
-                                   {effect.type === 'learn_skill' && selectedSkill && `參悟後習得：【${selectedSkill.name}】`}
+                                   {formatConsumableEffectLabel(effect, {
+                                     skillName: selectedSkill?.name,
+                                     useColon: true,
+                                   })}
                                </div>
                            ))}
                            {selectedConsumable?.requiredProfession && (

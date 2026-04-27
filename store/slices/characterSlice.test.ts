@@ -204,7 +204,7 @@ describe("character skill acquisition rules", () => {
   it("does not count runtime-only recovery effects as consumed character effects", () => {
     const base = reducer(undefined, { type: "test/init" });
 
-    const next = reducer(
+    const afterHealHp = reducer(
       {
         ...base,
         itemConsumption: {},
@@ -215,6 +215,18 @@ describe("character skill acquisition rules", () => {
       })
     );
 
-    expect(next.itemConsumption.heal_pill).toBeUndefined();
+    const afterHealMp = reducer(afterHealHp, consumeItem({
+      itemId: "spirit_recovery_test",
+      effects: [{ type: "heal_mp", value: 30 }],
+    }));
+
+    const afterFullRestore = reducer(afterHealMp, consumeItem({
+      itemId: "full_restore_test",
+      effects: [{ type: "full_restore", value: 0 }],
+    }));
+
+    expect(afterFullRestore.itemConsumption.heal_pill).toBeUndefined();
+    expect(afterFullRestore.itemConsumption.spirit_recovery_test).toBeUndefined();
+    expect(afterFullRestore.itemConsumption.full_restore_test).toBeUndefined();
   });
 });

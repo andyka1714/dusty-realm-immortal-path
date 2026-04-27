@@ -34,20 +34,14 @@ const QI_SKILL_MANUALS = getManualIds(
   filterByRealm(SHOP_CORE_SKILLS, (realm) => realm <= MajorRealm.QiRefining)
 );
 
-const SWORD_SECT_MANUALS = getManualIds(
-  filterByRealm(SHOP_CORE_SKILLS, (realm) => realm > MajorRealm.QiRefining)
-    .filter((skill) => skill.profession === ProfessionType.Sword)
-);
+const getSectManuals = (profession: ProfessionType) =>
+  getManualIds(
+    SHOP_CORE_SKILLS.filter((skill) => skill.profession === profession)
+  );
 
-const BODY_SECT_MANUALS = getManualIds(
-  filterByRealm(SHOP_CORE_SKILLS, (realm) => realm > MajorRealm.QiRefining)
-    .filter((skill) => skill.profession === ProfessionType.Body)
-);
-
-const MAGE_SECT_MANUALS = getManualIds(
-  filterByRealm(SHOP_CORE_SKILLS, (realm) => realm > MajorRealm.QiRefining)
-    .filter((skill) => skill.profession === ProfessionType.Mage)
-);
+const SWORD_SECT_MANUALS = getSectManuals(ProfessionType.Sword);
+const BODY_SECT_MANUALS = getSectManuals(ProfessionType.Body);
+const MAGE_SECT_MANUALS = getSectManuals(ProfessionType.Mage);
 
 const INHERITANCE_MANUALS = getManualIds(
   getFormalCoreSkills({ formalSourceTier: "inheritance" })

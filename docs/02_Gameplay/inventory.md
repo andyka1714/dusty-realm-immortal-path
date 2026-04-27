@@ -78,7 +78,9 @@
 
 - 背包選中恢復品時，會顯示該道具的 `heal_hp / heal_mp / full_restore` effect 與目前可用狀態。
 - 若目前沒有對應 runtime resource，背包會顯示不可用原因並停用「服用」。
+- 若目前沒有 runtime recovery handler，即使傳入受傷資源，背包仍會阻擋服用，避免只扣道具卻沒有資源變化。
 - 若玩家已滿血，`heal_hp / full_restore` 會顯示「氣血已滿」，不會扣道具。
 - Adventure 即時戰鬥面板會讀取背包中的第一個恢復品，當玩家氣血低於上限時提供「服用」快捷入口。
 - 成功服用時，`worldPlayerHp` 立即回復並同步扣除背包數量；這是目前正式可見 HP resource，不新增 persisted combat resource。
 - `heal_mp` 仍等待正式 MP resource；目前只能顯示不可用原因，不得靜默消耗。
+- 商店與背包共用 consumable effect label，`breakthrough_chance`、`gain_exp`、`heal_hp`、`heal_mp`、`full_restore` 與秘卷效果需維持一致文案。
