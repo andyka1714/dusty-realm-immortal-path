@@ -418,3 +418,19 @@ Change id: `refine-shop-manual-drop-routing-v4`
 - 不新增 persisted schema。
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；routing v4 只讀既有 `Skill` metadata、manual item id、商店 catalog 與敵人 drop catalog。
+
+## 22. 道途面板修行布局 regression 收口記錄
+
+Change id: direct bugfix `fix(dashboard): stabilize cultivation panel layout`
+
+本輪修正使用者在 `道途` shared panel 回報的兩個 UI regression：
+
+- `境界突破` 按鈕外層仍使用共用 Button 預設高度，內層卻是 120px 高，導致按鈕內容溢出並看起來跑到右側疊住其他控制。
+- embedded Dashboard 左欄的 `修煉日誌` 容器被 flex 壓到只剩 2px 高，玩家只能看到標題，看不到「暫無消息」或後續日誌內容。
+- Playwright regression 已補在 `character panel keeps dashboard panes and stat tooltip anchored`，同時檢查日誌 panel 高度、日誌內容可讀、突破按鈕高度與運功按鈕一致。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；這是純 Dashboard layout / Playwright regression 修正。
