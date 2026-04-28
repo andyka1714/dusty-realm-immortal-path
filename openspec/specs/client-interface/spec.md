@@ -657,6 +657,11 @@ Workshop 介面必須 (MUST) 顯示 mastery milestone、specialization leaf、ro
 - **AND** `功法` 入口必須指向角色已學功法與戰鬥配置
 - **AND** `圖鑑` 入口必須保持資料庫與來源查詢職責
 
+#### Scenario: 玩家查看底部功能入口
+- **WHEN** 底部 dock 顯示道途、背包、功法、洞府、圖鑑與地圖入口
+- **THEN** 每個入口必須以獨立按鈕呈現，不得共用一整條 bar 背景
+- **AND** active 入口必須有獨立的外框、圖示座與狀態色
+
 ### Requirement: 主畫面 HUD 必須提供 mobile-first 角色狀態
 介面必須 (MUST) 在主畫面顯示 mobile-first 的角色狀態卡，包含名稱、境界、推導等級、HP、MP、戰力與活動狀態。
 

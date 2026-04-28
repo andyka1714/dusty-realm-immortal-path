@@ -43,34 +43,42 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
 }) => {
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-4 z-[3200] flex justify-center px-4"
+      className="pointer-events-none fixed inset-x-0 bottom-4 z-[3200] flex justify-center px-3"
       data-testid="floating-dock"
+      data-display-mode="separate-actions"
     >
-      <div className="pointer-events-auto flex items-center gap-2 rounded-[24px] border border-stone-700/80 bg-stone-950/85 px-3 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+      <div
+        className="pointer-events-auto flex max-w-full items-end justify-center gap-2 overflow-x-auto rounded-[28px] px-1 py-1 [scrollbar-width:none] sm:gap-3"
+        data-testid="floating-dock-actions"
+      >
         {ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = activePanel === item.id;
 
           return (
-            <div key={item.id} className="group relative">
+            <div
+              key={item.id}
+              className="group relative shrink-0"
+              data-testid={`dock-action-${item.id}`}
+            >
               <Button
                 onClick={() => onTogglePanel(item.id)}
                 variant="tab"
                 size="sm"
                 className={clsx(
-                  "flex min-w-[60px] flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs tracking-widest transition-all",
+                  "flex h-auto min-w-[58px] flex-col items-center gap-1.5 rounded-2xl border px-2.5 py-2 text-[11px] tracking-widest shadow-[0_10px_28px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all sm:min-w-[66px] sm:px-3 sm:text-xs",
                   isActive
-                    ? "bg-amber-500/15 text-amber-300 shadow-[inset_0_0_0_1px_rgba(245,158,11,0.3)]"
-                    : "text-stone-400 hover:bg-stone-800/80 hover:text-stone-100"
+                    ? "border-amber-500/65 bg-amber-500/18 text-amber-200 shadow-[0_0_0_1px_rgba(245,158,11,0.18),0_14px_34px_rgba(0,0,0,0.48)]"
+                    : "border-stone-700/75 bg-stone-950/82 text-stone-400 hover:border-stone-500/85 hover:bg-stone-900/90 hover:text-stone-100"
                 )}
                 data-testid={`dock-${item.id}`}
               >
                 <div
                   className={clsx(
-                    "flex h-9 w-9 items-center justify-center rounded-full border transition-colors",
+                    "flex h-8 w-8 items-center justify-center rounded-full border transition-colors sm:h-9 sm:w-9",
                     isActive
-                      ? "border-amber-500/60 bg-amber-500/10"
-                      : "border-stone-700 bg-stone-900/80 group-hover:border-stone-500"
+                      ? "border-amber-400/70 bg-amber-400/14"
+                      : "border-stone-700/90 bg-black/20 group-hover:border-stone-500"
                   )}
                 >
                   <Icon size={18} />
