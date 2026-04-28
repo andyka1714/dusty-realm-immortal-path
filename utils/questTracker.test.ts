@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { ElementType, EnemyRank, MajorRealm, NPCType, QuestType } from "../types";
+import {
+  ElementType,
+  EnemyRank,
+  MajorRealm,
+  NPCType,
+  QuestType,
+} from "../types";
 import { buildQuestTrackerItems } from "./questTracker";
 
 describe("questTracker", () => {
@@ -120,7 +126,10 @@ describe("questTracker", () => {
       questId: "scripture",
       title: "藏經初問",
       typeLabel: "主線",
-      statusLabel: "下一主線",
+      statusLabel: "可接取",
+      lifecycleStatus: "available",
+      lifecycleLabel: "可接取",
+      primaryActionLabel: "前往藏經閣執事",
       isSuggested: true,
       navigationTarget: {
         kind: "npc",
@@ -129,6 +138,88 @@ describe("questTracker", () => {
         y: 25,
         label: "前往藏經閣執事",
       },
+    });
+  });
+
+  it("derives ready and active lifecycle statuses separately", () => {
+    const items = buildQuestTrackerItems({
+      activeQuests: {
+        ready_report: { progress: 1, isReadyToComplete: true },
+        active_hunt: { progress: 1, isReadyToComplete: false },
+      },
+      quests: {
+        ready_report: {
+          id: "ready_report",
+          type: QuestType.Main,
+          title: "回報仙緣",
+          description: "",
+          giverId: "chief",
+          submitNpcId: "blacksmith",
+          requirements: [{ type: "dialogue", targetNpcId: "chief" }],
+          rewards: [],
+          dialogue: { start: [], progress: [], complete: [] },
+        },
+        active_hunt: {
+          id: "active_hunt",
+          type: QuestType.Side,
+          title: "清理妖巢",
+          description: "",
+          giverId: "chief",
+          requirements: [{ type: "kill", targetId: "wolf", count: 3 }],
+          rewards: [],
+          dialogue: { start: [], progress: [], complete: [] },
+        },
+      },
+    });
+
+    expect(items[0]).toMatchObject({
+      lifecycleStatus: "ready",
+      lifecycleLabel: "可回報",
+      primaryActionLabel: "回報任務",
+    });
+    expect(items[1]).toMatchObject({
+      lifecycleStatus: "active",
+      lifecycleLabel: "進行中",
+      primaryActionLabel: "追蹤目標",
+    });
+  });
+
+  it("builds progress rows for mixed dialogue kill item and level objectives", () => {
+    const items = buildQuestTrackerItems({
+      activeQuests: {
+        mixed_trial: { progress: 2, isReadyToComplete: false },
+      },
+      inventoryItems: [
+        { itemId: "spirit_token", count: 1 },
+      ],
+      majorRealm: MajorRealm.Foundation,
+      quests: {
+        mixed_trial: {
+          id: "mixed_trial",
+          type: QuestType.Main,
+          title: "複合試煉",
+          description: "",
+          giverId: "chief",
+          requirements: [
+            { type: "dialogue", targetNpcId: "chief" },
+            { type: "kill", targetId: "wolf", count: 3 },
+            { type: "item", targetId: "spirit_token", count: 2 },
+            { type: "level", minRealm: MajorRealm.Foundation },
+          ],
+          rewards: [],
+          dialogue: { start: [], progress: [], complete: [] },
+        },
+      },
+    });
+
+    expect(items[0]).toMatchObject({
+      objectiveKind: "mixed",
+      progressRows: [
+        { kind: "dialogue", label: "對話：前往 chief", complete: false },
+        { kind: "kill", label: "討伐 wolf", current: 2, required: 3, complete: false },
+        { kind: "item", label: "提交 spirit_token", current: 1, required: 2, complete: false },
+        { kind: "level", label: "境界需求 2", complete: true },
+      ],
     });
   });
 

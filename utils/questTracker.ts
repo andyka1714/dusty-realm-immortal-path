@@ -1,4 +1,11 @@
-import { MapData, Quest, QuestRequirement, QuestType } from "../types";
+import {
+  InventorySlot,
+  MajorRealm,
+  MapData,
+  Quest,
+  QuestRequirement,
+  QuestType,
+} from "../types";
 
 export interface ActiveQuestTrackerState {
   progress: number;
@@ -13,7 +20,29 @@ export interface QuestTrackerItem {
   progressLabel: string;
   isReadyToComplete: boolean;
   isSuggested?: boolean;
+  lifecycleStatus: QuestLifecycleStatus;
+  lifecycleLabel: string;
+  objectiveKind: QuestObjectiveKind;
+  progressRows: QuestProgressRow[];
+  primaryActionLabel: string;
   navigationTarget?: QuestNavigationTarget;
+}
+
+export type QuestLifecycleStatus = "available" | "active" | "ready";
+
+export type QuestObjectiveKind =
+  | "dialogue"
+  | "kill"
+  | "item"
+  | "level"
+  | "mixed";
+
+export interface QuestProgressRow {
+  kind: QuestObjectiveKind;
+  label: string;
+  current?: number;
+  required?: number;
+  complete: boolean;
 }
 
 export interface QuestNavigationTarget {
@@ -67,6 +96,126 @@ const formatRequirementProgress = (
     default:
       return "進行中";
   }
+};
+
+const resolveLifecycle = (
+  activeQuest: ActiveQuestTrackerState | undefined,
+  isSuggested = false
+) => {
+  if (!activeQuest || isSuggested) {
+    return {
+      lifecycleStatus: "available" as const,
+      lifecycleLabel: "可接取",
+      statusLabel: "可接取",
+    };
+  }
+
+  if (activeQuest.isReadyToComplete) {
+    return {
+      lifecycleStatus: "ready" as const,
+      lifecycleLabel: "可回報",
+      statusLabel: "可回報",
+    };
+  }
+
+  return {
+    lifecycleStatus: "active" as const,
+    lifecycleLabel: "進行中",
+    statusLabel: "進行中",
+  };
+};
+
+const getInventoryCount = (items: InventorySlot[] = [], itemId?: string) => {
+  if (!itemId) return 0;
+  return items
+    .filter((item) => item.itemId === itemId)
+    .reduce((total, item) => total + item.count, 0);
+};
+
+const formatRequirementLabel = (requirement: QuestRequirement) => {
+  switch (requirement.type) {
+    case "dialogue":
+      return `對話：前往 ${requirement.targetNpcId ?? "任務 NPC"}`;
+    case "kill":
+      return `討伐 ${requirement.targetId ?? "目標妖獸"}`;
+    case "item":
+      return `提交 ${requirement.targetId ?? "任務物品"}`;
+    case "level":
+      return requirement.minRealm !== undefined
+        ? `境界需求 ${requirement.minRealm}`
+        : "境界需求";
+    default:
+      return "任務目標";
+  }
+};
+
+const buildProgressRows = ({
+  quest,
+  activeQuest,
+  inventoryItems = [],
+  majorRealm = MajorRealm.Mortal,
+}: {
+  quest: Quest;
+  activeQuest?: ActiveQuestTrackerState;
+  inventoryItems?: InventorySlot[];
+  majorRealm?: MajorRealm;
+}): QuestProgressRow[] =>
+  quest.requirements.map((requirement) => {
+    switch (requirement.type) {
+      case "dialogue":
+        return {
+          kind: "dialogue",
+          label: formatRequirementLabel(requirement),
+          complete: Boolean(activeQuest?.isReadyToComplete),
+        };
+      case "kill": {
+        const required = requirement.count ?? 1;
+        const current = Math.min(activeQuest?.progress ?? 0, required);
+        return {
+          kind: "kill",
+          label: formatRequirementLabel(requirement),
+          current,
+          required,
+          complete: current >= required,
+        };
+      }
+      case "item": {
+        const required = requirement.count ?? 1;
+        const current = Math.min(
+          getInventoryCount(inventoryItems, requirement.targetId),
+          required
+        );
+        return {
+          kind: "item",
+          label: formatRequirementLabel(requirement),
+          current,
+          required,
+          complete: current >= required,
+        };
+      }
+      case "level":
+        return {
+          kind: "level",
+          label: formatRequirementLabel(requirement),
+          complete:
+            requirement.minRealm !== undefined &&
+            majorRealm >= requirement.minRealm,
+        };
+      default:
+        return {
+          kind: "mixed",
+          label: "任務目標",
+          complete: false,
+        };
+    }
+  });
+
+const resolveObjectiveKind = (rows: QuestProgressRow[]): QuestObjectiveKind => {
+  const kinds = new Set(rows.map((row) => row.kind));
+  if (kinds.size === 1) {
+    return rows[0]?.kind ?? "mixed";
+  }
+  return "mixed";
 };
 
 const findNpcLocation = (maps: MapData[] = [], npcId: string) => {
@@ -144,6 +293,27 @@ const resolveQuestNavigationTarget = ({
   );
 };
 
+const resolvePrimaryActionLabel = ({
+  lifecycleStatus,
+  navigationTarget,
+}: {
+  lifecycleStatus: QuestLifecycleStatus;
+  navigationTarget?: QuestNavigationTarget;
+}) => {
+  if (navigationTarget?.label) {
+    if (lifecycleStatus === "ready") {
+      return navigationTarget.label.replace(/^前往/, "回報");
+    }
+    return navigationTarget.label;
+  }
+
+  if (lifecycleStatus === "ready") {
+    return "回報任務";
+  }
+
+  return "追蹤目標";
+};
+
 const findNextMainQuest = ({
   activeQuests,
   completedQuests,
@@ -169,12 +339,16 @@ const findNextMainQuest = ({
 export const buildQuestTrackerItems = ({
   activeQuests,
   completedQuests = [],
+  inventoryItems = [],
+  majorRealm = MajorRealm.Mortal,
   quests,
   maps = [],
   limit = 4,
 }: {
   activeQuests: Record<string, ActiveQuestTrackerState>;
   completedQuests?: string[];
+  inventoryItems?: InventorySlot[];
+  majorRealm?: MajorRealm;
   quests: Record<string, Quest>;
   maps?: MapData[];
   limit?: number;
@@ -185,22 +359,38 @@ export const buildQuestTrackerItems = ({
       if (!quest) {
         return null;
       }
+      const lifecycle = resolveLifecycle(activeQuest);
+      const progressRows = buildProgressRows({
+        quest,
+        activeQuest,
+        inventoryItems,
+        majorRealm,
+      });
+      const navigationTarget = resolveQuestNavigationTarget({
+        quest,
+        activeQuest,
+        maps,
+      });
 
       return {
         questId,
         title: quest.title,
         typeLabel: QUEST_TYPE_LABELS[quest.type],
-        statusLabel: activeQuest.isReadyToComplete ? "可回報" : "追蹤中",
+        statusLabel: lifecycle.statusLabel,
         progressLabel: formatRequirementProgress(
           getPrimaryRequirement(quest),
           activeQuest
         ),
         isReadyToComplete: activeQuest.isReadyToComplete,
-        navigationTarget: resolveQuestNavigationTarget({
-          quest,
-          activeQuest,
-          maps,
+        lifecycleStatus: lifecycle.lifecycleStatus,
+        lifecycleLabel: lifecycle.lifecycleLabel,
+        objectiveKind: resolveObjectiveKind(progressRows),
+        progressRows,
+        primaryActionLabel: resolvePrimaryActionLabel({
+          lifecycleStatus: lifecycle.lifecycleStatus,
+          navigationTarget,
         }),
+        navigationTarget,
       };
     })
     .filter((item): item is QuestTrackerItem => Boolean(item))
@@ -232,21 +422,39 @@ export const buildQuestTrackerItems = ({
   }
 
   return [
-    {
-      questId: nextMainQuest.id,
-      title: nextMainQuest.title,
-      typeLabel: QUEST_TYPE_LABELS[nextMainQuest.type],
-      statusLabel: "下一主線",
-      progressLabel: formatRequirementProgress(
-        getPrimaryRequirement(nextMainQuest),
-        { progress: 0, isReadyToComplete: false }
-      ),
-      isReadyToComplete: false,
-      isSuggested: true,
-      navigationTarget: resolveQuestNavigationTarget({
+    (() => {
+      const lifecycle = resolveLifecycle(undefined, true);
+      const progressRows = buildProgressRows({
+        quest: nextMainQuest,
+        inventoryItems,
+        majorRealm,
+      });
+      const navigationTarget = resolveQuestNavigationTarget({
         quest: nextMainQuest,
         maps,
-      }),
-    },
+      });
+
+      return {
+        questId: nextMainQuest.id,
+        title: nextMainQuest.title,
+        typeLabel: QUEST_TYPE_LABELS[nextMainQuest.type],
+        statusLabel: lifecycle.statusLabel,
+        progressLabel: formatRequirementProgress(
+          getPrimaryRequirement(nextMainQuest),
+          { progress: 0, isReadyToComplete: false }
+        ),
+        isReadyToComplete: false,
+        isSuggested: true,
+        lifecycleStatus: lifecycle.lifecycleStatus,
+        lifecycleLabel: lifecycle.lifecycleLabel,
+        objectiveKind: resolveObjectiveKind(progressRows),
+        progressRows,
+        primaryActionLabel: resolvePrimaryActionLabel({
+          lifecycleStatus: lifecycle.lifecycleStatus,
+          navigationTarget,
+        }),
+        navigationTarget,
+      };
+    })(),
   ];
 };

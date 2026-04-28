@@ -729,8 +729,17 @@ test("adventure quest tracker renders active quest progress", async ({ page }) =
   await expect(tracker).toBeVisible();
   await expect(tracker).toContainText("防身利器");
   await expect(tracker).toContainText("可回報");
+  await expect(tracker.getByTestId("quest-tracker-item-tutorial_02_get_sword")).toHaveAttribute(
+    "data-lifecycle-status",
+    "ready"
+  );
   await expect(tracker).toContainText("劍宗試煉：斬虎");
+  await expect(tracker).toContainText("進行中");
   await expect(tracker).toContainText("討伐 0 / 1");
+  await expect(tracker.getByTestId("quest-tracker-item-sect_sword_task_01")).toHaveAttribute(
+    "data-lifecycle-status",
+    "active"
+  );
   await expectVerticalGapAtMost(hud, tracker, 32);
 });
 
@@ -764,7 +773,11 @@ test("adventure quest tracker suggests next main quest and navigates to its targ
 
   const tracker = page.getByTestId("quest-tracker-hud");
   await expect(tracker).toContainText("藏經初問");
-  await expect(tracker).toContainText("下一主線");
+  await expect(tracker).toContainText("可接取");
+  await expect(tracker.getByTestId("quest-tracker-item-tutorial_03_scripture_intro")).toHaveAttribute(
+    "data-lifecycle-status",
+    "available"
+  );
 
   await tracker.getByTestId("quest-tracker-item-tutorial_03_scripture_intro").click();
 

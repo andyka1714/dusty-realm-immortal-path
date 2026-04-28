@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import characterReducer from "../../store/slices/characterSlice";
+import inventoryReducer from "../../store/slices/inventorySlice";
 import questReducer from "../../store/slices/questSlice";
 import { QuestTrackerHUD } from "./QuestTrackerHUD";
 
@@ -14,10 +15,12 @@ const createMarkup = (
   const store = configureStore({
     reducer: {
       character: characterReducer,
+      inventory: inventoryReducer,
       quest: questReducer,
     },
     preloadedState: {
       character: characterReducer(undefined, { type: "@@INIT" }),
+      inventory: inventoryReducer(undefined, { type: "@@INIT" }),
       quest: {
         activeQuests,
         completedQuests,
@@ -42,8 +45,10 @@ describe("QuestTrackerHUD", () => {
     expect(markup).toContain("任務追蹤");
     expect(markup).toContain("防身利器");
     expect(markup).toContain("可回報");
+    expect(markup).toContain('data-lifecycle-status="ready"');
     expect(markup).toContain("劍宗試煉：斬虎");
     expect(markup).toContain("討伐 0 / 1");
+    expect(markup).toContain('data-lifecycle-status="active"');
     expect(markup).toContain('data-layout-anchor="below-character-hud"');
   });
 
@@ -61,7 +66,8 @@ describe("QuestTrackerHUD", () => {
     const markup = createMarkup({}, ["tutorial_01", "tutorial_02_get_sword"]);
 
     expect(markup).toContain("藏經初問");
-    expect(markup).toContain("下一主線");
+    expect(markup).toContain("可接取");
+    expect(markup).toContain('data-lifecycle-status="available"');
     expect(markup).toContain('data-testid="quest-tracker-item-tutorial_03_scripture_intro"');
     expect(markup).toContain('data-navigation-kind="npc"');
     expect(markup).toContain("前往藏經閣執事");
