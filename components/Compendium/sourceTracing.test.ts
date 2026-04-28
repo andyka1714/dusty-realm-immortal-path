@@ -77,6 +77,13 @@ describe("Compendium source tracing helpers", () => {
     expect(dropSources.some((source) => source.rank === EnemyRank.Common)).toBe(true);
     expect(dropSources.some((source) => source.rank === EnemyRank.Elite)).toBe(true);
     expect(dropSources.some((source) => source.rank === EnemyRank.Boss)).toBe(true);
+    const rankOrder = dropSources.map((source) => source.rank);
+    expect(rankOrder.lastIndexOf(EnemyRank.Common)).toBeLessThan(
+      rankOrder.indexOf(EnemyRank.Elite)
+    );
+    expect(rankOrder.lastIndexOf(EnemyRank.Elite)).toBeLessThan(
+      rankOrder.indexOf(EnemyRank.Boss)
+    );
     expect(dropSources.every((source) => source.detail === undefined)).toBe(true);
     expect(workshopSink?.label).toContain("工坊用途：可用於");
     expect(materialTrace.sources.map((source) => source.label).join("\n")).not.toContain(

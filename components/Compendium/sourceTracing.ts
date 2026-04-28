@@ -16,7 +16,7 @@ import {
   type WorkshopRecipeDiscipline,
   type WorkshopRecipeTier,
 } from "../../data/workshopRecipes";
-import { MajorRealmCN, type EnemyRank, type ProfessionType, type Skill } from "../../types";
+import { EnemyRank, MajorRealmCN, type ProfessionType, type Skill } from "../../types";
 import { getSkill } from "../../data/skills";
 
 export type CompendiumSourceKind =
@@ -115,6 +115,31 @@ const dedupeStrings = (values: Array<string | undefined>) =>
 const compareByLabel = <T>(getLabel: (value: T) => string) => (left: T, right: T) =>
   getLabel(left).localeCompare(getLabel(right), "zh-Hant");
 
+const DROP_RANK_TRACE_PRIORITY: Record<EnemyRank, number> = {
+  [EnemyRank.Common]: 0,
+  [EnemyRank.Elite]: 1,
+  [EnemyRank.Boss]: 2,
+};
+
+const compareDropSource = (
+  left: CompendiumDropSource,
+  right: CompendiumDropSource
+) => {
+  const leftPriority = DROP_RANK_TRACE_PRIORITY[left.rank];
+  const rightPriority = DROP_RANK_TRACE_PRIORITY[right.rank];
+
+  if (leftPriority !== rightPriority) {
+    return leftPriority - rightPriority;
+  }
+
+  const realmCompare = left.realmLabel.localeCompare(right.realmLabel, "zh-Hant");
+  if (realmCompare !== 0) {
+    return realmCompare;
+  }
+
+  return left.enemyName.localeCompare(right.enemyName, "zh-Hant");
+};
+
 const WORKSHOP_SINK_TRACE_PRIORITY: Record<string, number> = {
   immortal_emperor_sword_forge: 0,
   immortal_ascension_elixir: 0,
@@ -161,7 +186,7 @@ const buildDropSources = (itemId: string): CompendiumDropSource[] =>
       rank: enemy.rank,
       realmLabel: MajorRealmCN[enemy.realm],
     }))
-    .sort(compareByLabel((source) => `${source.realmLabel}:${source.enemyName}`));
+    .sort(compareDropSource);
 
 const buildShopSources = (itemId: string): CompendiumShopSource[] =>
   Object.values(SHOPS)
