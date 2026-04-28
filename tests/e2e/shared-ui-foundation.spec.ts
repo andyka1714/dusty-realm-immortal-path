@@ -148,6 +148,21 @@ const expectDoesNotCover = async (topLocator: Locator, lowerLocator: Locator) =>
   expect(topBox.y + topBox.height).toBeLessThanOrEqual(lowerBox.y + 1);
 };
 
+const expectVerticalGapAtMost = async (
+  topLocator: Locator,
+  lowerLocator: Locator,
+  maxGap: number
+) => {
+  await expectDoesNotCover(topLocator, lowerLocator);
+  const topBox = await topLocator.boundingBox();
+  const lowerBox = await lowerLocator.boundingBox();
+  expect(topBox).not.toBeNull();
+  expect(lowerBox).not.toBeNull();
+  if (!topBox || !lowerBox) return;
+
+  expect(lowerBox.y - (topBox.y + topBox.height)).toBeLessThanOrEqual(maxGap);
+};
+
 const expectCanvasHasNonBlackPixels = async (canvas: Locator) => {
   const image = PNG.sync.read(await canvas.screenshot({ type: "png" }));
   let nonBlack = 0;
@@ -716,7 +731,47 @@ test("adventure quest tracker renders active quest progress", async ({ page }) =
   await expect(tracker).toContainText("可回報");
   await expect(tracker).toContainText("劍宗試煉：斬虎");
   await expect(tracker).toContainText("討伐 0 / 1");
-  await expectDoesNotCover(hud, tracker);
+  await expectVerticalGapAtMost(hud, tracker, 32);
+});
+
+test("adventure quest tracker suggests next main quest and navigates to its target", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  const save = createActiveRunSave();
+  const adventure = save.current.adventure as RootFixtureState["adventure"];
+  const quest = save.current.quest as RootFixtureState["quest"];
+  await installSave(page, {
+    ...save,
+    current: {
+      ...save.current,
+      adventure: {
+        ...adventure,
+        currentMapId: "0",
+        playerPosition: { x: 20, y: 20 },
+      },
+      quest: {
+        ...quest,
+        activeQuests: {},
+        completedQuests: ["tutorial_01", "tutorial_02_get_sword"],
+      },
+    },
+  });
+
+  await page.goto("/");
+  await page.getByRole("heading", { name: "仙緣鎮" }).click();
+  await expect(page.getByTestId("adventure-minimap-status")).toBeVisible();
+
+  const tracker = page.getByTestId("quest-tracker-hud");
+  await expect(tracker).toContainText("藏經初問");
+  await expect(tracker).toContainText("下一主線");
+
+  await tracker.getByTestId("quest-tracker-item-tutorial_03_scripture_intro").click();
+
+  await expect(page.getByTestId("adventure-minimap-status")).toContainText(
+    "20,25",
+    { timeout: 6000 }
+  );
 });
 
 test("mobile adventure quest tracker expands without covering the dock", async ({

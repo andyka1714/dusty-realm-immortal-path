@@ -8,7 +8,8 @@ import questReducer from "../../store/slices/questSlice";
 import { QuestTrackerHUD } from "./QuestTrackerHUD";
 
 const createMarkup = (
-  activeQuests: ReturnType<typeof questReducer>["activeQuests"] = {}
+  activeQuests: ReturnType<typeof questReducer>["activeQuests"] = {},
+  completedQuests: string[] = []
 ) => {
   const store = configureStore({
     reducer: {
@@ -19,7 +20,7 @@ const createMarkup = (
       character: characterReducer(undefined, { type: "@@INIT" }),
       quest: {
         activeQuests,
-        completedQuests: [],
+        completedQuests,
       },
     },
   });
@@ -47,9 +48,23 @@ describe("QuestTrackerHUD", () => {
   });
 
   it("renders a compact empty state", () => {
-    const markup = createMarkup();
+    const markup = createMarkup({}, [
+      "tutorial_01",
+      "tutorial_02_get_sword",
+      "tutorial_03_scripture_intro",
+    ]);
 
     expect(markup).toContain("目前沒有進行中的任務");
+  });
+
+  it("renders next main quest guidance when no quest is active", () => {
+    const markup = createMarkup({}, ["tutorial_01", "tutorial_02_get_sword"]);
+
+    expect(markup).toContain("藏經初問");
+    expect(markup).toContain("下一主線");
+    expect(markup).toContain('data-testid="quest-tracker-item-tutorial_03_scripture_intro"');
+    expect(markup).toContain('data-navigation-kind="npc"');
+    expect(markup).toContain("前往藏經閣執事");
   });
 
   it("renders a mobile trigger and collapsible sheet without persisted state", () => {

@@ -1,20 +1,45 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { CheckCircle2, ScrollText, X } from "lucide-react";
+import { CheckCircle2, MapPin, ScrollText, X } from "lucide-react";
 import clsx from "clsx";
+import { MAPS } from "../../data/maps";
 import { QUESTS } from "../../data/quests";
 import { RootState } from "../../store/store";
-import { buildQuestTrackerItems } from "../../utils/questTracker";
+import {
+  buildQuestTrackerItems,
+  QuestNavigationTarget,
+} from "../../utils/questTracker";
 import { Button } from "../ui/button";
+
+const QUEST_NAVIGATION_EVENT = "dusty-realm:quest-navigation";
+
+const dispatchQuestNavigation = (
+  navigationTarget: QuestNavigationTarget | undefined
+) => {
+  if (!navigationTarget || typeof window === "undefined") {
+    return;
+  }
+
+  window.dispatchEvent(
+    new CustomEvent<QuestNavigationTarget>(QUEST_NAVIGATION_EVENT, {
+      detail: navigationTarget,
+    })
+  );
+};
 
 export const QuestTrackerHUD: React.FC = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const activeQuests = useSelector(
     (state: RootState) => state.quest.activeQuests
   );
+  const completedQuests = useSelector(
+    (state: RootState) => state.quest.completedQuests
+  );
   const trackerItems = buildQuestTrackerItems({
     activeQuests,
+    completedQuests,
     quests: QUESTS,
+    maps: MAPS,
     limit: 4,
   });
 
@@ -27,12 +52,23 @@ export const QuestTrackerHUD: React.FC = () => {
       ) : (
         <div className="space-y-2">
           {trackerItems.map((item) => (
-            <div
+            <Button
               key={item.questId}
+              type="button"
+              variant="ghost"
+              data-testid={`quest-tracker-item-${item.questId}`}
+              data-navigation-kind={item.navigationTarget?.kind ?? "none"}
+              disabled={!item.navigationTarget}
+              onClick={() => dispatchQuestNavigation(item.navigationTarget)}
               className={clsx(
-                "rounded-lg border px-3 py-2",
+                "!h-auto w-full flex-col items-stretch justify-start gap-0 whitespace-normal rounded-lg border px-3 py-2 text-left transition",
+                item.navigationTarget
+                  ? "cursor-pointer hover:border-amber-500/60 hover:bg-amber-950/16"
+                  : "cursor-default",
                 item.isReadyToComplete
                   ? "border-emerald-700/70 bg-emerald-950/24"
+                  : item.isSuggested
+                    ? "border-amber-700/60 bg-amber-950/18"
                   : "border-stone-800/80 bg-black/25"
               )}
             >
@@ -60,7 +96,13 @@ export const QuestTrackerHUD: React.FC = () => {
                   {item.progressLabel}
                 </span>
               </div>
-            </div>
+              {item.navigationTarget && (
+                <div className="mt-1 inline-flex max-w-full items-center gap-1 text-[10px] text-amber-300">
+                  <MapPin size={11} className="shrink-0" />
+                  <span className="truncate">{item.navigationTarget.label}</span>
+                </div>
+              )}
+            </Button>
           ))}
         </div>
       )}
@@ -70,12 +112,12 @@ export const QuestTrackerHUD: React.FC = () => {
   return (
     <>
       <aside
-        className="pointer-events-none absolute left-4 top-[21rem] z-30 hidden w-[min(320px,calc(100vw-2rem))] md:block"
+        className="pointer-events-none absolute left-4 top-[16rem] z-30 hidden w-[min(320px,calc(100vw-2rem))] md:block"
         data-testid="quest-tracker-hud"
         data-layout-anchor="below-character-hud"
         aria-label="任務追蹤"
       >
-        <div className="rounded-xl border border-stone-700/80 bg-stone-950/78 p-3 shadow-[0_12px_34px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+        <div className="pointer-events-auto rounded-xl border border-stone-700/80 bg-stone-950/78 p-3 shadow-[0_12px_34px_rgba(0,0,0,0.45)] backdrop-blur-xl">
           <div className="mb-2 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-stone-200">
               <ScrollText size={15} className="text-amber-300" />

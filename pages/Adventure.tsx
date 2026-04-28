@@ -76,12 +76,15 @@ import {
   calculateEnemyCombatPower,
   formatCombatPower,
 } from '../utils/combatPower';
+import type { QuestNavigationTarget } from '../utils/questTracker';
 
 const AdventurePixelStagePrototype = lazy(() =>
   import('../components/adventure/AdventurePixelStagePrototype').then((module) => ({
     default: module.AdventurePixelStagePrototype,
   }))
 );
+
+const QUEST_NAVIGATION_EVENT = 'dusty-realm:quest-navigation';
 
 
 // --- VISUAL CONFIG ---
@@ -834,6 +837,82 @@ export const Adventure: React.FC<AdventureProps> = ({
   }, [currentMapId, dispatch]);
 
   const mapData = MAPS.find(m => m.id === currentMapId);
+
+  useEffect(() => {
+    const handleQuestNavigation = (event: Event) => {
+      const target = (event as CustomEvent<QuestNavigationTarget>).detail;
+      if (!target?.mapId) return;
+
+      const targetMap = MAPS.find((map) => map.id === target.mapId);
+      if (!targetMap) return;
+
+      const targetPoint = {
+        x: Math.max(0, Math.min(targetMap.width - 1, target.x)),
+        y: Math.max(0, Math.min(targetMap.height - 1, target.y)),
+      };
+
+      setIsMapModalOpen(false);
+      setInteractingNPC(null);
+      setTargetMonsterId(null);
+      setWorldCombatTargetId(null);
+      setIsAutoBattling(false);
+      setAutoMovePath([]);
+      setTargetNPCId(target.kind === 'npc' ? target.targetId ?? null : null);
+
+      if (target.mapId !== currentMapId || !mapData) {
+        dispatch(
+          enterMap({
+            mapId: target.mapId,
+            startX: targetPoint.x,
+            startY: targetPoint.y,
+          })
+        );
+        return;
+      }
+
+      const path = findPath(
+        playerPosition,
+        targetPoint,
+        mapData.width,
+        mapData.height
+      );
+
+      if (path.length > 0) {
+        setAutoMovePath(path);
+      }
+
+      if (target.kind === 'npc') {
+        const npc = mapData.npcs.find(
+          (candidate) => candidate.id === target.targetId
+        );
+        if (npc) {
+          setTargetNPCId(npc.id);
+          if (path.length === 0) {
+            setInteractingNPC(npc);
+          }
+        }
+      }
+    };
+
+    window.addEventListener(QUEST_NAVIGATION_EVENT, handleQuestNavigation);
+    return () =>
+      window.removeEventListener(QUEST_NAVIGATION_EVENT, handleQuestNavigation);
+  }, [currentMapId, dispatch, mapData, playerPosition]);
+
+  useEffect(() => {
+    if (!targetNPCId || !mapData) return;
+
+    const npc = mapData.npcs.find((candidate) => candidate.id === targetNPCId);
+    if (!npc) return;
+
+    const distance =
+      Math.abs(playerPosition.x - npc.x) + Math.abs(playerPosition.y - npc.y);
+    if (distance <= 1) {
+      setInteractingNPC(npc);
+      setTargetNPCId(null);
+    }
+  }, [mapData, playerPosition, targetNPCId]);
+
   const areaMapSurfaceStyle = useMemo<React.CSSProperties>(() => {
     if (!mapData) return {};
 
