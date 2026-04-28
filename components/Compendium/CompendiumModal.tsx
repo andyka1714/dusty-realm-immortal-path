@@ -16,6 +16,7 @@ import {
   ProfessionType,
   EnemyRank,
   Item,
+  EquipmentItem,
   Enemy,
   Skill,
   NPCType,
@@ -54,12 +55,17 @@ import {
   calculateEnemyCombatPower,
   formatCombatPower,
 } from "../../utils/combatPower";
+import {
+  EQUIPMENT_REALM_AUDIT,
+  type EquipmentPathId,
+} from "../../data/items/equipment/audit";
 
 interface CompendiumModalProps {
   isOpen: boolean;
   onClose: () => void;
   embedded?: boolean;
   initialTab?: TabType;
+  initialEquipmentProfession?: ProfessionType;
   initialSkillProfession?: ProfessionType;
   initialSectId?: SectId;
   initialMapId?: string;
@@ -360,6 +366,40 @@ const skillProfessionTabs = [
   { id: ProfessionType.Mage, label: "法修" },
 ];
 
+const equipmentPathProfessionMap: Record<EquipmentPathId, ProfessionType> = {
+  general: ProfessionType.None,
+  sword: ProfessionType.Sword,
+  body: ProfessionType.Body,
+  mage: ProfessionType.Mage,
+};
+
+const equipmentProfessionByItemId = new Map<string, ProfessionType>(
+  EQUIPMENT_REALM_AUDIT.flatMap((realmAudit) =>
+    Object.entries(realmAudit.paths).flatMap(([path, audit]) => {
+      if (!audit) return [];
+      const profession = equipmentPathProfessionMap[path as EquipmentPathId];
+      return audit.itemIds.map((itemId) => [itemId, profession] as const);
+    })
+  )
+);
+
+const getEquipmentProfession = (item: EquipmentItem) =>
+  equipmentProfessionByItemId.get(item.id) ?? ProfessionType.None;
+
+const groupItemsByRealm = (items: Item[]) =>
+  Object.values(MajorRealm)
+    .filter((realm): realm is MajorRealm => typeof realm === "number")
+    .map((realm) => ({
+      realm,
+      items: items.filter((item) => {
+        if (item.minRealm === undefined && realm === MajorRealm.Mortal) {
+          return true;
+        }
+        return item.minRealm === realm;
+      }),
+    }))
+    .filter((group) => group.items.length > 0);
+
 const sectConfigs: Array<{
   id: SectId;
   profession: ProfessionType;
@@ -442,6 +482,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
   onClose,
   embedded = false,
   initialTab = "realm",
+  initialEquipmentProfession = ProfessionType.None,
   initialSkillProfession = ProfessionType.Sword,
   initialSectId = "sword",
   initialMapId,
@@ -452,6 +493,8 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
   ); // For detailed view
   const [activeSkillProfession, setActiveSkillProfession] =
     useState<ProfessionType>(initialSkillProfession);
+  const [activeEquipmentProfession, setActiveEquipmentProfession] =
+    useState<ProfessionType>(initialEquipmentProfession);
   const [activeSectId, setActiveSectId] = useState<SectId>(initialSectId);
   const [activeItemCategory, setActiveItemCategory] = useState<
     GeneralItemCategoryId | "all"
@@ -498,6 +541,18 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
     () => itemList.filter(isCompendiumEquipmentItem),
     [itemList]
   );
+  const activeEquipmentItems = useMemo(
+    () =>
+      equipmentItems.filter(
+        (item) => getEquipmentProfession(item) === activeEquipmentProfession
+      ),
+    [activeEquipmentProfession, equipmentItems]
+  );
+  const activeEquipmentGroups = useMemo(
+    () => groupItemsByRealm(activeEquipmentItems),
+    [activeEquipmentItems]
+  );
+  const activeEquipmentCount = activeEquipmentItems.length;
   const visibleItems = useMemo(
     () =>
       activeItemCategory === "all"
@@ -1234,54 +1289,69 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
             )}
 
             {activeTab === "equipment" && (
-              <div className="space-y-8" data-testid="compendium-equipment-grid">
+              <div className="space-y-6" data-testid="compendium-equipment-grid">
+                <div className="flex gap-2 overflow-x-auto rounded-xl border border-stone-800 bg-stone-950/70 p-1">
+                  {skillProfessionTabs.map((tab) => (
+                    <Button
+                      key={tab.id}
+                      data-testid={`compendium-equipment-profession-${tab.id.toLowerCase()}`}
+                      onClick={() => setActiveEquipmentProfession(tab.id)}
+                      variant="tab"
+                      size="sm"
+                      className={clsx(
+                        "shrink-0",
+                        activeEquipmentProfession === tab.id
+                          ? "border-amber-600/60 bg-amber-500/15 text-amber-100"
+                          : "text-stone-400"
+                      )}
+                    >
+                      {tab.label}
+                    </Button>
+                  ))}
+                </div>
+
                 <div
-                  className="rounded-lg border border-stone-800 bg-stone-950/60 p-4"
+                  className="rounded-lg border border-amber-900/40 bg-amber-950/20 p-4"
                   data-testid="compendium-equipment-header"
                 >
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                     <div>
                       <h2 className="text-xl font-bold text-amber-400">
-                        裝備法寶
+                        {getProfessionLabel(activeEquipmentProfession)}裝備
                       </h2>
                       <p className="mt-1 text-sm text-stone-500">
-                        獨立檢視武器、防具、飾品與法寶裝備，保留品質、子類與來源追蹤。
+                        獨立檢視武器、防具、飾品與法寶裝備，依通用與職業路線保留品質、子類與來源追蹤。
                       </p>
                     </div>
                     <span className="rounded border border-amber-900/40 bg-amber-950/20 px-3 py-1 text-xs text-amber-200">
-                      {equipmentItems.length} 件裝備
+                      {activeEquipmentCount} 件裝備
                     </span>
                   </div>
                 </div>
 
-                {Object.values(MajorRealm)
-                  .filter((r) => typeof r === "number")
-                  .map((realmId) => {
-                    const rId = realmId as MajorRealm;
-                    const itemsInRealm = equipmentItems.filter((item) => {
-                      if (item.minRealm === undefined && rId === MajorRealm.Mortal)
-                        return true;
-                      return item.minRealm === rId;
-                    });
-
-                    if (itemsInRealm.length === 0) return null;
-
-                    return (
-                      <div key={rId} className="space-y-4">
+                {activeEquipmentGroups.length === 0 ? (
+                  <div className="rounded border border-stone-800 bg-stone-900/60 p-4 text-sm text-stone-500">
+                    目前沒有此分類的正式裝備。
+                  </div>
+                ) : (
+                  <div className="space-y-8">
+                    {activeEquipmentGroups.map((group) => (
+                      <div key={group.realm} className="space-y-4">
                         <h3
                           className="border-l-4 border-amber-600 bg-stone-900/70 py-2 pl-3 text-xl font-bold text-amber-500"
-                          data-testid={`compendium-equipment-realm-heading-${rId}`}
+                          data-testid={`compendium-equipment-realm-heading-${group.realm}`}
                         >
-                          {MajorRealmCN[rId]}期
+                          {MajorRealmCN[group.realm]}期
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {itemsInRealm.map((item) =>
+                          {group.items.map((item) =>
                             renderItemCard(item, "compendium-equipment")
                           )}
                         </div>
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -1309,10 +1379,10 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                 </div>
 
                 <div
-                  className="rounded-lg border border-indigo-900/40 bg-indigo-950/20 p-4"
+                  className="rounded-lg border border-amber-900/40 bg-amber-950/20 p-4"
                   data-testid="compendium-skill-summary"
                 >
-                  <div className="text-sm font-bold text-indigo-100">
+                  <div className="text-sm font-bold text-amber-100">
                     {getProfessionLabel(activeSkillProfession)}功法
                   </div>
                   <div className="mt-1 text-xs text-stone-400">
@@ -1329,7 +1399,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                     {activeSkillGroups.map((group) => (
                       <section key={group.realm} className="space-y-3">
                         <h3
-                          className="border-l-4 border-indigo-600 bg-stone-900/70 py-2 pl-3 text-lg font-bold text-indigo-300"
+                          className="border-l-4 border-amber-600 bg-stone-900/70 py-2 pl-3 text-lg font-bold text-amber-500"
                           data-testid={`compendium-skill-realm-${group.realm}`}
                         >
                           {MajorRealmCN[group.realm]}期

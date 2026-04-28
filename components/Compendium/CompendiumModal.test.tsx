@@ -82,6 +82,29 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).toContain("來源追蹤");
   });
 
+  it("filters equipment by common and profession paths like skills", () => {
+    const swordMarkup = renderCompendium({
+      initialTab: "equipment",
+      initialEquipmentProfession: "Sword",
+    });
+
+    expect(swordMarkup).toContain('data-testid="compendium-equipment-profession-none"');
+    expect(swordMarkup).toContain('data-testid="compendium-equipment-profession-sword"');
+    expect(swordMarkup).toContain("劍修裝備");
+    expect(swordMarkup).toContain('data-testid="compendium-equipment-card-spirit_iron_sword"');
+    expect(swordMarkup).not.toContain('data-testid="compendium-equipment-card-bear_paw_gauntlet"');
+    expect(swordMarkup).not.toContain('data-testid="compendium-equipment-card-spirit_wood_staff"');
+
+    const commonMarkup = renderCompendium({
+      initialTab: "equipment",
+      initialEquipmentProfession: "None",
+    });
+
+    expect(commonMarkup).toContain("通用裝備");
+    expect(commonMarkup).toContain('data-testid="compendium-equipment-card-novice_sword"');
+    expect(commonMarkup).not.toContain('data-testid="compendium-equipment-card-spirit_iron_sword"');
+  });
+
   it("renders equipment source badges by monster rank and isolates tier tooltip hover", () => {
     const markup = renderCompendium({ initialTab: "equipment" });
 
@@ -119,6 +142,18 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).toContain("歸元吐納");
     expect(markup).toContain("bg-stone-800 p-3 rounded border border-stone-700");
     expect(markup).toContain("來源追蹤");
+  });
+
+  it("uses the same amber visual language for skill and equipment panels", () => {
+    const markup = renderCompendium({
+      initialTab: "skill",
+      initialSkillProfession: "Sword",
+    });
+
+    expect(markup).toContain("border border-amber-900/40 bg-amber-950/20 p-4");
+    expect(markup).toContain("border-l-4 border-amber-600 bg-stone-900/70");
+    expect(markup).not.toContain("border border-indigo-900/40 bg-indigo-950/20 p-4");
+    expect(markup).not.toContain("border-l-4 border-indigo-600 bg-stone-900/70");
   });
 
   it("surfaces item source tracing for route materials", () => {
