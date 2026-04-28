@@ -701,3 +701,51 @@
 - **THEN** 系統必須從既有 `character`、`inventory.equipmentStats` 與 combat stats helper 推導
 - **AND** 不得因 HUD 顯示而改變實際戰鬥傷害、修煉收益或突破規則
 
+### Requirement: 核心非戰鬥屬性必須有可讀玩法效果
+系統必須 (MUST) 讓悟性、福緣與魅力至少各自提供一個可被 UI 與 helper 讀取的 derived gameplay effect。
+
+#### Scenario: 屬性效果由既有 attributes 推導
+- **WHEN** 系統需要顯示或套用悟性、福緣、魅力效果
+- **THEN** 必須從既有 `character.attributes` 推導修煉、突破、掉落、遭遇或商店互動加成
+- **AND** 不得新增新的 persisted attribute effect state
+
+### Requirement: Adventure 世界戰鬥必須追蹤玩家靈力 runtime
+系統必須 (MUST) 在 Adventure 世界戰鬥中追蹤目前玩家靈力，讓主動術式消耗與補靈丹效果能形成閉環。
+
+#### Scenario: 主動術式消耗靈力
+- **WHEN** 玩家施放主動術式
+- **THEN** 系統必須扣除對應靈力成本
+- **AND** 靈力不足時必須阻擋施放，不得只靠 cooldown 或技能存在判斷
+
+### Requirement: 突破必須提供災劫風險 preview
+系統必須 (MUST) 在突破前推導成功率、災劫風險與準備提示，讓高境界突破不只是不可讀的機率按鈕。
+
+#### Scenario: 高境界突破顯示風險
+- **WHEN** 玩家接近高境界突破
+- **THEN** 系統必須顯示天劫、心魔或反噬類風險提示
+- **AND** 第一版不得新增 persisted 傷勢或心魔 state
+
+### Requirement: NPC 態度與商店折扣必須可由既有資料推導
+系統必須 (MUST) 從魅力、宗門身份、完成任務或 world memory 推導 deterministic NPC 態度與商店折扣。
+
+#### Scenario: 商店價格套用 deterministic 折扣
+- **WHEN** 玩家與商店 NPC 互動
+- **THEN** 系統必須能推導折扣比例與來源文字
+- **AND** 不得新增每個 NPC 的 persisted affinity state
+
+### Requirement: 終盤 route 必須有 v6 repeatable density
+系統必須 (MUST) 讓已完成 `sect:*:endgame-loop-v4` 的三宗路線各自擁有 v6 repeatable aftermath。
+
+#### Scenario: 三宗終盤 route 都有後續遭遇
+- **WHEN** 玩家具備對應 `sect:*:endgame-loop-v4`
+- **THEN** encounter selector 必須能選到該宗 v6 repeatable aftermath
+- **AND** 每個事件必須提供 route、風險、收益與 memory cue
+
+### Requirement: Workshop 終盤專精必須影響 endgame recipe cue
+系統必須 (MUST) 讓 endgame specialization leaf 對終盤 recipe 顯示可讀影響，但不得跳過核心 route material。
+
+#### Scenario: active specialization 影響終盤 recipe
+- **WHEN** 玩家啟用 endgame specialization leaf 並查看對應 recipe
+- **THEN** 系統必須顯示成本、熟練、品質或副產物 cue
+- **AND** recipe 仍必須消耗對應 route material
+

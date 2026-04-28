@@ -531,3 +531,56 @@ Workshop 介面必須 (MUST) 顯示 mastery milestone、specialization leaf、ro
 - **THEN** 介面必須以小型 action wheel、icon button 或等效低佔用控制呈現
 - **AND** 不得再顯示寬版 `戰鬥快捷列` 面板遮住場景與底部 dock
 
+### Requirement: Adventure 主畫面必須提供任務追蹤 HUD
+介面必須 (MUST) 在 Adventure 主畫面提供 derived 任務追蹤欄，讓玩家不需要離開主場景就能讀到目前主要任務進度。
+
+#### Scenario: 顯示 active quest 進度
+- **WHEN** 玩家有 active quest
+- **THEN** 任務追蹤 HUD 必須顯示任務類型、標題、進度或可回報狀態
+- **AND** 任務排序必須優先顯示可回報任務、主線、宗門任務，再顯示其他任務
+
+#### Scenario: 沒有 active quest
+- **WHEN** 玩家沒有 active quest
+- **THEN** 任務追蹤 HUD 必須顯示低佔用 empty state
+- **AND** 不得新增 persisted pin state 或 tracked quest preference
+
+### Requirement: Adventure HUD 必須顯示可見靈力 runtime
+介面必須 (MUST) 在 Adventure 戰鬥中顯示目前靈力與最大靈力。
+
+#### Scenario: 補靈丹恢復目前靈力
+- **WHEN** 玩家在 Adventure 中使用 `heal_mp` 或 `full_restore` 補給
+- **THEN** 介面必須更新目前靈力
+- **AND** 若目前靈力已滿，補給必須顯示不可用或不消耗
+
+### Requirement: Dashboard 突破區必須顯示準備狀態
+介面必須 (MUST) 在突破區顯示成功率、風險與丹藥 / 屬性準備提示。
+
+#### Scenario: 玩家查看突破按鈕
+- **WHEN** 玩家打開道途面板
+- **THEN** 突破區必須顯示可讀的 preview
+- **AND** 失敗風險不得只藏在 log 或文件中
+
+### Requirement: 商店介面必須顯示 NPC 態度與折扣來源
+介面必須 (MUST) 在商店面板顯示目前 NPC 態度、折扣比例與來源。
+
+#### Scenario: 玩家打開商店
+- **WHEN** 玩家打開 ShopPanel
+- **THEN** 介面必須顯示態度 label 與折扣來源
+- **AND** 折扣後價格必須可和原價區分
+
+### Requirement: Workshop recipe card 必須顯示終盤專精影響
+介面必須 (MUST) 在 recipe card 顯示 active endgame specialization 是否影響該 recipe。
+
+#### Scenario: recipe 被專精影響
+- **WHEN** active specialization 影響目前 recipe
+- **THEN** recipe card 必須顯示專精名稱與效果 cue
+- **AND** 不得讓玩家誤以為核心材料可被跳過
+
+### Requirement: 終盤地圖必須提供 v6 local hook
+介面與資料必須 (MUST) 讓 180+ 終盤地圖提供 route rumor、Workshop 或 Reincarnation clue 的 local NPC / quest hook。
+
+#### Scenario: 玩家查看終盤地圖 local content
+- **WHEN** 玩家進入 180+ 終盤代表地圖
+- **THEN** 地圖必須提供至少一個 v6 local NPC 或 dialogue-only quest
+- **AND** 該內容必須說明 route memory、Workshop sink 或下一世 build hook
+
