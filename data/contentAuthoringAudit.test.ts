@@ -3,6 +3,7 @@ import {
   ROUTE_MATERIAL_AUDIT_TARGETS,
   auditContentAuthoringCatalog,
   auditRouteMaterialSourceCoverage,
+  auditV5EndgameRouteCoverage,
 } from "./contentAuthoringAudit";
 
 describe("content authoring audit", () => {
@@ -29,6 +30,22 @@ describe("content authoring audit", () => {
       expect(entry.hasSource, entry.itemId).toBe(true);
       expect(entry.hasWorkshopSink, entry.itemId).toBe(true);
       expect(entry.hasCompendiumTracing, entry.itemId).toBe(true);
+    });
+  });
+
+  it("keeps v5 endgame route catalogs connected across encounter, workshop, map, and reincarnation", () => {
+    const report = auditV5EndgameRouteCoverage();
+
+    expect(report.routes.map((entry) => entry.memoryTag)).toEqual([
+      "sect:sword:endgame-loop-v4",
+      "sect:beast:endgame-loop-v4",
+      "sect:mystic:endgame-loop-v4",
+    ]);
+    report.routes.forEach((entry) => {
+      expect(entry.hasRepeatableEncounter, entry.memoryTag).toBe(true);
+      expect(entry.hasWorkshopFollowup, entry.memoryTag).toBe(true);
+      expect(entry.hasMapLocalClue, entry.memoryTag).toBe(true);
+      expect(entry.hasReincarnationSeal, entry.memoryTag).toBe(true);
     });
   });
 });

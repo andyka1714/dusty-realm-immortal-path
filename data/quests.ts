@@ -970,5 +970,59 @@ export const QUESTS: Record<string, Quest> = {
                 '往後擴仙帝 v4 loop 時，Workshop 不必再猜這些材料從哪裡來。'
             ]
         }
+    },
+    'local_guixu_v5_route_oracle': {
+        id: 'local_guixu_v5_route_oracle',
+        type: QuestType.Side,
+        title: '歸墟路諭：v5 餘波',
+        description: '歸墟 v5 路諭師請你在歸墟裂界（182）核對三宗 v5 route rumor，確認 sect:sword:endgame-loop-v4、sect:beast:endgame-loop-v4、sect:mystic:endgame-loop-v4 如何接到 Workshop 與輪迴。',
+        giverId: 'local_guixu_v5_route_oracle',
+        submitNpcId: 'local_guixu_v5_route_oracle',
+        requirements: [
+            { type: 'dialogue', targetNpcId: 'local_guixu_v5_route_oracle' }
+        ],
+        rewards: [
+            { exp: 228000, spiritStones: 9200 }
+        ],
+        dialogue: {
+            start: [
+                '歸墟裂界（182）裡的 v5 餘波只認三條記憶：sect:sword:endgame-loop-v4、sect:beast:endgame-loop-v4、sect:mystic:endgame-loop-v4。',
+                '凌霄劍宗、萬獸山莊、縹緲仙宮若沒有各自完成終盤，後面的 Workshop clue 與輪迴 build 都只是空話。'
+            ],
+            progress: [
+                '先分清 route rumor，再看帝冕爐火。v5 的重點是讓終盤餘波可重複追蹤。'
+            ],
+            complete: [
+                '三宗 v5 route rumor 已在歸墟裂界（182）校準。Workshop、輪迴與 encounter aftermath 可以讀同一組記憶。',
+                '這樣 v5 不會變成新的一套外掛資料，而是接在 sect:*:endgame-loop-v4 上。'
+            ]
+        }
+    },
+    'local_guixu_v5_workshop_clue': {
+        id: 'local_guixu_v5_workshop_clue',
+        type: QuestType.Side,
+        title: '歸墟冕爐：v5 職業火候',
+        description: '歸墟 v5 冕爐師請你確認帝冕與三路材料如何拆成職業向 Workshop follow-up，並把 sect:sword:endgame-loop-v4、sect:beast:endgame-loop-v4、sect:mystic:endgame-loop-v4 回接下一世輪迴提示。',
+        giverId: 'local_guixu_v5_workshop_seer',
+        submitNpcId: 'local_guixu_v5_workshop_seer',
+        requirements: [
+            { type: 'dialogue', targetNpcId: 'local_guixu_v5_workshop_seer' }
+        ],
+        rewards: [
+            { exp: 244000, spiritStones: 9800 }
+        ],
+        dialogue: {
+            start: [
+                '帝冕配凌霄劍星鋼，會回到劍修帝劍與 sect:sword:endgame-loop-v4；帝冕配萬獸血骨殘材，會回到大道真身與 sect:beast:endgame-loop-v4；帝冕配縹緲星魂蓮，會回到至高法杖與 sect:mystic:endgame-loop-v4。',
+                '這些都是 Workshop follow-up，不是新裝備表的孤立條目，也會被輪迴 build 記住。'
+            ],
+            progress: [
+                '看火候時要同時看 route memory、帝冕與材料，不要只看產出名稱。'
+            ],
+            complete: [
+                'v5 職業火候已核對。帝冕、三路材料、Workshop follow-up 與輪迴提示會在歸墟裂界（182）互相對齊。',
+                '玩家看到 v5 recipe 時，能知道它從哪條 sect:*:endgame-loop-v4 延伸而來，包含 sect:mystic:endgame-loop-v4 這條法修冕爐線。'
+            ]
+        }
     }
 };

@@ -47,6 +47,27 @@ const MAP_LOCAL_CONTENT_CASES = [
     materialQuestId: "local_guixu_material_clue",
     expectedClues: ["凌霄劍星鋼", "萬獸血骨殘材", "縹緲星魂蓮", "終盤"],
   },
+  {
+    mapId: "182",
+    mapName: "歸墟裂界",
+    localNpcId: "local_guixu_v5_route_oracle",
+    localQuestId: "local_guixu_v5_route_oracle",
+    routeNpcIds: [
+      "local_guixu_sword_echo",
+      "local_guixu_beast_echo",
+      "local_guixu_mystic_echo",
+    ],
+    materialNpcId: "local_guixu_v5_workshop_seer",
+    materialQuestId: "local_guixu_v5_workshop_clue",
+    expectedClues: [
+      "sect:sword:endgame-loop-v4",
+      "sect:beast:endgame-loop-v4",
+      "sect:mystic:endgame-loop-v4",
+      "v5",
+      "Workshop",
+      "輪迴",
+    ],
+  },
 ] as const;
 
 const mapById = (mapId: string) => MAPS.find((map) => map.id === mapId);

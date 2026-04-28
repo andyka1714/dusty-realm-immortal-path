@@ -86,6 +86,30 @@ const HIGH_TIER_RECIPE_CASES = [
     expectedRouteTags: ["仙帝", "凌霄劍宗", "萬獸山莊", "縹緲仙宮"],
     expectedSourceHint: "sect:sword:endgame-loop-v4",
   },
+  {
+    id: "heaven_sunder_crown_reforge",
+    discipline: "smithing",
+    outputItemId: "origin_sword",
+    expectedMinRealm: MajorRealm.ImmortalEmperor,
+    expectedRouteTags: ["仙帝", "凌霄劍宗", "v5", "sect:sword:endgame-loop-v4"],
+    expectedSourceHint: "sect:sword:endgame-loop-v4",
+  },
+  {
+    id: "worldblood_crown_body_forge",
+    discipline: "smithing",
+    outputItemId: "great_dao_body",
+    expectedMinRealm: MajorRealm.ImmortalEmperor,
+    expectedRouteTags: ["仙帝", "萬獸山莊", "v5", "sect:beast:endgame-loop-v4"],
+    expectedSourceHint: "sect:beast:endgame-loop-v4",
+  },
+  {
+    id: "star_throne_crown_staff_forge",
+    discipline: "smithing",
+    outputItemId: "supreme_law_staff",
+    expectedMinRealm: MajorRealm.ImmortalEmperor,
+    expectedRouteTags: ["仙帝", "縹緲仙宮", "v5", "sect:mystic:endgame-loop-v4"],
+    expectedSourceHint: "sect:mystic:endgame-loop-v4",
+  },
 ] as const;
 
 const ROUTE_SPECIFIC_MATERIAL_IDS = new Set([
@@ -137,9 +161,9 @@ describe("workshop recipe data", () => {
       (recipe) => recipe.tier === "highRealm"
     );
 
-    expect(highTierRecipes).toHaveLength(9);
+    expect(highTierRecipes).toHaveLength(12);
     expect(highTierRecipes.filter((recipe) => recipe.discipline === "alchemy")).toHaveLength(4);
-    expect(highTierRecipes.filter((recipe) => recipe.discipline === "smithing")).toHaveLength(5);
+    expect(highTierRecipes.filter((recipe) => recipe.discipline === "smithing")).toHaveLength(8);
   });
 
   it("keeps all high-tier recipe ingredients and outputs anchored to real items", () => {
@@ -148,8 +172,8 @@ describe("workshop recipe data", () => {
 
       recipe?.ingredients.forEach((ingredient) => {
         expect(
-          MATERIAL_ITEMS[ingredient.itemId],
-          `${ingredient.itemId} should exist as a workshop material`
+          MATERIAL_ITEMS[ingredient.itemId] ?? ITEMS[ingredient.itemId],
+          `${ingredient.itemId} should exist as a workshop ingredient item`
         ).toBeDefined();
       });
 
@@ -203,6 +227,50 @@ describe("workshop recipe data", () => {
         { itemId: "mystic_path_starlotus", count: 2 },
       ])
     );
+  });
+
+  it("adds v5 profession follow-up sinks after the endgame crown", () => {
+    [
+      {
+        id: "heaven_sunder_crown_reforge",
+        memoryTag: "sect:sword:endgame-loop-v4",
+        routeMaterialId: "sword_path_starsteel",
+        outputItemId: "origin_sword",
+      },
+      {
+        id: "worldblood_crown_body_forge",
+        memoryTag: "sect:beast:endgame-loop-v4",
+        routeMaterialId: "beast_path_bloodbone",
+        outputItemId: "great_dao_body",
+      },
+      {
+        id: "star_throne_crown_staff_forge",
+        memoryTag: "sect:mystic:endgame-loop-v4",
+        routeMaterialId: "mystic_path_starlotus",
+        outputItemId: "supreme_law_staff",
+      },
+    ].forEach((testCase) => {
+      const recipe = WORKSHOP_RECIPES[testCase.id];
+
+      expect(recipe, `${testCase.id} should exist`).toBeDefined();
+      expect(recipe.tier).toBe("highRealm");
+      expect(recipe.minRealm).toBe(MajorRealm.ImmortalEmperor);
+      expect(recipe.routeTags).toEqual(
+        expect.arrayContaining(["v5", testCase.memoryTag])
+      );
+      expect(recipe.sourceHint).toContain(testCase.memoryTag);
+      expect(recipe.ingredients).toEqual(
+        expect.arrayContaining([
+          { itemId: "emperor_crown", count: 1 },
+          { itemId: testCase.routeMaterialId, count: 2 },
+        ])
+      );
+      expect(recipe.outputs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ itemId: testCase.outputItemId, count: 1 }),
+        ])
+      );
+    });
   });
 
   it("maps each v3 sect world memory to high-tier recipe source cues and material sinks", () => {

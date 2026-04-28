@@ -324,6 +324,94 @@ describe("ReincarnationFlow", () => {
     expect(markup).toContain("預期收益：根骨 +4、悟性 +3、福緣 +1");
   });
 
+  it("shows v5 endgame build hook on an available soul seal card", () => {
+    const lifetimeStats = createLifetimeStats(MajorRealm.ImmortalEmperor);
+
+    const markup = renderToStaticMarkup(
+      <ReincarnationFlow
+        flowStep="hall"
+        summary={{
+          cause: "voluntary",
+          ageYears: 2800,
+          highestRealm: MajorRealm.ImmortalEmperor,
+          realmMerit: 100000000,
+          ageMerit: 1400,
+          totalMeritGained: 100001400,
+          eligibleHeirlooms: [],
+        }}
+        totalMerit={100001400}
+        lifetimeStats={lifetimeStats}
+        worldMemoryTags={["sect:sword:endgame-loop-v4"]}
+        unlockedPerks={getAvailableReincarnationPerks({
+          lifetimeStats,
+          worldMemoryTags: ["sect:sword:endgame-loop-v4"],
+        })}
+        config={{
+          plannerVersion: 2,
+          selectedBuildIdentity: "sword",
+          selectedPerkIds: [],
+          selectedHeirloomIds: [],
+        }}
+        onEnterHall={() => undefined}
+        onSelectBuildIdentity={() => undefined}
+        onSelectSoulSeal={() => undefined}
+        onTogglePerk={() => undefined}
+        onToggleHeirloom={() => undefined}
+        onSelectSpiritRoot={() => undefined}
+        onConfirm={() => undefined}
+      />
+    );
+
+    expect(markup).toContain('data-testid="rebirth-seal-seal_sword_endgame_v5"');
+    expect(markup).toContain("斬天 v5 劍冕");
+    expect(markup).toContain("route memory：sect:sword:endgame-loop-v4");
+    expect(markup).toContain("下一世將帶著 v5 斬天劍冕開局");
+    expect(markup).toContain("預期收益：根骨 +5、悟性 +3、福緣 +2");
+    expect(markup).toContain("帝冕、劍系武器與劍修手札可帶入");
+  });
+
+  it("shows the missing v4 endgame reason on a locked v5 soul seal card", () => {
+    const lifetimeStats = createLifetimeStats(MajorRealm.ImmortalEmperor);
+
+    const markup = renderToStaticMarkup(
+      <ReincarnationFlow
+        flowStep="hall"
+        summary={{
+          cause: "voluntary",
+          ageYears: 2800,
+          highestRealm: MajorRealm.ImmortalEmperor,
+          realmMerit: 100000000,
+          ageMerit: 1400,
+          totalMeritGained: 100001400,
+          eligibleHeirlooms: [],
+        }}
+        totalMerit={100001400}
+        lifetimeStats={lifetimeStats}
+        worldMemoryTags={[]}
+        unlockedPerks={getAvailableReincarnationPerks({
+          lifetimeStats,
+          worldMemoryTags: [],
+        })}
+        config={{
+          plannerVersion: 2,
+          selectedBuildIdentity: "sword",
+          selectedPerkIds: [],
+          selectedHeirloomIds: [],
+        }}
+        onEnterHall={() => undefined}
+        onSelectBuildIdentity={() => undefined}
+        onSelectSoulSeal={() => undefined}
+        onTogglePerk={() => undefined}
+        onToggleHeirloom={() => undefined}
+        onSelectSpiritRoot={() => undefined}
+        onConfirm={() => undefined}
+      />
+    );
+
+    expect(markup).toContain("斬天 v5 劍冕");
+    expect(markup).toContain("缺少 route memory：sect:sword:endgame-loop-v4");
+  });
+
   it("shows voluntary endgame closure copy separately from death reincarnation", () => {
     const lifetimeStats = createLifetimeStats(MajorRealm.ImmortalEmperor);
 

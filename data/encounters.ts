@@ -2897,6 +2897,165 @@ const RAW_ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
       },
     ],
   }),
+  sword_emperor_v5_heaven_sunder_afterpath: createSingleRealmEncounterEvent({
+    id: "sword_emperor_v5_heaven_sunder_afterpath",
+    title: "斬天餘路星鋼潮",
+    description: "斬天終局被輪迴記住後，凌霄劍宗仍能在歸墟餘路中反覆取回劍冕星鋼。",
+    realm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 4,
+      repeatPolicy: "repeatable",
+      eligibleProfessions: [ProfessionType.Sword],
+      requiredWorldMemoryTags: ["sect:sword:endgame-loop-v4"],
+    },
+    presentation: {
+      categoryLabel: "仙帝 v5 路線餘波",
+      routeLabel: "凌霄劍宗",
+      chainLabel: "斬天餘路",
+      memoryCue: "v5 斬天餘路讀取 sect:sword:endgame-loop-v4，延續帝冕後的劍修材料與下一世 build hook。",
+      sectLabel: "凌霄劍宗 v5 餘波",
+    },
+    choices: [
+      {
+        id: "salvage_v5_heaven_sunder_starsteel",
+        label: "收回劍冕星鋼",
+        description: "沿著帝冕裂痕取回一段仍能重鍛本命帝劍的星鋼。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "凌霄劍星鋼 x1" },
+            { kind: "resource", label: "材料來源" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "sword_path_starsteel", count: 1 }],
+          logMessage: "你從斬天餘路取回凌霄劍星鋼，v5 劍宗終盤有了可重複材料回路。",
+        },
+      },
+      {
+        id: "temper_v5_heaven_sunder_oath",
+        label: "重溫斬天誓",
+        description: "不取材料，將餘路劍痕壓成下一輪出劍節奏。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "穩定收益" },
+            { kind: "benefit", label: "v5 劍修 build" },
+          ],
+        },
+        reward: {
+          experience: 5680000,
+          logMessage: "你重溫斬天誓，凌霄劍宗 v5 餘波轉成穩定修為與下一世劍路提示。",
+        },
+      },
+    ],
+  }),
+  beast_emperor_v5_worldblood_afterpath: createSingleRealmEncounterEvent({
+    id: "beast_emperor_v5_worldblood_afterpath",
+    title: "帝血餘路骨潮",
+    description: "帝血終局沉入輪迴後，萬獸山莊仍能在歸墟骨潮中反覆壓出可用血骨。",
+    realm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 4,
+      repeatPolicy: "repeatable",
+      eligibleProfessions: [ProfessionType.Body],
+      requiredWorldMemoryTags: ["sect:beast:endgame-loop-v4"],
+    },
+    presentation: {
+      categoryLabel: "仙帝 v5 路線餘波",
+      routeLabel: "萬獸山莊",
+      chainLabel: "帝血餘路",
+      memoryCue: "v5 帝血餘路讀取 sect:beast:endgame-loop-v4，延續帝冕後的體修材料與下一世 build hook。",
+      sectLabel: "萬獸山莊 v5 餘波",
+    },
+    choices: [
+      {
+        id: "harvest_v5_worldblood_bloodbone",
+        label: "剝下餘路血骨",
+        description: "硬闖歸墟骨潮，剝下一段足以回爐大道真身的血骨殘材。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "resource", label: "萬獸血骨殘材 x1" },
+            { kind: "risk", label: "高風險收益" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "beast_path_bloodbone", count: 1 }],
+          logMessage: "你剝下餘路血骨，萬獸山莊 v5 終盤保留高壓材料來源。",
+        },
+      },
+      {
+        id: "endure_v5_worldblood_pressure",
+        label: "承受餘路血壓",
+        description: "讓帝血餘路反覆壓身，把終盤骨潮化作肉身底盤。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "risk", label: "高風險收益" },
+            { kind: "benefit", label: "v5 體修 build" },
+          ],
+        },
+        reward: {
+          experience: 5520000,
+          logMessage: "你承受帝血餘路血壓，萬獸山莊 v5 餘波轉成體修底盤。",
+        },
+      },
+    ],
+  }),
+  mystic_emperor_v5_star_throne_afterpath: createSingleRealmEncounterEvent({
+    id: "mystic_emperor_v5_star_throne_afterpath",
+    title: "星詔餘路蓮命",
+    description: "星詔終局照入輪迴後，縹緲仙宮仍能從歸墟命盤中反覆凝出終局星蓮。",
+    realm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 4,
+      repeatPolicy: "repeatable",
+      eligibleProfessions: [ProfessionType.Mage],
+      requiredWorldMemoryTags: ["sect:mystic:endgame-loop-v4"],
+    },
+    presentation: {
+      categoryLabel: "仙帝 v5 路線餘波",
+      routeLabel: "縹緲仙宮",
+      chainLabel: "星詔餘路",
+      memoryCue: "v5 星詔餘路讀取 sect:mystic:endgame-loop-v4，延續帝冕後的法修材料與下一世 build hook。",
+      sectLabel: "縹緲仙宮 v5 餘波",
+    },
+    choices: [
+      {
+        id: "gather_v5_star_throne_starlotus",
+        label: "凝採餘路星蓮",
+        description: "以神識穩住歸墟命盤，凝出一株能重鍛法杖的星魂蓮。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "縹緲星魂蓮 x1" },
+            { kind: "resource", label: "材料來源" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "mystic_path_starlotus", count: 1 }],
+          logMessage: "你凝出餘路星蓮，縹緲仙宮 v5 終盤保留穩定材料來源。",
+        },
+      },
+      {
+        id: "read_v5_star_throne_chart",
+        label: "推演餘路星盤",
+        description: "不採星蓮，改把餘路星盤轉為下一世神識開局提示。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "benefit", label: "穩定收益" },
+            { kind: "benefit", label: "v5 法修 build" },
+          ],
+        },
+        reward: {
+          experience: 5840000,
+          logMessage: "你推演餘路星盤，縹緲仙宮 v5 餘波轉成神識修為與下一世命盤提示。",
+        },
+      },
+    ],
+  }),
 };
 
 export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> =

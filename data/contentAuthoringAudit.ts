@@ -7,6 +7,7 @@ import { WORLD_STORY_NPCS } from "./npcs";
 import { QUESTS } from "./quests";
 import { SHOPS } from "./shops";
 import { WORKSHOP_RECIPES } from "./workshopRecipes";
+import { DEFAULT_REINCARNATION_SOUL_SEALS } from "./reincarnationPerks";
 
 export const ROUTE_MATERIAL_AUDIT_TARGETS = [
   "sword_path_starsteel",
@@ -37,6 +38,42 @@ export interface RouteMaterialAuditEntry {
 
 export interface RouteMaterialAuditReport {
   routeMaterials: RouteMaterialAuditEntry[];
+}
+
+const V5_ENDGAME_ROUTE_AUDIT_TARGETS = [
+  {
+    memoryTag: "sect:sword:endgame-loop-v4",
+    encounterId: "sword_emperor_v5_heaven_sunder_afterpath",
+    recipeId: "heaven_sunder_crown_reforge",
+    mapLocalQuestId: "local_guixu_v5_route_oracle",
+    sealId: "seal_sword_endgame_v5",
+  },
+  {
+    memoryTag: "sect:beast:endgame-loop-v4",
+    encounterId: "beast_emperor_v5_worldblood_afterpath",
+    recipeId: "worldblood_crown_body_forge",
+    mapLocalQuestId: "local_guixu_v5_route_oracle",
+    sealId: "seal_body_endgame_v5",
+  },
+  {
+    memoryTag: "sect:mystic:endgame-loop-v4",
+    encounterId: "mystic_emperor_v5_star_throne_afterpath",
+    recipeId: "star_throne_crown_staff_forge",
+    mapLocalQuestId: "local_guixu_v5_workshop_clue",
+    sealId: "seal_mage_endgame_v5",
+  },
+] as const;
+
+export interface V5EndgameRouteAuditEntry {
+  memoryTag: string;
+  hasRepeatableEncounter: boolean;
+  hasWorkshopFollowup: boolean;
+  hasMapLocalClue: boolean;
+  hasReincarnationSeal: boolean;
+}
+
+export interface V5EndgameRouteAuditReport {
+  routes: V5EndgameRouteAuditEntry[];
 }
 
 const pushIfMissing = ({
@@ -241,6 +278,37 @@ export const auditRouteMaterialSourceCoverage = (): RouteMaterialAuditReport => 
       hasWorkshopSink,
       hasCompendiumTracing: trace.sources.length > 0,
       sourceKinds,
+    };
+  }),
+});
+
+export const auditV5EndgameRouteCoverage = (): V5EndgameRouteAuditReport => ({
+  routes: V5_ENDGAME_ROUTE_AUDIT_TARGETS.map((target) => {
+    const event = ENCOUNTER_EVENTS[target.encounterId];
+    const recipe = WORKSHOP_RECIPES[target.recipeId];
+    const quest = QUESTS[target.mapLocalQuestId];
+    const seal = DEFAULT_REINCARNATION_SOUL_SEALS.find(
+      (candidate) => candidate.id === target.sealId
+    );
+    const questText = [
+      quest?.description,
+      ...(quest?.dialogue.start ?? []),
+      ...(quest?.dialogue.progress ?? []),
+      ...(quest?.dialogue.complete ?? []),
+    ].join("\n");
+
+    return {
+      memoryTag: target.memoryTag,
+      hasRepeatableEncounter:
+        event?.selector?.repeatPolicy === "repeatable" &&
+        Boolean(event.selector.requiredWorldMemoryTags?.includes(target.memoryTag)),
+      hasWorkshopFollowup:
+        Boolean(recipe?.routeTags?.includes(target.memoryTag)) &&
+        Boolean(recipe?.ingredients.some((ingredient) => ingredient.itemId === "emperor_crown")),
+      hasMapLocalClue: Boolean(questText.includes(target.memoryTag)),
+      hasReincarnationSeal: Boolean(
+        seal?.requiredWorldMemoryTags?.includes(target.memoryTag)
+      ),
     };
   }),
 });

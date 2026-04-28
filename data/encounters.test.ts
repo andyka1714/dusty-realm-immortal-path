@@ -232,6 +232,39 @@ const V4_ENDGAME_ROUTE_EVENT_CASES = [
   },
 ] as const;
 
+const V5_ENDGAME_AFTERMATH_EVENT_CASES = [
+  {
+    eventId: "sword_emperor_v5_heaven_sunder_afterpath",
+    profession: ProfessionType.Sword,
+    endgameMemoryTag: "sect:sword:endgame-loop-v4",
+    routeLabel: "凌霄劍宗",
+    categoryLabel: "仙帝 v5 路線餘波",
+    chainLabel: "斬天餘路",
+    sourceCueLabel: "凌霄劍星鋼 x1",
+    rewardItemId: "sword_path_starsteel",
+  },
+  {
+    eventId: "beast_emperor_v5_worldblood_afterpath",
+    profession: ProfessionType.Body,
+    endgameMemoryTag: "sect:beast:endgame-loop-v4",
+    routeLabel: "萬獸山莊",
+    categoryLabel: "仙帝 v5 路線餘波",
+    chainLabel: "帝血餘路",
+    sourceCueLabel: "萬獸血骨殘材 x1",
+    rewardItemId: "beast_path_bloodbone",
+  },
+  {
+    eventId: "mystic_emperor_v5_star_throne_afterpath",
+    profession: ProfessionType.Mage,
+    endgameMemoryTag: "sect:mystic:endgame-loop-v4",
+    routeLabel: "縹緲仙宮",
+    categoryLabel: "仙帝 v5 路線餘波",
+    chainLabel: "星詔餘路",
+    sourceCueLabel: "縹緲星魂蓮 x1",
+    rewardItemId: "mystic_path_starlotus",
+  },
+] as const;
+
 const buildRouteMemoryContext = (
   profession: ProfessionType,
   realm: MajorRealm
@@ -775,6 +808,91 @@ describe("encounter selector", () => {
 
   it("publishes v4 endgame convergence material source cues", () => {
     V4_ENDGAME_ROUTE_EVENT_CASES.forEach((testCase) => {
+      const sourceCues = getEncounterMaterialSourceCues(testCase.rewardItemId);
+
+      expect(sourceCues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            eventId: testCase.eventId,
+            routeLabel: testCase.routeLabel,
+            categoryLabel: expect.stringContaining(testCase.categoryLabel),
+          }),
+        ])
+      );
+    });
+  });
+
+  it("adds repeatable v5 aftermath events unlocked by matching endgame memory", () => {
+    V5_ENDGAME_AFTERMATH_EVENT_CASES.forEach((testCase) => {
+      const event = ENCOUNTER_EVENTS[testCase.eventId];
+
+      expect(event, `${testCase.eventId} should exist`).toBeDefined();
+      expect(event.minRealm).toBe(MajorRealm.ImmortalEmperor);
+      expect(event.maxRealm).toBe(MajorRealm.ImmortalEmperor);
+      expect(event.selector?.repeatPolicy).toBe("repeatable");
+      expect(event.selector?.eligibleProfessions).toEqual([testCase.profession]);
+      expect(event.selector?.requiredWorldMemoryTags).toEqual([
+        testCase.endgameMemoryTag,
+      ]);
+      expect(event.presentation).toMatchObject({
+        routeLabel: testCase.routeLabel,
+        chainLabel: testCase.chainLabel,
+      });
+      expect(event.presentation?.categoryLabel).toContain(testCase.categoryLabel);
+      expect(event.presentation?.memoryCue).toContain("v5");
+
+      const rewardItemIds = event.choices.flatMap((choice) =>
+        choice.reward.items?.map((item) => item.itemId) ?? []
+      );
+      const cueLabels = event.choices.flatMap((choice) =>
+        choice.cue?.tags?.map((tag) => tag.label) ?? []
+      );
+
+      expect(rewardItemIds).toContain(testCase.rewardItemId);
+      expect(cueLabels).toContain(testCase.sourceCueLabel);
+      expect(cueLabels).toEqual(
+        expect.arrayContaining([
+          expect.stringMatching(/穩定收益|材料來源|高風險收益/),
+        ])
+      );
+    });
+  });
+
+  it("keeps v5 aftermath locked behind matching endgame memory and profession", () => {
+    V5_ENDGAME_AFTERMATH_EVENT_CASES.forEach((testCase) => {
+      const matchingContext = {
+        majorRealm: MajorRealm.ImmortalEmperor,
+        profession: testCase.profession,
+        completedQuestIds: [],
+        resolvedEventIds: [],
+        worldMemoryTags: [testCase.endgameMemoryTag],
+      };
+
+      expect(
+        getAvailableEncounterEvents(matchingContext).some(
+          (event) => event.id === testCase.eventId
+        )
+      ).toBe(true);
+      expect(
+        getAvailableEncounterEvents({
+          ...matchingContext,
+          worldMemoryTags: [],
+        }).some((event) => event.id === testCase.eventId)
+      ).toBe(false);
+      expect(
+        getAvailableEncounterEvents({
+          ...matchingContext,
+          profession:
+            testCase.profession === ProfessionType.Sword
+              ? ProfessionType.Body
+              : ProfessionType.Sword,
+        }).some((event) => event.id === testCase.eventId)
+      ).toBe(false);
+    });
+  });
+
+  it("publishes v5 aftermath material source cues", () => {
+    V5_ENDGAME_AFTERMATH_EVENT_CASES.forEach((testCase) => {
       const sourceCues = getEncounterMaterialSourceCues(testCase.rewardItemId);
 
       expect(sourceCues).toEqual(

@@ -472,6 +472,9 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
                     <p className="mt-2 text-xs leading-5 text-stone-400">
                       {seal.identityCue}
                     </p>
+                    <p className="mt-2 text-xs leading-5 text-stone-500">
+                      {seal.heirloomHint}
+                    </p>
                     {benefitLabel && (
                       <p className="mt-2 text-xs text-emerald-300/80">
                         {benefitLabel}
@@ -507,6 +510,9 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
                         )}
                         <p className="mt-2 text-xs leading-5 text-stone-500">
                           {seal.identityCue}
+                        </p>
+                        <p className="mt-2 text-xs leading-5 text-stone-600">
+                          {seal.heirloomHint}
                         </p>
                         {benefitLabel && (
                           <p className="mt-2 text-xs text-emerald-300/70">

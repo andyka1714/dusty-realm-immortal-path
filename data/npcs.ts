@@ -659,6 +659,34 @@ export const GUIXU_RIFT_NPCS: NPC[] = [
             '終盤爐口不吃空話，只吃凌霄劍星鋼、萬獸血骨殘材與縹緲星魂蓮。',
             '到了歸墟裂界（182），這三路宗門材料會被壓成終盤 Workshop sink；缺一味，帝兵和仙品丹都會失衡。'
         ]
+    },
+    {
+        id: 'local_guixu_v5_route_oracle',
+        name: '歸墟 v5 路諭師',
+        symbol: '諭',
+        type: NPCType.Quest,
+        x: 136,
+        y: 96,
+        description: '在歸墟裂界（182）解讀 v5 route rumor 的路諭師，說明 sect:sword:endgame-loop-v4、sect:beast:endgame-loop-v4、sect:mystic:endgame-loop-v4 如何延伸成 Workshop 與輪迴線索。',
+        questIds: ['local_guixu_v5_route_oracle'],
+        dialogue: [
+            'v5 不是另開一條路，而是把 sect:sword:endgame-loop-v4、sect:beast:endgame-loop-v4、sect:mystic:endgame-loop-v4 的餘波讀出來。',
+            '凌霄劍宗、萬獸山莊、縹緲仙宮的終盤 route 會在歸墟裂界（182）留下 Workshop clue，也會回到輪迴 build。'
+        ]
+    },
+    {
+        id: 'local_guixu_v5_workshop_seer',
+        name: '歸墟 v5 冕爐師',
+        symbol: '冕',
+        type: NPCType.Quest,
+        x: 146,
+        y: 116,
+        description: '守著 v5 帝冕爐火的 Workshop 爐師，提示帝冕、凌霄劍星鋼、萬獸血骨殘材與縹緲星魂蓮如何拆成職業向 follow-up。',
+        questIds: ['local_guixu_v5_workshop_clue'],
+        dialogue: [
+            '歸墟三道帝冕不是最後一件裝備；v5 會把帝冕拆回劍冕、骨冕與星冕三條 Workshop follow-up。',
+            '帝冕接上凌霄劍星鋼、萬獸血骨殘材、縹緲星魂蓮後，才會分別指向劍修、體修、法修的下一世輪迴提示。'
+        ]
     }
 ];
 
