@@ -17,6 +17,7 @@ import {
   getProfessionPassives,
 } from "./battlePassiveSkillBonusRegistry";
 import type { PlayerCombatStats } from "./battleSystem";
+import { getCoreAttributeEffects } from "./attributeEffects";
 
 const BODY_LATE_REALM_ATTACK_BONUS: Partial<Record<MajorRealm, number>> = {
   [MajorRealm.Fusion]: 0.04,
@@ -161,9 +162,14 @@ export const calculatePlayerStats = (
     effectivePhysique * 0.1 + (equipmentStats.blockRate || 0);
   const alchemyBonus = rootDetails.bonuses.alchemyBonus || 0;
   const craftingBonus = rootDetails.bonuses.craftingBonus || 0;
-  const breakthroughBonus = 0;
-  const dropRateBonus = effectiveFortune * 0.1;
-  const cultivationSpeedBonus = 0;
+  const attributeEffects = getCoreAttributeEffects({
+    ...attributes,
+    comprehension: effectiveComprehension,
+    fortune: effectiveFortune,
+  });
+  const breakthroughBonus = attributeEffects.breakthroughBonus;
+  const dropRateBonus = attributeEffects.dropRateBonus;
+  const cultivationSpeedBonus = attributeEffects.cultivationSpeedBonus;
   const damageReduction =
     (rootBonuses.damageReduction || 0) +
     (equipmentStats.damageReduction || 0) +

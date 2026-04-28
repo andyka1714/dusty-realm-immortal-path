@@ -36,6 +36,7 @@ import { Play, ChevronsUp, Moon, Info, AlertTriangle, Zap, Lock, RefreshCw } fro
 import { MajorRealm, SpiritRootId, SpiritRootType } from '../types';
 import { calculateSeclusionCost, getBaseCultivationRate, getGatheringMultiplier, getManualCultivateCooldown, getPassiveCultivationRate } from '../utils/cultivation';
 import { DEFAULT_REINCARNATION_PERKS } from '../utils/reincarnation';
+import { buildBreakthroughPreview } from '../utils/breakthroughPreview';
 
 
 // Custom Animation Style
@@ -231,7 +232,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
       return Math.min(0.95, rate) * 100;
   };
 
-  const successRate = calculateSuccessRate();
+  const breakthroughPreview = buildBreakthroughPreview({
+    majorRealm,
+    minorRealm,
+    attributes,
+    spiritRootId: spiritRoot,
+    hasRequiredItem: hasItem,
+    requiredItemName: requiredItem?.name,
+  });
+  const successRate = breakthroughPreview.successRatePercent;
   
   // Floating Gain Animation Logic
   const prevExpRef = React.useRef(currentExp);
@@ -578,7 +587,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                   <ChevronsUp size={20} className={isBreakthroughAvailable ? "text-amber-100" : "text-stone-600"} />
                   <span className="font-bold tracking-widest">境界突破</span>
                   <span className="text-[10px] font-normal opacity-80">
-                    {isBreakthroughAvailable ? "瓶頸已至，點擊破境" : "積累修為中..."}
+                    {isBreakthroughAvailable
+                      ? `${breakthroughPreview.riskLabel} · ${successRate.toFixed(1)}%`
+                      : "積累修為中..."}
                   </span>
                 </Button>
                 <GameHintBubble eyebrow="BREAKTHROUGH" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
@@ -711,6 +722,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                   {successRate.toFixed(1)}% <span className="text-sm text-stone-500">成功率</span>
                </div>
                <p className="text-xs text-stone-600 mt-1">成功率受悟性、福緣與靈根影響</p>
+               <div className="mt-3 flex flex-wrap justify-center gap-2">
+                  {breakthroughPreview.preparationCues.map((cue) => (
+                    <span
+                      key={cue}
+                      className="rounded border border-stone-700 bg-stone-950 px-2 py-1 text-[11px] text-stone-400"
+                    >
+                      {cue}
+                    </span>
+                  ))}
+               </div>
             </div>
 
             {/* Major Breakthrough Requirement */}

@@ -1024,5 +1024,59 @@ export const QUESTS: Record<string, Quest> = {
                 '玩家看到 v5 recipe 時，能知道它從哪條 sect:*:endgame-loop-v4 延伸而來，包含 sect:mystic:endgame-loop-v4 這條法修冕爐線。'
             ]
         }
+    },
+    'local_guixu_v6_afterpath_broker': {
+        id: 'local_guixu_v6_afterpath_broker',
+        type: QuestType.Side,
+        title: '歸墟餘路：v6 迴響',
+        description: '歸墟 v6 餘路行者請你確認歸墟裂界（182）的 v6 route rumor：三宗 sect:*:endgame-loop-v4 如何形成 repeatable aftermath、Workshop 與 Reincarnation clue。',
+        giverId: 'local_guixu_v6_afterpath_broker',
+        submitNpcId: 'local_guixu_v6_afterpath_broker',
+        requirements: [
+            { type: 'dialogue', targetNpcId: 'local_guixu_v6_afterpath_broker' }
+        ],
+        rewards: [
+            { exp: 268000, spiritStones: 10400 }
+        ],
+        dialogue: {
+            start: [
+                'v6 讀的是同一組終盤記憶：sect:sword:endgame-loop-v4、sect:beast:endgame-loop-v4、sect:mystic:endgame-loop-v4。',
+                '它們會各自延伸 repeatable aftermath，也要回到 Workshop 與 Reincarnation clue，不能變成孤立刷怪。'
+            ],
+            progress: [
+                '先把 route rumor 對上三宗，再看哪個 aftermath 給材料，哪個只給下一世 build 提示。'
+            ],
+            complete: [
+                'v6 餘路已核對：凌霄劍宗、萬獸山莊、縹緲仙宮的終盤記憶都能回接歸墟裂界（182）。',
+                'Workshop、Reincarnation 與 encounter aftermath 仍讀同一組 sect:*:endgame-loop-v4。'
+            ]
+        }
+    },
+    'local_guixu_v6_reincarnation_clue': {
+        id: 'local_guixu_v6_reincarnation_clue',
+        type: QuestType.Side,
+        title: '歸墟錄卷：v6 專精與輪迴',
+        description: '歸墟 v6 輪迴錄師請你確認 Workshop v6 specialization leaf、route material sink 與 Reincarnation clue 不新增永久狀態也不跳過核心材料。',
+        giverId: 'local_guixu_v6_reincarnation_scribe',
+        submitNpcId: 'local_guixu_v6_reincarnation_scribe',
+        requirements: [
+            { type: 'dialogue', targetNpcId: 'local_guixu_v6_reincarnation_scribe' }
+        ],
+        rewards: [
+            { exp: 284000, spiritStones: 11200 }
+        ],
+        dialogue: {
+            start: [
+                'Workshop v6 leaf 只應顯示品質、副產物與熟練 cue；凌霄劍星鋼、萬獸血骨殘材、縹緲星魂蓮仍要消耗。',
+                'Reincarnation clue 也只讀 sect:sword:endgame-loop-v4、sect:beast:endgame-loop-v4、sect:mystic:endgame-loop-v4，不能再開一套記憶。'
+            ],
+            progress: [
+                '如果 recipe 卡看起來像材料被跳過，就代表 v6 專精寫壞了。'
+            ],
+            complete: [
+                'v6 專精與輪迴錄卷已校準：Workshop leaf 只給品質與副產物提示，Reincarnation 仍讀舊 route memory。',
+                '歸墟裂界（182）的 v6 local hook 已能把 Workshop 與 Reincarnation clue 串起來。'
+            ]
+        }
     }
 };

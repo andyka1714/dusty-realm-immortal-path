@@ -566,3 +566,40 @@ Change id: `add-combat-power-and-enemy-intel`
 - 不新增 persisted schema。
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；戰力與妖獸情報全部由既有 character stats、enemy catalog、map catalog 與 runtime target template 推導，不寫入存檔。
+
+## 28. 下一批八線 gameplay / HUD v6 實作收口記錄
+
+Change ids:
+
+- `add-quest-tracker-hud`
+- `implement-core-attribute-effects`
+- `add-spirit-power-runtime`
+- `expand-breakthrough-tribulation-system`
+- `add-npc-affinity-and-shop-discounts`
+- `expand-endgame-route-density-v6`
+- `expand-workshop-endgame-specialization-v6`
+- `expand-endgame-map-local-density-v6`
+
+本輪把第 26 節拆出的八條後續線一次開案並落地：
+
+- Adventure 主畫面新增 `QuestTrackerHUD`，由 `utils/questTracker.ts` 從既有 `quest.activeQuests` 與 `QUESTS` 推導任務排序、類型、可回報狀態與進度文字；desktop 顯示左側任務追蹤，empty state 不新增 pin / tracked preference。
+- 核心屬性新增 `utils/attributeEffects.ts`，讓悟性、福緣、魅力提供可讀 derived gameplay effect；`calculatePlayerStats` 的突破、掉落、修煉加成改讀同一套 helper，`StatsPanel` 也顯示對應說明。
+- Adventure 世界戰鬥新增 `worldPlayerMp` runtime；補給 helper 會把 `heal_mp / full_restore` 接到可見 MP，主動術式會檢查並消耗 MP，不足時顯示阻擋原因。
+- Dashboard 突破區新增 `utils/breakthroughPreview.ts`，顯示成功率、天劫 / 心魔風險與準備提示；第一版不新增持續性傷勢或心魔 state。
+- 商店新增 deterministic NPC 態度與折扣：`utils/npcAffinity.ts` 從魅力、職業 / 宗門身份與完成任務推導態度、折扣與來源，`ShopPanel` 顯示折扣前後價格與來源文字。
+- 終盤 route density v6 新增三宗 repeatable aftermath：`sword_emperor_v6_heaven_sunder_echo`、`beast_emperor_v6_worldblood_echo`、`mystic_emperor_v6_star_throne_echo`，都讀取對應 `sect:*:endgame-loop-v4` 並保留 route / chain / reward cue。
+- Workshop 終盤專精 v6 新增三個 leaf：`smithing_v6_heaven_sunder_edge`、`smithing_v6_worldblood_body`、`alchemy_v6_star_throne_lotus`；只影響熟練、品質與副產物 cue，不跳過核心 route material。
+- 歸墟裂界新增 v6 local NPC / dialogue-only quests：`local_guixu_v6_afterpath_broker` 與 `local_guixu_v6_reincarnation_scribe`，把 v6 route rumor、Workshop leaf 與 Reincarnation clue 接回同一組 route memory。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；新增內容為 static catalog、derived helper、Adventure runtime resource 與 deterministic UI projection。`worldPlayerMp` 不寫入存檔，NPC affinity / quest tracker / breakthrough preview 也只從既有 state 推導。
+
+目前已跑驗證：
+
+- `openspec validate <8 changes> --strict`
+- `npm test`
+- `npx tsc --noEmit`
+- `git diff --check`

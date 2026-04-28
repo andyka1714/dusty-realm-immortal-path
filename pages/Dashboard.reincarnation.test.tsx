@@ -65,7 +65,9 @@ const createDashboardMarkup = (flowStep: "life_review" | "hall") => {
   );
 };
 
-const createAliveDashboardMarkup = () => {
+const createAliveDashboardMarkup = (
+  characterOverrides: Partial<ReturnType<typeof characterReducer>> = {}
+) => {
   const store = configureStore({
     reducer: {
       character: characterReducer,
@@ -85,6 +87,7 @@ const createAliveDashboardMarkup = () => {
         gender: Gender.Male,
         majorRealm: MajorRealm.GoldenCore,
         age: 350 * 365,
+        ...characterOverrides,
       },
       inventory: inventoryReducer(undefined, { type: "@@INIT" }),
       logs: logReducer(undefined, { type: "@@INIT" }),
@@ -128,5 +131,16 @@ describe("Dashboard reincarnation flow", () => {
     expect(markup).toContain('data-testid="dashboard-start-seclusion"');
     expect(markup).toContain('data-testid="dashboard-breakthrough"');
     expect(markup).toContain('data-testid="dashboard-voluntary-reincarnation"');
+  });
+
+  it("shows breakthrough preview risk and success rate on the action button", () => {
+    const markup = createAliveDashboardMarkup({
+      isBreakthroughAvailable: true,
+      minorRealm: 9,
+      majorRealm: MajorRealm.Tribulation,
+    });
+
+    expect(markup).toContain("天劫與心魔並臨");
+    expect(markup).toContain("境界突破");
   });
 });

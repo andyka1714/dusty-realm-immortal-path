@@ -195,6 +195,19 @@ const createActiveRunSave = ({
       majorRealm: MajorRealm.Foundation,
       spiritStones: 100000,
     },
+    quest: {
+      ...state.quest,
+      activeQuests: {
+        tutorial_02_get_sword: {
+          progress: 0,
+          isReadyToComplete: true,
+        },
+        sect_sword_task_01: {
+          progress: 0,
+          isReadyToComplete: false,
+        },
+      },
+    },
     encounter: withPendingEncounter
       ? {
           pendingEvent: {
@@ -646,6 +659,20 @@ test("area and world map modal render visible map surfaces", async ({ page }) =>
   await page.getByTestId("adventure-map-tab-world").click();
   await expect(page.getByTestId("adventure-world-map")).toBeVisible();
   await expect(page.getByTestId("adventure-world-map-scroll")).toBeVisible();
+});
+
+test("adventure quest tracker renders active quest progress", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await installSave(page, createActiveRunSave());
+
+  await page.goto("/");
+
+  const tracker = page.getByTestId("quest-tracker-hud");
+  await expect(tracker).toBeVisible();
+  await expect(tracker).toContainText("防身利器");
+  await expect(tracker).toContainText("可回報");
+  await expect(tracker).toContainText("劍宗試煉：斬虎");
+  await expect(tracker).toContainText("討伐 0 / 1");
 });
 
 test("adventure canvas and mobile map modal keep visible non-black surfaces", async ({

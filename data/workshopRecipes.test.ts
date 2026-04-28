@@ -302,12 +302,15 @@ describe("workshop recipe data", () => {
       "alchemy_hongmeng_condenser",
       "alchemy_lifebloom_resonance",
       "alchemy_hongmeng_star_lotus_crown",
+      "alchemy_v6_star_throne_lotus",
     ]);
     expect(WORKSHOP_SPECIALIZATION_TREE.smithing.map((node) => node.id)).toEqual([
       "smithing_core_temper_foundation",
       "smithing_starfire_tempering",
       "smithing_soulsteel_inscription",
       "smithing_starfire_starsteel_crown",
+      "smithing_v6_heaven_sunder_edge",
+      "smithing_v6_worldblood_body",
     ]);
     expect(WORKSHOP_SPECIALIZATIONS.alchemy_hongmeng_condenser).toMatchObject({
       prerequisiteNodeIds: ["alchemy_inner_fire_foundation"],
@@ -511,6 +514,36 @@ describe("workshop recipe data", () => {
       { itemId: "beast_path_bloodbone", count: 1 },
       { itemId: "spirit_herb", count: 10 },
     ]);
+  });
+
+  it("publishes v6 endgame specialization leaves for sword, body, and mage follow-up recipes", () => {
+    [
+      {
+        nodeId: "smithing_v6_heaven_sunder_edge",
+        recipeId: "heaven_sunder_crown_reforge",
+        cue: "sect:sword:endgame-loop-v4",
+      },
+      {
+        nodeId: "smithing_v6_worldblood_body",
+        recipeId: "worldblood_crown_body_forge",
+        cue: "sect:beast:endgame-loop-v4",
+      },
+      {
+        nodeId: "alchemy_v6_star_throne_lotus",
+        recipeId: "star_throne_crown_staff_forge",
+        cue: "sect:mystic:endgame-loop-v4",
+      },
+    ].forEach((testCase) => {
+      const node = WORKSHOP_SPECIALIZATIONS[testCase.nodeId];
+      const recipe = WORKSHOP_RECIPES[testCase.recipeId];
+
+      expect(node, `${testCase.nodeId} should exist`).toBeDefined();
+      expect(node.tier).toBe(3);
+      expect(node.description).toContain(testCase.cue);
+      expect(node.effect?.qualityCue).toContain("v6");
+      expect(recipe.routeTags).toContain(testCase.cue);
+      expect(recipe.ingredients.some((ingredient) => ROUTE_SPECIFIC_MATERIAL_IDS.has(ingredient.itemId))).toBe(true);
+    });
   });
 
   it("does not apply specialization craft effects before its mastery requirement is met", () => {

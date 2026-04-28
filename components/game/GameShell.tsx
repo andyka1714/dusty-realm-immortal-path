@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { FloatingDock, GamePanelId } from "./FloatingDock";
 import { GameHUD } from "./GameHUD";
 import { GamePanel } from "./GamePanel";
+import { QuestTrackerHUD } from "./QuestTrackerHUD";
 import { BookOpen, Hammer, Home, Package } from "lucide-react";
 import { Modal } from "../Modal";
 import { PendingEncounterPanel } from "./PendingEncounterPanel";
@@ -141,6 +142,7 @@ export const GameShell: React.FC = () => {
       <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_160px_rgba(0,0,0,0.72)]"></div>
 
       <GameHUD />
+      <QuestTrackerHUD />
       <FloatingDock activePanel={activePanel} onTogglePanel={handleTogglePanel} />
 
       <Suspense fallback={null}>

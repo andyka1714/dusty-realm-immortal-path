@@ -31,6 +31,7 @@ import {
     formatConsumableEffectLabel,
     hasRecoveryEffect,
 } from '../../utils/consumableEffects';
+import { resolveNpcShopAffinity } from '../../utils/npcAffinity';
 
 
 // Helper for attribute names (Moved from Inventory to be shared concept ideally, but kept here for now)
@@ -100,6 +101,7 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
     const dispatch = useDispatch();
     const character = useSelector((state: RootState) => state.character);
     const { equipment, items: inventoryItems } = useSelector((state: RootState) => state.inventory);
+    const completedQuestIds = useSelector((state: RootState) => state.quest.completedQuests);
     const shop = SHOPS[shopId];
     
     // UI Effects State
@@ -111,12 +113,19 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
 
     // Safety check
     if (!shop) return null;
+    const shopAffinity = resolveNpcShopAffinity({
+        shopId,
+        charm: character.attributes.charm,
+        profession: character.profession,
+        completedQuestIds,
+    });
 
     const handleBuy = (shopItem: ShopItem) => {
         const item = ITEMS[shopItem.itemId];
         if (!item) return;
 
-        const price = shopItem.price ?? item.price;
+        const basePrice = shopItem.price ?? item.price;
+        const price = shopAffinity.applyDiscount(basePrice);
         
         if (character.spiritStones < price) {
             dispatch(addLog({ 
@@ -161,7 +170,20 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
             <div className="flex flex-col h-full bg-stone-900/50">
                 {/* Header Info */}
                 <div className="p-4 border-b border-stone-800 flex flex-col md:flex-row gap-3 md:gap-0 md:justify-between items-start md:items-center bg-stone-950/80 relative">
-                    <p className="text-stone-400 text-sm italic">{shop.description}</p>
+                    <div className="min-w-0">
+                        <p className="text-stone-400 text-sm italic">{shop.description}</p>
+                        <div className="mt-2 flex flex-wrap gap-2 text-[11px]" data-testid="shop-affinity-summary">
+                            <span className="rounded border border-amber-900/50 bg-amber-950/20 px-2 py-0.5 text-amber-200">
+                                態度：{shopAffinity.attitudeLabel}
+                            </span>
+                            <span className="rounded border border-emerald-900/50 bg-emerald-950/20 px-2 py-0.5 text-emerald-200">
+                                折扣 {shopAffinity.discountPercent}%
+                            </span>
+                            <span className="rounded border border-stone-800 bg-stone-950/70 px-2 py-0.5 text-stone-400">
+                                {shopAffinity.discountSources.join(" / ")}
+                            </span>
+                        </div>
+                    </div>
                     <div className="relative">
                         <div className="flex items-center gap-2 text-amber-500 font-mono font-bold bg-black/40 px-3 py-1 rounded border border-amber-900/30 self-end md:self-auto transition-all duration-300">
                             <Coins size={14} />
@@ -210,7 +232,8 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                             return null;
                         }
                         
-                        const price = shopItem.price ?? item.price;
+                        const basePrice = shopItem.price ?? item.price;
+                        const price = shopAffinity.applyDiscount(basePrice);
                         const canAfford = character.spiritStones >= price;
                         const isJustPurchased = recentlyPurchased === shopItem.itemId;
                         
@@ -313,9 +336,16 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                                 {/* Buy Action */}
                                 {/* Price & Action */}
                                 <div className="flex flex-col items-end gap-2 shrink-0 ml-2">
-                                    <div className="text-sm font-mono text-amber-500 flex items-center gap-1 whitespace-nowrap">
+                                    <div className="text-sm font-mono text-amber-500 flex flex-col items-end gap-0.5 whitespace-nowrap">
+                                        {shopAffinity.discountPercent > 0 && (
+                                            <span className="text-[10px] text-stone-500 line-through">
+                                                {formatSpiritStone(basePrice)}
+                                            </span>
+                                        )}
+                                        <span className="inline-flex items-center gap-1">
                                         {formatSpiritStone(price)}
                                         <Coins size={12} />
+                                        </span>
                                     </div>
                                     <Button
                                         onClick={() => handleBuy(shopItem)}

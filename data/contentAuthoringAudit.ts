@@ -6,7 +6,7 @@ import { MAPS } from "./maps";
 import { WORLD_STORY_NPCS } from "./npcs";
 import { QUESTS } from "./quests";
 import { SHOPS } from "./shops";
-import { WORKSHOP_RECIPES } from "./workshopRecipes";
+import { WORKSHOP_RECIPES, WORKSHOP_SPECIALIZATIONS } from "./workshopRecipes";
 import { DEFAULT_REINCARNATION_SOUL_SEALS } from "./reincarnationPerks";
 
 export const ROUTE_MATERIAL_AUDIT_TARGETS = [
@@ -74,6 +74,38 @@ export interface V5EndgameRouteAuditEntry {
 
 export interface V5EndgameRouteAuditReport {
   routes: V5EndgameRouteAuditEntry[];
+}
+
+const V6_ENDGAME_ROUTE_AUDIT_TARGETS = [
+  {
+    memoryTag: "sect:sword:endgame-loop-v4",
+    encounterId: "sword_emperor_v6_heaven_sunder_echo",
+    mapLocalQuestId: "local_guixu_v6_afterpath_broker",
+    specializationId: "smithing_v6_heaven_sunder_edge",
+  },
+  {
+    memoryTag: "sect:beast:endgame-loop-v4",
+    encounterId: "beast_emperor_v6_worldblood_echo",
+    mapLocalQuestId: "local_guixu_v6_reincarnation_clue",
+    specializationId: "smithing_v6_worldblood_body",
+  },
+  {
+    memoryTag: "sect:mystic:endgame-loop-v4",
+    encounterId: "mystic_emperor_v6_star_throne_echo",
+    mapLocalQuestId: "local_guixu_v6_reincarnation_clue",
+    specializationId: "alchemy_v6_star_throne_lotus",
+  },
+] as const;
+
+export interface V6EndgameRouteAuditEntry {
+  memoryTag: string;
+  hasRepeatableEncounter: boolean;
+  hasMapLocalClue: boolean;
+  hasWorkshopSpecialization: boolean;
+}
+
+export interface V6EndgameRouteAuditReport {
+  routes: V6EndgameRouteAuditEntry[];
 }
 
 const pushIfMissing = ({
@@ -309,6 +341,34 @@ export const auditV5EndgameRouteCoverage = (): V5EndgameRouteAuditReport => ({
       hasReincarnationSeal: Boolean(
         seal?.requiredWorldMemoryTags?.includes(target.memoryTag)
       ),
+    };
+  }),
+});
+
+export const auditV6EndgameRouteCoverage = (): V6EndgameRouteAuditReport => ({
+  routes: V6_ENDGAME_ROUTE_AUDIT_TARGETS.map((target) => {
+    const event = ENCOUNTER_EVENTS[target.encounterId];
+    const quest = QUESTS[target.mapLocalQuestId];
+    const specialization = WORKSHOP_SPECIALIZATIONS[target.specializationId];
+    const questText = [
+      quest?.description,
+      ...(quest?.dialogue.start ?? []),
+      ...(quest?.dialogue.progress ?? []),
+      ...(quest?.dialogue.complete ?? []),
+    ].join("\n");
+    const specializationText = [
+      specialization?.description,
+      specialization?.effect?.qualityCue,
+      specialization?.effect?.outputCue,
+    ].join("\n");
+
+    return {
+      memoryTag: target.memoryTag,
+      hasRepeatableEncounter:
+        event?.selector?.repeatPolicy === "repeatable" &&
+        Boolean(event.selector.requiredWorldMemoryTags?.includes(target.memoryTag)),
+      hasMapLocalClue: Boolean(questText.includes(target.memoryTag)),
+      hasWorkshopSpecialization: Boolean(specializationText.includes(target.memoryTag)),
     };
   }),
 });

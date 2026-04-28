@@ -3056,6 +3056,117 @@ const RAW_ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
       },
     ],
   }),
+  sword_emperor_v6_heaven_sunder_echo: createSingleRealmEncounterEvent({
+    id: "sword_emperor_v6_heaven_sunder_echo",
+    title: "斬天迴響劍冕潮",
+    description: "斬天終局與 v5 餘路穩定後，凌霄劍宗可在歸墟裂界反覆辨認劍冕迴響。",
+    realm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 3,
+      repeatPolicy: "repeatable",
+      eligibleProfessions: [ProfessionType.Sword],
+      requiredWorldMemoryTags: ["sect:sword:endgame-loop-v4"],
+    },
+    presentation: {
+      categoryLabel: "仙帝 v6 路線餘波",
+      routeLabel: "凌霄劍宗",
+      chainLabel: "斬天迴響",
+      memoryCue: "v6 斬天迴響讀取 sect:sword:endgame-loop-v4，補足劍修終盤 repeatable aftermath、Workshop 與輪迴 cue。",
+      sectLabel: "凌霄劍宗 v6 迴響",
+    },
+    choices: [
+      {
+        id: "salvage_v6_heaven_sunder_starsteel",
+        label: "辨回劍冕星鋼",
+        description: "把劍冕迴響中的星鋼碎脈收回，保留給終盤帝劍回爐。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "凌霄劍星鋼 x1" },
+            { kind: "benefit", label: "v6 Workshop clue" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "sword_path_starsteel", count: 1 }],
+          logMessage: "你辨回劍冕星鋼，凌霄劍宗 v6 迴響接上終盤 Workshop 與下一世劍路。",
+        },
+      },
+    ],
+  }),
+  beast_emperor_v6_worldblood_echo: createSingleRealmEncounterEvent({
+    id: "beast_emperor_v6_worldblood_echo",
+    title: "帝血迴響骨脈潮",
+    description: "帝血終局沉入骨潮後，萬獸山莊可反覆取回能承受歸墟壓力的骨脈。",
+    realm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 3,
+      repeatPolicy: "repeatable",
+      eligibleProfessions: [ProfessionType.Body],
+      requiredWorldMemoryTags: ["sect:beast:endgame-loop-v4"],
+    },
+    presentation: {
+      categoryLabel: "仙帝 v6 路線餘波",
+      routeLabel: "萬獸山莊",
+      chainLabel: "帝血迴響",
+      memoryCue: "v6 帝血迴響讀取 sect:beast:endgame-loop-v4，補足體修終盤 repeatable aftermath、Workshop 與輪迴 cue。",
+      sectLabel: "萬獸山莊 v6 迴響",
+    },
+    choices: [
+      {
+        id: "harvest_v6_worldblood_bloodbone",
+        label: "壓出帝血骨脈",
+        description: "承受骨潮反壓，取回一段可回爐大道真身的血骨殘材。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "resource", label: "萬獸血骨殘材 x1" },
+            { kind: "risk", label: "v6 高壓收益" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "beast_path_bloodbone", count: 1 }],
+          logMessage: "你壓出帝血骨脈，萬獸山莊 v6 迴響接上體修終盤 Workshop。",
+        },
+      },
+    ],
+  }),
+  mystic_emperor_v6_star_throne_echo: createSingleRealmEncounterEvent({
+    id: "mystic_emperor_v6_star_throne_echo",
+    title: "星詔迴響蓮命潮",
+    description: "星詔終局照入歸墟後，縹緲仙宮可反覆凝回穩住法杖與丹火的星蓮命盤。",
+    realm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 3,
+      repeatPolicy: "repeatable",
+      eligibleProfessions: [ProfessionType.Mage],
+      requiredWorldMemoryTags: ["sect:mystic:endgame-loop-v4"],
+    },
+    presentation: {
+      categoryLabel: "仙帝 v6 路線餘波",
+      routeLabel: "縹緲仙宮",
+      chainLabel: "星詔迴響",
+      memoryCue: "v6 星詔迴響讀取 sect:mystic:endgame-loop-v4，補足法修終盤 repeatable aftermath、Workshop 與輪迴 cue。",
+      sectLabel: "縹緲仙宮 v6 迴響",
+    },
+    choices: [
+      {
+        id: "gather_v6_star_throne_starlotus",
+        label: "凝回星詔蓮命",
+        description: "從星詔迴響中凝回星魂蓮，讓終盤法杖與丹火仍有可追溯來源。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "縹緲星魂蓮 x1" },
+            { kind: "benefit", label: "v6 法修 build" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "mystic_path_starlotus", count: 1 }],
+          logMessage: "你凝回星詔蓮命，縹緲仙宮 v6 迴響接上法修終盤 Workshop 與輪迴提示。",
+        },
+      },
+    ],
+  }),
 };
 
 export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> =

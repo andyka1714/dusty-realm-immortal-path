@@ -67,7 +67,7 @@ export const getConsumableRecoveryBlockedReason = (
   }
 
   const needsHp = hasEffect(effects, "heal_hp") || hasEffect(effects, "full_restore");
-  const needsMp = hasEffect(effects, "heal_mp");
+  const needsMp = hasEffect(effects, "heal_mp") || hasEffect(effects, "full_restore");
 
   if (needsHp && !resources.hp) {
     return "目前沒有可恢復的戰鬥氣血";

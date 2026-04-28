@@ -699,6 +699,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   const [targetMonsterId, setTargetMonsterId] = useState<string | null>(null);
   const [isAutoBattling, setIsAutoBattling] = useState(false);
   const [worldPlayerHp, setWorldPlayerHp] = useState(0);
+  const [worldPlayerMp, setWorldPlayerMp] = useState(0);
   const [worldPlayerShield, setWorldPlayerShield] = useState(0);
   const [worldCombatTargetId, setWorldCombatTargetId] = useState<string | null>(null);
   const [worldCombatTargetStatuses, setWorldCombatTargetStatuses] = useState<string[]>([]);
@@ -897,6 +898,8 @@ export const Adventure: React.FC<AdventureProps> = ({
     ? normalizeLearnedSkills(character.skills)
         .find((skill) => skill.type === 'Active' && skill.profession === profession)
     : undefined;
+  const primaryActiveSkillMpCost = primaryActiveSkill?.cost ?? 0;
+  const hasEnoughMpForPrimaryActiveSkill = worldPlayerMp >= primaryActiveSkillMpCost;
   const canEngageTarget =
     Boolean(targetedMonster) &&
     targetDistance !== null &&
@@ -944,7 +947,8 @@ export const Adventure: React.FC<AdventureProps> = ({
     : null;
   const combatSupplyBlockedReason = combatSupply
     ? getConsumableRecoveryBlockedReason(combatSupply.effects, {
-        hp: { current: worldPlayerHp, max: playerStats.maxHp },
+      hp: { current: worldPlayerHp, max: playerStats.maxHp },
+      mp: { current: worldPlayerMp, max: playerStats.maxMp },
       })
     : "沒有可用補給";
 
@@ -961,9 +965,10 @@ export const Adventure: React.FC<AdventureProps> = ({
 
     const recovery = applyConsumableRecoveryEffects(combatSupply.effects, {
       hp: { current: worldPlayerHp, max: playerStats.maxHp },
+      mp: { current: worldPlayerMp, max: playerStats.maxMp },
     });
 
-    if (recovery.appliedEffects <= 0 || !recovery.hp) {
+    if (recovery.appliedEffects <= 0 || (!recovery.hp && !recovery.mp)) {
       dispatch(addLog({
         message: `補給無法使用：沒有可恢復的戰鬥資源。`,
         type: 'warning-low',
@@ -971,14 +976,19 @@ export const Adventure: React.FC<AdventureProps> = ({
       return;
     }
 
-    setWorldPlayerHp(recovery.hp.current);
+    if (recovery.hp) {
+      setWorldPlayerHp(recovery.hp.current);
+    }
+    if (recovery.mp) {
+      setWorldPlayerMp(recovery.mp.current);
+    }
     dispatch(removeItem({
       itemId: combatSupplySlot.itemId,
       count: 1,
       instanceId: combatSupplySlot.instanceId,
     }));
     dispatch(addLog({
-      message: `你服用了 [${combatSupply.name}]，氣血恢復至 ${Math.floor(recovery.hp.current)} / ${playerStats.maxHp}。`,
+      message: `你服用了 [${combatSupply.name}]，氣血 ${Math.floor(recovery.hp?.current ?? worldPlayerHp)} / ${playerStats.maxHp}，靈力 ${Math.floor(recovery.mp?.current ?? worldPlayerMp)} / ${playerStats.maxMp}。`,
       type: 'gain',
     }));
   };
@@ -1005,14 +1015,18 @@ export const Adventure: React.FC<AdventureProps> = ({
 
   useEffect(() => {
     setWorldPlayerHp(playerStats.maxHp);
+    setWorldPlayerMp(playerStats.maxMp);
     applyWorldCombatEncounterState(createResetWorldCombatEncounterState());
-  }, [currentMapId, playerStats.maxHp]);
+  }, [currentMapId, playerStats.maxHp, playerStats.maxMp]);
 
   useEffect(() => {
     if (worldPlayerHp > playerStats.maxHp) {
       setWorldPlayerHp(playerStats.maxHp);
     }
-  }, [worldPlayerHp, playerStats.maxHp]);
+    if (worldPlayerMp > playerStats.maxMp) {
+      setWorldPlayerMp(playerStats.maxMp);
+    }
+  }, [worldPlayerHp, worldPlayerMp, playerStats.maxHp, playerStats.maxMp]);
 
   useEffect(() => {
     if (worldCombatTargetId && !activeMonsters.some((monster) => monster.instanceId === worldCombatTargetId)) {
@@ -1078,8 +1092,20 @@ export const Adventure: React.FC<AdventureProps> = ({
     clearWorldCombatTimers: () => clearCombatTimerBucket(combatTimersRef.current, 'world'),
   });
 
-  const runPlayerWorldAction = (useSkill: boolean) =>
-    runPlayerWorldStrikePipeline({
+  const runPlayerWorldAction = (useSkill: boolean) => {
+    const shouldUseSkill =
+      useSkill &&
+      Boolean(primaryActiveSkill) &&
+      Date.now() >= playerSkillReadyAt;
+    if (shouldUseSkill && !hasEnoughMpForPrimaryActiveSkill) {
+      dispatch(addLog({
+        message: `靈力不足，無法施放【${primaryActiveSkill?.name}】（需要 ${primaryActiveSkillMpCost}）。`,
+        type: 'warning-low',
+      }));
+      return;
+    }
+
+    const queuedAction = runPlayerWorldStrikePipeline({
       readyAt: playerActionReadyAt,
       canExecute: () => Boolean(canEngageTarget && targetedMonster && targetedMonsterTemplate),
       target: targetedMonster ?? undefined,
@@ -1135,6 +1161,11 @@ export const Adventure: React.FC<AdventureProps> = ({
         clearWorldEncounterState();
       },
     });
+
+    if (queuedAction !== undefined && shouldUseSkill && primaryActiveSkillMpCost > 0) {
+      setWorldPlayerMp((currentMp) => Math.max(0, currentMp - primaryActiveSkillMpCost));
+    }
+  };
 
   const runEnemyWorldAction = () =>
     targetedMonsterTemplate
@@ -1813,6 +1844,18 @@ export const Adventure: React.FC<AdventureProps> = ({
                                 <span>氣血 {Math.floor(worldPlayerHp)} / {playerStats.maxHp}</span>
                                 <span>{worldPlayerShield > 0 ? `護盾 ${Math.floor(worldPlayerShield)}` : '無護盾'}</span>
                             </div>
+                            <div className="mt-2 h-1.5 overflow-hidden rounded-full border border-blue-950 bg-stone-950">
+                                <div
+                                    className="h-full bg-blue-500 transition-all duration-200"
+                                    style={{ width: `${Math.max(0, (worldPlayerMp / playerStats.maxMp) * 100)}%` }}
+                                />
+                            </div>
+                            <div className="mt-1 flex items-center justify-between text-[11px] text-blue-200/80">
+                                <span>靈力 {Math.floor(worldPlayerMp)} / {playerStats.maxMp}</span>
+                                {primaryActiveSkill && (
+                                    <span>術式消耗 {primaryActiveSkillMpCost}</span>
+                                )}
+                            </div>
                             <div className="mt-3 flex items-center gap-2">
                                 <Button
                                     onClick={useCombatSupply}
@@ -2289,12 +2332,12 @@ export const Adventure: React.FC<AdventureProps> = ({
                                     setAutoMovePath([]);
                                 }
                             }}
-                            disabled={!primaryActiveSkill || !targetedMonster || !canEngageTarget}
-                            variant={primaryActiveSkill && targetedMonster && canEngageTarget ? "amber" : "stone"}
+                            disabled={!primaryActiveSkill || !targetedMonster || !canEngageTarget || !hasEnoughMpForPrimaryActiveSkill}
+                            variant={primaryActiveSkill && targetedMonster && canEngageTarget && hasEnoughMpForPrimaryActiveSkill ? "amber" : "stone"}
                             size="icon"
                             className={clsx(
                                 "group relative h-12 w-12 rounded-2xl border",
-                                primaryActiveSkill && targetedMonster && canEngageTarget
+                                primaryActiveSkill && targetedMonster && canEngageTarget && hasEnoughMpForPrimaryActiveSkill
                                   ? "border-amber-700 bg-amber-950/45 text-amber-200"
                                   : "cursor-not-allowed border-stone-800 bg-stone-950/60 text-stone-500"
                             )}
@@ -2303,7 +2346,11 @@ export const Adventure: React.FC<AdventureProps> = ({
                             <Zap size={18} />
                             <GameHintBubble eyebrow="ACTIVE SKILL" className="bottom-full right-0 mb-2">
                                 {primaryActiveSkill?.name ?? '主動術式'}：{' '}
-                                {primaryActiveSkill ? '直接施放主修術式' : '尚未習得主動術式'}
+                                {primaryActiveSkill
+                                  ? hasEnoughMpForPrimaryActiveSkill
+                                    ? `消耗 ${primaryActiveSkillMpCost} 靈力`
+                                    : `靈力不足，需要 ${primaryActiveSkillMpCost}`
+                                  : '尚未習得主動術式'}
                             </GameHintBubble>
                         </Button>
 

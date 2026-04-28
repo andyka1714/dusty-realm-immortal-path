@@ -68,6 +68,27 @@ const MAP_LOCAL_CONTENT_CASES = [
       "輪迴",
     ],
   },
+  {
+    mapId: "182",
+    mapName: "歸墟裂界",
+    localNpcId: "local_guixu_v6_afterpath_broker",
+    localQuestId: "local_guixu_v6_afterpath_broker",
+    routeNpcIds: [
+      "local_guixu_sword_echo",
+      "local_guixu_beast_echo",
+      "local_guixu_mystic_echo",
+    ],
+    materialNpcId: "local_guixu_v6_reincarnation_scribe",
+    materialQuestId: "local_guixu_v6_reincarnation_clue",
+    expectedClues: [
+      "v6",
+      "sect:sword:endgame-loop-v4",
+      "sect:beast:endgame-loop-v4",
+      "sect:mystic:endgame-loop-v4",
+      "Workshop",
+      "Reincarnation",
+    ],
+  },
 ] as const;
 
 const mapById = (mapId: string) => MAPS.find((map) => map.id === mapId);

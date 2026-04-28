@@ -17,6 +17,9 @@ describe("consumable recovery effects", () => {
     expect(getConsumableRecoveryBlockedReason(healMp, {})).toBe(
       "目前沒有可恢復的真元資源"
     );
+    expect(getConsumableRecoveryBlockedReason(fullRestore, {})).toBe(
+      "目前沒有可恢復的戰鬥氣血"
+    );
   });
 
   it("blocks MP recovery when true essence is already full", () => {

@@ -6,7 +6,9 @@ import { configureStore } from "@reduxjs/toolkit";
 import characterReducer from "../../store/slices/characterSlice";
 import inventoryReducer from "../../store/slices/inventorySlice";
 import logReducer from "../../store/slices/logSlice";
+import questReducer from "../../store/slices/questSlice";
 import ShopPanel from "./ShopPanel";
+import { Gender, ProfessionType } from "../../types";
 
 vi.mock("../Modal", () => ({
   Modal: ({ children, title }: { children: React.ReactNode; title: string }) => (
@@ -23,6 +25,13 @@ const createShopStore = () =>
       character: characterReducer,
       inventory: inventoryReducer,
       logs: logReducer,
+      quest: questReducer,
+    },
+    preloadedState: {
+      character: characterReducer(undefined, { type: "@@INIT" }),
+      inventory: inventoryReducer(undefined, { type: "@@INIT" }),
+      logs: logReducer(undefined, { type: "@@INIT" }),
+      quest: questReducer(undefined, { type: "@@INIT" }),
     },
   });
 
@@ -42,5 +51,45 @@ describe("ShopPanel supply readability", () => {
     expect(markup).toContain("恢復氣血 50");
     expect(markup).toContain("常備");
     expect(markup).toContain("庫存 1");
+  });
+
+  it("shows deterministic NPC attitude and discounted prices", () => {
+    const store = configureStore({
+      reducer: {
+        character: characterReducer,
+        inventory: inventoryReducer,
+        logs: logReducer,
+        quest: questReducer,
+      },
+      preloadedState: {
+        character: {
+          ...characterReducer(undefined, { type: "@@INIT" }),
+          isInitialized: true,
+          name: "韓立",
+          gender: Gender.Male,
+          profession: ProfessionType.Sword,
+          attributes: {
+            ...characterReducer(undefined, { type: "@@INIT" }).attributes,
+            charm: 34,
+          },
+        },
+        inventory: inventoryReducer(undefined, { type: "@@INIT" }),
+        logs: logReducer(undefined, { type: "@@INIT" }),
+        quest: {
+          activeQuests: {},
+          completedQuests: ["sect_sword_join", "sect_sword_task_04"],
+        },
+      },
+    });
+
+    const markup = renderToStaticMarkup(
+      <Provider store={store}>
+        <ShopPanel shopId="sect_shop_sword" onClose={() => {}} />
+      </Provider>
+    );
+
+    expect(markup).toContain("態度：同道相助");
+    expect(markup).toContain("魅力折扣 / 宗門身份 / 宗門功績");
+    expect(markup).toContain("折扣 14%");
   });
 });

@@ -1,0 +1,53 @@
+import React from "react";
+import { describe, expect, it } from "vitest";
+import { renderToStaticMarkup } from "react-dom/server";
+import { Provider } from "react-redux";
+import { configureStore } from "@reduxjs/toolkit";
+import characterReducer from "../../store/slices/characterSlice";
+import questReducer from "../../store/slices/questSlice";
+import { QuestTrackerHUD } from "./QuestTrackerHUD";
+
+const createMarkup = (
+  activeQuests: ReturnType<typeof questReducer>["activeQuests"] = {}
+) => {
+  const store = configureStore({
+    reducer: {
+      character: characterReducer,
+      quest: questReducer,
+    },
+    preloadedState: {
+      character: characterReducer(undefined, { type: "@@INIT" }),
+      quest: {
+        activeQuests,
+        completedQuests: [],
+      },
+    },
+  });
+
+  return renderToStaticMarkup(
+    <Provider store={store}>
+      <QuestTrackerHUD />
+    </Provider>
+  );
+};
+
+describe("QuestTrackerHUD", () => {
+  it("renders active quest progress and ready state", () => {
+    const markup = createMarkup({
+      tutorial_02_get_sword: { progress: 0, isReadyToComplete: true },
+      sect_sword_task_01: { progress: 0, isReadyToComplete: false },
+    });
+
+    expect(markup).toContain("任務追蹤");
+    expect(markup).toContain("防身利器");
+    expect(markup).toContain("可回報");
+    expect(markup).toContain("劍宗試煉：斬虎");
+    expect(markup).toContain("討伐 0 / 1");
+  });
+
+  it("renders a compact empty state", () => {
+    const markup = createMarkup();
+
+    expect(markup).toContain("目前沒有進行中的任務");
+  });
+});

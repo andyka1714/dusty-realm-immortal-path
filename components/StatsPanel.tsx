@@ -5,6 +5,7 @@ import { Heart, Brain, Zap, Shield, Sparkles, User, Dna, Activity, Sword, Wind, 
 import { SPIRIT_ROOT_DETAILS, REALM_BASE_STATS } from '../constants';
 import { formatSpiritStone } from '../utils/currency';
 import { calculatePlayerStats } from '../utils/battleSystem';
+import { getCoreAttributeEffects } from '../utils/attributeEffects';
 import clsx from 'clsx';
 import { GameTooltip } from './game/GameTooltip';
 import { GameSection } from './game/GameSection';
@@ -75,6 +76,12 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
 
   // Derived Stats Calculations for Display
   const combatStats = calculatePlayerStats(attributes, majorRealm, spiritRootId, equipmentStats);
+  const attributeEffects = getCoreAttributeEffects({
+    ...attributes,
+    comprehension: attributes.comprehension + (equipmentStats.comprehension || 0),
+    fortune: attributes.fortune + (equipmentStats.fortune || 0),
+    charm: attributes.charm + (equipmentStats.charm || 0),
+  });
   const hp = Math.floor(combatStats.hp);
   const mp = Math.floor(combatStats.mp);
 
@@ -194,11 +201,11 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
               <StatRow onHoverStart={handleMouseEnter} onHoverEnd={handleMouseLeave} icon={Brain} label="神識" value={attributes.insight}
                 desc="靈魂強度。影響「命中率」、「法術強度」、「煉丹」與「暴擊傷害」。" subDesc={`基礎值 + 裝備(${equipmentStats.insight||0})`} />
               <StatRow onHoverStart={handleMouseEnter} onHoverEnd={handleMouseLeave} icon={Brain} label="悟性" value={attributes.comprehension}
-                desc="領悟能力。影響「速度」、「修煉速度」與「突破成功率」。" subDesc={`基礎值 + 裝備(${equipmentStats.comprehension||0})`} />
+                desc="領悟能力。影響「速度」、「修煉速度」與「突破成功率」。" subDesc={`突破 +${attributeEffects.breakthroughBonus.toFixed(1)}%，修煉 +${attributeEffects.cultivationSpeedBonus.toFixed(1)}%`} />
               <StatRow onHoverStart={handleMouseEnter} onHoverEnd={handleMouseLeave} icon={Sparkles} label="福緣" value={attributes.fortune}
-                desc="氣運。影響「暴擊率」、「閃避率」與「掉落品質」。" subDesc={`基礎值 + 裝備(${equipmentStats.fortune||0})`} />
+                desc="氣運。影響「暴擊率」、「閃避率」、「掉落品質」與遭遇風險。" subDesc={`掉落 +${attributeEffects.dropRateBonus.toFixed(1)}%，遭遇 +${attributeEffects.encounterLuckBonus.toFixed(1)}%`} />
               <StatRow onHoverStart={handleMouseEnter} onHoverEnd={handleMouseLeave} icon={Heart} label="魅力" value={attributes.charm}
-                desc="個人魅力。影響「NPC好感度」與「特殊事件觸發」。" subDesc={`基礎值 + 裝備(${equipmentStats.charm||0})`} />
+                desc="個人魅力。影響「NPC好感度」、商店折扣與特殊事件觸發。" subDesc={`商店折扣 ${attributeEffects.shopDiscountPercent}%`} />
             </GameSection>
           </div>
         )}
@@ -269,11 +276,11 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ embedded = false }) => {
                 <StatRow onHoverStart={handleMouseEnter} onHoverEnd={handleMouseLeave} icon={Hammer} label="煉器" value={`+${combatStats.craftingBonus.toFixed(1)}%`}
                    desc="鍛造法寶時的額外成功率。" subDesc={`公式：${combatStats.craftingBonus > 0 ? "特殊靈根(+10%)" : "基礎(0%)"} + 裝備加成`} />
                 <StatRow onHoverStart={handleMouseEnter} onHoverEnd={handleMouseLeave} icon={ArrowUpCircle} label="突破" value={`+${combatStats.breakthroughBonus.toFixed(1)}%`}
-                   desc="境界突破時的額外成功率加成。" highlightColor="text-purple-300" subDesc="公式：基礎(0%) + 裝備加成" />
+                   desc="境界突破時的額外成功率加成。" highlightColor="text-purple-300" subDesc="公式：悟性 × 0.2% + 裝備加成" />
                 <StatRow onHoverStart={handleMouseEnter} onHoverEnd={handleMouseLeave} icon={Coins} label="掉落" value={`+${combatStats.dropRateBonus.toFixed(1)}%`}
                    desc="擊殺妖獸時獲取戰利品的額外機率。" highlightColor="text-yellow-300" subDesc="公式：福緣 × 0.1% + 裝備加成" />
                 <StatRow onHoverStart={handleMouseEnter} onHoverEnd={handleMouseLeave} icon={Flame} label="修煉" value={`+${combatStats.cultivationSpeedBonus.toFixed(0)}%`}
-                   desc="運轉功法時獲取修為的額外速度。" highlightColor="text-orange-400" subDesc="公式：裝備效率加成" />
+                   desc="運轉功法時獲取修為的額外速度。" highlightColor="text-orange-400" subDesc="公式：悟性 × 0.1% + 裝備效率加成" />
               </div>
             </GameSection>
           </div>

@@ -687,6 +687,34 @@ export const GUIXU_RIFT_NPCS: NPC[] = [
             '歸墟三道帝冕不是最後一件裝備；v5 會把帝冕拆回劍冕、骨冕與星冕三條 Workshop follow-up。',
             '帝冕接上凌霄劍星鋼、萬獸血骨殘材、縹緲星魂蓮後，才會分別指向劍修、體修、法修的下一世輪迴提示。'
         ]
+    },
+    {
+        id: 'local_guixu_v6_afterpath_broker',
+        name: '歸墟 v6 餘路行者',
+        symbol: '行',
+        type: NPCType.Quest,
+        x: 154,
+        y: 102,
+        description: '在歸墟裂界（182）整理 v6 route rumor 的餘路行者，追蹤三宗 sect:*:endgame-loop-v4 如何延伸到 repeatable aftermath、Workshop 與 Reincarnation clue。',
+        questIds: ['local_guixu_v6_afterpath_broker'],
+        dialogue: [
+            'v6 不是再開一張表，而是把 sect:sword:endgame-loop-v4、sect:beast:endgame-loop-v4、sect:mystic:endgame-loop-v4 的餘路變成可反覆讀取的 aftermath。',
+            '你要看的是 route rumor、Workshop sink 和 Reincarnation build 是否還讀同一組記憶。'
+        ]
+    },
+    {
+        id: 'local_guixu_v6_reincarnation_scribe',
+        name: '歸墟 v6 輪迴錄師',
+        symbol: '錄',
+        type: NPCType.Quest,
+        x: 164,
+        y: 124,
+        description: '負責把歸墟裂界（182）v6 Workshop 與 Reincarnation clue 對齊的錄師，避免終盤專精 leaf 和下一世 build 脫節。',
+        questIds: ['local_guixu_v6_reincarnation_clue'],
+        dialogue: [
+            'Workshop 的 v6 leaf 只改品質 cue、副產物與熟練，不跳過凌霄劍星鋼、萬獸血骨殘材、縹緲星魂蓮。',
+            'Reincarnation 也只讀 sect:sword:endgame-loop-v4、sect:beast:endgame-loop-v4、sect:mystic:endgame-loop-v4，不另造一套記憶。'
+        ]
     }
 ];
 
