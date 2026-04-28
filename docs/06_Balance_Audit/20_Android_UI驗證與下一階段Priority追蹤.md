@@ -619,3 +619,29 @@ Change ids:
 - `openspec list` 顯示沒有 active changes。
 
 新的後續規劃改以 `docs/superpowers/specs/2026-04-28-post-v6-next-wave-design.md` 為準。下一輪不建議一次打開所有大型 change；應先從低 persistence 風險、可快速驗證的主畫面 / catalog 線開始，再進入需要 migration 的長期狀態系統。
+
+## 30. Mobile 任務追蹤收合收口記錄
+
+Change id: `update-mobile-quest-tracker-collapse`
+
+本輪把已存在的 Adventure 任務追蹤補齊 mobile viewport 行為：
+
+- `QuestTrackerHUD` 新增 mobile 固定小入口，顯示目前追蹤任務數量。
+- 點擊入口會展開 runtime-only 任務追蹤 panel，顯示 active quest 類型、標題、可回報狀態與進度文字。
+- Desktop `quest-tracker-hud` 維持左側常駐顯示，不改原有 HUD 佈局。
+- `FloatingDock` 補上穩定 `floating-dock` selector，讓 Playwright 能檢查 mobile 任務 panel 不覆蓋底部 dock。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；mobile 展開 / 收合只存在目前 React runtime。
+
+目前已跑驗證：
+
+- `openspec validate update-mobile-quest-tracker-collapse --strict`
+- `npm test -- components/game/QuestTrackerHUD.test.tsx`
+- `npx tsc --noEmit`
+- `npm run test:e2e -- tests/e2e/shared-ui-foundation.spec.ts --project=chromium -g "mobile adventure quest tracker"`
+- `npm run build`
+- `git diff --check`

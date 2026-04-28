@@ -50,4 +50,16 @@ describe("QuestTrackerHUD", () => {
 
     expect(markup).toContain("目前沒有進行中的任務");
   });
+
+  it("renders a mobile trigger and collapsible sheet without persisted state", () => {
+    const markup = createMarkup({
+      tutorial_02_get_sword: { progress: 0, isReadyToComplete: true },
+    });
+
+    expect(markup).toContain('data-testid="quest-tracker-mobile-toggle"');
+    expect(markup).toContain('aria-controls="quest-tracker-mobile-panel"');
+    expect(markup).toContain('data-testid="quest-tracker-mobile-panel"');
+    expect(markup).toContain("任務");
+    expect(markup).toContain("防身利器");
+  });
 });

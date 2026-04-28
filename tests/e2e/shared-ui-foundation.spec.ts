@@ -675,6 +675,33 @@ test("adventure quest tracker renders active quest progress", async ({ page }) =
   await expect(tracker).toContainText("討伐 0 / 1");
 });
 
+test("mobile adventure quest tracker expands without covering the dock", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await installSave(page, createActiveRunSave());
+
+  await page.goto("/");
+
+  const trigger = page.getByTestId("quest-tracker-mobile-toggle");
+  const panel = page.getByTestId("quest-tracker-mobile-panel");
+  const dock = page.getByTestId("floating-dock");
+
+  await expect(trigger).toBeVisible();
+  await expect(panel).toBeHidden();
+  await expect(dock).toBeVisible();
+
+  await trigger.click();
+
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText("防身利器");
+  await expect(panel).toContainText("可回報");
+  await expect(panel).toContainText("劍宗試煉：斬虎");
+  await expect(panel).toContainText("討伐 0 / 1");
+  await expectWithinViewport(panel, page);
+  await expectDoesNotCover(panel, dock);
+});
+
 test("adventure canvas and mobile map modal keep visible non-black surfaces", async ({
   page,
 }) => {

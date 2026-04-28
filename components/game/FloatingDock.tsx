@@ -42,7 +42,10 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
   onTogglePanel,
 }) => {
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[3200] flex justify-center px-4">
+    <div
+      className="pointer-events-none fixed inset-x-0 bottom-4 z-[3200] flex justify-center px-4"
+      data-testid="floating-dock"
+    >
       <div className="pointer-events-auto flex items-center gap-2 rounded-[24px] border border-stone-700/80 bg-stone-950/85 px-3 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl">
         {ITEMS.map((item) => {
           const Icon = item.icon;
