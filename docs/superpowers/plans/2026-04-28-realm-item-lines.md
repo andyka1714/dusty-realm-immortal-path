@@ -28,7 +28,7 @@
 
 寫入九條物品線、境界分層、Persistence 與驗證策略。
 
-- [ ] **Step 2: 驗證九條 OpenSpec**
+- [x] **Step 2: 驗證九條 OpenSpec**
 
 Run:
 
@@ -56,7 +56,7 @@ Expected: 每條 change 都通過。
 - Create: `data/items/itemLineMetadata.ts`
 - Create: `data/items/itemLineAudit.test.ts`
 
-- [ ] **Step 1: 寫 RED test**
+- [x] **Step 1: 寫 RED test**
 
 新增 `data/items/itemLineAudit.test.ts`，確認五條第一輪物品線都有境界 coverage：
 
@@ -83,7 +83,7 @@ describe("item line metadata", () => {
 });
 ```
 
-- [ ] **Step 2: 確認 RED**
+- [x] **Step 2: 確認 RED**
 
 Run:
 
@@ -93,7 +93,7 @@ npm test -- data/items/itemLineAudit.test.ts
 
 Expected: FAIL，因為 `itemLineMetadata.ts` 尚未存在。
 
-- [ ] **Step 3: 實作 metadata**
+- [x] **Step 3: 實作 metadata**
 
 建立 `data/items/itemLineMetadata.ts`，輸出：
 
@@ -152,7 +152,7 @@ export const ITEM_LINE_REALM_COVERAGE: Record<
 };
 ```
 
-- [ ] **Step 4: GREEN**
+- [x] **Step 4: GREEN**
 
 Run:
 
@@ -171,11 +171,11 @@ Expected: PASS。
 - Test: `data/items/itemLineAudit.test.ts`
 - Test: `data/workshopRecipes.test.ts`
 
-- [ ] **Step 1: 寫 RED test**
+- [x] **Step 1: 寫 RED test**
 
 在 `data/items/itemLineAudit.test.ts` 增加測試：低中境界丹材與器材 item id 必須存在於 `ITEMS`。
 
-- [ ] **Step 2: 確認 RED**
+- [x] **Step 2: 確認 RED**
 
 Run:
 
@@ -185,7 +185,7 @@ npm test -- data/items/itemLineAudit.test.ts
 
 Expected: FAIL，因為新 item id 尚未加入。
 
-- [ ] **Step 3: 新增材料**
+- [x] **Step 3: 新增材料**
 
 在 `data/items/materials.ts` 補低中境界材料，例如：
 
@@ -200,11 +200,11 @@ Expected: FAIL，因為新 item id 尚未加入。
 - `red_copper_essence`
 - `gold_vein_stone`
 
-- [ ] **Step 4: 接入 recipe**
+- [x] **Step 4: 接入 recipe**
 
 把 `qi_pill` 與 `novice_sword_reforge` 的 ingredient 保持相容，再新增 1-2 個低中境界 recipe，例如 `condensed_qi_pill`、`foundation_iron_reforge`。
 
-- [ ] **Step 5: GREEN**
+- [x] **Step 5: GREEN**
 
 Run:
 
@@ -223,11 +223,11 @@ Expected: PASS。
 - Test: `data/items/itemLineAudit.test.ts`
 - Test: `pages/Inventory.supplies.test.tsx`
 
-- [ ] **Step 1: 寫 RED test**
+- [x] **Step 1: 寫 RED test**
 
 新增測試確認低中境界至少有修為丹、恢復丹、戰鬥丹、突破輔助丹。
 
-- [ ] **Step 2: 確認 RED**
+- [x] **Step 2: 確認 RED**
 
 Run:
 
@@ -237,7 +237,7 @@ npm test -- data/items/itemLineAudit.test.ts
 
 Expected: FAIL，因為戰鬥丹與部分境界丹藥尚未存在。
 
-- [ ] **Step 3: 新增丹藥**
+- [x] **Step 3: 新增丹藥**
 
 在 `data/items/consumables.ts` 補：
 
@@ -248,11 +248,11 @@ Expected: FAIL，因為戰鬥丹與部分境界丹藥尚未存在。
 - `spirit_focus_pill`
 - `golden_core_condensing_pill`
 
-- [ ] **Step 4: 接入 recipe 或商店**
+- [x] **Step 4: 接入 recipe 或商店**
 
 至少讓新丹藥有 Workshop recipe 或商店來源，避免只有 catalog。
 
-- [ ] **Step 5: GREEN**
+- [x] **Step 5: GREEN**
 
 Run:
 
@@ -270,7 +270,7 @@ Expected: PASS。
 - Modify: `data/skills/skillBookCoverage.test.ts`
 - Modify: `data/items/equipment/equipmentAudit.test.ts`
 
-- [ ] **Step 1: 跑既有基線**
+- [x] **Step 1: 跑既有基線**
 
 Run:
 
@@ -280,11 +280,11 @@ npm test -- data/skills/skillBookCoverage.test.ts data/skillManualRouting.test.t
 
 Expected: PASS。
 
-- [ ] **Step 2: 補缺口**
+- [x] **Step 2: 補缺口**
 
 若 audit 顯示缺境界或來源，補 metadata 或測試，不改 persisted schema。
 
-- [ ] **Step 3: 更新 tasks**
+- [x] **Step 3: 更新 tasks**
 
 把前五條 OpenSpec tasks 對應項目標記完成。
 
@@ -294,7 +294,7 @@ Expected: PASS。
 - Modify: `docs/superpowers/plans/2026-04-28-realm-item-lines.md`
 - Modify: all active OpenSpec `tasks.md`
 
-- [ ] **Step 1: OpenSpec validate**
+- [x] **Step 1: OpenSpec validate**
 
 Run:
 
@@ -313,7 +313,7 @@ for change in \
 done
 ```
 
-- [ ] **Step 2: 全量驗證**
+- [x] **Step 2: 全量驗證**
 
 Run:
 
@@ -324,6 +324,6 @@ npm run build
 git diff --check
 ```
 
-- [ ] **Step 3: Archive 第一批已完成 changes**
+- [x] **Step 3: Archive 第一批已完成 changes**
 
 第一批只 archive 已完成實作的前五條；後四條維持 active 規格或等下一輪內容實作。

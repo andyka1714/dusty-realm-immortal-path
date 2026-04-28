@@ -18,6 +18,66 @@ export const MATERIAL_ITEMS: Record<string, Item> = {
     id: 'spirit_herb', name: '聚靈草', category: ItemCategory.Material, subType: MaterialType.Herb,
     description: '煉製聚氣丹的主材。', price: 8, quality: ItemQuality.Low, maxStack: 999 
   },
+  'wild_ginseng': {
+    id: 'wild_ginseng', name: '野山參', category: ItemCategory.Material, subType: MaterialType.Herb,
+    description: '凡界山林常見的補氣藥根，可作低階修為丹藥引。', price: 6, quality: ItemQuality.Low, maxStack: 999,
+    minRealm: MajorRealm.Mortal,
+  },
+  'condensed_qi_grass': {
+    id: 'condensed_qi_grass', name: '凝氣草', category: ItemCategory.Material, subType: MaterialType.Herb,
+    description: '吸納薄弱靈氣而生的草藥，適合練氣期丹方。', price: 24, quality: ItemQuality.Low, maxStack: 999,
+    minRealm: MajorRealm.QiRefining,
+  },
+  'spirit_dew': {
+    id: 'spirit_dew', name: '靈露', category: ItemCategory.Material, subType: MaterialType.Herb,
+    description: '清晨凝於靈草葉尖的露珠，可調和入門丹火。', price: 30, quality: ItemQuality.Low, maxStack: 999,
+    minRealm: MajorRealm.QiRefining,
+  },
+  'frost_lingzhi': {
+    id: 'frost_lingzhi', name: '玄霜芝', category: ItemCategory.Material, subType: MaterialType.Herb,
+    description: '生於寒濕靈脈旁的芝草，可穩住築基後的經脈躁動。', price: 120, quality: ItemQuality.Medium, maxStack: 999,
+    minRealm: MajorRealm.Foundation,
+  },
+  'nine_leaf_golden_lotus': {
+    id: 'nine_leaf_golden_lotus', name: '九葉金蓮', category: ItemCategory.Material, subType: MaterialType.Herb,
+    description: '九葉抱金，能牽引丹田靈液凝成金丹。', price: 520, quality: ItemQuality.High, maxStack: 999,
+    minRealm: MajorRealm.GoldenCore,
+  },
+  'common_iron': {
+    id: 'common_iron', name: '凡鐵', category: ItemCategory.Material, subType: MaterialType.Ore,
+    description: '凡間鐵匠最常用的鐵料，適合入門重鑄。', price: 4, quality: ItemQuality.Low, maxStack: 999,
+    minRealm: MajorRealm.Mortal,
+  },
+  'spiritwood': {
+    id: 'spiritwood', name: '靈木', category: ItemCategory.Material, subType: MaterialType.Ore,
+    description: '受靈氣滋養的木芯，常用於法杖與陣盤胚體。', price: 35, quality: ItemQuality.Low, maxStack: 999,
+    minRealm: MajorRealm.QiRefining,
+  },
+  'refined_xuan_iron': {
+    id: 'refined_xuan_iron', name: '精煉玄鐵', category: ItemCategory.Material, subType: MaterialType.Ore,
+    description: '玄鐵經靈火淬煉後的精料，可承受初階靈紋。', price: 48, quality: ItemQuality.Low, maxStack: 999,
+    minRealm: MajorRealm.QiRefining,
+  },
+  'cold_iron': {
+    id: 'cold_iron', name: '寒鐵', category: ItemCategory.Material, subType: MaterialType.Ore,
+    description: '帶有寒氣的築基礦材，適合打造穩定靈力的兵刃。', price: 150, quality: ItemQuality.Medium, maxStack: 999,
+    minRealm: MajorRealm.Foundation,
+  },
+  'green_jade': {
+    id: 'green_jade', name: '青玉', category: ItemCategory.Material, subType: MaterialType.Ore,
+    description: '可導引靈氣的青色玉料，常嵌於護符與劍鞘。', price: 180, quality: ItemQuality.Medium, maxStack: 999,
+    minRealm: MajorRealm.Foundation,
+  },
+  'red_copper_essence': {
+    id: 'red_copper_essence', name: '赤銅精', category: ItemCategory.Material, subType: MaterialType.Ore,
+    description: '赤銅反覆熔煉後留下的精華，足以承接金丹真火。', price: 650, quality: ItemQuality.High, maxStack: 999,
+    minRealm: MajorRealm.GoldenCore,
+  },
+  'gold_vein_stone': {
+    id: 'gold_vein_stone', name: '金紋石', category: ItemCategory.Material, subType: MaterialType.Ore,
+    description: '石中天然生成金色道紋，是金丹裝備的穩定基材。', price: 700, quality: ItemQuality.High, maxStack: 999,
+    minRealm: MajorRealm.GoldenCore,
+  },
   'sword_path_starsteel': {
     id: 'sword_path_starsteel',
     name: '凌霄劍星鋼',

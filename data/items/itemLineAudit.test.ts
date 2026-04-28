@@ -1,0 +1,111 @@
+import { describe, expect, it } from "vitest";
+import { ConsumableItem, ConsumableType, ItemCategory, MajorRealm } from "../../types";
+import { SHOPS } from "../shops";
+import { WORKSHOP_RECIPES } from "../workshopRecipes";
+import { ITEMS } from ".";
+import {
+  FIRST_WAVE_ITEM_LINE_ITEM_IDS,
+  ITEM_LINE_REALM_COVERAGE,
+} from "./itemLineMetadata";
+
+describe("item line metadata", () => {
+  it("covers low and mid realms for first-wave item lines", () => {
+    const requiredRealms = [
+      MajorRealm.Mortal,
+      MajorRealm.QiRefining,
+      MajorRealm.Foundation,
+      MajorRealm.GoldenCore,
+    ];
+
+    for (const line of [
+      "manual",
+      "equipment",
+      "alchemy_material",
+      "smithing_material",
+      "pill",
+    ] as const) {
+      for (const realm of requiredRealms) {
+        expect(
+          ITEM_LINE_REALM_COVERAGE[line][realm]?.length ?? 0,
+          `${line} realm ${realm}`
+        ).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("anchors low and mid realm alchemy and smithing materials to real item ids", () => {
+    const materialLines = ["alchemy_material", "smithing_material"] as const;
+    const requiredRealms = [
+      MajorRealm.Mortal,
+      MajorRealm.QiRefining,
+      MajorRealm.Foundation,
+      MajorRealm.GoldenCore,
+    ];
+
+    for (const line of materialLines) {
+      for (const realm of requiredRealms) {
+        const itemIds = FIRST_WAVE_ITEM_LINE_ITEM_IDS[line][realm] ?? [];
+
+        expect(itemIds.length, `${line} realm ${realm} ids`).toBeGreaterThan(0);
+        itemIds.forEach((itemId) => {
+          expect(ITEMS[itemId], `${itemId} should exist`).toBeDefined();
+        });
+      }
+    }
+  });
+
+  it("gives first-wave alchemy and smithing materials at least one workshop sink", () => {
+    const sinkedItemIds = new Set(
+      Object.values(WORKSHOP_RECIPES).flatMap((recipe) =>
+        recipe.ingredients.map((ingredient) => ingredient.itemId)
+      )
+    );
+
+    for (const line of ["alchemy_material", "smithing_material"] as const) {
+      const itemIds = Object.values(FIRST_WAVE_ITEM_LINE_ITEM_IDS[line]).flat();
+      itemIds.forEach((itemId) => {
+        expect(sinkedItemIds.has(itemId), `${itemId} should have a recipe sink`).toBe(
+          true
+        );
+      });
+    }
+  });
+
+  it("anchors first-wave pills to real consumables with effects and sources", () => {
+    const sourcedItemIds = new Set([
+      ...Object.values(WORKSHOP_RECIPES).flatMap((recipe) =>
+        recipe.outputs.map((output) => output.itemId)
+      ),
+      ...Object.values(SHOPS).flatMap((shop) =>
+        shop.items.map((shopItem) => shopItem.itemId)
+      ),
+    ]);
+
+    const requiredEffectTypes = new Set([
+      "gain_exp",
+      "heal_hp",
+      "full_restore",
+      "breakthrough_chance",
+      "buff_stat",
+    ]);
+
+    const pillIds = Object.values(FIRST_WAVE_ITEM_LINE_ITEM_IDS.pill).flat();
+    expect(pillIds.length).toBeGreaterThan(0);
+
+    pillIds.forEach((itemId) => {
+      const item = ITEMS[itemId] as ConsumableItem | undefined;
+
+      expect(item, `${itemId} should exist`).toBeDefined();
+      expect(item?.category, `${itemId} category`).toBe(ItemCategory.Consumable);
+      expect(item?.subType, `${itemId} subtype`).toBe(ConsumableType.Pill);
+      expect(item?.effects.length ?? 0, `${itemId} effects`).toBeGreaterThan(0);
+      expect(sourcedItemIds.has(itemId), `${itemId} should have a shop or recipe source`).toBe(true);
+      item?.effects.forEach((effect) => {
+        expect(
+          requiredEffectTypes.has(effect.type),
+          `${itemId} effect ${effect.type} should fit the first-wave pill line`
+        ).toBe(true);
+      });
+    });
+  });
+});
