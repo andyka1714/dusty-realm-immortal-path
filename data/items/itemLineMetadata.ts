@@ -45,11 +45,27 @@ export const ITEM_LINE_REALM_COVERAGE: Record<
     [MajorRealm.Foundation]: ["築基輔助丹"],
     [MajorRealm.GoldenCore]: ["凝元丹"],
   },
-  quest_item: {},
+  quest_item: {
+    [MajorRealm.Mortal]: ["village_recommendation_letter", "broken_region_map"],
+    [MajorRealm.QiRefining]: ["sect_trial_token", "monster_core_sample"],
+    [MajorRealm.Foundation]: ["outer_disciple_seal", "ancient_jade_slip"],
+    [MajorRealm.GoldenCore]: ["golden_core_trial_writ", "core_beast_trace"],
+  },
   region_specialty: {},
   currency_token: {},
   talisman_array_artifact: {},
 };
+
+export const QUEST_ITEM_IDS = [
+  "village_recommendation_letter",
+  "broken_region_map",
+  "sect_trial_token",
+  "monster_core_sample",
+  "outer_disciple_seal",
+  "ancient_jade_slip",
+  "golden_core_trial_writ",
+  "core_beast_trace",
+] as const;
 
 export const FIRST_WAVE_ITEM_LINE_ITEM_IDS: Record<
   ItemLineId,

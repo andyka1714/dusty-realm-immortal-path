@@ -6,6 +6,7 @@ import { ITEMS } from ".";
 import {
   FIRST_WAVE_ITEM_LINE_ITEM_IDS,
   ITEM_LINE_REALM_COVERAGE,
+  QUEST_ITEM_IDS,
 } from "./itemLineMetadata";
 
 describe("item line metadata", () => {
@@ -106,6 +107,35 @@ describe("item line metadata", () => {
           `${itemId} effect ${effect.type} should fit the first-wave pill line`
         ).toBe(true);
       });
+    });
+  });
+
+  it("keeps quest items separate from workshop recipes and shops", () => {
+    const workshopItemIds = new Set(
+      Object.values(WORKSHOP_RECIPES).flatMap((recipe) => [
+        ...recipe.ingredients.map((ingredient) => ingredient.itemId),
+        ...recipe.outputs.map((output) => output.itemId),
+      ])
+    );
+    const shopItemIds = new Set(
+      Object.values(SHOPS).flatMap((shop) =>
+        shop.items.map((shopItem) => shopItem.itemId)
+      )
+    );
+
+    expect(QUEST_ITEM_IDS.length).toBeGreaterThan(0);
+
+    QUEST_ITEM_IDS.forEach((itemId) => {
+      const item = ITEMS[itemId];
+
+      expect(item, `${itemId} should exist`).toBeDefined();
+      expect(item?.category, `${itemId} category`).toBe(ItemCategory.Material);
+      expect(workshopItemIds.has(itemId), `${itemId} should not be a recipe item`).toBe(
+        false
+      );
+      expect(shopItemIds.has(itemId), `${itemId} should not be sold in shops`).toBe(
+        false
+      );
     });
   });
 });

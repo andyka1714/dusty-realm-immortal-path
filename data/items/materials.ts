@@ -78,6 +78,46 @@ export const MATERIAL_ITEMS: Record<string, Item> = {
     description: '石中天然生成金色道紋，是金丹裝備的穩定基材。', price: 700, quality: ItemQuality.High, maxStack: 999,
     minRealm: MajorRealm.GoldenCore,
   },
+  'village_recommendation_letter': {
+    id: 'village_recommendation_letter', name: '村長薦書', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '村長親筆寫下的薦書，只作任務與拜入門派時的身分憑證。', price: 0, quality: ItemQuality.Low, maxStack: 1,
+    minRealm: MajorRealm.Mortal,
+  },
+  'broken_region_map': {
+    id: 'broken_region_map', name: '殘破地圖', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '標著附近山路與舊礦點的殘圖，是探索任務的線索物。', price: 0, quality: ItemQuality.Low, maxStack: 9,
+    minRealm: MajorRealm.Mortal,
+  },
+  'sect_trial_token': {
+    id: 'sect_trial_token', name: '門派試煉令', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '三宗試煉用的令牌，代表持有者已取得入門考核資格。', price: 0, quality: ItemQuality.Low, maxStack: 9,
+    minRealm: MajorRealm.QiRefining,
+  },
+  'monster_core_sample': {
+    id: 'monster_core_sample', name: '妖丹樣本', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '封存於玉盒中的妖丹樣本，用於任務回報與長老判斷妖獸異動。', price: 0, quality: ItemQuality.Low, maxStack: 99,
+    minRealm: MajorRealm.QiRefining,
+  },
+  'outer_disciple_seal': {
+    id: 'outer_disciple_seal', name: '外門弟子印', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '記錄外門身分與任務履歷的印記，不作一般材料用途。', price: 0, quality: ItemQuality.Medium, maxStack: 1,
+    minRealm: MajorRealm.Foundation,
+  },
+  'ancient_jade_slip': {
+    id: 'ancient_jade_slip', name: '古修玉簡', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '殘留古修神念的玉簡，是劇情與傳承任務的重要線索。', price: 0, quality: ItemQuality.Medium, maxStack: 9,
+    minRealm: MajorRealm.Foundation,
+  },
+  'golden_core_trial_writ': {
+    id: 'golden_core_trial_writ', name: '金丹試煉符詔', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '長老頒下的金丹試煉符詔，只能用於宗門主線任務。', price: 0, quality: ItemQuality.High, maxStack: 1,
+    minRealm: MajorRealm.GoldenCore,
+  },
+  'core_beast_trace': {
+    id: 'core_beast_trace', name: '金丹妖獸蹤跡', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '記錄金丹妖獸行蹤的靈痕拓片，可作追蹤與回報任務證物。', price: 0, quality: ItemQuality.High, maxStack: 9,
+    minRealm: MajorRealm.GoldenCore,
+  },
   'sword_path_starsteel': {
     id: 'sword_path_starsteel',
     name: '凌霄劍星鋼',
