@@ -16,6 +16,10 @@ import { Button } from '../ui/button';
 import { getFormalSkill } from '../../data/skills';
 import { resolveQuestReadinessAtNpc } from '../../utils/questProgress';
 import {
+    resolveNpcInteractionAffinity,
+    resolveSectIdFromRouteId,
+} from '../../utils/npcAffinity';
+import {
     getSkillManualAcquisitionTierLabel,
     getSkillManualCategoryLabel,
     getSkillManualSourceLabels,
@@ -50,8 +54,14 @@ const getQualityTextColor = (quality: ItemQuality) => {
 
 export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
     const dispatch = useDispatch();
-    const { activeQuests, completedQuests } = useSelector((state: RootState) => state.quest);
+    const { activeQuests, completedQuests, npcAffinity, sectAffinity } = useSelector((state: RootState) => state.quest);
     const { majorRealm } = useSelector((state: RootState) => state.character);
+    const npcRelationship = resolveNpcInteractionAffinity({
+        npcId: npc.id,
+        sectId: resolveSectIdFromRouteId(npc.id),
+        persistedNpcAffinity: npcAffinity,
+        persistedSectAffinity: sectAffinity,
+    });
 
     // Determines the current interaction state
     const [currentQuest, setCurrentQuest] = useState<Quest | null>(null);
@@ -335,6 +345,20 @@ export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
             }
         >
             <div className="flex flex-col gap-4">
+                <div className="rounded border border-amber-900/40 bg-stone-950/70 px-3 py-2 text-[11px] text-stone-300">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-bold tracking-widest text-amber-200">
+                            關係：{npcRelationship.attitudeLabel}
+                        </span>
+                        <span className="text-stone-500">
+                            好感 {npcRelationship.affinityValue}
+                        </span>
+                    </div>
+                    <div className="mt-1 text-stone-500">
+                        {npcRelationship.sources.join(" / ")}
+                    </div>
+                </div>
+
                 {/* Dialogue Area */}
                 <GameSection
                     title="問答往來"

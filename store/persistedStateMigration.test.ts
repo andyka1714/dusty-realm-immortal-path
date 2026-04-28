@@ -123,6 +123,93 @@ describe("persisted state migration", () => {
     expect((malformed.character as { breakthroughConsequence?: unknown }).breakthroughConsequence).toBeNull();
   });
 
+  it("hydrates and sanitizes persisted NPC affinity quest state", () => {
+    const migrated = migratePersistedState(
+      createPersistedState({
+        quest: {
+          activeQuests: {},
+          completedQuests: ["sect_sword_task_04"],
+          npcAffinity: {
+            sect_sword_patrol_captain: {
+              value: 18,
+              lastReason: "完成任務：巡山統領",
+              updatedAt: 123,
+              ignored: true,
+            },
+            bad_npc: {
+              value: "high",
+              lastReason: "bad",
+              updatedAt: 0,
+            },
+          },
+          sectAffinity: {
+            sect_sword: {
+              value: 7,
+              lastReason: "宗門功績",
+              updatedAt: 456,
+            },
+          },
+          recentAffinityChanges: [
+            {
+              targetType: "npc",
+              targetId: "sect_sword_patrol_captain",
+              delta: 8,
+              nextValue: 18,
+              reason: "完成任務：巡山統領",
+              timestamp: 123,
+            },
+            {
+              targetType: "bad",
+              targetId: "",
+              delta: "x",
+              nextValue: 18,
+              reason: "bad",
+              timestamp: 123,
+            },
+          ],
+        },
+      })
+    );
+
+    expect(migrated.quest).toMatchObject({
+      activeQuests: {},
+      completedQuests: ["sect_sword_task_04"],
+      npcAffinity: {
+        sect_sword_patrol_captain: {
+          value: 18,
+          lastReason: "完成任務：巡山統領",
+          updatedAt: 123,
+        },
+      },
+      sectAffinity: {
+        sect_sword: {
+          value: 7,
+          lastReason: "宗門功績",
+          updatedAt: 456,
+        },
+      },
+      recentAffinityChanges: [
+        {
+          targetType: "npc",
+          targetId: "sect_sword_patrol_captain",
+          delta: 8,
+          nextValue: 18,
+          reason: "完成任務：巡山統領",
+          timestamp: 123,
+        },
+      ],
+    });
+
+    const legacy = migratePersistedState(createPersistedState({ quest: {} }));
+    expect(legacy.quest).toMatchObject({
+      activeQuests: {},
+      completedQuests: [],
+      npcAffinity: {},
+      sectAffinity: {},
+      recentAffinityChanges: [],
+    });
+  });
+
   it("normalizes retired learned skills into a unique formal core list", () => {
     const migrated = migratePersistedState(
       createPersistedState({

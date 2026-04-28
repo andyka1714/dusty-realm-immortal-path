@@ -698,6 +698,36 @@ Change id: `expand-breakthrough-tribulation-consequences`
 - `npm run build`
 - `git diff --check`
 
+## 34. 永久 NPC 好感系統收口記錄
+
+Change id: `add-persistent-npc-affinity-system`
+
+本輪把 deterministic NPC affinity 往 persisted 關係狀態推進：
+
+- `QuestState` 新增 `npcAffinity`、`sectAffinity` 與 `recentAffinityChanges`，記錄本世 NPC / sect 長期關係。
+- `completeQuest` 會對交付 NPC 與對應宗門寫入 affinity；`adjustAffinity` 可供 dialogue、shop 或後續 route memory 明確調整好感。
+- 商店購買成功會寫入「商店往來」/「宗門商店往來」小幅好感。
+- `resolveNpcShopAffinity` 會合併魅力、職業、宗門功績與 persisted NPC / sect affinity，並顯示態度、折扣與來源。
+- `QuestModal` 顯示目前 NPC 關係、好感值與最近來源，讓任務 NPC 不只顯示對話。
+- `migratePersistedQuestState` 會 sanitize affinity records 與 recent change records；舊存檔缺欄位時補安全預設。
+
+本輪 persisted shape：
+
+- `current.quest.npcAffinity`
+- `current.quest.sectAffinity`
+- `current.quest.recentAffinityChanges`
+- Migration：舊存檔缺欄位安全補 `{}` / `[]`；非法 target、非數字 value / delta、空 target id 或非法 timestamp 會被丟棄。
+
+目前已跑驗證：
+
+- `openspec validate add-persistent-npc-affinity-system --strict`
+- `npm test -- store/slices/questSlice.test.ts utils/npcAffinity.test.ts store/persistedStateMigration.test.ts components/adventure/ShopPanel.supplies.test.tsx components/adventure/QuestModal.affinity.test.tsx`
+- `npm test`
+- `npx tsc --noEmit`
+- `npm run build`
+- `npm run test:e2e -- tests/e2e/shared-ui-foundation.spec.ts --project=chromium`
+- `git diff --check`
+
 ## 32. Endgame route density v7 收口記錄
 
 Change id: `expand-endgame-route-density-v7`

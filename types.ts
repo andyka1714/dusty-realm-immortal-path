@@ -718,6 +718,23 @@ export interface QuestReward {
   items?: { itemId: string; count: number; quality?: ItemQuality }[];
 }
 
+export interface AffinityRecord {
+  value: number;
+  lastReason: string;
+  updatedAt: number;
+}
+
+export type AffinityTargetType = "npc" | "sect";
+
+export interface AffinityChangeRecord {
+  targetType: AffinityTargetType;
+  targetId: string;
+  delta: number;
+  nextValue: number;
+  reason: string;
+  timestamp: number;
+}
+
 export interface Quest {
   id: string;
   type: QuestType;

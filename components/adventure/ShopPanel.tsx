@@ -31,7 +31,12 @@ import {
     formatConsumableEffectLabel,
     hasRecoveryEffect,
 } from '../../utils/consumableEffects';
-import { resolveNpcShopAffinity } from '../../utils/npcAffinity';
+import {
+    resolveNpcShopAffinity,
+    resolveSectIdFromRouteId,
+    resolveShopNpcId,
+} from '../../utils/npcAffinity';
+import { adjustAffinity } from '../../store/slices/questSlice';
 
 
 // Helper for attribute names (Moved from Inventory to be shared concept ideally, but kept here for now)
@@ -101,7 +106,7 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
     const dispatch = useDispatch();
     const character = useSelector((state: RootState) => state.character);
     const { equipment, items: inventoryItems } = useSelector((state: RootState) => state.inventory);
-    const completedQuestIds = useSelector((state: RootState) => state.quest.completedQuests);
+    const { completedQuests: completedQuestIds, npcAffinity, sectAffinity } = useSelector((state: RootState) => state.quest);
     const shop = SHOPS[shopId];
     
     // UI Effects State
@@ -113,11 +118,16 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
 
     // Safety check
     if (!shop) return null;
+    const shopNpcId = resolveShopNpcId(shopId);
+    const shopSectId = resolveSectIdFromRouteId(shopId);
     const shopAffinity = resolveNpcShopAffinity({
         shopId,
+        npcId: shopNpcId,
         charm: character.attributes.charm,
         profession: character.profession,
         completedQuestIds,
+        persistedNpcAffinity: npcAffinity,
+        persistedSectAffinity: sectAffinity,
     });
 
     const handleBuy = (shopItem: ShopItem) => {
@@ -142,6 +152,22 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
             message: `花費 ${price} 靈石購買了 [${item.name}]。`, 
             type: 'gold'
         }));
+        if (shopNpcId) {
+            dispatch(adjustAffinity({
+                targetType: 'npc',
+                targetId: shopNpcId,
+                delta: 1,
+                reason: '商店往來',
+            }));
+        }
+        if (shopSectId) {
+            dispatch(adjustAffinity({
+                targetType: 'sect',
+                targetId: shopSectId,
+                delta: 1,
+                reason: '宗門商店往來',
+            }));
+        }
 
         // Trigger Effects
         const effectId = Date.now();

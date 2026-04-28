@@ -78,6 +78,9 @@ describe("ShopPanel supply readability", () => {
         quest: {
           activeQuests: {},
           completedQuests: ["sect_sword_join", "sect_sword_task_04"],
+          npcAffinity: {},
+          sectAffinity: {},
+          recentAffinityChanges: [],
         },
       },
     });
@@ -91,5 +94,56 @@ describe("ShopPanel supply readability", () => {
     expect(markup).toContain("態度：同道相助");
     expect(markup).toContain("魅力折扣 / 宗門身份 / 宗門功績");
     expect(markup).toContain("折扣 14%");
+  });
+
+  it("shows persisted NPC and sect affinity as shop discount sources", () => {
+    const store = configureStore({
+      reducer: {
+        character: characterReducer,
+        inventory: inventoryReducer,
+        logs: logReducer,
+        quest: questReducer,
+      },
+      preloadedState: {
+        character: {
+          ...characterReducer(undefined, { type: "@@INIT" }),
+          isInitialized: true,
+          name: "韓立",
+          gender: Gender.Male,
+          profession: ProfessionType.Sword,
+        },
+        inventory: inventoryReducer(undefined, { type: "@@INIT" }),
+        logs: logReducer(undefined, { type: "@@INIT" }),
+        quest: {
+          activeQuests: {},
+          completedQuests: ["sect_sword_join"],
+          npcAffinity: {
+            sect_sword_lingbao: {
+              value: 18,
+              lastReason: "常客往來",
+              updatedAt: 100,
+            },
+          },
+          sectAffinity: {
+            sect_sword: {
+              value: 12,
+              lastReason: "宗門功績",
+              updatedAt: 90,
+            },
+          },
+          recentAffinityChanges: [],
+        },
+      },
+    });
+
+    const markup = renderToStaticMarkup(
+      <Provider store={store}>
+        <ShopPanel shopId="sect_shop_sword" onClose={() => {}} />
+      </Provider>
+    );
+
+    expect(markup).toContain("態度：患難之交");
+    expect(markup).toContain("NPC 好感：常客往來");
+    expect(markup).toContain("宗門好感：宗門功績");
   });
 });

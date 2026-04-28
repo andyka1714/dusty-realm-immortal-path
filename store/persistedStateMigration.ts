@@ -1,4 +1,6 @@
 import {
+  AffinityChangeRecord,
+  AffinityRecord,
   BreakthroughConsequence,
   EncounterState,
   HeirloomCandidate,
@@ -23,6 +25,7 @@ import {
 import { createInitialSoulState } from "./slices/soulSlice";
 import { createInitialEncounterState } from "./slices/encounterSlice";
 import { createInitialWorkshopState } from "./slices/workshopSlice";
+import { createInitialQuestState, QuestState } from "./slices/questSlice";
 import {
   createInitialWorkshopSpecializationTreeState,
   getWorkshopSpecializationNode,
@@ -140,6 +143,67 @@ const migratePersistedBreakthroughConsequence = (
     label: consequence.label,
     recoveryHint: consequence.recoveryHint,
   };
+};
+
+const sanitizeAffinityRecordMap = (value: unknown): Record<string, AffinityRecord> => {
+  if (!isRecord(value) || Array.isArray(value)) {
+    return {};
+  }
+
+  return Object.entries(value).reduce<Record<string, AffinityRecord>>(
+    (records, [targetId, record]) => {
+      if (
+        !targetId ||
+        !isRecord(record) ||
+        !isFiniteNumber(record.value) ||
+        typeof record.lastReason !== "string" ||
+        !isPositiveInteger(record.updatedAt)
+      ) {
+        return records;
+      }
+
+      records[targetId] = {
+        value: Math.max(-100, Math.min(100, record.value)),
+        lastReason: record.lastReason,
+        updatedAt: record.updatedAt,
+      };
+      return records;
+    },
+    {}
+  );
+};
+
+const sanitizeAffinityChangeRecords = (value: unknown): AffinityChangeRecord[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((change): AffinityChangeRecord | null => {
+      if (
+        !isRecord(change) ||
+        (change.targetType !== "npc" && change.targetType !== "sect") ||
+        typeof change.targetId !== "string" ||
+        change.targetId.length === 0 ||
+        !isFiniteNumber(change.delta) ||
+        !isFiniteNumber(change.nextValue) ||
+        typeof change.reason !== "string" ||
+        !isPositiveInteger(change.timestamp)
+      ) {
+        return null;
+      }
+
+      return {
+        targetType: change.targetType,
+        targetId: change.targetId,
+        delta: change.delta,
+        nextValue: Math.max(-100, Math.min(100, change.nextValue)),
+        reason: change.reason,
+        timestamp: change.timestamp,
+      };
+    })
+    .filter((change): change is AffinityChangeRecord => Boolean(change))
+    .slice(0, 5);
 };
 
 const migratePersistedItemInstance = (instance: unknown): ItemInstance | undefined => {
@@ -328,6 +392,43 @@ export const migratePersistedInventoryState = (inventory: unknown) => {
   }
 
   return nextInventory;
+};
+
+export const migratePersistedQuestState = (quest: unknown): QuestState => {
+  const initialQuest = createInitialQuestState();
+  if (!isRecord(quest)) {
+    return initialQuest;
+  }
+
+  const activeQuests = isRecord(quest.activeQuests)
+    ? Object.entries(quest.activeQuests).reduce<QuestState["activeQuests"]>(
+        (quests, [questId, activeQuest]) => {
+          if (!isRecord(activeQuest)) {
+            return quests;
+          }
+
+          quests[questId] = {
+            progress: isFiniteNumber(activeQuest.progress) ? activeQuest.progress : 0,
+            isReadyToComplete: activeQuest.isReadyToComplete === true,
+          };
+          return quests;
+        },
+        {}
+      )
+    : initialQuest.activeQuests;
+
+  return {
+    ...initialQuest,
+    activeQuests,
+    completedQuests: Array.isArray(quest.completedQuests)
+      ? quest.completedQuests.filter(
+          (questId): questId is string => typeof questId === "string" && questId.length > 0
+        )
+      : initialQuest.completedQuests,
+    npcAffinity: sanitizeAffinityRecordMap(quest.npcAffinity),
+    sectAffinity: sanitizeAffinityRecordMap(quest.sectAffinity),
+    recentAffinityChanges: sanitizeAffinityChangeRecords(quest.recentAffinityChanges),
+  };
 };
 
 const migratePersistedSoulState = (soul: unknown): SoulState => {
@@ -600,6 +701,7 @@ export const migratePersistedState = (
     ...current,
     character: migratePersistedCharacterState(current.character),
     inventory: migratePersistedInventoryState(current.inventory),
+    quest: migratePersistedQuestState(current.quest),
     workshop: migratePersistedWorkshopState(current.workshop),
     soul: migratePersistedSoulState(
       isPersistedSaveEnvelope(state) ? state.soul : undefined
