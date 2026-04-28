@@ -114,6 +114,34 @@ const dedupeStrings = (values: Array<string | undefined>) =>
 const compareByLabel = <T>(getLabel: (value: T) => string) => (left: T, right: T) =>
   getLabel(left).localeCompare(getLabel(right), "zh-Hant");
 
+const WORKSHOP_SINK_TRACE_PRIORITY: Record<string, number> = {
+  immortal_emperor_sword_forge: 0,
+  immortal_ascension_elixir: 0,
+  void_refining_starlotus_pill: 0,
+  great_dao_body_forge: 1,
+  supreme_law_staff_forge: 1,
+  starsteel_bloodbone_sword_forge: 2,
+  star_lotus_hongmeng_pill: 2,
+  guixu_three_paths_convergence_forge: 3,
+  heaven_sunder_crown_reforge: 4,
+  worldblood_crown_body_forge: 4,
+  star_throne_crown_staff_forge: 4,
+};
+
+const compareWorkshopSinkSource = (
+  left: CompendiumWorkshopSource,
+  right: CompendiumWorkshopSource
+) => {
+  const leftPriority = WORKSHOP_SINK_TRACE_PRIORITY[left.recipeId] ?? 10;
+  const rightPriority = WORKSHOP_SINK_TRACE_PRIORITY[right.recipeId] ?? 10;
+
+  if (leftPriority !== rightPriority) {
+    return leftPriority - rightPriority;
+  }
+
+  return left.recipeName.localeCompare(right.recipeName, "zh-Hant");
+};
+
 const toWorkshopSource = (recipe: WorkshopRecipe): CompendiumWorkshopSource => ({
   recipeId: recipe.id,
   recipeName: recipe.name,
@@ -153,7 +181,7 @@ const buildWorkshopSinkSources = (itemId: string): CompendiumWorkshopSource[] =>
   Object.values(WORKSHOP_RECIPES)
     .filter((recipe) => recipe.ingredients.some((ingredient) => ingredient.itemId === itemId))
     .map(toWorkshopSource)
-    .sort(compareByLabel((source) => source.recipeName));
+    .sort(compareWorkshopSinkSource);
 
 const buildEncounterRouteSources = (
   itemId: string
