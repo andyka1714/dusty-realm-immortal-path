@@ -453,3 +453,27 @@ Change id: direct bugfix `fix(inventory): compact embedded item details`
 - 不新增 persisted schema。
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；這是純 Inventory embedded layout / Playwright regression 修正。
+
+## 24. Shared panel layout regression hardening v1 收口記錄
+
+Change id: `harden-shared-panel-layout-regression-v1`
+
+本輪把近期反覆出現的 shared panel layout 問題推進成正式 regression gate，而不是只靠單次人工截圖檢查：
+
+- `tests/e2e/shared-ui-foundation.spec.ts` 新增 `expectHorizontallyWithinBox` 與 `expectReadableHeight` helper，讓 Playwright 能檢查 visible content 是否仍留在 panel 水平邊界內，以及關鍵資訊卡是否保有可讀高度。
+- `道途` regression 現在同時檢查四個修行 action 同列、`境界突破` 與其他 action 高度一致、`修煉指南` 不覆蓋 `修煉日誌`、日誌內容可見且面板沒有水平溢出。
+- `行囊空間` regression 現在檢查物品詳情與當前裝備側欄不互相覆蓋、不超出側欄底部，並要求詳情卡與裝備 section 保有可讀高度。
+- `洞府百業` regression 現在檢查 specialization panel 與 recipe card 仍在 shared panel 水平邊界內，且 recipe card 需要看得到材料與產出資訊。
+- `.gitignore` 已收斂整個 `.codex/`、`.playwright-mcp/`、`output/`，並清掉目前工作區中的本地工具產物與舊草稿。
+- 後續 v5 backlog 已整理到 `docs/superpowers/plans/2026-04-28-shared-panel-hardening-and-v5-backlog.md`，不把大型內容擴張塞進這條 UI hardening change。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；這是純 shared panel Playwright regression、文件與本地產物 hygiene。
+
+目前已跑驗證：
+
+- `openspec validate harden-shared-panel-layout-regression-v1 --strict`
+- `npm run test:e2e -- tests/e2e/shared-ui-foundation.spec.ts --project=chromium`

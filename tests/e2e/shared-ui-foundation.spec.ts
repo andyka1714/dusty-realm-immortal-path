@@ -91,6 +91,27 @@ const expectWithinBox = async (child: Locator, parent: Locator) => {
   );
 };
 
+const expectHorizontallyWithinBox = async (child: Locator, parent: Locator) => {
+  const childBox = await child.boundingBox();
+  const parentBox = await parent.boundingBox();
+  expect(childBox).not.toBeNull();
+  expect(parentBox).not.toBeNull();
+  if (!childBox || !parentBox) return;
+
+  expect(childBox.x).toBeGreaterThanOrEqual(parentBox.x - 1);
+  expect(childBox.x + childBox.width).toBeLessThanOrEqual(
+    parentBox.x + parentBox.width + 1
+  );
+};
+
+const expectReadableHeight = async (locator: Locator, minHeight: number) => {
+  const box = await locator.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) return;
+
+  expect(box.height).toBeGreaterThanOrEqual(minHeight);
+};
+
 const expectWithinViewport = async (locator: Locator, page: Page) => {
   await expect(locator).toBeVisible();
   const box = await locator.boundingBox();
@@ -336,6 +357,10 @@ test("game shell overlay exposes inventory shared controls", async ({ page }) =>
   await expect(selectedItemCard).toContainText("攻擊");
   await expect(selectedItemCard.getByRole("button", { name: "裝備" })).toBeVisible();
   await expect(equipmentSection).toContainText("武器");
+  await expectNoHorizontalOverflow(inventorySidePanel);
+  await expectNoHorizontalOverflow(selectedItemCard);
+  await expectReadableHeight(selectedItemCard, 260);
+  await expectReadableHeight(equipmentSection, 260);
 
   const sidePanelBox = await inventorySidePanel.boundingBox();
   const detailBox = await selectedItemCard.boundingBox();
@@ -393,6 +418,11 @@ test("character panel keeps dashboard panes and stat tooltip anchored", async ({
   await expect(logContent).toContainText("修煉日誌");
   await expect(logContent).toContainText("暫無消息");
   await expect(guideSection).toContainText("閉關雖能大幅提升修為");
+  await expectNoHorizontalOverflow(actionsSection);
+  await expectNoHorizontalOverflow(guideSection);
+  await expectNoHorizontalOverflow(logPanel);
+  await expectDoesNotCover(actionsSection, guideSection);
+  await expectDoesNotCover(guideSection, logPanel);
 
   const logPanelBox = await logPanel.boundingBox();
   expect(logPanelBox).not.toBeNull();
@@ -463,6 +493,15 @@ test("workshop and compendium embedded panels avoid horizontal overflow", async 
   await expect(page.getByTestId("workshop-grid")).toBeVisible();
   await expect(page.getByTestId("workshop-specialization-alchemy")).toBeVisible();
   await expectNoHorizontalOverflow(workshopPanel);
+  await expectHorizontallyWithinBox(
+    page.getByTestId("workshop-specialization-alchemy"),
+    workshopPanel
+  );
+  await page.getByTestId("workshop-recipe-card-qi_pill").scrollIntoViewIfNeeded();
+  await expect(page.getByTestId("workshop-recipe-card-qi_pill")).toBeVisible();
+  await expect(page.getByTestId("workshop-recipe-card-qi_pill")).toContainText("材料");
+  await expect(page.getByTestId("workshop-recipe-card-qi_pill")).toContainText("產出");
+  await expectHorizontallyWithinBox(page.getByTestId("workshop-recipe-card-qi_pill"), workshopPanel);
 
   await page.getByTestId("game-shell-panel-close").click();
   await expect(page.getByTestId("game-shell-panel")).toBeHidden();
