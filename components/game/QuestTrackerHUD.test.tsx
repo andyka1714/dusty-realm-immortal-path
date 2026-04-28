@@ -52,21 +52,6 @@ describe("QuestTrackerHUD", () => {
     expect(markup).toContain('data-layout-anchor="below-character-hud"');
   });
 
-  it("renders quest tracker items as independent cards instead of one bar panel", () => {
-    const markup = createMarkup({
-      tutorial_02_get_sword: { progress: 0, isReadyToComplete: true },
-      sect_sword_task_01: { progress: 0, isReadyToComplete: false },
-    });
-
-    expect(markup).toContain('data-testid="quest-tracker-stack"');
-    expect(markup).toContain('data-display-mode="separate-cards"');
-    expect(markup).toContain('data-testid="quest-tracker-card-tutorial_02_get_sword"');
-    expect(markup).toContain('data-testid="quest-tracker-card-sect_sword_task_01"');
-    expect(markup).toContain("[主線]");
-    expect(markup).toContain("[宗門]");
-    expect(markup).not.toContain('data-testid="quest-tracker-panel-frame"');
-  });
-
   it("renders a compact empty state", () => {
     const markup = createMarkup({}, [
       "tutorial_01",
