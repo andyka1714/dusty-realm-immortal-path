@@ -70,7 +70,7 @@ export const QuestTrackerHUD: React.FC = () => {
   return (
     <>
       <aside
-        className="pointer-events-none absolute left-4 top-[17rem] z-30 hidden w-[min(320px,calc(100vw-2rem))] md:block"
+        className="pointer-events-none absolute left-4 top-[21rem] z-30 hidden w-[min(320px,calc(100vw-2rem))] md:block"
         data-testid="quest-tracker-hud"
         data-layout-anchor="below-character-hud"
         aria-label="任務追蹤"

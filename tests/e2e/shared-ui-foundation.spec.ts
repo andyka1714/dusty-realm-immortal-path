@@ -699,12 +699,15 @@ test("adventure quest tracker renders active quest progress", async ({ page }) =
 
   await page.goto("/");
 
+  const hud = page.getByTestId("game-hud-character-card");
   const tracker = page.getByTestId("quest-tracker-hud");
+  await expect(hud).toBeVisible();
   await expect(tracker).toBeVisible();
   await expect(tracker).toContainText("防身利器");
   await expect(tracker).toContainText("可回報");
   await expect(tracker).toContainText("劍宗試煉：斬虎");
   await expect(tracker).toContainText("討伐 0 / 1");
+  await expectDoesNotCover(hud, tracker);
 });
 
 test("mobile adventure quest tracker expands without covering the dock", async ({
