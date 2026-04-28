@@ -513,6 +513,11 @@ test("workshop and compendium embedded panels avoid horizontal overflow", async 
   await expect(page.getByTestId("compendium-map-layout")).toBeVisible();
   await expect(page.getByTestId("compendium-map-list")).toBeVisible();
   await expect(page.getByTestId("compendium-map-detail")).toBeVisible();
+  await page.getByText("北郊荒徑").first().click();
+  await expect(page.getByTestId("compendium-enemy-card-m1_c1")).toBeVisible();
+  await expect(page.getByTestId("compendium-enemy-power-m1_c1")).toContainText("戰力");
+  await expect(page.getByTestId("compendium-enemy-card-m1_c1")).toContainText("氣血");
+  await expect(page.getByTestId("compendium-enemy-card-m1_c1")).toContainText("特殊攻擊");
 
   await page.getByTestId("compendium-tab-item").click();
   await expect(page.getByTestId("compendium-item-header")).toBeVisible();

@@ -22,6 +22,7 @@ import {
   ItemCategory,
   ItemQuality,
 } from "../../types";
+import { ELEMENT_NAMES } from "../../constants";
 import { ITEMS } from "../../data/items";
 import {
   FORMAL_CORE_SKILLS_BY_PROFESSION,
@@ -41,6 +42,10 @@ import {
   type CompendiumSourceChip,
   type CompendiumSourceKind,
 } from "./sourceTracing";
+import {
+  calculateEnemyCombatPower,
+  formatCombatPower,
+} from "../../utils/combatPower";
 
 interface CompendiumModalProps {
   isOpen: boolean;
@@ -49,6 +54,7 @@ interface CompendiumModalProps {
   initialTab?: TabType;
   initialSkillProfession?: ProfessionType;
   initialSectId?: SectId;
+  initialMapId?: string;
 }
 
 type TabType = "realm" | "map" | "item" | "skill" | "sect";
@@ -129,6 +135,36 @@ const getSkillSourceLabel = (source?: Skill["formalSourceTier"]): string => {
       return "未標記";
   }
 };
+
+const getEnemyRankLabel = (rank: EnemyRank): string => {
+  switch (rank) {
+    case EnemyRank.Boss:
+      return "首領";
+    case EnemyRank.Elite:
+      return "精英";
+    default:
+      return "普通";
+  }
+};
+
+const getEnemyAiLabel = (aiStyle?: Enemy["aiStyle"]): string => {
+  switch (aiStyle) {
+    case "ranged":
+      return "遠程";
+    case "caster":
+      return "施法";
+    default:
+      return "近戰";
+  }
+};
+
+const getElementLabel = (element: Enemy["element"]) =>
+  element === undefined ? "無" : ELEMENT_NAMES[element];
+
+const formatEnemyElements = (elements?: Enemy["resistances"]) =>
+  elements && elements.length > 0
+    ? elements.map((element) => ELEMENT_NAMES[element]).join("、")
+    : "無";
 
 const sourceChipClassNames: Record<CompendiumSourceKind, string> = {
   drop: "border-red-900/40 bg-red-950/30 text-red-300",
@@ -273,9 +309,12 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
   initialTab = "realm",
   initialSkillProfession = ProfessionType.Sword,
   initialSectId = "sword",
+  initialMapId,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
-  const [selectedId, setSelectedId] = useState<string | null>(null); // For detailed view
+  const [selectedId, setSelectedId] = useState<string | null>(
+    initialTab === "map" ? initialMapId ?? null : null
+  ); // For detailed view
   const [activeSkillProfession, setActiveSkillProfession] =
     useState<ProfessionType>(initialSkillProfession);
   const [activeSectId, setActiveSectId] = useState<SectId>(initialSectId);
@@ -488,7 +527,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                   <h3 className="sticky top-0 mb-4 bg-stone-950/95 py-2 text-lg font-bold text-stone-300">
                     地圖列表
                   </h3>
-                  {MAPS.sort((a, b) => a.minRealm - b.minRealm).map((map) => (
+                  {[...MAPS].sort((a, b) => a.minRealm - b.minRealm).map((map) => (
                     <div
                       key={map.id}
                       onClick={() =>
@@ -591,6 +630,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                                       <div
                                         key={monster.id}
                                         className="bg-stone-800 p-4 rounded border border-stone-700"
+                                        data-testid={`compendium-enemy-card-${monster.id}`}
                                       >
                                         <div className="flex justify-between items-start mb-2">
                                           <div>
@@ -605,12 +645,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                                                     : "bg-stone-700 text-stone-400 border border-stone-600"
                                               )}
                                             >
-                                              {monster.rank === EnemyRank.Boss
-                                                ? "首領"
-                                                : monster.rank ===
-                                                    EnemyRank.Elite
-                                                  ? "精英"
-                                                  : "普通"}
+                                              {getEnemyRankLabel(monster.rank)}
                                             </span>
                                             <span className="font-bold text-stone-200 text-lg">
                                               {monster.name}
@@ -619,6 +654,60 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                                           <span className="text-stone-500 text-sm">
                                             境界: {MajorRealmCN[monster.realm]}
                                           </span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+                                          <div
+                                            className="rounded border border-amber-900/40 bg-stone-950/70 p-2"
+                                            data-testid={`compendium-enemy-power-${monster.id}`}
+                                          >
+                                            <div className="text-[10px] uppercase tracking-wider text-stone-500">
+                                              戰力
+                                            </div>
+                                            <div className="text-sm font-bold text-amber-300">
+                                              {formatCombatPower(calculateEnemyCombatPower(monster))}
+                                            </div>
+                                          </div>
+                                          <div className="rounded border border-stone-700 bg-stone-950/70 p-2">
+                                            <div className="text-[10px] uppercase tracking-wider text-stone-500">
+                                              氣血
+                                            </div>
+                                            <div className="text-sm font-bold text-stone-200">
+                                              氣血 {monster.maxHp}
+                                            </div>
+                                          </div>
+                                          <div className="rounded border border-stone-700 bg-stone-950/70 p-2">
+                                            <div className="text-[10px] uppercase tracking-wider text-stone-500">
+                                              攻防
+                                            </div>
+                                            <div className="text-sm font-bold text-stone-200">
+                                              攻擊 {monster.attack} / 防禦 {monster.defense}
+                                            </div>
+                                          </div>
+                                          <div className="rounded border border-stone-700 bg-stone-950/70 p-2">
+                                            <div className="text-[10px] uppercase tracking-wider text-stone-500">
+                                              元素
+                                            </div>
+                                            <div className="text-sm font-bold text-stone-200">
+                                              {getElementLabel(monster.element)}
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div className="mt-3 grid gap-2 text-xs text-stone-400 md:grid-cols-2">
+                                          <div className="rounded border border-stone-700 bg-stone-950/50 p-2">
+                                            AI：{getEnemyAiLabel(monster.aiStyle)}
+                                          </div>
+                                          <div className="rounded border border-stone-700 bg-stone-950/50 p-2">
+                                            弱點：{formatEnemyElements(monster.weaknesses)}
+                                          </div>
+                                          <div className="rounded border border-stone-700 bg-stone-950/50 p-2">
+                                            抗性：{formatEnemyElements(monster.resistances)}
+                                          </div>
+                                          <div className="rounded border border-stone-700 bg-stone-950/50 p-2">
+                                            特殊攻擊：
+                                            {monster.specialAttack
+                                              ? `${monster.specialAttack.name} / ${monster.specialAttack.cooldownSeconds}s`
+                                              : "無特殊攻擊"}
+                                          </div>
                                         </div>
 
                                         {/* Drops */}

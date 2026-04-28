@@ -530,3 +530,21 @@ Change id: `expand-endgame-route-v5`
 2. 再開 `update-adventure-hud-layout`，調整左上角色狀態、右上小地圖與底部 dock。
 3. 再開 `add-quest-tracker-hud`，把任務追蹤欄接上左側資訊架構。
 4. 最後開 `add-spirit-power-runtime`，補正式 MP runtime、技能消耗與補靈丹閉環。
+
+## 27. 戰力估算與妖獸情報 v1 實作記錄
+
+Change id: `add-combat-power-and-enemy-intel`
+
+本輪先把 HUD / 任務追蹤前置所需的 derived 戰力與妖獸情報資料源落地：
+
+- 新增 `utils/combatPower.ts`，從既有 `calculatePlayerStats` 產出的 HP、MP、攻擊、防禦、速度、暴擊、閃避等資料推導玩家戰力；妖獸戰力則從 HP、攻擊、防禦、境界、小境界、rank 與 special attack 推導。
+- `getCharacterDerivedLevel()` 以 `majorRealm * 10 + minorRealm + 1` 推導顯示等級，作為後續左上角色狀態卡資料來源，不新增角色 level 欄位。
+- `萬界圖鑑 / 山川妖獸` 的妖獸卡新增戰力、氣血、攻擊、防禦、元素、AI 風格、弱點、抗性與特殊攻擊資訊，並保留既有可能掉落區塊。
+- Adventure 選取妖獸目標卡新增戰力、攻防、AI、弱點 / 抗性與特殊攻擊摘要，讓玩家在接戰前可判讀風險。
+- `utils/combatPower.test.ts` 驗證角色屬性提升、妖獸 rank、小境界、特殊攻擊與 derived level；`CompendiumModal` regression 驗證圖鑑妖獸情報不再只顯示境界與掉落。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；戰力與妖獸情報全部由既有 character stats、enemy catalog、map catalog 與 runtime target template 推導，不寫入存檔。

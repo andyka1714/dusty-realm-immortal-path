@@ -60,6 +60,19 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).toContain("repeatable aftermath");
   });
 
+  it("shows enemy combat intel beyond realm and drops", () => {
+    const markup = renderCompendium({ initialTab: "map", initialMapId: "1" });
+
+    expect(markup).toContain('data-testid="compendium-enemy-card-m1_c1"');
+    expect(markup).toContain('data-testid="compendium-enemy-power-m1_c1"');
+    expect(markup).toContain("戰力");
+    expect(markup).toContain("氣血 250");
+    expect(markup).toContain("攻擊 30");
+    expect(markup).toContain("防禦 10");
+    expect(markup).toContain("AI：近戰");
+    expect(markup).toContain("特殊攻擊");
+  });
+
   it("surfaces manual source labels on skill cards", () => {
     const markup = renderCompendium({
       initialTab: "skill",

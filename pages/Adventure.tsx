@@ -71,6 +71,10 @@ import {
   getConsumableRecoveryBlockedReason,
   hasRecoveryEffect,
 } from '../utils/consumableEffects';
+import {
+  calculateEnemyCombatPower,
+  formatCombatPower,
+} from '../utils/combatPower';
 
 const AdventurePixelStagePrototype = lazy(() =>
   import('../components/adventure/AdventurePixelStagePrototype').then((module) => ({
@@ -97,6 +101,27 @@ type CombatCueRenderable = {
   tone: WorldCombatCueTone;
   iconKey: WorldCombatCueIconKey;
 };
+
+const getEnemyAiLabel = (aiStyle?: Enemy["aiStyle"]) => {
+  switch (aiStyle) {
+    case "ranged":
+      return "遠程";
+    case "caster":
+      return "施法";
+    default:
+      return "近戰";
+  }
+};
+
+const formatEnemyElements = (elements?: ElementType[]) =>
+  elements && elements.length > 0
+    ? elements.map((element) => ELEMENT_NAMES[element]).join("、")
+    : "無";
+
+const formatEnemySpecialAttack = (enemy: Enemy) =>
+  enemy.specialAttack
+    ? `${enemy.specialAttack.name} / ${enemy.specialAttack.cooldownSeconds}s`
+    : "無特殊攻擊";
 
 const COMBAT_CUE_ICON_MAP: Record<
   WorldCombatCueIconKey,
@@ -1670,6 +1695,26 @@ export const Adventure: React.FC<AdventureProps> = ({
                             <div className="mt-1 text-xs text-stone-500">
                                 {REALM_NAMES[targetedMonsterTemplate.realm]} {targetedMonsterTemplate.minorRealm}
                             </div>
+                            <div
+                                className="mt-2 flex flex-wrap gap-2 text-[11px] text-stone-300"
+                                data-testid="adventure-target-enemy-intel"
+                            >
+                                <span className="rounded border border-amber-900/50 bg-amber-950/30 px-2 py-1 font-bold text-amber-200">
+                                    戰力 {formatCombatPower(calculateEnemyCombatPower(targetedMonsterTemplate))}
+                                </span>
+                                <span className="rounded border border-stone-700 bg-stone-950/70 px-2 py-1">
+                                    攻擊 {targetedMonsterTemplate.attack}
+                                </span>
+                                <span className="rounded border border-stone-700 bg-stone-950/70 px-2 py-1">
+                                    防禦 {targetedMonsterTemplate.defense}
+                                </span>
+                                <span className="rounded border border-stone-700 bg-stone-950/70 px-2 py-1">
+                                    AI：{getEnemyAiLabel(targetedMonsterTemplate.aiStyle)}
+                                </span>
+                                <span className="rounded border border-stone-700 bg-stone-950/70 px-2 py-1">
+                                    特殊攻擊：{formatEnemySpecialAttack(targetedMonsterTemplate)}
+                                </span>
+                            </div>
                             {worldCombatPresentation && (
                                 <div className="mt-1 text-[11px] text-stone-400">
                                     {worldCombatPresentation.rolePresentation.label} · {worldCombatPresentation.rolePresentation.detail}
@@ -1848,6 +1893,23 @@ export const Adventure: React.FC<AdventureProps> = ({
                             <div className="mt-2 flex items-center justify-between text-[11px] text-stone-400">
                                 <span>氣血 {targetedMonster.currentHp} / {targetedMonsterTemplate.maxHp}</span>
                                 <span>射程 {getEnemyEngagementRange(targetedMonsterTemplate)}</span>
+                            </div>
+                            <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-stone-400">
+                                <span className="rounded border border-amber-900/40 bg-amber-950/20 px-2 py-1 font-semibold text-amber-200">
+                                    戰力 {formatCombatPower(calculateEnemyCombatPower(targetedMonsterTemplate))}
+                                </span>
+                                <span className="rounded border border-stone-700 bg-stone-950/60 px-2 py-1">
+                                    {targetedMonsterTemplate.element !== ElementType.None ? ELEMENT_NAMES[targetedMonsterTemplate.element] : '無屬性'}
+                                </span>
+                                <span className="rounded border border-stone-700 bg-stone-950/60 px-2 py-1">
+                                    弱點 {formatEnemyElements(targetedMonsterTemplate.weaknesses)}
+                                </span>
+                                <span className="rounded border border-stone-700 bg-stone-950/60 px-2 py-1">
+                                    抗性 {formatEnemyElements(targetedMonsterTemplate.resistances)}
+                                </span>
+                                <span className="col-span-2 rounded border border-stone-700 bg-stone-950/60 px-2 py-1">
+                                    特殊攻擊：{formatEnemySpecialAttack(targetedMonsterTemplate)}
+                                </span>
                             </div>
                             <div className="mt-2">
                                 {worldCombatPresentation
