@@ -620,13 +620,31 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
     [activeEquipmentItems]
   );
   const activeEquipmentCount = activeEquipmentItems.length;
+  const villageMaps = useMemo(
+    () =>
+      MAPS.filter(
+        (map) =>
+          map.minRealm === MajorRealm.Mortal &&
+          (map.npcs?.length ?? 0) > 0 &&
+          map.enemies.length === 0
+      ),
+    []
+  );
   const mapsByRealm = useMemo(
     () =>
       Object.values(MajorRealm)
         .filter((realm): realm is MajorRealm => typeof realm === "number")
         .map((realm) => ({
           realm,
-          maps: MAPS.filter((map) => map.minRealm === realm),
+          maps: MAPS.filter(
+            (map) =>
+              map.minRealm === realm &&
+              !(
+                map.minRealm === MajorRealm.Mortal &&
+                (map.npcs?.length ?? 0) > 0 &&
+                map.enemies.length === 0
+              )
+          ),
         }))
         .filter((group) => group.maps.length > 0),
     []
@@ -882,6 +900,24 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
     );
   };
 
+  const renderMapIndexCard = (map: (typeof MAPS)[number]) => (
+    <div
+      key={map.id}
+      onClick={() => setSelectedId(selectedId === map.id ? null : map.id)}
+      className={clsx(
+        "cursor-pointer rounded border p-3 transition-colors",
+        selectedId === map.id
+          ? "border-amber-600/50 bg-amber-900/20 text-amber-400"
+          : "border-stone-700 bg-stone-800 text-stone-400 hover:bg-stone-700"
+      )}
+    >
+      <div className="font-bold">{map.name}</div>
+      <div className="mt-1 line-clamp-2 text-xs opacity-60">
+        {map.description}
+      </div>
+    </div>
+  );
+
   if (!isOpen) return null;
 
   const content = (
@@ -1047,6 +1083,17 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                   <h3 className="sticky top-0 z-10 mb-4 bg-stone-950/95 py-2 text-lg font-bold text-stone-300">
                     地圖索引
                   </h3>
+                  {villageMaps.length > 0 && (
+                    <section className="mb-4 space-y-2">
+                      <h4
+                        className="border-l-4 border-amber-700 bg-stone-900/70 py-1.5 pl-2 text-sm font-bold text-amber-300"
+                        data-testid="compendium-map-village-heading"
+                      >
+                        村莊聚落
+                      </h4>
+                      {villageMaps.map((map) => renderMapIndexCard(map))}
+                    </section>
+                  )}
                   {mapsByRealm.map((group) => (
                     <section key={group.realm} className="mb-4 space-y-2">
                       <h4
@@ -1055,25 +1102,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                       >
                         {MajorRealmCN[group.realm]}地圖
                       </h4>
-                      {group.maps.map((map) => (
-                        <div
-                          key={map.id}
-                          onClick={() =>
-                            setSelectedId(selectedId === map.id ? null : map.id)
-                          }
-                          className={clsx(
-                            "cursor-pointer rounded border p-3 transition-colors",
-                            selectedId === map.id
-                              ? "border-amber-600/50 bg-amber-900/20 text-amber-400"
-                              : "border-stone-700 bg-stone-800 text-stone-400 hover:bg-stone-700"
-                          )}
-                        >
-                          <div className="font-bold">{map.name}</div>
-                          <div className="mt-1 text-xs opacity-60">
-                            {map.npcs?.length ?? 0} 位 NPC / {map.enemies.length} 種妖獸
-                          </div>
-                        </div>
-                      ))}
+                      {group.maps.map((map) => renderMapIndexCard(map))}
                     </section>
                   ))}
                 </div>

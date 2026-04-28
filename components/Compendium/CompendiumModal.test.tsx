@@ -230,6 +230,36 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).toContain("特殊攻擊");
   });
 
+  it("separates village maps from realm wilderness groups", () => {
+    const markup = renderCompendium({ initialTab: "map", initialMapId: "0" });
+
+    expect(markup).toContain('data-testid="compendium-map-village-heading"');
+    expect(markup).toContain("村莊聚落");
+    expect(markup).toContain("仙緣鎮");
+    expect(markup).toContain('data-testid="compendium-map-realm-heading-0"');
+
+    const villageStart = markup.indexOf('data-testid="compendium-map-village-heading"');
+    const mortalStart = markup.indexOf('data-testid="compendium-map-realm-heading-0"');
+    const nextRealmStart = markup.indexOf(
+      'data-testid="compendium-map-realm-heading-1"',
+      mortalStart
+    );
+    const villageSection = markup.slice(villageStart, mortalStart);
+    const mortalSection = markup.slice(mortalStart, nextRealmStart);
+
+    expect(villageSection).toContain("仙緣鎮");
+    expect(mortalSection).not.toContain("仙緣鎮");
+  });
+
+  it("uses map descriptions on index cards instead of npc and monster counts", () => {
+    const markup = renderCompendium({ initialTab: "map", initialMapId: "0" });
+
+    expect(markup).toContain("紅塵滾滾，人聲鼎沸。");
+    expect(markup).toContain("離開城鎮向北的荒涼小徑，寒風漸起。");
+    expect(markup).not.toContain("位 NPC /");
+    expect(markup).not.toContain("種妖獸");
+  });
+
   it("surfaces manual source labels on skill cards", () => {
     const markup = renderCompendium({
       initialTab: "skill",
