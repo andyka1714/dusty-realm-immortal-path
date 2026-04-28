@@ -603,3 +603,19 @@ Change ids:
 - `npm test`
 - `npx tsc --noEmit`
 - `git diff --check`
+
+## 29. Post-v6 規劃狀態收口
+
+第 26 節的兩份規劃文件已作為歷史設計輸入保留，不再視為 active backlog：
+
+- `docs/superpowers/specs/2026-04-28-seven-track-next-scope-design.md`
+- `docs/superpowers/specs/2026-04-28-adventure-hud-quest-tracker-design.md`
+
+目前狀態：
+
+- `add-combat-power-and-enemy-intel` 已完成並 archive。
+- `update-adventure-hud-layout` 已完成並 archive。
+- 第 28 節列出的八條 gameplay / HUD v6 change 已完成並 archive。
+- `openspec list` 顯示沒有 active changes。
+
+新的後續規劃改以 `docs/superpowers/specs/2026-04-28-post-v6-next-wave-design.md` 為準。下一輪不建議一次打開所有大型 change；應先從低 persistence 風險、可快速驗證的主畫面 / catalog 線開始，再進入需要 migration 的長期狀態系統。
