@@ -29,6 +29,6 @@
 ## 6. Audit / Docs / Validation
 
 - [x] 6.1 擴充 content authoring audit coverage 到 v5 catalogs
-- [ ] 6.2 更新 gameplay、world、reincarnation、tracking docs
+- [x] 6.2 更新 gameplay、world、reincarnation、tracking docs
 - [ ] 6.3 跑 targeted tests、Playwright smoke、unit tests、typecheck、build、OpenSpec validate 與 `git diff --check`
 - [ ] 6.4 完成後更新 tasks 狀態、提交並 archive

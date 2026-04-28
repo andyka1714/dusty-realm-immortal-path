@@ -146,9 +146,20 @@ Workshop state 已正式記錄：
 - `主動坐化` 現在以 `本世收束 / 飛升/結局回顧 / 主動重開下一世` 呈現，語意上和戰死、壽盡後輪迴分開。
 - 本 change 不新增 `current.workshop`、`current.encounter`、`soul` 或 LocalStorage envelope 欄位；只新增 catalog data 與 derived UI copy，因此不需要 migration。
 
+`expand-endgame-route-v5` 在 v4 帝冕 convergence 後補上三條職業向 follow-up：
+
+- `斬天帝冕重鑄`: 消耗 `帝冠 / 凌霄劍星鋼 / 玄鐵礦`，產出劍修向帝冕武器，接 `sect:sword:endgame-loop-v4`。
+- `帝血冕骨鍛體`: 消耗 `帝冠 / 萬獸血骨殘材 / 玄鐵礦`，產出體修向大道真身，接 `sect:beast:endgame-loop-v4`。
+- `星詔冕杖重鍛`: 消耗 `帝冠 / 縹緲星魂蓮 / 玄鐵礦`，產出法修向至高法杖，接 `sect:mystic:endgame-loop-v4`。
+
+這批 recipe 的定位不是新增第二個終盤 sink，而是把 `歸墟三道帝冕` 產出的 `帝冠` 拆回三宗職業路線，讓玩家在 v4 convergence 後仍能把帝冕投入當世 build。recipe card、source tracing 與 content audit 會追蹤 `emperor_crown`、對應 route material、`sect:*:endgame-loop-v4` route tag 與 sourceHint。
+
+本 v5 擴充仍不新增 persisted state。它只新增 Workshop catalog entry，讀取既有 inventory、Workshop mastery / specialization tree、recipe metadata 與 `soul.worldMemoryTags`；舊存檔不需要 migration。
+
 ## 6. 後續可擴充部分
 
 目前第二批 recipe、第一批專精效果、材料來源 cue、專精解鎖 / 切換成本與可重置分支樹都已完成，後續若要再擴充，重點會是：
 
 - 更多職業 / 宗門專屬 recipe 分支
 - 更多跨路線專精互斥、專精副收益實裝或更高階的 root-to-leaf 分支
+- v5 之後若繼續加深，優先補 `帝冠` follow-up 的專精 leaf 或材料副產物，不新增另一套 Workshop runtime。

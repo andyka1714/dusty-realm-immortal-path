@@ -51,12 +51,24 @@
 - pending encounter 需保留 `routeLabel / categoryLabel / chainLabel / memoryCue`，choice cue 需讓玩家在選擇前辨識穩定收益、材料來源或高風險收益。
 - 本 change 只新增 catalog event、selector gate、presentation cue 與 choice reward；不新增 persisted schema、不變更 LocalStorage envelope、不需要 migration。
 
+`expand-endgame-route-v5` 把 `sect:*:endgame-loop-v4` 轉成終盤後續內容，而不是讓 v4 帝冕成為最終靜態節點：
+
+- 三宗新增 repeatable v5 aftermath encounter：
+  - 凌霄劍宗：`sword_emperor_v5_heaven_sunder_afterpath`，讀取 `sect:sword:endgame-loop-v4`。
+  - 萬獸山莊：`beast_emperor_v5_worldblood_afterpath`，讀取 `sect:beast:endgame-loop-v4`。
+  - 縹緲仙宮：`mystic_emperor_v5_star_throne_afterpath`，讀取 `sect:mystic:endgame-loop-v4`。
+- `歸墟裂界 (182)` 新增 `歸墟 v5 路諭師` 與 `歸墟 v5 冕爐師`，用 dialogue-only quest 把三條 `sect:*:endgame-loop-v4`、帝冕 follow-up recipe 與輪迴魂印提示接起來。
+- v5 aftermath 仍是 repeatable encounter，不使用 `once_per_run` 支撐密度；choice cue 會顯示 route、風險、收益與材料來源。
+- 本輪只新增 `Encounter / NPC / Quest / Workshop / Reincarnation` catalog 與 derived UI copy，不新增第二套 quest engine，不新增 persisted schema，也不需要 migration。
+
 ## 驗證
 
 - `data/sectLateProgression.test.ts` 覆蓋後段 quest、NPC 與 reward / dialogue 對齊。
 - `data/encounters.test.ts` 覆蓋 late sect milestone 的 route gating、cue tags 與 resolved state 行為。
 - `data/sectWorldStoryBranch.test.ts` 覆蓋 Phase 2 / v2 / v3 世界章節 quest / NPC / map / encounter 對齊。
 - `components/game/PendingEncounterPanel.test.tsx` 覆蓋 v3 aftermath 在 pending panel 顯示 route、category、chain、memory 與 choice cue tags。
+- `data/mapLocalContentDensity.test.ts` 覆蓋歸墟裂界 v5 NPC、quest、Workshop clue 與 route memory text。
+- `data/contentAuthoringAudit.test.ts` 覆蓋 v5 aftermath、Workshop follow-up、map-local clue 與輪迴魂印的 cross-catalog 對齊。
 
 ## 下一步
 

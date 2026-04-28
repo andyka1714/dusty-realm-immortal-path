@@ -152,6 +152,20 @@ v3 route memory 進一步追加三個仙人期本命魂印：
 
 這批 v3 hook 只讀既有 `soul.worldMemoryTags` 與既有 `rebirthConfig.selectedSealId`。它不新增 `soul`、`current` 或 LocalStorage envelope 欄位，因此不需要 migration 或 hydrate sanitize。
 
+v4 終盤 loop 追加三個仙帝端本命魂印：
+
+- `斬天輪迴劍印`: 需要 `sect:sword:endgame-loop-v4`。
+- `帝血輪迴骨印`: 需要 `sect:beast:endgame-loop-v4`。
+- `星詔輪迴命盤`: 需要 `sect:mystic:endgame-loop-v4`。
+
+`expand-endgame-route-v5` 進一步把 v4 終盤記憶拆成三條下一世職業火種：
+
+- `seal_sword_endgame_v5 / 斬天 v5 劍冕`：讀取 `sect:sword:endgame-loop-v4`，提示帝冕、劍系武器與劍修手札可帶入。
+- `seal_body_endgame_v5 / 帝血 v5 骨冕`：讀取 `sect:beast:endgame-loop-v4`，提示帝冕、體修裝備與體修手札可帶入。
+- `seal_mage_endgame_v5 / 星詔 v5 命冕`：讀取 `sect:mystic:endgame-loop-v4`，提示帝冕、法杖與法修手札可帶入。
+
+輪迴 Hall 的可用與鎖定本命魂印卡片現在都必須顯示 route memory、identity cue、heirloom hint、預期收益與鎖定原因。v5 仍只讀既有 `soul.worldMemoryTags` 與 `rebirthConfig.selectedSealId`，不新增 persisted unlock state，也不需要 migration。
+
 ### D. 靈根改寫
 
 - 可在輪迴大殿指定下一世靈根

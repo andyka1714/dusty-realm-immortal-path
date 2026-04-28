@@ -482,3 +482,33 @@ Change id: `harden-shared-panel-layout-regression-v1`
 - `npm run build`
 - `openspec validate --all --strict`
 - `git diff --check`
+
+## 25. Endgame route v5 收口記錄
+
+Change id: `expand-endgame-route-v5`
+
+本輪把已完成的 `endgame-loop-v4` 推進到可重複的終盤後續，而不是讓三宗 route 在帝冕 convergence 後停止：
+
+- 新增三宗 repeatable v5 aftermath encounter：`sword_emperor_v5_heaven_sunder_afterpath`、`beast_emperor_v5_worldblood_afterpath`、`mystic_emperor_v5_star_throne_afterpath`。
+- v5 aftermath 讀取對應 `sect:*:endgame-loop-v4`，不使用 `once_per_run`，並保留 route、category、chain、memory、風險、收益與材料來源 cue。
+- 新增三條 Workshop follow-up：`斬天帝冕重鑄`、`帝血冕骨鍛體`、`星詔冕杖重鍛`，都消耗 `emperor_crown` 與對應 route material，讓 `歸墟三道帝冕` 的產出能回到三條職業 build。
+- `歸墟裂界 (182)` 新增 v5 route rumor NPC 與冕爐 NPC / quest，讓 map-local clue 明確說出 `sect:sword:endgame-loop-v4`、`sect:beast:endgame-loop-v4`、`sect:mystic:endgame-loop-v4` 與 Workshop / Reincarnation 連接。
+- 新增三個 v5 本命魂印：`斬天 v5 劍冕`、`帝血 v5 骨冕`、`星詔 v5 命冕`，可用與鎖定卡片都顯示 route memory、identity cue、heirloom hint、預期收益與鎖定原因。
+- `auditV5EndgameRouteCoverage` 會檢查每條 route 是否同時有 repeatable aftermath、帝冕 Workshop follow-up、map-local clue 與輪迴魂印。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；v5 只新增 catalog data、derived UI copy 與 deterministic authoring audit。
+
+驗證基線：
+
+- `openspec validate expand-endgame-route-v5 --strict`
+- `npm test -- data/encounters.test.ts data/workshopRecipes.test.ts data/mapLocalContentDensity.test.ts components/game/ReincarnationFlow.test.tsx data/contentAuthoringAudit.test.ts`
+- `npm run test:e2e -- tests/e2e/shared-ui-foundation.spec.ts --project=chromium`
+- `npm test`
+- `npm run typecheck`
+- `npm run build`
+- `openspec validate --all --strict`
+- `git diff --check`

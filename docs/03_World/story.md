@@ -89,6 +89,14 @@
 
 這段仍只使用既有 `Quest / NPC / Map / Encounter` data，不新增 persisted schema 或 migration。
 
+`expand-endgame-route-v5` 則把 v4 終盤記憶放回 `歸墟裂界 (182)`，讓仙帝端不只停在一次性結局：
+
+- **凌霄劍宗**：`斬天 v5 餘燼` 讀取 `sect:sword:endgame-loop-v4`，以歸墟裂界的路諭與劍冕爐火承接劍修帝冕。
+- **萬獸山莊**：`帝血 v5 餘燼` 讀取 `sect:beast:endgame-loop-v4`，以血骨冕爐承接體修真身。
+- **縹緲仙宮**：`星詔 v5 餘燼` 讀取 `sect:mystic:endgame-loop-v4`，以星詔冕杖承接法修命盤。
+
+`歸墟 v5 路諭師` 會明確說出三條 `sect:*:endgame-loop-v4`，`歸墟 v5 冕爐師` 則說明帝冕如何拆成劍修、體修、法修三條 Workshop follow-up，並接回下一世輪迴魂印。這仍沿用既有 Quest、NPC、Encounter、Workshop 與 Reincarnation catalog，不新增對話樹 runtime 或 persisted schema。
+
 ### 3.7 合體期 (Fusion) - 身神合一
 - **成功**：元神與肉身徹底融合，不分彼此。肉身即是元神，元神即是肉身，滴血重生不再是傳說，舉手投足間皆具備毀天滅地之能。
 - **失敗**：融合過程中，肉身無法承受元神的強大威壓，寸寸崩裂。你不得不強行終止融合，重塑肉身，修為遭受重創。
