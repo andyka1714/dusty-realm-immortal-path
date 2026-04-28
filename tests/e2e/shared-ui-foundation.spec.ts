@@ -112,6 +112,14 @@ const expectReadableHeight = async (locator: Locator, minHeight: number) => {
   expect(box.height).toBeGreaterThanOrEqual(minHeight);
 };
 
+const expectMaxHeight = async (locator: Locator, maxHeight: number) => {
+  const box = await locator.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) return;
+
+  expect(box.height).toBeLessThanOrEqual(maxHeight);
+};
+
 const expectWithinViewport = async (locator: Locator, page: Page) => {
   await expect(locator).toBeVisible();
   const box = await locator.boundingBox();
@@ -702,6 +710,7 @@ test("adventure quest tracker renders active quest progress", async ({ page }) =
   const hud = page.getByTestId("game-hud-character-card");
   const tracker = page.getByTestId("quest-tracker-hud");
   await expect(hud).toBeVisible();
+  await expectMaxHeight(hud, 240);
   await expect(tracker).toBeVisible();
   await expect(tracker).toContainText("防身利器");
   await expect(tracker).toContainText("可回報");
