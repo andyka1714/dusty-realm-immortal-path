@@ -180,6 +180,7 @@ const initialState: CharacterState = {
   lastSaveTime: Date.now(),
   // Last Line of initialState
   lastBreakthroughResult: undefined,
+  breakthroughConsequence: null,
   itemConsumption: {},
   lastProcessedYear: 10, // Starts at age 10
   skills: [],
@@ -220,6 +221,7 @@ const characterSlice = createSlice({
       state.gatheringLevel = 1;
       state.lastSaveTime = Date.now();
       state.lastBreakthroughResult = undefined;
+      state.breakthroughConsequence = null;
       state.itemConsumption = {};
       state.lastProcessedYear = 10;
       state.lastWarningAge = undefined;
@@ -265,6 +267,7 @@ const characterSlice = createSlice({
       state.isDead = false;
       state.lastDeathCause = undefined;
       state.itemConsumption = {};
+      state.breakthroughConsequence = null;
       state.lastProcessedYear = 10;
     },
 
@@ -656,6 +659,7 @@ const characterSlice = createSlice({
           isMajor: isMajorBreakthrough,
           timestamp: Date.now(),
         };
+        state.breakthroughConsequence = null;
       } else {
         // --- FAILURE ---
         const penaltyType = isMajorBreakthrough ? config.penaltyType : "minor";
@@ -706,8 +710,19 @@ const characterSlice = createSlice({
           success: false,
           dropRealm: false,
           isTribulation,
+          isMajor: isMajorBreakthrough,
           timestamp: Date.now(),
         };
+        if (isTribulation) {
+          state.breakthroughConsequence = {
+            type: "heart_demon",
+            severity:
+              state.majorRealm >= MajorRealm.Immortal ? "critical" : "major",
+            remainingDays: state.majorRealm >= MajorRealm.Immortal ? 730 : 365,
+            label: "心魔纏身",
+            recoveryHint: "靜修或服用清心丹可降低影響。",
+          };
+        }
       }
     },
 

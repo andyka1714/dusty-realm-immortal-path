@@ -143,4 +143,21 @@ describe("Dashboard reincarnation flow", () => {
     expect(markup).toContain("天劫與心魔並臨");
     expect(markup).toContain("境界突破");
   });
+
+  it("shows active breakthrough consequence and recovery hint on the dashboard", () => {
+    const markup = createAliveDashboardMarkup({
+      breakthroughConsequence: {
+        type: "heart_demon",
+        severity: "major",
+        remainingDays: 365,
+        label: "心魔纏身",
+        recoveryHint: "靜修或服用清心丹可降低影響。",
+      },
+    });
+
+    expect(markup).toContain("災劫後果");
+    expect(markup).toContain("心魔纏身");
+    expect(markup).toContain("剩餘 365 天");
+    expect(markup).toContain("靜修或服用清心丹可降低影響。");
+  });
 });

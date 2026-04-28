@@ -671,6 +671,33 @@ Change id: `add-reincarnation-v6-soul-seals`
 - `npm run build`
 - `git diff --check`
 
+## 33. 突破災劫持續後果收口記錄
+
+Change id: `expand-breakthrough-tribulation-consequences`
+
+本輪把突破 preview 的災劫風險推進到可持續追蹤的本世 consequence：
+
+- `CharacterState` 新增 `breakthroughConsequence: BreakthroughConsequence | null`，目前由高境界 unsafe major breakthrough failure 寫入。
+- 目前 first consequence 為 `heart_demon / 心魔纏身`，記錄 severity、remainingDays、label 與 recoveryHint。
+- `attemptBreakthrough` 在災劫失敗時寫入 consequence，突破成功或新 run 初始化時清除。
+- `buildBreakthroughPreview` 會把 active consequence 加進 risk label 與 preparation cue。
+- Dashboard 道途面板新增 `災劫後果` 區塊，顯示 consequence、剩餘天數與恢復提示。
+- `migratePersistedCharacterState` 會 sanitize `breakthroughConsequence`；舊存檔缺欄位時補 `null`，非法 payload 也會落回 `null`。
+
+本輪 persisted shape：
+
+- `current.character.breakthroughConsequence`
+- 型別：`null` 或 `{ type, severity, remainingDays, label, recoveryHint }`
+- Migration：舊存檔缺欄位安全補 `null`；不接受未知 type / severity / 非正整數 remainingDays。
+
+目前已跑驗證：
+
+- `openspec validate expand-breakthrough-tribulation-consequences --strict`
+- `npm test -- store/slices/characterSlice.test.ts utils/breakthroughPreview.test.ts store/persistedStateMigration.test.ts pages/Dashboard.reincarnation.test.tsx`
+- `npx tsc --noEmit`
+- `npm run build`
+- `git diff --check`
+
 ## 32. Endgame route density v7 收口記錄
 
 Change id: `expand-endgame-route-density-v7`

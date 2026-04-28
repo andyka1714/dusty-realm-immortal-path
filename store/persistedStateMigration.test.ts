@@ -81,6 +81,46 @@ describe("persisted state migration", () => {
       pendingEvent: null,
       resolvedEventIds: [],
     });
+    expect((migrated.character as { breakthroughConsequence?: unknown }).breakthroughConsequence).toBeNull();
+  });
+
+  it("sanitizes breakthrough consequence state during character migration", () => {
+    const migrated = migratePersistedState(
+      createPersistedState({
+        character: {
+          breakthroughConsequence: {
+            type: "heart_demon",
+            severity: "major",
+            remainingDays: 180,
+            label: "心魔纏身",
+            recoveryHint: "靜修或服用清心丹可降低影響。",
+            ignored: true,
+          },
+        },
+      })
+    );
+
+    expect((migrated.character as { breakthroughConsequence?: unknown }).breakthroughConsequence).toEqual({
+      type: "heart_demon",
+      severity: "major",
+      remainingDays: 180,
+      label: "心魔纏身",
+      recoveryHint: "靜修或服用清心丹可降低影響。",
+    });
+
+    const malformed = migratePersistedState(
+      createPersistedState({
+        character: {
+          breakthroughConsequence: {
+            type: "unknown",
+            severity: "bad",
+            remainingDays: -1,
+          },
+        },
+      })
+    );
+
+    expect((malformed.character as { breakthroughConsequence?: unknown }).breakthroughConsequence).toBeNull();
   });
 
   it("normalizes retired learned skills into a unique formal core list", () => {

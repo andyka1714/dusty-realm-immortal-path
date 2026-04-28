@@ -99,6 +99,14 @@ export interface BreakthroughResult {
   timestamp: number;
 }
 
+export interface BreakthroughConsequence {
+  type: "heart_demon" | "foundation_injury" | "tribulation_backlash";
+  severity: "minor" | "major" | "critical";
+  remainingDays: number;
+  label: string;
+  recoveryHint: string;
+}
+
 export interface CharacterState {
   isInitialized: boolean;
   isDead: boolean;
@@ -136,6 +144,7 @@ export interface CharacterState {
   lastSaveTime: number;
 
   lastBreakthroughResult?: BreakthroughResult;
+  breakthroughConsequence: BreakthroughConsequence | null;
 
   itemConsumption: Record<string, number>; // Track how many times an item was consumed
 

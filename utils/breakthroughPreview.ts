@@ -1,5 +1,6 @@
 import {
   BaseAttributes,
+  BreakthroughConsequence,
   MajorRealm,
   SpiritRootId,
   SpiritRootType,
@@ -25,6 +26,7 @@ export const buildBreakthroughPreview = ({
   spiritRootId,
   hasRequiredItem,
   requiredItemName,
+  activeConsequence,
 }: {
   majorRealm: MajorRealm;
   minorRealm: number;
@@ -32,6 +34,7 @@ export const buildBreakthroughPreview = ({
   spiritRootId: SpiritRootId;
   hasRequiredItem: boolean;
   requiredItemName?: string;
+  activeConsequence?: BreakthroughConsequence | null;
 }): BreakthroughPreview => {
   const config = BREAKTHROUGH_CONFIG[majorRealm];
   const isMajorBreakthrough = minorRealm >= MINOR_REALM_CAP;
@@ -48,15 +51,24 @@ export const buildBreakthroughPreview = ({
   }
 
   const successRatePercent = Math.min(95, Math.max(1, rate * 100));
-  const riskLabel = isMajorBreakthrough
+  const baseRiskLabel = isMajorBreakthrough
     ? majorRealm >= MajorRealm.Tribulation
       ? "天劫與心魔並臨"
       : "破境反噬"
     : "小境瓶頸";
+  const riskLabel = activeConsequence
+    ? `${baseRiskLabel} · ${activeConsequence.label}`
+    : baseRiskLabel;
   const preparationCues = [
     `悟性提供突破 +${attributeEffects.breakthroughBonus.toFixed(1)}%`,
     `福緣穩定風險 +${attributeEffects.encounterLuckBonus.toFixed(1)}%`,
   ];
+
+  if (activeConsequence) {
+    preparationCues.unshift(
+      `${activeConsequence.label}：剩餘 ${activeConsequence.remainingDays} 天`
+    );
+  }
 
   if (isMajorBreakthrough && requiredItemName && !hasRequiredItem) {
     preparationCues.unshift(`缺少${requiredItemName}`);

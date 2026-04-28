@@ -44,6 +44,35 @@ describe("character skill acquisition rules", () => {
     expect(next.skills).toEqual([]);
   });
 
+  it("records a recoverable tribulation consequence after unsafe major breakthrough failure", () => {
+    vi.spyOn(Math, "random").mockReturnValue(1);
+
+    const base = reducer(undefined, { type: "test/init" });
+    const failed = reducer(
+      {
+        ...base,
+        isInitialized: true,
+        majorRealm: MajorRealm.Tribulation,
+        minorRealm: 9,
+        currentExp: base.maxExp,
+        maxExp: base.maxExp,
+        isBreakthroughAvailable: true,
+      },
+      attemptBreakthrough({ successChanceBonus: 0, consumedItem: true })
+    );
+
+    expect(failed.lastBreakthroughResult).toMatchObject({
+      success: false,
+      isTribulation: true,
+      isMajor: true,
+    });
+    expect(failed.breakthroughConsequence).toMatchObject({
+      type: "heart_demon",
+      severity: "major",
+      remainingDays: 365,
+    });
+  });
+
   it("learns a skill from manuals only when realm and profession requirements are met", () => {
     const manual = ITEMS[getSkillManualId("s_q_active")] as ConsumableItem;
     const base = reducer(undefined, { type: "test/init" });
@@ -199,6 +228,32 @@ describe("character skill acquisition rules", () => {
 
     expect(learned.skills).toContain("b_ma_active");
     expect(learned.skills).not.toContain("b_ie_active");
+  });
+
+  it("clears breakthrough consequence when initializing a new run", () => {
+    const base = reducer(undefined, { type: "test/init" });
+    const initialized = reducer(
+      {
+        ...base,
+        breakthroughConsequence: {
+          type: "heart_demon",
+          severity: "major",
+          remainingDays: 365,
+          label: "心魔纏身",
+          recoveryHint: "靜修或服用清心丹可降低影響。",
+        },
+      },
+      {
+        type: "character/initializeCharacter",
+        payload: {
+          name: "韓立",
+          gender: Gender.Male,
+          spiritRootId: SpiritRootId.MIXED_FIVE,
+        },
+      }
+    );
+
+    expect(initialized.breakthroughConsequence).toBeNull();
   });
 
   it("does not count runtime-only recovery effects as consumed character effects", () => {

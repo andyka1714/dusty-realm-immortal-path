@@ -1,4 +1,5 @@
 import {
+  BreakthroughConsequence,
   EncounterState,
   HeirloomCandidate,
   InventorySlot,
@@ -101,6 +102,44 @@ const migratePersistedItemConsumption = (itemConsumption: unknown) => {
     },
     {}
   );
+};
+
+const migratePersistedBreakthroughConsequence = (
+  consequence: unknown
+): BreakthroughConsequence | null => {
+  if (!isRecord(consequence)) {
+    return null;
+  }
+
+  const isValidType =
+    consequence.type === "heart_demon" ||
+    consequence.type === "foundation_injury" ||
+    consequence.type === "tribulation_backlash";
+  const isValidSeverity =
+    consequence.severity === "minor" ||
+    consequence.severity === "major" ||
+    consequence.severity === "critical";
+
+  if (
+    !isValidType ||
+    !isValidSeverity ||
+    !isPositiveInteger(consequence.remainingDays) ||
+    typeof consequence.label !== "string" ||
+    typeof consequence.recoveryHint !== "string"
+  ) {
+    return null;
+  }
+
+  const type = consequence.type as BreakthroughConsequence["type"];
+  const severity = consequence.severity as BreakthroughConsequence["severity"];
+
+  return {
+    type,
+    severity,
+    remainingDays: consequence.remainingDays,
+    label: consequence.label,
+    recoveryHint: consequence.recoveryHint,
+  };
 };
 
 const migratePersistedItemInstance = (instance: unknown): ItemInstance | undefined => {
@@ -265,6 +304,10 @@ export const migratePersistedCharacterState = (character: unknown) => {
   if ("itemConsumption" in character) {
     nextCharacter.itemConsumption = migratePersistedItemConsumption(character.itemConsumption);
   }
+
+  nextCharacter.breakthroughConsequence = migratePersistedBreakthroughConsequence(
+    character.breakthroughConsequence
+  );
 
   return nextCharacter;
 };

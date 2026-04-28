@@ -60,7 +60,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
   const { 
     isInitialized, isDead, name, gender, majorRealm, minorRealm, currentExp, maxExp, spiritStones, 
     cultivationRate, isBreakthroughAvailable, isInSeclusion, seclusionEndTime, attributes, spiritRootId,
-    lastBreakthroughResult, age, lifespan, gatheringLevel, lastManualCultivateTime, lastDeathCause
+    lastBreakthroughResult, breakthroughConsequence, age, lifespan, gatheringLevel, lastManualCultivateTime, lastDeathCause
   } = character;
   
   const spiritRoot = spiritRootId;
@@ -239,6 +239,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
     spiritRootId: spiritRoot,
     hasRequiredItem: hasItem,
     requiredItemName: requiredItem?.name,
+    activeConsequence: breakthroughConsequence,
   });
   const successRate = breakthroughPreview.successRatePercent;
   
@@ -630,6 +631,29 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
                 )}
               </div>
             </GameSection>
+
+            {breakthroughConsequence && (
+              <GameSection
+                title="災劫後果"
+                eyebrow="TRIBULATION CONSEQUENCE"
+                className="border-red-900/50 bg-red-950/25"
+                bodyClassName={embedded ? "p-3" : undefined}
+              >
+                <div className="space-y-2 text-sm text-red-100">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-bold tracking-widest">
+                      {breakthroughConsequence.label}
+                    </span>
+                    <span className="rounded border border-red-800/70 px-2 py-0.5 text-[11px] text-red-200">
+                      剩餘 {breakthroughConsequence.remainingDays} 天
+                    </span>
+                  </div>
+                  <p className="text-xs leading-6 text-red-100/80">
+                    {breakthroughConsequence.recoveryHint}
+                  </p>
+                </div>
+              </GameSection>
+            )}
 
             <GameSection
               title="修煉指南"
