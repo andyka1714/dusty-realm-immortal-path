@@ -18,8 +18,8 @@ describe("CompendiumModal taxonomy layout", () => {
     const markup = renderCompendium({ initialTab: "item" });
 
     expect(markup).toContain('data-testid="compendium-item-header"');
-    expect(markup).toContain("神兵法寶");
-    expect(markup).toContain("依境界檢視正式物品");
+    expect(markup).toContain("萬物圖鑑");
+    expect(markup).toContain("依物品線與境界檢視正式物品");
     expect(markup).toContain('data-testid="compendium-item-grid"');
     expect(markup).toContain('data-testid="compendium-item-realm-heading-0"');
     expect(markup).toContain("凡人期");
@@ -31,6 +31,33 @@ describe("CompendiumModal taxonomy layout", () => {
     const headingMarkup = markup.slice(headingStart, headingEnd);
     expect(headingMarkup).not.toContain("sticky");
     expect(headingMarkup).not.toContain("top-0");
+  });
+
+  it("renders item line filters and card category labels", () => {
+    const markup = renderCompendium({ initialTab: "item" });
+
+    expect(markup).toContain('data-testid="compendium-item-category-filter-all"');
+    expect(markup).toContain('data-testid="compendium-item-category-filter-manual"');
+    expect(markup).toContain('data-testid="compendium-item-category-filter-equipment"');
+    expect(markup).toContain('data-testid="compendium-item-category-filter-pill"');
+    expect(markup).toContain('data-testid="compendium-item-category-filter-alchemy_material"');
+    expect(markup).toContain('data-testid="compendium-item-category-filter-smithing_material"');
+    expect(markup).toContain('data-testid="compendium-item-category-filter-quest_item"');
+    expect(markup).toContain('data-testid="compendium-item-category-filter-region_specialty"');
+    expect(markup).toContain('data-testid="compendium-item-category-filter-currency_token"');
+    expect(markup).toContain('data-testid="compendium-item-category-filter-talisman"');
+    expect(markup).toContain('data-testid="compendium-item-category-filter-array"');
+    expect(markup).toContain('data-testid="compendium-item-category-filter-artifact_spirit"');
+    expect(markup).toContain('data-testid="compendium-item-category-filter-breakthrough"');
+    expect(markup).toContain('data-testid="compendium-item-category-filter-other"');
+
+    expect(markup).toContain('data-testid="compendium-item-category-village_recommendation_letter"');
+    expect(markup).toContain("任務物品");
+    expect(markup).toContain("地區特產");
+    expect(markup).toContain("貨幣代幣");
+    expect(markup).toContain("符籙");
+    expect(markup).toContain("陣盤");
+    expect(markup).toContain("法寶器靈");
   });
 
   it("groups skills by profession and realm instead of rendering a flat mixed grid", () => {

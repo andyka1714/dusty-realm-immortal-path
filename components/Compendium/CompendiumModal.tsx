@@ -43,6 +43,11 @@ import {
   type CompendiumSourceKind,
 } from "./sourceTracing";
 import {
+  COMPENDIUM_ITEM_CATEGORIES,
+  getCompendiumItemCategory,
+  type CompendiumItemCategoryId,
+} from "./itemClassification";
+import {
   calculateEnemyCombatPower,
   formatCombatPower,
 } from "../../utils/combatPower";
@@ -318,6 +323,9 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
   const [activeSkillProfession, setActiveSkillProfession] =
     useState<ProfessionType>(initialSkillProfession);
   const [activeSectId, setActiveSectId] = useState<SectId>(initialSectId);
+  const [activeItemCategory, setActiveItemCategory] = useState<
+    CompendiumItemCategoryId | "all"
+  >("all");
 
   // Tooltip state for Item Drop Source
   const [tooltip, setTooltip] = useState<{
@@ -336,6 +344,45 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
   );
 
   const allItems: Record<string, Item> = useMemo(() => ITEMS, []);
+  const itemList = useMemo(() => Object.values(allItems), [allItems]);
+  const visibleItems = useMemo(
+    () =>
+      activeItemCategory === "all"
+        ? itemList
+        : itemList.filter(
+            (item) => getCompendiumItemCategory(item).id === activeItemCategory
+          ),
+    [activeItemCategory, itemList]
+  );
+  const itemCategoryCounts = useMemo(() => {
+    const counts: Record<CompendiumItemCategoryId, number> = {
+      manual: 0,
+      equipment: 0,
+      pill: 0,
+      alchemy_material: 0,
+      smithing_material: 0,
+      quest_item: 0,
+      region_specialty: 0,
+      currency_token: 0,
+      talisman: 0,
+      array: 0,
+      artifact_spirit: 0,
+      breakthrough: 0,
+      other: 0,
+    };
+
+    itemList.forEach((item) => {
+      counts[getCompendiumItemCategory(item).id] += 1;
+    });
+
+    return counts;
+  }, [itemList]);
+  const activeItemCategoryLabel =
+    activeItemCategory === "all"
+      ? "全部分類"
+      : COMPENDIUM_ITEM_CATEGORIES.find(
+          (category) => category.id === activeItemCategory
+        )?.label ?? "全部分類";
 
   const allSkills: Skill[] = useMemo(() => [...FORMAL_CORE_SKILLS_SORTED], []);
   const activeSkillGroups = useMemo(() => {
@@ -431,7 +478,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
             {[
               { id: "realm", label: "境界總覽", icon: Database },
               { id: "map", label: "山川妖獸", icon: MapIcon },
-              { id: "item", label: "神兵法寶", icon: Sword },
+              { id: "item", label: "萬物圖鑑", icon: Sword },
               { id: "skill", label: "功法神通", icon: Scroll },
               { id: "sect", label: "宗門傳承", icon: Shield },
             ].map((tab) => (
@@ -772,25 +819,64 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                   className="rounded-lg border border-stone-800 bg-stone-950/60 p-4"
                   data-testid="compendium-item-header"
                 >
-                  <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div>
                       <h2 className="text-xl font-bold text-amber-400">
-                        神兵法寶
+                        萬物圖鑑
                       </h2>
                       <p className="mt-1 text-sm text-stone-500">
-                        依境界檢視正式物品、來源追蹤與 Workshop sink，不使用 sticky 標題遮住卡片。
+                        依物品線與境界檢視正式物品、來源追蹤與 Workshop sink，不使用 sticky 標題遮住卡片。
                       </p>
                     </div>
-                    <span className="rounded border border-amber-900/40 bg-amber-950/20 px-3 py-1 text-xs text-amber-200">
-                      {Object.keys(allItems).length} 件物品
-                    </span>
+                    <div className="flex flex-col items-start gap-2 md:items-end">
+                      <span className="rounded border border-amber-900/40 bg-amber-950/20 px-3 py-1 text-xs text-amber-200">
+                        {visibleItems.length} / {itemList.length} 件物品
+                      </span>
+                      <span className="text-xs text-stone-600">
+                        {activeItemCategoryLabel}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button
+                      data-testid="compendium-item-category-filter-all"
+                      onClick={() => setActiveItemCategory("all")}
+                      variant={activeItemCategory === "all" ? "amber" : "outline"}
+                      size="sm"
+                      className="h-8 rounded-md px-2.5 text-xs"
+                    >
+                      全部
+                      <span className="ml-1 text-[10px] opacity-70">
+                        {itemList.length}
+                      </span>
+                    </Button>
+                    {COMPENDIUM_ITEM_CATEGORIES.map((category) => (
+                      <Button
+                        key={category.id}
+                        data-testid={`compendium-item-category-filter-${category.id}`}
+                        onClick={() => setActiveItemCategory(category.id)}
+                        variant={
+                          activeItemCategory === category.id
+                            ? "amber"
+                            : "outline"
+                        }
+                        size="sm"
+                        className="h-8 rounded-md px-2.5 text-xs"
+                        title={category.description}
+                      >
+                        {category.label}
+                        <span className="ml-1 text-[10px] opacity-70">
+                          {itemCategoryCounts[category.id]}
+                        </span>
+                      </Button>
+                    ))}
                   </div>
                 </div>
                 {Object.values(MajorRealm)
                   .filter((r) => typeof r === "number")
                   .map((realmId) => {
                     const rId = realmId as MajorRealm;
-                    const itemsInRealm = Object.values(allItems).filter((i) => {
+                    const itemsInRealm = visibleItems.filter((i) => {
                       // Include base realm items. Some might be undefined (Mortal default)
                       if (i.minRealm === undefined && rId === MajorRealm.Mortal)
                         return true;
@@ -810,6 +896,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {itemsInRealm.map((item) => {
                             const sourceTrace = buildCompendiumItemSourceTrace(item.id);
+                            const category = getCompendiumItemCategory(item);
                             const overflowCount = Math.max(
                               0,
                               sourceTrace.sources.length -
@@ -893,8 +980,14 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                                   )}
                                 </div>
                               </div>
-                              <div className="text-xs text-stone-500 mb-1">
-                                {getItemSubtypeLabel(item)}
+                              <div className="mb-1 flex flex-wrap items-center gap-1 text-xs text-stone-500">
+                                <span
+                                  className="rounded border border-amber-900/30 bg-amber-950/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200"
+                                  data-testid={`compendium-item-category-${item.id}`}
+                                >
+                                  {category.label}
+                                </span>
+                                <span>{getItemSubtypeLabel(item)}</span>
                               </div>
 
                               <p className="text-xs text-stone-400 mt-1 line-clamp-2 min-h-[2.5em]">
