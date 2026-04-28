@@ -436,3 +436,20 @@ Change id: direct bugfix `fix(dashboard): stabilize cultivation panel layout`
 - 不新增 persisted schema。
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；這是純 Dashboard layout / Playwright regression 修正。
+
+## 23. 行囊側欄物品詳情 regression 收口記錄
+
+Change id: direct bugfix `fix(inventory): compact embedded item details`
+
+本輪修正使用者在 `行囊空間` shared panel 回報的物品詳情與當前裝備資訊呈現不完整問題：
+
+- embedded Inventory 右側 `裝備與鑑別` 欄原本在 xl 桌面使用 `overflow-hidden`，一旦 `物品詳情` 與 `當前裝備` 合計高度超出欄位，就會直接截斷而不是讓玩家讀完資訊。
+- `物品詳情` 在 embedded 模式仍使用 `flex-1 min-h-[300px]`，短裝備也會被放大成高卡片，底部 action 被 `mt-auto` 推到底，造成資訊區大量空白並壓縮下方裝備區。
+- embedded `EquipSlot` 新增 compact 模式，行囊面板內使用較低 padding 與 icon 尺寸，確保六個裝備欄在桌面大面板可完整落在側欄內。
+- Playwright regression 已補在 `game shell overlay exposes inventory shared controls`：選中 `鏽鐵劍` 後必須看見描述、基礎屬性、攻擊數值、裝備按鈕與完整 `當前裝備` section，並檢查詳情卡與裝備卡不互相覆蓋、不超出側欄底部。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；這是純 Inventory embedded layout / Playwright regression 修正。

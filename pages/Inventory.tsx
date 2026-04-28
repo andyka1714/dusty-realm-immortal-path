@@ -242,11 +242,12 @@ export const Inventory: React.FC<InventoryProps> = ({
       title="當前裝備"
       eyebrow="CURRENT LOADOUT"
       className={clsx("shrink-0", embedded ? "border-t border-stone-800/80" : "")}
-      bodyClassName="grid grid-cols-2 gap-2 md:gap-3"
+      bodyClassName={clsx("grid grid-cols-2 gap-2", embedded ? "p-3" : "md:gap-3")}
     >
         <EquipSlot
           label="武器" icon={Sword}
           instance={getEquippedInstance(EquipmentSlot.Weapon)}
+          compact={embedded}
           onUnequip={() => dispatch(unequipItem(EquipmentSlot.Weapon))}
           onClick={() => {
              const id = equipment[EquipmentSlot.Weapon];
@@ -257,6 +258,7 @@ export const Inventory: React.FC<InventoryProps> = ({
         <EquipSlot
           label="副手" icon={Shield}
           instance={getEquippedInstance(EquipmentSlot.Offhand)}
+          compact={embedded}
           onUnequip={() => dispatch(unequipItem(EquipmentSlot.Offhand))}
           onClick={() => {
              const id = equipment[EquipmentSlot.Offhand];
@@ -267,6 +269,7 @@ export const Inventory: React.FC<InventoryProps> = ({
         <EquipSlot
           label="頭部" icon={Crown}
           instance={getEquippedInstance(EquipmentSlot.Head)}
+          compact={embedded}
           onUnequip={() => dispatch(unequipItem(EquipmentSlot.Head))}
           onClick={() => {
              const id = equipment[EquipmentSlot.Head];
@@ -277,6 +280,7 @@ export const Inventory: React.FC<InventoryProps> = ({
         <EquipSlot
           label="身軀" icon={Shirt}
           instance={getEquippedInstance(EquipmentSlot.Body)}
+          compact={embedded}
           onUnequip={() => dispatch(unequipItem(EquipmentSlot.Body))}
           onClick={() => {
              const id = equipment[EquipmentSlot.Body];
@@ -287,6 +291,7 @@ export const Inventory: React.FC<InventoryProps> = ({
         <EquipSlot
           label="腿部" icon={Footprints}
           instance={getEquippedInstance(EquipmentSlot.Legs)}
+          compact={embedded}
           onUnequip={() => dispatch(unequipItem(EquipmentSlot.Legs))}
           onClick={() => {
              const id = equipment[EquipmentSlot.Legs];
@@ -297,6 +302,7 @@ export const Inventory: React.FC<InventoryProps> = ({
         <EquipSlot
           label="飾品" icon={Medal}
           instance={getEquippedInstance(EquipmentSlot.Accessory)}
+          compact={embedded}
           onUnequip={() => dispatch(unequipItem(EquipmentSlot.Accessory))}
           onClick={() => {
              const id = equipment[EquipmentSlot.Accessory];
@@ -526,14 +532,15 @@ export const Inventory: React.FC<InventoryProps> = ({
         {/* Right: Equipment & Details */}
         <div
           className={clsx(
-            "flex min-h-0 flex-col overflow-y-auto xl:overflow-hidden",
+            "flex min-h-0 flex-col overflow-y-auto",
             embedded
-              ? "order-1 rounded-[24px] border border-stone-800/90 bg-stone-950/32"
+              ? "order-1 gap-3 rounded-[24px] border border-stone-800/90 bg-stone-950/32 p-3"
               : "gap-4"
           )}
+          data-testid={embedded ? "inventory-side-panel" : undefined}
         >
            {embedded && (
-             <div className="border-b border-stone-800/80 px-4 py-3">
+             <div className="-mx-3 -mt-3 border-b border-stone-800/80 px-4 py-3">
                <div className="text-xs font-bold tracking-[0.28em] text-stone-500">裝備與鑑別</div>
              </div>
            )}
@@ -664,8 +671,8 @@ export const Inventory: React.FC<InventoryProps> = ({
                  <GameSection
                    title="物品詳情"
                    eyebrow="ITEM RECORD"
-                   className="flex-1 min-h-[300px]"
-                   bodyClassName="flex h-full min-h-[300px] flex-col"
+                   className={embedded ? "shrink-0" : "flex-1 min-h-[300px]"}
+                   bodyClassName={embedded ? "space-y-3 p-4" : "flex h-full min-h-[300px] flex-col"}
                  >
                     <div className="flex justify-between items-start mb-2">
                        <div className="flex flex-col">
@@ -686,7 +693,7 @@ export const Inventory: React.FC<InventoryProps> = ({
                        <span className="text-xs bg-stone-800 px-2 py-1 rounded text-stone-400">{getCategoryName(selectedItemDef.category)}</span>
                     </div>
 
-                    <p className="text-sm text-stone-500 italic mb-4">{selectedItemDef.description}</p>
+                    <p className={clsx("text-sm text-stone-500 italic", embedded ? "" : "mb-4")}>{selectedItemDef.description}</p>
 
                     {selectedSkill && (
                       <div className="mb-4 space-y-2 rounded-lg border border-indigo-900/40 bg-indigo-950/10 p-3">
@@ -722,7 +729,7 @@ export const Inventory: React.FC<InventoryProps> = ({
 
                     {/* Stats & Affixes */}
                     {selectedSlot.instance && (
-                        <div className="space-y-3 mb-4 bg-stone-950/30 p-2 rounded">
+                        <div className={clsx("space-y-3 bg-stone-950/30 p-2 rounded", embedded ? "" : "mb-4")}>
                             {/* Base Stats */}
                             {Object.keys(selectedSlot.instance.stats).length > 0 && (
                                  <div className="text-sm text-stone-300">
@@ -793,7 +800,7 @@ export const Inventory: React.FC<InventoryProps> = ({
                         </div>
                     )}
 
-                    <div className="border-t border-stone-800 pt-3 mt-auto space-y-2">
+                    <div className={clsx("border-t border-stone-800 pt-3 space-y-2", embedded ? "" : "mt-auto")}>
                        {/* Consumable Effects */}
                        {selectedItemDef.category === ItemCategory.Consumable && (selectedItemDef as ConsumableItem).effects && (
                          <div className="text-xs text-stone-400 space-y-1">
@@ -1130,20 +1137,55 @@ export const Inventory: React.FC<InventoryProps> = ({
   );
 };
 
-const EquipSlot = ({ label, icon: Icon, instance, onUnequip, onClick }: { label: string, icon: any, instance: ItemInstance | null, onUnequip: () => void, onClick?: () => void }) => {
+const EquipSlot = ({
+  label,
+  icon: Icon,
+  instance,
+  onUnequip,
+  onClick,
+  compact = false,
+}: {
+  label: string;
+  icon: any;
+  instance: ItemInstance | null;
+  onUnequip: () => void;
+  onClick?: () => void;
+  compact?: boolean;
+}) => {
   const item = instance ? ITEMS[instance.templateId] : null;
 
   return (
     <div
         onClick={onClick}
-        className={`flex items-center gap-2 p-2 md:p-3 bg-stone-900/80 rounded border border-stone-800 relative group h-full transition-colors hover:border-stone-700 ${item ? 'cursor-pointer hover:bg-stone-800/80' : ''}`}
+        className={clsx(
+          "relative flex h-full items-center gap-2 rounded border border-stone-800 bg-stone-900/80 transition-colors hover:border-stone-700 group",
+          compact ? "p-2" : "p-2 md:p-3",
+          item ? "cursor-pointer hover:bg-stone-800/80" : ""
+        )}
     >
-       <div className={`p-1.5 md:p-2.5 rounded border ${instance ? 'border-amber-900/50 bg-amber-950/20' : 'border-stone-800 bg-stone-950'} text-stone-500`}>
-         <Icon className={`w-4 h-4 md:w-6 md:h-6 ${instance ? getQualityTextColor(instance.quality) : ''}`} />
+       <div
+         className={clsx(
+           "rounded border text-stone-500",
+           compact ? "p-1.5" : "p-1.5 md:p-2.5",
+           instance ? "border-amber-900/50 bg-amber-950/20" : "border-stone-800 bg-stone-950"
+         )}
+       >
+         <Icon
+           className={clsx(
+             compact ? "h-4 w-4" : "h-4 w-4 md:h-6 md:w-6",
+             instance ? getQualityTextColor(instance.quality) : ""
+           )}
+         />
        </div>
        <div className="flex-1 min-w-0 flex flex-col justify-center">
          <div className="text-[10px] md:text-xs text-stone-500 font-bold uppercase tracking-wider leading-none mb-0.5">{label}</div>
-         <div className={`text-xs md:text-base font-bold truncate ${item ? getQualityTextColor(instance!.quality) : 'text-stone-600 italic'}`}>
+         <div
+           className={clsx(
+             "truncate font-bold",
+             compact ? "text-xs" : "text-xs md:text-base",
+             item ? getQualityTextColor(instance!.quality) : "text-stone-600 italic"
+           )}
+         >
            {item ? item.name : '未裝備'}
          </div>
        </div>

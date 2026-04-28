@@ -316,6 +316,7 @@ test("reincarnation hall keeps the mobile-first shared-control flow operable", a
 });
 
 test("game shell overlay exposes inventory shared controls", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
   await installSave(page, createActiveRunSave());
 
   await page.goto("/");
@@ -325,6 +326,31 @@ test("game shell overlay exposes inventory shared controls", async ({ page }) =>
 
   await expect(page.getByTestId("game-shell-panel")).toBeVisible();
   await expect(page.getByTestId("inventory-sort")).toBeVisible();
+  const inventorySidePanel = page.getByTestId("inventory-side-panel");
+  const selectedItemCard = page.locator("section").filter({ hasText: "物品詳情" }).first();
+  const equipmentSection = page.locator("section").filter({ hasText: "當前裝備" }).first();
+
+  await page.getByText("鏽鐵劍").click();
+  await expect(selectedItemCard).toContainText("雖然生鏽了");
+  await expect(selectedItemCard).toContainText("基礎屬性");
+  await expect(selectedItemCard).toContainText("攻擊");
+  await expect(selectedItemCard.getByRole("button", { name: "裝備" })).toBeVisible();
+  await expect(equipmentSection).toContainText("武器");
+
+  const sidePanelBox = await inventorySidePanel.boundingBox();
+  const detailBox = await selectedItemCard.boundingBox();
+  const equipmentBox = await equipmentSection.boundingBox();
+  expect(sidePanelBox).not.toBeNull();
+  expect(detailBox).not.toBeNull();
+  expect(equipmentBox).not.toBeNull();
+  if (sidePanelBox && detailBox && equipmentBox) {
+    expect(detailBox.y).toBeGreaterThanOrEqual(sidePanelBox.y);
+    expect(detailBox.y + detailBox.height).toBeLessThanOrEqual(equipmentBox.y);
+    expect(equipmentBox.y + equipmentBox.height).toBeLessThanOrEqual(
+      sidePanelBox.y + sidePanelBox.height + 1
+    );
+  }
+
   await page.getByTestId("inventory-filter-consumable").click();
   await expect(page.getByRole("tab", { name: "丹藥" })).toHaveAttribute(
     "data-state",
@@ -401,14 +427,14 @@ test("character panel keeps dashboard panes and stat tooltip anchored", async ({
   }
 
   await spiritRootRow.scrollIntoViewIfNeeded();
+  const rowBox = await spiritRootRow.boundingBox();
+  expect(rowBox).not.toBeNull();
   await spiritRootRow.hover();
   const tooltip = page.getByTestId("game-tooltip");
   await expect(tooltip).toBeVisible();
 
   const tooltipBox = await tooltip.boundingBox();
-  const rowBox = await spiritRootRow.boundingBox();
   expect(tooltipBox).not.toBeNull();
-  expect(rowBox).not.toBeNull();
   if (tooltipBox && rowBox) {
     expect(tooltipBox.x).toBeGreaterThanOrEqual(0);
     expect(tooltipBox.y).toBeGreaterThanOrEqual(0);
