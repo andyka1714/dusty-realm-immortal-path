@@ -52,12 +52,12 @@ export const COMPENDIUM_ITEM_CATEGORIES: CompendiumItemCategoryDefinition[] = [
   {
     id: "alchemy_material",
     label: "煉丹材料",
-    description: "藥草、靈露與丹方主材，主要進入煉丹 Workshop sink。",
+    description: "藥草、靈露與丹方主材，主要用於煉丹工坊配方。",
   },
   {
     id: "smithing_material",
     label: "煉器材料",
-    description: "礦石、妖獸素材與器胚材料，主要進入鍛造 Workshop sink。",
+    description: "礦石、妖獸素材與器胚材料，主要用於鍛造工坊配方。",
   },
   {
     id: "quest_item",

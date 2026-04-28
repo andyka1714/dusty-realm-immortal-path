@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ProfessionType } from "../../types";
+import { EnemyRank, ProfessionType } from "../../types";
 import { FORMAL_CORE_SKILL_MAP } from "../../data/skills";
 import {
   buildCompendiumItemSourceTrace,
@@ -64,6 +64,24 @@ describe("Compendium source tracing helpers", () => {
         )
       ).toBe(true);
     });
+  });
+
+  it("keeps drop rank on source chips and uses readable workshop labels", () => {
+    const dropTrace = buildCompendiumItemSourceTrace("novice_sword");
+    const materialTrace = buildCompendiumItemSourceTrace("wolf_fang");
+    const dropSources = dropTrace.sources.filter((source) => source.kind === "drop");
+    const workshopSink = materialTrace.sources.find(
+      (source) => source.kind === "workshop_sink"
+    );
+
+    expect(dropSources.some((source) => source.rank === EnemyRank.Common)).toBe(true);
+    expect(dropSources.some((source) => source.rank === EnemyRank.Elite)).toBe(true);
+    expect(dropSources.some((source) => source.rank === EnemyRank.Boss)).toBe(true);
+    expect(dropSources.every((source) => source.detail === undefined)).toBe(true);
+    expect(workshopSink?.label).toContain("工坊用途：可用於");
+    expect(materialTrace.sources.map((source) => source.label).join("\n")).not.toContain(
+      "Workshop sink"
+    );
   });
 
   it("derives skill manual labels from the existing manual metadata", () => {

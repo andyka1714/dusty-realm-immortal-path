@@ -82,6 +82,15 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).toContain("來源追蹤");
   });
 
+  it("renders equipment source badges by monster rank and isolates tier tooltip hover", () => {
+    const markup = renderCompendium({ initialTab: "equipment" });
+
+    expect(markup).toContain("border-stone-700 bg-stone-900/70 text-stone-300");
+    expect(markup).toContain("group/tier");
+    expect(markup).toContain("group-hover/tier:opacity-100");
+    expect(markup).not.toContain("Workshop sink");
+  });
+
   it("groups skills by profession and realm instead of rendering a flat mixed grid", () => {
     const markup = renderCompendium({
       initialTab: "skill",
@@ -105,7 +114,7 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).toContain('data-testid="compendium-item-source-sword_path_starsteel"');
     expect(markup).toContain("來源追蹤");
     expect(markup).toContain("sect:sword:world-chapter-03");
-    expect(markup).toContain("Workshop sink：萬古帝劍鍛造");
+    expect(markup).toContain("工坊用途：可用於 萬古帝劍鍛造");
     expect(markup).toContain("repeatable aftermath");
   });
 

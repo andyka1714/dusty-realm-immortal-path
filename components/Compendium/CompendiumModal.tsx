@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import {
   X,
   Book,
@@ -39,6 +39,7 @@ import { Button } from "../ui/button";
 import {
   buildCompendiumItemSourceTrace,
   buildCompendiumSkillSourceTrace,
+  type CompendiumItemSourceTrace,
   type CompendiumSourceChip,
   type CompendiumSourceKind,
 } from "./sourceTracing";
@@ -186,6 +187,21 @@ const sourceChipClassNames: Record<CompendiumSourceKind, string> = {
   skill_manual: "border-indigo-900/40 bg-indigo-950/30 text-indigo-300",
 };
 
+const dropRankChipClassNames: Record<EnemyRank, string> = {
+  [EnemyRank.Common]: "border-stone-700 bg-stone-900/70 text-stone-300",
+  [EnemyRank.Elite]: "border-sky-700/50 bg-sky-950/40 text-sky-200",
+  [EnemyRank.Boss]: "border-red-800/60 bg-red-950/45 text-red-200",
+};
+
+const enemyRankLabels: Record<EnemyRank, string> = {
+  [EnemyRank.Common]: "普通",
+  [EnemyRank.Elite]: "精英",
+  [EnemyRank.Boss]: "首領",
+};
+
+const dedupeSourceLabels = (values: Array<string | undefined>) =>
+  Array.from(new Set(values.filter((value): value is string => Boolean(value))));
+
 const getVisibleSourceChips = (sources: CompendiumSourceChip[]) => {
   const visible = sources.slice(0, 5);
   const hasWorkshopSink = visible.some((source) => source.kind === "workshop_sink");
@@ -211,7 +227,9 @@ const renderSourceChips = (
       key={`${source.kind}-${source.label}-${index}`}
       className={clsx(
         "max-w-full rounded border px-1.5 py-0.5 text-[10px] leading-4",
-        sourceChipClassNames[source.kind]
+        source.kind === "drop" && source.rank
+          ? dropRankChipClassNames[source.rank]
+          : sourceChipClassNames[source.kind]
       )}
       title={source.detail}
     >
@@ -219,6 +237,112 @@ const renderSourceChips = (
     </span>
   ));
 };
+
+const renderSourceGroup = (
+  title: string,
+  children: React.ReactNode,
+  testId: string
+) => (
+  <section className="space-y-2" data-testid={testId}>
+    <div className="text-[11px] font-bold text-amber-200">{title}</div>
+    <div className="flex flex-wrap gap-1.5">{children}</div>
+  </section>
+);
+
+const renderGroupedSourcePopover = (sourceTrace: CompendiumItemSourceTrace) => (
+  <div
+    className="max-h-[420px] space-y-4 overflow-y-auto pr-2"
+    data-testid="compendium-source-popover-content"
+  >
+    {sourceTrace.dropSources.length > 0 &&
+      renderSourceGroup(
+        "掉落來源",
+        sourceTrace.dropSources.map((source) => (
+          <span
+            key={source.enemyId}
+            className={clsx(
+              "rounded border px-2 py-1 text-[11px] leading-4",
+              dropRankChipClassNames[source.rank]
+            )}
+            title={enemyRankLabels[source.rank]}
+          >
+            {source.enemyName} 掉落
+          </span>
+        )),
+        "compendium-source-group-drops"
+      )}
+
+    {sourceTrace.shopSources.length > 0 &&
+      renderSourceGroup(
+        "商店販賣",
+        sourceTrace.shopSources.map((source) => (
+          <span
+            key={source.shopId}
+            className="rounded border border-emerald-900/40 bg-emerald-950/30 px-2 py-1 text-[11px] leading-4 text-emerald-300"
+          >
+            {source.shopName} 販賣
+          </span>
+        )),
+        "compendium-source-group-shops"
+      )}
+
+    {sourceTrace.workshopOutputs.length > 0 && (
+      <section className="space-y-2" data-testid="compendium-source-group-workshop-output">
+        <div className="text-[11px] font-bold text-amber-200">工坊製作</div>
+        {sourceTrace.workshopOutputs.map((source) => (
+          <div key={source.recipeId} className="space-y-1">
+            <span className="inline-flex rounded border border-purple-900/40 bg-purple-950/30 px-2 py-1 text-[11px] leading-4 text-purple-300">
+              {source.recipeName}
+            </span>
+            {source.sourceHint && (
+              <p className="text-xs leading-relaxed text-stone-500">
+                {source.sourceHint}
+              </p>
+            )}
+          </div>
+        ))}
+      </section>
+    )}
+
+    {sourceTrace.workshopSinks.length > 0 && (
+      <section className="space-y-2" data-testid="compendium-source-group-workshop-sink">
+        <div className="text-[11px] font-bold text-amber-200">工坊用途</div>
+        {sourceTrace.workshopSinks.map((source) => (
+          <div key={source.recipeId} className="space-y-1">
+            <span className="inline-flex rounded border border-amber-900/40 bg-amber-950/30 px-2 py-1 text-[11px] leading-4 text-amber-300">
+              可用於 {source.recipeName}
+            </span>
+            {source.sourceHint && (
+              <p className="text-xs leading-relaxed text-stone-500">
+                {source.sourceHint}
+              </p>
+            )}
+          </div>
+        ))}
+      </section>
+    )}
+
+    {sourceTrace.encounterRoutes.length > 0 &&
+      renderSourceGroup(
+        "奇遇路線",
+        sourceTrace.encounterRoutes.map((source) => (
+          <span
+            key={`${source.eventId}-${source.choiceId}`}
+            className="rounded border border-violet-900/40 bg-violet-950/30 px-2 py-1 text-[11px] leading-4 text-violet-300"
+            title={source.memoryCue}
+          >
+            {dedupeSourceLabels([
+              source.routeLabel,
+              source.sectLabel,
+              source.categoryLabel,
+              source.eventTitle,
+            ]).join(" / ")}
+          </span>
+        )),
+        "compendium-source-group-encounters"
+      )}
+  </div>
+);
 
 const groupSkillsByRealm = (skills: Skill[]) =>
   Object.values(MajorRealm)
@@ -342,6 +466,21 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
     footer?: React.ReactNode;
     content: React.ReactNode;
   } | null>(null);
+  const tooltipHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelTooltipHide = () => {
+    if (!tooltipHideTimerRef.current) return;
+    clearTimeout(tooltipHideTimerRef.current);
+    tooltipHideTimerRef.current = null;
+  };
+
+  const scheduleTooltipHide = () => {
+    cancelTooltipHide();
+    tooltipHideTimerRef.current = setTimeout(() => {
+      setTooltip(null);
+      tooltipHideTimerRef.current = null;
+    }, 220);
+  };
 
   // Aggregate Data
   const allEnemies: Record<string, Enemy> = useMemo(
@@ -478,7 +617,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                     c: "text-amber-500 border-amber-900/30 bg-amber-950/20",
                   },
                 ].map((badge) => (
-                  <span key={badge.q} className="relative group inline-flex">
+                  <span key={badge.q} className="relative group/tier inline-flex">
                     <span
                       className={clsx("text-[10px] px-1 rounded border", badge.c)}
                     >
@@ -487,6 +626,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                     <GameHintBubble
                       eyebrow="DROP TIER"
                       className="bottom-full left-1/2 mb-2 -translate-x-1/2"
+                      trigger="tier"
                     >
                       可掉落{badge.l}品
                     </GameHintBubble>
@@ -544,33 +684,17 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
               <span
                 className="text-[10px] text-stone-500 cursor-help hover:text-stone-300 decoration-dotted underline"
                 onMouseEnter={(event) => {
-                  const content = (
-                    <div className="flex flex-col gap-1 min-w-[120px]">
-                      {sourceTrace.sources.map((source, index) => (
-                        <div
-                          key={`${source.kind}-${source.label}-${index}`}
-                          className="flex flex-col gap-0.5"
-                        >
-                          <span className="text-stone-200">{source.label}</span>
-                          {source.detail && (
-                            <span className="text-stone-500">
-                              {source.detail}
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  );
+                  cancelTooltipHide();
                   setTooltip({
                     visible: true,
                     x: event.clientX,
                     y: event.clientY,
                     title: "完整來源追蹤",
                     footer: `${sourceTrace.sources.length} 個來源`,
-                    content: content,
+                    content: renderGroupedSourcePopover(sourceTrace),
                   });
                 }}
-                onMouseLeave={() => setTooltip(null)}
+                onMouseLeave={scheduleTooltipHide}
               >
                 +{overflowCount} 更多
               </span>
@@ -599,9 +723,12 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
             eyebrow="DROP INTEL"
             title={tooltip.title}
             footer={tooltip.footer}
-            widthClassName="max-w-xs"
-            className="z-[70] whitespace-pre-wrap text-xs"
+            widthClassName="w-[min(520px,calc(100vw-2rem))]"
+            className="z-[70] text-xs"
             style={{ left: tooltip.x, top: tooltip.y }}
+            interactive
+            onMouseEnter={cancelTooltipHide}
+            onMouseLeave={scheduleTooltipHide}
           >
             {tooltip.content}
           </GameTooltip>
@@ -983,7 +1110,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                         萬物圖鑑
                       </h2>
                       <p className="mt-1 text-sm text-stone-500">
-                        依物品線與境界檢視正式物品、來源追蹤與 Workshop sink，不使用 sticky 標題遮住卡片。
+                        依物品線與境界檢視正式物品、來源追蹤與工坊用途，不使用 sticky 標題遮住卡片。
                       </p>
                     </div>
                     <div className="flex flex-col items-start gap-2 md:items-end">
@@ -1052,159 +1179,9 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                           {MajorRealmCN[rId]}期
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {itemsInRealm.map((item) => {
-                            const sourceTrace = buildCompendiumItemSourceTrace(item.id);
-                            const category = getCompendiumItemCategory(item);
-                            const overflowCount = Math.max(
-                              0,
-                              sourceTrace.sources.length -
-                                getVisibleSourceChips(sourceTrace.sources).length
-                            );
-                            return (
-                              <div
-                                key={item.id}
-                                className="bg-stone-800 p-3 rounded border border-stone-700 group hover:border-amber-500/30 transition-colors"
-                                data-testid={`compendium-item-card-${item.id}`}
-                              >
-                              <div className="flex justify-between">
-                                <span className="font-bold text-stone-200">
-                                  {item.name}
-                                </span>
-                                {/* Quality Badges */}
-                                <div className="ml-2">
-                                  {item.category === ItemCategory.Equipment ? (
-                                    /* Equipment: Show All Qualities */
-                                    <div className="flex gap-1">
-                                      {[
-                                        {
-                                          l: "下",
-                                          q: 0,
-                                          c: "text-stone-500 border-stone-800 bg-stone-900/50",
-                                        },
-                                        {
-                                          l: "中",
-                                          q: 1,
-                                          c: "text-emerald-500 border-emerald-900/30 bg-emerald-950/20",
-                                        },
-                                        {
-                                          l: "上",
-                                          q: 2,
-                                          c: "text-sky-500 border-sky-900/30 bg-sky-950/20",
-                                        },
-                                        {
-                                          l: "仙",
-                                          q: 3,
-                                          c: "text-amber-500 border-amber-900/30 bg-amber-950/20",
-                                        },
-                                      ].map((badge) => (
-                                        <span key={badge.q} className="relative group inline-flex">
-                                          <span
-                                            className={clsx(
-                                              "text-[10px] px-1 rounded border",
-                                              badge.c
-                                            )}
-                                          >
-                                            {badge.l}
-                                          </span>
-                                          <GameHintBubble eyebrow="DROP TIER" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
-                                            可掉落{badge.l}品
-                                          </GameHintBubble>
-                                        </span>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    /* Non-Equipment (Breakthrough/Consumable): Show Single Quality */
-                                    <span
-                                      className={clsx(
-                                        "text-[10px] px-1.5 rounded border h-fit",
-                                        item.quality === ItemQuality.Immortal
-                                          ? "text-amber-500 border-amber-900/50 bg-amber-950/30"
-                                          : item.quality === ItemQuality.High
-                                            ? "text-sky-400 border-sky-900/50 bg-sky-950/30"
-                                            : item.quality ===
-                                                ItemQuality.Medium
-                                              ? "text-emerald-400 border-emerald-900/50 bg-emerald-950/30"
-                                              : "text-stone-400 border-stone-700"
-                                      )}
-                                    >
-                                      {item.quality === ItemQuality.Immortal
-                                        ? "仙"
-                                        : item.quality === ItemQuality.High
-                                          ? "上"
-                                          : item.quality === ItemQuality.Medium
-                                            ? "中"
-                                            : "下"}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="mb-1 flex flex-wrap items-center gap-1 text-xs text-stone-500">
-                                <span
-                                  className="rounded border border-amber-900/30 bg-amber-950/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200"
-                                  data-testid={`compendium-item-category-${item.id}`}
-                                >
-                                  {category.label}
-                                </span>
-                                <span>{getItemSubtypeLabel(item)}</span>
-                              </div>
-
-                              <p className="text-xs text-stone-400 mt-1 line-clamp-2 min-h-[2.5em]">
-                                {item.description}
-                              </p>
-
-                              <div
-                                className="mt-3 pt-2 border-t border-stone-700/50"
-                                data-testid={`compendium-item-source-${item.id}`}
-                              >
-                                <span className="text-[10px] text-stone-600 block mb-1">
-                                  來源追蹤:
-                                </span>
-                                <div className="flex flex-wrap gap-1">
-                                  {renderSourceChips(sourceTrace.sources)}
-                                  {overflowCount > 0 && (
-                                        <span
-                                          className="text-[10px] text-stone-500 cursor-help hover:text-stone-300 decoration-dotted underline"
-                                          onMouseEnter={(event) => {
-                                            const content = (
-                                              <div className="flex flex-col gap-1 min-w-[120px]">
-                                                {sourceTrace.sources.map(
-                                                  (source, index) => (
-                                                    <div
-                                                      key={`${source.kind}-${source.label}-${index}`}
-                                                      className="flex flex-col gap-0.5"
-                                                    >
-                                                      <span className="text-stone-200">
-                                                        {source.label}
-                                                      </span>
-                                                      {source.detail && (
-                                                        <span className="text-stone-500">
-                                                          {source.detail}
-                                                        </span>
-                                                      )}
-                                                    </div>
-                                                  )
-                                                )}
-                                              </div>
-                                            );
-                                            setTooltip({
-                                              visible: true,
-                                              x: event.clientX,
-                                              y: event.clientY,
-                                              title: "完整來源追蹤",
-                                              footer: `${sourceTrace.sources.length} 個來源`,
-                                              content: content,
-                                            });
-                                          }}
-                                          onMouseLeave={() => setTooltip(null)}
-                                        >
-                                          +{overflowCount} 更多
-                                        </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                            );
-                          })}
+                          {itemsInRealm.map((item) =>
+                            renderItemCard(item, "compendium-item")
+                          )}
                         </div>
                       </div>
                     );

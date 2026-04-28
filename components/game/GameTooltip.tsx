@@ -13,6 +13,9 @@ interface GameTooltipProps {
   className?: string;
   widthClassName?: string;
   style?: React.CSSProperties;
+  interactive?: boolean;
+  onMouseEnter?: React.MouseEventHandler<HTMLDivElement>;
+  onMouseLeave?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 export const GameTooltip: React.FC<GameTooltipProps> = ({
@@ -24,16 +27,22 @@ export const GameTooltip: React.FC<GameTooltipProps> = ({
   className,
   widthClassName = "w-72",
   style,
+  interactive = false,
+  onMouseEnter,
+  onMouseLeave,
 }) => {
   const tooltip = (
     <div
       className={clsx(
-        "fixed z-[9999] overflow-hidden rounded-[18px] border border-amber-900/35 bg-[linear-gradient(180deg,rgba(28,22,12,0.98)_0%,rgba(10,10,10,0.98)_100%)] p-4 text-stone-300 shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md pointer-events-none",
+        "fixed z-[9999] overflow-hidden rounded-[18px] border border-amber-900/35 bg-[linear-gradient(180deg,rgba(28,22,12,0.98)_0%,rgba(10,10,10,0.98)_100%)] p-4 text-stone-300 shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-md",
+        interactive ? "pointer-events-auto" : "pointer-events-none",
         widthClassName,
         className
       )}
       style={style}
       data-testid="game-tooltip"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <GameOrnamentFrame
         size="compact"

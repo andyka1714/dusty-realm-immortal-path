@@ -32,6 +32,7 @@ export interface CompendiumSourceChip {
   label: string;
   detail?: string;
   tags: string[];
+  rank?: EnemyRank;
 }
 
 export interface CompendiumDropSource {
@@ -222,7 +223,7 @@ const buildItemSourceChips = (
   ...dropSources.map((source) => ({
     kind: "drop" as const,
     label: `${source.enemyName} 掉落`,
-    detail: source.realmLabel,
+    rank: source.rank,
     tags: [source.rank, source.realmLabel],
   })),
   ...shopSources.map((source) => ({
@@ -232,7 +233,7 @@ const buildItemSourceChips = (
   })),
   ...workshopOutputs.map((source) => ({
     kind: "workshop_output" as const,
-    label: `Workshop 產物：${source.recipeName}`,
+    label: `工坊製作：${source.recipeName}`,
     detail: source.sourceHint || undefined,
     tags: source.routeTags,
   })),
@@ -253,7 +254,7 @@ const buildItemSourceChips = (
   })),
   ...workshopSinks.map((source) => ({
     kind: "workshop_sink" as const,
-    label: `Workshop sink：${source.recipeName}`,
+    label: `工坊用途：可用於 ${source.recipeName}`,
     detail: source.sourceHint || undefined,
     tags: source.routeTags,
   })),
