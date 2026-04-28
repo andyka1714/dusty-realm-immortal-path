@@ -94,6 +94,19 @@ const getProfessionLabel = (profession?: ProfessionType): string => {
   }
 };
 
+const getProfessionRouteLabel = (profession?: ProfessionType): string => {
+  switch (profession) {
+    case ProfessionType.Sword:
+      return "凌霄劍宗";
+    case ProfessionType.Body:
+      return "萬獸山莊";
+    case ProfessionType.Mage:
+      return "縹緲仙宮";
+    default:
+      return "通用";
+  }
+};
+
 const getItemSubtypeLabel = (item: Item): string => {
   if ("subType" in item) {
     switch (item.subType) {
@@ -361,9 +374,9 @@ const groupSkillsByRealm = (skills: Skill[]) =>
 
 const skillProfessionTabs = [
   { id: ProfessionType.None, label: "通用" },
-  { id: ProfessionType.Sword, label: "劍修" },
-  { id: ProfessionType.Body, label: "體修" },
-  { id: ProfessionType.Mage, label: "法修" },
+  { id: ProfessionType.Sword, label: "凌霄劍宗" },
+  { id: ProfessionType.Body, label: "萬獸山莊" },
+  { id: ProfessionType.Mage, label: "縹緲仙宮" },
 ];
 
 const equipmentPathProfessionMap: Record<EquipmentPathId, ProfessionType> = {
@@ -1317,7 +1330,8 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                   <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                     <div>
                       <h2 className="text-xl font-bold text-amber-400">
-                        {getProfessionLabel(activeEquipmentProfession)}裝備
+                        {getProfessionRouteLabel(activeEquipmentProfession)}
+                        裝備
                       </h2>
                       <p className="mt-1 text-sm text-stone-500">
                         獨立檢視武器、防具、飾品與法寶裝備，依通用與職業路線保留品質、子類與來源追蹤。
@@ -1383,7 +1397,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                   data-testid="compendium-skill-summary"
                 >
                   <div className="text-sm font-bold text-amber-100">
-                    {getProfessionLabel(activeSkillProfession)}功法
+                    {getProfessionRouteLabel(activeSkillProfession)}功法
                   </div>
                   <div className="mt-1 text-xs text-stone-400">
                     {activeSkillCount} 本正式功法，依 {activeSkillGroups.length} 個境界分段顯示，並保留藏經閣、精英、首領與古修傳承來源 cue。

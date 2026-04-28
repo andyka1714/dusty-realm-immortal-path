@@ -90,7 +90,9 @@ describe("CompendiumModal taxonomy layout", () => {
 
     expect(swordMarkup).toContain('data-testid="compendium-equipment-profession-none"');
     expect(swordMarkup).toContain('data-testid="compendium-equipment-profession-sword"');
-    expect(swordMarkup).toContain("劍修裝備");
+    expect(swordMarkup).toContain("凌霄劍宗");
+    expect(swordMarkup).toContain("凌霄劍宗裝備");
+    expect(swordMarkup).not.toContain("劍修裝備");
     expect(swordMarkup).toContain('data-testid="compendium-equipment-card-spirit_iron_sword"');
     expect(swordMarkup).not.toContain('data-testid="compendium-equipment-card-bear_paw_gauntlet"');
     expect(swordMarkup).not.toContain('data-testid="compendium-equipment-card-spirit_wood_staff"');
@@ -123,7 +125,9 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).toContain('data-testid="compendium-skill-profession-sword"');
     expect(markup).toContain('data-testid="compendium-skill-profession-body"');
     expect(markup).toContain('data-testid="compendium-skill-summary"');
-    expect(markup).toContain("劍修功法");
+    expect(markup).toContain("凌霄劍宗");
+    expect(markup).toContain("凌霄劍宗功法");
+    expect(markup).not.toContain("劍修功法");
     expect(markup).toContain("境界分段");
     expect(markup).toContain('data-testid="compendium-skill-realm-1"');
     expect(markup).toContain("疾風三疊");
@@ -154,6 +158,25 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).toContain("border-l-4 border-amber-600 bg-stone-900/70");
     expect(markup).not.toContain("border border-indigo-900/40 bg-indigo-950/20 p-4");
     expect(markup).not.toContain("border-l-4 border-indigo-600 bg-stone-900/70");
+  });
+
+  it("uses sect-style profession tabs for equipment and skills", () => {
+    const equipmentMarkup = renderCompendium({
+      initialTab: "equipment",
+      initialEquipmentProfession: "Sword",
+    });
+    const skillMarkup = renderCompendium({
+      initialTab: "skill",
+      initialSkillProfession: "Sword",
+    });
+
+    [equipmentMarkup, skillMarkup].forEach((markup) => {
+      expect(markup).toContain("凌霄劍宗");
+      expect(markup).toContain("萬獸山莊");
+      expect(markup).toContain("縹緲仙宮");
+      expect(markup).toContain("rounded-xl border border-stone-800 bg-stone-950/70 p-1");
+      expect(markup).toContain("border-amber-600/60 bg-amber-500/15 text-amber-100");
+    });
   });
 
   it("surfaces item source tracing for route materials", () => {
