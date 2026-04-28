@@ -42,7 +42,7 @@ const CompendiumModal = lazy(() =>
 );
 
 const PANEL_CONFIG: Record<
-  Exclude<GamePanelId, "compendium">,
+  Exclude<GamePanelId, "compendium" | "skills" | "map">,
   {
     widthClassName: string;
     title: string;
@@ -77,6 +77,7 @@ const PANEL_CONFIG: Record<
 export const GameShell: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [activePanel, setActivePanel] = useState<GamePanelId | null>(null);
+  const [mapOpenRequest, setMapOpenRequest] = useState(0);
   const { age, isInitialized, isDead } = useSelector(
     (state: RootState) => state.character
   );
@@ -91,16 +92,28 @@ export const GameShell: React.FC = () => {
   }, [dispatch, age, isInitialized, isDead]);
 
   const handleTogglePanel = (panel: GamePanelId) => {
+    if (panel === "map") {
+      setMapOpenRequest((value) => value + 1);
+      setActivePanel(null);
+      return;
+    }
+
     setActivePanel((current) => (current === panel ? null : panel));
   };
   const handleDismissPendingEncounter = () => {
     dispatch(dismissPendingEncounter());
   };
 
-  const isCompendiumOpen = activePanel === "compendium";
+  const isCompendiumOpen =
+    activePanel === "compendium" || activePanel === "skills";
 
   const activePanelConfig = useMemo(() => {
-    if (!activePanel || activePanel === "compendium") {
+    if (
+      !activePanel ||
+      activePanel === "compendium" ||
+      activePanel === "skills" ||
+      activePanel === "map"
+    ) {
       return null;
     }
 
@@ -118,7 +131,10 @@ export const GameShell: React.FC = () => {
   return (
     <div className="relative h-[100dvh] w-screen overflow-hidden bg-black font-serif text-stone-100">
       <Suspense fallback={<SceneLoading />}>
-        <Adventure isInputBlocked={activePanel !== null} />
+        <Adventure
+          isInputBlocked={activePanel !== null}
+          mapOpenRequest={mapOpenRequest}
+        />
       </Suspense>
 
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.08),transparent_26%),radial-gradient(circle_at_bottom,rgba(59,130,246,0.08),transparent_24%)]"></div>
@@ -153,6 +169,7 @@ export const GameShell: React.FC = () => {
             isOpen={isCompendiumOpen}
             onClose={() => setActivePanel(null)}
             embedded
+            initialTab={activePanel === "skills" ? "skill" : "realm"}
           />
         </GamePanel>
 

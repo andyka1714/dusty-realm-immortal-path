@@ -728,10 +728,8 @@ test("clicking an adjacent monster starts world combat without waiting for auto 
   const canvas = page.getByTestId("adventure-stage").locator("canvas");
   await expect(canvas).toBeVisible();
   await expect(page.getByText("歷練中")).toBeVisible();
-  await expect(page.getByTestId("adventure-command-basic-attack")).toContainText(
-    "未鎖定目標"
-  );
-  await expect(page.getByTestId("adventure-command-surface")).toBeVisible();
+  await expect(page.getByTestId("adventure-action-wheel")).toBeVisible();
+  await expect(page.getByTestId("adventure-command-surface")).toBeHidden();
 
   const box = await canvas.boundingBox();
   expect(box).not.toBeNull();
@@ -740,9 +738,7 @@ test("clicking an adjacent monster starts world combat without waiting for auto 
   await page.mouse.click(box.x + box.width / 2 - 40, box.y + box.height / 2);
 
   await expect(page.getByText("荒徑野狗").first()).toBeVisible();
-  await expect(page.getByTestId("adventure-command-basic-attack")).toContainText(
-    "直接在場景內出手"
-  );
+  await expect(page.getByTestId("adventure-action-basic-attack")).toBeEnabled();
   await expect(page.getByText(/造成\s+\d+\s+點傷害/).first()).toBeVisible({
     timeout: 2000,
   });

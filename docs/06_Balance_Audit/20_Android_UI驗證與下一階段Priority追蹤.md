@@ -419,6 +419,24 @@ Change id: `refine-shop-manual-drop-routing-v4`
 - 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
 - 不需要 migration；routing v4 只讀既有 `Skill` metadata、manual item id、商店 catalog 與敵人 drop catalog。
 
+## 22. Adventure HUD layout 收口記錄
+
+Change id: `update-adventure-hud-layout`
+
+本輪把正式 Adventure 畫面的 RPG HUD 資訊層級收斂到主要常駐區塊：
+
+- 左上 `GameHUD` 改為角色狀態卡，顯示暫代 avatar、角色名稱、境界、derived Lv、氣血、靈力、戰力、靈石、修為與壽元。
+- HUD 的 HP / MP 讀取既有 `calculatePlayerStats`，戰力讀取既有 `calculatePlayerCombatPower` 與 `formatCombatPower`，不另寫 UI 專用估算。
+- 底部 `FloatingDock` 補上 `功法` 與 `地圖` 入口；`功法` 開啟圖鑑功法 tab，`地圖` 透過 Adventure runtime 開啟地圖 modal。
+- Adventure 大型 `戰鬥快捷列` 已弱化為右下小型 action wheel，保留普攻、主動術式、掛機與地圖操作，避免和底部 dock 長期競爭視野。
+- Regression 覆蓋 `GameHUD` 角色卡、`FloatingDock` 主要入口，以及點擊鄰近怪物後 action wheel 可直接進入世界戰鬥。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；HUD 欄位只從既有 `character`、`inventory.equipmentStats`、Adventure UI state 與 combat power helper 推導，dock / map modal 狀態也只存在於目前 React runtime。
+
 ## 22. 道途面板修行布局 regression 收口記錄
 
 Change id: direct bugfix `fix(dashboard): stabilize cultivation panel layout`

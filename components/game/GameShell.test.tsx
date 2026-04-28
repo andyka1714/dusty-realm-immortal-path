@@ -91,8 +91,10 @@ describe("GameShell", () => {
 
     expect(markup).toContain("道途");
     expect(markup).toContain("背包");
+    expect(markup).toContain("功法");
     expect(markup).toContain("洞府");
     expect(markup).toContain("圖鑑");
+    expect(markup).toContain("地圖");
   });
 
   it("renders the pending encounter content when a formal event is waiting", () => {

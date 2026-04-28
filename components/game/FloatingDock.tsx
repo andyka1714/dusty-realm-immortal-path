@@ -4,6 +4,8 @@ import {
   BookOpen,
   Hammer,
   Home,
+  Map,
+  Scroll,
 } from "lucide-react";
 import clsx from "clsx";
 import { GameHintBubble } from "./GameHintBubble";
@@ -12,8 +14,10 @@ import { Button } from "../ui/button";
 export type GamePanelId =
   | "character"
   | "inventory"
+  | "skills"
   | "workshop"
-  | "compendium";
+  | "compendium"
+  | "map";
 
 interface FloatingDockProps {
   activePanel: GamePanelId | null;
@@ -27,8 +31,10 @@ const ITEMS: Array<{
 }> = [
   { id: "character", label: "道途", icon: Home },
   { id: "inventory", label: "背包", icon: Backpack },
+  { id: "skills", label: "功法", icon: Scroll },
   { id: "workshop", label: "洞府", icon: Hammer },
   { id: "compendium", label: "圖鑑", icon: BookOpen },
+  { id: "map", label: "地圖", icon: Map },
 ];
 
 export const FloatingDock: React.FC<FloatingDockProps> = ({

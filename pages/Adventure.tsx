@@ -629,10 +629,12 @@ const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
 interface AdventureProps {
   isInputBlocked?: boolean;
+  mapOpenRequest?: number;
 }
 
 export const Adventure: React.FC<AdventureProps> = ({
   isInputBlocked = false,
+  mapOpenRequest = 0,
 }) => {
   const dispatch = useDispatch();
   const character = useSelector((state: RootState) => state.character);
@@ -684,6 +686,12 @@ export const Adventure: React.FC<AdventureProps> = ({
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [mapTab, setMapTab] = useState<'area' | 'world'>('area');
   const [stageRenderMode, setStageRenderMode] = useState<AdventureStageRenderMode>('official');
+
+  useEffect(() => {
+    if (mapOpenRequest <= 0) return;
+    setMapTab('area');
+    setIsMapModalOpen(true);
+  }, [mapOpenRequest]);
 
   // Auto-Movement State
   const [autoMovePath, setAutoMovePath] = useState<Coordinate[]>([]);
@@ -2242,17 +2250,10 @@ export const Adventure: React.FC<AdventureProps> = ({
 
         {combatUiState.showCombatCommandSurface && (
             <div
-              className="pointer-events-none fixed bottom-28 left-1/2 z-[3100] -translate-x-1/2"
-              data-testid="adventure-command-surface"
+              className="pointer-events-none fixed bottom-24 right-4 z-[3100] flex flex-col items-end gap-2"
+              data-testid="adventure-action-wheel"
             >
-                <div className="pointer-events-auto">
-                    <GameSection
-                        eyebrow="BATTLE COMMAND"
-                        title="戰鬥快捷列"
-                        titleIcon={<Swords size={15} className="text-amber-500" />}
-                        className="min-w-[min(92vw,44rem)] shadow-[0_0_30px_rgba(0,0,0,0.55)] backdrop-blur"
-                        bodyClassName="grid grid-cols-2 gap-2 p-3 md:grid-cols-4"
-                    >
+                <div className="pointer-events-auto flex items-end gap-2 rounded-[22px] border border-stone-700/80 bg-stone-950/86 px-3 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl">
                         <Button
                             onClick={() => {
                                 if (targetedMonster && canEngageTarget) {
@@ -2261,26 +2262,24 @@ export const Adventure: React.FC<AdventureProps> = ({
                                 }
                             }}
                             disabled={!targetedMonster || !canEngageTarget}
-                            variant="selection"
+                            variant={targetedMonster && canEngageTarget ? "danger" : "stone"}
+                            size="icon"
                             className={clsx(
-                                "h-auto min-w-24 flex-col items-stretch justify-start whitespace-normal rounded-xl border px-3 py-2 text-left transition-colors",
+                                "group relative h-12 w-12 rounded-2xl border",
                                 targetedMonster && canEngageTarget
-                                  ? "border-red-700 bg-red-950/50 text-red-200 hover:bg-red-900/60"
+                                  ? "border-red-700 bg-red-950/60 text-red-200"
                                   : "cursor-not-allowed border-stone-800 bg-stone-950/60 text-stone-500"
                             )}
-                            data-testid="adventure-command-basic-attack"
+                            data-testid="adventure-action-basic-attack"
                         >
-                            <div className="flex items-center justify-between gap-3">
-                                <span className="text-sm font-bold">普攻</span>
-                                <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">F</span>
-                            </div>
-                            <div className="mt-1 text-[11px] text-stone-400">
+                            <Swords size={18} />
+                            <GameHintBubble eyebrow="BASIC ATTACK" className="bottom-full right-0 mb-2">
                                 {targetedMonster
                                   ? canEngageTarget
-                                    ? '直接在場景內出手'
+                                    ? '普攻：直接在場景內出手'
                                     : '目標尚未進入距離'
                                   : '未鎖定目標'}
-                            </div>
+                            </GameHintBubble>
                         </Button>
 
                         <Button
@@ -2291,42 +2290,39 @@ export const Adventure: React.FC<AdventureProps> = ({
                                 }
                             }}
                             disabled={!primaryActiveSkill || !targetedMonster || !canEngageTarget}
-                            variant="selection"
+                            variant={primaryActiveSkill && targetedMonster && canEngageTarget ? "amber" : "stone"}
+                            size="icon"
                             className={clsx(
-                                "h-auto min-w-36 flex-col items-stretch justify-start whitespace-normal rounded-xl border px-3 py-2 text-left transition-colors",
+                                "group relative h-12 w-12 rounded-2xl border",
                                 primaryActiveSkill && targetedMonster && canEngageTarget
-                                  ? "border-amber-700 bg-amber-950/45 text-amber-200 hover:bg-amber-900/60"
+                                  ? "border-amber-700 bg-amber-950/45 text-amber-200"
                                   : "cursor-not-allowed border-stone-800 bg-stone-950/60 text-stone-500"
                             )}
-                            data-testid="adventure-command-active-skill"
+                            data-testid="adventure-action-active-skill"
                         >
-                            <div className="flex items-center justify-between gap-3">
-                                <span className="truncate text-sm font-bold">
-                                    {primaryActiveSkill?.name ?? '主動術式'}
-                                </span>
-                                <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">Q</span>
-                            </div>
-                            <div className="mt-1 text-[11px] text-stone-400">
+                            <Zap size={18} />
+                            <GameHintBubble eyebrow="ACTIVE SKILL" className="bottom-full right-0 mb-2">
+                                {primaryActiveSkill?.name ?? '主動術式'}：{' '}
                                 {primaryActiveSkill ? '直接施放主修術式' : '尚未習得主動術式'}
-                            </div>
+                            </GameHintBubble>
                         </Button>
 
                         <Button
                             onClick={() => setIsAutoBattling((prev) => !prev)}
-                            variant="selection"
+                            variant={isAutoBattling ? "emerald" : "stone"}
+                            size="icon"
                             className={clsx(
-                                "h-auto min-w-24 flex-col items-stretch justify-start whitespace-normal rounded-xl border px-3 py-2 text-left transition-colors",
+                                "group relative h-12 w-12 rounded-2xl border",
                                 isAutoBattling
-                                  ? "border-emerald-700 bg-emerald-950/45 text-emerald-200 hover:bg-emerald-900/60"
-                                  : "border-stone-700 bg-stone-950/60 text-stone-300 hover:bg-stone-900/70"
+                                  ? "border-emerald-700 bg-emerald-950/45 text-emerald-200"
+                                  : "border-stone-700 bg-stone-950/60 text-stone-300"
                             )}
-                            data-testid="adventure-command-auto-battle"
+                            data-testid="adventure-action-auto-battle"
                         >
-                            <div className="flex items-center justify-between gap-3">
-                                <span className="text-sm font-bold">{isAutoBattling ? '掛機中' : '掛機'}</span>
-                                <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">R</span>
-                            </div>
-                            <div className="mt-1 text-[11px] text-stone-400">自動尋敵與追擊</div>
+                            <Target size={18} />
+                            <GameHintBubble eyebrow="AUTO BATTLE" className="bottom-full right-0 mb-2">
+                                {isAutoBattling ? '停止掛機' : '掛機：自動尋敵與追擊'}
+                            </GameHintBubble>
                         </Button>
 
                         <Button
@@ -2334,17 +2330,16 @@ export const Adventure: React.FC<AdventureProps> = ({
                                 setIsMapModalOpen(true);
                                 setMapTab('area');
                             }}
-                            variant="selection"
-                            className="h-auto min-w-24 flex-col items-stretch justify-start whitespace-normal rounded-xl border border-stone-700 bg-stone-950/60 px-3 py-2 text-left text-stone-300 transition-colors hover:bg-stone-900/70"
-                            data-testid="adventure-command-map"
+                            variant="stone"
+                            size="icon"
+                            className="group relative h-12 w-12 rounded-2xl border border-stone-700 bg-stone-950/60 text-stone-300"
+                            data-testid="adventure-action-map"
                         >
-                            <div className="flex items-center justify-between gap-3">
-                                <span className="text-sm font-bold">地圖</span>
-                                <span className="rounded border border-stone-700 bg-stone-900 px-1.5 py-0.5 text-[10px] font-mono text-stone-300">M</span>
-                            </div>
-                            <div className="mt-1 text-[11px] text-stone-400">展開地區 / 世界地圖</div>
+                            <MapIcon size={18} />
+                            <GameHintBubble eyebrow="MAP" className="bottom-full right-0 mb-2">
+                                展開地區 / 世界地圖
+                            </GameHintBubble>
                         </Button>
-                    </GameSection>
                 </div>
             </div>
         )}
