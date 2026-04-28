@@ -57,7 +57,12 @@ export const ITEM_LINE_REALM_COVERAGE: Record<
     [MajorRealm.Foundation]: ["cold_peak_ice_marrow", "beast_valley_bone_salt"],
     [MajorRealm.GoldenCore]: ["golden_lotus_pond_silt", "crimson_copper_spring"],
   },
-  currency_token: {},
+  currency_token: {
+    [MajorRealm.Mortal]: ["low_grade_spirit_stone_token"],
+    [MajorRealm.QiRefining]: ["sect_contribution_token", "scripture_voucher"],
+    [MajorRealm.Foundation]: ["trial_writ_token"],
+    [MajorRealm.GoldenCore]: ["inheritance_fragment"],
+  },
   talisman_array_artifact: {},
 };
 
@@ -120,6 +125,29 @@ export const REGION_SPECIALTY_ITEMS = [
     realm: MajorRealm.GoldenCore,
     regionLabel: "赤銅泉",
     mapHint: "金丹火脈旁的赤銅泉眼",
+  },
+] as const;
+
+export const TOKEN_ITEMS = [
+  {
+    itemId: "low_grade_spirit_stone_token",
+    exchangeLoop: "通用小額兌換與任務記帳",
+  },
+  {
+    itemId: "sect_contribution_token",
+    exchangeLoop: "宗門商店與門派支線兌換",
+  },
+  {
+    itemId: "scripture_voucher",
+    exchangeLoop: "藏經閣功法秘卷兌換",
+  },
+  {
+    itemId: "trial_writ_token",
+    exchangeLoop: "試煉、秘境與門派考核門票",
+  },
+  {
+    itemId: "inheritance_fragment",
+    exchangeLoop: "古修傳承、真傳秘卷與高階法寶兌換",
   },
 ] as const;
 

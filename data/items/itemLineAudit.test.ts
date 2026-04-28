@@ -8,6 +8,7 @@ import {
   ITEM_LINE_REALM_COVERAGE,
   QUEST_ITEM_IDS,
   REGION_SPECIALTY_ITEMS,
+  TOKEN_ITEMS,
 } from "./itemLineMetadata";
 
 describe("item line metadata", () => {
@@ -151,6 +152,27 @@ describe("item line metadata", () => {
       expect(item?.minRealm, `${specialty.itemId} min realm`).toBe(specialty.realm);
       expect(specialty.regionLabel.length, `${specialty.itemId} region`).toBeGreaterThan(0);
       expect(specialty.mapHint.length, `${specialty.itemId} map hint`).toBeGreaterThan(0);
+    });
+  });
+
+  it("anchors currency tokens to inventory items without workshop sinks", () => {
+    const workshopItemIds = new Set(
+      Object.values(WORKSHOP_RECIPES).flatMap((recipe) => [
+        ...recipe.ingredients.map((ingredient) => ingredient.itemId),
+        ...recipe.outputs.map((output) => output.itemId),
+      ])
+    );
+
+    expect(TOKEN_ITEMS.length).toBeGreaterThanOrEqual(5);
+
+    TOKEN_ITEMS.forEach((token) => {
+      const item = ITEMS[token.itemId];
+
+      expect(item, `${token.itemId} should exist`).toBeDefined();
+      expect(item?.category, `${token.itemId} category`).toBe(ItemCategory.Material);
+      expect(item?.maxStack, `${token.itemId} stack`).toBeGreaterThanOrEqual(999);
+      expect(token.exchangeLoop.length, `${token.itemId} exchange loop`).toBeGreaterThan(0);
+      expect(workshopItemIds.has(token.itemId), `${token.itemId} should not be a workshop item`).toBe(false);
     });
   });
 });

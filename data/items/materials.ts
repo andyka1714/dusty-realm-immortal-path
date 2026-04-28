@@ -158,6 +158,31 @@ export const MATERIAL_ITEMS: Record<string, Item> = {
     description: '赤銅泉眼沉積的火脈砂粒，可輔助金丹真火鍛造。', price: 680, quality: ItemQuality.High, maxStack: 999,
     minRealm: MajorRealm.GoldenCore,
   },
+  'low_grade_spirit_stone_token': {
+    id: 'low_grade_spirit_stone_token', name: '下品靈石票', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '小額靈石票據，可作通用任務記帳與低階兌換，不取代角色靈石餘額。', price: 1, quality: ItemQuality.Low, maxStack: 99999,
+    minRealm: MajorRealm.Mortal,
+  },
+  'sect_contribution_token': {
+    id: 'sect_contribution_token', name: '宗門貢獻牌', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '記錄宗門貢獻的令牌，未來可用於宗門商店與門派支線兌換。', price: 0, quality: ItemQuality.Medium, maxStack: 99999,
+    minRealm: MajorRealm.QiRefining,
+  },
+  'scripture_voucher': {
+    id: 'scripture_voucher', name: '藏經閣書券', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '藏經閣核發的兌換券，專供功法秘卷與心法殘頁兌換。', price: 0, quality: ItemQuality.Medium, maxStack: 99999,
+    minRealm: MajorRealm.QiRefining,
+  },
+  'trial_writ_token': {
+    id: 'trial_writ_token', name: '試煉符券', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '開啟門派試煉或秘境入口的符券，作為門票型代幣。', price: 0, quality: ItemQuality.Medium, maxStack: 99999,
+    minRealm: MajorRealm.Foundation,
+  },
+  'inheritance_fragment': {
+    id: 'inheritance_fragment', name: '傳承殘頁', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '古修傳承中剝落的殘頁，可累積兌換真傳秘卷或高階法寶線索。', price: 0, quality: ItemQuality.High, maxStack: 99999,
+    minRealm: MajorRealm.GoldenCore,
+  },
   'sword_path_starsteel': {
     id: 'sword_path_starsteel',
     name: '凌霄劍星鋼',
