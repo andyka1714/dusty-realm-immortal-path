@@ -17,7 +17,7 @@
 
 ## 4. 文件與驗證
 
-- [ ] 4.1 更新 Priority tracking，記錄本輪 scope、驗證結果與不需要 migration
+- [x] 4.1 更新 Priority tracking，記錄本輪 scope、驗證結果與不需要 migration
 - [x] 4.2 建立後續 v5 backlog 文件，避免把遠期內容任務塞進同一個 UI hardening change
-- [ ] 4.3 跑 targeted Playwright smoke、unit tests、typecheck、build、OpenSpec validate 與 `git diff --check`
-- [ ] 4.4 完成後更新 tasks 狀態、提交並 archive
+- [x] 4.3 跑 targeted Playwright smoke、unit tests、typecheck、build、OpenSpec validate 與 `git diff --check`
+- [x] 4.4 完成後更新 tasks 狀態、提交並 archive

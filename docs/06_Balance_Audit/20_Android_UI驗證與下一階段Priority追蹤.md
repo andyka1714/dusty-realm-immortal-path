@@ -477,3 +477,8 @@ Change id: `harden-shared-panel-layout-regression-v1`
 
 - `openspec validate harden-shared-panel-layout-regression-v1 --strict`
 - `npm run test:e2e -- tests/e2e/shared-ui-foundation.spec.ts --project=chromium`
+- `npm test`
+- `npm run typecheck`
+- `npm run build`
+- `openspec validate --all --strict`
+- `git diff --check`
