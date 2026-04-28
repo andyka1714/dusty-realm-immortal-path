@@ -51,7 +51,12 @@ export const ITEM_LINE_REALM_COVERAGE: Record<
     [MajorRealm.Foundation]: ["outer_disciple_seal", "ancient_jade_slip"],
     [MajorRealm.GoldenCore]: ["golden_core_trial_writ", "core_beast_trace"],
   },
-  region_specialty: {},
+  region_specialty: {
+    [MajorRealm.Mortal]: ["village_spirit_sprout", "north_hill_sword_sand"],
+    [MajorRealm.QiRefining]: ["west_forest_bloodvine", "east_lake_moondew"],
+    [MajorRealm.Foundation]: ["cold_peak_ice_marrow", "beast_valley_bone_salt"],
+    [MajorRealm.GoldenCore]: ["golden_lotus_pond_silt", "crimson_copper_spring"],
+  },
   currency_token: {},
   talisman_array_artifact: {},
 };
@@ -65,6 +70,57 @@ export const QUEST_ITEM_IDS = [
   "ancient_jade_slip",
   "golden_core_trial_writ",
   "core_beast_trace",
+] as const;
+
+export const REGION_SPECIALTY_ITEMS = [
+  {
+    itemId: "village_spirit_sprout",
+    realm: MajorRealm.Mortal,
+    regionLabel: "仙緣鎮",
+    mapHint: "仙緣鎮周邊藥圃與村外草坡",
+  },
+  {
+    itemId: "north_hill_sword_sand",
+    realm: MajorRealm.Mortal,
+    regionLabel: "北郊荒徑",
+    mapHint: "凌霄山腳前的碎石坡",
+  },
+  {
+    itemId: "west_forest_bloodvine",
+    realm: MajorRealm.QiRefining,
+    regionLabel: "西郊密林",
+    mapHint: "萬獸谷外圍血藤林",
+  },
+  {
+    itemId: "east_lake_moondew",
+    realm: MajorRealm.QiRefining,
+    regionLabel: "東郊靈湖",
+    mapHint: "靈湖草甸的月露水脈",
+  },
+  {
+    itemId: "cold_peak_ice_marrow",
+    realm: MajorRealm.Foundation,
+    regionLabel: "寒峰支脈",
+    mapHint: "築基寒脈礦穴",
+  },
+  {
+    itemId: "beast_valley_bone_salt",
+    realm: MajorRealm.Foundation,
+    regionLabel: "獸王谷",
+    mapHint: "萬獸山莊試煉谷骨鹽地",
+  },
+  {
+    itemId: "golden_lotus_pond_silt",
+    realm: MajorRealm.GoldenCore,
+    regionLabel: "金蓮池",
+    mapHint: "金丹靈池沉積的蓮泥",
+  },
+  {
+    itemId: "crimson_copper_spring",
+    realm: MajorRealm.GoldenCore,
+    regionLabel: "赤銅泉",
+    mapHint: "金丹火脈旁的赤銅泉眼",
+  },
 ] as const;
 
 export const FIRST_WAVE_ITEM_LINE_ITEM_IDS: Record<

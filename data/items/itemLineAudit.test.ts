@@ -7,6 +7,7 @@ import {
   FIRST_WAVE_ITEM_LINE_ITEM_IDS,
   ITEM_LINE_REALM_COVERAGE,
   QUEST_ITEM_IDS,
+  REGION_SPECIALTY_ITEMS,
 } from "./itemLineMetadata";
 
 describe("item line metadata", () => {
@@ -136,6 +137,20 @@ describe("item line metadata", () => {
       expect(shopItemIds.has(itemId), `${itemId} should not be sold in shops`).toBe(
         false
       );
+    });
+  });
+
+  it("anchors region specialties to real items with map source metadata", () => {
+    expect(REGION_SPECIALTY_ITEMS.length).toBeGreaterThanOrEqual(6);
+
+    REGION_SPECIALTY_ITEMS.forEach((specialty) => {
+      const item = ITEMS[specialty.itemId];
+
+      expect(item, `${specialty.itemId} should exist`).toBeDefined();
+      expect(item?.category, `${specialty.itemId} category`).toBe(ItemCategory.Material);
+      expect(item?.minRealm, `${specialty.itemId} min realm`).toBe(specialty.realm);
+      expect(specialty.regionLabel.length, `${specialty.itemId} region`).toBeGreaterThan(0);
+      expect(specialty.mapHint.length, `${specialty.itemId} map hint`).toBeGreaterThan(0);
     });
   });
 });

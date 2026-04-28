@@ -118,6 +118,46 @@ export const MATERIAL_ITEMS: Record<string, Item> = {
     description: '記錄金丹妖獸行蹤的靈痕拓片，可作追蹤與回報任務證物。', price: 0, quality: ItemQuality.High, maxStack: 9,
     minRealm: MajorRealm.GoldenCore,
   },
+  'village_spirit_sprout': {
+    id: 'village_spirit_sprout', name: '鎮郊靈芽', category: ItemCategory.Material, subType: MaterialType.Herb,
+    description: '仙緣鎮外藥圃偶爾冒出的靈芽，是凡人最早接觸的地區特產。', price: 5, quality: ItemQuality.Low, maxStack: 999,
+    minRealm: MajorRealm.Mortal,
+  },
+  'north_hill_sword_sand': {
+    id: 'north_hill_sword_sand', name: '北嶺劍砂', category: ItemCategory.Material, subType: MaterialType.Ore,
+    description: '凌霄山腳碎石坡常見的細砂，帶有微弱金性，適合入門劍器任務。', price: 7, quality: ItemQuality.Low, maxStack: 999,
+    minRealm: MajorRealm.Mortal,
+  },
+  'west_forest_bloodvine': {
+    id: 'west_forest_bloodvine', name: '西林血藤', category: ItemCategory.Material, subType: MaterialType.Herb,
+    description: '西郊密林吸收妖獸血氣生出的藤蔓，是體修任務常用特產。', price: 28, quality: ItemQuality.Low, maxStack: 999,
+    minRealm: MajorRealm.QiRefining,
+  },
+  'east_lake_moondew': {
+    id: 'east_lake_moondew', name: '靈湖月露', category: ItemCategory.Material, subType: MaterialType.Herb,
+    description: '東郊靈湖夜間凝成的月露，帶有清冷水性，適合法修任務與丹材。', price: 30, quality: ItemQuality.Low, maxStack: 999,
+    minRealm: MajorRealm.QiRefining,
+  },
+  'cold_peak_ice_marrow': {
+    id: 'cold_peak_ice_marrow', name: '寒峰冰髓', category: ItemCategory.Material, subType: MaterialType.Ore,
+    description: '築基寒脈中滲出的冰髓，可作穩脈任務與寒性器材。', price: 160, quality: ItemQuality.Medium, maxStack: 999,
+    minRealm: MajorRealm.Foundation,
+  },
+  'beast_valley_bone_salt': {
+    id: 'beast_valley_bone_salt', name: '獸谷骨鹽', category: ItemCategory.Material, subType: MaterialType.MonsterPart,
+    description: '獸王谷骨鹽地凝成的白色晶粒，可鎮壓血氣與煉體反噬。', price: 170, quality: ItemQuality.Medium, maxStack: 999,
+    minRealm: MajorRealm.Foundation,
+  },
+  'golden_lotus_pond_silt': {
+    id: 'golden_lotus_pond_silt', name: '金蓮池泥', category: ItemCategory.Material, subType: MaterialType.Herb,
+    description: '金蓮池底沉積的靈泥，能滋養金丹期蓮類丹材。', price: 600, quality: ItemQuality.High, maxStack: 999,
+    minRealm: MajorRealm.GoldenCore,
+  },
+  'crimson_copper_spring': {
+    id: 'crimson_copper_spring', name: '赤銅泉砂', category: ItemCategory.Material, subType: MaterialType.Ore,
+    description: '赤銅泉眼沉積的火脈砂粒，可輔助金丹真火鍛造。', price: 680, quality: ItemQuality.High, maxStack: 999,
+    minRealm: MajorRealm.GoldenCore,
+  },
   'sword_path_starsteel': {
     id: 'sword_path_starsteel',
     name: '凌霄劍星鋼',
