@@ -112,6 +112,35 @@ export interface V6EndgameRouteAuditReport {
   routes: V6EndgameRouteAuditEntry[];
 }
 
+const V7_ENDGAME_ROUTE_AUDIT_TARGETS = [
+  {
+    memoryTag: "sect:sword:endgame-loop-v4",
+    encounterId: "sword_emperor_v7_heaven_sunder_trial",
+    rewardItemId: "sword_path_starsteel",
+  },
+  {
+    memoryTag: "sect:beast:endgame-loop-v4",
+    encounterId: "beast_emperor_v7_worldblood_ordeal",
+    rewardItemId: "beast_path_bloodbone",
+  },
+  {
+    memoryTag: "sect:mystic:endgame-loop-v4",
+    encounterId: "mystic_emperor_v7_star_throne_edict",
+    rewardItemId: "mystic_path_starlotus",
+  },
+] as const;
+
+export interface V7EndgameRouteAuditEntry {
+  memoryTag: string;
+  hasRepeatableEncounter: boolean;
+  hasRouteCue: boolean;
+  hasRewardSource: boolean;
+}
+
+export interface V7EndgameRouteAuditReport {
+  routes: V7EndgameRouteAuditEntry[];
+}
+
 const pushIfMissing = ({
   issues,
   source,
@@ -379,6 +408,33 @@ export const auditV6EndgameRouteCoverage = (): V6EndgameRouteAuditReport => ({
       hasReincarnationSeal: Boolean(
         seal?.requiredWorldMemoryTags?.includes(target.memoryTag)
       ),
+    };
+  }),
+});
+
+export const auditV7EndgameRouteCoverage = (): V7EndgameRouteAuditReport => ({
+  routes: V7_ENDGAME_ROUTE_AUDIT_TARGETS.map((target) => {
+    const event = ENCOUNTER_EVENTS[target.encounterId];
+    const choiceCues =
+      event?.choices.flatMap((choice) => choice.cue?.tags?.map((tag) => tag.label) ?? []) ??
+      [];
+    const rewardItemIds =
+      event?.choices.flatMap((choice) =>
+        choice.reward.items?.map((item) => item.itemId) ?? []
+      ) ?? [];
+
+    return {
+      memoryTag: target.memoryTag,
+      hasRepeatableEncounter:
+        event?.selector?.repeatPolicy === "repeatable" &&
+        Boolean(event.selector.requiredWorldMemoryTags?.includes(target.memoryTag)),
+      hasRouteCue: Boolean(
+        event?.presentation?.memoryCue?.includes("v7") &&
+          event.presentation.memoryCue.includes(target.memoryTag)
+      ),
+      hasRewardSource:
+        rewardItemIds.includes(target.rewardItemId) &&
+        choiceCues.some((label) => label.includes("v7")),
     };
   }),
 });

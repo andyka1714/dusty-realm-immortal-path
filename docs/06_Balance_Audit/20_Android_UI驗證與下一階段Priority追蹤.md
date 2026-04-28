@@ -670,3 +670,28 @@ Change id: `add-reincarnation-v6-soul-seals`
 - `npx tsc --noEmit`
 - `npm run build`
 - `git diff --check`
+
+## 32. Endgame route density v7 收口記錄
+
+Change id: `expand-endgame-route-density-v7`
+
+本輪把三宗仙帝端從 v6 aftermath 再往 v7 內容密度推進：
+
+- 新增三宗 v7 repeatable aftermath：`sword_emperor_v7_heaven_sunder_trial`、`beast_emperor_v7_worldblood_ordeal`、`mystic_emperor_v7_star_throne_edict`。
+- v7 事件仍讀取既有 `sect:*:endgame-loop-v4` world memory，並維持 profession gate、repeatable policy、route label、chain label、memory cue、風險 / 收益 cue。
+- 三宗 v7 都回流既有 route material：凌霄劍星鋼、萬獸血骨殘材、縹緲星魂蓮。
+- `auditV7EndgameRouteCoverage` 新增 v7 route density 檢查，要求 repeatable encounter、route cue 與 reward source 同時存在。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；v7 只是 static encounter catalog 與 deterministic authoring audit。
+
+目前已跑驗證：
+
+- `openspec validate expand-endgame-route-density-v7 --strict`
+- `npm test -- data/encounters.test.ts data/contentAuthoringAudit.test.ts`
+- `npx tsc --noEmit`
+- `npm run build`
+- `git diff --check`

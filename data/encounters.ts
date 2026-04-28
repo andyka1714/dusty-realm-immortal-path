@@ -3167,6 +3167,120 @@ const RAW_ENCOUNTER_EVENTS: Record<string, EncounterEvent> = {
       },
     ],
   }),
+  sword_emperor_v7_heaven_sunder_trial: createSingleRealmEncounterEvent({
+    id: "sword_emperor_v7_heaven_sunder_trial",
+    title: "斬天試鋒劍劫",
+    description: "斬天 v6 迴響穩定後，凌霄劍宗可反覆以劍劫試鋒，換取更高壓的帝冕星鋼回流。",
+    realm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 2,
+      repeatPolicy: "repeatable",
+      eligibleProfessions: [ProfessionType.Sword],
+      requiredWorldMemoryTags: ["sect:sword:endgame-loop-v4"],
+    },
+    presentation: {
+      categoryLabel: "仙帝 v7 路線餘波",
+      routeLabel: "凌霄劍宗",
+      chainLabel: "斬天試鋒",
+      memoryCue: "v7 斬天試鋒讀取 sect:sword:endgame-loop-v4，提供高風險劍修 build 與星鋼回流。",
+      sectLabel: "凌霄劍宗 v7 試鋒",
+    },
+    choices: [
+      {
+        id: "challenge_v7_heaven_sunder_edge",
+        label: "以身試斬天鋒",
+        description: "用本命劍意硬接斬天劍劫，成功後可取回高純度星鋼。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "resource", label: "凌霄劍星鋼 x2" },
+            { kind: "risk", label: "v7 高風險劍修 build" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "sword_path_starsteel", count: 2 }],
+          experience: 7200000,
+          logMessage: "你以身試斬天鋒，劍劫碎成星鋼，凌霄劍宗 v7 餘波回到下一輪劍路。",
+        },
+      },
+    ],
+  }),
+  beast_emperor_v7_worldblood_ordeal: createSingleRealmEncounterEvent({
+    id: "beast_emperor_v7_worldblood_ordeal",
+    title: "帝血試骨獸潮",
+    description: "帝血 v6 骨脈沉穩後，萬獸山莊可反覆承受獸潮試骨，換取更濃的血骨殘材。",
+    realm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 2,
+      repeatPolicy: "repeatable",
+      eligibleProfessions: [ProfessionType.Body],
+      requiredWorldMemoryTags: ["sect:beast:endgame-loop-v4"],
+    },
+    presentation: {
+      categoryLabel: "仙帝 v7 路線餘波",
+      routeLabel: "萬獸山莊",
+      chainLabel: "帝血試骨",
+      memoryCue: "v7 帝血試骨讀取 sect:beast:endgame-loop-v4，提供高壓體修 build 與血骨回流。",
+      sectLabel: "萬獸山莊 v7 試骨",
+    },
+    choices: [
+      {
+        id: "endure_v7_worldblood_ordeal",
+        label: "以骨承帝血潮",
+        description: "用肉身承接帝血獸潮，從反壓中取出可再鍛大道真身的血骨。",
+        cue: {
+          tone: "risky",
+          tags: [
+            { kind: "resource", label: "萬獸血骨殘材 x2" },
+            { kind: "risk", label: "v7 高壓體修 build" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "beast_path_bloodbone", count: 2 }],
+          experience: 7100000,
+          logMessage: "你以骨承帝血潮，試骨獸潮化成血骨殘材，萬獸山莊 v7 餘波回到體修路線。",
+        },
+      },
+    ],
+  }),
+  mystic_emperor_v7_star_throne_edict: createSingleRealmEncounterEvent({
+    id: "mystic_emperor_v7_star_throne_edict",
+    title: "星詔試命蓮詔",
+    description: "星詔 v6 蓮命穩定後，縹緲仙宮可反覆推演星詔試命，換取更清晰的下一世法修命印。",
+    realm: MajorRealm.ImmortalEmperor,
+    selector: {
+      weight: 2,
+      repeatPolicy: "repeatable",
+      eligibleProfessions: [ProfessionType.Mage],
+      requiredWorldMemoryTags: ["sect:mystic:endgame-loop-v4"],
+    },
+    presentation: {
+      categoryLabel: "仙帝 v7 路線餘波",
+      routeLabel: "縹緲仙宮",
+      chainLabel: "星詔試命",
+      memoryCue: "v7 星詔試命讀取 sect:mystic:endgame-loop-v4，提供法修 soul cue 與星蓮回流。",
+      sectLabel: "縹緲仙宮 v7 試命",
+    },
+    choices: [
+      {
+        id: "interpret_v7_star_throne_edict",
+        label: "推演星詔試命",
+        description: "把星詔命盤推演到下一世，從命盤裂隙中凝回星魂蓮。",
+        cue: {
+          tone: "steady",
+          tags: [
+            { kind: "resource", label: "縹緲星魂蓮 x2" },
+            { kind: "benefit", label: "v7 法修 soul cue" },
+          ],
+        },
+        reward: {
+          items: [{ itemId: "mystic_path_starlotus", count: 2 }],
+          experience: 7300000,
+          logMessage: "你推演星詔試命，星蓮命盤照回下一世法修魂印，縹緲仙宮 v7 餘波成形。",
+        },
+      },
+    ],
+  }),
 };
 
 export const ENCOUNTER_EVENTS: Record<string, EncounterEvent> =

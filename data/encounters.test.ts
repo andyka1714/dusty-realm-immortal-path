@@ -298,6 +298,39 @@ const V6_ENDGAME_AFTERMATH_EVENT_CASES = [
   },
 ] as const;
 
+const V7_ENDGAME_AFTERMATH_EVENT_CASES = [
+  {
+    eventId: "sword_emperor_v7_heaven_sunder_trial",
+    profession: ProfessionType.Sword,
+    endgameMemoryTag: "sect:sword:endgame-loop-v4",
+    routeLabel: "凌霄劍宗",
+    categoryLabel: "仙帝 v7 路線餘波",
+    chainLabel: "斬天試鋒",
+    sourceCueLabel: "v7 高風險劍修 build",
+    rewardItemId: "sword_path_starsteel",
+  },
+  {
+    eventId: "beast_emperor_v7_worldblood_ordeal",
+    profession: ProfessionType.Body,
+    endgameMemoryTag: "sect:beast:endgame-loop-v4",
+    routeLabel: "萬獸山莊",
+    categoryLabel: "仙帝 v7 路線餘波",
+    chainLabel: "帝血試骨",
+    sourceCueLabel: "v7 高壓體修 build",
+    rewardItemId: "beast_path_bloodbone",
+  },
+  {
+    eventId: "mystic_emperor_v7_star_throne_edict",
+    profession: ProfessionType.Mage,
+    endgameMemoryTag: "sect:mystic:endgame-loop-v4",
+    routeLabel: "縹緲仙宮",
+    categoryLabel: "仙帝 v7 路線餘波",
+    chainLabel: "星詔試命",
+    sourceCueLabel: "v7 法修 soul cue",
+    rewardItemId: "mystic_path_starlotus",
+  },
+] as const;
+
 const buildRouteMemoryContext = (
   profession: ProfessionType,
   realm: MajorRealm
@@ -958,6 +991,46 @@ describe("encounter selector", () => {
       });
       expect(event.presentation?.categoryLabel).toContain(testCase.categoryLabel);
       expect(event.presentation?.memoryCue).toContain("v6");
+
+      const rewardItemIds = event.choices.flatMap((choice) =>
+        choice.reward.items?.map((item) => item.itemId) ?? []
+      );
+      const cueLabels = event.choices.flatMap((choice) =>
+        choice.cue?.tags?.map((tag) => tag.label) ?? []
+      );
+
+      expect(rewardItemIds).toContain(testCase.rewardItemId);
+      expect(cueLabels).toContain(testCase.sourceCueLabel);
+      expect(
+        getAvailableEncounterEvents({
+          majorRealm: MajorRealm.ImmortalEmperor,
+          profession: testCase.profession,
+          completedQuestIds: [],
+          resolvedEventIds: [],
+          worldMemoryTags: [testCase.endgameMemoryTag],
+        }).some((available) => available.id === event.id)
+      ).toBe(true);
+    });
+  });
+
+  it("adds v7 repeatable endgame aftermath unlocked by matching endgame memory", () => {
+    V7_ENDGAME_AFTERMATH_EVENT_CASES.forEach((testCase) => {
+      const event = ENCOUNTER_EVENTS[testCase.eventId];
+
+      expect(event, `${testCase.eventId} should exist`).toBeDefined();
+      expect(event.minRealm).toBe(MajorRealm.ImmortalEmperor);
+      expect(event.maxRealm).toBe(MajorRealm.ImmortalEmperor);
+      expect(event.selector?.repeatPolicy).toBe("repeatable");
+      expect(event.selector?.eligibleProfessions).toEqual([testCase.profession]);
+      expect(event.selector?.requiredWorldMemoryTags).toEqual([
+        testCase.endgameMemoryTag,
+      ]);
+      expect(event.presentation).toMatchObject({
+        routeLabel: testCase.routeLabel,
+        chainLabel: testCase.chainLabel,
+      });
+      expect(event.presentation?.categoryLabel).toContain(testCase.categoryLabel);
+      expect(event.presentation?.memoryCue).toContain("v7");
 
       const rewardItemIds = event.choices.flatMap((choice) =>
         choice.reward.items?.map((item) => item.itemId) ?? []
