@@ -512,3 +512,21 @@ Change id: `expand-endgame-route-v5`
 - `npm run build`
 - `openspec validate --all --strict`
 - `git diff --check`
+
+## 26. 後續七線與 HUD / 任務追蹤規劃入口
+
+本輪未開新 OpenSpec change，先把後續規劃拆成兩份正式文件，避免下一輪又從聊天記憶重建 scope：
+
+- `docs/superpowers/specs/2026-04-28-seven-track-next-scope-design.md`
+  - 記錄七條後續主線：核心屬性實裝、正式 MP / 靈力 runtime、突破災劫、NPC 好感與商店互動、endgame route density v6、Workshop endgame specialization v6、endgame map local density v6。
+  - 每條都列出建議 change id、範圍、驗證重點與是否需要 persistence。
+- `docs/superpowers/specs/2026-04-28-adventure-hud-quest-tracker-design.md`
+  - 記錄主畫面 HUD 調整方向：左上角色狀態卡、戰力公式、左側任務追蹤、右上小地圖、底部功能 dock、戰鬥快捷列弱化、怪物圖鑑資訊擴充。
+  - 建議拆成 `update-adventure-hud-layout`、`add-quest-tracker-hud`、`add-combat-power-and-enemy-intel`、`add-spirit-power-runtime` 四條 OpenSpec change。
+
+建議下一步：
+
+1. 先開 `add-combat-power-and-enemy-intel`，因為角色 HUD、怪物目標卡與圖鑑都需要同一套戰力與 enemy intel derived data。
+2. 再開 `update-adventure-hud-layout`，調整左上角色狀態、右上小地圖與底部 dock。
+3. 再開 `add-quest-tracker-hud`，把任務追蹤欄接上左側資訊架構。
+4. 最後開 `add-spirit-power-runtime`，補正式 MP runtime、技能消耗與補靈丹閉環。
