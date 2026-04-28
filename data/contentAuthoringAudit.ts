@@ -82,18 +82,21 @@ const V6_ENDGAME_ROUTE_AUDIT_TARGETS = [
     encounterId: "sword_emperor_v6_heaven_sunder_echo",
     mapLocalQuestId: "local_guixu_v6_afterpath_broker",
     specializationId: "smithing_v6_heaven_sunder_edge",
+    sealId: "seal_sword_endgame_v6",
   },
   {
     memoryTag: "sect:beast:endgame-loop-v4",
     encounterId: "beast_emperor_v6_worldblood_echo",
     mapLocalQuestId: "local_guixu_v6_reincarnation_clue",
     specializationId: "smithing_v6_worldblood_body",
+    sealId: "seal_body_endgame_v6",
   },
   {
     memoryTag: "sect:mystic:endgame-loop-v4",
     encounterId: "mystic_emperor_v6_star_throne_echo",
     mapLocalQuestId: "local_guixu_v6_reincarnation_clue",
     specializationId: "alchemy_v6_star_throne_lotus",
+    sealId: "seal_mage_endgame_v6",
   },
 ] as const;
 
@@ -102,6 +105,7 @@ export interface V6EndgameRouteAuditEntry {
   hasRepeatableEncounter: boolean;
   hasMapLocalClue: boolean;
   hasWorkshopSpecialization: boolean;
+  hasReincarnationSeal: boolean;
 }
 
 export interface V6EndgameRouteAuditReport {
@@ -350,6 +354,9 @@ export const auditV6EndgameRouteCoverage = (): V6EndgameRouteAuditReport => ({
     const event = ENCOUNTER_EVENTS[target.encounterId];
     const quest = QUESTS[target.mapLocalQuestId];
     const specialization = WORKSHOP_SPECIALIZATIONS[target.specializationId];
+    const seal = DEFAULT_REINCARNATION_SOUL_SEALS.find(
+      (candidate) => candidate.id === target.sealId
+    );
     const questText = [
       quest?.description,
       ...(quest?.dialogue.start ?? []),
@@ -369,6 +376,9 @@ export const auditV6EndgameRouteCoverage = (): V6EndgameRouteAuditReport => ({
         Boolean(event.selector.requiredWorldMemoryTags?.includes(target.memoryTag)),
       hasMapLocalClue: Boolean(questText.includes(target.memoryTag)),
       hasWorkshopSpecialization: Boolean(specializationText.includes(target.memoryTag)),
+      hasReincarnationSeal: Boolean(
+        seal?.requiredWorldMemoryTags?.includes(target.memoryTag)
+      ),
     };
   }),
 });

@@ -370,6 +370,51 @@ describe("ReincarnationFlow", () => {
     expect(markup).toContain("帝冕、劍系武器與劍修手札可帶入");
   });
 
+  it("shows v6 endgame soul seal source and build identity on an available card", () => {
+    const lifetimeStats = createLifetimeStats(MajorRealm.ImmortalEmperor);
+
+    const markup = renderToStaticMarkup(
+      <ReincarnationFlow
+        flowStep="hall"
+        summary={{
+          cause: "voluntary",
+          ageYears: 3200,
+          highestRealm: MajorRealm.ImmortalEmperor,
+          realmMerit: 100000000,
+          ageMerit: 1600,
+          totalMeritGained: 100001600,
+          eligibleHeirlooms: [],
+        }}
+        totalMerit={100001600}
+        lifetimeStats={lifetimeStats}
+        worldMemoryTags={["sect:sword:endgame-loop-v4"]}
+        unlockedPerks={getAvailableReincarnationPerks({
+          lifetimeStats,
+          worldMemoryTags: ["sect:sword:endgame-loop-v4"],
+        })}
+        config={{
+          plannerVersion: 2,
+          selectedBuildIdentity: "sword",
+          selectedPerkIds: [],
+          selectedHeirloomIds: [],
+        }}
+        onEnterHall={() => undefined}
+        onSelectBuildIdentity={() => undefined}
+        onSelectSoulSeal={() => undefined}
+        onTogglePerk={() => undefined}
+        onToggleHeirloom={() => undefined}
+        onSelectSpiritRoot={() => undefined}
+        onConfirm={() => undefined}
+      />
+    );
+
+    expect(markup).toContain('data-testid="rebirth-seal-seal_sword_endgame_v6"');
+    expect(markup).toContain("斬天 v6 劍印");
+    expect(markup).toContain("route memory：sect:sword:endgame-loop-v4");
+    expect(markup).toContain("下一世將帶著 v6 斬天迴響開局");
+    expect(markup).toContain("預期收益：根骨 +6、悟性 +4、福緣 +2");
+  });
+
   it("shows the missing v4 endgame reason on a locked v5 soul seal card", () => {
     const lifetimeStats = createLifetimeStats(MajorRealm.ImmortalEmperor);
 

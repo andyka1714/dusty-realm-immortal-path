@@ -142,6 +142,67 @@ describe("reincarnation utils", () => {
     ).not.toContain("seal_sword_edge");
   });
 
+  it("unlocks v6 endgame soul seals from the existing sect endgame memories", () => {
+    const v6Seals = [
+      {
+        id: "seal_sword_endgame_v6",
+        lane: "sword",
+        tag: "sect:sword:endgame-loop-v4",
+      },
+      {
+        id: "seal_body_endgame_v6",
+        lane: "body",
+        tag: "sect:beast:endgame-loop-v4",
+      },
+      {
+        id: "seal_mage_endgame_v6",
+        lane: "mage",
+        tag: "sect:mystic:endgame-loop-v4",
+      },
+    ] as const;
+
+    v6Seals.forEach(({ id, lane, tag }) => {
+      const seal = DEFAULT_REINCARNATION_SOUL_SEALS.find(
+        (entry) => entry.id === id
+      );
+
+      expect(seal).toMatchObject({
+        id,
+        lane,
+        unlockRequirement: { minHighestRealm: MajorRealm.ImmortalEmperor },
+        requiredWorldMemoryTags: [tag],
+      });
+      expect(seal?.identityCue).toContain("v6");
+      expect(seal?.heirloomHint).toContain("v6");
+      expect(
+        getAvailableReincarnationSoulSeals(
+          createPlannerContext({
+            lifetimeStats: {
+              highestRealmEver: MajorRealm.ImmortalEmperor,
+              highestAgeYears: 3200,
+              totalDeaths: 8,
+              totalReincarnations: 4,
+            },
+            worldMemoryTags: [tag],
+          })
+        ).map((availableSeal) => availableSeal.id)
+      ).toContain(id);
+      expect(
+        getAvailableReincarnationSoulSeals(
+          createPlannerContext({
+            lifetimeStats: {
+              highestRealmEver: MajorRealm.Immortal,
+              highestAgeYears: 2200,
+              totalDeaths: 7,
+              totalReincarnations: 3,
+            },
+            worldMemoryTags: [tag],
+          })
+        ).map((availableSeal) => availableSeal.id)
+      ).not.toContain(id);
+    });
+  });
+
   it("unlocks v3 route-memory soul seals only from chapter 03 memories at Immortal realm", () => {
     const v3Seals = [
       {

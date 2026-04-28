@@ -645,3 +645,28 @@ Change id: `update-mobile-quest-tracker-collapse`
 - `npm run test:e2e -- tests/e2e/shared-ui-foundation.spec.ts --project=chromium -g "mobile adventure quest tracker"`
 - `npm run build`
 - `git diff --check`
+
+## 31. Reincarnation v6 魂印收口記錄
+
+Change id: `add-reincarnation-v6-soul-seals`
+
+本輪把 v6 route / Workshop / map clue 正式接回輪迴 build loop：
+
+- 新增三宗 v6 本命魂印：`seal_sword_endgame_v6`、`seal_body_endgame_v6`、`seal_mage_endgame_v6`。
+- 三個 v6 魂印都讀取既有 `sect:*:endgame-loop-v4` world memory，不新增新的 memory tag 或 resolved content shape。
+- Reincarnation UI 透過既有 soul seal card 自動顯示 v6 名稱、route memory source、identity cue、heirloom hint 與預期收益。
+- `auditV6EndgameRouteCoverage` 擴充為檢查 v6 encounter、map clue、Workshop specialization 與 Reincarnation seal 是否同時存在。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；v6 魂印沿用既有 `ReincarnationSoulSeal` catalog shape 與 `soul.worldMemoryTags` 解鎖機制。
+
+目前已跑驗證：
+
+- `openspec validate add-reincarnation-v6-soul-seals --strict`
+- `npm test -- utils/reincarnation.test.ts components/game/ReincarnationFlow.test.tsx data/contentAuthoringAudit.test.ts`
+- `npx tsc --noEmit`
+- `npm run build`
+- `git diff --check`

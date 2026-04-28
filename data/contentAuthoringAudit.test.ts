@@ -50,7 +50,7 @@ describe("content authoring audit", () => {
     });
   });
 
-  it("keeps v6 endgame route catalogs connected across encounter, map, and specialization leaves", () => {
+  it("keeps v6 endgame route catalogs connected across encounter, map, specialization leaves, and reincarnation", () => {
     const report = auditV6EndgameRouteCoverage();
 
     expect(report.routes.map((entry) => entry.memoryTag)).toEqual([
@@ -62,6 +62,7 @@ describe("content authoring audit", () => {
       expect(entry.hasRepeatableEncounter, entry.memoryTag).toBe(true);
       expect(entry.hasMapLocalClue, entry.memoryTag).toBe(true);
       expect(entry.hasWorkshopSpecialization, entry.memoryTag).toBe(true);
+      expect(entry.hasReincarnationSeal, entry.memoryTag).toBe(true);
     });
   });
 });
