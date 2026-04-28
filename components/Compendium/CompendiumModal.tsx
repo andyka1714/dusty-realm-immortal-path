@@ -107,6 +107,60 @@ const getProfessionRouteLabel = (profession?: ProfessionType): string => {
   }
 };
 
+const realmCompendiumDetails: Record<
+  MajorRealm,
+  { role: string; description: string }
+> = {
+  [MajorRealm.Mortal]: {
+    role: "入道準備",
+    description: "凡軀未脫，仍以氣血、武藝與基礎資源立足。",
+  },
+  [MajorRealm.QiRefining]: {
+    role: "引氣入體",
+    description: "初識靈氣運轉，能修習入門功法並使用基礎法器。",
+  },
+  [MajorRealm.Foundation]: {
+    role: "道基初立",
+    description: "築成修行根基，職業路線開始分化，裝備與功法逐漸成型。",
+  },
+  [MajorRealm.GoldenCore]: {
+    role: "金丹凝華",
+    description: "靈力凝成金丹，爆發、護體與持續戰鬥能力明顯提升。",
+  },
+  [MajorRealm.NascentSoul]: {
+    role: "元神出竅",
+    description: "元嬰護命，能承受更高風險並接觸宗門深層傳承。",
+  },
+  [MajorRealm.SpiritSevering]: {
+    role: "神意化形",
+    description: "神識與術法大幅增長，開始影響大型戰場與秘境路線。",
+  },
+  [MajorRealm.VoidRefining]: {
+    role: "煉虛合道",
+    description: "觸及空間與虛界規則，材料、掉落與奇遇來源更稀有。",
+  },
+  [MajorRealm.Fusion]: {
+    role: "天地合體",
+    description: "肉身、元神與大道相合，職業裝備逐步轉向高階套系。",
+  },
+  [MajorRealm.Mahayana]: {
+    role: "大乘圓滿",
+    description: "凡修極境，開始收束古修傳承與渡劫前置資源。",
+  },
+  [MajorRealm.Tribulation]: {
+    role: "破劫登仙",
+    description: "直面天劫考驗，需要完整功法、裝備與突破資源支撐。",
+  },
+  [MajorRealm.Immortal]: {
+    role: "仙道初成",
+    description: "脫離凡俗界限，進入仙域、帝路與高階法寶循環。",
+  },
+  [MajorRealm.ImmortalEmperor]: {
+    role: "帝路終局",
+    description: "統御大道本源，對應終盤首領、仙帝傳承與專屬材料閉環。",
+  },
+};
+
 const getItemSubtypeLabel = (item: Item): string => {
   if ("subType" in item) {
     switch (item.subType) {
@@ -496,7 +550,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
   embedded = false,
   initialTab = "realm",
   initialEquipmentProfession = ProfessionType.None,
-  initialSkillProfession = ProfessionType.Sword,
+  initialSkillProfession = ProfessionType.None,
   initialSectId = "sword",
   initialMapId,
 }) => {
@@ -566,6 +620,17 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
     [activeEquipmentItems]
   );
   const activeEquipmentCount = activeEquipmentItems.length;
+  const mapsByRealm = useMemo(
+    () =>
+      Object.values(MajorRealm)
+        .filter((realm): realm is MajorRealm => typeof realm === "number")
+        .map((realm) => ({
+          realm,
+          maps: MAPS.filter((map) => map.minRealm === realm),
+        }))
+        .filter((group) => group.maps.length > 0),
+    []
+  );
   const visibleItems = useMemo(
     () =>
       activeItemCategory === "all"
@@ -873,7 +938,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
           <nav className={clsx("flex gap-1 p-2", embedded ? "pt-4 md:pt-5" : "", "md:flex-col")}>
             {[
               { id: "realm", label: "境界總覽", icon: Database },
-              { id: "map", label: "山川妖獸", icon: MapIcon },
+              { id: "map", label: "九域輿圖", icon: MapIcon },
               { id: "item", label: "萬物圖鑑", icon: Book },
               { id: "equipment", label: "裝備法寶", icon: Sword },
               { id: "skill", label: "功法神通", icon: Scroll },
@@ -934,21 +999,32 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                   修仙境界一覽
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {Object.keys(MajorRealm)
-                    .filter((k) => isNaN(Number(k)))
-                    .map((key) => {
-                      const realmId =
-                        MajorRealm[key as keyof typeof MajorRealm];
+                  {Object.values(MajorRealm)
+                    .filter((realm): realm is MajorRealm => typeof realm === "number")
+                    .map((realmId) => {
+                      const detail = realmCompendiumDetails[realmId];
                       return (
                         <div
-                          key={key}
-                          className="p-4 bg-stone-800 rounded border border-stone-700 hover:border-amber-500/50 transition-colors"
+                          key={realmId}
+                          className="bg-stone-800 p-3 rounded border border-stone-700 group hover:border-amber-500/30 transition-colors"
+                          data-testid={`compendium-realm-card-${realmId}`}
                         >
-                          <h3 className="text-lg font-bold text-amber-400">
-                            {MajorRealmCN[realmId]}
-                          </h3>
-                          <p className="text-sm text-stone-500 mt-1">
-                            境界 ID: {realmId}
+                          <div className="flex justify-between gap-3">
+                            <h3 className="font-bold text-stone-200">
+                              {MajorRealmCN[realmId]}
+                            </h3>
+                            <span className="h-fit shrink-0 rounded border border-amber-900/40 bg-amber-950/30 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200">
+                              境界
+                            </span>
+                          </div>
+                          <div className="mb-1 mt-1 flex flex-wrap items-center gap-1 text-xs text-stone-500">
+                            <span className="rounded border border-amber-900/30 bg-amber-950/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200">
+                              修行定位
+                            </span>
+                            <span>{detail.role}</span>
+                          </div>
+                          <p className="text-xs text-stone-400 mt-1 line-clamp-3 min-h-[3.75em]">
+                            {detail.description}
                           </p>
                         </div>
                       );
@@ -968,27 +1044,37 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                   className="max-h-64 overflow-y-auto border-b border-stone-800 pb-4 lg:max-h-none lg:w-1/3 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-4"
                   data-testid="compendium-map-list"
                 >
-                  <h3 className="sticky top-0 mb-4 bg-stone-950/95 py-2 text-lg font-bold text-stone-300">
-                    地圖列表
+                  <h3 className="sticky top-0 z-10 mb-4 bg-stone-950/95 py-2 text-lg font-bold text-stone-300">
+                    地圖索引
                   </h3>
-                  {[...MAPS].sort((a, b) => a.minRealm - b.minRealm).map((map) => (
-                    <div
-                      key={map.id}
-                      onClick={() =>
-                        setSelectedId(selectedId === map.id ? null : map.id)
-                      }
-                      className={clsx(
-                        "p-3 mb-2 rounded cursor-pointer transition-colors border",
-                        selectedId === map.id
-                          ? "bg-amber-900/20 border-amber-600/50 text-amber-400"
-                          : "bg-stone-800 border-stone-700 text-stone-400 hover:bg-stone-700"
-                      )}
-                    >
-                      <div className="font-bold">{map.name}</div>
-                      <div className="text-xs opacity-60">
-                        建議境界: {MajorRealmCN[map.minRealm]}
-                      </div>
-                    </div>
+                  {mapsByRealm.map((group) => (
+                    <section key={group.realm} className="mb-4 space-y-2">
+                      <h4
+                        className="border-l-4 border-amber-700 bg-stone-900/70 py-1.5 pl-2 text-sm font-bold text-amber-300"
+                        data-testid={`compendium-map-realm-heading-${group.realm}`}
+                      >
+                        {MajorRealmCN[group.realm]}地圖
+                      </h4>
+                      {group.maps.map((map) => (
+                        <div
+                          key={map.id}
+                          onClick={() =>
+                            setSelectedId(selectedId === map.id ? null : map.id)
+                          }
+                          className={clsx(
+                            "cursor-pointer rounded border p-3 transition-colors",
+                            selectedId === map.id
+                              ? "border-amber-600/50 bg-amber-900/20 text-amber-400"
+                              : "border-stone-700 bg-stone-800 text-stone-400 hover:bg-stone-700"
+                          )}
+                        >
+                          <div className="font-bold">{map.name}</div>
+                          <div className="mt-1 text-xs opacity-60">
+                            {map.npcs?.length ?? 0} 位 NPC / {map.enemies.length} 種妖獸
+                          </div>
+                        </div>
+                      ))}
+                    </section>
                   ))}
                 </div>
                 {/* Detail */}
@@ -1007,12 +1093,24 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
 
                         return (
                           <>
-                            <h2 className="text-2xl font-bold text-amber-500 mb-2">
-                              {map.name}
-                            </h2>
-                            <p className="text-stone-400 mb-6">
-                              {map.description}
-                            </p>
+                            <div className="mb-6 rounded-lg border border-amber-900/40 bg-amber-950/20 p-4">
+                              <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.24em] text-stone-500">
+                                地圖資訊
+                              </div>
+                              <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                                <div>
+                                  <h2 className="text-2xl font-bold text-amber-500">
+                                    {map.name}
+                                  </h2>
+                                  <p className="mt-1 text-sm text-stone-400">
+                                    {map.description}
+                                  </p>
+                                </div>
+                                <span className="h-fit shrink-0 rounded border border-amber-900/40 bg-amber-950/20 px-3 py-1 text-xs text-amber-200">
+                                  {MajorRealmCN[map.minRealm]}地圖
+                                </span>
+                              </div>
+                            </div>
 
                             {/* NPC Section (For Villages/Sects) */}
                             {hasNPCs && (

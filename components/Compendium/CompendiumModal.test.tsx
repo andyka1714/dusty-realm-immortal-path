@@ -14,6 +14,18 @@ const renderCompendium = (props: Record<string, unknown>) =>
   );
 
 describe("CompendiumModal taxonomy layout", () => {
+  it("renders realm cards with descriptions instead of internal ids", () => {
+    const markup = renderCompendium({ initialTab: "realm" });
+
+    expect(markup).toContain('data-testid="compendium-realm-card-0"');
+    expect(markup).toContain("凡人");
+    expect(markup).toContain("凡軀未脫，仍以氣血、武藝與基礎資源立足。");
+    expect(markup).toContain("修行定位");
+    expect(markup).toContain("入道準備");
+    expect(markup).toContain("bg-stone-800 p-3 rounded border border-stone-700");
+    expect(markup).not.toContain("境界 ID:");
+  });
+
   it("renders item realm headings without sticky overlap classes", () => {
     const markup = renderCompendium({ initialTab: "item" });
 
@@ -135,6 +147,15 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).not.toContain("裂地重拳");
   });
 
+  it("defaults the skill compendium to common skills like equipment", () => {
+    const markup = renderCompendium({ initialTab: "skill" });
+
+    expect(markup).toContain("通用功法");
+    expect(markup).toContain('data-testid="compendium-skill-card-common_q_passive"');
+    expect(markup).not.toContain("凌霄劍宗功法");
+    expect(markup).not.toContain('data-testid="compendium-skill-card-s_q_active"');
+  });
+
   it("renders common skills with equipment-like card structure", () => {
     const markup = renderCompendium({
       initialTab: "skill",
@@ -192,6 +213,13 @@ describe("CompendiumModal taxonomy layout", () => {
   it("shows enemy combat intel beyond realm and drops", () => {
     const markup = renderCompendium({ initialTab: "map", initialMapId: "1" });
 
+    expect(markup).toContain("九域輿圖");
+    expect(markup).not.toContain("山川妖獸");
+    expect(markup).toContain("地圖索引");
+    expect(markup).toContain('data-testid="compendium-map-realm-heading-0"');
+    expect(markup).toContain("凡人地圖");
+    expect(markup).toContain("地圖資訊");
+    expect(markup).toContain("可能掉落");
     expect(markup).toContain('data-testid="compendium-enemy-card-m1_c1"');
     expect(markup).toContain('data-testid="compendium-enemy-power-m1_c1"');
     expect(markup).toContain("戰力");
