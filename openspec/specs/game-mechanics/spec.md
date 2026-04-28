@@ -726,12 +726,13 @@
 - **AND** 第一版不得新增 persisted 傷勢或心魔 state
 
 ### Requirement: NPC 態度與商店折扣必須可由既有資料推導
-系統必須 (MUST) 從魅力、宗門身份、完成任務或 world memory 推導 deterministic NPC 態度與商店折扣。
+系統必須 (MUST) 從魅力、宗門身份、完成任務、world memory 與 persisted NPC / sect affinity 合併推導 NPC 態度與商店折扣。
 
-#### Scenario: 商店價格套用 deterministic 折扣
+#### Scenario: 商店價格套用合併後的折扣
 - **WHEN** 玩家與商店 NPC 互動
 - **THEN** 系統必須能推導折扣比例與來源文字
-- **AND** 不得新增每個 NPC 的 persisted affinity state
+- **AND** deterministic 魅力 / 職業 / 宗門功績來源不得被 persisted affinity 取代
+- **AND** persisted NPC / sect affinity 必須以增量方式影響態度與折扣
 
 ### Requirement: 終盤 route 必須有 v6 repeatable density
 系統必須 (MUST) 讓已完成 `sect:*:endgame-loop-v4` 的三宗路線各自擁有 v6 repeatable aftermath。
@@ -772,4 +773,12 @@
 - **WHEN** 玩家在高境界突破失敗且風險判定觸發
 - **THEN** 系統必須記錄對應 consequence 類型、嚴重度與剩餘持續時間或恢復條件
 - **AND** 後續 preview 必須能讀取該 consequence 並反映風險或準備提示
+
+### Requirement: NPC / sect 好感必須可持續累積
+系統必須 (MUST) 記錄玩家與 NPC 或 sect 的長期 affinity，並讓任務、對話、商店或 route memory 能調整該值。
+
+#### Scenario: 玩家行為調整 affinity
+- **WHEN** 玩家完成會影響 NPC 或 sect 的任務、對話或商店互動
+- **THEN** 系統必須調整對應 affinity state
+- **AND** deterministic 魅力 / 職業 baseline 必須保留為額外來源，不得被 persisted affinity 完全取代
 
