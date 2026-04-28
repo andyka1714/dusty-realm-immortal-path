@@ -44,6 +44,16 @@ export const VILLAGE_NPCS: NPC[] = [
         y: 20,
         description: '傳來陣陣打鐵聲，鐵匠張正揮汗如雨。',
         shopId: 'blacksmith_village'
+    },
+    {
+        id: 'village_scripture_keeper',
+        name: '藏經閣執事',
+        symbol: '經',
+        type: NPCType.Shop,
+        x: 20,
+        y: 25,
+        description: '守著鎮中藏經閣的執事，供應入門功法秘卷。',
+        shopId: 'skill_shop_mortal'
     }
 ];
 

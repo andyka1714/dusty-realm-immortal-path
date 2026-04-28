@@ -184,6 +184,33 @@ const initialState: CharacterState = {
   itemConsumption: {},
   lastProcessedYear: 10, // Starts at age 10
   skills: [],
+  equippedActiveSkillId: null,
+};
+
+const canEquipActiveSkill = (
+  skillId: string,
+  state: Pick<CharacterState, "skills" | "profession">
+) => {
+  const normalizedSkillId = resolveReplacementSkillId(skillId);
+  const skill = getFormalSkill(normalizedSkillId);
+
+  return Boolean(
+    skill &&
+      skill.type === "Active" &&
+      state.skills.includes(normalizedSkillId) &&
+      skill.profession === state.profession
+  );
+};
+
+const sanitizeEquippedActiveSkillId = (
+  state: Pick<CharacterState, "equippedActiveSkillId" | "skills" | "profession">
+) => {
+  if (
+    state.equippedActiveSkillId &&
+    !canEquipActiveSkill(state.equippedActiveSkillId, state)
+  ) {
+    state.equippedActiveSkillId = null;
+  }
 };
 
 const characterSlice = createSlice({
@@ -227,6 +254,7 @@ const characterSlice = createSlice({
       state.lastWarningAge = undefined;
       state.lastManualCultivateTime = 0;
       state.skills = normalizeFormalSkillIds(state.skills);
+      state.equippedActiveSkillId = null;
 
       // Generate Spirit Root First to determine potential
       const generatedRootId =
@@ -269,6 +297,7 @@ const characterSlice = createSlice({
       state.itemConsumption = {};
       state.breakthroughConsequence = null;
       state.lastProcessedYear = 10;
+      state.equippedActiveSkillId = null;
     },
 
     updateLastProcessedYear: (state, action: PayloadAction<number>) => {
@@ -357,6 +386,7 @@ const characterSlice = createSlice({
                   ...state.skills,
                   normalizedSkillId,
                 ]);
+                sanitizeEquippedActiveSkillId(state);
                 appliedEffects += 1;
               }
             }
@@ -538,6 +568,7 @@ const characterSlice = createSlice({
 
     setProfession: (state, action: PayloadAction<ProfessionType>) => {
       state.profession = action.payload;
+      sanitizeEquippedActiveSkillId(state);
     },
 
     learnSkill: (state, action: PayloadAction<string>) => {
@@ -547,6 +578,19 @@ const characterSlice = createSlice({
           ...state.skills,
           normalizedSkillId,
         ]);
+        sanitizeEquippedActiveSkillId(state);
+      }
+    },
+
+    equipActiveSkill: (state, action: PayloadAction<string | null>) => {
+      if (action.payload === null) {
+        state.equippedActiveSkillId = null;
+        return;
+      }
+
+      const normalizedSkillId = resolveReplacementSkillId(action.payload);
+      if (canEquipActiveSkill(normalizedSkillId, state)) {
+        state.equippedActiveSkillId = normalizedSkillId;
       }
     },
 
@@ -758,5 +802,6 @@ export const {
   upgradeGatheringLevel,
   setProfession,
   learnSkill,
+  equipActiveSkill,
 } = characterSlice.actions;
 export default characterSlice.reducer;

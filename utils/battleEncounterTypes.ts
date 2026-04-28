@@ -5,7 +5,9 @@ import type {
 export type EncounterPlayerCombatStatsLike = Pick<
   TurnPhasePlayerCombatStatsLike,
   "profession" | "learnedSkills" | "element" | "speed" | "maxHp" | "maxMp" | "regenHp"
->;
+> & {
+  equippedActiveSkillId?: string | null;
+};
 
 export type EncounterRestriction = {
   isEffective: boolean;

@@ -84,6 +84,31 @@ const migratePersistedItemId = (itemId: string): string | null => {
 const normalizePersistedSkillIds = (skillIds: string[]) =>
   normalizeFormalSkillIds(skillIds).filter((skillId) => Boolean(getFormalSkill(skillId)));
 
+const sanitizePersistedEquippedActiveSkillId = ({
+  equippedActiveSkillId,
+  skillIds,
+  profession,
+}: {
+  equippedActiveSkillId: unknown;
+  skillIds: string[];
+  profession: unknown;
+}) => {
+  if (typeof equippedActiveSkillId !== "string") {
+    return null;
+  }
+
+  const skill = getFormalSkill(equippedActiveSkillId);
+  if (!skill || skill.type !== "Active" || !skillIds.includes(skill.id)) {
+    return null;
+  }
+
+  if (typeof profession === "string" && skill.profession !== profession) {
+    return null;
+  }
+
+  return skill.id;
+};
+
 const migratePersistedItemConsumption = (itemConsumption: unknown) => {
   if (!isRecord(itemConsumption)) {
     return itemConsumption;
@@ -359,11 +384,21 @@ export const migratePersistedCharacterState = (character: unknown) => {
 
   const nextCharacter = { ...character } as Record<string, unknown>;
 
-  if (Array.isArray(character.skills)) {
-    nextCharacter.skills = normalizePersistedSkillIds(
+  const normalizedSkillIds = Array.isArray(character.skills)
+    ? normalizePersistedSkillIds(
       character.skills.filter((skillId): skillId is string => typeof skillId === "string")
-    );
+    )
+    : [];
+
+  if (Array.isArray(character.skills)) {
+    nextCharacter.skills = normalizedSkillIds;
   }
+
+  nextCharacter.equippedActiveSkillId = sanitizePersistedEquippedActiveSkillId({
+    equippedActiveSkillId: character.equippedActiveSkillId,
+    skillIds: normalizedSkillIds,
+    profession: character.profession,
+  });
 
   if ("itemConsumption" in character) {
     nextCharacter.itemConsumption = migratePersistedItemConsumption(character.itemConsumption);

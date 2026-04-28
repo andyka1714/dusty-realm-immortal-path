@@ -21,6 +21,7 @@ import {
   runPlayerWorldStrikePipeline,
   getResolvedSkillCooldownSeconds,
 } from '../utils/battleSystem';
+import { getSelectedActiveSkill } from '../utils/battleEncounterSkillSelection';
 import { addLog } from '../store/slices/logSlice';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Skull, Footprints, Navigation, Map as MapIcon, X, Lock, Globe, Target, MapPin, Info, Users, Move, Swords, Flame, Droplets, Shield, ShieldOff, Zap, Snowflake, Sparkles } from 'lucide-react';
 import { parseBattleLog } from '../utils/logParser';
@@ -878,7 +879,8 @@ export const Adventure: React.FC<AdventureProps> = ({
     equipmentStats,
     character.name,
     profession,
-    character.skills
+    character.skills,
+    character.equippedActiveSkillId
   );
   const playerEngagementRange = Math.max(
     getPlayerEngagementRange(profession),
@@ -895,8 +897,11 @@ export const Adventure: React.FC<AdventureProps> = ({
     ? getGridDistance(playerPosition, targetedMonster)
     : null;
   const primaryActiveSkill = profession !== ProfessionType.None
-    ? normalizeLearnedSkills(character.skills)
-        .find((skill) => skill.type === 'Active' && skill.profession === profession)
+    ? getSelectedActiveSkill(
+        profession,
+        normalizeLearnedSkills(character.skills),
+        character.equippedActiveSkillId
+      )
     : undefined;
   const primaryActiveSkillMpCost = primaryActiveSkill?.cost ?? 0;
   const hasEnoughMpForPrimaryActiveSkill = worldPlayerMp >= primaryActiveSkillMpCost;

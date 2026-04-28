@@ -67,5 +67,6 @@ describe("GameHUD", () => {
     expect(markup).toContain("靈力");
     expect(markup).toContain("戰力");
     expect(markup).toContain("築基");
+    expect(markup).toContain('data-testid="game-hud-compact-stat-grid"');
   });
 });

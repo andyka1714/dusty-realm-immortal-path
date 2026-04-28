@@ -25,6 +25,7 @@ export type PlayerCombatStatsLike = {
   regenHp: number;
   profession: import("../types").ProfessionType;
   learnedSkills: Skill[];
+  equippedActiveSkillId?: string | null;
 };
 
 export type RestrictionLike = {

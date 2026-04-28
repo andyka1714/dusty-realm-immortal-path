@@ -222,6 +222,34 @@ describe("persisted state migration", () => {
     expect((migrated.character as { skills?: string[] }).skills).toEqual(["m_tr_active"]);
   });
 
+  it("sanitizes equipped active skill ids against migrated learned skills", () => {
+    const migrated = migratePersistedState(
+      createPersistedState({
+        character: {
+          skills: ["s_q_active", "s_f_active", "s_q_passive"],
+          equippedActiveSkillId: "s_q_active",
+        },
+      })
+    );
+
+    expect(
+      (migrated.character as { equippedActiveSkillId?: string | null }).equippedActiveSkillId
+    ).toBe("s_q_active");
+
+    const invalid = migratePersistedState(
+      createPersistedState({
+        character: {
+          skills: ["s_q_active", "s_q_passive"],
+          equippedActiveSkillId: "s_q_passive",
+        },
+      })
+    );
+
+    expect(
+      (invalid.character as { equippedActiveSkillId?: string | null }).equippedActiveSkillId
+    ).toBeNull();
+  });
+
   it("upgrades retired manual ids in inventory and itemConsumption to formal manuals", () => {
     const migrated = migratePersistedState(
       createPersistedState({

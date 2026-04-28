@@ -43,6 +43,7 @@ describe("QuestTrackerHUD", () => {
     expect(markup).toContain("可回報");
     expect(markup).toContain("劍宗試煉：斬虎");
     expect(markup).toContain("討伐 0 / 1");
+    expect(markup).toContain('data-layout-anchor="below-character-hud"');
   });
 
   it("renders a compact empty state", () => {

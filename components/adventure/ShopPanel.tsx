@@ -118,6 +118,13 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
 
     // Safety check
     if (!shop) return null;
+    const hasSkillManualGoods = shop.items.some((shopItem) => {
+        const item = ITEMS[shopItem.itemId];
+        return (
+            item?.category === ItemCategory.Consumable &&
+            (item as ConsumableItem).subType === ConsumableType.Manual
+        );
+    });
     const shopNpcId = resolveShopNpcId(shopId);
     const shopSectId = resolveSectIdFromRouteId(shopId);
     const shopAffinity = resolveNpcShopAffinity({
@@ -198,6 +205,14 @@ const ShopPanel: React.FC<ShopPanelProps> = ({ shopId, onClose }) => {
                 <div className="p-4 border-b border-stone-800 flex flex-col md:flex-row gap-3 md:gap-0 md:justify-between items-start md:items-center bg-stone-950/80 relative">
                     <div className="min-w-0">
                         <p className="text-stone-400 text-sm italic">{shop.description}</p>
+                        {hasSkillManualGoods && (
+                            <p
+                                className="mt-2 rounded border border-indigo-900/50 bg-indigo-950/20 px-2 py-1 text-xs text-indigo-200"
+                                data-testid="skill-manual-shop-hint"
+                            >
+                                功法秘卷購買後可在背包參悟；已學功法與戰鬥裝備請至底部「功法」面板調整。
+                            </p>
+                        )}
                         <div className="mt-2 flex flex-wrap gap-2 text-[11px]" data-testid="shop-affinity-summary">
                             <span className="rounded border border-amber-900/50 bg-amber-950/20 px-2 py-0.5 text-amber-200">
                                 態度：{shopAffinity.attitudeLabel}

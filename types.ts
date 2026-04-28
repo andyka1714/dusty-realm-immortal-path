@@ -152,6 +152,7 @@ export interface CharacterState {
   lastWarningAge?: number; // For yearly events
   lastManualCultivateTime?: number;
   skills: string[]; // Learned Skill IDs
+  equippedActiveSkillId: string | null;
 }
 
 export type LifeEndCause = "lifespan" | "battle" | "voluntary";

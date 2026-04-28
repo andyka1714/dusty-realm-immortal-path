@@ -14,7 +14,7 @@ import soulReducer, { createInitialSoulState } from "../../store/slices/soulSlic
 import workshopReducer from "../../store/slices/workshopSlice";
 import type { PersistedSaveEnvelope } from "../../store/persistedStateMigration";
 import { BESTIARY } from "../../data/enemies";
-import { Gender, MajorRealm, SpiritRootId } from "../../types";
+import { Gender, MajorRealm, ProfessionType, SpiritRootId } from "../../types";
 import { getAvailableReincarnationPerks } from "../../utils/reincarnation";
 
 const require = createRequire(import.meta.url);
@@ -398,6 +398,38 @@ test("game shell overlay exposes inventory shared controls", async ({ page }) =>
   await expect(page.getByTestId("inventory-bulk-delete-confirm")).toBeVisible();
   await page.getByTestId("game-shell-panel-close").click();
   await expect(page.getByTestId("game-shell-panel")).toBeHidden();
+});
+
+test("game shell skill dock opens the learned skill loadout instead of the compendium", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  const save = createActiveRunSave();
+  const character = save.current.character as RootFixtureState["character"];
+  await installSave(page, {
+    ...save,
+    current: {
+      ...save.current,
+      character: {
+        ...character,
+        profession: ProfessionType.Sword,
+        skills: ["s_q_active", "s_f_active", "s_q_passive"],
+        equippedActiveSkillId: "s_q_active",
+      },
+    },
+  });
+
+  await page.goto("/");
+  await page.getByTestId("dock-skills").click();
+
+  const panel = page.getByTestId("game-shell-panel");
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText("角色功法");
+  await expect(page.getByTestId("skill-panel")).toBeVisible();
+  await expect(page.getByTestId("skill-panel")).toContainText("目前裝備");
+  await expect(page.getByTestId("skill-panel")).toContainText("疾風三疊");
+  await expect(page.getByTestId("skill-panel")).not.toContainText("萬界圖鑑");
+  await expectNoHorizontalOverflow(panel);
 });
 
 test("character panel keeps dashboard panes and stat tooltip anchored", async ({

@@ -146,4 +146,17 @@ describe("ShopPanel supply readability", () => {
     expect(markup).toContain("NPC 好感：常客往來");
     expect(markup).toContain("宗門好感：宗門功績");
   });
+
+  it("explains that scripture pavilion manuals are learned from the inventory after purchase", () => {
+    const store = createShopStore();
+
+    const markup = renderToStaticMarkup(
+      <Provider store={store}>
+        <ShopPanel shopId="skill_shop_mortal" onClose={() => {}} />
+      </Provider>
+    );
+
+    expect(markup).toContain("功法秘卷");
+    expect(markup).toContain("購買後可在背包參悟");
+  });
 });

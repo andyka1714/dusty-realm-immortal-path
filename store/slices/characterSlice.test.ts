@@ -2,6 +2,7 @@ import { describe, expect, it, vi, afterEach } from "vitest";
 import reducer, {
   attemptBreakthrough,
   consumeItem,
+  equipActiveSkill,
   learnSkill,
   setProfession,
 } from "./characterSlice";
@@ -228,6 +229,27 @@ describe("character skill acquisition rules", () => {
 
     expect(learned.skills).toContain("b_ma_active");
     expect(learned.skills).not.toContain("b_ie_active");
+  });
+
+  it("equips only learned active skills for the current profession", () => {
+    const base = {
+      ...reducer(undefined, { type: "test/init" }),
+      profession: ProfessionType.Sword,
+      majorRealm: MajorRealm.Foundation,
+      skills: ["s_q_active", "s_f_active", "s_q_passive", "b_q_active"],
+    };
+
+    const equipped = reducer(base, equipActiveSkill("s_f_active"));
+    expect(equipped.equippedActiveSkillId).toBe("s_f_active");
+
+    const passiveBlocked = reducer(equipped, equipActiveSkill("s_q_passive"));
+    expect(passiveBlocked.equippedActiveSkillId).toBe("s_f_active");
+
+    const wrongProfessionBlocked = reducer(equipped, equipActiveSkill("b_q_active"));
+    expect(wrongProfessionBlocked.equippedActiveSkillId).toBe("s_f_active");
+
+    const cleared = reducer(equipped, equipActiveSkill(null));
+    expect(cleared.equippedActiveSkillId).toBeNull();
   });
 
   it("clears breakthrough consequence when initializing a new run", () => {

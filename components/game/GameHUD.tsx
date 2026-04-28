@@ -112,40 +112,43 @@ export const GameHUD: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-4 grid gap-2 border-t border-stone-800 pt-3 text-sm text-stone-300">
-          <div className="flex items-center justify-between gap-6">
-            <span className="flex items-center gap-2 text-stone-500">
+        <div
+          className="mt-3 grid grid-cols-2 gap-2 border-t border-stone-800 pt-3 text-xs text-stone-300"
+          data-testid="game-hud-compact-stat-grid"
+        >
+          <div className="rounded-lg border border-stone-800/80 bg-black/20 px-2 py-2">
+            <span className="flex items-center gap-1 text-[11px] text-stone-500">
               <Zap size={14} />
               戰力
             </span>
-            <span className="font-mono font-bold text-amber-300">
+            <span className="mt-1 block truncate font-mono font-bold text-amber-300">
               {formatCombatPower(combatPower)}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-6">
-            <span className="flex items-center gap-2 text-stone-500">
+          <div className="rounded-lg border border-stone-800/80 bg-black/20 px-2 py-2">
+            <span className="flex items-center gap-1 text-[11px] text-stone-500">
               <Wallet size={14} />
               靈石
             </span>
-            <span className="font-mono text-amber-300">
+            <span className="mt-1 block truncate font-mono text-amber-300">
               {formatSpiritStone(character.spiritStones)}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-6">
-            <span className="flex items-center gap-2 text-stone-500">
+          <div className="rounded-lg border border-stone-800/80 bg-black/20 px-2 py-2">
+            <span className="flex items-center gap-1 text-[11px] text-stone-500">
               <Sparkles size={14} />
               修為
             </span>
-            <span className="font-mono text-emerald-300">
+            <span className="mt-1 block truncate font-mono text-emerald-300">
               {character.currentExp.toFixed(0)} / {character.maxExp.toFixed(0)}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-6">
-            <span className="flex items-center gap-2 text-stone-500">
+          <div className="rounded-lg border border-stone-800/80 bg-black/20 px-2 py-2">
+            <span className="flex items-center gap-1 text-[11px] text-stone-500">
               <Shield size={14} />
               壽元
             </span>
-            <span className="font-mono text-stone-300">
+            <span className="mt-1 block truncate font-mono text-stone-300">
               {(character.age / DAYS_PER_YEAR).toFixed(1)} /{" "}
               {(character.lifespan / DAYS_PER_YEAR).toFixed(0)} 歲
             </span>

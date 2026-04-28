@@ -3,7 +3,7 @@ import {
   getEnemyElementalModifier,
   getRestriction,
 } from "./battleEncounterElements";
-import { getHighestActiveSkill } from "./battleEncounterSkillSelection";
+import { getSelectedActiveSkill } from "./battleEncounterSkillSelection";
 import { type PlayerPassiveFlags, getPlayerPassiveFlags } from "./battlePassives";
 import type {
   EncounterElementalAffinity,
@@ -41,7 +41,11 @@ export const createCombatRuntimeContext = (
   player: EncounterPlayerCombatStatsLike,
   enemy: Enemy
 ): CombatRuntimeContext => {
-  const activeSkill = getHighestActiveSkill(player.profession, player.learnedSkills);
+  const activeSkill = getSelectedActiveSkill(
+    player.profession,
+    player.learnedSkills,
+    player.equippedActiveSkillId
+  );
   return {
     activeSkill: activeSkill ?? undefined,
     playerAttackIntervalMs: getPlayerAttackIntervalMs(player),

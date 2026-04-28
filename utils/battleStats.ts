@@ -66,7 +66,8 @@ export const calculatePlayerStats = (
   > = {},
   name = "道友",
   profession: ProfessionType = ProfessionType.None,
-  learnedSkillIds: string[] = []
+  learnedSkillIds: string[] = [],
+  equippedActiveSkillId: string | null = null
 ): PlayerCombatStats => {
   const base = REALM_BASE_STATS[majorRealm];
   const rootDetails = SPIRIT_ROOT_DETAILS[spiritRootId];
@@ -207,5 +208,6 @@ export const calculatePlayerStats = (
     regenHp,
     profession,
     learnedSkills,
+    equippedActiveSkillId,
   };
 };

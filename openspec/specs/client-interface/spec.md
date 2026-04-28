@@ -621,3 +621,44 @@ Workshop 介面必須 (MUST) 顯示 mastery milestone、specialization leaf、ro
 - **THEN** 介面必須顯示 persisted affinity 與 deterministic baseline 的合併結果
 - **AND** 折扣或任務提示必須能說明來源
 
+### Requirement: 功法入口必須顯示角色已學功法與戰鬥配置
+介面必須 (MUST) 將底部 `功法` 入口導向角色自身的功法面板，而不是萬界圖鑑的功法資料庫。
+
+#### Scenario: 玩家打開功法面板
+- **WHEN** 玩家點擊底部 `功法`
+- **THEN** 介面必須顯示已學主動術式、被動心法與目前裝備主動功法
+- **AND** 圖鑑仍必須保留所有功法與來源查詢
+
+### Requirement: 功法秘卷商店必須說明參悟流程
+介面必須 (MUST) 在功法秘卷商店顯示購買後需要到背包參悟，避免玩家把商店、圖鑑與已學功法面板混淆。
+
+#### Scenario: 玩家打開藏經閣商店
+- **WHEN** 玩家查看功法秘卷商品
+- **THEN** 商品說明必須顯示購買後可在背包參悟
+- **AND** 商品來源仍必須能在圖鑑中查詢
+
+### Requirement: RPG 主畫面必須有穩定資訊架構
+介面必須 (MUST) 維持穩定的 RPG 主畫面資訊架構，避免圖鑑、功法、任務、地圖與戰鬥操作互相混淆。
+
+#### Scenario: 玩家進入主畫面
+- **WHEN** 玩家進入 Adventure 主畫面
+- **THEN** 左上必須保留角色狀態，左側承接任務追蹤，右上保留小地圖，底部 dock 保留主要功能入口
+- **AND** `功法` 入口必須指向角色已學功法與戰鬥配置
+- **AND** `圖鑑` 入口必須保持資料庫與來源查詢職責
+
+### Requirement: 主畫面 HUD 必須提供 mobile-first 角色狀態
+介面必須 (MUST) 在主畫面顯示 mobile-first 的角色狀態卡，包含名稱、境界、推導等級、HP、MP、戰力與活動狀態。
+
+#### Scenario: 玩家在主畫面查看角色狀態
+- **WHEN** 玩家進入 Adventure 主畫面
+- **THEN** 左上角色狀態卡必須以 compact layout 顯示核心數值
+- **AND** mobile viewport 不得因戰力、靈石、修為、壽元直列而佔用過多垂直畫面
+
+### Requirement: 主畫面任務追蹤必須支援 desktop 與 mobile
+介面必須 (MUST) 讓玩家在 Adventure 主畫面看到目前任務追蹤，且 desktop 與 mobile 都不得遮住主要操作。
+
+#### Scenario: 玩家查看目前任務
+- **WHEN** 玩家有 active quests
+- **THEN** desktop 任務追蹤必須顯示在角色卡下方
+- **AND** mobile 任務追蹤必須以低佔用入口收合並可展開
+

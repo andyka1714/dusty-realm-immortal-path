@@ -4,7 +4,7 @@ import { FloatingDock, GamePanelId } from "./FloatingDock";
 import { GameHUD } from "./GameHUD";
 import { GamePanel } from "./GamePanel";
 import { QuestTrackerHUD } from "./QuestTrackerHUD";
-import { BookOpen, Hammer, Home, Package } from "lucide-react";
+import { BookOpen, Hammer, Home, Package, Scroll } from "lucide-react";
 import { Modal } from "../Modal";
 import { PendingEncounterPanel } from "./PendingEncounterPanel";
 import { AppDispatch, RootState } from "../../store/store";
@@ -41,9 +41,14 @@ const CompendiumModal = lazy(() =>
     default: module.CompendiumModal,
   }))
 );
+const SkillPanel = lazy(() =>
+  import("./SkillPanel").then((module) => ({
+    default: module.SkillPanel,
+  }))
+);
 
 const PANEL_CONFIG: Record<
-  Exclude<GamePanelId, "compendium" | "skills" | "map">,
+  Exclude<GamePanelId, "compendium" | "map">,
   {
     widthClassName: string;
     title: string;
@@ -65,6 +70,13 @@ const PANEL_CONFIG: Record<
     eyebrow: "TRAVEL PACK",
     icon: <Package size={18} />,
     render: () => <Inventory embedded />,
+  },
+  skills: {
+    widthClassName: "md:w-[min(92vw,980px)]",
+    title: "角色功法",
+    eyebrow: "SKILL LOADOUT",
+    icon: <Scroll size={18} />,
+    render: () => <SkillPanel />,
   },
   workshop: {
     widthClassName: "md:w-[min(94vw,1320px)]",
@@ -105,14 +117,12 @@ export const GameShell: React.FC = () => {
     dispatch(dismissPendingEncounter());
   };
 
-  const isCompendiumOpen =
-    activePanel === "compendium" || activePanel === "skills";
+  const isCompendiumOpen = activePanel === "compendium";
 
   const activePanelConfig = useMemo(() => {
     if (
       !activePanel ||
       activePanel === "compendium" ||
-      activePanel === "skills" ||
       activePanel === "map"
     ) {
       return null;

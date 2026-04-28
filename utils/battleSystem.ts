@@ -232,4 +232,5 @@ export interface PlayerCombatStats {
   regenHp: number;
   profession: ProfessionType;
   learnedSkills: Skill[];
+  equippedActiveSkillId?: string | null;
 }
