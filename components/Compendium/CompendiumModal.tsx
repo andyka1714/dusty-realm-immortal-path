@@ -467,6 +467,9 @@ const groupItemsByRealm = (items: Item[]) =>
     }))
     .filter((group) => group.items.length > 0);
 
+const isSettlementMap = (map: (typeof MAPS)[number]) =>
+  (map.npcs?.length ?? 0) > 0 && map.enemies.length === 0;
+
 const sectConfigs: Array<{
   id: SectId;
   profession: ProfessionType;
@@ -621,13 +624,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
   );
   const activeEquipmentCount = activeEquipmentItems.length;
   const villageMaps = useMemo(
-    () =>
-      MAPS.filter(
-        (map) =>
-          map.minRealm === MajorRealm.Mortal &&
-          (map.npcs?.length ?? 0) > 0 &&
-          map.enemies.length === 0
-      ),
+    () => MAPS.filter(isSettlementMap),
     []
   );
   const mapsByRealm = useMemo(
@@ -637,13 +634,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
         .map((realm) => ({
           realm,
           maps: MAPS.filter(
-            (map) =>
-              map.minRealm === realm &&
-              !(
-                map.minRealm === MajorRealm.Mortal &&
-                (map.npcs?.length ?? 0) > 0 &&
-                map.enemies.length === 0
-              )
+            (map) => map.minRealm === realm && !isSettlementMap(map)
           ),
         }))
         .filter((group) => group.maps.length > 0),

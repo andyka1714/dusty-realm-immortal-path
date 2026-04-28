@@ -240,15 +240,23 @@ describe("CompendiumModal taxonomy layout", () => {
 
     const villageStart = markup.indexOf('data-testid="compendium-map-village-heading"');
     const mortalStart = markup.indexOf('data-testid="compendium-map-realm-heading-0"');
-    const nextRealmStart = markup.indexOf(
-      'data-testid="compendium-map-realm-heading-1"',
-      mortalStart
+    const qiStart = markup.indexOf('data-testid="compendium-map-realm-heading-1"');
+    const foundationStart = markup.indexOf(
+      'data-testid="compendium-map-realm-heading-2"',
+      qiStart
     );
     const villageSection = markup.slice(villageStart, mortalStart);
-    const mortalSection = markup.slice(mortalStart, nextRealmStart);
+    const mortalSection = markup.slice(mortalStart, qiStart);
+    const qiSection = markup.slice(qiStart, foundationStart);
 
     expect(villageSection).toContain("仙緣鎮");
+    expect(villageSection).toContain("凌霄劍宗");
+    expect(villageSection).toContain("萬獸山莊");
+    expect(villageSection).toContain("縹緲仙宮");
     expect(mortalSection).not.toContain("仙緣鎮");
+    expect(qiSection).not.toContain("凌霄劍宗");
+    expect(qiSection).not.toContain("萬獸山莊");
+    expect(qiSection).not.toContain("縹緲仙宮");
   });
 
   it("uses map descriptions on index cards instead of npc and monster counts", () => {
