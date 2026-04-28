@@ -8,10 +8,19 @@ import { RootState } from "../../store/store";
 import {
   buildQuestTrackerItems,
   QuestNavigationTarget,
+  QuestTrackerItem,
 } from "../../utils/questTracker";
 import { Button } from "../ui/button";
 
 const QUEST_NAVIGATION_EVENT = "dusty-realm:quest-navigation";
+
+const getQuestCardTypeLabel = (item: QuestTrackerItem) => {
+  if (item.questId.startsWith("sect_")) {
+    return "宗門";
+  }
+
+  return item.typeLabel;
+};
 
 const dispatchQuestNavigation = (
   navigationTarget: QuestNavigationTarget | undefined
@@ -54,40 +63,52 @@ export const QuestTrackerHUD: React.FC = () => {
           目前沒有進行中的任務
         </div>
       ) : (
-        <div className="space-y-2">
+        <div
+          className="space-y-3"
+          data-testid="quest-tracker-stack"
+          data-display-mode="separate-cards"
+        >
           {trackerItems.map((item) => (
-            <Button
+            <div
               key={item.questId}
-              type="button"
-              variant="ghost"
-              data-testid={`quest-tracker-item-${item.questId}`}
-              data-navigation-kind={item.navigationTarget?.kind ?? "none"}
-              data-lifecycle-status={item.lifecycleStatus}
-              disabled={!item.navigationTarget}
-              onClick={() => dispatchQuestNavigation(item.navigationTarget)}
+              data-testid={`quest-tracker-card-${item.questId}`}
               className={clsx(
-                "!h-auto w-full flex-col items-stretch justify-start gap-0 whitespace-normal rounded-lg border px-3 py-2 text-left transition",
+                "rounded-xl border shadow-[0_12px_28px_rgba(0,0,0,0.4)] backdrop-blur-xl",
                 item.navigationTarget
-                  ? "cursor-pointer hover:border-amber-500/60 hover:bg-amber-950/16"
-                  : "cursor-default",
+                  ? "hover:border-amber-500/70 hover:bg-amber-950/18"
+                  : "",
                 item.lifecycleStatus === "ready"
                   ? "border-emerald-700/70 bg-emerald-950/24"
                   : item.lifecycleStatus === "available"
                     ? "border-amber-700/60 bg-amber-950/18"
-                  : "border-stone-800/80 bg-black/25"
+                    : "border-stone-800/80 bg-stone-950/72"
               )}
             >
-              <div className="flex min-w-0 items-center justify-between gap-2">
-                <div className="min-w-0 truncate text-sm font-bold text-stone-100">
-                  {item.title}
-                </div>
-                <div className="flex shrink-0 items-center gap-1">
-                  <span className="rounded border border-stone-700/80 px-1.5 py-0.5 text-[10px] text-stone-400">
-                    {item.typeLabel}
-                  </span>
+              <Button
+                type="button"
+                variant="ghost"
+                data-testid={`quest-tracker-item-${item.questId}`}
+                data-navigation-kind={item.navigationTarget?.kind ?? "none"}
+                data-lifecycle-status={item.lifecycleStatus}
+                disabled={!item.navigationTarget}
+                onClick={() => dispatchQuestNavigation(item.navigationTarget)}
+                className={clsx(
+                  "!h-auto w-full flex-col items-stretch justify-start gap-0 whitespace-normal rounded-xl px-3.5 py-3 text-left transition hover:bg-transparent disabled:opacity-100",
+                  item.navigationTarget ? "cursor-pointer" : "cursor-default"
+                )}
+              >
+                <div className="flex min-w-0 items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-bold tracking-[0.22em] text-amber-300">
+                      [{getQuestCardTypeLabel(item)}]
+                    </div>
+                    <div className="mt-1 truncate text-sm font-bold text-stone-100">
+                      {item.title}
+                    </div>
+                  </div>
                   <span
                     className={clsx(
-                      "rounded border px-1.5 py-0.5 text-[10px] font-bold",
+                      "shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-bold",
                       item.lifecycleStatus === "ready"
                         ? "border-emerald-600/70 text-emerald-300"
                         : item.lifecycleStatus === "available"
@@ -98,50 +119,55 @@ export const QuestTrackerHUD: React.FC = () => {
                     {item.lifecycleLabel}
                   </span>
                 </div>
-              </div>
-              <div className="mt-1 flex items-center justify-between gap-2 text-[11px]">
-                <span
-                  className={clsx(
-                    "inline-flex min-w-0 items-center gap-1 truncate",
-                    item.lifecycleStatus === "ready"
-                      ? "text-emerald-300"
-                      : "text-stone-400"
-                  )}
-                >
-                  {item.lifecycleStatus === "ready" && <CheckCircle2 size={12} />}
-                  {item.primaryActionLabel}
-                </span>
-                <span className="shrink-0 text-stone-500">
-                  {item.progressLabel}
-                </span>
-              </div>
-              {item.progressRows.length > 0 && (
-                <div className="mt-1 space-y-0.5">
-                  {item.progressRows.map((row, index) => (
-                    <div
-                      key={`${item.questId}-${row.kind}-${index}`}
-                      className={clsx(
-                        "flex items-center justify-between gap-2 text-[10px]",
-                        row.complete ? "text-emerald-300/80" : "text-stone-500"
-                      )}
-                    >
-                      <span className="min-w-0 truncate">{row.label}</span>
-                      {row.current !== undefined && row.required !== undefined && (
-                        <span className="shrink-0 font-mono">
-                          {row.current} / {row.required}
-                        </span>
-                      )}
-                    </div>
-                  ))}
+                <div className="mt-2 flex items-center justify-between gap-2 text-[11px]">
+                  <span
+                    className={clsx(
+                      "inline-flex min-w-0 items-center gap-1 truncate",
+                      item.lifecycleStatus === "ready"
+                        ? "text-emerald-300"
+                        : "text-stone-400"
+                    )}
+                  >
+                    {item.lifecycleStatus === "ready" && (
+                      <CheckCircle2 size={12} />
+                    )}
+                    {item.primaryActionLabel}
+                  </span>
+                  <span className="shrink-0 text-stone-500">
+                    {item.progressLabel}
+                  </span>
                 </div>
-              )}
-              {item.navigationTarget && (
-                <div className="mt-1 inline-flex max-w-full items-center gap-1 text-[10px] text-amber-300">
-                  <MapPin size={11} className="shrink-0" />
-                  <span className="truncate">{item.navigationTarget.label}</span>
-                </div>
-              )}
-            </Button>
+                {item.progressRows.length > 0 && (
+                  <div className="mt-2 space-y-1 border-t border-stone-800/80 pt-2">
+                    {item.progressRows.map((row, index) => (
+                      <div
+                        key={`${item.questId}-${row.kind}-${index}`}
+                        className={clsx(
+                          "flex items-center justify-between gap-2 text-[10px]",
+                          row.complete ? "text-emerald-300/80" : "text-stone-500"
+                        )}
+                      >
+                        <span className="min-w-0 truncate">{row.label}</span>
+                        {row.current !== undefined &&
+                          row.required !== undefined && (
+                            <span className="shrink-0 font-mono">
+                              {row.current} / {row.required}
+                            </span>
+                          )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {item.navigationTarget && (
+                  <div className="mt-2 inline-flex max-w-full items-center gap-1 text-[10px] font-bold text-amber-300">
+                    <MapPin size={11} className="shrink-0" />
+                    <span className="truncate">
+                      {item.navigationTarget.label}
+                    </span>
+                  </div>
+                )}
+              </Button>
+            </div>
           ))}
         </div>
       )}
@@ -156,8 +182,8 @@ export const QuestTrackerHUD: React.FC = () => {
         data-layout-anchor="below-character-hud"
         aria-label="任務追蹤"
       >
-        <div className="pointer-events-auto rounded-xl border border-stone-700/80 bg-stone-950/78 p-3 shadow-[0_12px_34px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-          <div className="mb-2 flex items-center justify-between gap-3">
+        <div className="pointer-events-auto space-y-3">
+          <div className="inline-flex items-center gap-3 rounded-full border border-stone-700/75 bg-stone-950/78 px-3 py-2 shadow-[0_12px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl">
             <div className="flex items-center gap-2 text-stone-200">
               <ScrollText size={15} className="text-amber-300" />
               <span className="text-sm font-bold tracking-widest">任務追蹤</span>

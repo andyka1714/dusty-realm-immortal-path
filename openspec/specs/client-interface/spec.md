@@ -673,6 +673,11 @@ Workshop 介面必須 (MUST) 顯示 mastery milestone、specialization leaf、ro
 - **THEN** desktop 任務追蹤必須顯示在角色卡下方
 - **AND** mobile 任務追蹤必須以低佔用入口收合並可展開
 
+#### Scenario: Desktop 顯示多個任務
+- **WHEN** desktop 任務追蹤顯示多個任務
+- **THEN** 每個任務必須以獨立卡片呈現，不得只塞在同一條 bar 或單一大面板內
+- **AND** 每張卡片必須保留任務類型、lifecycle、標題、進度與可導向目標
+
 ### Requirement: RPG 主畫面 Layout v2 必須有 runtime 狀態層
 介面必須 (MUST) 在 Adventure 主畫面提供穩定的右上小地圖資訊層與右下戰鬥功法快捷狀態，讓 layout v2 不只停留在規格描述。
 
