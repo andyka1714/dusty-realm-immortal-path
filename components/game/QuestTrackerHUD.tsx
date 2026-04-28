@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { QUESTS } from "../../data/quests";
 import { RootState } from "../../store/store";
 import { buildQuestTrackerItems } from "../../utils/questTracker";
+import { Button } from "../ui/button";
 
 export const QuestTrackerHUD: React.FC = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -89,8 +90,10 @@ export const QuestTrackerHUD: React.FC = () => {
       </aside>
 
       <div className="md:hidden">
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           className="pointer-events-auto fixed bottom-28 left-4 z-[3100] inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-stone-950/88 px-3 py-2 text-xs font-bold tracking-widest text-amber-200 shadow-[0_10px_30px_rgba(0,0,0,0.45)] backdrop-blur-xl"
           data-testid="quest-tracker-mobile-toggle"
           aria-controls="quest-tracker-mobile-panel"
@@ -104,7 +107,7 @@ export const QuestTrackerHUD: React.FC = () => {
               {trackerItems.length}
             </span>
           )}
-        </button>
+        </Button>
 
         <section
           id="quest-tracker-mobile-panel"
@@ -120,14 +123,16 @@ export const QuestTrackerHUD: React.FC = () => {
               <ScrollText size={15} className="text-amber-300" />
               <span className="text-sm font-bold tracking-widest">任務追蹤</span>
             </div>
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               className="rounded-full border border-stone-700/80 p-1 text-stone-400 hover:border-stone-500 hover:text-stone-100"
               aria-label="收合任務追蹤"
               onClick={() => setIsMobileOpen(false)}
             >
               <X size={14} />
-            </button>
+            </Button>
           </div>
 
           {trackerContent}
