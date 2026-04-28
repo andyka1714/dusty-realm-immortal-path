@@ -37,8 +37,8 @@ describe("CompendiumModal taxonomy layout", () => {
     const markup = renderCompendium({ initialTab: "item" });
 
     expect(markup).toContain('data-testid="compendium-item-category-filter-all"');
-    expect(markup).toContain('data-testid="compendium-item-category-filter-manual"');
-    expect(markup).toContain('data-testid="compendium-item-category-filter-equipment"');
+    expect(markup).not.toContain('data-testid="compendium-item-category-filter-manual"');
+    expect(markup).not.toContain('data-testid="compendium-item-category-filter-equipment"');
     expect(markup).toContain('data-testid="compendium-item-category-filter-pill"');
     expect(markup).toContain('data-testid="compendium-item-category-filter-alchemy_material"');
     expect(markup).toContain('data-testid="compendium-item-category-filter-smithing_material"');
@@ -58,6 +58,28 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).toContain("符籙");
     expect(markup).toContain("陣盤");
     expect(markup).toContain("法寶器靈");
+  });
+
+  it("keeps skills and equipment out of the all-items compendium tab", () => {
+    const markup = renderCompendium({ initialTab: "item" });
+
+    expect(markup).toContain('data-testid="compendium-tab-skill"');
+    expect(markup).toContain('data-testid="compendium-tab-equipment"');
+    expect(markup).toContain("功法神通");
+    expect(markup).toContain("裝備法寶");
+    expect(markup).not.toContain('data-testid="compendium-item-card-manual_s_q_active"');
+    expect(markup).not.toContain('data-testid="compendium-item-card-novice_sword"');
+  });
+
+  it("renders equipment in its own compendium tab", () => {
+    const markup = renderCompendium({ initialTab: "equipment" });
+
+    expect(markup).toContain('data-testid="compendium-equipment-grid"');
+    expect(markup).toContain('data-testid="compendium-equipment-header"');
+    expect(markup).toContain("裝備法寶");
+    expect(markup).toContain('data-testid="compendium-equipment-card-novice_sword"');
+    expect(markup).toContain("鏽鐵劍");
+    expect(markup).toContain("來源追蹤");
   });
 
   it("groups skills by profession and realm instead of rendering a flat mixed grid", () => {

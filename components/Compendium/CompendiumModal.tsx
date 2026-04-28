@@ -43,8 +43,10 @@ import {
   type CompendiumSourceKind,
 } from "./sourceTracing";
 import {
-  COMPENDIUM_ITEM_CATEGORIES,
+  COMPENDIUM_GENERAL_ITEM_CATEGORIES,
   getCompendiumItemCategory,
+  isCompendiumEquipmentItem,
+  isCompendiumGeneralItem,
   type CompendiumItemCategoryId,
 } from "./itemClassification";
 import {
@@ -62,8 +64,12 @@ interface CompendiumModalProps {
   initialMapId?: string;
 }
 
-type TabType = "realm" | "map" | "item" | "skill" | "sect";
+type TabType = "realm" | "map" | "item" | "equipment" | "skill" | "sect";
 type SectId = "sword" | "body" | "mage";
+type GeneralItemCategoryId = Exclude<
+  CompendiumItemCategoryId,
+  "manual" | "equipment"
+>;
 
 const getSkillTypeLabel = (type: Skill["type"]): string =>
   type === "Active" ? "主動" : "被動";
@@ -324,7 +330,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
     useState<ProfessionType>(initialSkillProfession);
   const [activeSectId, setActiveSectId] = useState<SectId>(initialSectId);
   const [activeItemCategory, setActiveItemCategory] = useState<
-    CompendiumItemCategoryId | "all"
+    GeneralItemCategoryId | "all"
   >("all");
 
   // Tooltip state for Item Drop Source
@@ -345,19 +351,25 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
 
   const allItems: Record<string, Item> = useMemo(() => ITEMS, []);
   const itemList = useMemo(() => Object.values(allItems), [allItems]);
+  const generalItemList = useMemo(
+    () => itemList.filter(isCompendiumGeneralItem),
+    [itemList]
+  );
+  const equipmentItems = useMemo(
+    () => itemList.filter(isCompendiumEquipmentItem),
+    [itemList]
+  );
   const visibleItems = useMemo(
     () =>
       activeItemCategory === "all"
-        ? itemList
-        : itemList.filter(
+        ? generalItemList
+        : generalItemList.filter(
             (item) => getCompendiumItemCategory(item).id === activeItemCategory
           ),
-    [activeItemCategory, itemList]
+    [activeItemCategory, generalItemList]
   );
   const itemCategoryCounts = useMemo(() => {
-    const counts: Record<CompendiumItemCategoryId, number> = {
-      manual: 0,
-      equipment: 0,
+    const counts: Record<GeneralItemCategoryId, number> = {
       pill: 0,
       alchemy_material: 0,
       smithing_material: 0,
@@ -371,16 +383,16 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
       other: 0,
     };
 
-    itemList.forEach((item) => {
+    generalItemList.forEach((item) => {
       counts[getCompendiumItemCategory(item).id] += 1;
     });
 
     return counts;
-  }, [itemList]);
+  }, [generalItemList]);
   const activeItemCategoryLabel =
     activeItemCategory === "all"
       ? "全部分類"
-      : COMPENDIUM_ITEM_CATEGORIES.find(
+      : COMPENDIUM_GENERAL_ITEM_CATEGORIES.find(
           (category) => category.id === activeItemCategory
         )?.label ?? "全部分類";
 
@@ -422,6 +434,151 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
   // Helper: Get Dropped By for Item
   const getDroppedBy = (itemId: string): Enemy[] => {
     return Object.values(allEnemies).filter((e) => e.drops?.includes(itemId));
+  };
+
+  const renderItemCard = (item: Item, testIdPrefix: string) => {
+    const sourceTrace = buildCompendiumItemSourceTrace(item.id);
+    const category = getCompendiumItemCategory(item);
+    const overflowCount = Math.max(
+      0,
+      sourceTrace.sources.length -
+        getVisibleSourceChips(sourceTrace.sources).length
+    );
+
+    return (
+      <div
+        key={item.id}
+        className="bg-stone-800 p-3 rounded border border-stone-700 group hover:border-amber-500/30 transition-colors"
+        data-testid={`${testIdPrefix}-card-${item.id}`}
+      >
+        <div className="flex justify-between">
+          <span className="font-bold text-stone-200">{item.name}</span>
+          <div className="ml-2">
+            {item.category === ItemCategory.Equipment ? (
+              <div className="flex gap-1">
+                {[
+                  {
+                    l: "下",
+                    q: 0,
+                    c: "text-stone-500 border-stone-800 bg-stone-900/50",
+                  },
+                  {
+                    l: "中",
+                    q: 1,
+                    c: "text-emerald-500 border-emerald-900/30 bg-emerald-950/20",
+                  },
+                  {
+                    l: "上",
+                    q: 2,
+                    c: "text-sky-500 border-sky-900/30 bg-sky-950/20",
+                  },
+                  {
+                    l: "仙",
+                    q: 3,
+                    c: "text-amber-500 border-amber-900/30 bg-amber-950/20",
+                  },
+                ].map((badge) => (
+                  <span key={badge.q} className="relative group inline-flex">
+                    <span
+                      className={clsx("text-[10px] px-1 rounded border", badge.c)}
+                    >
+                      {badge.l}
+                    </span>
+                    <GameHintBubble
+                      eyebrow="DROP TIER"
+                      className="bottom-full left-1/2 mb-2 -translate-x-1/2"
+                    >
+                      可掉落{badge.l}品
+                    </GameHintBubble>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span
+                className={clsx(
+                  "text-[10px] px-1.5 rounded border h-fit",
+                  item.quality === ItemQuality.Immortal
+                    ? "text-amber-500 border-amber-900/50 bg-amber-950/30"
+                    : item.quality === ItemQuality.High
+                      ? "text-sky-400 border-sky-900/50 bg-sky-950/30"
+                      : item.quality === ItemQuality.Medium
+                        ? "text-emerald-400 border-emerald-900/50 bg-emerald-950/30"
+                        : "text-stone-400 border-stone-700"
+                )}
+              >
+                {item.quality === ItemQuality.Immortal
+                  ? "仙"
+                  : item.quality === ItemQuality.High
+                    ? "上"
+                    : item.quality === ItemQuality.Medium
+                      ? "中"
+                      : "下"}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="mb-1 flex flex-wrap items-center gap-1 text-xs text-stone-500">
+          <span
+            className="rounded border border-amber-900/30 bg-amber-950/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200"
+            data-testid={`${testIdPrefix}-category-${item.id}`}
+          >
+            {category.label}
+          </span>
+          <span>{getItemSubtypeLabel(item)}</span>
+        </div>
+
+        <p className="text-xs text-stone-400 mt-1 line-clamp-2 min-h-[2.5em]">
+          {item.description}
+        </p>
+
+        <div
+          className="mt-3 pt-2 border-t border-stone-700/50"
+          data-testid={`${testIdPrefix}-source-${item.id}`}
+        >
+          <span className="text-[10px] text-stone-600 block mb-1">
+            來源追蹤:
+          </span>
+          <div className="flex flex-wrap gap-1">
+            {renderSourceChips(sourceTrace.sources)}
+            {overflowCount > 0 && (
+              <span
+                className="text-[10px] text-stone-500 cursor-help hover:text-stone-300 decoration-dotted underline"
+                onMouseEnter={(event) => {
+                  const content = (
+                    <div className="flex flex-col gap-1 min-w-[120px]">
+                      {sourceTrace.sources.map((source, index) => (
+                        <div
+                          key={`${source.kind}-${source.label}-${index}`}
+                          className="flex flex-col gap-0.5"
+                        >
+                          <span className="text-stone-200">{source.label}</span>
+                          {source.detail && (
+                            <span className="text-stone-500">
+                              {source.detail}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                  setTooltip({
+                    visible: true,
+                    x: event.clientX,
+                    y: event.clientY,
+                    title: "完整來源追蹤",
+                    footer: `${sourceTrace.sources.length} 個來源`,
+                    content: content,
+                  });
+                }}
+                onMouseLeave={() => setTooltip(null)}
+              >
+                +{overflowCount} 更多
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   if (!isOpen) return null;
@@ -478,7 +635,8 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
             {[
               { id: "realm", label: "境界總覽", icon: Database },
               { id: "map", label: "山川妖獸", icon: MapIcon },
-              { id: "item", label: "萬物圖鑑", icon: Sword },
+              { id: "item", label: "萬物圖鑑", icon: Book },
+              { id: "equipment", label: "裝備法寶", icon: Sword },
               { id: "skill", label: "功法神通", icon: Scroll },
               { id: "sect", label: "宗門傳承", icon: Shield },
             ].map((tab) => (
@@ -830,7 +988,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                     </div>
                     <div className="flex flex-col items-start gap-2 md:items-end">
                       <span className="rounded border border-amber-900/40 bg-amber-950/20 px-3 py-1 text-xs text-amber-200">
-                        {visibleItems.length} / {itemList.length} 件物品
+                        {visibleItems.length} / {generalItemList.length} 件物品
                       </span>
                       <span className="text-xs text-stone-600">
                         {activeItemCategoryLabel}
@@ -847,10 +1005,10 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                     >
                       全部
                       <span className="ml-1 text-[10px] opacity-70">
-                        {itemList.length}
+                        {generalItemList.length}
                       </span>
                     </Button>
-                    {COMPENDIUM_ITEM_CATEGORIES.map((category) => (
+                    {COMPENDIUM_GENERAL_ITEM_CATEGORIES.map((category) => (
                       <Button
                         key={category.id}
                         data-testid={`compendium-item-category-filter-${category.id}`}
@@ -1047,6 +1205,58 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                             </div>
                             );
                           })}
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            )}
+
+            {activeTab === "equipment" && (
+              <div className="space-y-8" data-testid="compendium-equipment-grid">
+                <div
+                  className="rounded-lg border border-stone-800 bg-stone-950/60 p-4"
+                  data-testid="compendium-equipment-header"
+                >
+                  <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                    <div>
+                      <h2 className="text-xl font-bold text-amber-400">
+                        裝備法寶
+                      </h2>
+                      <p className="mt-1 text-sm text-stone-500">
+                        獨立檢視武器、防具、飾品與法寶裝備，保留品質、子類與來源追蹤。
+                      </p>
+                    </div>
+                    <span className="rounded border border-amber-900/40 bg-amber-950/20 px-3 py-1 text-xs text-amber-200">
+                      {equipmentItems.length} 件裝備
+                    </span>
+                  </div>
+                </div>
+
+                {Object.values(MajorRealm)
+                  .filter((r) => typeof r === "number")
+                  .map((realmId) => {
+                    const rId = realmId as MajorRealm;
+                    const itemsInRealm = equipmentItems.filter((item) => {
+                      if (item.minRealm === undefined && rId === MajorRealm.Mortal)
+                        return true;
+                      return item.minRealm === rId;
+                    });
+
+                    if (itemsInRealm.length === 0) return null;
+
+                    return (
+                      <div key={rId} className="space-y-4">
+                        <h3
+                          className="border-l-4 border-amber-600 bg-stone-900/70 py-2 pl-3 text-xl font-bold text-amber-500"
+                          data-testid={`compendium-equipment-realm-heading-${rId}`}
+                        >
+                          {MajorRealmCN[rId]}期
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {itemsInRealm.map((item) =>
+                            renderItemCard(item, "compendium-equipment")
+                          )}
                         </div>
                       </div>
                     );

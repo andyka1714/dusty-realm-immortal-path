@@ -101,6 +101,11 @@ export const COMPENDIUM_ITEM_CATEGORIES: CompendiumItemCategoryDefinition[] = [
   },
 ];
 
+export const COMPENDIUM_GENERAL_ITEM_CATEGORIES =
+  COMPENDIUM_ITEM_CATEGORIES.filter(
+    (category) => category.id !== "manual" && category.id !== "equipment"
+  );
+
 const questItemIds = new Set<string>(QUEST_ITEM_IDS);
 const regionSpecialtyIds = new Set<string>(
   REGION_SPECIALTY_ITEMS.map((item) => item.itemId)
@@ -196,3 +201,11 @@ export const getCompendiumItemCategory = (
 
 export const getCompendiumItemCategoryLabel = (item: Item): string =>
   getCompendiumItemCategory(item).label;
+
+export const isCompendiumGeneralItem = (item: Item): boolean => {
+  const categoryId = getCompendiumItemCategory(item).id;
+  return categoryId !== "manual" && categoryId !== "equipment";
+};
+
+export const isCompendiumEquipmentItem = (item: Item): boolean =>
+  getCompendiumItemCategory(item).id === "equipment";
