@@ -56,4 +56,14 @@ describe("SkillPanel", () => {
     expect(markup).toContain("藏經閣");
     expect(markup).not.toContain("萬界圖鑑");
   });
+
+  it("explains the full manual acquisition, inventory study, and combat equip loop", () => {
+    const markup = renderSkillPanel(["s_q_active"]);
+
+    expect(markup).toContain("功法取得流程");
+    expect(markup).toContain("藏經閣購買");
+    expect(markup).toContain("背包參悟");
+    expect(markup).toContain("裝備參戰");
+    expect(markup).toContain("買到秘卷不等於已學會");
+  });
 });

@@ -39,6 +39,27 @@ export const SkillPanel: React.FC = () => {
       data-testid="skill-panel"
       aria-label="角色功法"
     >
+      <section className="rounded-xl border border-stone-800 bg-stone-950/55 p-4">
+        <div className="flex items-center gap-2 text-sm font-bold tracking-widest text-stone-200">
+          <Scroll size={16} className="text-amber-300" />
+          功法取得流程
+        </div>
+        <div className="mt-3 grid gap-2 text-xs text-stone-400 md:grid-cols-3">
+          <div className="rounded-lg border border-stone-800 bg-black/25 px-3 py-2">
+            <div className="font-bold text-amber-200">1. 藏經閣購買</div>
+            <div className="mt-1">任務、怪物掉落與傳承也可能取得功法秘卷。</div>
+          </div>
+          <div className="rounded-lg border border-stone-800 bg-black/25 px-3 py-2">
+            <div className="font-bold text-emerald-200">2. 背包參悟</div>
+            <div className="mt-1">買到秘卷不等於已學會，需符合職業、境界與前置條件。</div>
+          </div>
+          <div className="rounded-lg border border-stone-800 bg-black/25 px-3 py-2">
+            <div className="font-bold text-sky-200">3. 裝備參戰</div>
+            <div className="mt-1">已學主動術式會出現在此，可選為戰鬥功法。</div>
+          </div>
+        </div>
+      </section>
+
       <section className="rounded-xl border border-amber-700/35 bg-amber-950/15 p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">

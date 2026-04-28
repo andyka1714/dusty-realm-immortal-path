@@ -753,6 +753,25 @@ test("adventure canvas and mobile map modal keep visible non-black surfaces", as
   await expect(page.getByTestId("adventure-area-map-surface")).toBeVisible();
 });
 
+test("adventure main screen exposes layout v2 minimap and combat shortcut status", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await installSave(page, createWildCombatRunSave());
+
+  await page.goto("/");
+
+  await expect(page.getByTestId("adventure-minimap-status")).toBeVisible();
+  await expect(page.getByTestId("adventure-minimap-status")).toContainText("附近妖獸");
+  await expect(page.getByTestId("adventure-action-wheel-status")).toBeVisible();
+  await expect(page.getByTestId("adventure-action-wheel-status")).toContainText("功法");
+  await expect(page.getByTestId("adventure-action-wheel-status")).toContainText("靈力");
+  await expectDoesNotCover(
+    page.getByTestId("adventure-action-wheel-status"),
+    page.getByTestId("floating-dock")
+  );
+});
+
 test("safe village state hides world-combat shortcuts", async ({ page }) => {
   await installSave(page, createVillageRunSave());
 

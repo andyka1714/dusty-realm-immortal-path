@@ -78,4 +78,11 @@ describe("Inventory combat supplies", () => {
     expect(markup).toContain("築基輔助丹");
     expect(markup).toContain("突破機率: +10%");
   });
+
+  it("shows skill manuals as a study step before equipping from the skill panel", () => {
+    const markup = renderInventory({}, "manual_s_q_active");
+
+    expect(markup).toContain("參悟");
+    expect(markup).toContain("參悟後可至底部「功法」面板裝備主動術式參戰");
+  });
 });

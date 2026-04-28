@@ -1569,6 +1569,23 @@ export const Adventure: React.FC<AdventureProps> = ({
     // PixiJS handles rendering and camera movement now.
     // We retain gridMetrics for proper sizing.
 
+  const nearbyMonsterCount = activeMonsters.filter((monster) => {
+      const relX = monster.x - playerPosition.x;
+      const relY = monster.y - playerPosition.y;
+      return Math.abs(relX) < 10 && Math.abs(relY) < 10;
+  }).length;
+  const bossStatusLabel = mapData?.enemies.some((enemy) => enemy.rank === EnemyRank.Boss)
+      ? activeMonsters.some((monster) => monster.rank === EnemyRank.Boss)
+          ? 'Boss 已出現'
+          : 'Boss 未現身'
+      : '無 Boss';
+  const actionTargetLabel = targetedMonster ? targetedMonster.name : '未鎖定目標';
+  const actionSkillLabel = primaryActiveSkill?.name ?? '尚未習得主動術式';
+  const actionSkillMpLabel = primaryActiveSkill
+      ? hasEnoughMpForPrimaryActiveSkill
+          ? `靈力可用 ${Math.floor(worldPlayerMp)} / ${primaryActiveSkillMpCost}`
+          : `靈力不足 ${Math.floor(worldPlayerMp)} / ${primaryActiveSkillMpCost}`
+      : `靈力 ${Math.floor(worldPlayerMp)} / ${playerStats.maxMp}`;
 
 
 
@@ -1619,6 +1636,22 @@ export const Adventure: React.FC<AdventureProps> = ({
                      {playerPosition.x},{playerPosition.y}
                  </div>
             </Button>
+             <div
+                className="w-32 rounded-lg border border-stone-700/80 bg-black/72 px-2.5 py-2 text-right text-[10px] text-stone-400 shadow-lg backdrop-blur md:w-40"
+                data-testid="adventure-minimap-status"
+             >
+                <div className="truncate font-bold tracking-widest text-stone-200">
+                    {mapData?.name ?? '未知地界'}
+                </div>
+                <div className="mt-1 flex items-center justify-end gap-1 font-mono text-stone-500">
+                    <MapPin size={10} />
+                    {playerPosition.x},{playerPosition.y}
+                </div>
+                <div className="mt-1 text-amber-200">附近妖獸 {nearbyMonsterCount}</div>
+                <div className={clsx("mt-0.5", bossStatusLabel === 'Boss 已出現' ? "text-red-300" : "text-stone-500")}>
+                    {bossStatusLabel}
+                </div>
+             </div>
              <div className="flex flex-col items-end gap-1">
                  <div className="flex items-center gap-2">
                      <Button
@@ -2298,9 +2331,26 @@ export const Adventure: React.FC<AdventureProps> = ({
 
         {combatUiState.showCombatCommandSurface && (
             <div
-              className="pointer-events-none fixed bottom-24 right-4 z-[3100] flex flex-col items-end gap-2"
+              className="pointer-events-none fixed bottom-24 right-3 z-[3100] flex max-w-[calc(100vw-1.5rem)] flex-col items-end gap-2 md:right-4"
               data-testid="adventure-action-wheel"
             >
+                <div
+                  className="pointer-events-auto w-[min(360px,calc(100vw-1.5rem))] rounded-2xl border border-stone-700/80 bg-stone-950/86 px-3 py-2 text-xs text-stone-400 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl md:w-[390px]"
+                  data-testid="adventure-action-wheel-status"
+                >
+                    <div className="flex items-center justify-between gap-3">
+                        <span className="min-w-0 truncate font-bold text-stone-200">目標：{actionTargetLabel}</span>
+                        <span className={clsx("shrink-0 font-bold", targetedMonster ? "text-emerald-300" : "text-stone-500")}>
+                            {targetedMonster && canEngageTarget ? "可接戰" : targetedMonster ? "靠近目標" : "待鎖定"}
+                        </span>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between gap-3">
+                        <span className="min-w-0 truncate">功法：{actionSkillLabel}</span>
+                        <span className={clsx("shrink-0", hasEnoughMpForPrimaryActiveSkill ? "text-blue-200" : "text-amber-300")}>
+                            {actionSkillMpLabel}
+                        </span>
+                    </div>
+                </div>
                 <div className="pointer-events-auto flex items-end gap-2 rounded-[22px] border border-stone-700/80 bg-stone-950/86 px-3 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl">
                         <Button
                             onClick={() => {

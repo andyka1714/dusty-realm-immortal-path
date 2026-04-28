@@ -85,6 +85,35 @@ export const QUESTS: Record<string, Quest> = {
             ]
         }
     },
+    'tutorial_03_scripture_intro': {
+        id: 'tutorial_03_scripture_intro',
+        type: QuestType.Main,
+        title: '藏經初問',
+        description: '前往鎮中藏經閣，了解功法秘卷、背包參悟與功法面板裝備的流程。',
+        giverId: 'village_scripture_keeper',
+        prerequisiteQuestId: 'tutorial_02_get_sword',
+        submitNpcId: 'village_scripture_keeper',
+        requirements: [
+            { type: 'dialogue', targetNpcId: 'village_scripture_keeper' }
+        ],
+        rewards: [
+            { exp: 80, spiritStones: 60 }
+        ],
+        dialogue: {
+            start: [
+                '你既已領了兵器，下一步便該明白何謂功法。',
+                '藏經閣售的是秘卷，不是直接灌入腦中的法術。買到秘卷後，需到背包參悟，符合職業、境界與前置條件，才會真正學會。',
+                '學會主動術式後，再打開底部功法面板，將它裝備參戰。圖鑑只查來源，真正上陣用哪一門功法，要在功法面板決定。'
+            ],
+            progress: [
+                '先記住三步：藏經閣得秘卷，背包參悟，功法面板裝備參戰。'
+            ],
+            complete: [
+                '很好，你已知道功法不是圖鑑條目，而是修士自身的戰鬥配置。',
+                '若靈石足夠，可先在藏經閣挑一卷入門秘卷；若暫時不買，也可循任務與妖獸掉落慢慢取得。'
+            ]
+        }
+    },
 
     // --- Sect Join Quests ---
 

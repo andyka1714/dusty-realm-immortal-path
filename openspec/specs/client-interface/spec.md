@@ -662,3 +662,28 @@ Workshop 介面必須 (MUST) 顯示 mastery milestone、specialization leaf、ro
 - **THEN** desktop 任務追蹤必須顯示在角色卡下方
 - **AND** mobile 任務追蹤必須以低佔用入口收合並可展開
 
+### Requirement: RPG 主畫面 Layout v2 必須有 runtime 狀態層
+介面必須 (MUST) 在 Adventure 主畫面提供穩定的右上小地圖資訊層與右下戰鬥功法快捷狀態，讓 layout v2 不只停留在規格描述。
+
+#### Scenario: 玩家在主畫面查看地圖與戰鬥狀態
+- **WHEN** 玩家進入 Adventure 主畫面
+- **THEN** 右上小地圖必須顯示目前地圖、座標、附近妖獸與 Boss 狀態
+- **AND** 右下 action wheel 必須顯示目前目標、裝備主動功法與靈力可用狀態
+- **AND** mobile viewport 下任務入口、底部 dock 與戰鬥快捷不得互相遮擋
+
+### Requirement: 功法介面必須串起取得、參悟與裝備流程
+介面必須 (MUST) 清楚說明功法秘卷取得後仍需到背包參悟，參悟後才會出現在功法面板並可裝備參戰。
+
+#### Scenario: 玩家查看功法面板
+- **WHEN** 玩家打開底部 `功法`
+- **THEN** 面板必須顯示藏經閣、任務、怪物掉落或傳承取得秘卷的入口說明
+- **AND** 必須說明秘卷需在背包參悟，已學主動術式可在此裝備參戰
+
+### Requirement: 規劃文件不得把歷史待辦誤導為 active backlog
+專案文件必須 (MUST) 清楚區分歷史 plan 與目前 active OpenSpec backlog，避免已完成 runtime 被舊 checklist 重新標成未完成。
+
+#### Scenario: 開發者盤點未完成項目
+- **WHEN** 開發者查看舊 plan 或 checklist
+- **THEN** 文件必須指出已被後續 tracking / archive 吸收的 plan 不再是 active backlog
+- **AND** active backlog 必須以 `openspec list` 與最新 tracking 節為準
+

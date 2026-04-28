@@ -1,5 +1,7 @@
 # Endgame Route v5 Implementation Plan
 
+> Historical status: 本計畫已由 `docs/06_Balance_Audit/20_Android_UI驗證與下一階段Priority追蹤.md` 第 25 節收口，對應 OpenSpec / live code / tests 已完成。下方 unchecked boxes 是原始執行計畫格式保留，不再代表 active backlog。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 完成 `expand-endgame-route-v5`，把 v4 終盤記憶延伸成 v5 aftermath、Workshop follow-up、map-local clue、reincarnation seal 與 authoring audit。

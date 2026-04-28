@@ -752,3 +752,36 @@ Change id: `expand-endgame-route-density-v7`
 - `npx tsc --noEmit`
 - `npm run build`
 - `git diff --check`
+
+## 35. RPG 主畫面 / 功法流程 / 主線 Foundation v8 規劃與收口
+
+Change ids:
+
+- `refine-rpg-main-screen-layout-v2-runtime`
+- `tighten-skill-acquisition-to-loadout-loop`
+- `expand-main-questline-foundation`
+- `cleanup-stale-planning-docs`
+
+本輪承接 RPG HUD 與功法操作設計，將下一步拆成四條小 change，而不是再次開一條大型 UI / gameplay 混合案：
+
+- Adventure 主畫面補上 runtime layout v2 狀態層：右上小地圖顯示目前地圖、座標、附近妖獸與 Boss 狀態；右下 action wheel 顯示目標、功法與靈力狀態。
+- 功法面板補上「藏經閣購買 / 背包參悟 / 裝備參戰」流程提示；背包參悟功法後提示可到功法面板裝備主動術式。
+- 新增 `tutorial_03_scripture_intro` 早期主線，掛到凡界 `藏經閣執事`，讓任務追蹤能把玩家導向功法秘卷流程。
+- `docs/superpowers/plans/2026-04-28-endgame-route-v5.md` 已標記為 historical completed elsewhere，避免原始 unchecked plan 被誤判為 active backlog。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；新增內容皆由既有 Adventure runtime、static quest / NPC catalog、`character.skills` 與 `equippedActiveSkillId` 推導或呈現。
+
+目前已跑 focused RED/GREEN 驗證：
+
+- `npm test -- components/game/SkillPanel.test.tsx pages/Inventory.supplies.test.tsx data/mainQuestlineFoundation.test.ts`
+- `npm run test:e2e -- tests/e2e/shared-ui-foundation.spec.ts --project=chromium -g "layout v2 minimap"`
+- `openspec validate <4 changes> --strict`
+- `npm test`
+- `npx tsc --noEmit`
+- `npm run build`
+- `npm run test:e2e`
+- `git diff --check`

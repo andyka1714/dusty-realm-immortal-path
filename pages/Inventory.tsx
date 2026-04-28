@@ -363,7 +363,7 @@ export const Inventory: React.FC<InventoryProps> = ({
     if (selectedSkill) {
       dispatch(
         addLog({
-          message: `你參悟了【${selectedSkill.name}】。`,
+          message: `你參悟了【${selectedSkill.name}】。可至底部「功法」面板裝備主動術式參戰。`,
           type: 'success',
         })
       );
@@ -817,6 +817,9 @@ export const Inventory: React.FC<InventoryProps> = ({
                            )}
                            {selectedConsumable?.requiredRealm !== undefined && (
                              <div>境界限制：{REALM_NAMES[selectedConsumable.requiredRealm]}期以上</div>
+                           )}
+                           {selectedSkill && (
+                             <div>參悟後可至底部「功法」面板裝備主動術式參戰。</div>
                            )}
                            {selectedSkill && selectedSkill.prerequisiteSkillIds && selectedSkill.prerequisiteSkillIds.length > 0 && (
                              <div>

@@ -53,7 +53,8 @@ export const VILLAGE_NPCS: NPC[] = [
         x: 20,
         y: 25,
         description: '守著鎮中藏經閣的執事，供應入門功法秘卷。',
-        shopId: 'skill_shop_mortal'
+        shopId: 'skill_shop_mortal',
+        questIds: ['tutorial_03_scripture_intro']
     }
 ];
 
