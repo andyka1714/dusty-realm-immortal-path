@@ -183,6 +183,26 @@ export const MATERIAL_ITEMS: Record<string, Item> = {
     description: '古修傳承中剝落的殘頁，可累積兌換真傳秘卷或高階法寶線索。', price: 0, quality: ItemQuality.High, maxStack: 99999,
     minRealm: MajorRealm.GoldenCore,
   },
+  'gathering_array_plate': {
+    id: 'gathering_array_plate', name: '聚靈陣盤', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '刻有聚靈紋路的陣盤胚，作為洞府與場域系統的 catalog-only 物品。', price: 900, quality: ItemQuality.Medium, maxStack: 99,
+    minRealm: MajorRealm.Foundation,
+  },
+  'breakthrough_guard_array': {
+    id: 'breakthrough_guard_array', name: '護關陣盤', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '可用於後續突破護關玩法的陣盤，目前只作高階任務與 recipe 語彙。', price: 1200, quality: ItemQuality.Medium, maxStack: 99,
+    minRealm: MajorRealm.Foundation,
+  },
+  'sword_artifact_embryo': {
+    id: 'sword_artifact_embryo', name: '劍形法寶胚', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '尚未開鋒的法寶胚體，未接入法寶裝備欄前只作 catalog-only 物品。', price: 3200, quality: ItemQuality.High, maxStack: 9,
+    minRealm: MajorRealm.GoldenCore,
+  },
+  'artifact_spirit_shard': {
+    id: 'artifact_spirit_shard', name: '器靈碎片', category: ItemCategory.Material, subType: MaterialType.Other,
+    description: '殘缺器靈留下的碎片，未接入器靈養成前只作傳承與法寶線索。', price: 4500, quality: ItemQuality.High, maxStack: 99,
+    minRealm: MajorRealm.GoldenCore,
+  },
   'sword_path_starsteel': {
     id: 'sword_path_starsteel',
     name: '凌霄劍星鋼',

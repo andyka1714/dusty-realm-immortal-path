@@ -143,6 +143,30 @@ export const CONSUMABLE_ITEMS: Record<string, Item> = {
     maxUsage: 5,
     effects: [{ type: "lifespan", value: 3650 }],
   },
+  thunder_talisman: {
+    id: "thunder_talisman",
+    name: "引雷符",
+    category: ItemCategory.Consumable,
+    subType: ConsumableType.Fateful,
+    description: "封存一縷雷意的一次性符籙，目前以短時間提升根骨代表戰鬥爆發。",
+    price: 260,
+    quality: ItemQuality.Medium,
+    maxStack: 20,
+    requiredRealm: MajorRealm.QiRefining,
+    effects: [{ type: "buff_stat", value: 8, duration: 90, stat: "rootBone" }],
+  },
+  warding_talisman: {
+    id: "warding_talisman",
+    name: "護身符",
+    category: ItemCategory.Consumable,
+    subType: ConsumableType.Fateful,
+    description: "以符紙承接護體靈紋的一次性符籙，目前以短時間提升體魄代表防護。",
+    price: 220,
+    quality: ItemQuality.Medium,
+    maxStack: 20,
+    requiredRealm: MajorRealm.QiRefining,
+    effects: [{ type: "buff_stat", value: 8, duration: 90, stat: "physique" }],
+  },
 
   // --- Breakthrough Items ---
   bt_mortal_qi: {

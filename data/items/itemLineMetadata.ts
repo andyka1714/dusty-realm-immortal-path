@@ -63,7 +63,11 @@ export const ITEM_LINE_REALM_COVERAGE: Record<
     [MajorRealm.Foundation]: ["trial_writ_token"],
     [MajorRealm.GoldenCore]: ["inheritance_fragment"],
   },
-  talisman_array_artifact: {},
+  talisman_array_artifact: {
+    [MajorRealm.QiRefining]: ["thunder_talisman", "warding_talisman"],
+    [MajorRealm.Foundation]: ["gathering_array_plate", "breakthrough_guard_array"],
+    [MajorRealm.GoldenCore]: ["sword_artifact_embryo", "artifact_spirit_shard"],
+  },
 };
 
 export const QUEST_ITEM_IDS = [
@@ -148,6 +152,39 @@ export const TOKEN_ITEMS = [
   {
     itemId: "inheritance_fragment",
     exchangeLoop: "古修傳承、真傳秘卷與高階法寶兌換",
+  },
+] as const;
+
+export const TALISMAN_ARRAY_ARTIFACT_ITEMS = [
+  {
+    itemId: "thunder_talisman",
+    kind: "talisman",
+    runtimeStatus: "usable",
+  },
+  {
+    itemId: "warding_talisman",
+    kind: "talisman",
+    runtimeStatus: "usable",
+  },
+  {
+    itemId: "gathering_array_plate",
+    kind: "array",
+    runtimeStatus: "catalog_only",
+  },
+  {
+    itemId: "breakthrough_guard_array",
+    kind: "array",
+    runtimeStatus: "catalog_only",
+  },
+  {
+    itemId: "sword_artifact_embryo",
+    kind: "artifact",
+    runtimeStatus: "catalog_only",
+  },
+  {
+    itemId: "artifact_spirit_shard",
+    kind: "spirit",
+    runtimeStatus: "catalog_only",
   },
 ] as const;
 

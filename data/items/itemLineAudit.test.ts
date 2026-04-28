@@ -8,6 +8,7 @@ import {
   ITEM_LINE_REALM_COVERAGE,
   QUEST_ITEM_IDS,
   REGION_SPECIALTY_ITEMS,
+  TALISMAN_ARRAY_ARTIFACT_ITEMS,
   TOKEN_ITEMS,
 } from "./itemLineMetadata";
 
@@ -173,6 +174,24 @@ describe("item line metadata", () => {
       expect(item?.maxStack, `${token.itemId} stack`).toBeGreaterThanOrEqual(999);
       expect(token.exchangeLoop.length, `${token.itemId} exchange loop`).toBeGreaterThan(0);
       expect(workshopItemIds.has(token.itemId), `${token.itemId} should not be a workshop item`).toBe(false);
+    });
+  });
+
+  it("separates usable talismans from catalog-only arrays artifacts and spirits", () => {
+    expect(TALISMAN_ARRAY_ARTIFACT_ITEMS.length).toBeGreaterThanOrEqual(6);
+
+    TALISMAN_ARRAY_ARTIFACT_ITEMS.forEach((entry) => {
+      const item = ITEMS[entry.itemId];
+
+      expect(item, `${entry.itemId} should exist`).toBeDefined();
+      if (entry.kind === "talisman") {
+        const consumable = item as ConsumableItem;
+        expect(consumable.category, `${entry.itemId} category`).toBe(ItemCategory.Consumable);
+        expect(consumable.effects.length, `${entry.itemId} effects`).toBeGreaterThan(0);
+      } else {
+        expect(item?.category, `${entry.itemId} category`).toBe(ItemCategory.Material);
+        expect(entry.runtimeStatus, `${entry.itemId} runtime status`).toBe("catalog_only");
+      }
     });
   });
 });
