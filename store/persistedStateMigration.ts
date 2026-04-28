@@ -8,6 +8,7 @@ import {
   ItemInstance,
   LifeReviewSummary,
   MajorRealm,
+  ProfessionType,
   SoulState,
   WorkshopDiscipline,
   WorkshopState,
@@ -102,7 +103,11 @@ const sanitizePersistedEquippedActiveSkillId = ({
     return null;
   }
 
-  if (typeof profession === "string" && skill.profession !== profession) {
+  if (
+    typeof profession === "string" &&
+    skill.profession !== profession &&
+    skill.profession !== ProfessionType.None
+  ) {
     return null;
   }
 

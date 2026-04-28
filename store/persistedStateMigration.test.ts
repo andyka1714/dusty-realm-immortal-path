@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getSkillManualId } from "../data/items/manuals";
-import { ItemQuality, MajorRealm } from "../types";
+import { ItemQuality, MajorRealm, ProfessionType } from "../types";
 import {
   PersistedState,
   migratePersistedState,
@@ -248,6 +248,22 @@ describe("persisted state migration", () => {
     expect(
       (invalid.character as { equippedActiveSkillId?: string | null }).equippedActiveSkillId
     ).toBeNull();
+  });
+
+  it("keeps equipped common active skill ids for any profession", () => {
+    const migrated = migratePersistedState(
+      createPersistedState({
+        character: {
+          profession: ProfessionType.Sword,
+          skills: ["common_f_active"],
+          equippedActiveSkillId: "common_f_active",
+        },
+      })
+    );
+
+    expect(
+      (migrated.character as { equippedActiveSkillId?: string | null }).equippedActiveSkillId
+    ).toBe("common_f_active");
   });
 
   it("upgrades retired manual ids in inventory and itemConsumption to formal manuals", () => {

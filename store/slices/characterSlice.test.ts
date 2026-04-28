@@ -252,6 +252,19 @@ describe("character skill acquisition rules", () => {
     expect(cleared.equippedActiveSkillId).toBeNull();
   });
 
+  it("allows learned common active skills to be equipped by any profession", () => {
+    const base = {
+      ...reducer(undefined, { type: "test/init" }),
+      profession: ProfessionType.Sword,
+      majorRealm: MajorRealm.Foundation,
+      skills: ["common_f_active"],
+    };
+
+    const equipped = reducer(base, equipActiveSkill("common_f_active"));
+
+    expect(equipped.equippedActiveSkillId).toBe("common_f_active");
+  });
+
   it("clears breakthrough consequence when initializing a new run", () => {
     const base = reducer(undefined, { type: "test/init" });
     const initialized = reducer(

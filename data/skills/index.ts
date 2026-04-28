@@ -15,6 +15,7 @@ import { MAHAYANA_SKILLS } from "./mahayana";
 import { TRIBULATION_SKILLS } from "./tribulation";
 import { IMMORTAL_SKILLS } from "./immortal";
 import { IMMORTAL_EMPEROR_SKILLS } from "./immortal_emperor";
+import { COMMON_SKILLS } from "./common";
 import {
   ALL_RETIRED_ALIASES,
 } from "./retired_aliases";
@@ -410,6 +411,7 @@ const normalizeSkill = (skill: Skill): Skill => {
 };
 
 const RAW_SKILLS: Record<string, Skill> = {
+  ...COMMON_SKILLS,
   ...QI_REFINING_SKILLS,
   ...FOUNDATION_SKILLS,
   ...GOLDEN_CORE_SKILLS,
@@ -424,16 +426,45 @@ const RAW_SKILLS: Record<string, Skill> = {
   ...ALL_RETIRED_ALIASES,
 };
 
+const getCommonSkillsForRealm = (realm: MajorRealm) =>
+  Object.fromEntries(
+    Object.entries(COMMON_SKILLS).filter(([, skill]) => skill.minRealm === realm)
+  ) as Record<string, Skill>;
+
 export const CORE_SKILL_SETS_BY_REALM: Record<MajorRealm, Record<string, Skill>> = {
   [MajorRealm.Mortal]: {},
-  [MajorRealm.QiRefining]: QI_REFINING_SKILLS,
-  [MajorRealm.Foundation]: FOUNDATION_SKILLS,
-  [MajorRealm.GoldenCore]: GOLDEN_CORE_SKILLS,
-  [MajorRealm.NascentSoul]: NASCENT_SOUL_SKILLS,
-  [MajorRealm.SpiritSevering]: SPIRIT_SEVERING_SKILLS,
-  [MajorRealm.VoidRefining]: VOID_REFINING_SKILLS,
-  [MajorRealm.Fusion]: FUSION_SKILLS,
-  [MajorRealm.Mahayana]: MAHAYANA_SKILLS,
+  [MajorRealm.QiRefining]: {
+    ...getCommonSkillsForRealm(MajorRealm.QiRefining),
+    ...QI_REFINING_SKILLS,
+  },
+  [MajorRealm.Foundation]: {
+    ...getCommonSkillsForRealm(MajorRealm.Foundation),
+    ...FOUNDATION_SKILLS,
+  },
+  [MajorRealm.GoldenCore]: {
+    ...getCommonSkillsForRealm(MajorRealm.GoldenCore),
+    ...GOLDEN_CORE_SKILLS,
+  },
+  [MajorRealm.NascentSoul]: {
+    ...getCommonSkillsForRealm(MajorRealm.NascentSoul),
+    ...NASCENT_SOUL_SKILLS,
+  },
+  [MajorRealm.SpiritSevering]: {
+    ...getCommonSkillsForRealm(MajorRealm.SpiritSevering),
+    ...SPIRIT_SEVERING_SKILLS,
+  },
+  [MajorRealm.VoidRefining]: {
+    ...getCommonSkillsForRealm(MajorRealm.VoidRefining),
+    ...VOID_REFINING_SKILLS,
+  },
+  [MajorRealm.Fusion]: {
+    ...getCommonSkillsForRealm(MajorRealm.Fusion),
+    ...FUSION_SKILLS,
+  },
+  [MajorRealm.Mahayana]: {
+    ...getCommonSkillsForRealm(MajorRealm.Mahayana),
+    ...MAHAYANA_SKILLS,
+  },
   [MajorRealm.Tribulation]: TRIBULATION_SKILLS,
   [MajorRealm.Immortal]: IMMORTAL_SKILLS,
   [MajorRealm.ImmortalEmperor]: IMMORTAL_EMPEROR_SKILLS,
@@ -547,7 +578,9 @@ export const FORMAL_CORE_SKILLS_BY_PROFESSION: Record<
   ProfessionType,
   Skill[]
 > = {
-  [ProfessionType.None]: [],
+  [ProfessionType.None]: FORMAL_CORE_SKILLS.filter(
+    (skill) => skill.profession === ProfessionType.None
+  ).sort(compareSkills),
   [ProfessionType.Sword]: FORMAL_CORE_SKILLS.filter(
     (skill) => skill.profession === ProfessionType.Sword
   ).sort(compareSkills),
@@ -838,7 +871,7 @@ export const getFormalCoreSkills = (options?: {
   type?: Skill["type"];
 }) =>
   FORMAL_CORE_SKILLS_SORTED.filter((skill) => {
-    if (options?.profession && skill.profession !== options.profession) {
+    if (options?.profession !== undefined && skill.profession !== options.profession) {
       return false;
     }
     if (options?.minRealm !== undefined && skill.minRealm !== options.minRealm) {

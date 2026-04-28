@@ -198,7 +198,8 @@ const canEquipActiveSkill = (
     skill &&
       skill.type === "Active" &&
       state.skills.includes(normalizedSkillId) &&
-      skill.profession === state.profession
+      (skill.profession === state.profession ||
+        skill.profession === ProfessionType.None)
   );
 };
 

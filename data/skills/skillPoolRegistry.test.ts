@@ -745,6 +745,7 @@ describe("skill pool registry", () => {
   });
 
   it("provides per-profession formal core groupings", () => {
+    expect(FORMAL_CORE_SKILLS_BY_PROFESSION[ProfessionType.None]).toHaveLength(8);
     expect(FORMAL_CORE_SKILLS_BY_PROFESSION[ProfessionType.Sword]).toHaveLength(12);
     expect(FORMAL_CORE_SKILLS_BY_PROFESSION[ProfessionType.Body]).toHaveLength(12);
     expect(FORMAL_CORE_SKILLS_BY_PROFESSION[ProfessionType.Mage]).toHaveLength(12);
@@ -754,7 +755,7 @@ describe("skill pool registry", () => {
     const allFormalRealms = FORMAL_CORE_SKILLS_SORTED.map((skill) => skill.minRealm);
     expect(allFormalRealms).toEqual([...allFormalRealms].sort((left, right) => left - right));
 
-    [ProfessionType.Sword, ProfessionType.Body, ProfessionType.Mage].forEach((profession) => {
+    [ProfessionType.None, ProfessionType.Sword, ProfessionType.Body, ProfessionType.Mage].forEach((profession) => {
       const professionRealms = FORMAL_CORE_SKILLS_BY_PROFESSION[profession].map(
         (skill) => skill.minRealm
       );

@@ -36,7 +36,10 @@ const QI_SKILL_MANUALS = getManualIds(
 
 const getSectManuals = (profession: ProfessionType) =>
   getManualIds(
-    SHOP_CORE_SKILLS.filter((skill) => skill.profession === profession)
+    SHOP_CORE_SKILLS.filter(
+      (skill) =>
+        skill.profession === profession || skill.profession === ProfessionType.None
+    )
   );
 
 const SWORD_SECT_MANUALS = getSectManuals(ProfessionType.Sword);

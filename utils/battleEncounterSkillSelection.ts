@@ -1,12 +1,23 @@
 import { ProfessionType, Skill } from "../types";
 
+const canUseActiveSkillForProfession = (skill: Skill, profession: ProfessionType) =>
+  skill.type === "Active" &&
+  (skill.profession === profession || skill.profession === ProfessionType.None);
+
 export const getHighestActiveSkill = (
   profession: ProfessionType,
   learnedSkills: Skill[]
 ): Skill | undefined =>
   learnedSkills
-    .filter((skill) => skill.profession === profession && skill.type === "Active")
-    .sort((left, right) => right.minRealm - left.minRealm)[0];
+    .filter((skill) => canUseActiveSkillForProfession(skill, profession))
+    .sort((left, right) => {
+      if (left.minRealm !== right.minRealm) {
+        return right.minRealm - left.minRealm;
+      }
+      const leftProfessionPriority = left.profession === profession ? 0 : 1;
+      const rightProfessionPriority = right.profession === profession ? 0 : 1;
+      return leftProfessionPriority - rightProfessionPriority;
+    })[0];
 
 export const getSelectedActiveSkill = (
   profession: ProfessionType,
@@ -17,8 +28,7 @@ export const getSelectedActiveSkill = (
     ? learnedSkills.find(
         (skill) =>
           skill.id === equippedActiveSkillId &&
-          skill.profession === profession &&
-          skill.type === "Active"
+          canUseActiveSkillForProfession(skill, profession)
       )
     : undefined;
 

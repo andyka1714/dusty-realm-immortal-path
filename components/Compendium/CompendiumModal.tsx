@@ -705,6 +705,50 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
     );
   };
 
+  const renderSkillCard = (skill: Skill) => {
+    const sourceTrace = buildCompendiumSkillSourceTrace(skill);
+
+    return (
+      <div
+        key={skill.id}
+        className="bg-stone-800 p-3 rounded border border-stone-700 group hover:border-amber-500/30 transition-colors"
+        data-testid={`compendium-skill-card-${skill.id}`}
+      >
+        <div className="flex justify-between">
+          <span className="font-bold text-stone-200">{skill.name}</span>
+          <span className="ml-2 h-fit shrink-0 rounded border border-amber-900/40 bg-amber-950/30 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200">
+            {getSkillTypeLabel(skill.type)}
+          </span>
+        </div>
+
+        <div className="mb-1 flex flex-wrap items-center gap-1 text-xs text-stone-500">
+          <span className="rounded border border-amber-900/30 bg-amber-950/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200">
+            功法
+          </span>
+          <span>{getProfessionLabel(skill.profession)}</span>
+          <span>{MajorRealmCN[skill.minRealm]}期</span>
+          <span>來源：{sourceTrace.formalSourceLabel}</span>
+        </div>
+
+        <p className="text-xs text-stone-400 mt-1 line-clamp-2 min-h-[2.5em]">
+          {skill.description}
+        </p>
+
+        <div
+          className="mt-3 pt-2 border-t border-stone-700/50"
+          data-testid={`compendium-skill-source-${skill.id}`}
+        >
+          <span className="text-[10px] text-stone-600 block mb-1">
+            來源追蹤:
+          </span>
+          <div className="flex flex-wrap gap-1">
+            {renderSourceChips(sourceTrace.sources, "未標記")}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (!isOpen) return null;
 
   const content = (
@@ -1291,35 +1335,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                           {MajorRealmCN[group.realm]}期
                         </h3>
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                          {group.skills.map((skill) => {
-                            const sourceTrace = buildCompendiumSkillSourceTrace(skill);
-                            return (
-                              <div
-                                key={skill.id}
-                                className="rounded border border-stone-700 bg-stone-800 p-4"
-                              >
-                              <div className="flex items-start justify-between gap-3">
-                                <h4 className="font-bold text-indigo-400">
-                                  {skill.name}
-                                </h4>
-                                <span className="shrink-0 rounded bg-stone-700 px-2 py-0.5 text-xs text-stone-300">
-                                  {getSkillTypeLabel(skill.type)}
-                                </span>
-                              </div>
-                              <div className="mt-1 text-xs text-stone-500">
-                                {getProfessionLabel(skill.profession)} |{" "}
-                                {MajorRealmCN[skill.minRealm]} | 來源：
-                                {sourceTrace.formalSourceLabel}
-                              </div>
-                              <div className="mt-2 flex flex-wrap gap-1">
-                                {renderSourceChips(sourceTrace.sources, "未標記")}
-                              </div>
-                              <p className="mt-2 text-sm text-stone-300">
-                                {skill.description}
-                              </p>
-                            </div>
-                            );
-                          })}
+                          {group.skills.map((skill) => renderSkillCard(skill))}
                         </div>
                       </section>
                     ))}

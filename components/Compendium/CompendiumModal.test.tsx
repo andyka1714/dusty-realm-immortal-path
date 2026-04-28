@@ -108,6 +108,19 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).not.toContain("裂地重拳");
   });
 
+  it("renders common skills with equipment-like card structure", () => {
+    const markup = renderCompendium({
+      initialTab: "skill",
+      initialSkillProfession: "None",
+    });
+
+    expect(markup).toContain('data-testid="compendium-skill-card-common_q_passive"');
+    expect(markup).toContain("通用功法");
+    expect(markup).toContain("歸元吐納");
+    expect(markup).toContain("bg-stone-800 p-3 rounded border border-stone-700");
+    expect(markup).toContain("來源追蹤");
+  });
+
   it("surfaces item source tracing for route materials", () => {
     const markup = renderCompendium({ initialTab: "item" });
 

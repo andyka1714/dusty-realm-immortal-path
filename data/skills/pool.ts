@@ -34,6 +34,17 @@ const defineSkill = (
   replacementSkillId,
 });
 
+const COMMON_SKILL_POOL_ENTRIES: SkillPoolEntry[] = [
+  defineSkill(ProfessionType.None, "common_q_passive", "core", "passive", "shop"),
+  defineSkill(ProfessionType.None, "common_f_active", "core", "utility", "shop"),
+  defineSkill(ProfessionType.None, "common_g_passive", "core", "passive", "shop"),
+  defineSkill(ProfessionType.None, "common_n_active", "core", "utility", "shop"),
+  defineSkill(ProfessionType.None, "common_sf_passive", "core", "passive", "elite"),
+  defineSkill(ProfessionType.None, "common_vr_active", "core", "utility", "boss"),
+  defineSkill(ProfessionType.None, "common_fu_passive", "core", "passive", "elite"),
+  defineSkill(ProfessionType.None, "common_ma_active", "core", "utility", "inheritance"),
+];
+
 const SWORD_SKILL_POOL_ENTRIES: SkillPoolEntry[] = [
   defineSkill(ProfessionType.Sword, "s_q_active", "core", "guaranteed", "shop"),
   defineSkill(ProfessionType.Sword, "s_q_passive", "core", "passive", "shop"),
@@ -110,7 +121,7 @@ const MAGE_SKILL_POOL_ENTRIES: SkillPoolEntry[] = [
 ];
 
 const SKILL_POOL_ENTRIES_BY_PROFESSION: Record<ProfessionType, SkillPoolEntry[]> = {
-  [ProfessionType.None]: [],
+  [ProfessionType.None]: COMMON_SKILL_POOL_ENTRIES,
   [ProfessionType.Sword]: SWORD_SKILL_POOL_ENTRIES,
   [ProfessionType.Body]: BODY_SKILL_POOL_ENTRIES,
   [ProfessionType.Mage]: MAGE_SKILL_POOL_ENTRIES,

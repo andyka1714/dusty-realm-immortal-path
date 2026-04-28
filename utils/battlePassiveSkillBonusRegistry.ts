@@ -10,6 +10,25 @@ const FORMAL_PASSIVE_SKILL_BONUS_MAP: Record<
   string,
   Partial<PassiveSkillBonuses>
 > = {
+  common_q_passive: {
+    mpPercent: 5,
+    resPercent: 3,
+  },
+  common_g_passive: {
+    critBonus: 1.5,
+    critDamageBonus: 8,
+    resPercent: 5,
+  },
+  common_sf_passive: {
+    dodgeBonus: 2,
+    resPercent: 8,
+  },
+  common_fu_passive: {
+    hpPercent: 10,
+    mpPercent: 10,
+    defensePercent: 6,
+    resPercent: 6,
+  },
   s_q_passive: {
     attackPercent: 6,
     critBonus: 2,
