@@ -141,6 +141,89 @@ describe("questTracker", () => {
     });
   });
 
+  it("points available quests to their giver before tracking their completion target", () => {
+    const items = buildQuestTrackerItems({
+      activeQuests: {},
+      completedQuests: ["intro"],
+      limit: 1,
+      quests: {
+        intro: {
+          id: "intro",
+          type: QuestType.Main,
+          title: "初見村長",
+          description: "",
+          giverId: "chief",
+          requirements: [{ type: "dialogue", targetNpcId: "chief" }],
+          rewards: [],
+          dialogue: { start: [], progress: [], complete: [] },
+        },
+        cross_npc: {
+          id: "cross_npc",
+          type: QuestType.Main,
+          title: "防身利器",
+          description: "村長建議你去鐵匠鋪領取一把防身兵器。",
+          giverId: "chief",
+          prerequisiteQuestId: "intro",
+          submitNpcId: "blacksmith",
+          requirements: [{ type: "dialogue", targetNpcId: "blacksmith" }],
+          rewards: [],
+          dialogue: { start: [], progress: [], complete: [] },
+        },
+      },
+      maps: [
+        {
+          id: "0",
+          name: "仙緣鎮",
+          theme: "Center",
+          minRealm: MajorRealm.Mortal,
+          description: "",
+          introText: "",
+          width: 40,
+          height: 40,
+          worldX: 0,
+          worldY: 0,
+          portals: [],
+          npcs: [
+            {
+              id: "chief",
+              name: "村長",
+              symbol: "長",
+              type: NPCType.Quest,
+              x: 20,
+              y: 18,
+              description: "",
+            },
+            {
+              id: "blacksmith",
+              name: "鐵匠鋪",
+              symbol: "匠",
+              type: NPCType.Shop,
+              x: 25,
+              y: 20,
+              description: "",
+            },
+          ],
+          enemies: [],
+          dropRateMultiplier: 1,
+        },
+      ],
+    });
+
+    expect(items[0]).toMatchObject({
+      questId: "cross_npc",
+      description: "村長建議你去鐵匠鋪領取一把防身兵器。",
+      lifecycleStatus: "available",
+      primaryActionLabel: "前往村長",
+      navigationTarget: {
+        kind: "npc",
+        mapId: "0",
+        x: 20,
+        y: 18,
+        label: "前往村長",
+      },
+    });
+  });
+
   it("derives ready and active lifecycle statuses separately", () => {
     const items = buildQuestTrackerItems({
       activeQuests: {
@@ -215,8 +298,8 @@ describe("questTracker", () => {
     expect(items[0]).toMatchObject({
       objectiveKind: "mixed",
       progressRows: [
-        { kind: "dialogue", label: "對話：前往 chief", complete: false },
-        { kind: "kill", label: "討伐 wolf", current: 2, required: 3, complete: false },
+        { kind: "dialogue", label: "對話：任務 NPC", complete: false },
+        { kind: "kill", label: "討伐 目標妖獸", current: 2, required: 3, complete: false },
         { kind: "item", label: "提交 spirit_token", current: 1, required: 2, complete: false },
         { kind: "level", label: "境界需求 2", complete: true },
       ],

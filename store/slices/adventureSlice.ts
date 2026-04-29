@@ -1,6 +1,6 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Enemy, CombatLog, Coordinate, ActiveMonster, EnemyRank, VisualEffect } from '../../types';
+import { Enemy, CombatLog, Coordinate, ActiveMonster, EnemyRank, NPC, VisualEffect } from '../../types';
 import { MAPS } from '../../data/maps';
 import {
   BOSS_RESPAWN_MINUTES,
@@ -88,6 +88,42 @@ const isOccupiedCell = (
   );
 };
 
+const isNpcCell = (npcs: NPC[] = [], x: number, y: number) =>
+  npcs.some((npc) => npc.x === x && npc.y === y);
+
+const isBlockedForPlayer = (
+  mapData: { npcs?: NPC[] },
+  monsters: ActiveMonster[],
+  x: number,
+  y: number
+) => isNpcCell(mapData.npcs, x, y) || isOccupiedCell(monsters, x, y);
+
+const resolvePlayerStartPosition = (
+  width: number,
+  height: number,
+  npcs: NPC[] = [],
+  preferred: Coordinate
+) => {
+  const candidates: Coordinate[] = [
+    preferred,
+    { x: preferred.x + 1, y: preferred.y },
+    { x: preferred.x - 1, y: preferred.y },
+    { x: preferred.x, y: preferred.y + 1 },
+    { x: preferred.x, y: preferred.y - 1 },
+  ];
+
+  return (
+    candidates.find(
+      (candidate) =>
+        candidate.x >= 0 &&
+        candidate.x < width &&
+        candidate.y >= 0 &&
+        candidate.y < height &&
+        !isNpcCell(npcs, candidate.x, candidate.y)
+    ) ?? preferred
+  );
+};
+
 const findOpenCoordinate = (
   width: number,
   height: number,
@@ -157,7 +193,12 @@ const adventureSlice = createSlice({
       if (!mapData) return;
 
       state.currentMapId = mapId;
-      state.playerPosition = { x: startX ?? 0, y: startY ?? 0 };
+      state.playerPosition = resolvePlayerStartPosition(
+        mapData.width,
+        mapData.height,
+        mapData.npcs,
+        { x: startX ?? 0, y: startY ?? 0 }
+      );
       state.visitedCells = { [`${state.playerPosition.x},${state.playerPosition.y}`]: true };
       
       // Spawn Monsters Logic
@@ -220,15 +261,23 @@ const adventureSlice = createSlice({
       if (mapData.bossSpawn) {
           const bossTemplate = mapData.enemies.find(e => e.rank === EnemyRank.Boss);
           if (bossTemplate) {
+             const bossPosition = findOpenCoordinate(
+               mapData.width,
+               mapData.height,
+               state.activeMonsters,
+               state.playerPosition,
+               { x: mapData.bossSpawn.x, y: mapData.bossSpawn.y }
+             );
+             if (!bossPosition) return;
              state.activeMonsters.push({
                   instanceId: 'boss_instance',
                   templateId: bossTemplate.id,
                   name: bossTemplate.name,
                   symbol: bossTemplate.symbol,
-                  x: mapData.bossSpawn.x,
-                  y: mapData.bossSpawn.y,
-                  spawnX: mapData.bossSpawn.x,
-                  spawnY: mapData.bossSpawn.y,
+                  x: bossPosition.x,
+                  y: bossPosition.y,
+                  spawnX: bossPosition.x,
+                  spawnY: bossPosition.y,
                   currentHp: bossTemplate.maxHp,
                   rank: EnemyRank.Boss
              });
@@ -249,6 +298,7 @@ const adventureSlice = createSlice({
       const newY = state.playerPosition.y + action.payload.dy;
 
       if (newX < 0 || newX >= mapData.width || newY < 0 || newY >= mapData.height) return;
+      if (isBlockedForPlayer(mapData, state.activeMonsters, newX, newY)) return;
 
       state.playerPosition = { x: newX, y: newY };
       state.visitedCells[`${newX},${newY}`] = true;

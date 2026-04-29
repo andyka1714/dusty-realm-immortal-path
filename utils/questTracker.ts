@@ -15,6 +15,7 @@ export interface ActiveQuestTrackerState {
 export interface QuestTrackerItem {
   questId: string;
   title: string;
+  description: string;
   typeLabel: string;
   statusLabel: string;
   progressLabel: string;
@@ -132,12 +133,37 @@ const getInventoryCount = (items: InventorySlot[] = [], itemId?: string) => {
     .reduce((total, item) => total + item.count, 0);
 };
 
-const formatRequirementLabel = (requirement: QuestRequirement) => {
+const findNpcName = (maps: MapData[] = [], npcId?: string) => {
+  if (!npcId) return undefined;
+  for (const map of maps) {
+    const npc = map.npcs.find((candidate) => candidate.id === npcId);
+    if (npc) {
+      return npc.name;
+    }
+  }
+  return undefined;
+};
+
+const findEnemyName = (maps: MapData[] = [], enemyId?: string) => {
+  if (!enemyId) return undefined;
+  for (const map of maps) {
+    const enemy = map.enemies.find((candidate) => candidate.id === enemyId);
+    if (enemy) {
+      return enemy.name;
+    }
+  }
+  return undefined;
+};
+
+const formatRequirementLabel = (
+  requirement: QuestRequirement,
+  maps: MapData[] = []
+) => {
   switch (requirement.type) {
     case "dialogue":
-      return `對話：前往 ${requirement.targetNpcId ?? "任務 NPC"}`;
+      return `對話：${findNpcName(maps, requirement.targetNpcId) ?? "任務 NPC"}`;
     case "kill":
-      return `討伐 ${requirement.targetId ?? "目標妖獸"}`;
+      return `討伐 ${findEnemyName(maps, requirement.targetId) ?? "目標妖獸"}`;
     case "item":
       return `提交 ${requirement.targetId ?? "任務物品"}`;
     case "level":
@@ -154,18 +180,20 @@ const buildProgressRows = ({
   activeQuest,
   inventoryItems = [],
   majorRealm = MajorRealm.Mortal,
+  maps = [],
 }: {
   quest: Quest;
   activeQuest?: ActiveQuestTrackerState;
   inventoryItems?: InventorySlot[];
   majorRealm?: MajorRealm;
+  maps?: MapData[];
 }): QuestProgressRow[] =>
   quest.requirements.map((requirement) => {
     switch (requirement.type) {
       case "dialogue":
         return {
           kind: "dialogue",
-          label: formatRequirementLabel(requirement),
+          label: formatRequirementLabel(requirement, maps),
           complete: Boolean(activeQuest?.isReadyToComplete),
         };
       case "kill": {
@@ -173,7 +201,7 @@ const buildProgressRows = ({
         const current = Math.min(activeQuest?.progress ?? 0, required);
         return {
           kind: "kill",
-          label: formatRequirementLabel(requirement),
+          label: formatRequirementLabel(requirement, maps),
           current,
           required,
           complete: current >= required,
@@ -187,7 +215,7 @@ const buildProgressRows = ({
         );
         return {
           kind: "item",
-          label: formatRequirementLabel(requirement),
+          label: formatRequirementLabel(requirement, maps),
           current,
           required,
           complete: current >= required,
@@ -196,7 +224,7 @@ const buildProgressRows = ({
       case "level":
         return {
           kind: "level",
-          label: formatRequirementLabel(requirement),
+          label: formatRequirementLabel(requirement, maps),
           complete:
             requirement.minRealm !== undefined &&
             majorRealm >= requirement.minRealm,
@@ -282,6 +310,10 @@ const resolveQuestNavigationTarget = ({
   activeQuest?: ActiveQuestTrackerState;
   maps?: MapData[];
 }): QuestNavigationTarget | undefined => {
+  if (!activeQuest) {
+    return findNpcLocation(maps, quest.giverId);
+  }
+
   const submitNpcId = quest.submitNpcId ?? quest.giverId;
   if (activeQuest?.isReadyToComplete) {
     return findNpcLocation(maps, submitNpcId);
@@ -365,6 +397,7 @@ export const buildQuestTrackerItems = ({
         activeQuest,
         inventoryItems,
         majorRealm,
+        maps,
       });
       const navigationTarget = resolveQuestNavigationTarget({
         quest,
@@ -375,6 +408,7 @@ export const buildQuestTrackerItems = ({
       return {
         questId,
         title: quest.title,
+        description: quest.description,
         typeLabel: QUEST_TYPE_LABELS[quest.type],
         statusLabel: lifecycle.statusLabel,
         progressLabel: formatRequirementProgress(
@@ -428,6 +462,7 @@ export const buildQuestTrackerItems = ({
         quest: nextMainQuest,
         inventoryItems,
         majorRealm,
+        maps,
       });
       const navigationTarget = resolveQuestNavigationTarget({
         quest: nextMainQuest,
@@ -437,6 +472,7 @@ export const buildQuestTrackerItems = ({
       return {
         questId: nextMainQuest.id,
         title: nextMainQuest.title,
+        description: nextMainQuest.description,
         typeLabel: QUEST_TYPE_LABELS[nextMainQuest.type],
         statusLabel: lifecycle.statusLabel,
         progressLabel: formatRequirementProgress(

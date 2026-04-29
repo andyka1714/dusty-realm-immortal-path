@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { CheckCircle2, MapPin, ScrollText, X } from "lucide-react";
+import { MapPin, ScrollText, X } from "lucide-react";
 import clsx from "clsx";
 import { MAPS } from "../../data/maps";
 import { QUESTS } from "../../data/quests";
@@ -55,94 +55,91 @@ export const QuestTrackerHUD: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-2">
-          {trackerItems.map((item) => (
-            <Button
-              key={item.questId}
-              type="button"
-              variant="ghost"
-              data-testid={`quest-tracker-item-${item.questId}`}
-              data-navigation-kind={item.navigationTarget?.kind ?? "none"}
-              data-lifecycle-status={item.lifecycleStatus}
-              disabled={!item.navigationTarget}
-              onClick={() => dispatchQuestNavigation(item.navigationTarget)}
-              className={clsx(
-                "!h-auto w-full flex-col items-stretch justify-start gap-0 whitespace-normal rounded-lg border px-3 py-2 text-left transition",
-                item.navigationTarget
-                  ? "cursor-pointer hover:border-amber-500/60 hover:bg-amber-950/16"
-                  : "cursor-default",
-                item.lifecycleStatus === "ready"
-                  ? "border-emerald-700/70 bg-emerald-950/24"
-                  : item.lifecycleStatus === "available"
-                    ? "border-amber-700/60 bg-amber-950/18"
-                  : "border-stone-800/80 bg-black/25"
-              )}
-            >
-              <div className="flex min-w-0 items-center justify-between gap-2">
-                <div className="min-w-0 truncate text-sm font-bold text-stone-100">
-                  {item.title}
-                </div>
-                <div className="flex shrink-0 items-center gap-1">
-                  <span className="rounded border border-stone-700/80 px-1.5 py-0.5 text-[10px] text-stone-400">
-                    {item.typeLabel}
-                  </span>
-                  <span
-                    className={clsx(
-                      "rounded border px-1.5 py-0.5 text-[10px] font-bold",
-                      item.lifecycleStatus === "ready"
-                        ? "border-emerald-600/70 text-emerald-300"
-                        : item.lifecycleStatus === "available"
-                          ? "border-amber-600/70 text-amber-300"
-                          : "border-sky-700/60 text-sky-300"
-                    )}
-                  >
-                    {item.lifecycleLabel}
-                  </span>
-                </div>
-              </div>
-              <div className="mt-1 flex items-center justify-between gap-2 text-[11px]">
-                <span
-                  className={clsx(
-                    "inline-flex min-w-0 items-center gap-1 truncate",
-                    item.lifecycleStatus === "ready"
-                      ? "text-emerald-300"
-                      : "text-stone-400"
-                  )}
-                >
-                  {item.lifecycleStatus === "ready" && <CheckCircle2 size={12} />}
-                  {item.primaryActionLabel}
-                </span>
-                <span className="shrink-0 text-stone-500">
-                  {item.progressLabel}
-                </span>
-              </div>
-              {item.progressRows.length > 0 && (
-                <div className="mt-1 space-y-0.5">
-                  {item.progressRows.map((row, index) => (
-                    <div
-                      key={`${item.questId}-${row.kind}-${index}`}
+          {trackerItems.map((item) => {
+            const visibleProgressRows =
+              item.lifecycleStatus === "ready"
+                ? []
+                : item.progressRows.filter((row) => row.kind !== "dialogue");
+
+            return (
+              <Button
+                key={item.questId}
+                type="button"
+                variant="ghost"
+                data-testid={`quest-tracker-item-${item.questId}`}
+                data-navigation-kind={item.navigationTarget?.kind ?? "none"}
+                data-lifecycle-status={item.lifecycleStatus}
+                disabled={!item.navigationTarget}
+                onClick={() => dispatchQuestNavigation(item.navigationTarget)}
+                className={clsx(
+                  "!h-auto w-full flex-col items-stretch justify-start gap-0 whitespace-normal rounded-lg border px-3 py-2 text-left transition",
+                  item.navigationTarget
+                    ? "cursor-pointer hover:border-amber-500/60 hover:bg-amber-950/16"
+                    : "cursor-default",
+                  item.lifecycleStatus === "ready"
+                    ? "border-emerald-700/70 bg-emerald-950/24"
+                    : item.lifecycleStatus === "available"
+                      ? "border-amber-700/60 bg-amber-950/18"
+                    : "border-stone-800/80 bg-black/25"
+                )}
+              >
+                <div className="flex min-w-0 items-center justify-between gap-2">
+                  <div className="min-w-0 truncate text-sm font-bold text-stone-100">
+                    {item.title}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <span className="rounded border border-stone-700/80 px-1.5 py-0.5 text-[10px] text-stone-400">
+                      {item.typeLabel}
+                    </span>
+                    <span
                       className={clsx(
-                        "flex items-center justify-between gap-2 text-[10px]",
-                        row.complete ? "text-emerald-300/80" : "text-stone-500"
+                        "rounded border px-1.5 py-0.5 text-[10px] font-bold",
+                        item.lifecycleStatus === "ready"
+                          ? "border-emerald-600/70 text-emerald-300"
+                          : item.lifecycleStatus === "available"
+                            ? "border-amber-600/70 text-amber-300"
+                            : "border-sky-700/60 text-sky-300"
                       )}
                     >
-                      <span className="min-w-0 truncate">{row.label}</span>
-                      {row.current !== undefined && row.required !== undefined && (
-                        <span className="shrink-0 font-mono">
-                          {row.current} / {row.required}
-                        </span>
-                      )}
-                    </div>
-                  ))}
+                      {item.lifecycleLabel}
+                    </span>
+                  </div>
                 </div>
-              )}
-              {item.navigationTarget && (
-                <div className="mt-1 inline-flex max-w-full items-center gap-1 text-[10px] text-amber-300">
-                  <MapPin size={11} className="shrink-0" />
-                  <span className="truncate">{item.navigationTarget.label}</span>
-                </div>
-              )}
-            </Button>
-          ))}
+                <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-stone-400">
+                  {item.description}
+                </p>
+                {visibleProgressRows.length > 0 && (
+                  <div className="mt-1 space-y-0.5">
+                    {visibleProgressRows.map((row, index) => (
+                      <div
+                        key={`${item.questId}-${row.kind}-${index}`}
+                        className={clsx(
+                          "flex items-center justify-between gap-2 text-[10px]",
+                          row.complete ? "text-emerald-300/80" : "text-stone-500"
+                        )}
+                      >
+                        <span className="min-w-0 truncate">{row.label}</span>
+                        {row.current !== undefined &&
+                          row.required !== undefined && (
+                            <span className="shrink-0 font-mono">
+                              {row.current} / {row.required}
+                            </span>
+                          )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {item.navigationTarget && (
+                  <div className="mt-1 inline-flex max-w-full items-center gap-1 text-[10px] text-amber-300">
+                    <MapPin size={11} className="shrink-0" />
+                    <span className="truncate">
+                      {item.primaryActionLabel}
+                    </span>
+                  </div>
+                )}
+              </Button>
+            );
+          })}
         </div>
       )}
     </>
@@ -151,7 +148,7 @@ export const QuestTrackerHUD: React.FC = () => {
   return (
     <>
       <aside
-        className="pointer-events-none absolute left-4 top-[16rem] z-30 hidden w-[min(320px,calc(100vw-2rem))] md:block"
+        className="pointer-events-none absolute left-4 top-[16rem] z-30 hidden w-[min(370px,calc(100vw-2rem))] md:block"
         data-testid="quest-tracker-hud"
         data-layout-anchor="below-character-hud"
         aria-label="任務追蹤"

@@ -3,6 +3,7 @@ import reducer, {
   applyWorldDamageToMonster,
   engageMonster,
   enterMap,
+  movePlayer,
   resolveBattle,
   tickMonsters,
 } from "./adventureSlice";
@@ -16,6 +17,57 @@ afterEach(() => {
 });
 
 describe("adventure engagement flow", () => {
+  it("does not let the player move onto an NPC occupied cell", () => {
+    const state = reducer(
+      undefined,
+      enterMap({ mapId: "0", startX: 20, startY: 16 })
+    );
+
+    const next = reducer(state, movePlayer({ dx: 0, dy: -1 }));
+
+    expect(next.playerPosition).toEqual({ x: 20, y: 16 });
+  });
+
+  it("places quest navigation map entries next to NPCs instead of on top of them", () => {
+    const state = reducer(
+      undefined,
+      enterMap({ mapId: "0", startX: 20, startY: 15 })
+    );
+
+    expect(state.playerPosition).not.toEqual({ x: 20, y: 15 });
+    expect(
+      Math.abs(state.playerPosition.x - 20) + Math.abs(state.playerPosition.y - 15)
+    ).toBe(1);
+  });
+
+  it("does not let the player move onto a monster occupied cell", () => {
+    let state = reducer(
+      undefined,
+      enterMap({ mapId: "20", startX: 20, startY: 20 })
+    );
+    state = {
+      ...state,
+      activeMonsters: [
+        {
+          instanceId: "blocking-monster",
+          templateId: "m20_c1",
+          name: "田間稻草人",
+          symbol: "草",
+          x: 21,
+          y: 20,
+          spawnX: 21,
+          spawnY: 20,
+          currentHp: 250,
+          rank: EnemyRank.Common,
+        },
+      ],
+    };
+
+    const next = reducer(state, movePlayer({ dx: 1, dy: 0 }));
+
+    expect(next.playerPosition).toEqual({ x: 20, y: 20 });
+  });
+
   it("engages the selected monster instance instead of requiring tile collision", () => {
     let state = reducer(undefined, enterMap({ mapId: "20", startX: 20, startY: 20 }));
 

@@ -47,9 +47,25 @@ describe("QuestTrackerHUD", () => {
     expect(markup).toContain("可回報");
     expect(markup).toContain('data-lifecycle-status="ready"');
     expect(markup).toContain("劍宗試煉：斬虎");
-    expect(markup).toContain("討伐 0 / 1");
+    expect(markup).toContain("討伐 守山靈虎");
+    expect(markup).toContain("0 / 1");
     expect(markup).toContain('data-lifecycle-status="active"');
     expect(markup).toContain('data-layout-anchor="below-character-hud"');
+  });
+
+  it("aligns with the character HUD and avoids duplicated ready dialogue copy", () => {
+    const markup = createMarkup({
+      tutorial_01: { progress: 0, isReadyToComplete: true },
+    });
+
+    expect(markup).toContain("w-[min(370px,calc(100vw-2rem))]");
+    expect(markup).toContain("回報村長");
+    expect(markup).not.toContain("對話：前往");
+    expect(markup).not.toContain("village_chief");
+    expect(markup).not.toContain("前往村長");
+    expect(markup).not.toContain(
+      '<span class="shrink-0 text-stone-500">可回報</span>'
+    );
   });
 
   it("renders a compact empty state", () => {
@@ -63,14 +79,19 @@ describe("QuestTrackerHUD", () => {
   });
 
   it("renders next main quest guidance when no quest is active", () => {
-    const markup = createMarkup({}, ["tutorial_01", "tutorial_02_get_sword"]);
+    const markup = createMarkup({}, ["tutorial_01"]);
 
-    expect(markup).toContain("藏經初問");
+    expect(markup).toContain("防身利器");
+    expect(markup).toContain("村長建議你去鐵匠鋪領取一把防身兵器。");
     expect(markup).toContain("可接取");
     expect(markup).toContain('data-lifecycle-status="available"');
-    expect(markup).toContain('data-testid="quest-tracker-item-tutorial_03_scripture_intro"');
+    expect(markup).toContain('data-testid="quest-tracker-item-tutorial_02_get_sword"');
     expect(markup).toContain('data-navigation-kind="npc"');
-    expect(markup).toContain("前往藏經閣執事");
+    expect(markup).toContain("前往村長");
+    expect(markup).not.toContain("前往鐵匠鋪");
+    expect(markup).not.toContain("前往對話");
+    expect(markup).not.toContain("village_chief");
+    expect(markup).not.toContain("village_blacksmith");
   });
 
   it("renders a mobile trigger and collapsible sheet without persisted state", () => {

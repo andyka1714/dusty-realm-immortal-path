@@ -822,12 +822,18 @@
 - **THEN** Adventure 可以在當前 runtime 移動或切換地圖
 - **AND** 導向 intent 不得寫入 persisted state
 
+#### Scenario: 玩家導向 NPC 或怪物
+- **WHEN** 任務追蹤或地圖點擊導向 NPC / 怪物所在座標
+- **THEN** 玩家必須停在相鄰格即可互動或接戰
+- **AND** 玩家不得與 NPC 或怪物佔用同一格
+
 ### Requirement: 任務追蹤狀態必須由現有 runtime/state 推導
 系統必須 (MUST) 從既有 quest definitions、active quests、completed quests、角色狀態與背包內容推導任務追蹤狀態，不得為 UI 狀態新增 persisted schema。
 
 #### Scenario: 系統推導任務 lifecycle
 - **WHEN** 任務尚未接受但符合主線前置條件
 - **THEN** 任務追蹤可將它標示為可接取或下一主線
+- **AND** 可接取任務的導向必須指向 `giverId`，不得提前指向 requirement 或 submit target
 - **AND** 當 active quest 條件滿足時，任務追蹤必須將它標示為可回報
 - **AND** 這些 UI 狀態不得寫入 LocalStorage
 
@@ -910,4 +916,3 @@
 - **WHEN** 角色已轉職並已學會通用主動功法
 - **THEN** 角色必須可以裝備該通用主動功法
 - **AND** 戰鬥選招必須優先使用已裝備的通用主動功法
-

@@ -710,6 +710,7 @@ Workshop 介面必須 (MUST) 顯示 mastery milestone、specialization leaf、ro
 - **WHEN** 玩家進入 Adventure 主畫面且沒有 active quest
 - **THEN** 任務追蹤必須顯示下一個符合前置條件的主線任務
 - **AND** 點擊該項目必須導向任務起始 NPC 所在地圖與座標
+- **AND** 即使該任務完成目標是另一個 NPC，可接取階段也不得直接導向完成目標
 
 #### Scenario: 玩家已有進行中任務
 - **WHEN** 玩家點擊進行中的任務追蹤項目
@@ -724,6 +725,7 @@ Workshop 介面必須 (MUST) 顯示 mastery milestone、specialization leaf、ro
 - **WHEN** compact 角色 HUD 與任務追蹤同時顯示
 - **THEN** 任務追蹤必須在角色 HUD 下方
 - **AND** 兩者距離必須足夠避免重疊，但不得形成過大的垂直空白
+- **AND** 任務追蹤寬度必須與角色 HUD 寬度對齊
 
 ### Requirement: 任務追蹤卡片必須區分 lifecycle 狀態
 介面必須 (MUST) 在任務追蹤卡片中清楚區分可接取、進行中、可回報與下一主線狀態，避免玩家無法判斷任務是尚未接受、正在進行或可以完成。
@@ -732,6 +734,9 @@ Workshop 介面必須 (MUST) 顯示 mastery milestone、specialization leaf、ro
 - **WHEN** 任務追蹤顯示任務
 - **THEN** 卡片必須顯示任務 lifecycle badge
 - **AND** 可接取、進行中、可回報、下一主線不得只共用同一種文案或顏色語意
+- **AND** 卡片必須顯示任務 description，讓玩家理解任務內容而不只看到標題
+- **AND** 若 lifecycle badge 已顯示可接取、進行中或可回報，卡片內容不得再重複顯示同義狀態文字
+- **AND** 卡片不得露出 NPC 或怪物的內部 id
 
 ### Requirement: 任務追蹤必須顯示多目標進度列
 介面必須 (MUST) 支援對話、討伐、提交物品、境界與複合任務的目標摘要與進度列。
