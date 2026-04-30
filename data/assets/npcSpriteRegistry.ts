@@ -100,6 +100,11 @@ export const NPC_IDLE_SPRITE_MAPPINGS: NpcSpriteMapping[] = [
     variant: "mystic",
     assetId: "npc.scripture_keeper.mystic.idle_v1",
   },
+  {
+    archetype: "world_battlefield_envoy",
+    variant: "sword",
+    assetId: "npc.world_battlefield_envoy.sword.idle_v1",
+  },
 ];
 
 export const findNpcSpriteMapping = ({

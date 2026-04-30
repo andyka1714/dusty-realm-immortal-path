@@ -326,7 +326,11 @@ export const MYSTIC_SECT_NPCS: NPC[] = [
 export const TRI_REALM_BATTLEFIELD_NPCS: NPC[] = [
     {
         id: 'world_sword_battlefield_envoy',
-        name: '劍宗界令使',
+        name: '岳界令',
+        affiliationLabel: '凌霄劍宗',
+        roleLabel: '三界戰場界令使',
+        spriteArchetype: 'world_battlefield_envoy',
+        spriteVariant: 'sword',
         symbol: '令',
         type: NPCType.Quest,
         x: 70,
