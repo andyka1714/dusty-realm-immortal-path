@@ -45,6 +45,13 @@ NPC sprite 必須 (MUST) 使用原地 idle sheet，不要求 NPC 具備地圖移
 - **AND** idle sheet 不得包含位移步行、攻擊、受擊或施法衝刺動作
 - **AND** 必須通過 humanoid QC 並標記 `qcStatus: "passed"`
 
+#### Scenario: NPC idle sheet 生成後必須接入 catalog
+- **WHEN** 開發者為任一 NPC 生成 idle sheet 並通過 QC
+- **THEN** 同一次變更必須更新該 NPC 的 `spriteArchetype` 與 `spriteVariant` 或等效 sprite mapping
+- **AND** 必須更新 sprite registry，讓該 NPC 在 Adventure 地圖可解析到新 asset
+- **AND** 不得只留下未被 catalog 或 registry 使用的孤立 generated asset
+- **AND** 若 asset 尚未通過 QC，則不得接入 production NPC catalog
+
 #### Scenario: NPC 尚未有 sprite asset
 - **WHEN** NPC 沒有可用 sprite asset 或 frame 載入失敗
 - **THEN** 系統必須保留既有文字 token fallback

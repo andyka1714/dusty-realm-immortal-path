@@ -12,6 +12,7 @@ NPC sprite rollout needs a clean identity model before assets are generated, so 
 - Define map label rendering for institution NPCs, showing affiliation above the personal name.
 - Define NPC sprite archetype and variant rules so same-affiliation or same-role NPCs can share images while different roles use distinct images.
 - Plan the first NPC sprite rollout around stationary humanoid idle sheets, without adding NPC movement or combat sprites.
+- Require each generated and QC-passed NPC idle sheet to be wired into the actual NPC catalog and sprite registry in the same change.
 - Normalize the existing 53 NPCs into planned identity and sprite groups.
 
 ## Impact

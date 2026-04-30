@@ -96,6 +96,19 @@ Grounding and QC:
 - Asset metadata records frame count, frame size, idle cadence, footline, center line, target height, archetype, variant, and `qcStatus`.
 - Only `qcStatus: "passed"` assets can be used as production map tokens.
 
+## Generated Asset Wiring Rule
+
+Every generated NPC idle sheet must be treated as incomplete until it is connected to live catalog data.
+
+For each generated and QC-passed NPC idle sheet, the same implementation slice must:
+
+- Add or update the generated asset metadata.
+- Add or update the sprite registry entry.
+- Update the matching NPC catalog entry with `spriteArchetype` and `spriteVariant`, or an equivalent resolver mapping.
+- Add test coverage proving the NPC resolves to the new asset.
+
+Generated assets that fail QC may remain in a scratch or rejected location, but they must not be wired into production catalog data. Generated assets that pass QC but are not used by any NPC should not be committed as part of the production rollout.
+
 ## Full NPC Identity and Sprite Plan
 
 | Map | NPC ID | Planned Display | Role | Archetype | Variant |
@@ -185,6 +198,7 @@ Tune palette and props across variants only after base archetype loading is stab
   - institution NPCs have personal `name` and non-empty `affiliationLabel`.
   - no NPC with `shopId` uses `萬寶閣`, `靈寶閣`, or `藏經閣` as its personal `name`.
   - all NPCs with sprite metadata resolve to known archetypes.
+  - each generated and QC-passed NPC asset is referenced by at least one NPC or explicit archetype mapping.
 - Asset registry tests:
   - same archetype/variant maps to expected asset ID.
   - different archetypes do not collapse to the same image.
