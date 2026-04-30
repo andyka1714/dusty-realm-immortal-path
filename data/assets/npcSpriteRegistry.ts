@@ -55,6 +55,11 @@ export const NPC_IDLE_SPRITE_MAPPINGS: NpcSpriteMapping[] = [
     variant: "beast",
     assetId: "npc.sect_elder.beast.idle_v1",
   },
+  {
+    archetype: "sect_field_officer",
+    variant: "beast",
+    assetId: "npc.sect_field_officer.beast.idle_v1",
+  },
 ];
 
 export const findNpcSpriteMapping = ({

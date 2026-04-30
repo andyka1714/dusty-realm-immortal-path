@@ -14,7 +14,7 @@ Each checked item means the NPC has a generated idle sheet created through `$gen
 - [x] `sect_sword_lingbao` - 靈寶閣 / 沈劍爐
 - [x] `sect_sword_skills` - 藏經閣 / 白簡執事
 - [x] `sect_beast_elder` - 萬獸山莊 / 蒼骨長老
-- [ ] `sect_beast_huntmaster` - 萬獸山莊 / 厲獵川
+- [x] `sect_beast_huntmaster` - 萬獸山莊 / 厲獵川
 - [ ] `sect_beast_wanbao` - 萬寶閣 / 祝獠商
 - [ ] `sect_beast_lingbao` - 靈寶閣 / 鐵骨匠
 - [ ] `sect_beast_skills` - 藏經閣 / 玄骨祭書
