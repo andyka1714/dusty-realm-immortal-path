@@ -95,6 +95,11 @@ export const NPC_IDLE_SPRITE_MAPPINGS: NpcSpriteMapping[] = [
     variant: "mystic",
     assetId: "npc.lingbao_forgemaster.mystic.idle_v1",
   },
+  {
+    archetype: "scripture_keeper",
+    variant: "mystic",
+    assetId: "npc.scripture_keeper.mystic.idle_v1",
+  },
 ];
 
 export const findNpcSpriteMapping = ({

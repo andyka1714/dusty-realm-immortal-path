@@ -22,7 +22,7 @@ Each checked item means the NPC has a generated idle sheet created through `$gen
 - [x] `sect_mystic_envoy` - 縹緲仙宮 / 陶星使
 - [x] `sect_mystic_wanbao` - 萬寶閣 / 蘇靈掌櫃
 - [x] `sect_mystic_lingbao` - 靈寶閣 / 洛霞器師
-- [ ] `sect_mystic_skills` - 藏經閣 / 雲冊執事
+- [x] `sect_mystic_skills` - 藏經閣 / 雲冊執事
 
 ## Phase 2: World Route NPCs
 
