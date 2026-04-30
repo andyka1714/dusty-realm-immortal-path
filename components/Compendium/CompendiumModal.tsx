@@ -22,6 +22,8 @@ import {
   NPCType,
   ItemCategory,
   ItemQuality,
+  ConsumableItem,
+  ConsumableEffect,
 } from "../../types";
 import { ELEMENT_NAMES } from "../../constants";
 import { ITEMS } from "../../data/items";
@@ -59,6 +61,13 @@ import {
   EQUIPMENT_REALM_AUDIT,
   type EquipmentPathId,
 } from "../../data/items/equipment/audit";
+import {
+  RECOVERY_CONSUMABLE_COOLDOWN_MS,
+  formatConsumableEffectLabel,
+  hasRecoveryEffect,
+} from "../../utils/consumableEffects";
+import { getStatusLabel } from "../../utils/battleStatusLabels";
+import { getPassiveSkillBonuses } from "../../utils/battlePassiveSkillBonusRegistry";
 
 interface CompendiumModalProps {
   isOpen: boolean;
@@ -458,14 +467,104 @@ const groupItemsByRealm = (items: Item[]) =>
     .filter((realm): realm is MajorRealm => typeof realm === "number")
     .map((realm) => ({
       realm,
-      items: items.filter((item) => {
-        if (item.minRealm === undefined && realm === MajorRealm.Mortal) {
-          return true;
-        }
-        return item.minRealm === realm;
-      }),
+      items: items.filter((item) => getItemDisplayRealm(item) === realm),
     }))
     .filter((group) => group.items.length > 0);
+
+const getItemDisplayRealm = (item: Item): MajorRealm => {
+  if (item.minRealm !== undefined) return item.minRealm;
+
+  if (
+    (item.category === ItemCategory.Consumable ||
+      item.category === ItemCategory.Breakthrough) &&
+    "requiredRealm" in item &&
+    item.requiredRealm !== undefined
+  ) {
+    return item.requiredRealm;
+  }
+
+  return MajorRealm.Mortal;
+};
+
+const getConsumableEffectDetailLabels = (item: ConsumableItem) =>
+  item.effects
+    .map((effect: ConsumableEffect) => formatConsumableEffectLabel(effect))
+    .filter(Boolean);
+
+const formatPercent = (value: number) => {
+  const percent = Math.round(value * 100);
+  return `${percent}%`;
+};
+
+const getSkillTargetLabel = (targetType?: Skill["targetType"]) => {
+  switch (targetType) {
+    case "all":
+      return "全體目標";
+    case "self":
+      return "自身";
+    case "single":
+      return "單體目標";
+    default:
+      return "依技能規則";
+  }
+};
+
+const getSkillEffectDetails = (skill: Skill) => {
+  if (skill.type === "Passive") {
+    const bonuses = getPassiveSkillBonuses([skill]);
+    const bonusLabels = [
+      bonuses.hpPercent ? `氣血 +${bonuses.hpPercent}%` : null,
+      bonuses.mpPercent ? `真元 +${bonuses.mpPercent}%` : null,
+      bonuses.attackPercent ? `攻擊 +${bonuses.attackPercent}%` : null,
+      bonuses.magicPercent ? `法術 +${bonuses.magicPercent}%` : null,
+      bonuses.defensePercent ? `防禦 +${bonuses.defensePercent}%` : null,
+      bonuses.resPercent ? `靈抗 +${bonuses.resPercent}%` : null,
+      bonuses.critBonus ? `暴擊 +${bonuses.critBonus}%` : null,
+      bonuses.critDamageBonus ? `暴傷 +${bonuses.critDamageBonus}%` : null,
+      bonuses.dodgeBonus ? `閃避 +${bonuses.dodgeBonus}%` : null,
+      bonuses.damageReductionBonus
+        ? `減傷 +${bonuses.damageReductionBonus}%`
+        : null,
+      bonuses.regenHpBonus ? `氣血回復 +${bonuses.regenHpBonus}` : null,
+    ].filter((label): label is string => Boolean(label));
+
+    return [
+      "被動生效",
+      ...bonusLabels,
+      "無需裝備，學會後會依戰鬥規則自動套用。",
+    ];
+  }
+
+  const details: string[] = [];
+
+  if (skill.damageMultiplier !== undefined) {
+    details.push(`造成 ${formatPercent(skill.damageMultiplier)} 傷害`);
+  }
+
+  if (skill.healMultiplier !== undefined) {
+    details.push(`恢復 ${formatPercent(skill.healMultiplier)} 效果`);
+  }
+
+  details.push(`目標：${getSkillTargetLabel(skill.targetType)}`);
+
+  const cooldownSeconds = skill.cooldownSeconds ?? skill.cooldown;
+  if (cooldownSeconds > 0) {
+    details.push(`冷卻 ${cooldownSeconds} 秒`);
+  }
+
+  if (skill.cost !== undefined && skill.cost > 0) {
+    details.push(`消耗真元 ${skill.cost}`);
+  }
+
+  if (skill.statusEffect) {
+    const chance = Math.round(skill.statusEffect.chance * 100);
+    details.push(
+      `${chance}% 附加${getStatusLabel(skill.statusEffect.id)} ${skill.statusEffect.duration} 秒`
+    );
+  }
+
+  return details;
+};
 
 const isSettlementMap = (map: (typeof MAPS)[number]) =>
   (map.npcs?.length ?? 0) > 0 && map.enemies.length === 0;
@@ -649,6 +748,10 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
           ),
     [activeItemCategory, generalItemList]
   );
+  const activeItemGroups = useMemo(
+    () => groupItemsByRealm(visibleItems),
+    [visibleItems]
+  );
   const itemCategoryCounts = useMemo(() => {
     const counts: Record<GeneralItemCategoryId, number> = {
       pill: 0,
@@ -720,6 +823,14 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
   const renderItemCard = (item: Item, testIdPrefix: string) => {
     const sourceTrace = buildCompendiumItemSourceTrace(item.id);
     const category = getCompendiumItemCategory(item);
+    const consumable =
+      item.category === ItemCategory.Consumable ||
+      item.category === ItemCategory.Breakthrough
+        ? (item as ConsumableItem)
+        : null;
+    const consumableEffectLabels = consumable
+      ? getConsumableEffectDetailLabels(consumable)
+      : [];
     const overflowCount = Math.max(
       0,
       sourceTrace.sources.length -
@@ -813,6 +924,30 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
           {item.description}
         </p>
 
+        {consumableEffectLabels.length > 0 && (
+          <div
+            className="mt-3 space-y-1 rounded border border-stone-700/50 bg-stone-900/40 p-2"
+            data-testid={`${testIdPrefix}-effects-${item.id}`}
+          >
+            <div className="text-[10px] font-semibold text-amber-200">功效</div>
+            <div className="flex flex-wrap gap-1.5">
+              {consumableEffectLabels.map((label) => (
+                <span
+                  key={label}
+                  className="rounded border border-amber-900/40 bg-amber-950/20 px-1.5 py-0.5 text-[10px] leading-4 text-amber-100"
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+            {hasRecoveryEffect(consumable.effects) && (
+              <div className="text-[10px] text-stone-500">
+                戰鬥補給共用冷卻：{RECOVERY_CONSUMABLE_COOLDOWN_MS / 1000} 秒
+              </div>
+            )}
+          </div>
+        )}
+
         <div
           className="mt-3 pt-2 border-t border-stone-700/50"
           data-testid={`${testIdPrefix}-source-${item.id}`}
@@ -849,6 +984,7 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
 
   const renderSkillCard = (skill: Skill) => {
     const sourceTrace = buildCompendiumSkillSourceTrace(skill);
+    const effectDetails = getSkillEffectDetails(skill);
 
     return (
       <div
@@ -875,6 +1011,23 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
         <p className="text-xs text-stone-400 mt-1 line-clamp-2 min-h-[2.5em]">
           {skill.description}
         </p>
+
+        <div
+          className="mt-3 space-y-1 rounded border border-stone-700/50 bg-stone-900/40 p-2"
+          data-testid={`compendium-skill-effects-${skill.id}`}
+        >
+          <div className="text-[10px] font-semibold text-amber-200">技能效果</div>
+          <div className="flex flex-wrap gap-1.5">
+            {effectDetails.map((detail) => (
+              <span
+                key={detail}
+                className="rounded border border-amber-900/40 bg-amber-950/20 px-1.5 py-0.5 text-[10px] leading-4 text-amber-100"
+              >
+                {detail}
+              </span>
+            ))}
+          </div>
+        </div>
 
         <div
           className="mt-3 pt-2 border-t border-stone-700/50"
@@ -1387,29 +1540,17 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                     ))}
                   </div>
                 </div>
-                {Object.values(MajorRealm)
-                  .filter((r) => typeof r === "number")
-                  .map((realmId) => {
-                    const rId = realmId as MajorRealm;
-                    const itemsInRealm = visibleItems.filter((i) => {
-                      // Include base realm items. Some might be undefined (Mortal default)
-                      if (i.minRealm === undefined && rId === MajorRealm.Mortal)
-                        return true;
-                      return i.minRealm === rId;
-                    });
-
-                    if (itemsInRealm.length === 0) return null;
-
+                {activeItemGroups.map((group) => {
                     return (
-                      <div key={rId} className="space-y-4">
+                      <div key={group.realm} className="space-y-4">
                         <h3
                           className="border-l-4 border-amber-600 bg-stone-900/70 py-2 pl-3 text-xl font-bold text-amber-500"
-                          data-testid={`compendium-item-realm-heading-${rId}`}
+                          data-testid={`compendium-item-realm-heading-${group.realm}`}
                         >
-                          {MajorRealmCN[rId]}期
+                          {MajorRealmCN[group.realm]}期
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {itemsInRealm.map((item) =>
+                          {group.items.map((item) =>
                             renderItemCard(item, "compendium-item")
                           )}
                         </div>

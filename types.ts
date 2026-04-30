@@ -107,6 +107,16 @@ export interface BreakthroughConsequence {
   recoveryHint: string;
 }
 
+export interface AutoConsumableRule {
+  enabled: boolean;
+  thresholdPercent: number;
+}
+
+export interface AutoConsumableSettings {
+  hp: AutoConsumableRule;
+  mp: AutoConsumableRule;
+}
+
 export interface CharacterState {
   isInitialized: boolean;
   isDead: boolean;

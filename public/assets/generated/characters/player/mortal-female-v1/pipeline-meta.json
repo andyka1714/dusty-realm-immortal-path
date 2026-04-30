@@ -1,0 +1,330 @@
+{
+  "target": "player",
+  "mode": "humanoid_walk_sheet",
+  "input": "public/assets/generated/characters/player/mortal-female-v1/raw-sheet.png",
+  "prompt": "Create a production-ready 4x4 top-down RPG pixel-art walking sprite sheet for a clearly female mortal cultivator character with very long straight black hair falling down the back, no bun, no topknot, no tied-up round hair, dark gray robe, blue belt, wooden sword on back, same humanoid scale in every cell.",
+  "rows": 4,
+  "cols": 4,
+  "frameCount": 16,
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "profile": "humanoid",
+  "rowOrder": [
+    "down",
+    "left",
+    "right",
+    "up"
+  ],
+  "targetHeight": 80,
+  "heightTolerance": 1,
+  "footlineY": 88,
+  "centerX": 48,
+  "centerTolerance": 1,
+  "qcStatus": "passed",
+  "qc": [
+    {
+      "label": "player_sheet-1",
+      "bbox": [
+        30,
+        9,
+        65,
+        88
+      ],
+      "width": 36,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2126
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-2",
+      "bbox": [
+        30,
+        9,
+        66,
+        88
+      ],
+      "width": 37,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2056
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-3",
+      "bbox": [
+        30,
+        9,
+        65,
+        88
+      ],
+      "width": 36,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2102
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-4",
+      "bbox": [
+        30,
+        9,
+        66,
+        88
+      ],
+      "width": 37,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2053
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-5",
+      "bbox": [
+        29,
+        9,
+        66,
+        88
+      ],
+      "width": 38,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1910
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-6",
+      "bbox": [
+        26,
+        9,
+        70,
+        88
+      ],
+      "width": 45,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2200
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-7",
+      "bbox": [
+        30,
+        9,
+        66,
+        88
+      ],
+      "width": 37,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        1937
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-8",
+      "bbox": [
+        26,
+        9,
+        69,
+        88
+      ],
+      "width": 44,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2150
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-9",
+      "bbox": [
+        30,
+        9,
+        66,
+        88
+      ],
+      "width": 37,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        1855
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-10",
+      "bbox": [
+        26,
+        9,
+        68,
+        88
+      ],
+      "width": 43,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2095
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-11",
+      "bbox": [
+        30,
+        9,
+        66,
+        88
+      ],
+      "width": 37,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        1863
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-12",
+      "bbox": [
+        26,
+        9,
+        68,
+        88
+      ],
+      "width": 43,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2117
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-13",
+      "bbox": [
+        30,
+        9,
+        65,
+        88
+      ],
+      "width": 36,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2073
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-14",
+      "bbox": [
+        30,
+        9,
+        65,
+        88
+      ],
+      "width": 36,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2025
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-15",
+      "bbox": [
+        30,
+        9,
+        64,
+        88
+      ],
+      "width": 35,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        1975
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-16",
+      "bbox": [
+        30,
+        9,
+        65,
+        88
+      ],
+      "width": 36,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1998
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    }
+  ]
+}

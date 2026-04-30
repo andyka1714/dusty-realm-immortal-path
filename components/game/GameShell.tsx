@@ -4,7 +4,9 @@ import { FloatingDock, GamePanelId } from "./FloatingDock";
 import { GameHUD } from "./GameHUD";
 import { GamePanel } from "./GamePanel";
 import { QuestTrackerHUD } from "./QuestTrackerHUD";
-import { BookOpen, Hammer, Home, Package, Scroll } from "lucide-react";
+import { BookOpen, Hammer, Home, Info, Package, Scroll } from "lucide-react";
+import { GameTooltip } from "./GameTooltip";
+import { SkillAcquisitionGuide } from "./SkillAcquisitionGuide";
 import { Modal } from "../Modal";
 import { PendingEncounterPanel } from "./PendingEncounterPanel";
 import { AppDispatch, RootState } from "../../store/store";
@@ -91,6 +93,10 @@ export const GameShell: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [activePanel, setActivePanel] = useState<GamePanelId | null>(null);
   const [mapOpenRequest, setMapOpenRequest] = useState(0);
+  const [skillInfoTooltip, setSkillInfoTooltip] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const { age, isInitialized, isDead } = useSelector(
     (state: RootState) => state.character
   );
@@ -113,6 +119,32 @@ export const GameShell: React.FC = () => {
 
     setActivePanel((current) => (current === panel ? null : panel));
   };
+  const showSkillInfoTooltip = (event: React.SyntheticEvent<HTMLElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setSkillInfoTooltip({
+      x: Math.min(rect.left, window.innerWidth - 360),
+      y: rect.bottom + 8,
+    });
+  };
+  const hideSkillInfoTooltip = () => setSkillInfoTooltip(null);
+
+  const skillTitleAccessory =
+    activePanel === "skills" ? (
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="mb-1 h-7 w-7 rounded-full border border-stone-700/70 bg-stone-950/70 text-stone-400 hover:border-amber-500/60 hover:text-amber-200"
+        aria-label="功法取得流程"
+        data-testid="skill-acquisition-info-trigger"
+        onMouseEnter={showSkillInfoTooltip}
+        onMouseLeave={hideSkillInfoTooltip}
+        onFocus={showSkillInfoTooltip}
+        onBlur={hideSkillInfoTooltip}
+      >
+        <Info size={14} />
+      </Button>
+    ) : null;
   const handleDismissPendingEncounter = () => {
     dispatch(dismissPendingEncounter());
   };
@@ -164,6 +196,7 @@ export const GameShell: React.FC = () => {
             title={activePanelConfig.title}
             eyebrow={activePanelConfig.eyebrow}
             titleIcon={activePanelConfig.icon}
+            titleAccessory={skillTitleAccessory}
           >
             {activePanelConfig.render()}
           </GamePanel>
@@ -211,6 +244,16 @@ export const GameShell: React.FC = () => {
           )}
         </Modal>
       </Suspense>
+      {skillInfoTooltip && (
+        <GameTooltip
+          eyebrow="SKILL GUIDE"
+          title="功法取得流程"
+          widthClassName="w-[22rem]"
+          style={{ left: skillInfoTooltip.x, top: skillInfoTooltip.y }}
+        >
+          <SkillAcquisitionGuide />
+        </GameTooltip>
+      )}
     </div>
   );
 };

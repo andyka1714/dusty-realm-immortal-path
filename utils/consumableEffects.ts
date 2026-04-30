@@ -1,5 +1,7 @@
 import { ConsumableEffect } from "../types";
 
+export const RECOVERY_CONSUMABLE_COOLDOWN_MS = 5000;
+
 export interface RuntimeResourceSnapshot {
   current: number;
   max: number;
@@ -25,6 +27,20 @@ export const hasRecoveryEffect = (effects: readonly ConsumableEffect[]) =>
   hasEffect(effects, "heal_hp") ||
   hasEffect(effects, "heal_mp") ||
   hasEffect(effects, "full_restore");
+
+export const getRecoveryConsumableCooldownRemainingMs = (
+  lastUsedAt: number | null | undefined,
+  now: number
+) => {
+  if (!lastUsedAt) {
+    return 0;
+  }
+
+  return Math.max(0, RECOVERY_CONSUMABLE_COOLDOWN_MS - (now - lastUsedAt));
+};
+
+export const getRecoveryConsumableCooldownLabel = (remainingMs: number) =>
+  remainingMs > 0 ? `冷卻 ${Math.ceil(remainingMs / 1000)} 秒` : null;
 
 export const formatConsumableEffectLabel = (
   effect: ConsumableEffect,

@@ -28,6 +28,7 @@ import {
   formatConsumableEffectLabel,
   getConsumableRecoveryBlockedReason,
   hasRecoveryEffect,
+  RECOVERY_CONSUMABLE_COOLDOWN_MS,
   type ConsumableRuntimeResources,
 } from '../utils/consumableEffects';
 
@@ -820,6 +821,11 @@ export const Inventory: React.FC<InventoryProps> = ({
                            )}
                            {selectedSkill && (
                              <div>參悟後可至底部「功法」面板裝備主動術式參戰。</div>
+                           )}
+                           {selectedConsumable && hasRecoveryEffect(selectedConsumable.effects) && (
+                             <div>
+                               戰鬥補給共用冷卻：{RECOVERY_CONSUMABLE_COOLDOWN_MS / 1000} 秒
+                             </div>
                            )}
                            {selectedSkill && selectedSkill.prerequisiteSkillIds && selectedSkill.prerequisiteSkillIds.length > 0 && (
                              <div>

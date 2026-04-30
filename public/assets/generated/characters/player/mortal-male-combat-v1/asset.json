@@ -1,0 +1,38 @@
+{
+  "assetId": "character.player.mortal_male.combat_v1",
+  "kind": "character",
+  "name": "男性凡人木劍戰鬥動作",
+  "description": "男性凡人主角進入戰鬥時使用的四方向 4x6 木劍攻擊動作 sheet。",
+  "style": "pixel_art",
+  "source": "generated",
+  "version": 1,
+  "usage": ["player_combat_idle", "player_combat_attack", "map_token"],
+  "basePath": "/assets/generated/characters/player/mortal-male-combat-v1",
+  "files": {
+    "raw": "raw-combat.png",
+    "sheet": "sheet-transparent.png",
+    "preview": "animation.gif",
+    "framesDir": "frames",
+    "prompt": "prompt-used.txt",
+    "meta": "pipeline-meta.json"
+  },
+  "sprite": {
+    "profile": "humanoid",
+    "rows": 4,
+    "cols": 6,
+    "frameCount": 24,
+    "framesPerDirection": 6,
+    "rowOrder": ["down", "left", "right", "up"],
+    "frameWidth": 96,
+    "frameHeight": 96,
+    "targetHeight": 80,
+    "maxWidth": 90,
+    "footlineY": 88,
+    "centerX": 48,
+    "centerTolerance": 2,
+    "anchor": "feet",
+    "view": "topdown",
+    "qcStatus": "passed"
+  },
+  "tags": ["player", "mortal", "male", "wooden-sword", "combat-sheet"]
+}

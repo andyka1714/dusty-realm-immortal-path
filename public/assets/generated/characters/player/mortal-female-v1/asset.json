@@ -1,0 +1,27 @@
+{
+  "assetId": "character.player.mortal_female.v1",
+  "kind": "character",
+  "name": "女性凡人主角",
+  "description": "初入仙途的女性凡人主角，行走時木劍背於身後，供地圖角色行走與後續角色外觀演進使用。",
+  "style": "pixel_art",
+  "source": "generated",
+  "version": 1,
+  "usage": ["player_walk", "map_token"],
+  "basePath": "/assets/generated/characters/player/mortal-female-v1",
+  "files": {
+    "raw": "raw-sheet.png",
+    "sheet": "sheet-transparent.png",
+    "preview": "animation.gif",
+    "framesDir": "frames",
+    "prompt": "prompt-used.txt",
+    "meta": "pipeline-meta.json"
+  },
+  "sprite": {
+    "rows": 4,
+    "cols": 4,
+    "frameCount": 16,
+    "anchor": "feet",
+    "view": "topdown"
+  },
+  "tags": ["player", "mortal", "female", "wooden-sword", "walk-sheet"]
+}

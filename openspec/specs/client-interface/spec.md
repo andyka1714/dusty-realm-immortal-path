@@ -679,11 +679,13 @@ Workshop 介面必須 (MUST) 顯示 mastery milestone、specialization leaf、ro
 - **AND** mobile 任務追蹤必須以低佔用入口收合並可展開
 
 ### Requirement: RPG 主畫面 Layout v2 必須有 runtime 狀態層
-介面必須 (MUST) 在 Adventure 主畫面提供穩定的右上小地圖資訊層與右下戰鬥功法快捷狀態，讓 layout v2 不只停留在規格描述。
+介面必須 (MUST) 在 Adventure 主畫面提供穩定的右上小地圖入口與右下戰鬥功法快捷狀態，讓 layout v2 不只停留在規格描述。
 
 #### Scenario: 玩家在主畫面查看地圖與戰鬥狀態
 - **WHEN** 玩家進入 Adventure 主畫面
-- **THEN** 右上小地圖必須顯示目前地圖、座標、附近妖獸與 Boss 狀態
+- **THEN** 右上小地圖必須作為地圖入口並顯示玩家座標提示
+- **AND** 右上小地圖下方不得額外顯示重複的地圖狀態卡
+- **AND** 正式 HUD 不得顯示開發用途的像素原型切換按鈕
 - **AND** 右下 action wheel 必須顯示目前目標、裝備主動功法與靈力可用狀態
 - **AND** mobile viewport 下任務入口、底部 dock 與戰鬥快捷不得互相遮擋
 
@@ -815,3 +817,33 @@ Workshop 介面必須 (MUST) 顯示 mastery milestone、specialization leaf、ro
 - **WHEN** 玩家打開 `功法神通`
 - **THEN** summary 與境界 heading 必須使用和 `裝備法寶` 一致的 amber 視覺語言
 - **AND** 功法卡片仍必須顯示名稱、主動/被動、分類列、描述與來源追蹤
+
+### Requirement: 戰鬥補給 UI 必須顯示冷卻與自動服丹狀態
+介面必須 (MUST) 在 Adventure 戰鬥補給區顯示目前可用丹藥、剩餘數量、5 秒冷卻與自動服丹設定。
+
+#### Scenario: 玩家查看戰鬥操作區
+- **WHEN** 玩家在地圖內鎖定怪物或進入接戰狀態
+- **THEN** 補給按鈕必須顯示可服用丹藥或不可用原因
+- **AND** 若恢復丹藥正在冷卻，必須顯示剩餘秒數
+- **AND** 玩家必須能切換 HP / MP 自動服丹開關
+
+### Requirement: 背包必須說明恢復丹藥的戰鬥冷卻
+介面必須 (MUST) 在背包丹藥詳情中標示恢復丹藥屬於戰鬥補給並共用 5 秒冷卻。
+
+#### Scenario: 玩家查看回血丹、回靈丹或混合恢復丹
+- **WHEN** 玩家在背包選取 `heal_hp`、`heal_mp` 或同時帶有兩者的混合恢復丹藥
+- **THEN** 詳情必須顯示恢復效果
+- **AND** 必須顯示「戰鬥補給共用冷卻：5 秒」
+
+### Requirement: 主畫面 HUD 必須在修為滿時提供直接突破入口
+介面必須 (MUST) 在 Adventure 主畫面角色 HUD 的修為格中，於角色可突破時提供直接 `突破` 操作，且不得要求玩家先打開 `道途` 面板。
+
+#### Scenario: 玩家修為已滿
+- **WHEN** 角色 `isBreakthroughAvailable` 為 true
+- **THEN** HUD 修為格必須顯示 `突破` 按鈕
+- **AND** 點擊後必須開啟與 `道途` 相同的突破彈窗
+
+#### Scenario: 玩家嘗試大境界突破
+- **WHEN** HUD 開啟的大境界突破彈窗需要突破道具
+- **THEN** 彈窗必須顯示需求道具、持有狀態與掉落提示
+- **AND** 缺少道具時確認突破必須 disabled

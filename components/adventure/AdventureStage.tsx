@@ -3,7 +3,7 @@ import * as PIXI from 'pixi.js';
 import { useSelector, useDispatch } from 'react-redux'; // Added Redux hooks
 import { RootState } from '../../store/store'; // Fixed import path
 import { clearVisualEffect } from '../../store/slices/adventureSlice';
-import { MapData, Coordinate, Portal, EnemyRank, ActiveMonster, MajorRealm, Quest, QuestStatus, VisualEffect } from '../../types';
+import { MapData, Coordinate, Portal, EnemyRank, ActiveMonster, MajorRealm, Quest, QuestStatus, VisualEffect, Gender } from '../../types';
 import { MOVEMENT_SPEEDS } from '../../constants';
 import { QUESTS } from '../../data/quests'; // Import QUESTS
 import { current } from '@reduxjs/toolkit';
@@ -16,6 +16,22 @@ import {
   type AdventureTerrainTile,
   resolveAdventureTerrainPalette,
 } from '../../utils/adventureTerrainPixelization';
+import { getAssetFileUrl, getAssetFrameFileUrls } from '../../data/assets';
+import {
+  getCharacterSpriteLayout,
+  getCharacterTileAnchorPosition,
+  getPlayerCombatSpriteFrame,
+  getPlayerSpriteDirectionFromDelta,
+  getPlayerSpriteDirectionTowardTarget,
+  getPlayerSpriteFrame,
+  shouldFaceClickedInteractionTarget,
+  shouldUsePlayerCombatSprite,
+  type PlayerSpriteDirection,
+} from '../../utils/playerSpriteAnimation';
+import {
+  getPlayerCombatSpriteAssetId,
+  getPlayerSpriteAssetId,
+} from '../../utils/playerSpriteAsset';
 
 interface AdventureStageProps {
   mapData: MapData;
@@ -24,6 +40,7 @@ interface AdventureStageProps {
   portals: Portal[];
   targetMonsterId: string | null;
   combatPresentation?: WorldCombatStagePresentation | null;
+  canPlayCombatAnimation?: boolean;
   majorRealm: MajorRealm;
   isBattling: boolean;
   onTileClick: (x: number, y: number) => void;
@@ -33,6 +50,7 @@ interface AdventureStageProps {
   cellSize: number;
   key?: React.Key;
   playerName: string;
+  playerGender: Gender;
   moveDestination?: Coordinate | null;
   activeQuests: Record<string, any>; // Passed from parent
   completedQuests: string[]; // Passed from parent
@@ -48,6 +66,8 @@ const THEME_COLORS = {
     [EnemyRank.Boss]:   0xf87171, // Red-400
 };
 const PLAYER_COLOR = 0x4ade80; // Green-400
+const PLAYER_COMBAT_SPRITE_ROWS = 4;
+const PLAYER_COMBAT_SPRITE_COLS = 6;
 
 const drawAdventureTerrainTile = ({
   graphics,
@@ -165,6 +185,7 @@ export default function AdventureStage({
   portals,
   targetMonsterId,
   combatPresentation,
+  canPlayCombatAnimation = false,
   majorRealm,
   isBattling,
   onTileClick,
@@ -173,6 +194,7 @@ export default function AdventureStage({
   cellSize = 40,
   onPlayerArrive,
   playerName,
+  playerGender,
   moveDestination,
   activeQuests,
   completedQuests
@@ -194,6 +216,8 @@ export default function AdventureStage({
 
   const moveTimerRef = useRef<number>(0);
   const isMovingRef = useRef(false);
+  const lastPlayerFacingRef = useRef<PlayerSpriteDirection>("down");
+  const playerMoveStartedAtRef = useRef(Date.now());
   const onPlayerArriveRef = useRef(onPlayerArrive);
   const framesRenderedRef = useRef(0);
   
@@ -348,7 +372,7 @@ export default function AdventureStage({
 
   const onTileClickRef = useRef(onTileClick);
   const entitiesRef = useRef({ monsters: activeMonsters, portals: portals });
-  const latestDataRef = useRef({ mapData, playerPosition, activeMonsters, portals, targetMonsterId, combatPresentation, majorRealm, isBattling, playerName, moveDestination, activeQuests, completedQuests });
+  const latestDataRef = useRef({ mapData, playerPosition, activeMonsters, portals, targetMonsterId, combatPresentation, canPlayCombatAnimation, majorRealm, isBattling, playerName, playerGender, moveDestination, activeQuests, completedQuests });
 
   // Sync latest props
   useEffect(() => {
@@ -358,8 +382,8 @@ export default function AdventureStage({
   useLayoutEffect(() => {
     entitiesRef.current.monsters = activeMonsters;
     entitiesRef.current.portals = portals;
-    latestDataRef.current = { mapData, playerPosition, activeMonsters, portals, targetMonsterId, combatPresentation, majorRealm, isBattling, playerName, moveDestination, activeQuests, completedQuests };
-  }, [mapData, playerPosition, activeMonsters, portals, targetMonsterId, combatPresentation, majorRealm, isBattling, playerName, moveDestination, activeQuests, completedQuests]);
+    latestDataRef.current = { mapData, playerPosition, activeMonsters, portals, targetMonsterId, combatPresentation, canPlayCombatAnimation, majorRealm, isBattling, playerName, playerGender, moveDestination, activeQuests, completedQuests };
+  }, [mapData, playerPosition, activeMonsters, portals, targetMonsterId, combatPresentation, canPlayCombatAnimation, majorRealm, isBattling, playerName, playerGender, moveDestination, activeQuests, completedQuests]);
 
   // Force Snap (New Map)
   useLayoutEffect(() => {
@@ -581,11 +605,13 @@ export default function AdventureStage({
 
       // Entities Layer (Monsters + Player)
       const entityLayer = new PIXI.Container();
+      entityLayer.sortableChildren = true;
       world.addChild(entityLayer);
       displayRefs.current.entityLayer = entityLayer;
 
       // --- Create Player Avatar ---
       const playerContainer = new PIXI.Container();
+      playerContainer.sortableChildren = true;
       // BG (Border Only)
       const pBg = new PIXI.Graphics();
       pBg.lineStyle(2, PLAYER_COLOR, 1);
@@ -610,6 +636,82 @@ export default function AdventureStage({
       playerContainer.addChild(pText);
       entityLayer.addChild(playerContainer); // Add to layer
       displayRefs.current.playerContainer = playerContainer;
+
+      let playerSprite: PIXI.Sprite | null = null;
+      let playerFrameTextures: PIXI.Texture[] = [];
+      let playerCombatFrameTextures: PIXI.Texture[] = [];
+      let didDestroyStage = false;
+
+      const playerWalkFrameUrls = getAssetFrameFileUrls(
+        getPlayerSpriteAssetId(latestDataRef.current.playerGender)
+      );
+
+      Promise.all([
+        Promise.all(playerWalkFrameUrls.map((url) => PIXI.Assets.load(url))),
+        PIXI.Assets.load(getAssetFileUrl(getPlayerCombatSpriteAssetId(latestDataRef.current.playerGender), "sheet")),
+      ])
+        .then(([walkTextures, combatTexture]) => {
+          const firstWalkTexture = walkTextures[0];
+          if (
+            didDestroyStage ||
+            !firstWalkTexture?.baseTexture.valid ||
+            walkTextures.length === 0
+          ) {
+            return;
+          }
+
+          walkTextures.forEach((walkTexture) => {
+            walkTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+          });
+
+          const frameHeight = firstWalkTexture.height;
+          const walkLayout = getCharacterSpriteLayout({
+            cellSize,
+            frameHeight,
+          });
+          playerFrameTextures = walkTextures;
+          if (combatTexture?.baseTexture.valid) {
+            combatTexture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+            const combatFrameWidth = combatTexture.width / PLAYER_COMBAT_SPRITE_COLS;
+            const combatFrameHeight = combatTexture.height / PLAYER_COMBAT_SPRITE_ROWS;
+            playerCombatFrameTextures = Array.from(
+              { length: PLAYER_COMBAT_SPRITE_ROWS * PLAYER_COMBAT_SPRITE_COLS },
+              (_, index) => {
+                const row = Math.floor(index / PLAYER_COMBAT_SPRITE_COLS);
+                const col = index % PLAYER_COMBAT_SPRITE_COLS;
+                return new PIXI.Texture(
+                  combatTexture.baseTexture,
+                  new PIXI.Rectangle(
+                    col * combatFrameWidth,
+                    row * combatFrameHeight,
+                    combatFrameWidth,
+                    combatFrameHeight
+                  )
+                );
+              }
+            );
+          }
+
+          const idleFrame = getPlayerSpriteFrame({
+            direction: lastPlayerFacingRef.current,
+            isMoving: false,
+            elapsedMs: 0,
+          });
+          playerSprite = new PIXI.Sprite(playerFrameTextures[idleFrame.frameIndex]);
+          playerSprite.anchor.set(walkLayout.anchorX, walkLayout.anchorY);
+          playerSprite.x = walkLayout.x;
+          playerSprite.y = walkLayout.y;
+          playerSprite.width = walkLayout.width;
+          playerSprite.height = walkLayout.height;
+          playerSprite.roundPixels = true;
+          playerContainer.addChild(playerSprite);
+          pBg.visible = false;
+          pText.visible = false;
+        })
+        .catch(() => {
+          pBg.visible = true;
+          pText.visible = true;
+        });
 
       // --- Target Marker (Shared instance, moved around) ---
       const targetMarker = new PIXI.Graphics();
@@ -658,6 +760,28 @@ export default function AdventureStage({
           const local = e.getLocalPosition(world);
           const gx = Math.floor(local.x / cellSize);
           const gy = Math.floor(local.y / cellSize);
+          const clickedTarget = { x: gx, y: gy };
+          const clickedInteractionTarget =
+              latestDataRef.current.mapData.npcs?.some(
+                  (npc) => npc.x === gx && npc.y === gy
+              ) ||
+              latestDataRef.current.activeMonsters.some(
+                  (monster) => monster.x === gx && monster.y === gy
+              );
+          if (
+              shouldFaceClickedInteractionTarget({
+                  source: latestDataRef.current.playerPosition,
+                  target: clickedTarget,
+                  hasInteractionTarget: Boolean(clickedInteractionTarget),
+              })
+          ) {
+              lastPlayerFacingRef.current = getPlayerSpriteDirectionTowardTarget({
+                  source: latestDataRef.current.playerPosition,
+                  target: clickedTarget,
+                  fallback: lastPlayerFacingRef.current,
+              });
+              playerMoveStartedAtRef.current = Date.now();
+          }
           onTileClickRef.current(gx, gy);
       });
 
@@ -770,8 +894,13 @@ export default function AdventureStage({
                
                // Apply to Container
                if (playerContainer) {
-                   playerContainer.x = (snapX + 0.5) * cellSize;
-                   playerContainer.y = (snapY + 0.5) * cellSize;
+                   const playerAnchor = getCharacterTileAnchorPosition({
+                       tileX: snapX,
+                       tileY: snapY,
+                       cellSize,
+                   });
+                   playerContainer.x = playerAnchor.x;
+                   playerContainer.y = playerAnchor.y;
                }
                // Update Camera
                world.x = width / 2 - visualRef.current.cam.x;
@@ -795,7 +924,17 @@ export default function AdventureStage({
           const pDist = Math.sqrt(pdx * pdx + pdy * pdy);
 
           if (pDist > 0.001) {
+              const wasMoving = isMovingRef.current;
               isMovingRef.current = true;
+              const nextFacing = getPlayerSpriteDirectionFromDelta(
+                  pdx,
+                  pdy,
+                  lastPlayerFacingRef.current
+              );
+              if (!wasMoving || nextFacing !== lastPlayerFacingRef.current) {
+                  lastPlayerFacingRef.current = nextFacing;
+                  playerMoveStartedAtRef.current = Date.now();
+              }
               if (pDist <= MOVE_SPEED) {
                   visualRef.current.player.x = targetPx;
                   visualRef.current.player.y = targetPy;
@@ -814,16 +953,90 @@ export default function AdventureStage({
               isMovingRef.current = false;
           }
 
+          const facingTargetId = latestDataRef.current.targetMonsterId;
+          const facingTarget = facingTargetId
+              ? latestDataRef.current.activeMonsters.find(
+                    (monster) => monster.instanceId === facingTargetId
+                )
+              : null;
+          if (!isMovingRef.current && facingTarget) {
+              const nextFacing = getPlayerSpriteDirectionTowardTarget({
+                  source: visualRef.current.player,
+                  target: facingTarget,
+                  fallback: lastPlayerFacingRef.current,
+              });
+              if (nextFacing !== lastPlayerFacingRef.current) {
+                  lastPlayerFacingRef.current = nextFacing;
+                  playerMoveStartedAtRef.current = Date.now();
+              }
+          }
 
-          // --- Animation Pulse ---
-          // ~1.5s per cycle. Range 0.95 to 1.05
+          if (playerSprite && playerFrameTextures.length > 0) {
+              const attackCycle = latestDataRef.current.combatPresentation?.playerAttackCycle;
+              const elapsedSinceActionMs = attackCycle
+                  ? attackCycle.ready
+                      ? 0
+                      : attackCycle.totalMs - attackCycle.remainingMs
+                  : 0;
+              if (
+                  shouldUsePlayerCombatSprite({
+                      isMoving: isMovingRef.current,
+                      hasCombatPresentation: Boolean(latestDataRef.current.combatPresentation),
+                      canPlayCombatAnimation: latestDataRef.current.canPlayCombatAnimation,
+                      isAttackReady: attackCycle?.ready ?? false,
+                      elapsedSinceActionMs,
+                      attackIntervalMs: attackCycle?.totalMs ?? 0,
+                  }) &&
+                  playerCombatFrameTextures.length > 0
+              ) {
+                  const combatFrame = getPlayerCombatSpriteFrame({
+                      direction: lastPlayerFacingRef.current,
+                      elapsedSinceActionMs,
+                      attackIntervalMs: attackCycle?.totalMs ?? 0,
+                  });
+                  playerSprite.texture =
+                      playerCombatFrameTextures[combatFrame.frameIndex] ?? playerSprite.texture;
+                  const combatLayout = getCharacterSpriteLayout({
+                      cellSize,
+                      frameHeight: playerSprite.texture.height,
+                  });
+                  playerSprite.anchor.set(combatLayout.anchorX, combatLayout.anchorY);
+                  playerSprite.x = combatLayout.x;
+                  playerSprite.y = combatLayout.y;
+                  playerSprite.width = combatLayout.width;
+                  playerSprite.height = combatLayout.height;
+              } else {
+                  const frame = getPlayerSpriteFrame({
+                      direction: lastPlayerFacingRef.current,
+                      isMoving: isMovingRef.current,
+                      elapsedMs: Date.now() - playerMoveStartedAtRef.current,
+                  });
+                  playerSprite.texture = playerFrameTextures[frame.frameIndex] ?? playerSprite.texture;
+                  const walkLayout = getCharacterSpriteLayout({
+                      cellSize,
+                      frameHeight: playerSprite.texture.height,
+                  });
+                  playerSprite.anchor.set(walkLayout.anchorX, walkLayout.anchorY);
+                  playerSprite.x = walkLayout.x;
+                  playerSprite.y = walkLayout.y;
+                  playerSprite.width = walkLayout.width;
+                  playerSprite.height = walkLayout.height;
+              }
+          }
+
+
           const time = Date.now() / 1000;
-          const pulse = 1 + Math.sin(time * 4) * 0.05; 
           
           if (playerContainer) {
-              playerContainer.x = (visualRef.current.player.x + 0.5) * cellSize;
-              playerContainer.y = (visualRef.current.player.y + 0.5) * cellSize;
-              playerContainer.scale.set(pulse); // Apply Pulse
+              const playerAnchor = getCharacterTileAnchorPosition({
+                  tileX: visualRef.current.player.x,
+                  tileY: visualRef.current.player.y,
+                  cellSize,
+              });
+              playerContainer.x = playerAnchor.x;
+              playerContainer.y = playerAnchor.y;
+              playerContainer.scale.set(1);
+              playerContainer.zIndex = playerContainer.y;
           }
 
           const combatOverlay = displayRefs.current.combatOverlay;
@@ -1006,6 +1219,7 @@ export default function AdventureStage({
               // Update Container Pos & Anim
               container.x = (visCoords.x + 0.5) * cellSize;
               container.y = (visCoords.y + 0.5) * cellSize;
+              container.zIndex = container.y;
               
               // Random Phase Pulse
               // Simple hash from instanceId for phase
@@ -1184,6 +1398,7 @@ export default function AdventureStage({
       app.ticker.add(ticker);
 
       return () => {
+          didDestroyStage = true;
           setIsPixiReady(false);
           try {
             app.destroy(true, { children: true, texture: true, baseTexture: true });
@@ -1192,7 +1407,7 @@ export default function AdventureStage({
           }
           appRef.current = null;
       };
-  }, [width, height, cellSize, mapData?.id]); 
+  }, [width, height, cellSize, mapData?.id, playerGender]);
 
   return <div ref={containerRef} data-testid="adventure-stage" />;
 }

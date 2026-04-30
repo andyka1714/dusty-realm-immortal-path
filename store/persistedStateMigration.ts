@@ -32,6 +32,7 @@ import {
   getWorkshopSpecializationNode,
   getWorkshopSpecializationNodesForDiscipline,
 } from "../data/workshopSpecializationTree";
+import { sanitizeAutoConsumableSettings } from "../utils/autoConsumableSettings";
 
 export interface LegacyPersistedState {
   character: unknown;
@@ -434,6 +435,24 @@ export const migratePersistedInventoryState = (inventory: unknown) => {
   return nextInventory;
 };
 
+const migratePersistedAdventureState = (adventure: unknown) => {
+  if (!isRecord(adventure)) {
+    return adventure;
+  }
+
+  const {
+    lastRecoveryConsumableUsedAt: _lastRecoveryConsumableUsedAt,
+    ...rest
+  } = adventure;
+
+  return {
+    ...rest,
+    autoConsumableSettings: sanitizeAutoConsumableSettings(
+      adventure.autoConsumableSettings
+    ),
+  };
+};
+
 export const migratePersistedQuestState = (quest: unknown): QuestState => {
   const initialQuest = createInitialQuestState();
   if (!isRecord(quest)) {
@@ -740,6 +759,7 @@ export const migratePersistedState = (
   return {
     ...current,
     character: migratePersistedCharacterState(current.character),
+    adventure: migratePersistedAdventureState(current.adventure),
     inventory: migratePersistedInventoryState(current.inventory),
     quest: migratePersistedQuestState(current.quest),
     workshop: migratePersistedWorkshopState(current.workshop),

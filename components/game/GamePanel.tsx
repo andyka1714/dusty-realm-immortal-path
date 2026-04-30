@@ -13,6 +13,7 @@ interface GamePanelProps {
   title?: string;
   eyebrow?: string;
   titleIcon?: React.ReactNode;
+  titleAccessory?: React.ReactNode;
 }
 
 export const GamePanel: React.FC<GamePanelProps> = ({
@@ -23,6 +24,7 @@ export const GamePanel: React.FC<GamePanelProps> = ({
   title,
   eyebrow = "IMMORTAL ARCHIVE",
   titleIcon,
+  titleAccessory,
 }) => {
   if (!isOpen) return null;
 
@@ -48,8 +50,9 @@ export const GamePanel: React.FC<GamePanelProps> = ({
         />
 
         {title && (
-          <div className="pointer-events-none absolute left-7 top-6 z-20">
+          <div className="pointer-events-auto absolute left-7 top-6 z-20 flex items-end gap-2">
             <GameTitleStack eyebrow={eyebrow} title={title} icon={titleIcon ? <span className="text-amber-500/95">{titleIcon}</span> : undefined} className="px-1 py-1" />
+            {titleAccessory}
           </div>
         )}
 

@@ -5,6 +5,8 @@ import reducer, {
   enterMap,
   movePlayer,
   resolveBattle,
+  setWorldPlayerResources,
+  setAutoConsumableSettings,
   tickMonsters,
 } from "./adventureSlice";
 import { ElementType, EnemyRank, MajorRealm } from "../../types";
@@ -17,6 +19,49 @@ afterEach(() => {
 });
 
 describe("adventure engagement flow", () => {
+  it("initializes persisted auto consumable settings for HP and MP", () => {
+    const state = reducer(undefined, { type: "@@INIT" });
+
+    expect(state.autoConsumableSettings).toEqual({
+      hp: { enabled: true, thresholdPercent: 45 },
+      mp: { enabled: false, thresholdPercent: 25 },
+    });
+  });
+
+  it("sanitizes auto consumable thresholds when settings are changed", () => {
+    const state = reducer(
+      undefined,
+      setAutoConsumableSettings({
+        hp: { enabled: false, thresholdPercent: 5 },
+        mp: { enabled: true, thresholdPercent: 120 },
+      })
+    );
+
+    expect(state.autoConsumableSettings).toEqual({
+      hp: { enabled: false, thresholdPercent: 10 },
+      mp: { enabled: true, thresholdPercent: 90 },
+    });
+  });
+
+  it("stores live world player resources for shared HUD display", () => {
+    const state = reducer(
+      undefined,
+      setWorldPlayerResources({
+        hp: 42,
+        maxHp: 280,
+        mp: 96,
+        maxMp: 130,
+      })
+    );
+
+    expect(state.worldPlayerResources).toEqual({
+      hp: 42,
+      maxHp: 280,
+      mp: 96,
+      maxMp: 130,
+    });
+  });
+
   it("does not let the player move onto an NPC occupied cell", () => {
     const state = reducer(
       undefined,

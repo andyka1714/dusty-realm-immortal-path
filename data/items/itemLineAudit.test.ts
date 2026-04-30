@@ -13,6 +13,21 @@ import {
 } from "./itemLineMetadata";
 
 describe("item line metadata", () => {
+  const allMajorRealms = [
+    MajorRealm.Mortal,
+    MajorRealm.QiRefining,
+    MajorRealm.Foundation,
+    MajorRealm.GoldenCore,
+    MajorRealm.NascentSoul,
+    MajorRealm.SpiritSevering,
+    MajorRealm.VoidRefining,
+    MajorRealm.Fusion,
+    MajorRealm.Mahayana,
+    MajorRealm.Tribulation,
+    MajorRealm.Immortal,
+    MajorRealm.ImmortalEmperor,
+  ];
+
   it("covers low and mid realms for first-wave item lines", () => {
     const requiredRealms = [
       MajorRealm.Mortal,
@@ -88,7 +103,7 @@ describe("item line metadata", () => {
     const requiredEffectTypes = new Set([
       "gain_exp",
       "heal_hp",
-      "full_restore",
+      "heal_mp",
       "breakthrough_chance",
       "buff_stat",
     ]);
@@ -110,6 +125,142 @@ describe("item line metadata", () => {
           `${itemId} effect ${effect.type} should fit the first-wave pill line`
         ).toBe(true);
       });
+    });
+  });
+
+  it("covers combat pill purposes and shared recovery cooldown for low and mid realms", () => {
+    const pillIds = Object.values(FIRST_WAVE_ITEM_LINE_ITEM_IDS.pill).flat();
+    const pills = pillIds.map((itemId) => ITEMS[itemId] as ConsumableItem);
+    const effectTypes = new Set(
+      pills.flatMap((pill) => pill.effects.map((effect) => effect.type))
+    );
+
+    expect(Array.from(effectTypes)).toEqual(
+      expect.arrayContaining([
+        "gain_exp",
+        "heal_hp",
+        "heal_mp",
+        "breakthrough_chance",
+        "buff_stat",
+      ])
+    );
+
+    pills
+      .filter((pill) =>
+        pill.effects.some((effect) =>
+          ["heal_hp", "heal_mp", "full_restore"].includes(effect.type)
+        )
+      )
+      .forEach((pill) => {
+        expect(pill.cooldown, `${pill.id} recovery cooldown`).toBe(5);
+      });
+  });
+
+  it("does not publish full-restore pills in the current realm pill progression", () => {
+    const pillIds = Object.values(FIRST_WAVE_ITEM_LINE_ITEM_IDS.pill).flat();
+    const fullRestorePills = pillIds.filter((itemId) => {
+      const item = ITEMS[itemId] as ConsumableItem | undefined;
+      return item?.effects.some((effect) => effect.type === "full_restore");
+    });
+
+    expect(fullRestorePills).toEqual([]);
+  });
+
+  it("gives every major realm a cultivation, HP recovery, and MP recovery pill with a source", () => {
+    const sourcedItemIds = new Set([
+      ...Object.values(WORKSHOP_RECIPES).flatMap((recipe) =>
+        recipe.outputs.map((output) => output.itemId)
+      ),
+      ...Object.values(SHOPS).flatMap((shop) =>
+        shop.items.map((shopItem) => shopItem.itemId)
+      ),
+    ]);
+
+    allMajorRealms.forEach((realm) => {
+      const pillIds = FIRST_WAVE_ITEM_LINE_ITEM_IDS.pill[realm] ?? [];
+      const pills = pillIds.map((itemId) => ITEMS[itemId] as ConsumableItem | undefined);
+
+      expect(pillIds.length, `realm ${realm} pill ids`).toBeGreaterThanOrEqual(3);
+      expect(
+        pills.some((pill) => pill?.effects.some((effect) => effect.type === "gain_exp")),
+        `realm ${realm} should have a cultivation pill`
+      ).toBe(true);
+      expect(
+        pills.some((pill) => pill?.effects.some((effect) => effect.type === "heal_hp")),
+        `realm ${realm} should have an HP pill`
+      ).toBe(true);
+      expect(
+        pills.some((pill) => pill?.effects.some((effect) => effect.type === "heal_mp")),
+        `realm ${realm} should have an MP pill`
+      ).toBe(true);
+
+      pillIds.forEach((itemId) => {
+        expect(ITEMS[itemId], `${itemId} should exist`).toBeDefined();
+        expect(sourcedItemIds.has(itemId), `${itemId} should have a source`).toBe(true);
+      });
+    });
+  });
+
+  it("keeps realm recovery pill values in a conservative five-second cooldown envelope", () => {
+    const recoveryEnvelope: Record<
+      MajorRealm,
+      { hp: [number, number]; mp: [number, number] }
+    > = {
+      [MajorRealm.Mortal]: { hp: [45, 65], mp: [35, 55] },
+      [MajorRealm.QiRefining]: { hp: [75, 110], mp: [65, 95] },
+      [MajorRealm.Foundation]: { hp: [160, 230], mp: [130, 190] },
+      [MajorRealm.GoldenCore]: { hp: [700, 1100], mp: [600, 900] },
+      [MajorRealm.NascentSoul]: { hp: [2500, 3800], mp: [1800, 2800] },
+      [MajorRealm.SpiritSevering]: { hp: [10000, 15000], mp: [7500, 11000] },
+      [MajorRealm.VoidRefining]: { hp: [34000, 52000], mp: [25000, 38000] },
+      [MajorRealm.Fusion]: { hp: [100000, 150000], mp: [76000, 115000] },
+      [MajorRealm.Mahayana]: { hp: [300000, 430000], mp: [220000, 320000] },
+      [MajorRealm.Tribulation]: { hp: [850000, 1200000], mp: [620000, 850000] },
+      [MajorRealm.Immortal]: { hp: [2200000, 3000000], mp: [1500000, 2200000] },
+      [MajorRealm.ImmortalEmperor]: { hp: [5200000, 6800000], mp: [3600000, 4800000] },
+    };
+
+    allMajorRealms.forEach((realm) => {
+      const pills = (FIRST_WAVE_ITEM_LINE_ITEM_IDS.pill[realm] ?? []).map(
+        (itemId) => ITEMS[itemId] as ConsumableItem
+      );
+      const hpValues = pills.flatMap((pill) =>
+        pill.effects
+          .filter((effect) => effect.type === "heal_hp")
+          .map((effect) => effect.value)
+      );
+      const mpValues = pills.flatMap((pill) =>
+        pill.effects
+          .filter((effect) => effect.type === "heal_mp")
+          .map((effect) => effect.value)
+      );
+
+      expect(
+        hpValues.some(
+          (value) =>
+            value >= recoveryEnvelope[realm].hp[0] &&
+            value <= recoveryEnvelope[realm].hp[1]
+        ),
+        `realm ${realm} HP recovery envelope`
+      ).toBe(true);
+      expect(
+        mpValues.some(
+          (value) =>
+            value >= recoveryEnvelope[realm].mp[0] &&
+            value <= recoveryEnvelope[realm].mp[1]
+        ),
+        `realm ${realm} MP recovery envelope`
+      ).toBe(true);
+
+      pills
+        .filter((pill) =>
+          pill.effects.some((effect) =>
+            ["heal_hp", "heal_mp", "full_restore"].includes(effect.type)
+          )
+        )
+        .forEach((pill) => {
+          expect(pill.cooldown, `${pill.id} recovery cooldown`).toBe(5);
+        });
     });
   });
 

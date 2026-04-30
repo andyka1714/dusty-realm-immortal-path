@@ -307,3 +307,12 @@ LocalStorage persistence 必須 (MUST) 在新增正式通用功法與秘卷 cata
 - **THEN** 系統不得要求 schema migration
 - **AND** 若日後存檔包含已學通用主動功法與合法 `equippedActiveSkillId`，hydrate sanitize 必須保留它
 
+### Requirement: 自動服丹設定必須安全持久化
+LocalStorage persistence 必須 (MUST) 保存地圖內自動服丹設定，並能從舊存檔補齊預設值。
+
+#### Scenario: 舊存檔缺少自動服丹設定
+- **WHEN** 系統載入沒有 `adventure.autoConsumableSettings` 的舊存檔
+- **THEN** migration 必須補上 HP 與 MP 自動服丹預設設定
+- **AND** 非法閾值必須被清理回安全範圍
+- **AND** 恢復丹藥冷卻 timestamp 不得被持久化
+

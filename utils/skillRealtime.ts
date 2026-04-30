@@ -82,3 +82,20 @@ export const getLearnedSkillEngagementRange = (
 
   return Math.max(baseRange, ...activeRanges, 0);
 };
+
+export const getAvailablePlayerEngagementRange = ({
+  profession,
+  activeSkill,
+  canUseActiveSkill,
+}: {
+  profession: ProfessionType;
+  activeSkill?: Skill;
+  canUseActiveSkill: boolean;
+}) => {
+  const baseRange = profession === ProfessionType.Mage ? 3 : 1;
+  if (!activeSkill || !canUseActiveSkill) {
+    return baseRange;
+  }
+
+  return Math.max(baseRange, getSkillRealtimeProfile(activeSkill).castRange);
+};

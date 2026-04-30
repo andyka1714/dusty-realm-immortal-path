@@ -210,6 +210,33 @@ describe("persisted state migration", () => {
     });
   });
 
+  it("hydrates auto consumable settings onto legacy adventure state", () => {
+    const migrated = migratePersistedState(
+      createPersistedState({
+        adventure: {
+          currentMapId: "20",
+          autoConsumableSettings: {
+            hp: { enabled: false, thresholdPercent: 4 },
+            mp: { enabled: true, thresholdPercent: 120 },
+          },
+          lastRecoveryConsumableUsedAt: 999999,
+        },
+      })
+    );
+
+    expect(migrated.adventure).toMatchObject({
+      currentMapId: "20",
+      autoConsumableSettings: {
+        hp: { enabled: false, thresholdPercent: 10 },
+        mp: { enabled: true, thresholdPercent: 90 },
+      },
+    });
+    expect(
+      (migrated.adventure as { lastRecoveryConsumableUsedAt?: unknown })
+        .lastRecoveryConsumableUsedAt
+    ).toBeUndefined();
+  });
+
   it("normalizes retired learned skills into a unique formal core list", () => {
     const migrated = migratePersistedState(
       createPersistedState({

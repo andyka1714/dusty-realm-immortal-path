@@ -91,6 +91,10 @@ export interface WorldCombatStagePresentation {
   enemyChargeColor?: number;
   bossTelegraphRadius?: number;
   bossTelegraphState?: "warning" | "ready";
+  playerAttackCycle: Pick<
+    CombatCadencePresentation,
+    "ready" | "remainingMs" | "totalMs" | "fillPercent"
+  >;
 }
 
 export interface WorldCombatEnemySpecialPresentation
@@ -743,6 +747,12 @@ export const resolveWorldCombatTargetPresentation = ({
     intentTone,
     rangeHint,
     stagePresentation: {
+      playerAttackCycle: {
+        ready: playerAction.ready,
+        remainingMs: playerAction.remainingMs,
+        totalMs: playerAction.totalMs,
+        fillPercent: playerAction.fillPercent,
+      },
       playerRangeRadius: playerEngagementRange,
       enemyRangeRadius: enemyEngagementRange,
       enemyAggroRadius: enemyAggroRange,

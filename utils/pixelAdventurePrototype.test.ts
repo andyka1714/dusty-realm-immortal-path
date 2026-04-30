@@ -54,6 +54,12 @@ describe("pixelAdventurePrototype", () => {
       enemyAggroColor: 0xf87171,
       enemyPreferredColor: 0x38bdf8,
       enemyDangerFillAlpha: 0.24,
+      playerAttackCycle: {
+        ready: false,
+        remainingMs: 600,
+        totalMs: 1200,
+        fillPercent: 50,
+      },
     };
 
     const model = buildPixelPrototypeScene({

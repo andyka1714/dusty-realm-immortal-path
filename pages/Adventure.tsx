@@ -6,7 +6,17 @@ import { RootState } from '../store/store';
 import { MAPS } from '../data/maps';
 import { ITEMS } from '../data/items';
 import { QUESTS } from '../data/quests';
-import { enterMap, movePlayer, tickMonsters, applyWorldDamageToMonster, cancelBattle, markMapVisited } from '../store/slices/adventureSlice';
+import {
+  enterMap,
+  movePlayer,
+  tickMonsters,
+  applyWorldDamageToMonster,
+  cancelBattle,
+  markMapVisited,
+  setAutoConsumableSettings,
+  setWorldPlayerResources,
+  clearWorldPlayerResources,
+} from '../store/slices/adventureSlice';
 import { removeItem } from '../store/slices/inventorySlice';
 import {
   clearAllCombatTimers,
@@ -39,8 +49,8 @@ import { GameTooltip } from '../components/game/GameTooltip';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { SHOPS } from '../data/shops';
-import { getEnemyEngagementRange, getGridDistance, getPlayerEngagementRange } from '../utils/worldCombat';
-import { getLearnedSkillEngagementRange } from '../utils/skillRealtime';
+import { getEnemyEngagementRange, getGridDistance } from '../utils/worldCombat';
+import { getAvailablePlayerEngagementRange } from '../utils/skillRealtime';
 import { normalizeLearnedSkills } from '../data/skills';
 import {
   resolveAdventureCombatUiState,
@@ -59,6 +69,10 @@ import {
   resolveAdventureStageRenderMode,
   type AdventureStageRenderMode,
 } from '../utils/pixelAdventurePrototype';
+import {
+  resolveEngagementPath,
+  resolveImmediatePathStep,
+} from '../utils/adventurePathMovement';
 import { createAdventureBattleUiBridge } from '../utils/adventureBattleUiBridge';
 import { createAdventureBattleVisualBridge } from '../utils/adventureBattleVisualBridge';
 import {
@@ -70,6 +84,8 @@ import { resolveAdventureTerrainPalette } from '../utils/adventureTerrainPixeliz
 import {
   applyConsumableRecoveryEffects,
   getConsumableRecoveryBlockedReason,
+  getRecoveryConsumableCooldownLabel,
+  getRecoveryConsumableCooldownRemainingMs,
   hasRecoveryEffect,
 } from '../utils/consumableEffects';
 import {
@@ -646,7 +662,8 @@ export const Adventure: React.FC<AdventureProps> = ({
   const { equipmentStats, items: inventoryItems } = useSelector((state: RootState) => state.inventory);
   const { 
     currentMapId, playerPosition, activeMonsters, visitedCells, 
-    mapHistory, isBattling, currentEnemy, currentEnemyInstanceId, battleLogs, lastBattleResult 
+    mapHistory, isBattling, currentEnemy, currentEnemyInstanceId, battleLogs, lastBattleResult,
+    autoConsumableSettings,
   } = useSelector((state: RootState) => state.adventure);
   const { activeQuests, completedQuests } = useSelector((state: RootState) => state.quest);
   
@@ -714,6 +731,7 @@ export const Adventure: React.FC<AdventureProps> = ({
   const [enemyActionReadyAtById, setEnemyActionReadyAtById] = useState<Record<string, number>>({});
   const [enemySpecialReadyAtById, setEnemySpecialReadyAtById] = useState<Record<string, number>>({});
   const [worldUiNow, setWorldUiNow] = useState(() => Date.now());
+  const [lastRecoveryConsumableUsedAt, setLastRecoveryConsumableUsedAt] = useState<number | null>(null);
   const combatTimersRef = useRef(createCombatTimerBuckets());
   
   // NPC Interaction State
@@ -961,10 +979,6 @@ export const Adventure: React.FC<AdventureProps> = ({
     character.skills,
     character.equippedActiveSkillId
   );
-  const playerEngagementRange = Math.max(
-    getPlayerEngagementRange(profession),
-    getLearnedSkillEngagementRange(profession, character.skills)
-  );
   const latestBattleLog = displayedLogs.length > 0 ? displayedLogs[displayedLogs.length - 1] : null;
   const targetedMonster = targetMonsterId
     ? activeMonsters.find((monster) => monster.instanceId === targetMonsterId) ?? null
@@ -984,6 +998,15 @@ export const Adventure: React.FC<AdventureProps> = ({
     : undefined;
   const primaryActiveSkillMpCost = primaryActiveSkill?.cost ?? 0;
   const hasEnoughMpForPrimaryActiveSkill = worldPlayerMp >= primaryActiveSkillMpCost;
+  const canUsePrimaryActiveSkillNow =
+    Boolean(primaryActiveSkill) &&
+    hasEnoughMpForPrimaryActiveSkill &&
+    currentTimestamp >= playerSkillReadyAt;
+  const playerEngagementRange = getAvailablePlayerEngagementRange({
+    profession,
+    activeSkill: primaryActiveSkill,
+    canUseActiveSkill: canUsePrimaryActiveSkillNow,
+  });
   const canEngageTarget =
     Boolean(targetedMonster) &&
     targetDistance !== null &&
@@ -1019,45 +1042,84 @@ export const Adventure: React.FC<AdventureProps> = ({
           recentMessage: worldLastCombatMessage,
         })
       : null;
-  const combatSupplySlot = inventoryItems.find((slot) => {
+  const combatSupplyOptions = inventoryItems.flatMap((slot) => {
     const item = ITEMS[slot.itemId];
-    return (
-      item?.category === ItemCategory.Consumable &&
-      hasRecoveryEffect((item as ConsumableItem).effects)
-    );
-  });
-  const combatSupply = combatSupplySlot
-    ? ITEMS[combatSupplySlot.itemId] as ConsumableItem
-    : null;
-  const combatSupplyBlockedReason = combatSupply
-    ? getConsumableRecoveryBlockedReason(combatSupply.effects, {
-      hp: { current: worldPlayerHp, max: playerStats.maxHp },
-      mp: { current: worldPlayerMp, max: playerStats.maxMp },
-      })
-    : "沒有可用補給";
+    if (
+      item?.category !== ItemCategory.Consumable ||
+      !hasRecoveryEffect((item as ConsumableItem).effects)
+    ) {
+      return [];
+    }
 
-  const useCombatSupply = () => {
-    if (!combatSupply || !combatSupplySlot || combatSupplyBlockedReason) {
-      if (combatSupplyBlockedReason) {
+    return [{ slot, item: item as ConsumableItem }];
+  });
+  const recoveryCooldownRemainingMs = getRecoveryConsumableCooldownRemainingMs(
+    lastRecoveryConsumableUsedAt,
+    worldUiNow
+  );
+  const recoveryCooldownLabel = getRecoveryConsumableCooldownLabel(
+    recoveryCooldownRemainingMs
+  );
+  const combatSupplyCandidate = combatSupplyOptions.find(
+    ({ item }) =>
+      !getConsumableRecoveryBlockedReason(item.effects, {
+        hp: { current: worldPlayerHp, max: playerStats.maxHp },
+        mp: { current: worldPlayerMp, max: playerStats.maxMp },
+      })
+  );
+  const combatSupplySlot = combatSupplyCandidate?.slot ?? combatSupplyOptions[0]?.slot ?? null;
+  const combatSupply = combatSupplyCandidate?.item ?? combatSupplyOptions[0]?.item ?? null;
+  const combatSupplyBlockedReason = recoveryCooldownLabel
+    ? recoveryCooldownLabel
+    : combatSupply
+      ? getConsumableRecoveryBlockedReason(combatSupply.effects, {
+        hp: { current: worldPlayerHp, max: playerStats.maxHp },
+        mp: { current: worldPlayerMp, max: playerStats.maxMp },
+      })
+      : "沒有可用補給";
+
+  const useCombatSupply = (
+    slot: typeof combatSupplySlot = combatSupplySlot,
+    item: typeof combatSupply = combatSupply,
+    source: "manual" | "auto" = "manual"
+  ) => {
+    const now = Date.now();
+    const cooldownRemaining = getRecoveryConsumableCooldownRemainingMs(
+      lastRecoveryConsumableUsedAt,
+      now
+    );
+    const cooldownReason = getRecoveryConsumableCooldownLabel(cooldownRemaining);
+    const blockedReason = item
+      ? cooldownReason ??
+        getConsumableRecoveryBlockedReason(item.effects, {
+          hp: { current: worldPlayerHp, max: playerStats.maxHp },
+          mp: { current: worldPlayerMp, max: playerStats.maxMp },
+        })
+      : "沒有可用補給";
+
+    if (!item || !slot || blockedReason) {
+      if (blockedReason && source === "manual") {
         dispatch(addLog({
-          message: `補給無法使用：${combatSupplyBlockedReason}。`,
+          message: `補給無法使用：${blockedReason}。`,
           type: 'warning-low',
         }));
       }
-      return;
+      return false;
     }
 
-    const recovery = applyConsumableRecoveryEffects(combatSupply.effects, {
+    const recovery = applyConsumableRecoveryEffects(item.effects, {
       hp: { current: worldPlayerHp, max: playerStats.maxHp },
       mp: { current: worldPlayerMp, max: playerStats.maxMp },
     });
 
     if (recovery.appliedEffects <= 0 || (!recovery.hp && !recovery.mp)) {
-      dispatch(addLog({
-        message: `補給無法使用：沒有可恢復的戰鬥資源。`,
-        type: 'warning-low',
-      }));
-      return;
+      if (source === "manual") {
+        dispatch(addLog({
+          message: `補給無法使用：沒有可恢復的戰鬥資源。`,
+          type: 'warning-low',
+        }));
+      }
+      return false;
     }
 
     if (recovery.hp) {
@@ -1067,15 +1129,127 @@ export const Adventure: React.FC<AdventureProps> = ({
       setWorldPlayerMp(recovery.mp.current);
     }
     dispatch(removeItem({
-      itemId: combatSupplySlot.itemId,
+      itemId: slot.itemId,
       count: 1,
-      instanceId: combatSupplySlot.instanceId,
+      instanceId: slot.instanceId,
     }));
+    setLastRecoveryConsumableUsedAt(now);
     dispatch(addLog({
-      message: `你服用了 [${combatSupply.name}]，氣血 ${Math.floor(recovery.hp?.current ?? worldPlayerHp)} / ${playerStats.maxHp}，靈力 ${Math.floor(recovery.mp?.current ?? worldPlayerMp)} / ${playerStats.maxMp}。`,
+      message: `${source === "auto" ? "自動服丹：" : ""}你服用了 [${item.name}]，氣血 ${Math.floor(recovery.hp?.current ?? worldPlayerHp)} / ${playerStats.maxHp}，靈力 ${Math.floor(recovery.mp?.current ?? worldPlayerMp)} / ${playerStats.maxMp}。`,
       type: 'gain',
     }));
+    return true;
   };
+
+  const toggleAutoConsumable = (resource: "hp" | "mp") => {
+    dispatch(
+      setAutoConsumableSettings({
+        ...autoConsumableSettings,
+        [resource]: {
+          ...autoConsumableSettings[resource],
+          enabled: !autoConsumableSettings[resource].enabled,
+        },
+      })
+    );
+  };
+
+  const selectAutoRecoverySupply = () => {
+    if (combatSupplyOptions.length === 0) {
+      return null;
+    }
+
+    const hpPercent = playerStats.maxHp > 0 ? (worldPlayerHp / playerStats.maxHp) * 100 : 100;
+    const mpPercent = playerStats.maxMp > 0 ? (worldPlayerMp / playerStats.maxMp) * 100 : 100;
+    const wantsHp =
+      autoConsumableSettings.hp.enabled &&
+      hpPercent <= autoConsumableSettings.hp.thresholdPercent;
+    const wantsMp =
+      autoConsumableSettings.mp.enabled &&
+      mpPercent <= autoConsumableSettings.mp.thresholdPercent;
+
+    if (!wantsHp && !wantsMp) {
+      return null;
+    }
+
+    const getRestoreScore = (item: ConsumableItem) => {
+      const hasFullRestore = item.effects.some((effect) => effect.type === "full_restore");
+      if (wantsHp && wantsMp && hasFullRestore) {
+        return 0;
+      }
+
+      const hpMissing = Math.max(0, playerStats.maxHp - worldPlayerHp);
+      const mpMissing = Math.max(0, playerStats.maxMp - worldPlayerMp);
+      const hpValue = item.effects
+        .filter((effect) => effect.type === "heal_hp")
+        .reduce((sum, effect) => sum + effect.value, 0);
+      const mpValue = item.effects
+        .filter((effect) => effect.type === "heal_mp")
+        .reduce((sum, effect) => sum + effect.value, 0);
+
+      if (wantsHp && !wantsMp) {
+        if (hpValue <= 0 && !hasFullRestore) return Number.POSITIVE_INFINITY;
+        return hpValue > 0 ? Math.abs(hpValue - hpMissing) : hpMissing + 10000;
+      }
+
+      if (wantsMp && !wantsHp) {
+        if (mpValue <= 0 && !hasFullRestore) return Number.POSITIVE_INFINITY;
+        return mpValue > 0 ? Math.abs(mpValue - mpMissing) : mpMissing + 10000;
+      }
+
+      if (hpValue > 0 && mpValue > 0) {
+        return Math.abs(hpValue - hpMissing) + Math.abs(mpValue - mpMissing);
+      }
+
+      return Number.POSITIVE_INFINITY;
+    };
+
+    const candidates = combatSupplyOptions
+      .filter(
+        ({ item }) =>
+          !getConsumableRecoveryBlockedReason(item.effects, {
+            hp: { current: worldPlayerHp, max: playerStats.maxHp },
+            mp: { current: worldPlayerMp, max: playerStats.maxMp },
+          })
+      )
+      .map((candidate) => ({
+        ...candidate,
+        score: getRestoreScore(candidate.item),
+      }))
+      .filter((candidate) => Number.isFinite(candidate.score))
+      .sort((a, b) => a.score - b.score);
+
+    return candidates[0] ?? null;
+  };
+
+  useEffect(() => {
+    if (
+      !targetedMonster ||
+      isBattling ||
+      showIntro ||
+      recoveryCooldownRemainingMs > 0
+    ) {
+      return;
+    }
+
+    const candidate = selectAutoRecoverySupply();
+    if (!candidate) {
+      return;
+    }
+
+    useCombatSupply(candidate.slot, candidate.item, "auto");
+  }, [
+    autoConsumableSettings,
+    combatSupplyOptions,
+    isBattling,
+    playerStats.maxHp,
+    playerStats.maxMp,
+    recoveryCooldownRemainingMs,
+    showIntro,
+    targetedMonster,
+    useCombatSupply,
+    worldPlayerHp,
+    worldPlayerMp,
+  ]);
 
   useEffect(() => {
     if (!targetedMonster || isBattling || showIntro) {
@@ -1111,6 +1285,21 @@ export const Adventure: React.FC<AdventureProps> = ({
       setWorldPlayerMp(playerStats.maxMp);
     }
   }, [worldPlayerHp, worldPlayerMp, playerStats.maxHp, playerStats.maxMp]);
+
+  useEffect(() => {
+    dispatch(
+      setWorldPlayerResources({
+        hp: worldPlayerHp,
+        maxHp: playerStats.maxHp,
+        mp: worldPlayerMp,
+        maxMp: playerStats.maxMp,
+      })
+    );
+
+    return () => {
+      dispatch(clearWorldPlayerResources());
+    };
+  }, [dispatch, worldPlayerHp, worldPlayerMp, playerStats.maxHp, playerStats.maxMp]);
 
   useEffect(() => {
     if (worldCombatTargetId && !activeMonsters.some((monster) => monster.instanceId === worldCombatTargetId)) {
@@ -1177,16 +1366,16 @@ export const Adventure: React.FC<AdventureProps> = ({
   });
 
   const runPlayerWorldAction = (useSkill: boolean) => {
-    const shouldUseSkill =
+    let shouldUseSkill =
       useSkill &&
       Boolean(primaryActiveSkill) &&
       Date.now() >= playerSkillReadyAt;
     if (shouldUseSkill && !hasEnoughMpForPrimaryActiveSkill) {
       dispatch(addLog({
-        message: `靈力不足，無法施放【${primaryActiveSkill?.name}】（需要 ${primaryActiveSkillMpCost}）。`,
+        message: `靈力不足，無法施放【${primaryActiveSkill?.name}】（需要 ${primaryActiveSkillMpCost}），改以普通攻擊接戰。`,
         type: 'warning-low',
       }));
-      return;
+      shouldUseSkill = false;
     }
 
     const queuedAction = runPlayerWorldStrikePipeline({
@@ -1195,7 +1384,7 @@ export const Adventure: React.FC<AdventureProps> = ({
       target: targetedMonster ?? undefined,
       primaryActiveSkill,
       playerSkillReadyAt,
-      useSkill,
+      useSkill: shouldUseSkill,
       resolveStrike: (chosenSkill) =>
         resolvePlayerWorldStrike(playerStats, targetedMonsterTemplate, chosenSkill),
       activeMonsters,
@@ -1342,14 +1531,22 @@ export const Adventure: React.FC<AdventureProps> = ({
               return;
           }
 
+          const newPath = resolveEngagementPath({
+              playerPosition,
+              targetPosition: targetMonster,
+              engagementRange: playerEngagementRange,
+              width: mapData.width,
+              height: mapData.height,
+          });
+          const desiredDest = newPath.length > 0 ? newPath[newPath.length - 1] : null;
           const currentDest = autoMovePath.length > 0 ? autoMovePath[autoMovePath.length - 1] : null;
           
-          if (!currentDest || currentDest.x !== targetMonster.x || currentDest.y !== targetMonster.y) {
+          if (
+              desiredDest &&
+              (!currentDest || currentDest.x !== desiredDest.x || currentDest.y !== desiredDest.y)
+          ) {
                // Target moved or new target! Recalculate path.
-               const newPath = findPath(playerPosition, { x: targetMonster.x, y: targetMonster.y }, mapData.width, mapData.height);
-               if (newPath.length > 0) {
-                   setAutoMovePath(newPath);
-               }
+               setAutoMovePath(newPath);
           }
       } else {
           // Monster dead or gone? Stop targeting.
@@ -1633,9 +1830,34 @@ export const Adventure: React.FC<AdventureProps> = ({
       }
 
       // Pathfinding
-      const path = findPath(playerPosition, { x: targetX, y: targetY }, mapData.width, mapData.height);
+      const path = targetMonster
+          ? resolveEngagementPath({
+              playerPosition,
+              targetPosition: targetMonster,
+              engagementRange: playerEngagementRange,
+              width: mapData.width,
+              height: mapData.height,
+          })
+          : findPath(playerPosition, { x: targetX, y: targetY }, mapData.width, mapData.height);
       if (path.length > 0) {
-          setAutoMovePath(path);
+          const immediateStep = resolveImmediatePathStep({
+              playerPosition,
+              path,
+          });
+          if (immediateStep) {
+              dispatch(movePlayer({ dx: immediateStep.dx, dy: immediateStep.dy }));
+              setAutoMovePath(immediateStep.remainingPath);
+              if (
+                  immediateStep.remainingPath.length === 0 &&
+                  targetNPC &&
+                  getGridDistance(immediateStep.nextPosition, targetNPC) <= 1
+              ) {
+                  setInteractingNPC(targetNPC);
+                  setTargetNPCId(null);
+              }
+          } else {
+              setAutoMovePath(path);
+          }
       } else if (targetNPC) {
           // You might be clicking the NPC while standing next to it
            if (Math.abs(playerPosition.x - targetX) + Math.abs(playerPosition.y - targetY) <= 1) {
@@ -1648,16 +1870,6 @@ export const Adventure: React.FC<AdventureProps> = ({
     // PixiJS handles rendering and camera movement now.
     // We retain gridMetrics for proper sizing.
 
-  const nearbyMonsterCount = activeMonsters.filter((monster) => {
-      const relX = monster.x - playerPosition.x;
-      const relY = monster.y - playerPosition.y;
-      return Math.abs(relX) < 10 && Math.abs(relY) < 10;
-  }).length;
-  const bossStatusLabel = mapData?.enemies.some((enemy) => enemy.rank === EnemyRank.Boss)
-      ? activeMonsters.some((monster) => monster.rank === EnemyRank.Boss)
-          ? 'Boss 已出現'
-          : 'Boss 未現身'
-      : '無 Boss';
   const actionTargetLabel = targetedMonster ? targetedMonster.name : '未鎖定目標';
   const actionSkillLabel = primaryActiveSkill?.name ?? '尚未習得主動術式';
   const actionSkillMpLabel = primaryActiveSkill
@@ -1715,56 +1927,8 @@ export const Adventure: React.FC<AdventureProps> = ({
                      {playerPosition.x},{playerPosition.y}
                  </div>
             </Button>
-             <div
-                className="w-32 rounded-lg border border-stone-700/80 bg-black/72 px-2.5 py-2 text-right text-[10px] text-stone-400 shadow-lg backdrop-blur md:w-40"
-                data-testid="adventure-minimap-status"
-             >
-                <div className="truncate font-bold tracking-widest text-stone-200">
-                    {mapData?.name ?? '未知地界'}
-                </div>
-                <div className="mt-1 flex items-center justify-end gap-1 font-mono text-stone-500">
-                    <MapPin size={10} />
-                    {playerPosition.x},{playerPosition.y}
-                </div>
-                <div className="mt-1 text-amber-200">附近妖獸 {nearbyMonsterCount}</div>
-                <div className={clsx("mt-0.5", bossStatusLabel === 'Boss 已出現' ? "text-red-300" : "text-stone-500")}>
-                    {bossStatusLabel}
-                </div>
-             </div>
              <div className="flex flex-col items-end gap-1">
                  <div className="flex items-center gap-2">
-                     <Button
-                        onClick={() =>
-                          setStageRenderMode((currentMode) =>
-                            currentMode === 'pixel_prototype' ? 'official' : 'pixel_prototype'
-                          )
-                        }
-                        disabled={!canPreviewPixelPrototype}
-                        variant="ghost"
-                        size="icon"
-                        className={clsx(
-                            "h-8 w-8 flex items-center justify-center rounded backdrop-blur border transition-all group relative",
-                            activeStageRenderMode === 'pixel_prototype'
-                                ? "bg-emerald-900/80 border-emerald-500 text-emerald-200 shadow-[0_0_10px_rgba(16,185,129,0.35)]"
-                                : canPreviewPixelPrototype
-                                  ? "bg-black/50 border-stone-800 text-stone-500 hover:text-stone-200 hover:border-stone-600"
-                                  : "bg-black/30 border-stone-900 text-stone-700 cursor-not-allowed opacity-70"
-                        )}
-                        data-testid="adventure-pixel-prototype-toggle"
-                     >
-                         <Sparkles size={16} />
-                         
-                         <GameHintBubble
-                           eyebrow="PIXEL PROTOTYPE"
-                           className="left-1/2 top-full mt-1 -translate-x-1/2"
-                         >
-                            {canPreviewPixelPrototype
-                              ? activeStageRenderMode === 'pixel_prototype'
-                                ? "切回正式 AdventureStage"
-                                : "切換到像素風 vertical slice 原型"
-                              : "目前只在東郊靈田開放像素原型預覽"}
-                         </GameHintBubble>
-                     </Button>
                      {combatUiState.showTopCombatControls && (
                          <Button
                             onClick={() => setIsAutoBattling(!isAutoBattling)}
@@ -1975,7 +2139,7 @@ export const Adventure: React.FC<AdventureProps> = ({
                             </div>
                             <div className="mt-3 flex items-center gap-2">
                                 <Button
-                                    onClick={useCombatSupply}
+                                    onClick={() => useCombatSupply()}
                                     disabled={!combatSupply || Boolean(combatSupplyBlockedReason)}
                                     variant={combatSupply && !combatSupplyBlockedReason ? "emerald" : "stone"}
                                     size="sm"
@@ -1987,6 +2151,28 @@ export const Adventure: React.FC<AdventureProps> = ({
                                 <span className="min-w-0 flex-1 text-[11px] text-stone-500">
                                     {combatSupplyBlockedReason ?? `剩餘 ${combatSupplySlot?.count ?? 0}`}
                                 </span>
+                            </div>
+                            <div className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
+                                <Button
+                                    onClick={() => toggleAutoConsumable("hp")}
+                                    variant={autoConsumableSettings.hp.enabled ? "emerald" : "stone"}
+                                    size="sm"
+                                    className="h-8 justify-between px-2 text-[11px]"
+                                    data-testid="adventure-auto-hp-supply"
+                                >
+                                    <span>自動氣血</span>
+                                    <span>{autoConsumableSettings.hp.thresholdPercent}%</span>
+                                </Button>
+                                <Button
+                                    onClick={() => toggleAutoConsumable("mp")}
+                                    variant={autoConsumableSettings.mp.enabled ? "primary" : "stone"}
+                                    size="sm"
+                                    className="h-8 justify-between px-2 text-[11px]"
+                                    data-testid="adventure-auto-mp-supply"
+                                >
+                                    <span>自動靈力</span>
+                                    <span>{autoConsumableSettings.mp.thresholdPercent}%</span>
+                                </Button>
                             </div>
                             <div className="mt-2">
                                 {worldCombatPresentation
@@ -2216,8 +2402,10 @@ export const Adventure: React.FC<AdventureProps> = ({
                         majorRealm={character.majorRealm}
                         targetMonsterId={targetMonsterId}
                         combatPresentation={worldCombatPresentation?.stagePresentation ?? null}
+                        canPlayCombatAnimation={canEngageTarget}
                         isBattling={isBattling}
                         playerName={character.name}
+                        playerGender={character.gender}
                         moveDestination={autoMovePath.length > 0 ? autoMovePath[autoMovePath.length - 1] : null}
                         activeQuests={activeQuests}
                         completedQuests={completedQuests}

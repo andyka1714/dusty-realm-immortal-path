@@ -769,7 +769,7 @@ test("adventure quest tracker suggests next main quest and navigates to its targ
 
   await page.goto("/");
   await page.getByRole("heading", { name: "仙緣鎮" }).click();
-  await expect(page.getByTestId("adventure-minimap-status")).toBeVisible();
+  await expect(page.getByTestId("adventure-minimap-open")).toBeVisible();
 
   const tracker = page.getByTestId("quest-tracker-hud");
   await expect(tracker).toContainText("藏經初問");
@@ -781,7 +781,7 @@ test("adventure quest tracker suggests next main quest and navigates to its targ
 
   await tracker.getByTestId("quest-tracker-item-tutorial_03_scripture_intro").click();
 
-  await expect(page.getByTestId("adventure-minimap-status")).toContainText(
+  await expect(page.getByTestId("adventure-minimap-open")).toContainText(
     "20,25",
     { timeout: 6000 }
   );
@@ -841,8 +841,8 @@ test("adventure main screen exposes layout v2 minimap and combat shortcut status
 
   await page.goto("/");
 
-  await expect(page.getByTestId("adventure-minimap-status")).toBeVisible();
-  await expect(page.getByTestId("adventure-minimap-status")).toContainText("附近妖獸");
+  await expect(page.getByTestId("adventure-minimap-open")).toBeVisible();
+  await expect(page.getByTestId("adventure-pixel-prototype-toggle")).toHaveCount(0);
   await expect(page.getByTestId("adventure-action-wheel-status")).toBeVisible();
   await expect(page.getByTestId("adventure-action-wheel-status")).toContainText("功法");
   await expect(page.getByTestId("adventure-action-wheel-status")).toContainText("靈力");

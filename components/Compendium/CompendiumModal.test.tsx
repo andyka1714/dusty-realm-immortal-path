@@ -72,6 +72,39 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).toContain("法寶器靈");
   });
 
+  it("groups pill cards by their usable realm and surfaces readable effects", () => {
+    const markup = renderCompendium({ initialTab: "item" });
+
+    const mortalHeading = markup.indexOf(
+      'data-testid="compendium-item-realm-heading-0"'
+    );
+    const foundationHeading = markup.indexOf(
+      'data-testid="compendium-item-realm-heading-2"'
+    );
+    const goldenCoreHeading = markup.indexOf(
+      'data-testid="compendium-item-realm-heading-3"'
+    );
+    const greaterHealCard = markup.indexOf(
+      'data-testid="compendium-item-card-greater_heal_pill"'
+    );
+    const revitalizingCard = markup.indexOf(
+      'data-testid="compendium-item-card-revitalizing_pill"'
+    );
+
+    expect(mortalHeading).toBeGreaterThan(-1);
+    expect(foundationHeading).toBeGreaterThan(mortalHeading);
+    expect(goldenCoreHeading).toBeGreaterThan(foundationHeading);
+    expect(greaterHealCard).toBeGreaterThan(foundationHeading);
+    expect(greaterHealCard).toBeLessThan(goldenCoreHeading);
+    expect(revitalizingCard).toBeGreaterThan(goldenCoreHeading);
+
+    expect(markup).toContain('data-testid="compendium-item-effects-heal_pill"');
+    expect(markup).toContain("功效");
+    expect(markup).toContain("恢復氣血 50");
+    expect(markup).toContain("戰鬥補給共用冷卻：5 秒");
+    expect(markup).toContain("恢復真元 40");
+  });
+
   it("keeps skills and equipment out of the all-items compendium tab", () => {
     const markup = renderCompendium({ initialTab: "item" });
 
@@ -167,6 +200,29 @@ describe("CompendiumModal taxonomy layout", () => {
     expect(markup).toContain("歸元吐納");
     expect(markup).toContain("bg-stone-800 p-3 rounded border border-stone-700");
     expect(markup).toContain("來源追蹤");
+  });
+
+  it("surfaces readable skill effects on active and passive skill cards", () => {
+    const swordMarkup = renderCompendium({
+      initialTab: "skill",
+      initialSkillProfession: "Sword",
+    });
+    const commonMarkup = renderCompendium({
+      initialTab: "skill",
+      initialSkillProfession: "None",
+    });
+
+    expect(swordMarkup).toContain('data-testid="compendium-skill-effects-s_q_active"');
+    expect(swordMarkup).toContain("技能效果");
+    expect(swordMarkup).toContain("造成 235% 傷害");
+    expect(swordMarkup).toContain("冷卻 2.1 秒");
+    expect(swordMarkup).toContain("消耗真元 40");
+
+    expect(commonMarkup).toContain('data-testid="compendium-skill-effects-common_q_passive"');
+    expect(commonMarkup).toContain("被動生效");
+    expect(commonMarkup).toContain("真元 +5%");
+    expect(commonMarkup).toContain("靈抗 +3%");
+    expect(commonMarkup).toContain("無需裝備，學會後會依戰鬥規則自動套用。");
   });
 
   it("uses the same amber visual language for skill and equipment panels", () => {

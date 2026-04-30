@@ -1,15 +1,14 @@
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { getRealmLabel } from '../utils/realm';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store/store';
-import { manualCultivate, attemptBreakthrough, startSeclusion } from '../store/slices/characterSlice';
+import { manualCultivate, startSeclusion } from '../store/slices/characterSlice';
 import {
   completeRebirthFromHall,
   startLifeReviewFromCurrentRun,
 } from '../store/actions/reincarnationActions';
-import { removeItem } from '../store/slices/inventorySlice';
 import { addLog } from '../store/slices/logSlice';
 import {
   enterReincarnationHall,
@@ -22,17 +21,16 @@ import {
 import { REALM_NAMES, REALM_MODIFIERS, MINOR_REALM_CAP, DAYS_PER_YEAR, BREAKTHROUGH_CONFIG, MANUAL_CULTIVATE_COOLDOWN, SECLUSION_DURATION_MS, SPIRIT_ROOT_DETAILS } from '../constants';
 import { ITEMS } from '../data/items';
 import { ProgressBar } from '../components/ProgressBar';
-import { BREAKTHROUGH_TEXTS, GENERIC_BREAKTHROUGH_TEXT } from '../data/game_text';
 import { LogPanel } from '../components/LogPanel';
 import { StatsPanel } from '../components/StatsPanel';
-import { Modal } from '../components/Modal';
 import { IntroSequence } from '../components/IntroSequence';
 import { GameHintBubble } from '../components/game/GameHintBubble';
 import { ReincarnationFlow } from '../components/game/ReincarnationFlow';
 import { GameSection } from '../components/game/GameSection';
 import { GameTooltip } from '../components/game/GameTooltip';
+import { BreakthroughModal } from '../components/game/BreakthroughModal';
 import { Button } from '../components/ui/button';
-import { Play, ChevronsUp, Moon, Info, AlertTriangle, Zap, Lock, RefreshCw } from 'lucide-react';
+import { Play, ChevronsUp, Moon, Info, RefreshCw } from 'lucide-react';
 import { MajorRealm, SpiritRootId, SpiritRootType } from '../types';
 import { calculateSeclusionCost, getBaseCultivationRate, getGatheringMultiplier, getManualCultivateCooldown, getPassiveCultivationRate } from '../utils/cultivation';
 import { DEFAULT_REINCARNATION_PERKS } from '../utils/reincarnation';
@@ -60,7 +58,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
   const { 
     isInitialized, isDead, name, gender, majorRealm, minorRealm, currentExp, maxExp, spiritStones, 
     cultivationRate, isBreakthroughAvailable, isInSeclusion, seclusionEndTime, attributes, spiritRootId,
-    lastBreakthroughResult, breakthroughConsequence, age, lifespan, gatheringLevel, lastManualCultivateTime, lastDeathCause
+    breakthroughConsequence, age, lifespan, gatheringLevel, lastManualCultivateTime, lastDeathCause
   } = character;
   
   const spiritRoot = spiritRootId;
@@ -73,7 +71,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
     content: React.ReactNode;
     widthClassName?: string;
   } | null>(null);
-  const processedBreakthroughRef = useRef<number>(lastBreakthroughResult?.timestamp || 0);
 
   const showTooltip = useCallback(
     (
@@ -105,40 +102,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
       dispatch(startLifeReviewFromCurrentRun(lastDeathCause));
     }
   }, [dispatch, isInitialized, isDead, soul.flowStep, lastDeathCause]);
-
-  // Monitor breakthrough result
-  useEffect(() => {
-    if (lastBreakthroughResult && lastBreakthroughResult.timestamp > processedBreakthroughRef.current) {
-        processedBreakthroughRef.current = lastBreakthroughResult.timestamp;
-        
-        if (lastBreakthroughResult.success) {
-             if (lastBreakthroughResult.isMajor) {
-                // Use refined story text for major realm breakthrough
-                const text = BREAKTHROUGH_TEXTS[majorRealm]?.success || "金光乍現，瓶頸轟然破碎！壽元大增，修為更進一步！";
-                dispatch(addLog({ message: text, type: 'gold' }));
-             } else {
-                dispatch(addLog({ message: GENERIC_BREAKTHROUGH_TEXT.minorSuccess, type: 'success' }));
-             }
-        } else {
-             if (lastBreakthroughResult.isMajor) {
-                 // Use refined story text for major realm failure
-                 const text = BREAKTHROUGH_TEXTS[majorRealm]?.failure || (lastBreakthroughResult.isTribulation ? GENERIC_BREAKTHROUGH_TEXT.tribulationFailure : "突破失敗，心魔干擾...");
-                 
-                 // If tribulation specifically failed (and text includes generic warning), maybe append?
-                 // But refined text covers it.
-                 const logType = lastBreakthroughResult.isTribulation ? 'tribulation' : 'danger';
-                 dispatch(addLog({ message: text, type: logType }));
-             } else {
-                 // Minor failure
-                 if (lastBreakthroughResult.dropRealm) {
-                     dispatch(addLog({ message: GENERIC_BREAKTHROUGH_TEXT.realmDropFailure, type: 'danger' }));
-                 } else {
-                     dispatch(addLog({ message: GENERIC_BREAKTHROUGH_TEXT.minorFailure, type: 'danger' }));
-                 }
-             }
-        }
-    }
-  }, [lastBreakthroughResult, dispatch, majorRealm]);
 
   const [manualCooldown, setManualCooldown] = useState(0);
 
@@ -183,24 +146,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
   const hasItem = requiredItemId 
     ? inventory.some(i => i.itemId === requiredItemId && i.count > 0)
     : true;
-
-  const confirmBreakthrough = () => {
-    if (isMajorBreakthrough && requiredItemId) {
-        if (!hasItem) {
-            dispatch(addLog({ message: `缺少關鍵道具【${requiredItem?.name}】，無法突破！`, type: 'danger' }));
-            return;
-        }
-        // Consume Item
-        dispatch(removeItem({ itemId: requiredItemId, count: 1 }));
-        // Dispatch Attempt with consumed flag
-        dispatch(attemptBreakthrough({ successChanceBonus: 0, consumedItem: true }));
-        dispatch(addLog({ message: `服下【${requiredItem?.name}】，運轉全身靈力衝擊瓶頸...`, type: 'info' }));
-    } else {
-        dispatch(attemptBreakthrough({ successChanceBonus: 0 }));
-        dispatch(addLog({ message: "運轉全身靈力衝擊瓶頸...", type: 'info' }));
-    }
-    setIsBreakthroughModalOpen(false);
-  };
 
   // Seclusion Logic
   const seclusionCost = calculateSeclusionCost(majorRealm, minorRealm);
@@ -716,106 +661,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
         </GameTooltip>
       )}
 
-      {/* Breakthrough Confirmation Modal */}
-      <Modal
+      <BreakthroughModal
         isOpen={isBreakthroughModalOpen}
         onClose={() => setIsBreakthroughModalOpen(false)}
-        title={isMajorBreakthrough ? "衝擊大境界" : "突破小境界"}
-        eyebrow="BREAKTHROUGH RITE"
-        icon={config.tribulationName ? <Zap size={18} className="text-red-500" /> : <ChevronsUp size={18} className="text-amber-500" />}
-      >
-         <div className="space-y-6 text-center py-2">
-            <div className="flex justify-center">
-               <div className={`w-20 h-20 bg-stone-800 rounded-full flex items-center justify-center border-2 shadow-[0_0_20px_rgba(245,158,11,0.3)] animate-pulse
-                   ${config.penaltyType === 'major_unsafe' ? 'border-red-500' : 'border-amber-500'}
-               `}>
-                  {config.tribulationName ? <Zap size={40} className="text-red-500" /> : <ChevronsUp size={40} className="text-amber-500" />}
-               </div>
-            </div>
-            
-            {/* Tribulation Warning */}
-            {config.tribulationName && isMajorBreakthrough && (
-                <div className="bg-red-950/50 border border-red-900 p-2 rounded text-red-200 font-bold text-sm">
-                    ⚠️ {config.tribulationName} 將至！
-                </div>
-            )}
-
-            <div>
-               <p className="text-stone-400 mb-2">當前境界圓滿，是否嘗試衝擊瓶頸？</p>
-               <div className="text-3xl font-bold text-emerald-400 font-mono">
-                  {successRate.toFixed(1)}% <span className="text-sm text-stone-500">成功率</span>
-               </div>
-               <p className="text-xs text-stone-600 mt-1">成功率受悟性、福緣與靈根影響</p>
-               <div className="mt-3 flex flex-wrap justify-center gap-2">
-                  {breakthroughPreview.preparationCues.map((cue) => (
-                    <span
-                      key={cue}
-                      className="rounded border border-stone-700 bg-stone-950 px-2 py-1 text-[11px] text-stone-400"
-                    >
-                      {cue}
-                    </span>
-                  ))}
-               </div>
-            </div>
-
-            {/* Major Breakthrough Requirement */}
-            {isMajorBreakthrough && requiredItem && (
-                <div className={`p-4 rounded border text-left flex items-center gap-3 ${hasItem ? 'bg-stone-800 border-stone-600' : 'bg-red-950/30 border-red-900'}`}>
-                    <div className="p-2 bg-stone-900 rounded border border-stone-700">
-                        {hasItem ? <ChevronsUp className="text-amber-500" /> : <Lock className="text-red-500" />}
-                    </div>
-                    <div className="flex-1">
-                        <div className={hasItem ? "text-amber-500 font-bold" : "text-red-400 font-bold"}>
-                            需要：{requiredItem.name}
-                        </div>
-                        <div className="text-xs text-stone-500">
-                            {hasItem ? "已持有，點擊突破後消耗" : `未持有 (掉落：${config.bossHint})`}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            <div className="bg-stone-900/50 border border-stone-800 rounded p-4 text-left flex gap-3">
-               <AlertTriangle className={config.penaltyType === 'major_unsafe' ? "text-red-600" : "text-orange-500"} />
-               <div className="text-sm">
-                  <span className="font-bold block mb-1 text-stone-300">失敗懲罰</span>
-                  <ul className="text-stone-400/80 list-disc list-inside space-y-1 text-xs">
-                     {config.penaltyType === 'major_unsafe' ? (
-                        <>
-                           <li className="text-red-400 font-bold">天劫失敗：修為盡失 (-100%)</li>
-                           <li className="text-red-400">核心道具損毀</li>
-                        </>
-                     ) : (
-                        <li>修為倒退 30%</li>
-                     )}
-                     {isMajorBreakthrough && config.penaltyType !== 'major_unsafe' && (
-                        <li className="text-orange-400">道具損毀</li>
-                     )}
-                  </ul>
-               </div>
-            </div>
-
-            <div className="flex gap-3 pt-2">
-               <Button
-                 onClick={() => setIsBreakthroughModalOpen(false)}
-                 variant="outline"
-                 className="flex-1"
-                 data-testid="dashboard-breakthrough-cancel"
-               >
-                 暫緩
-               </Button>
-               <Button
-                 onClick={confirmBreakthrough}
-                 disabled={isMajorBreakthrough && requiredItemId && !hasItem}
-                 variant={isMajorBreakthrough && requiredItemId && !hasItem ? "stone" : "primary"}
-                 className="flex-1 font-bold shadow-lg"
-                 data-testid="dashboard-breakthrough-confirm"
-               >
-                 開始突破
-               </Button>
-            </div>
-         </div>
-      </Modal>
+      />
     </div>
   );
 };

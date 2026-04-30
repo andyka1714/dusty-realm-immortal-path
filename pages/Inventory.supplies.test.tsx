@@ -60,6 +60,7 @@ describe("Inventory combat supplies", () => {
 
     expect(markup).toContain("回春丹");
     expect(markup).not.toContain("目前無法使用");
+    expect(markup).toContain("戰鬥補給共用冷卻：5 秒");
   });
 
   it("blocks recovery pills when no runtime recovery handler is provided", () => {

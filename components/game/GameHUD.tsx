@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { getRealmLabel } from "../../utils/realm";
@@ -13,14 +13,20 @@ import {
   formatCombatPower,
   getCharacterDerivedLevel,
 } from "../../utils/combatPower";
+import { Button } from "../ui/button";
+import { BreakthroughModal } from "./BreakthroughModal";
 
 export const GameHUD: React.FC = () => {
+  const [isBreakthroughModalOpen, setIsBreakthroughModalOpen] = useState(false);
   const character = useSelector((state: RootState) => state.character);
   const equipmentStats = useSelector(
     (state: RootState) => state.inventory.equipmentStats
   );
   const currentMapId = useSelector(
     (state: RootState) => state.adventure.currentMapId
+  );
+  const worldPlayerResources = useSelector(
+    (state: RootState) => state.adventure.worldPlayerResources
   );
   const currentMap = MAPS.find((map) => map.id === currentMapId);
   const combatUiState = resolveAdventureCombatUiState({
@@ -48,11 +54,19 @@ export const GameHUD: React.FC = () => {
     character.majorRealm,
     character.minorRealm
   );
+  const displayedHp = worldPlayerResources?.maxHp
+    ? Math.max(0, Math.min(worldPlayerResources.hp, worldPlayerResources.maxHp))
+    : combatStats.maxHp;
+  const displayedMaxHp = worldPlayerResources?.maxHp ?? combatStats.maxHp;
+  const displayedMp = worldPlayerResources?.maxMp
+    ? Math.max(0, Math.min(worldPlayerResources.mp, worldPlayerResources.maxMp))
+    : combatStats.maxMp;
+  const displayedMaxMp = worldPlayerResources?.maxMp ?? combatStats.maxMp;
 
   return (
     <div className="pointer-events-none fixed left-4 top-4 z-[3000] w-[min(370px,calc(100vw-2rem))]">
       <div
-        className="rounded-2xl border border-stone-700/70 bg-stone-950/88 px-3 py-3 shadow-[0_10px_28px_rgba(0,0,0,0.34)] backdrop-blur-xl"
+        className="pointer-events-auto rounded-2xl border border-stone-700/70 bg-stone-950/88 px-3 py-3 shadow-[0_10px_28px_rgba(0,0,0,0.34)] backdrop-blur-xl"
         data-testid="game-hud-character-card"
       >
         <div className="flex items-start gap-3">
@@ -88,11 +102,16 @@ export const GameHUD: React.FC = () => {
                     <Heart size={12} /> 氣血
                   </span>
                   <span className="font-mono text-emerald-300">
-                    {combatStats.maxHp} / {combatStats.maxHp}
+                    {Math.floor(displayedHp)} / {displayedMaxHp}
                   </span>
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-stone-800">
-                  <div className="h-full w-full bg-emerald-500" />
+                  <div
+                    className="h-full bg-emerald-500"
+                    style={{
+                      width: `${Math.max(0, Math.min(100, (displayedHp / displayedMaxHp) * 100))}%`,
+                    }}
+                  />
                 </div>
               </div>
               <div>
@@ -101,11 +120,16 @@ export const GameHUD: React.FC = () => {
                     <Activity size={12} /> 靈力
                   </span>
                   <span className="font-mono text-blue-300">
-                    {combatStats.maxMp} / {combatStats.maxMp}
+                    {Math.floor(displayedMp)} / {displayedMaxMp}
                   </span>
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-stone-800">
-                  <div className="h-full w-full bg-blue-500" />
+                  <div
+                    className="h-full bg-blue-500"
+                    style={{
+                      width: `${Math.max(0, Math.min(100, (displayedMp / displayedMaxMp) * 100))}%`,
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -139,9 +163,22 @@ export const GameHUD: React.FC = () => {
               <Sparkles size={12} />
               修為
             </span>
-            <span className="truncate font-mono text-emerald-300">
-              {character.currentExp.toFixed(0)} / {character.maxExp.toFixed(0)}
-            </span>
+            {character.isBreakthroughAvailable ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="amber"
+                onClick={() => setIsBreakthroughModalOpen(true)}
+                className="h-6 rounded-md px-2 py-0.5 text-[11px] font-bold shadow-[0_0_12px_rgba(245,158,11,0.18)]"
+                data-testid="game-hud-breakthrough-button"
+              >
+                突破
+              </Button>
+            ) : (
+              <span className="truncate font-mono text-emerald-300">
+                {character.currentExp.toFixed(0)} / {character.maxExp.toFixed(0)}
+              </span>
+            )}
           </div>
           <div className="flex min-w-0 items-center justify-between gap-2 rounded-md border border-stone-800/70 bg-black/16 px-2 py-1.5">
             <span className="flex items-center gap-1 text-[11px] text-stone-500">
@@ -155,6 +192,10 @@ export const GameHUD: React.FC = () => {
           </div>
         </div>
       </div>
+      <BreakthroughModal
+        isOpen={isBreakthroughModalOpen}
+        onClose={() => setIsBreakthroughModalOpen(false)}
+      />
     </div>
   );
 };

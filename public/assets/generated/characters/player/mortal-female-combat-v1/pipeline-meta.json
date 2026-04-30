@@ -1,0 +1,483 @@
+{
+  "target": "player",
+  "mode": "humanoid_combat_sheet",
+  "input": "/Users/andyka1714/.codex/generated_images/019ddc8d-6ff7-7150-8930-8e52a2e258a6/ig_01e58e8f1a75cfa10169f2fec5f34c8198a16056807782a800.png",
+  "prompt": "4x6 female mortal cultivator long straight hair wooden sword combat sheet, rows down left right up, six attack frames per direction, solid magenta raw generated image.",
+  "rows": 4,
+  "cols": 6,
+  "frameCount": 24,
+  "framesPerDirection": 6,
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "profile": "humanoid",
+  "rowOrder": [
+    "down",
+    "left",
+    "right",
+    "up"
+  ],
+  "targetHeight": 80,
+  "maxWidth": 90,
+  "footlineY": 88,
+  "centerX": 48,
+  "centerTolerance": 2,
+  "qcStatus": "passed",
+  "qc": [
+    {
+      "label": "combat_sheet-1",
+      "bbox": [
+        26,
+        9,
+        70,
+        88
+      ],
+      "width": 45,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2517
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-2",
+      "bbox": [
+        10,
+        9,
+        84,
+        88
+      ],
+      "width": 75,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2994
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-3",
+      "bbox": [
+        4,
+        9,
+        90,
+        88
+      ],
+      "width": 87,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2891
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-4",
+      "bbox": [
+        3,
+        14,
+        92,
+        88
+      ],
+      "width": 90,
+      "height": 75,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2647
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-5",
+      "bbox": [
+        17,
+        9,
+        78,
+        88
+      ],
+      "width": 62,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2777
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-6",
+      "bbox": [
+        25,
+        9,
+        70,
+        88
+      ],
+      "width": 46,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2553
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-7",
+      "bbox": [
+        20,
+        9,
+        75,
+        88
+      ],
+      "width": 56,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2508
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-8",
+      "bbox": [
+        26,
+        9,
+        69,
+        88
+      ],
+      "width": 44,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2072
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-9",
+      "bbox": [
+        4,
+        9,
+        90,
+        88
+      ],
+      "width": 87,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2940
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-10",
+      "bbox": [
+        3,
+        27,
+        92,
+        88
+      ],
+      "width": 90,
+      "height": 62,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1975
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-11",
+      "bbox": [
+        17,
+        9,
+        78,
+        88
+      ],
+      "width": 62,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2752
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-12",
+      "bbox": [
+        20,
+        9,
+        74,
+        88
+      ],
+      "width": 55,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2487
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-13",
+      "bbox": [
+        22,
+        9,
+        74,
+        88
+      ],
+      "width": 53,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2435
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-14",
+      "bbox": [
+        26,
+        9,
+        70,
+        88
+      ],
+      "width": 45,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2088
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-15",
+      "bbox": [
+        4,
+        9,
+        90,
+        88
+      ],
+      "width": 87,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2884
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-16",
+      "bbox": [
+        3,
+        26,
+        92,
+        88
+      ],
+      "width": 90,
+      "height": 63,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2018
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-17",
+      "bbox": [
+        18,
+        9,
+        77,
+        88
+      ],
+      "width": 60,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2682
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-18",
+      "bbox": [
+        22,
+        9,
+        74,
+        88
+      ],
+      "width": 53,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2441
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-19",
+      "bbox": [
+        25,
+        9,
+        70,
+        88
+      ],
+      "width": 46,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2410
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-20",
+      "bbox": [
+        14,
+        9,
+        82,
+        88
+      ],
+      "width": 69,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2733
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-21",
+      "bbox": [
+        6,
+        9,
+        90,
+        88
+      ],
+      "width": 85,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2948
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-22",
+      "bbox": [
+        3,
+        17,
+        92,
+        88
+      ],
+      "width": 90,
+      "height": 72,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2412
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-23",
+      "bbox": [
+        20,
+        9,
+        74,
+        88
+      ],
+      "width": 55,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2605
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "combat_sheet-24",
+      "bbox": [
+        24,
+        9,
+        70,
+        88
+      ],
+      "width": 47,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2485
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    }
+  ]
+}

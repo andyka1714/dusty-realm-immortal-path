@@ -1,0 +1,16 @@
+{
+  "assetId": "ui.fallback.transparent.v1",
+  "kind": "ui",
+  "name": "透明備用素材",
+  "description": "素材缺失時使用的透明 fallback，避免介面崩潰。",
+  "style": "project_native",
+  "source": "placeholder",
+  "version": 1,
+  "usage": ["fallback"],
+  "basePath": "/assets/generated/ui/fallback",
+  "files": {
+    "preview": "transparent.png",
+    "transparent": "transparent.png"
+  },
+  "tags": ["fallback", "transparent"]
+}

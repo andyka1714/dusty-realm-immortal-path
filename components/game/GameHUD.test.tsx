@@ -14,7 +14,10 @@ import encounterReducer from "../../store/slices/encounterSlice";
 import { Gender, MajorRealm, SpiritRootId } from "../../types";
 import { GameHUD } from "./GameHUD";
 
-const renderHud = () => {
+const renderHud = (
+  characterOverrides: Partial<ReturnType<typeof characterReducer>> = {},
+  adventureOverrides: Partial<ReturnType<typeof adventureReducer>> = {}
+) => {
   const baseCharacter = characterReducer(undefined, { type: "@@INIT" });
   const store = configureStore({
     reducer: {
@@ -37,9 +40,13 @@ const renderHud = () => {
         majorRealm: MajorRealm.Foundation,
         minorRealm: 2,
         spiritRootId: SpiritRootId.HEAVENLY_WATER,
+        ...characterOverrides,
       },
       logs: logReducer(undefined, { type: "@@INIT" }),
-      adventure: adventureReducer(undefined, { type: "@@INIT" }),
+      adventure: {
+        ...adventureReducer(undefined, { type: "@@INIT" }),
+        ...adventureOverrides,
+      },
       inventory: inventoryReducer(undefined, { type: "@@INIT" }),
       workshop: workshopReducer(undefined, { type: "@@INIT" }),
       quest: questReducer(undefined, { type: "@@INIT" }),
@@ -68,5 +75,34 @@ describe("GameHUD", () => {
     expect(markup).toContain("戰力");
     expect(markup).toContain("築基");
     expect(markup).toContain('data-testid="game-hud-compact-stat-grid"');
+  });
+
+  it("shows a direct breakthrough action when cultivation is capped", () => {
+    const markup = renderHud({
+      currentExp: 500,
+      maxExp: 500,
+      isBreakthroughAvailable: true,
+    });
+
+    expect(markup).toContain('data-testid="game-hud-breakthrough-button"');
+    expect(markup).toContain("突破");
+    expect(markup).not.toContain("500 / 500");
+  });
+
+  it("uses live world combat resources when available", () => {
+    const markup = renderHud(
+      {},
+      {
+        worldPlayerResources: {
+          hp: 42,
+          maxHp: 280,
+          mp: 96,
+          maxMp: 130,
+        },
+      }
+    );
+
+    expect(markup).toContain("42 / 280");
+    expect(markup).toContain("96 / 130");
   });
 });

@@ -59,6 +59,10 @@ export const SHOPS: Record<string, ShopData> = {
         items: [
             { itemId: 'qi_pill' },
             { itemId: 'heal_pill' },
+            { itemId: 'spirit_recovery_pill' },
+            { itemId: 'condensed_qi_pill' },
+            { itemId: 'clear_channel_pill' },
+            { itemId: 'spirit_gathering_pill' },
             { itemId: 'foundation_pill', stock: 1 }
         ]
     },

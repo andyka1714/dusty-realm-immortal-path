@@ -1,6 +1,15 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Enemy, CombatLog, Coordinate, ActiveMonster, EnemyRank, NPC, VisualEffect } from '../../types';
+import {
+  ActiveMonster,
+  AutoConsumableSettings,
+  CombatLog,
+  Coordinate,
+  Enemy,
+  EnemyRank,
+  NPC,
+  VisualEffect,
+} from '../../types';
 import { MAPS } from '../../data/maps';
 import {
   BOSS_RESPAWN_MINUTES,
@@ -17,6 +26,10 @@ import {
   shouldEnemyRetreatFromCloseRange,
   shouldEnemyStrafeNearRange,
 } from '../../utils/worldCombat';
+import {
+  DEFAULT_AUTO_CONSUMABLE_SETTINGS,
+  sanitizeAutoConsumableSettings,
+} from '../../utils/autoConsumableSettings';
 
 interface AdventureState {
   currentMapId: string | null;
@@ -34,6 +47,13 @@ interface AdventureState {
   lastEliteSpawnTime: number;
   lastBossSpawnCheckTime: number;
   visualEffects: VisualEffect[];
+  autoConsumableSettings: AutoConsumableSettings;
+  worldPlayerResources: {
+    hp: number;
+    maxHp: number;
+    mp: number;
+    maxMp: number;
+  } | null;
 }
 
 const initialState: AdventureState = {
@@ -51,7 +71,9 @@ const initialState: AdventureState = {
   lastCommonSpawnTime: 0,
   lastEliteSpawnTime: 0,
   lastBossSpawnCheckTime: 0,
-  visualEffects: []
+  visualEffects: [],
+  autoConsumableSettings: DEFAULT_AUTO_CONSUMABLE_SETTINGS,
+  worldPlayerResources: null,
 };
 
 const getMapPopulationCaps = (width: number, height: number, hasElites: boolean) => {
@@ -587,6 +609,24 @@ const adventureSlice = createSlice({
         if (!state.visualEffects) return;
         state.visualEffects = state.visualEffects.filter(e => e.id !== action.payload);
     },
+    setAutoConsumableSettings: (
+      state,
+      action: PayloadAction<Partial<AutoConsumableSettings>>
+    ) => {
+      state.autoConsumableSettings = sanitizeAutoConsumableSettings({
+        ...state.autoConsumableSettings,
+        ...action.payload,
+      });
+    },
+    setWorldPlayerResources: (
+      state,
+      action: PayloadAction<NonNullable<AdventureState["worldPlayerResources"]>>
+    ) => {
+      state.worldPlayerResources = action.payload;
+    },
+    clearWorldPlayerResources: (state) => {
+      state.worldPlayerResources = null;
+    },
     resetAdventure: () => initialState,
   },
 });
@@ -603,6 +643,9 @@ export const {
   markMapVisited,
   addVisualEffect,
   clearVisualEffect,
+  setAutoConsumableSettings,
+  setWorldPlayerResources,
+  clearWorldPlayerResources,
   resetAdventure,
 } = adventureSlice.actions;
 export default adventureSlice.reducer;

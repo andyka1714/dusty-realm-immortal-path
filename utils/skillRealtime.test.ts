@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ProfessionType } from "../types";
 import { SKILLS } from "../data/skills";
 import {
+  getAvailablePlayerEngagementRange,
   getLearnedSkillEngagementRange,
   getSkillRealtimeProfile,
 } from "./skillRealtime";
@@ -38,5 +39,31 @@ describe("skill realtime profiles", () => {
     expect(getLearnedSkillEngagementRange(ProfessionType.Mage, ["m_ie_active"])).toBe(
       getLearnedSkillEngagementRange(ProfessionType.Mage, ["m_tr_active"])
     );
+  });
+
+  it("uses active skill range only when that skill can be used now", () => {
+    expect(
+      getAvailablePlayerEngagementRange({
+        profession: ProfessionType.Mage,
+        activeSkill: SKILLS.m_f_active,
+        canUseActiveSkill: true,
+      })
+    ).toBe(6);
+
+    expect(
+      getAvailablePlayerEngagementRange({
+        profession: ProfessionType.Mage,
+        activeSkill: SKILLS.m_f_active,
+        canUseActiveSkill: false,
+      })
+    ).toBe(3);
+
+    expect(
+      getAvailablePlayerEngagementRange({
+        profession: ProfessionType.Sword,
+        activeSkill: undefined,
+        canUseActiveSkill: false,
+      })
+    ).toBe(1);
   });
 });

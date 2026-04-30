@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  getRecoveryConsumableCooldownLabel,
+  getRecoveryConsumableCooldownRemainingMs,
   getConsumableRecoveryBlockedReason,
   applyConsumableRecoveryEffects,
+  RECOVERY_CONSUMABLE_COOLDOWN_MS,
 } from "./consumableEffects";
 import { ConsumableEffect } from "../types";
 
@@ -67,5 +70,14 @@ describe("consumable recovery effects", () => {
       hp: { current: 120, max: 120 },
       mp: { current: 80, max: 80 },
     });
+  });
+
+  it("uses one shared five-second cooldown for recovery consumables", () => {
+    expect(RECOVERY_CONSUMABLE_COOLDOWN_MS).toBe(5000);
+    expect(getRecoveryConsumableCooldownRemainingMs(null, 10_000)).toBe(0);
+    expect(getRecoveryConsumableCooldownRemainingMs(10_000, 10_000)).toBe(5000);
+    expect(getRecoveryConsumableCooldownRemainingMs(10_000, 12_000)).toBe(3000);
+    expect(getRecoveryConsumableCooldownRemainingMs(10_000, 15_001)).toBe(0);
+    expect(getRecoveryConsumableCooldownLabel(3200)).toBe("冷卻 4 秒");
   });
 });
