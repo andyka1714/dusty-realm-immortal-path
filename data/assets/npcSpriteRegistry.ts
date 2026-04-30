@@ -50,6 +50,11 @@ export const NPC_IDLE_SPRITE_MAPPINGS: NpcSpriteMapping[] = [
     variant: "sword",
     assetId: "npc.scripture_keeper.sword.idle_v1",
   },
+  {
+    archetype: "sect_elder",
+    variant: "beast",
+    assetId: "npc.sect_elder.beast.idle_v1",
+  },
 ];
 
 export const findNpcSpriteMapping = ({
