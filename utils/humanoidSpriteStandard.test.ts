@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   HUMANOID_COMBAT_SPRITE_STANDARD,
+  HUMANOID_IDLE_SPRITE_STANDARD,
   HUMANOID_WALK_SPRITE_STANDARD,
 } from "./humanoidSpriteStandard";
 
@@ -37,6 +38,23 @@ describe("humanoidSpriteStandard", () => {
       footlineY: 88,
       centerX: 48,
       centerTolerance: 2,
+    });
+  });
+
+  it("defines one shared stationary humanoid idle sheet profile for NPCs", () => {
+    expect(HUMANOID_IDLE_SPRITE_STANDARD).toEqual({
+      profile: "humanoid",
+      frameWidth: 96,
+      frameHeight: 96,
+      rows: 1,
+      cols: 2,
+      frameCount: 2,
+      targetHeight: 80,
+      heightTolerance: 1,
+      footlineY: 88,
+      centerX: 48,
+      centerTolerance: 1,
+      idleCadenceMs: 800,
     });
   });
 });

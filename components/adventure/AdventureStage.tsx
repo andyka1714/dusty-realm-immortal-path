@@ -32,6 +32,7 @@ import {
   getPlayerCombatSpriteAssetId,
   getPlayerSpriteAssetId,
 } from '../../utils/playerSpriteAsset';
+import { resolveNpcSpriteAssetId } from '../../utils/npcSpriteAsset';
 
 interface AdventureStageProps {
   mapData: MapData;
@@ -434,11 +435,49 @@ export default function AdventureStage({
          
          container.addChild(bg);
          container.addChild(text);
+
+         const npcSpriteAssetId = resolveNpcSpriteAssetId(npc);
+         if (npcSpriteAssetId) {
+             const frameUrls = getAssetFrameFileUrls(npcSpriteAssetId);
+             Promise.all(frameUrls.map((url) => PIXI.Assets.load(url)))
+                 .then((textures) => {
+                     if (container.destroyed || textures.length === 0) return;
+                     textures.forEach((texture) => {
+                         texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+                     });
+                     const firstTexture = textures[0];
+                     if (!firstTexture?.baseTexture.valid) return;
+
+                     const npcSprite = new PIXI.AnimatedSprite(textures);
+                     const layout = getCharacterSpriteLayout({
+                         cellSize,
+                         frameHeight: firstTexture.height,
+                     });
+                     npcSprite.anchor.set(layout.anchorX, layout.anchorY);
+                     npcSprite.x = layout.x;
+                     npcSprite.y = layout.y;
+                     npcSprite.width = layout.width;
+                     npcSprite.height = layout.height;
+                     npcSprite.animationSpeed = 0.025;
+                     npcSprite.roundPixels = true;
+                     npcSprite.play();
+                     container.addChildAt(npcSprite, 0);
+                     bg.visible = false;
+                     text.visible = false;
+                 })
+                 .catch(() => {
+                     bg.visible = true;
+                     text.visible = true;
+                 });
+         }
          
          // Name Label (Above)
-         const label = new PIXI.Text(npc.name, {
+         const labelText = npc.affiliationLabel
+             ? `${npc.affiliationLabel}\n${npc.name}`
+             : npc.name;
+         const label = new PIXI.Text(labelText, {
              fontFamily: 'Arial',
-             fontSize: cellSize * 0.3,
+             fontSize: cellSize * 0.24,
              fill: 0xcccccc,
              align: 'center',
          });

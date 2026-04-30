@@ -34,3 +34,21 @@ export const HUMANOID_COMBAT_SPRITE_STANDARD = {
 
 export type HumanoidCombatSpriteStandard =
   typeof HUMANOID_COMBAT_SPRITE_STANDARD;
+
+export const HUMANOID_IDLE_SPRITE_STANDARD = {
+  profile: "humanoid",
+  frameWidth: 96,
+  frameHeight: 96,
+  rows: 1,
+  cols: 2,
+  frameCount: 2,
+  targetHeight: 80,
+  heightTolerance: 1,
+  footlineY: 88,
+  centerX: 48,
+  centerTolerance: 1,
+  idleCadenceMs: 800,
+} as const;
+
+export type HumanoidIdleSpriteStandard =
+  typeof HUMANOID_IDLE_SPRITE_STANDARD;

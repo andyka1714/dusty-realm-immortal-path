@@ -447,6 +447,10 @@ export enum NPCType {
 export interface NPC extends Coordinate {
   id: string;
   name: string;
+  affiliationLabel?: string;
+  roleLabel?: string;
+  spriteArchetype?: string;
+  spriteVariant?: string;
   symbol: string; // e.g. '商'
   type: NPCType;
   description: string;

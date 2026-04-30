@@ -133,6 +133,44 @@ const assetDefinitions: Record<string, AssetDefinition> = {
     },
     tags: ["player", "mortal", "female", "wooden-sword", "combat-sheet"],
   },
+  "npc.wanbao_clerk.village.idle_v1": {
+    assetId: "npc.wanbao_clerk.village.idle_v1",
+    kind: "npc",
+    name: "仙緣鎮萬寶閣掌櫃原地待機",
+    description: "王掌櫃的 2x2 原地待機 sheet，供仙緣鎮萬寶閣 NPC map token 使用。",
+    style: "pixel_art",
+    source: "generated",
+    version: 1,
+    usage: ["npc_idle", "map_token"],
+    basePath: "/assets/generated/characters/npcs/wanbao-clerk-village-idle-v1",
+    files: {
+      raw: "raw-sheet.png",
+      sheet: "sheet-transparent.png",
+      preview: "animation.gif",
+      framesDir: "frames",
+      framePrefix: "npc_idle",
+      prompt: "prompt-used.txt",
+      meta: "pipeline-meta.json",
+    },
+    sprite: {
+      profile: "humanoid",
+      rows: 2,
+      cols: 2,
+      frameCount: 4,
+      anchor: "feet",
+      view: "topdown",
+      frameWidth: 96,
+      frameHeight: 96,
+      targetHeight: 80,
+      heightTolerance: 1,
+      footlineY: 88,
+      centerX: 48,
+      centerTolerance: 1,
+      idleCadenceMs: 800,
+      qcStatus: "passed",
+    },
+    tags: ["npc", "idle-sheet", "wanbao", "merchant", "village"],
+  },
 };
 
 export const getAssetDefinition = (assetId: string): AssetDefinition =>
@@ -160,8 +198,11 @@ export const getAssetFrameFileUrls = (assetId: string): string[] => {
 
   return Array.from(
     { length: asset.sprite.frameCount },
-    (_, index) =>
-      `${asset.basePath}/${asset.files.framesDir}/player_sheet-${index + 1}.png`
+    (_, index) => {
+      const framePrefix = asset.files.framePrefix ?? "player_sheet";
+
+      return `${asset.basePath}/${asset.files.framesDir}/${framePrefix}-${index + 1}.png`;
+    }
   );
 };
 

@@ -2983,7 +2983,16 @@ export const Adventure: React.FC<AdventureProps> = ({
                                       {npc.symbol}
                                       </div>
                                       <GameHintBubble eyebrow="MAP NPC" className="bottom-full left-1/2 mb-2 -translate-x-1/2">
-                                        {npc.name}
+                                        {npc.affiliationLabel ? (
+                                          <span className="flex flex-col items-center gap-0.5">
+                                            <span className="text-[10px] uppercase tracking-wide text-amber-300">
+                                              {npc.affiliationLabel}
+                                            </span>
+                                            <span>{npc.name}</span>
+                                          </span>
+                                        ) : (
+                                          npc.name
+                                        )}
                                       </GameHintBubble>
                                   </div>
                               ))}

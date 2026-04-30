@@ -8,7 +8,9 @@ describe("NPC scripture pavilion routing", () => {
       expect.arrayContaining([
         expect.objectContaining({
           id: "village_scripture_keeper",
-          name: "藏經閣執事",
+          name: "陸簡生",
+          affiliationLabel: "藏經閣",
+          roleLabel: "入門藏書執事",
           type: NPCType.Shop,
           shopId: "skill_shop_mortal",
         }),

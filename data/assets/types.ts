@@ -20,6 +20,7 @@ export type GeneratedAssetUsage =
   | "player_walk"
   | "player_combat_idle"
   | "player_combat_attack"
+  | "npc_idle"
   | "map_token"
   | "npc_portrait"
   | "enemy_idle"
@@ -40,6 +41,7 @@ export interface GeneratedAssetFiles {
   transparent?: string;
   preview?: string;
   framesDir?: string;
+  framePrefix?: string;
   prompt?: string;
   meta?: string;
 }
@@ -61,6 +63,7 @@ export interface GeneratedSpriteMetadata {
   footlineY?: number;
   centerX?: number;
   centerTolerance?: number;
+  idleCadenceMs?: number;
   qcStatus?: "passed" | "failed" | "pending";
 }
 

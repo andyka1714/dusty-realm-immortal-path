@@ -11,7 +11,11 @@ import { NPC, NPCType } from '../types';
 export const VILLAGE_NPCS: NPC[] = [
     {
         id: 'village_chief',
-        name: '村長',
+        name: '林守拙',
+        affiliationLabel: '村中長老',
+        roleLabel: '新手引導',
+        spriteArchetype: 'town_elder',
+        spriteVariant: 'village',
         symbol: '長',
         type: NPCType.Quest,
         x: 20,
@@ -27,7 +31,11 @@ export const VILLAGE_NPCS: NPC[] = [
     },
     {
         id: 'village_wanbao',
-        name: '萬寶閣',
+        name: '王掌櫃',
+        affiliationLabel: '萬寶閣',
+        roleLabel: '掌櫃',
+        spriteArchetype: 'wanbao_clerk',
+        spriteVariant: 'village',
         symbol: '商',
         type: NPCType.Shop, // General
         x: 15,
@@ -37,7 +45,11 @@ export const VILLAGE_NPCS: NPC[] = [
     },
     {
         id: 'village_blacksmith',
-        name: '鐵匠鋪',
+        name: '張鐵山',
+        affiliationLabel: '鐵匠鋪',
+        roleLabel: '鐵匠',
+        spriteArchetype: 'lingbao_forgemaster',
+        spriteVariant: 'village_blacksmith',
         symbol: '匠',
         type: NPCType.Shop, // Equipment
         x: 25,
@@ -47,7 +59,11 @@ export const VILLAGE_NPCS: NPC[] = [
     },
     {
         id: 'village_scripture_keeper',
-        name: '藏經閣執事',
+        name: '陸簡生',
+        affiliationLabel: '藏經閣',
+        roleLabel: '入門藏書執事',
+        spriteArchetype: 'scripture_keeper',
+        spriteVariant: 'village',
         symbol: '經',
         type: NPCType.Shop,
         x: 20,
@@ -62,7 +78,11 @@ export const VILLAGE_NPCS: NPC[] = [
 export const SWORD_SECT_NPCS: NPC[] = [
     {
         id: 'sect_sword_elder',
-        name: '劍宗長老',
+        name: '蕭長鋒',
+        affiliationLabel: '凌霄劍宗',
+        roleLabel: '劍宗長老',
+        spriteArchetype: 'sect_elder',
+        spriteVariant: 'sword',
         symbol: '老',
         type: NPCType.Quest,
         x: 20, 
@@ -76,7 +96,11 @@ export const SWORD_SECT_NPCS: NPC[] = [
     },
     {
         id: 'sect_sword_patrol_captain',
-        name: '巡山統領',
+        name: '顧巡岳',
+        affiliationLabel: '凌霄劍宗',
+        roleLabel: '巡山統領',
+        spriteArchetype: 'sect_field_officer',
+        spriteVariant: 'sword',
         symbol: '巡',
         type: NPCType.Quest,
         x: 28,
@@ -91,7 +115,11 @@ export const SWORD_SECT_NPCS: NPC[] = [
     },
     {
         id: 'sect_sword_wanbao',
-        name: '萬寶閣',
+        name: '韓雲商',
+        affiliationLabel: '萬寶閣',
+        roleLabel: '宗門掌櫃',
+        spriteArchetype: 'wanbao_clerk',
+        spriteVariant: 'sword',
         symbol: '商',
         type: NPCType.Shop, // General
         x: 15,
@@ -101,7 +129,11 @@ export const SWORD_SECT_NPCS: NPC[] = [
     },
     {
         id: 'sect_sword_lingbao',
-        name: '靈寶閣',
+        name: '沈劍爐',
+        affiliationLabel: '靈寶閣',
+        roleLabel: '劍器煉器師',
+        spriteArchetype: 'lingbao_forgemaster',
+        spriteVariant: 'sword',
         symbol: '劍',
         type: NPCType.Shop, // Equipment
         x: 25,
@@ -111,7 +143,11 @@ export const SWORD_SECT_NPCS: NPC[] = [
     },
     {
         id: 'sect_sword_skills',
-        name: '藏經閣',
+        name: '白簡執事',
+        affiliationLabel: '藏經閣',
+        roleLabel: '劍譜執事',
+        spriteArchetype: 'scripture_keeper',
+        spriteVariant: 'sword',
         symbol: '經',
         type: NPCType.Shop, // Skills
         x: 20,
@@ -125,7 +161,11 @@ export const SWORD_SECT_NPCS: NPC[] = [
 export const BEAST_SECT_NPCS: NPC[] = [
     {
         id: 'sect_beast_elder',
-        name: '煉體長老',
+        name: '蒼骨長老',
+        affiliationLabel: '萬獸山莊',
+        roleLabel: '煉體長老',
+        spriteArchetype: 'sect_elder',
+        spriteVariant: 'beast',
         symbol: '獸',
         type: NPCType.Quest,
         x: 20,
@@ -139,7 +179,11 @@ export const BEAST_SECT_NPCS: NPC[] = [
     },
     {
         id: 'sect_beast_huntmaster',
-        name: '獵場監軍',
+        name: '厲獵川',
+        affiliationLabel: '萬獸山莊',
+        roleLabel: '獵場監軍',
+        spriteArchetype: 'sect_field_officer',
+        spriteVariant: 'beast',
         symbol: '獵',
         type: NPCType.Quest,
         x: 28,
@@ -154,7 +198,11 @@ export const BEAST_SECT_NPCS: NPC[] = [
     },
     {
         id: 'sect_beast_wanbao',
-        name: '萬寶閣',
+        name: '祝獠商',
+        affiliationLabel: '萬寶閣',
+        roleLabel: '山莊掌櫃',
+        spriteArchetype: 'wanbao_clerk',
+        spriteVariant: 'beast',
         symbol: '商',
         type: NPCType.Shop, // General
         x: 15,
@@ -164,7 +212,11 @@ export const BEAST_SECT_NPCS: NPC[] = [
     },
     {
         id: 'sect_beast_lingbao',
-        name: '靈寶閣',
+        name: '鐵骨匠',
+        affiliationLabel: '靈寶閣',
+        roleLabel: '骨器煉器師',
+        spriteArchetype: 'lingbao_forgemaster',
+        spriteVariant: 'beast',
         symbol: '寨',
         type: NPCType.Shop, // Equipment
         x: 25,
@@ -174,7 +226,11 @@ export const BEAST_SECT_NPCS: NPC[] = [
     },
     {
         id: 'sect_beast_skills',
-        name: '藏經閣',
+        name: '玄骨祭書',
+        affiliationLabel: '藏經閣',
+        roleLabel: '煉體秘卷執事',
+        spriteArchetype: 'scripture_keeper',
+        spriteVariant: 'beast',
         symbol: '殿',
         type: NPCType.Shop, // Skills
         x: 20,
@@ -188,7 +244,11 @@ export const BEAST_SECT_NPCS: NPC[] = [
 export const MYSTIC_SECT_NPCS: NPC[] = [
     {
         id: 'sect_mystic_elder',
-        name: '傳法長老',
+        name: '靈微長老',
+        affiliationLabel: '縹緲仙宮',
+        roleLabel: '傳法長老',
+        spriteArchetype: 'sect_elder',
+        spriteVariant: 'mystic',
         symbol: '法',
         type: NPCType.Quest,
         x: 20,
@@ -202,7 +262,11 @@ export const MYSTIC_SECT_NPCS: NPC[] = [
     },
     {
         id: 'sect_mystic_envoy',
-        name: '外務使',
+        name: '陶星使',
+        affiliationLabel: '縹緲仙宮',
+        roleLabel: '外務使',
+        spriteArchetype: 'sect_field_officer',
+        spriteVariant: 'mystic',
         symbol: '使',
         type: NPCType.Quest,
         x: 28,
@@ -217,7 +281,11 @@ export const MYSTIC_SECT_NPCS: NPC[] = [
     },
     {
         id: 'sect_mystic_wanbao',
-        name: '萬寶閣',
+        name: '蘇靈掌櫃',
+        affiliationLabel: '萬寶閣',
+        roleLabel: '仙宮掌櫃',
+        spriteArchetype: 'wanbao_clerk',
+        spriteVariant: 'mystic',
         symbol: '商',
         type: NPCType.Shop, // General
         x: 15,
@@ -227,7 +295,11 @@ export const MYSTIC_SECT_NPCS: NPC[] = [
     },
     {
         id: 'sect_mystic_lingbao',
-        name: '靈寶閣',
+        name: '洛霞器師',
+        affiliationLabel: '靈寶閣',
+        roleLabel: '法器師',
+        spriteArchetype: 'lingbao_forgemaster',
+        spriteVariant: 'mystic',
         symbol: '劍',
         type: NPCType.Shop, // Equipment
         x: 25,
@@ -237,7 +309,11 @@ export const MYSTIC_SECT_NPCS: NPC[] = [
     },
     {
         id: 'sect_mystic_skills',
-        name: '藏經閣',
+        name: '雲冊執事',
+        affiliationLabel: '藏經閣',
+        roleLabel: '法術藏書執事',
+        spriteArchetype: 'scripture_keeper',
+        spriteVariant: 'mystic',
         symbol: '閣',
         type: NPCType.Shop, // Skills
         x: 20,
