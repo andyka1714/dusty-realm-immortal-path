@@ -492,6 +492,7 @@ export default function AdventureStage({
          label.anchor.set(0.5, 1);
          label.y = -(size * 1.75);
          container.addChild(label);
+         const markerBaseY = label.y - label.height - 14;
          
          // --- QUEST MARKER LOGIC ---
          let markerSymbol = '';
@@ -547,7 +548,8 @@ export default function AdventureStage({
              // Pulse Animation container
              const mCont = new PIXI.Container();
              mCont.name = 'quest_marker_container';
-             mCont.y = -size/2 - 30; // Increased spacing (Base pos)
+             (mCont as PIXI.Container & { baseY: number }).baseY = markerBaseY;
+             mCont.y = markerBaseY;
 
              // Ripple (Water wave)
              const ripple = new PIXI.Graphics();
@@ -1428,7 +1430,8 @@ export default function AdventureStage({
                  const marker = npcCont.getChildByName('quest_marker_container') as PIXI.Container;
                  if (marker) {
                      // Floating effect
-                     marker.y = -cellSize/2 - 30 + Math.sin(time * 3) * 3;
+                     const markerBaseY = (marker as PIXI.Container & { baseY?: number }).baseY ?? (-cellSize/2 - 30);
+                     marker.y = markerBaseY + Math.sin(time * 3) * 3;
 
                      // Ripple effect
                      const ripple = marker.getChildByName('ripple') as PIXI.Graphics;

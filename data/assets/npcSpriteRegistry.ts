@@ -15,6 +15,11 @@ export const NPC_IDLE_SPRITE_MAPPINGS: NpcSpriteMapping[] = [
     variant: "village",
     assetId: "npc.wanbao_clerk.village.idle_v1",
   },
+  {
+    archetype: "lingbao_forgemaster",
+    variant: "village_blacksmith",
+    assetId: "npc.lingbao_forgemaster.village_blacksmith.idle_v1",
+  },
 ];
 
 export const findNpcSpriteMapping = ({
