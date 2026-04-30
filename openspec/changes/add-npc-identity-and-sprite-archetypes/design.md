@@ -80,10 +80,10 @@ Different archetypes must not share one image. Variants may share base construct
 
 NPCs are stationary map actors. They do not need walk or combat sheets.
 
-Allowed asset shapes:
+Required asset shape:
 
-- Single idle frame: one `96x96` transparent PNG.
-- Idle sheet: multiple `96x96` frames showing only in-place motion.
+- Idle sheet: at least 2 transparent `96x96` frames showing only in-place motion.
+- Single-frame NPC idle PNGs are not valid production NPC sprite assets.
 
 Idle sheet motion can include breathing, sleeve sway, hair movement, robe movement, hand gestures, floating scrolls, furnace glow, shop ledger motion, weapon aura, or subtle spirit shimmer. It must not include walking displacement, pursuit, attack swings, hit reactions, directional turns, or cast lunges.
 

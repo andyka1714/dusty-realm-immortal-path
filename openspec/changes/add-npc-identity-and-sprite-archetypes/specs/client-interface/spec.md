@@ -17,7 +17,7 @@ Adventure 地圖介面必須 (MUST) 在 NPC 有歸屬標籤時，同時呈現機
 
 ### Requirement: NPC Sprite 呈現必須保留互動與 fallback
 
-Adventure 地圖介面必須 (MUST) 使用 NPC sprite resolver 載入已通過 QC 的 humanoid idle frame 或 idle sheet frames，並在缺圖或載入失敗時保留既有 NPC token 互動。
+Adventure 地圖介面必須 (MUST) 使用 NPC sprite resolver 載入已通過 QC 的 humanoid idle sheet frames，並在缺圖或載入失敗時保留既有 NPC token 互動。
 
 #### Scenario: NPC sprite 載入成功
 - **WHEN** NPC resolver 回傳可用 sprite asset

@@ -13,7 +13,7 @@
 ## 3. Map Presentation
 
 - [ ] 3.1 Update Adventure map NPC presentation to display affiliation above personal name when present.
-- [ ] 3.2 Load NPC humanoid idle frame or idle sheet frames through an independent-frame path.
+- [ ] 3.2 Load NPC humanoid idle sheet frames through an independent-frame path.
 - [ ] 3.3 Keep fallback behavior for NPCs without a sprite asset or failed frame loading.
 
 ## 4. Asset Rollout
