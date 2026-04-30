@@ -20,6 +20,11 @@ export const NPC_IDLE_SPRITE_MAPPINGS: NpcSpriteMapping[] = [
     variant: "village_blacksmith",
     assetId: "npc.lingbao_forgemaster.village_blacksmith.idle_v1",
   },
+  {
+    archetype: "scripture_keeper",
+    variant: "village",
+    assetId: "npc.scripture_keeper.village.idle_v1",
+  },
 ];
 
 export const findNpcSpriteMapping = ({

@@ -7,7 +7,7 @@ Each checked item means the NPC has a generated idle sheet created through `$gen
 - [x] `village_chief` - 村中長老 / 林守拙
 - [x] `village_wanbao` - 萬寶閣 / 王掌櫃
 - [x] `village_blacksmith` - 鐵匠鋪 / 張鐵山
-- [ ] `village_scripture_keeper` - 藏經閣 / 陸簡生
+- [x] `village_scripture_keeper` - 藏經閣 / 陸簡生
 - [ ] `sect_sword_elder` - 凌霄劍宗 / 蕭長鋒
 - [ ] `sect_sword_patrol_captain` - 凌霄劍宗 / 顧巡岳
 - [ ] `sect_sword_wanbao` - 萬寶閣 / 韓雲商
