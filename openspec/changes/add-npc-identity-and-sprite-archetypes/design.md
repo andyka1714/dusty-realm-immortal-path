@@ -4,7 +4,7 @@
 
 The project already has production rules for humanoid player walk and combat sprites. NPCs are still represented mainly by text tokens, and several shop-like NPC records use institution names (`萬寶閣`, `靈寶閣`, `藏經閣`) as `name`. Before generating NPC images, the catalog needs stable identity fields and a reusable sprite grouping strategy.
 
-This design covers all 53 existing NPCs across 12 maps. It plans identity and sprite grouping only; it does not include monster sprites or NPC combat animations.
+This design covers all 53 existing NPCs across 12 maps. It plans identity and sprite grouping only; it does not include monster sprites, NPC movement sprites, or NPC combat animations.
 
 ## Goals
 
@@ -13,12 +13,13 @@ This design covers all 53 existing NPCs across 12 maps. It plans identity and sp
 - Support role copy through `roleLabel`.
 - Reuse sprites by role and affiliation instead of generating 53 unrelated images.
 - Keep different role classes visually distinct.
-- Use existing humanoid walk sprite QC and frame-loading rules.
+- Use a humanoid idle sprite standard derived from the existing 96x96 humanoid grounding rules.
 - Preserve all current IDs, coordinates, shop links, quests, and interaction behavior.
 
 ## Non-Goals
 
 - No monster sprite profile.
+- No NPC map movement animation.
 - No NPC combat animation.
 - No LocalStorage migration.
 - No procedural runtime recoloring as the first solution.
@@ -74,6 +75,26 @@ Core archetypes:
 - `echo_spirit`: semi-transparent sect echo, used only for Info echo NPCs.
 
 Different archetypes must not share one image. Variants may share base construction but should have visible palette/prop differences.
+
+## NPC Idle Sprite Standard
+
+NPCs are stationary map actors. They do not need walk or combat sheets.
+
+Allowed asset shapes:
+
+- Single idle frame: one `96x96` transparent PNG.
+- Idle sheet: multiple `96x96` frames showing only in-place motion.
+
+Idle sheet motion can include breathing, sleeve sway, hair movement, robe movement, hand gestures, floating scrolls, furnace glow, shop ledger motion, weapon aura, or subtle spirit shimmer. It must not include walking displacement, pursuit, attack swings, hit reactions, directional turns, or cast lunges.
+
+Grounding and QC:
+
+- Each frame is `96x96`.
+- Footline stays at `y=88`.
+- Horizontal center stays at `x=48 ±1px`.
+- Character scale remains consistent across all frames.
+- Asset metadata records frame count, frame size, idle cadence, footline, center line, target height, archetype, variant, and `qcStatus`.
+- Only `qcStatus: "passed"` assets can be used as production map tokens.
 
 ## Full NPC Identity and Sprite Plan
 

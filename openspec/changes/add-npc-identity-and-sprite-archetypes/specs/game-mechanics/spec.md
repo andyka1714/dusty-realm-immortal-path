@@ -30,17 +30,18 @@ NPC sprite 系統必須 (MUST) 以 `spriteArchetype` 描述角色職能外觀，
 - **THEN** 這些類別必須使用不同的 sprite archetype
 - **AND** 不得讓商人、煉器師、藏書執事與宗門任務 NPC 共用同一張無差別人形圖
 
-### Requirement: NPC 人形圖像必須沿用既有 Humanoid Walk 標準
+### Requirement: NPC 人形圖像必須使用原地 Idle 標準
 
-NPC walk sprite 必須 (MUST) 沿用既有 player/NPC humanoid profile，不在本次規劃新增 NPC combat animation 或怪物圖像規格。
+NPC sprite 必須 (MUST) 以原地 idle 圖像為主，不要求 NPC 具備地圖移動動畫或戰鬥動畫。NPC 可以使用單張 idle 圖，也可以使用原地待機小動作 idle sheet，但不得把 NPC 規格綁定到 player 的 `4x4` 走路 sheet。
 
-#### Scenario: NPC walk asset 登錄
+#### Scenario: NPC idle asset 登錄
 - **WHEN** NPC sprite asset 被登錄為 production map token
-- **THEN** asset 必須是 `4x4` walk sheet
+- **THEN** asset 必須是單張 idle frame 或只包含原地待機小動作的 idle sheet
 - **AND** 每格必須 normalize 為 `96x96`
-- **AND** row order 必須為 `down`、`left`、`right`、`up`
 - **AND** 腳底必須對齊 `y=88`
 - **AND** bbox 中心必須落在 `x=48 ±1px`
+- **AND** 若使用 sheet，所有 frame 必須維持同一 footline、center line 與角色尺度
+- **AND** idle sheet 不得包含位移步行、攻擊、受擊或施法衝刺動作
 - **AND** 必須通過 humanoid QC 並標記 `qcStatus: "passed"`
 
 #### Scenario: NPC 尚未有 sprite asset

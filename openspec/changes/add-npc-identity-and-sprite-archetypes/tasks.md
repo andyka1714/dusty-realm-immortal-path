@@ -13,12 +13,12 @@
 ## 3. Map Presentation
 
 - [ ] 3.1 Update Adventure map NPC presentation to display affiliation above personal name when present.
-- [ ] 3.2 Load NPC humanoid walk frames through the same independent-frame path used by player walk sprites.
+- [ ] 3.2 Load NPC humanoid idle frame or idle sheet frames through an independent-frame path.
 - [ ] 3.3 Keep fallback behavior for NPCs without a sprite asset or failed frame loading.
 
 ## 4. Asset Rollout
 
-- [ ] 4.1 Generate or register first-batch NPC humanoid walk assets for town and three sect hub archetypes.
+- [ ] 4.1 Generate or register first-batch NPC humanoid idle assets for town and three sect hub archetypes.
 - [ ] 4.2 Run humanoid QC and only mark passing assets as production map tokens.
 - [ ] 4.3 Add staged follow-up list for world-route, workshop, scribe, and echo NPC assets.
 
