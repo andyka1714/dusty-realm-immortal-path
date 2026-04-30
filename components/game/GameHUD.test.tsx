@@ -105,4 +105,11 @@ describe("GameHUD", () => {
     expect(markup).toContain("42 / 280");
     expect(markup).toContain("96 / 130");
   });
+
+  it("animates HP and MP bar width changes", () => {
+    const markup = renderHud();
+
+    expect(markup).toContain("transition-[width]");
+    expect(markup).toContain("duration-300");
+  });
 });

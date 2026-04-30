@@ -2088,7 +2088,7 @@ export const Adventure: React.FC<AdventureProps> = ({
                     <div className="h-2 rounded-full border border-stone-800 bg-stone-950 overflow-hidden">
                         <div
                             className={clsx(
-                                "h-full transition-all duration-300",
+                                "h-full transition-[width] duration-300 ease-out",
                                 targetedMonster.rank === EnemyRank.Boss
                                   ? "bg-red-500"
                                   : targetedMonster.rank === EnemyRank.Elite
@@ -2117,7 +2117,7 @@ export const Adventure: React.FC<AdventureProps> = ({
                             </div>
                             <div className="h-2 overflow-hidden rounded-full border border-stone-800 bg-stone-950">
                                 <div
-                                    className="h-full bg-emerald-500 transition-all duration-200"
+                                    className="h-full bg-emerald-500 transition-[width] duration-300 ease-out"
                                     style={{ width: `${Math.max(0, (worldPlayerHp / playerStats.maxHp) * 100)}%` }}
                                 />
                             </div>
@@ -2127,7 +2127,7 @@ export const Adventure: React.FC<AdventureProps> = ({
                             </div>
                             <div className="mt-2 h-1.5 overflow-hidden rounded-full border border-blue-950 bg-stone-950">
                                 <div
-                                    className="h-full bg-blue-500 transition-all duration-200"
+                                    className="h-full bg-blue-500 transition-[width] duration-300 ease-out"
                                     style={{ width: `${Math.max(0, (worldPlayerMp / playerStats.maxMp) * 100)}%` }}
                                 />
                             </div>
@@ -2451,7 +2451,7 @@ export const Adventure: React.FC<AdventureProps> = ({
                                      </div>
                                  </div>
                                  <div className="h-2.5 bg-stone-950 rounded-full overflow-hidden border border-stone-800">
-                                     <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${Math.max(0, (battleSnapshot.playerHp / battleSnapshot.playerMaxHp) * 100)}%` }}></div>
+                                     <div className="h-full bg-emerald-500 transition-[width] duration-300 ease-out" style={{ width: `${Math.max(0, (battleSnapshot.playerHp / battleSnapshot.playerMaxHp) * 100)}%` }}></div>
                                  </div>
                                  <div className="mt-2 text-[11px] text-stone-500">
                                      剩餘生命 {Math.max(0, Math.round((battleSnapshot.playerHp / battleSnapshot.playerMaxHp) * 100))}%
@@ -2532,7 +2532,7 @@ export const Adventure: React.FC<AdventureProps> = ({
                                      </div>
                                  </div>
                                  <div className="h-2.5 bg-stone-950 rounded-full overflow-hidden border border-stone-800">
-                                     <div className="h-full bg-rose-500 transition-all duration-300" style={{ width: `${Math.max(0, (battleSnapshot.enemyHp / battleSnapshot.enemyMaxHp) * 100)}%` }}></div>
+                                     <div className="h-full bg-rose-500 transition-[width] duration-300 ease-out" style={{ width: `${Math.max(0, (battleSnapshot.enemyHp / battleSnapshot.enemyMaxHp) * 100)}%` }}></div>
                                  </div>
                                  <div className="mt-2 flex items-center justify-between text-[11px] text-stone-500">
                                     <span>{REALM_NAMES[currentEnemy.realm]} {currentEnemy.minorRealm}</span>

@@ -107,7 +107,7 @@ export const GameHUD: React.FC = () => {
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-stone-800">
                   <div
-                    className="h-full bg-emerald-500"
+                    className="h-full bg-emerald-500 transition-[width] duration-300 ease-out"
                     style={{
                       width: `${Math.max(0, Math.min(100, (displayedHp / displayedMaxHp) * 100))}%`,
                     }}
@@ -125,7 +125,7 @@ export const GameHUD: React.FC = () => {
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-stone-800">
                   <div
-                    className="h-full bg-blue-500"
+                    className="h-full bg-blue-500 transition-[width] duration-300 ease-out"
                     style={{
                       width: `${Math.max(0, Math.min(100, (displayedMp / displayedMaxMp) * 100))}%`,
                     }}
