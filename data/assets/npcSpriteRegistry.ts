@@ -40,6 +40,11 @@ export const NPC_IDLE_SPRITE_MAPPINGS: NpcSpriteMapping[] = [
     variant: "sword",
     assetId: "npc.wanbao_clerk.sword.idle_v1",
   },
+  {
+    archetype: "lingbao_forgemaster",
+    variant: "sword",
+    assetId: "npc.lingbao_forgemaster.sword.idle_v1",
+  },
 ];
 
 export const findNpcSpriteMapping = ({

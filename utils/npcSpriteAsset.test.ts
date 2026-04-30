@@ -249,6 +249,42 @@ describe("npcSpriteAsset", () => {
     ]);
   });
 
+  it("resolves the generated and QC-passed idle sheet for Shen Jianlu", () => {
+    const forgemaster = SWORD_SECT_NPCS.find(
+      (npc) => npc.id === "sect_sword_lingbao"
+    );
+
+    expect(forgemaster).toBeTruthy();
+    expect(resolveNpcSpriteAssetId(forgemaster!)).toBe(
+      "npc.lingbao_forgemaster.sword.idle_v1"
+    );
+
+    const asset = getAssetDefinition("npc.lingbao_forgemaster.sword.idle_v1");
+
+    expect(asset.kind).toBe("npc");
+    expect(asset.usage).toContain("npc_idle");
+    expect(asset.files.sheet).toBe("sheet-transparent.png");
+    expect(asset.files.framesDir).toBe("frames");
+    expect(asset.sprite).toMatchObject({
+      profile: "humanoid",
+      rows: 2,
+      cols: 2,
+      frameCount: 4,
+      frameWidth: 96,
+      frameHeight: 96,
+      footlineY: 88,
+      centerX: 48,
+      centerTolerance: 1,
+      qcStatus: "passed",
+    });
+    expect(getAssetFrameFileUrls(asset.assetId)).toEqual([
+      "/assets/generated/characters/npcs/lingbao-forgemaster-sword-idle-v1/frames/npc_idle-1.png",
+      "/assets/generated/characters/npcs/lingbao-forgemaster-sword-idle-v1/frames/npc_idle-2.png",
+      "/assets/generated/characters/npcs/lingbao-forgemaster-sword-idle-v1/frames/npc_idle-3.png",
+      "/assets/generated/characters/npcs/lingbao-forgemaster-sword-idle-v1/frames/npc_idle-4.png",
+    ]);
+  });
+
   it("keeps generated NPC idle assets wired through explicit mappings", () => {
     expect(listNpcSpriteMappings()).toEqual([
       {
@@ -285,6 +321,11 @@ describe("npcSpriteAsset", () => {
         archetype: "wanbao_clerk",
         variant: "sword",
         assetId: "npc.wanbao_clerk.sword.idle_v1",
+      },
+      {
+        archetype: "lingbao_forgemaster",
+        variant: "sword",
+        assetId: "npc.lingbao_forgemaster.sword.idle_v1",
       },
     ]);
   });
