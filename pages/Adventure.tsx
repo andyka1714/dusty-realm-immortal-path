@@ -73,6 +73,10 @@ import {
   resolveEngagementPath,
   resolveImmediatePathStep,
 } from '../utils/adventurePathMovement';
+import {
+  resolveWorldPlayerResourceRecovery,
+  WORLD_RESOURCE_RECOVERY_INTERVAL_MS,
+} from '../utils/worldPlayerResourceRecovery';
 import { createAdventureBattleUiBridge } from '../utils/adventureBattleUiBridge';
 import { createAdventureBattleVisualBridge } from '../utils/adventureBattleVisualBridge';
 import {
@@ -733,6 +737,15 @@ export const Adventure: React.FC<AdventureProps> = ({
   const [worldUiNow, setWorldUiNow] = useState(() => Date.now());
   const [lastRecoveryConsumableUsedAt, setLastRecoveryConsumableUsedAt] = useState<number | null>(null);
   const combatTimersRef = useRef(createCombatTimerBuckets());
+  const lastResourceRecoveryAtRef = useRef(Date.now());
+  const worldResourceRecoveryContextRef = useRef({
+    hp: 0,
+    mp: 0,
+    maxHp: 0,
+    maxMp: 0,
+    attributes,
+    regenHp: 0,
+  });
   
   // NPC Interaction State
   const [interactingNPC, setInteractingNPC] = useState<NPC | null>(null);
@@ -1274,8 +1287,66 @@ export const Adventure: React.FC<AdventureProps> = ({
   useEffect(() => {
     setWorldPlayerHp(playerStats.maxHp);
     setWorldPlayerMp(playerStats.maxMp);
+    lastResourceRecoveryAtRef.current = Date.now();
+    worldResourceRecoveryContextRef.current = {
+      ...worldResourceRecoveryContextRef.current,
+      hp: playerStats.maxHp,
+      mp: playerStats.maxMp,
+      maxHp: playerStats.maxHp,
+      maxMp: playerStats.maxMp,
+      regenHp: playerStats.regenHp,
+    };
     applyWorldCombatEncounterState(createResetWorldCombatEncounterState());
-  }, [currentMapId, playerStats.maxHp, playerStats.maxMp]);
+  }, [currentMapId, playerStats.maxHp, playerStats.maxMp, playerStats.regenHp]);
+
+  useEffect(() => {
+    worldResourceRecoveryContextRef.current = {
+      hp: worldPlayerHp,
+      mp: worldPlayerMp,
+      maxHp: playerStats.maxHp,
+      maxMp: playerStats.maxMp,
+      attributes,
+      regenHp: playerStats.regenHp,
+    };
+  }, [
+    attributes,
+    playerStats.maxHp,
+    playerStats.maxMp,
+    playerStats.regenHp,
+    worldPlayerHp,
+    worldPlayerMp,
+  ]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = Date.now();
+      const recoveryContext = worldResourceRecoveryContextRef.current;
+      const recovery = resolveWorldPlayerResourceRecovery({
+        now,
+        lastRecoveredAt: lastResourceRecoveryAtRef.current,
+        hp: { current: recoveryContext.hp, max: recoveryContext.maxHp },
+        mp: { current: recoveryContext.mp, max: recoveryContext.maxMp },
+        attributes: recoveryContext.attributes,
+        regenHp: recoveryContext.regenHp,
+      });
+
+      lastResourceRecoveryAtRef.current = recovery.nextRecoveredAt;
+
+      if (!recovery.didRecover) {
+        return;
+      }
+
+      worldResourceRecoveryContextRef.current = {
+        ...recoveryContext,
+        hp: recovery.hp.current,
+        mp: recovery.mp.current,
+      };
+      setWorldPlayerHp(recovery.hp.current);
+      setWorldPlayerMp(recovery.mp.current);
+    }, WORLD_RESOURCE_RECOVERY_INTERVAL_MS);
+
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (worldPlayerHp > playerStats.maxHp) {
