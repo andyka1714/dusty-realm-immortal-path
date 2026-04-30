@@ -70,6 +70,11 @@ export const NPC_IDLE_SPRITE_MAPPINGS: NpcSpriteMapping[] = [
     variant: "beast",
     assetId: "npc.lingbao_forgemaster.beast.idle_v1",
   },
+  {
+    archetype: "scripture_keeper",
+    variant: "beast",
+    assetId: "npc.scripture_keeper.beast.idle_v1",
+  },
 ];
 
 export const findNpcSpriteMapping = ({
