@@ -783,6 +783,7 @@ export default function AdventureStage({
       // --- Destination Marker (Green Bracket/Pulse) ---
       const destMarker = new PIXI.Graphics();
       destMarker.visible = false;
+      destMarker.zIndex = -1000;
       const dS = cellSize * 0.4;
       const dL = cellSize * 0.15;
       destMarker.lineStyle(2, 0x4ade80, 0.8); // Green
@@ -1352,8 +1353,11 @@ export default function AdventureStage({
               const dest = latestDataRef.current.moveDestination;
               const mId = latestDataRef.current.targetMonsterId;
               const isMonsterTarget = mId && visualRef.current.monsterCoords.has(mId);
+              const isPlayerOnDestination =
+                  Math.abs(visualRef.current.player.x - dest.x) < 0.01 &&
+                  Math.abs(visualRef.current.player.y - dest.y) < 0.01;
               
-              if (!isMonsterTarget) {
+              if (!isMonsterTarget && !isPlayerOnDestination) {
                   displayRefs.current.destinationMarker.visible = true;
                   displayRefs.current.destinationMarker.x = (dest.x + 0.5) * cellSize;
                   displayRefs.current.destinationMarker.y = (dest.y + 0.5) * cellSize;
