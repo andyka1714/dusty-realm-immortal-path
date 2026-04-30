@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { getAssetDefinition, getAssetFrameFileUrls } from "../data/assets/assetRegistry";
-import { BEAST_SECT_NPCS, SWORD_SECT_NPCS, VILLAGE_NPCS } from "../data/npcs";
+import {
+  BEAST_SECT_NPCS,
+  MYSTIC_SECT_NPCS,
+  SWORD_SECT_NPCS,
+  VILLAGE_NPCS,
+} from "../data/npcs";
 import {
   listNpcSpriteMappings,
   resolveNpcSpriteAssetId,
@@ -493,6 +498,38 @@ describe("npcSpriteAsset", () => {
     ]);
   });
 
+  it("resolves the generated and QC-passed idle sheet for Lingwei Elder", () => {
+    const elder = MYSTIC_SECT_NPCS.find((npc) => npc.id === "sect_mystic_elder");
+
+    expect(elder).toBeTruthy();
+    expect(resolveNpcSpriteAssetId(elder!)).toBe("npc.sect_elder.mystic.idle_v1");
+
+    const asset = getAssetDefinition("npc.sect_elder.mystic.idle_v1");
+
+    expect(asset.kind).toBe("npc");
+    expect(asset.usage).toContain("npc_idle");
+    expect(asset.files.sheet).toBe("sheet-transparent.png");
+    expect(asset.files.framesDir).toBe("frames");
+    expect(asset.sprite).toMatchObject({
+      profile: "humanoid",
+      rows: 2,
+      cols: 2,
+      frameCount: 4,
+      frameWidth: 96,
+      frameHeight: 96,
+      footlineY: 88,
+      centerX: 48,
+      centerTolerance: 1,
+      qcStatus: "passed",
+    });
+    expect(getAssetFrameFileUrls(asset.assetId)).toEqual([
+      "/assets/generated/characters/npcs/sect-elder-mystic-idle-v1/frames/npc_idle-1.png",
+      "/assets/generated/characters/npcs/sect-elder-mystic-idle-v1/frames/npc_idle-2.png",
+      "/assets/generated/characters/npcs/sect-elder-mystic-idle-v1/frames/npc_idle-3.png",
+      "/assets/generated/characters/npcs/sect-elder-mystic-idle-v1/frames/npc_idle-4.png",
+    ]);
+  });
+
   it("keeps generated NPC idle assets wired through explicit mappings", () => {
     expect(listNpcSpriteMappings()).toEqual([
       {
@@ -564,6 +601,11 @@ describe("npcSpriteAsset", () => {
         archetype: "scripture_keeper",
         variant: "beast",
         assetId: "npc.scripture_keeper.beast.idle_v1",
+      },
+      {
+        archetype: "sect_elder",
+        variant: "mystic",
+        assetId: "npc.sect_elder.mystic.idle_v1",
       },
     ]);
   });
