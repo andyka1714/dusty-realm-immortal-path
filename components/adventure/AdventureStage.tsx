@@ -478,11 +478,19 @@ export default function AdventureStage({
          const label = new PIXI.Text(labelText, {
              fontFamily: 'Arial',
              fontSize: cellSize * 0.24,
-             fill: 0xcccccc,
+             fontWeight: 'bold',
+             fill: 0xfff3b0,
              align: 'center',
+             stroke: 0x120b05,
+             strokeThickness: Math.max(3, cellSize * 0.08),
+             dropShadow: true,
+             dropShadowColor: 0x000000,
+             dropShadowAlpha: 0.85,
+             dropShadowBlur: 2,
+             dropShadowDistance: 1,
          });
-         label.anchor.set(0.5);
-         label.y = -size/2 - 5;
+         label.anchor.set(0.5, 1);
+         label.y = -(size * 1.75);
          container.addChild(label);
          
          // --- QUEST MARKER LOGIC ---
