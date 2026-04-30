@@ -1,0 +1,203 @@
+{
+  "target": "npc",
+  "mode": "humanoid_idle_sheet",
+  "prompt": "Create a production-ready 2x2 top-down RPG pixel-art idle sprite sheet for one NPC elder: Lin Shouzhuo, the village elder and beginner guide in an East Asian xianxia cultivation town. 4 equal cells arranged 2 columns by 2 rows. Each cell shows the SAME character, front-facing 3/4 top-down overworld view, stationary idle only. Subtle in-place animation poses: breathing, beard and sleeve sway, one hand resting on a wooden cane, no walking, no attack, no spell casting, no directional turn. Character: elderly male cultivator village elder, gray hair in simple topknot, short gray beard, kind but serious expression, plain earth-gray robe with faded green sash, wooden cane, humble mortal town style. Crisp 16-bit pixel art, dark outline, readable at 96x96 per frame, consistent body scale and bounding box in all 4 cells, feet aligned to same baseline, centered in every cell. Background must be 100% solid flat magenta #FF00FF. No shadows, no labels, no text, no grid lines, no borders, no numbers, nothing crossing cell edges.",
+  "role": "",
+  "input": "/Users/andyka1714/.codex/generated_images/019ddd7a-40e0-7673-872d-0b1cfa53e8f1/ig_0fa448376804fc710169f336818b6881999f1f9d007360d5ec.png",
+  "threshold": 100,
+  "edge_threshold": 150,
+  "duration": 800,
+  "rows": 2,
+  "cols": 2,
+  "cell_size": 96,
+  "fit_scale": 0.84,
+  "trim_border": 4,
+  "edge_clean_depth": 3,
+  "align": "feet",
+  "shared_scale": true,
+  "component_mode": "largest",
+  "component_padding": 6,
+  "min_component_area": 1,
+  "edge_touch_margin": 0,
+  "frame_labels": [
+    "npc_idle-1",
+    "npc_idle-2",
+    "npc_idle-3",
+    "npc_idle-4"
+  ],
+  "frames": [
+    {
+      "grid": [
+        0,
+        0
+      ],
+      "source_box": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "component_mode": "largest",
+      "component_count": 1,
+      "selected_component_area": 117838,
+      "selected_component_bbox": [
+        154,
+        22,
+        479,
+        582
+      ],
+      "crop_bbox": [
+        148,
+        16,
+        485,
+        588
+      ],
+      "edge_touch": false,
+      "output_size": [
+        47,
+        80
+      ],
+      "paste_position": [
+        24,
+        9
+      ],
+      "footlineY": 88,
+      "centerX": 48,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "grid": [
+        0,
+        1
+      ],
+      "source_box": [
+        627,
+        0,
+        1254,
+        627
+      ],
+      "component_mode": "largest",
+      "component_count": 1,
+      "selected_component_area": 117854,
+      "selected_component_bbox": [
+        128,
+        22,
+        453,
+        582
+      ],
+      "crop_bbox": [
+        122,
+        16,
+        459,
+        588
+      ],
+      "edge_touch": false,
+      "output_size": [
+        47,
+        80
+      ],
+      "paste_position": [
+        24,
+        9
+      ],
+      "footlineY": 88,
+      "centerX": 48,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "grid": [
+        1,
+        0
+      ],
+      "source_box": [
+        0,
+        627,
+        627,
+        1254
+      ],
+      "component_mode": "largest",
+      "component_count": 1,
+      "selected_component_area": 118093,
+      "selected_component_bbox": [
+        154,
+        22,
+        479,
+        582
+      ],
+      "crop_bbox": [
+        148,
+        16,
+        485,
+        588
+      ],
+      "edge_touch": false,
+      "output_size": [
+        47,
+        80
+      ],
+      "paste_position": [
+        24,
+        9
+      ],
+      "footlineY": 88,
+      "centerX": 48,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "grid": [
+        1,
+        1
+      ],
+      "source_box": [
+        627,
+        627,
+        1254,
+        1254
+      ],
+      "component_mode": "largest",
+      "component_count": 1,
+      "selected_component_area": 118658,
+      "selected_component_bbox": [
+        128,
+        22,
+        453,
+        582
+      ],
+      "crop_bbox": [
+        122,
+        16,
+        459,
+        588
+      ],
+      "edge_touch": false,
+      "output_size": [
+        47,
+        80
+      ],
+      "paste_position": [
+        24,
+        9
+      ],
+      "footlineY": 88,
+      "centerX": 48,
+      "passed": true,
+      "failures": []
+    }
+  ],
+  "edge_touch_frames": [],
+  "profile": "humanoid",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "targetHeight": 80,
+  "heightTolerance": 1,
+  "footlineY": 88,
+  "centerX": 48,
+  "centerTolerance": 1,
+  "idleCadenceMs": 800,
+  "archetype": "town_elder",
+  "variant": "village",
+  "qcStatus": "passed"
+}

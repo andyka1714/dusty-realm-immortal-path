@@ -7,6 +7,38 @@ import {
 } from "./npcSpriteAsset";
 
 describe("npcSpriteAsset", () => {
+  it("resolves the generated and QC-passed idle sheet for Lin Shouzhuo", () => {
+    const elder = VILLAGE_NPCS.find((npc) => npc.id === "village_chief");
+
+    expect(elder).toBeTruthy();
+    expect(resolveNpcSpriteAssetId(elder!)).toBe(
+      "npc.town_elder.village.idle_v1"
+    );
+
+    const asset = getAssetDefinition("npc.town_elder.village.idle_v1");
+
+    expect(asset.kind).toBe("npc");
+    expect(asset.usage).toContain("npc_idle");
+    expect(asset.sprite).toMatchObject({
+      profile: "humanoid",
+      rows: 2,
+      cols: 2,
+      frameCount: 4,
+      frameWidth: 96,
+      frameHeight: 96,
+      footlineY: 88,
+      centerX: 48,
+      centerTolerance: 1,
+      qcStatus: "passed",
+    });
+    expect(getAssetFrameFileUrls(asset.assetId)).toEqual([
+      "/assets/generated/characters/npcs/town-elder-village-idle-v1/frames/npc_idle-1.png",
+      "/assets/generated/characters/npcs/town-elder-village-idle-v1/frames/npc_idle-2.png",
+      "/assets/generated/characters/npcs/town-elder-village-idle-v1/frames/npc_idle-3.png",
+      "/assets/generated/characters/npcs/town-elder-village-idle-v1/frames/npc_idle-4.png",
+    ]);
+  });
+
   it("resolves the generated and QC-passed idle sheet for Wang Zhanggui", () => {
     const wang = VILLAGE_NPCS.find((npc) => npc.id === "village_wanbao");
 
@@ -43,6 +75,11 @@ describe("npcSpriteAsset", () => {
 
   it("keeps generated NPC idle assets wired through explicit mappings", () => {
     expect(listNpcSpriteMappings()).toEqual([
+      {
+        archetype: "town_elder",
+        variant: "village",
+        assetId: "npc.town_elder.village.idle_v1",
+      },
       {
         archetype: "wanbao_clerk",
         variant: "village",

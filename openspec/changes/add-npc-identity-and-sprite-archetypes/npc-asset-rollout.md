@@ -4,7 +4,7 @@ Each checked item means the NPC has a generated idle sheet created through `$gen
 
 ## Phase 1: Core Settlement And Sect Hubs
 
-- [ ] `village_chief` - 村中長老 / 林守拙
+- [x] `village_chief` - 村中長老 / 林守拙
 - [x] `village_wanbao` - 萬寶閣 / 王掌櫃
 - [ ] `village_blacksmith` - 鐵匠鋪 / 張鐵山
 - [ ] `village_scripture_keeper` - 藏經閣 / 陸簡生

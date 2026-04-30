@@ -6,6 +6,11 @@ export interface NpcSpriteMapping {
 
 export const NPC_IDLE_SPRITE_MAPPINGS: NpcSpriteMapping[] = [
   {
+    archetype: "town_elder",
+    variant: "village",
+    assetId: "npc.town_elder.village.idle_v1",
+  },
+  {
     archetype: "wanbao_clerk",
     variant: "village",
     assetId: "npc.wanbao_clerk.village.idle_v1",
