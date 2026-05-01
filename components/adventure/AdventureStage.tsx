@@ -16,7 +16,7 @@ import {
   type AdventureTerrainTile,
   resolveAdventureTerrainPalette,
 } from '../../utils/adventureTerrainPixelization';
-import { getAssetFileUrl, getAssetFrameFileUrls } from '../../data/assets';
+import { getAssetDefinition, getAssetFileUrl, getAssetFrameFileUrls } from '../../data/assets';
 import {
   getCharacterSpriteLayout,
   getCharacterTileAnchorPosition,
@@ -33,6 +33,12 @@ import {
   getPlayerSpriteAssetId,
 } from '../../utils/playerSpriteAsset';
 import { resolveNpcSpriteAssetId } from '../../utils/npcSpriteAsset';
+import { resolveAdventureEntityDepth } from '../../utils/adventureEntityDepth';
+import {
+  getMonsterSpriteFrame,
+  getMonsterSpriteLayout,
+} from '../../utils/monsterSpriteAnimation';
+import { resolveMonsterVisualProfile, type MonsterVisualProfile } from '../../utils/monsterVisualProfile';
 
 interface AdventureStageProps {
   mapData: MapData;
@@ -69,6 +75,15 @@ const THEME_COLORS = {
 const PLAYER_COLOR = 0x4ade80; // Green-400
 const PLAYER_COMBAT_SPRITE_ROWS = 4;
 const PLAYER_COMBAT_SPRITE_COLS = 6;
+
+type MonsterDisplayContainer = PIXI.Container & {
+  monsterProfile?: MonsterVisualProfile;
+  monsterSprite?: PIXI.Sprite;
+  movementTextures?: PIXI.Texture[];
+  combatTextures?: PIXI.Texture[];
+  lastFacing?: PlayerSpriteDirection;
+  moveStartedAt?: number;
+};
 
 const drawAdventureTerrainTile = ({
   graphics,
@@ -360,12 +375,12 @@ export default function AdventureStage({
       terrainLayer: null as PIXI.Graphics | null,
       playerContainer: null as PIXI.Container | null,
       monsterContainers: new Map<string, PIXI.Container>(),
+      npcContainers: [] as PIXI.Container[],
       entityLayer: null as PIXI.Container | null,
       combatOverlay: null as PIXI.Graphics | null,
       portalsLayer: null as PIXI.Container | null,
       targetMarker: null as PIXI.Graphics | null,
       destinationMarker: null as PIXI.Graphics | null,
-      npcLayer: null as PIXI.Container | null,
       effectsLayer: null as PIXI.Container | null,
   });
 
@@ -397,15 +412,20 @@ export default function AdventureStage({
        // Clear retained containers on map change to be safe
        displayRefs.current.monsterContainers.forEach(c => c.destroy());
        displayRefs.current.monsterContainers.clear();
+       displayRefs.current.npcContainers.forEach(c => c.destroy());
+       displayRefs.current.npcContainers = [];
   }, [mapData.id]);
 
   // --- Dynamic NPC Rendering (Quest Markers) ---
   const renderNPCs = React.useCallback(() => {
-     const npcLayer = displayRefs.current.npcLayer;
-     if (!npcLayer || !mapData || !mapData.npcs) return;
+     const entityLayer = displayRefs.current.entityLayer;
+     if (!entityLayer || !mapData || !mapData.npcs) return;
      
      const NPC_COLOR = 0xa0522d; // Sienna
-     npcLayer.removeChildren();
+     displayRefs.current.npcContainers.forEach((container) => {
+         container.destroy({ children: true });
+     });
+     displayRefs.current.npcContainers = [];
 
      mapData.npcs.forEach(npc => {
          const container = new PIXI.Container();
@@ -414,6 +434,7 @@ export default function AdventureStage({
          
          container.x = cx;
          container.y = cy;
+         container.zIndex = resolveAdventureEntityDepth({ footlineY: cy });
          
          // BG
          const bg = new PIXI.Graphics();
@@ -581,7 +602,8 @@ export default function AdventureStage({
              container.addChild(mCont);
          }
 
-         npcLayer.addChild(container);
+         entityLayer.addChild(container);
+         displayRefs.current.npcContainers.push(container);
      });
   }, [mapData, cellSize, activeQuests, completedQuests, majorRealm]);
 
@@ -644,19 +666,14 @@ export default function AdventureStage({
       world.addChild(portalsLayer);
       displayRefs.current.portalsLayer = portalsLayer;
 
-      // NPC Layer
-      const npcLayer = new PIXI.Container();
-      world.addChild(npcLayer);
-      displayRefs.current.npcLayer = npcLayer;
-      
-      // Force Initial Render of NPCs immediately
-      renderNPCs();
-
       // Entities Layer (Monsters + Player)
       const entityLayer = new PIXI.Container();
       entityLayer.sortableChildren = true;
       world.addChild(entityLayer);
       displayRefs.current.entityLayer = entityLayer;
+
+      // Force initial NPC render after the shared depth layer exists.
+      renderNPCs();
 
       // --- Create Player Avatar ---
       const playerContainer = new PIXI.Container();
@@ -893,22 +910,44 @@ export default function AdventureStage({
 
       // --- Helper: Create Monster Avatar ---
       const createMonsterAvatar = (m: ActiveMonster) => {
-          const container = new PIXI.Container();
+          const container = new PIXI.Container() as MonsterDisplayContainer;
           const color = THEME_COLORS[m.rank];
+          const template = mapData.enemies.find(e => e.id === m.templateId);
+          const profile = template ? resolveMonsterVisualProfile(template) : null;
+          if (profile) {
+              container.monsterProfile = profile;
+              container.lastFacing = 'down';
+              container.moveStartedAt = Date.now();
+          }
           
           // BG (Border Only)
           const bg = new PIXI.Graphics();
-          const size = cellSize; 
+          const footprintWidth = profile?.footprintTiles.width ?? 1;
+          const footprintHeight = profile?.footprintTiles.height ?? 1;
+          const size = cellSize;
+          const bgWidth = Math.max(cellSize, footprintWidth * cellSize);
+          const bgHeight = Math.max(cellSize, footprintHeight * cellSize);
           
           bg.lineStyle(2, color, 1);
-          bg.beginFill(0x000000, 0.01);
-          bg.drawRoundedRect(-size/2 + 2, -size/2 + 2, size - 4, size - 4, 8);
+          bg.beginFill(0x000000, m.rank === EnemyRank.Common ? 0.04 : 0.08);
+          bg.drawRoundedRect(-bgWidth / 2 + 2, -bgHeight + 2, bgWidth - 4, bgHeight - 4, 8);
           bg.endFill();
+
+          if (profile?.rankVisual.aura !== 'none') {
+              const aura = new PIXI.Graphics();
+              aura.name = 'monster_rank_aura';
+              aura.lineStyle(
+                  m.rank === EnemyRank.Boss ? 3 : 2,
+                  profile.rankVisual.aura === 'domain' ? 0xfbbf24 : color,
+                  m.rank === EnemyRank.Boss ? 0.78 : 0.5
+              );
+              aura.drawEllipse(0, 0, bgWidth * 0.55, Math.max(8, bgHeight * 0.28));
+              container.addChild(aura);
+          }
           
           // Text
           let symbol = m.symbol || (m.name && m.name[0]);
           if (!symbol) {
-              const template = mapData.enemies.find(e => e.id === m.templateId);
               symbol = template?.symbol || (template?.name && template.name[0]) || '?';
           }
           
@@ -926,6 +965,56 @@ export default function AdventureStage({
 
           container.addChild(bg);
           container.addChild(text);
+
+          if (template && profile) {
+              const movementAsset = getAssetDefinition(profile.movementAssetId);
+              const combatAsset = getAssetDefinition(profile.combatAssetId);
+              const canUseGeneratedMonsterSprites =
+                  movementAsset.source === 'generated' &&
+                  combatAsset.source === 'generated' &&
+                  movementAsset.sprite?.qcStatus === 'passed' &&
+                  combatAsset.sprite?.qcStatus === 'passed';
+              if (!canUseGeneratedMonsterSprites) {
+                  return container;
+              }
+              const movementFrameUrls = getAssetFrameFileUrls(profile.movementAssetId);
+              const combatFrameUrls = getAssetFrameFileUrls(profile.combatAssetId);
+              Promise.all([
+                  Promise.all(movementFrameUrls.map((url) => PIXI.Assets.load(url))),
+                  Promise.all(combatFrameUrls.map((url) => PIXI.Assets.load(url))),
+              ])
+                  .then(([movementTextures, combatTextures]) => {
+                      if (container.destroyed || movementTextures.length === 0) return;
+                      [...movementTextures, ...combatTextures].forEach((texture) => {
+                          texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+                      });
+                      const firstTexture = movementTextures[0];
+                      if (!firstTexture?.baseTexture.valid) return;
+
+                      const monsterSprite = new PIXI.Sprite(firstTexture);
+                      const layout = getMonsterSpriteLayout({
+                          cellSize,
+                          profile,
+                          frameHeight: firstTexture.height,
+                      });
+                      monsterSprite.anchor.set(layout.anchorX, layout.anchorY);
+                      monsterSprite.x = layout.x;
+                      monsterSprite.y = layout.y;
+                      monsterSprite.width = layout.width;
+                      monsterSprite.height = layout.height;
+                      monsterSprite.roundPixels = true;
+                      container.movementTextures = movementTextures;
+                      container.combatTextures = combatTextures;
+                      container.monsterSprite = monsterSprite;
+                      container.addChildAt(monsterSprite, 0);
+                      bg.visible = false;
+                      text.visible = false;
+                  })
+                  .catch(() => {
+                      bg.visible = true;
+                      text.visible = true;
+                  });
+          }
           return container;
       };
 
@@ -1086,7 +1175,7 @@ export default function AdventureStage({
               playerContainer.x = playerAnchor.x;
               playerContainer.y = playerAnchor.y;
               playerContainer.scale.set(1);
-              playerContainer.zIndex = playerContainer.y;
+              playerContainer.zIndex = resolveAdventureEntityDepth({ footlineY: playerContainer.y });
           }
 
           const combatOverlay = displayRefs.current.combatOverlay;
@@ -1265,11 +1354,56 @@ export default function AdventureStage({
                   }
                   displayRefs.current.monsterContainers.set(m.instanceId, container);
               }
+              const monsterContainer = container as MonsterDisplayContainer;
+              if (dist > 0.001) {
+                  const nextFacing = getPlayerSpriteDirectionFromDelta(
+                      dx,
+                      dy,
+                      monsterContainer.lastFacing ?? 'down'
+                  );
+                  if (nextFacing !== monsterContainer.lastFacing) {
+                      monsterContainer.lastFacing = nextFacing;
+                      monsterContainer.moveStartedAt = Date.now();
+                  }
+              }
 
               // Update Container Pos & Anim
               container.x = (visCoords.x + 0.5) * cellSize;
               container.y = (visCoords.y + 0.5) * cellSize;
-              container.zIndex = container.y;
+              container.zIndex = resolveAdventureEntityDepth({ footlineY: container.y });
+              if (
+                  monsterContainer.monsterSprite &&
+                  monsterContainer.monsterProfile &&
+                  monsterContainer.movementTextures?.length
+              ) {
+                  const useCombat =
+                      latestDataRef.current.targetMonsterId === m.instanceId &&
+                      Boolean(latestDataRef.current.combatPresentation) &&
+                      latestDataRef.current.canPlayCombatAnimation &&
+                      monsterContainer.combatTextures &&
+                      monsterContainer.combatTextures.length > 0;
+                  const action = useCombat ? 'combat' : 'movement';
+                  const frame = getMonsterSpriteFrame({
+                      direction: monsterContainer.lastFacing ?? 'down',
+                      action,
+                      elapsedMs: Date.now() - (monsterContainer.moveStartedAt ?? Date.now()),
+                  });
+                  const textures = useCombat
+                      ? monsterContainer.combatTextures ?? monsterContainer.movementTextures
+                      : monsterContainer.movementTextures;
+                  const nextTexture = textures[frame.frameIndex] ?? textures[0];
+                  monsterContainer.monsterSprite.texture = nextTexture;
+                  const layout = getMonsterSpriteLayout({
+                      cellSize,
+                      profile: monsterContainer.monsterProfile,
+                      frameHeight: nextTexture.height,
+                  });
+                  monsterContainer.monsterSprite.anchor.set(layout.anchorX, layout.anchorY);
+                  monsterContainer.monsterSprite.x = layout.x;
+                  monsterContainer.monsterSprite.y = layout.y;
+                  monsterContainer.monsterSprite.width = layout.width;
+                  monsterContainer.monsterSprite.height = layout.height;
+              }
               
               // Random Phase Pulse
               // Simple hash from instanceId for phase
@@ -1428,9 +1562,9 @@ export default function AdventureStage({
           }
 
           // --- 6. Animate NPC Quest Markers ---
-          const npcLayer = displayRefs.current.npcLayer; // Now accessed from ref
-          if (npcLayer) {
-             npcLayer.children.forEach((npcCont: PIXI.Container) => {
+          const npcContainers = displayRefs.current.npcContainers;
+          if (npcContainers.length > 0) {
+             npcContainers.forEach((npcCont: PIXI.Container) => {
                  const marker = npcCont.getChildByName('quest_marker_container') as PIXI.Container;
                  if (marker) {
                      // Floating effect

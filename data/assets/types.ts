@@ -14,7 +14,11 @@ export type GeneratedAssetStyle =
   | "map_style"
   | "project_native";
 
-export type GeneratedAssetSource = "generated" | "manual" | "placeholder";
+export type GeneratedAssetSource =
+  | "generated"
+  | "manual"
+  | "placeholder"
+  | "pending_generate2dsprite";
 
 export type GeneratedAssetUsage =
   | "player_walk"
@@ -22,6 +26,8 @@ export type GeneratedAssetUsage =
   | "player_combat_attack"
   | "npc_idle"
   | "map_token"
+  | "enemy_movement"
+  | "enemy_combat"
   | "npc_portrait"
   | "enemy_idle"
   | "item_icon"
@@ -47,7 +53,7 @@ export interface GeneratedAssetFiles {
 }
 
 export interface GeneratedSpriteMetadata {
-  profile?: "humanoid";
+  profile?: "humanoid" | "enemy";
   rows: number;
   cols: number;
   frameCount: number;

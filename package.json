@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "monster:checklist": "npx tsx scripts/update_monster_sprite_checklist.ts",
+    "monster:qc": "python3 scripts/qc_monster_sprite_assets.py"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

@@ -1,0 +1,1 @@
+Use m1_c1 movement sheet as strict style reference. Matching combat sheet for same brown-gray low quadruped dog. Invisible 4x6 sheet, row order down,left,right,up. Compact combat frames. Solid #FF00FF background, no grid lines. Same silhouette, palette, outline, scale, view angle, and footline as movement sheet.

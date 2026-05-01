@@ -131,6 +131,51 @@ Change id: `update-shared-ui-foundation-e2e-validation`
 - `npm run test:e2e`
 - `git diff --check`
 
+## 36. 玩家 / NPC / 怪物共用視覺比例與怪物獨立圖樣收口記錄
+
+Change id: `add-actor-visual-scale-and-monster-sprites`
+
+本輪把怪物從文字 token 推進到正式獨立 sprite asset 流程：
+
+- `BESTIARY` 265 隻怪物全部建立 visual profile，包含 `visualArchetype`、`visualVariant`、`bodyType`、`footprintTiles`、`heightTiles`、`anchor` 與 rank visual language。
+- 玩家角色維持 `1x2` 作為比例基準；怪物尺寸依名稱、描述、body type、rank、元素與地圖語境推導，不把範例尺寸硬套到所有怪物。
+- 每隻怪物都必須各自產生獨立 movement / combat asset folder，不得共用 archetype 圖檔。
+- movement sheet 為 4x4，combat sheet 為 4x6，row order 固定 `down / left / right / up`。
+- `AdventureStage` 改為讀取每隻怪物自己的 movement / combat frame，依 visual profile 套用 render footprint、height、腳底錨點與 rank aura。
+- 玩家、NPC、怪物都進入同一個 entity layer，用 footline y 做 depth sorting。
+
+目標資產輸出：
+
+- `public/assets/generated/characters/monsters/<enemy-id>-movement-v1/`
+- `public/assets/generated/characters/monsters/<enemy-id>-combat-v1/`
+- 共 530 個 asset folder。先前 procedural placeholder 已清除，正式產物必須由 `$generate2dsprite` 的 `image_gen -> processor -> QC` 流程建立。
+
+本輪仍維持：
+
+- 不新增 persisted schema。
+- 不變更 LocalStorage schema、hydrate shape 或 persisted catalog。
+- 不需要 migration；怪物 visual profile 與 asset id 都由 `Enemy.id` / `templateId` 回查，不寫入 active monster instance。
+
+目前已跑驗證：
+
+- `npm test -- utils/monsterVisualProfile.test.ts data/assets/monsterSpriteRegistry.test.ts utils/monsterSpriteAnimation.test.ts`
+- `npm test`
+- `npm run typecheck`
+- `npm run build`
+- `openspec validate add-actor-visual-scale-and-monster-sprites --strict`
+- `git diff --check`
+- `npm run test:e2e -- --project=chromium -g "clicking an adjacent monster starts world combat"`
+
+尚未完成：
+
+- 265 隻怪物的 movement raw sheet 必須逐隻用 `image_gen` 產生。
+- 265 隻怪物的 combat raw sheet 必須逐隻用 `image_gen` 產生。
+- 每組 raw sheet 必須通過 `$generate2dsprite` processor 與 QC 後才可標記為 `generated` / production-ready。
+
+已知非本輪阻塞：
+
+- `npm run test:e2e -- --project=chromium` 全量 shared-ui e2e 仍有 6 個既有 flow 失敗，集中在 compendium item card timeout、quest tracker 文字斷言與 minimap overlay click interception；本輪怪物接戰 focused smoke 已通過。
+
 Archive 記錄：
 
 - `2026-04-26` 已以 `openspec archive update-shared-ui-foundation-e2e-validation --skip-specs --yes` 歸檔。
