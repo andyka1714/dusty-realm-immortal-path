@@ -105,6 +105,16 @@ export const NPC_IDLE_SPRITE_MAPPINGS: NpcSpriteMapping[] = [
     variant: "sword",
     assetId: "npc.world_battlefield_envoy.sword.idle_v1",
   },
+  {
+    archetype: "world_battlefield_envoy",
+    variant: "beast",
+    assetId: "npc.world_battlefield_envoy.beast.idle_v1",
+  },
+  {
+    archetype: "world_battlefield_envoy",
+    variant: "mystic",
+    assetId: "npc.world_battlefield_envoy.mystic.idle_v1",
+  },
 ];
 
 export const findNpcSpriteMapping = ({

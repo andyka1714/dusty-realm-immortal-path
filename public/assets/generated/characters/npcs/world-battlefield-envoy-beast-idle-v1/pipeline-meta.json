@@ -1,0 +1,93 @@
+{
+  "target": "npc",
+  "mode": "idle",
+  "input": "/Users/andyka1714/.codex/generated_images/019de0e7-d304-74d1-ba20-a3c93248c849/ig_028c6857e928483f0169f3f26e8b148197a3b7729ec2cbab90.png",
+  "prompt": "Create a production-ready 2x2 top-down RPG pixel-art idle sprite sheet for one NPC battlefield envoy: Xueqi Lishi, the Ten Thousand Beasts Mountain Villa blood-banner envoy stationed at the Three Realms Battlefield. 4 equal cells arranged 2 columns by 2 rows. Each cell shows the SAME character, front-facing 3/4 top-down overworld view, stationary idle only. Subtle in-place animation poses: breathing, fur mantle edge sway, one hand holds a dark red battle banner command token close to the chest, no walking, no attack, no weapon swing, no spell casting, no directional turn. Character: adult male body-cultivator envoy, fierce battlefield expression, tied rough dark hair, rugged crimson and dark leather beast sect armor robes, bone ornaments, fur shoulder mantle, blood-banner token, official emissary on a battlefield frontier, not an elder, not a merchant. Crisp 16-bit pixel art, dark outline, readable at 96x96 per frame, consistent body scale and bounding box in all 4 cells, feet aligned to same baseline, centered in every cell, safe magenta margins on all sides. Background must be 100% solid flat magenta #FF00FF. No shadows, no labels, no text, no grid lines, no borders, no numbers, nothing crossing cell edges.",
+  "rows": 2,
+  "cols": 2,
+  "frameCount": 4,
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "profile": "humanoid",
+  "targetHeight": 80,
+  "heightTolerance": 1,
+  "footlineY": 88,
+  "centerX": 48,
+  "centerTolerance": 1,
+  "idleCadenceMs": 800,
+  "qcStatus": "passed",
+  "qc": [
+    {
+      "label": "npc_idle-1",
+      "bbox": [
+        20,
+        9,
+        76,
+        88
+      ],
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2730
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "npc_idle-2",
+      "bbox": [
+        18,
+        9,
+        76,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2752
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "npc_idle-3",
+      "bbox": [
+        18,
+        9,
+        76,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2792
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "npc_idle-4",
+      "bbox": [
+        18,
+        9,
+        76,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2771
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    }
+  ]
+}

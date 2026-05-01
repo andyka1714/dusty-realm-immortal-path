@@ -27,8 +27,8 @@ Each checked item means the NPC has a generated idle sheet created through `$gen
 ## Phase 2: World Route NPCs
 
 - [x] `world_sword_battlefield_envoy` - 凌霄劍宗 / 岳界令
-- [ ] `world_beast_battlefield_envoy` - 萬獸山莊 / 血旗厲使
-- [ ] `world_mystic_battlefield_envoy` - 縹緲仙宮 / 星牒洛使
+- [x] `world_beast_battlefield_envoy` - 萬獸山莊 / 血旗厲使
+- [x] `world_mystic_battlefield_envoy` - 縹緲仙宮 / 星牒洛使
 - [ ] `world_sword_abyss_witness` - 凌霄劍宗 / 沈劍痕
 - [ ] `world_beast_abyss_witness` - 萬獸山莊 / 骨鼓魁客
 - [ ] `world_mystic_abyss_witness` - 縹緲仙宮 / 觀星岑客
