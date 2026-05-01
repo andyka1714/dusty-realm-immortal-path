@@ -328,13 +328,17 @@
     }
   ],
   "walkCyclePattern": {
-    "description": "runtime 4-frame cycle uses stance, left-foot step, stance, right-foot step for alternating walking",
+    "description": "runtime 4-frame cycle uses stance, step A, stance, opposite step; opposite step is built from the opposite facing row where useful to keep full-body pose natural",
     "columns": [
       "stance",
-      "leftFootStep",
+      "stepA",
       "stance",
-      "rightFootStep"
+      "oppositeStep"
     ],
-    "frameDurationMs": 160
+    "frameDurationMs": 160,
+    "oppositeStepPostprocess": {
+      "frontBack": "horizontal mirror of step A",
+      "sideRows": "mirrored step from opposite facing row"
+    }
   }
 }
