@@ -1,8 +1,8 @@
 {
   "target": "player",
   "mode": "humanoid_walk_sheet",
-  "input": "public/assets/generated/characters/player/mortal-male-v1/raw-sheet.png",
-  "prompt": "Create a production-ready 4x4 top-down RPG pixel-art walking sprite sheet for a male mortal cultivator character. Rows: down, left, right, up. Columns: idle/neutral, step A, idle/neutral, step B. Solid #FF00FF background. Dark gray robe, blue belt, black tied hair with fully visible natural topknot, wooden sword on back, same scale in every cell, no cropped hair, no detached fragments.",
+  "input": "/Users/andyka1714/.codex/generated_images/019de0e7-d304-74d1-ba20-a3c93248c849/ig_028c6857e928483f0169f4005c00308197af8ae24a627a5330.png",
+  "prompt": "4x4 top-down RPG pixel-art male mortal cultivator walk sheet, adult NPC-like proportions, smaller head than chibi player sprites, longer torso and limbs, wooden sword, rows down left right up, four walk frames per direction, solid magenta raw generated image.",
   "rows": 4,
   "cols": 4,
   "frameCount": 16,
@@ -25,17 +25,17 @@
     {
       "label": "player_sheet-1",
       "bbox": [
-        29,
+        30,
         9,
         66,
         88
       ],
-      "width": 38,
+      "width": 37,
       "height": 80,
-      "centerX": 47.5,
+      "centerX": 48.0,
       "footlineY": 88,
       "largeComponents": [
-        2161
+        1904
       ],
       "chromaCount": 0,
       "passed": true,
@@ -54,7 +54,7 @@
       "centerX": 48.0,
       "footlineY": 88,
       "largeComponents": [
-        2024
+        1879
       ],
       "chromaCount": 0,
       "passed": true,
@@ -62,25 +62,6 @@
     },
     {
       "label": "player_sheet-3",
-      "bbox": [
-        29,
-        9,
-        66,
-        88
-      ],
-      "width": 38,
-      "height": 80,
-      "centerX": 47.5,
-      "footlineY": 88,
-      "largeComponents": [
-        2108
-      ],
-      "chromaCount": 0,
-      "passed": true,
-      "failures": []
-    },
-    {
-      "label": "player_sheet-4",
       "bbox": [
         30,
         9,
@@ -92,7 +73,26 @@
       "centerX": 48.0,
       "footlineY": 88,
       "largeComponents": [
-        2045
+        1863
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-4",
+      "bbox": [
+        29,
+        9,
+        66,
+        88
+      ],
+      "width": 38,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1914
       ],
       "chromaCount": 0,
       "passed": true,
@@ -101,17 +101,17 @@
     {
       "label": "player_sheet-5",
       "bbox": [
-        29,
+        32,
         9,
-        66,
+        63,
         88
       ],
-      "width": 38,
+      "width": 32,
       "height": 80,
       "centerX": 47.5,
       "footlineY": 88,
       "largeComponents": [
-        1839
+        1802
       ],
       "chromaCount": 0,
       "passed": true,
@@ -120,17 +120,17 @@
     {
       "label": "player_sheet-6",
       "bbox": [
-        27,
+        32,
         9,
-        68,
+        63,
         88
       ],
-      "width": 42,
+      "width": 32,
       "height": 80,
       "centerX": 47.5,
       "footlineY": 88,
       "largeComponents": [
-        2060
+        1762
       ],
       "chromaCount": 0,
       "passed": true,
@@ -139,17 +139,17 @@
     {
       "label": "player_sheet-7",
       "bbox": [
-        29,
+        30,
         9,
         66,
         88
       ],
-      "width": 38,
+      "width": 37,
       "height": 80,
-      "centerX": 47.5,
+      "centerX": 48.0,
       "footlineY": 88,
       "largeComponents": [
-        1822
+        1837
       ],
       "chromaCount": 0,
       "passed": true,
@@ -158,17 +158,17 @@
     {
       "label": "player_sheet-8",
       "bbox": [
-        27,
+        28,
         9,
-        68,
+        66,
         88
       ],
-      "width": 42,
+      "width": 39,
       "height": 80,
-      "centerX": 47.5,
+      "centerX": 47.0,
       "footlineY": 88,
       "largeComponents": [
-        2080
+        1883
       ],
       "chromaCount": 0,
       "passed": true,
@@ -177,17 +177,17 @@
     {
       "label": "player_sheet-9",
       "bbox": [
-        29,
+        32,
         9,
-        66,
+        63,
         88
       ],
-      "width": 38,
+      "width": 32,
       "height": 80,
       "centerX": 47.5,
       "footlineY": 88,
       "largeComponents": [
-        1808
+        1778
       ],
       "chromaCount": 0,
       "passed": true,
@@ -196,17 +196,17 @@
     {
       "label": "player_sheet-10",
       "bbox": [
-        26,
+        30,
         9,
-        69,
+        65,
         88
       ],
-      "width": 44,
+      "width": 36,
       "height": 80,
       "centerX": 47.5,
       "footlineY": 88,
       "largeComponents": [
-        2029
+        1847
       ],
       "chromaCount": 0,
       "passed": true,
@@ -215,17 +215,17 @@
     {
       "label": "player_sheet-11",
       "bbox": [
-        29,
+        30,
         9,
         66,
         88
       ],
-      "width": 38,
+      "width": 37,
       "height": 80,
-      "centerX": 47.5,
+      "centerX": 48.0,
       "footlineY": 88,
       "largeComponents": [
-        1828
+        1844
       ],
       "chromaCount": 0,
       "passed": true,
@@ -234,25 +234,6 @@
     {
       "label": "player_sheet-12",
       "bbox": [
-        28,
-        9,
-        68,
-        88
-      ],
-      "width": 41,
-      "height": 80,
-      "centerX": 48.0,
-      "footlineY": 88,
-      "largeComponents": [
-        1956
-      ],
-      "chromaCount": 0,
-      "passed": true,
-      "failures": []
-    },
-    {
-      "label": "player_sheet-13",
-      "bbox": [
         29,
         9,
         66,
@@ -263,7 +244,26 @@
       "centerX": 47.5,
       "footlineY": 88,
       "largeComponents": [
-        2151
+        1852
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "player_sheet-13",
+      "bbox": [
+        30,
+        9,
+        65,
+        88
+      ],
+      "width": 36,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1905
       ],
       "chromaCount": 0,
       "passed": true,
@@ -274,15 +274,15 @@
       "bbox": [
         30,
         9,
-        65,
+        66,
         88
       ],
-      "width": 36,
+      "width": 37,
       "height": 80,
-      "centerX": 47.5,
+      "centerX": 48.0,
       "footlineY": 88,
       "largeComponents": [
-        2012
+        1942
       ],
       "chromaCount": 0,
       "passed": true,
@@ -291,17 +291,17 @@
     {
       "label": "player_sheet-15",
       "bbox": [
-        29,
+        30,
         9,
         66,
         88
       ],
-      "width": 38,
+      "width": 37,
       "height": 80,
-      "centerX": 47.5,
+      "centerX": 48.0,
       "footlineY": 88,
       "largeComponents": [
-        2115
+        1918
       ],
       "chromaCount": 0,
       "passed": true,
@@ -312,15 +312,15 @@
       "bbox": [
         30,
         9,
-        65,
+        66,
         88
       ],
-      "width": 36,
+      "width": 37,
       "height": 80,
-      "centerX": 47.5,
+      "centerX": 48.0,
       "footlineY": 88,
       "largeComponents": [
-        2028
+        1928
       ],
       "chromaCount": 0,
       "passed": true,
