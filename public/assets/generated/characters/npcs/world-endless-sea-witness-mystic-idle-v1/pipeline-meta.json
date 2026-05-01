@@ -1,0 +1,93 @@
+{
+  "target": "npc",
+  "mode": "idle",
+  "input": "/tmp/npc_idle_raw/world-endless-sea-witness-mystic-idle-v1.png",
+  "prompt": "Jiehai Xinglianshou, Piaomiao Immortal Palace endless-sea witness, star-lotus sea watcher in flowing white blue robes.",
+  "rows": 2,
+  "cols": 2,
+  "frameCount": 4,
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "profile": "humanoid",
+  "targetHeight": 80,
+  "heightTolerance": 1,
+  "footlineY": 88,
+  "centerX": 48,
+  "centerTolerance": 1,
+  "idleCadenceMs": 800,
+  "qcStatus": "passed",
+  "qc": [
+    {
+      "label": "npc_idle-1",
+      "bbox": [
+        16,
+        9,
+        78,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2819
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "npc_idle-2",
+      "bbox": [
+        15,
+        9,
+        80,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2873
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "npc_idle-3",
+      "bbox": [
+        14,
+        9,
+        81,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2940
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "npc_idle-4",
+      "bbox": [
+        16,
+        9,
+        79,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2858
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    }
+  ]
+}

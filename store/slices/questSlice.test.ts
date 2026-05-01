@@ -25,7 +25,7 @@ describe("questSlice affinity state", () => {
     expect(state.completedQuests).toContain("sect_sword_task_04");
     expect(state.npcAffinity.sect_sword_patrol_captain).toMatchObject({
       value: 8,
-      lastReason: "完成任務：巡山統領",
+      lastReason: "完成任務：顧巡岳",
     });
     expect(state.sectAffinity.sect_sword).toMatchObject({
       value: 5,
@@ -36,7 +36,7 @@ describe("questSlice affinity state", () => {
       targetId: "sect_sword_patrol_captain",
       delta: 8,
       nextValue: 8,
-      reason: "完成任務：巡山統領",
+      reason: "完成任務：顧巡岳",
       timestamp: 123456,
     });
   });

@@ -4,6 +4,7 @@ import {
   MYSTIC_SECT_NPCS,
   SWORD_SECT_NPCS,
   VILLAGE_NPCS,
+  WORLD_STORY_NPCS,
 } from "./npcs";
 
 const firstPhaseNpcs = [
@@ -47,5 +48,16 @@ describe("NPC identity metadata", () => {
         }),
       ])
     );
+  });
+
+  it("gives every world-story NPC identity labels and sprite variants", () => {
+    expect(WORLD_STORY_NPCS).toHaveLength(34);
+
+    WORLD_STORY_NPCS.forEach((npc) => {
+      expect(npc.affiliationLabel, npc.id).toBeTruthy();
+      expect(npc.roleLabel, npc.id).toBeTruthy();
+      expect(npc.spriteArchetype, npc.id).toBeTruthy();
+      expect(npc.spriteVariant, npc.id).toBeTruthy();
+    });
   });
 });

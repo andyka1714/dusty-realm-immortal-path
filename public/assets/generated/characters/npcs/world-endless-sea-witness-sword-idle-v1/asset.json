@@ -1,0 +1,47 @@
+{
+  "assetId": "npc.world_endless_sea_witness.sword.idle_v1",
+  "kind": "npc",
+  "name": "凌霄劍宗無盡海劍潮守原地待機",
+  "description": "界海劍潮守的 2x2 原地待機 sheet，供無盡海凌霄劍宗劍潮守 NPC map token 使用。",
+  "style": "pixel_art",
+  "source": "generated",
+  "version": 1,
+  "usage": [
+    "npc_idle",
+    "map_token"
+  ],
+  "basePath": "/assets/generated/characters/npcs/world-endless-sea-witness-sword-idle-v1",
+  "files": {
+    "raw": "raw-sheet.png",
+    "sheet": "sheet-transparent.png",
+    "preview": "animation.gif",
+    "framesDir": "frames",
+    "framePrefix": "npc_idle",
+    "prompt": "prompt-used.txt",
+    "meta": "pipeline-meta.json"
+  },
+  "sprite": {
+    "profile": "humanoid",
+    "rows": 2,
+    "cols": 2,
+    "frameCount": 4,
+    "anchor": "feet",
+    "view": "topdown",
+    "frameWidth": 96,
+    "frameHeight": 96,
+    "targetHeight": 80,
+    "heightTolerance": 1,
+    "footlineY": 88,
+    "centerX": 48,
+    "centerTolerance": 1,
+    "idleCadenceMs": 800,
+    "qcStatus": "passed"
+  },
+  "tags": [
+    "npc",
+    "idle-sheet",
+    "endless-sea-witness",
+    "sword-sect",
+    "world-route"
+  ]
+}

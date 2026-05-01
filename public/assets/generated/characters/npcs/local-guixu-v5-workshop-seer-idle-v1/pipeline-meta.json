@@ -1,0 +1,95 @@
+{
+  "target": "npc",
+  "mode": "idle",
+  "input": "/tmp/npc_idle_raw/local-guixu-v5-workshop-seer-idle-v1.png",
+  "prompt": "Guixu v5 Mianlushi, Guixu v5 workshop crown-furnace seer, endgame workshop oracle in dark bronze and teal forge robes.",
+  "rows": 2,
+  "cols": 2,
+  "frameCount": 4,
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "profile": "humanoid",
+  "targetHeight": 80,
+  "heightTolerance": 1,
+  "footlineY": 88,
+  "centerX": 48,
+  "centerTolerance": 1,
+  "idleCadenceMs": 800,
+  "qcStatus": "passed",
+  "qc": [
+    {
+      "label": "npc_idle-1",
+      "bbox": [
+        15,
+        9,
+        80,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        3178,
+        45
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "npc_idle-2",
+      "bbox": [
+        16,
+        9,
+        79,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        3094,
+        44
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "npc_idle-3",
+      "bbox": [
+        16,
+        9,
+        78,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        3051
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "npc_idle-4",
+      "bbox": [
+        17,
+        9,
+        78,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        3025
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    }
+  ]
+}

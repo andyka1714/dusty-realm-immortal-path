@@ -1,0 +1,93 @@
+{
+  "target": "npc",
+  "mode": "idle",
+  "input": "/tmp/npc_idle_raw/local-guixu-echo-mystic-idle-v1.png",
+  "prompt": "Guixu Xinglian Huisheng, Piaomiao Immortal Palace Guixu star-lotus echo, ethereal white blue mystic echo.",
+  "rows": 2,
+  "cols": 2,
+  "frameCount": 4,
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "profile": "humanoid",
+  "targetHeight": 80,
+  "heightTolerance": 1,
+  "footlineY": 88,
+  "centerX": 48,
+  "centerTolerance": 1,
+  "idleCadenceMs": 800,
+  "qcStatus": "passed",
+  "qc": [
+    {
+      "label": "npc_idle-1",
+      "bbox": [
+        14,
+        9,
+        80,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        3159
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "npc_idle-2",
+      "bbox": [
+        14,
+        9,
+        80,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        3144
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "npc_idle-3",
+      "bbox": [
+        15,
+        9,
+        80,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        3046
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "npc_idle-4",
+      "bbox": [
+        15,
+        9,
+        80,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        3017
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    }
+  ]
+}

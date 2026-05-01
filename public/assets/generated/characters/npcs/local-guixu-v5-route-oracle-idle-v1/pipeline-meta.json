@@ -1,0 +1,93 @@
+{
+  "target": "npc",
+  "mode": "idle",
+  "input": "/tmp/npc_idle_raw/local-guixu-v5-route-oracle-idle-v1.png",
+  "prompt": "Guixu v5 Luyushi, Guixu v5 route oracle, mysterious route-reader in deep teal and violet robes.",
+  "rows": 2,
+  "cols": 2,
+  "frameCount": 4,
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "profile": "humanoid",
+  "targetHeight": 80,
+  "heightTolerance": 1,
+  "footlineY": 88,
+  "centerX": 48,
+  "centerTolerance": 1,
+  "idleCadenceMs": 800,
+  "qcStatus": "passed",
+  "qc": [
+    {
+      "label": "npc_idle-1",
+      "bbox": [
+        15,
+        9,
+        80,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        3362
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "npc_idle-2",
+      "bbox": [
+        15,
+        9,
+        80,
+        88
+      ],
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        3354
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "npc_idle-3",
+      "bbox": [
+        14,
+        9,
+        82,
+        88
+      ],
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        3616
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "npc_idle-4",
+      "bbox": [
+        14,
+        9,
+        82,
+        88
+      ],
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        3589
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    }
+  ]
+}

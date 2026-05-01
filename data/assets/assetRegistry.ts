@@ -1,4 +1,5 @@
 import type { AssetDefinition, GeneratedAssetFiles } from "./types";
+import { npcWorldRouteIdleAssets } from "./npcWorldRouteIdleAssets";
 import {
   HUMANOID_COMBAT_SPRITE_STANDARD,
   HUMANOID_WALK_SPRITE_STANDARD,
@@ -969,6 +970,7 @@ const assetDefinitions: Record<string, AssetDefinition> = {
     },
     tags: ["npc", "idle-sheet", "battlefield-envoy", "mystic-sect", "world-route"],
   },
+  ...npcWorldRouteIdleAssets,
 };
 
 export const getAssetDefinition = (assetId: string): AssetDefinition =>

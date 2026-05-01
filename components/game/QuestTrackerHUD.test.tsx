@@ -59,10 +59,10 @@ describe("QuestTrackerHUD", () => {
     });
 
     expect(markup).toContain("w-[min(370px,calc(100vw-2rem))]");
-    expect(markup).toContain("回報村長");
+    expect(markup).toContain("回報林守拙");
     expect(markup).not.toContain("對話：前往");
     expect(markup).not.toContain("village_chief");
-    expect(markup).not.toContain("前往村長");
+    expect(markup).not.toContain("前往林守拙");
     expect(markup).not.toContain(
       '<span class="shrink-0 text-stone-500">可回報</span>'
     );
@@ -87,7 +87,7 @@ describe("QuestTrackerHUD", () => {
     expect(markup).toContain('data-lifecycle-status="available"');
     expect(markup).toContain('data-testid="quest-tracker-item-tutorial_02_get_sword"');
     expect(markup).toContain('data-navigation-kind="npc"');
-    expect(markup).toContain("前往村長");
+    expect(markup).toContain("前往林守拙");
     expect(markup).not.toContain("前往鐵匠鋪");
     expect(markup).not.toContain("前往對話");
     expect(markup).not.toContain("village_chief");

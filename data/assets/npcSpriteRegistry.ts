@@ -1,3 +1,5 @@
+import { NPC_WORLD_ROUTE_IDLE_SPRITE_MAPPINGS } from "./npcWorldRouteSpriteMappings";
+
 export interface NpcSpriteMapping {
   archetype: string;
   variant: string;
@@ -115,6 +117,7 @@ export const NPC_IDLE_SPRITE_MAPPINGS: NpcSpriteMapping[] = [
     variant: "mystic",
     assetId: "npc.world_battlefield_envoy.mystic.idle_v1",
   },
+  ...NPC_WORLD_ROUTE_IDLE_SPRITE_MAPPINGS,
 ];
 
 export const findNpcSpriteMapping = ({

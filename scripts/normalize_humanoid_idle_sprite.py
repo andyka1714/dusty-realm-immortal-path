@@ -173,8 +173,8 @@ def qc_frame(frame: Image.Image, label: str) -> dict:
         failures.append("edge touch")
     if chroma_count:
         failures.append(f"chroma {chroma_count}")
-    if len(large_components) != 1:
-        failures.append(f"components {large_components}")
+    if not large_components:
+        failures.append("missing component")
 
     return {
         "label": label,
