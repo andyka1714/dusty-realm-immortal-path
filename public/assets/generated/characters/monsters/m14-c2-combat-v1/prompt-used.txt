@@ -1,0 +1,1 @@
+m14_c2 蠻力巨猿 combat sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x6 common-rank earth-element brute ape, same identity/style/scale as movement, fixed row facings, contained punch and ground-pound sequence, normalized to the same 96px cell size, target height and footline as movement, no elite or boss effects.

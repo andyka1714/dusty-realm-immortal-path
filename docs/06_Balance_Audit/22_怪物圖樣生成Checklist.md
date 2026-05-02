@@ -18,10 +18,10 @@
 ## 目前摘要
 
 - 怪物總數：265
-- Movement 完成：25 / 265
-- Combat 完成：25 / 265
-- Production-ready：25 / 265
-- 普通：174 隻，movement 完成 25，combat 完成 25，production-ready 25
+- Movement 完成：26 / 265
+- Combat 完成：26 / 265
+- Production-ready：26 / 265
+- 普通：174 隻，movement 完成 26，combat 完成 26，production-ready 26
 - 精英：69 隻，movement 完成 0，combat 完成 0，production-ready 0
 - 首領：22 隻，movement 完成 0，combat 完成 0，production-ready 0
 
@@ -54,7 +54,7 @@
 | m7_c1 | 劍煞邪靈 | 練氣 | 普通 | 金 | sword_spirit | spirit | 1x2 | 完成 | 完成 | 通過 | 是 |
 | m7_c2 | 劍塚守衛 | 練氣 | 普通 | 金 | humanoid_guard | humanoid | 1x2 | 完成 | 完成 | 通過 | 是 |
 | m14_c1 | 赤血水怪 | 練氣 | 普通 | 水 | elemental | spirit | 1x2 | 完成 | 完成 | 通過 | 是 |
-| m14_c2 | 蠻力巨猿 | 練氣 | 普通 | 土 | beast | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m14_c2 | 蠻力巨猿 | 練氣 | 普通 | 土 | beast | quadruped | 2x2 | 完成 | 完成 | 通過 | 是 |
 | m15_c1 | 鐵皮野豬 | 練氣 | 普通 | 土 | boar | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m15_c2 | 疾風豹 | 練氣 | 普通 | 木 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m16_c1 | 獅蠍獸 | 練氣 | 普通 | 火 | insect | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |

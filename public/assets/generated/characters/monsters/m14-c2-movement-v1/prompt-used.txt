@@ -1,0 +1,1 @@
+m14_c2 蠻力巨猿 movement sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x4 common-rank earth-element brute ape, broad low heavy body, long arms, consistent player-baseline scale, columns 1 and 3 neutral, columns 2 and 4 alternating limb phases, no elite or boss effects.

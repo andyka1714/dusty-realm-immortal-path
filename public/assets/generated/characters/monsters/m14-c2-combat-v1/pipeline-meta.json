@@ -1,0 +1,416 @@
+{
+  "target": "creature",
+  "mode": "combat",
+  "prompt": "",
+  "role": "",
+  "input": "/Users/andyka1714/.codex/generated_images/019de1e6-d9f8-79d2-854e-61c3a482ad93/ig_056908f2884b88840169f61db308248197951663fcf4c9db46.png",
+  "threshold": 90,
+  "edge_threshold": 110,
+  "duration": 200,
+  "rows": 4,
+  "cols": 6,
+  "cell_size": 96,
+  "fit_scale": 0.52,
+  "trim_border": 4,
+  "edge_clean_depth": 3,
+  "align": "feet",
+  "shared_scale": true,
+  "component_mode": "largest",
+  "component_padding": 26,
+  "min_component_area": 120,
+  "edge_touch_margin": 4,
+  "frame_labels": [
+    "m14-c2-combat-1",
+    "m14-c2-combat-2",
+    "m14-c2-combat-3",
+    "m14-c2-combat-4",
+    "m14-c2-combat-5",
+    "m14-c2-combat-6",
+    "m14-c2-combat-7",
+    "m14-c2-combat-8",
+    "m14-c2-combat-9",
+    "m14-c2-combat-10",
+    "m14-c2-combat-11",
+    "m14-c2-combat-12",
+    "m14-c2-combat-13",
+    "m14-c2-combat-14",
+    "m14-c2-combat-15",
+    "m14-c2-combat-16",
+    "m14-c2-combat-17",
+    "m14-c2-combat-18",
+    "m14-c2-combat-19",
+    "m14-c2-combat-20",
+    "m14-c2-combat-21",
+    "m14-c2-combat-22",
+    "m14-c2-combat-23",
+    "m14-c2-combat-24"
+  ],
+  "frames": [
+    {
+      "grid": [
+        0,
+        0
+      ],
+      "output_size": [
+        57,
+        56
+      ],
+      "paste_position": [
+        19,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        0,
+        1
+      ],
+      "output_size": [
+        82,
+        56
+      ],
+      "paste_position": [
+        7,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        0,
+        2
+      ],
+      "output_size": [
+        66,
+        56
+      ],
+      "paste_position": [
+        15,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        0,
+        3
+      ],
+      "output_size": [
+        87,
+        56
+      ],
+      "paste_position": [
+        4,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        0,
+        4
+      ],
+      "output_size": [
+        58,
+        56
+      ],
+      "paste_position": [
+        19,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        0,
+        5
+      ],
+      "output_size": [
+        57,
+        56
+      ],
+      "paste_position": [
+        19,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        1,
+        0
+      ],
+      "output_size": [
+        58,
+        56
+      ],
+      "paste_position": [
+        19,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        1,
+        1
+      ],
+      "output_size": [
+        68,
+        56
+      ],
+      "paste_position": [
+        14,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        1,
+        2
+      ],
+      "output_size": [
+        77,
+        56
+      ],
+      "paste_position": [
+        9,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        1,
+        3
+      ],
+      "output_size": [
+        77,
+        56
+      ],
+      "paste_position": [
+        9,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        1,
+        4
+      ],
+      "output_size": [
+        59,
+        56
+      ],
+      "paste_position": [
+        18,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        1,
+        5
+      ],
+      "output_size": [
+        57,
+        56
+      ],
+      "paste_position": [
+        19,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        2,
+        0
+      ],
+      "output_size": [
+        56,
+        56
+      ],
+      "paste_position": [
+        20,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        2,
+        1
+      ],
+      "output_size": [
+        68,
+        56
+      ],
+      "paste_position": [
+        14,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        2,
+        2
+      ],
+      "output_size": [
+        81,
+        56
+      ],
+      "paste_position": [
+        7,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        2,
+        3
+      ],
+      "output_size": [
+        80,
+        56
+      ],
+      "paste_position": [
+        8,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        2,
+        4
+      ],
+      "output_size": [
+        60,
+        56
+      ],
+      "paste_position": [
+        18,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        2,
+        5
+      ],
+      "output_size": [
+        54,
+        56
+      ],
+      "paste_position": [
+        21,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        3,
+        0
+      ],
+      "output_size": [
+        57,
+        56
+      ],
+      "paste_position": [
+        19,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        3,
+        1
+      ],
+      "output_size": [
+        76,
+        56
+      ],
+      "paste_position": [
+        10,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        3,
+        2
+      ],
+      "output_size": [
+        62,
+        56
+      ],
+      "paste_position": [
+        17,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        3,
+        3
+      ],
+      "output_size": [
+        69,
+        56
+      ],
+      "paste_position": [
+        13,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        3,
+        4
+      ],
+      "output_size": [
+        59,
+        56
+      ],
+      "paste_position": [
+        18,
+        32
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        3,
+        5
+      ],
+      "output_size": [
+        57,
+        56
+      ],
+      "paste_position": [
+        19,
+        32
+      ],
+      "edge_touch": false
+    }
+  ],
+  "edge_touch_frames": [],
+  "scale_normalization": {
+    "target_output_height": 56,
+    "foot_y": 88,
+    "reason": "player 1x2 sprite baseline normalization"
+  }
+}
