@@ -1,0 +1,288 @@
+{
+  "target": "creature",
+  "mode": "movement",
+  "prompt": "",
+  "role": "",
+  "input": "/Users/andyka1714/.codex/generated_images/019de1e6-d9f8-79d2-854e-61c3a482ad93/ig_056908f2884b88840169f62a0d74fc819782d7b06ff02c59b6.png",
+  "threshold": 90,
+  "edge_threshold": 110,
+  "duration": 200,
+  "rows": 4,
+  "cols": 4,
+  "cell_size": 96,
+  "fit_scale": 0.72,
+  "trim_border": 4,
+  "edge_clean_depth": 3,
+  "align": "feet",
+  "shared_scale": true,
+  "component_mode": "largest",
+  "component_padding": 22,
+  "min_component_area": 70,
+  "edge_touch_margin": 0,
+  "frame_labels": [
+    "m25-c1-movement-1",
+    "m25-c1-movement-2",
+    "m25-c1-movement-3",
+    "m25-c1-movement-4",
+    "m25-c1-movement-5",
+    "m25-c1-movement-6",
+    "m25-c1-movement-7",
+    "m25-c1-movement-8",
+    "m25-c1-movement-9",
+    "m25-c1-movement-10",
+    "m25-c1-movement-11",
+    "m25-c1-movement-12",
+    "m25-c1-movement-13",
+    "m25-c1-movement-14",
+    "m25-c1-movement-15",
+    "m25-c1-movement-16"
+  ],
+  "frames": [
+    {
+      "grid": [
+        0,
+        0
+      ],
+      "output_size": [
+        22,
+        36
+      ],
+      "paste_position": [
+        37,
+        52
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        0,
+        1
+      ],
+      "output_size": [
+        22,
+        36
+      ],
+      "paste_position": [
+        37,
+        52
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        0,
+        2
+      ],
+      "output_size": [
+        23,
+        36
+      ],
+      "paste_position": [
+        36,
+        52
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        0,
+        3
+      ],
+      "output_size": [
+        25,
+        36
+      ],
+      "paste_position": [
+        35,
+        52
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        1,
+        0
+      ],
+      "output_size": [
+        64,
+        36
+      ],
+      "paste_position": [
+        16,
+        52
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        1,
+        1
+      ],
+      "output_size": [
+        71,
+        36
+      ],
+      "paste_position": [
+        12,
+        52
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        1,
+        2
+      ],
+      "output_size": [
+        63,
+        36
+      ],
+      "paste_position": [
+        16,
+        52
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        1,
+        3
+      ],
+      "output_size": [
+        69,
+        36
+      ],
+      "paste_position": [
+        13,
+        52
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        2,
+        0
+      ],
+      "output_size": [
+        63,
+        36
+      ],
+      "paste_position": [
+        16,
+        52
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        2,
+        1
+      ],
+      "output_size": [
+        67,
+        36
+      ],
+      "paste_position": [
+        14,
+        52
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        2,
+        2
+      ],
+      "output_size": [
+        63,
+        36
+      ],
+      "paste_position": [
+        16,
+        52
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        2,
+        3
+      ],
+      "output_size": [
+        67,
+        36
+      ],
+      "paste_position": [
+        14,
+        52
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        3,
+        0
+      ],
+      "output_size": [
+        23,
+        36
+      ],
+      "paste_position": [
+        36,
+        52
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        3,
+        1
+      ],
+      "output_size": [
+        23,
+        36
+      ],
+      "paste_position": [
+        36,
+        52
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        3,
+        2
+      ],
+      "output_size": [
+        22,
+        36
+      ],
+      "paste_position": [
+        37,
+        52
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        3,
+        3
+      ],
+      "output_size": [
+        22,
+        36
+      ],
+      "paste_position": [
+        37,
+        52
+      ],
+      "edge_touch": false
+    }
+  ],
+  "edge_touch_frames": [],
+  "scale_normalization": {
+    "target_output_height": 36,
+    "foot_y": 88,
+    "reason": "player 1x2 sprite baseline normalization"
+  }
+}
