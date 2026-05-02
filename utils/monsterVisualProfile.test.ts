@@ -48,6 +48,13 @@ describe("monsterVisualProfile", () => {
       heightTiles: 2,
     });
 
+    expect(resolveMonsterVisualProfile(BESTIARY.m5_c1)).toMatchObject({
+      visualArchetype: "plant",
+      bodyType: "plant",
+      footprintTiles: { width: 1, height: 1 },
+      heightTiles: 2,
+    });
+
     expect(resolveMonsterVisualProfile(BESTIARY.m20_c2)).toMatchObject({
       bodyType: "quadruped",
       footprintTiles: { width: 1, height: 1 },
@@ -131,6 +138,8 @@ describe("monsterVisualProfile", () => {
       "m21_c2",
       "m22_c1",
       "m22_c2",
+      "m5_c1",
+      "m5_c2",
     ]);
     expect(movementAssetIds.size).toBe(profiles.length);
     expect(combatAssetIds.size).toBe(profiles.length);

@@ -91,6 +91,8 @@ const PRODUCTION_READY_MONSTER_IDS = new Set<string>([
   "m21_c2",
   "m22_c1",
   "m22_c2",
+  "m5_c1",
+  "m5_c2",
 ]);
 
 const includesAny = (name: string, tokens: readonly string[]): boolean =>
@@ -146,7 +148,7 @@ const resolveBodyTypeAndArchetype = (
   if (includesAny(name, ["石像", "傀儡", "石靈", "巨人", "構裝"])) {
     return { visualArchetype: "construct", bodyType: "construct" };
   }
-  if (includesAny(name, ["花", "藤", "樹", "荊棘", "毒草", "靈植"])) {
+  if (includesAny(name, ["花", "藤", "樹", "樁", "荊棘", "毒草", "靈植"])) {
     return { visualArchetype: "plant", bodyType: "plant" };
   }
   if (includesAny(name, ["劍客", "劍修", "劍士"])) {
