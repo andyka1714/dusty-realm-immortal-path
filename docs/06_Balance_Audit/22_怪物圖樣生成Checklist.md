@@ -18,10 +18,10 @@
 ## 目前摘要
 
 - 怪物總數：265
-- Movement 完成：38 / 265
-- Combat 完成：38 / 265
-- Production-ready：38 / 265
-- 普通：174 隻，movement 完成 38，combat 完成 38，production-ready 38
+- Movement 完成：40 / 265
+- Combat 完成：40 / 265
+- Production-ready：40 / 265
+- 普通：174 隻，movement 完成 40，combat 完成 40，production-ready 40
 - 精英：69 隻，movement 完成 0，combat 完成 0，production-ready 0
 - 首領：22 隻，movement 完成 0，combat 完成 0，production-ready 0
 
@@ -67,8 +67,8 @@
 | m26_c2 | 水靈龜 | 練氣 | 普通 | 水 | turtle | low_crawler | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m30_c1 | 雪原白狼 | 築基 | 普通 | 水 | wolf | quadruped | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m30_c2 | 冰晶蟲 | 築基 | 普通 | 水 | insect | low_crawler | 2x1 | 完成 | 完成 | 通過 | 是 |
-| m31_c1 | 冰封屍傀 | 築基 | 普通 | 水 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m31_c2 | 寒冰骷髏 | 築基 | 普通 | 水 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m31_c1 | 冰封屍傀 | 築基 | 普通 | 水 | undead_humanoid | humanoid | 1x2 | 完成 | 完成 | 通過 | 是 |
+| m31_c2 | 寒冰骷髏 | 築基 | 普通 | 水 | undead_humanoid | humanoid | 1x2 | 完成 | 完成 | 通過 | 是 |
 | m32_c1 | 紫電靈鷲 | 築基 | 普通 | 金 | spirit | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m32_c2 | 引雷石像 | 築基 | 普通 | 土 | construct | construct | 1x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m40_c1 | 腐化鬣狗 | 築基 | 普通 | 土 | dog | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |

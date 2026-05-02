@@ -68,6 +68,20 @@ describe("monsterVisualProfile", () => {
       heightTiles: 2,
     });
 
+    expect(resolveMonsterVisualProfile(BESTIARY.m31_c1)).toMatchObject({
+      visualArchetype: "undead_humanoid",
+      bodyType: "humanoid",
+      footprintTiles: { width: 1, height: 1 },
+      heightTiles: 2,
+    });
+
+    expect(resolveMonsterVisualProfile(BESTIARY.m31_c2)).toMatchObject({
+      visualArchetype: "undead_humanoid",
+      bodyType: "humanoid",
+      footprintTiles: { width: 1, height: 1 },
+      heightTiles: 2,
+    });
+
     expect(resolveMonsterVisualProfile(BESTIARY.m92_b1)).toMatchObject({
       visualArchetype: "sword_avatar",
       bodyType: "humanoid",
@@ -158,6 +172,8 @@ describe("monsterVisualProfile", () => {
       "m26_c2",
       "m30_c1",
       "m30_c2",
+      "m31_c1",
+      "m31_c2",
     ]);
     expect(movementAssetIds.size).toBe(profiles.length);
     expect(combatAssetIds.size).toBe(profiles.length);

@@ -26,7 +26,8 @@ export type MonsterVisualArchetype =
   | "construct"
   | "dao_avatar"
   | "plant"
-  | "elemental";
+  | "elemental"
+  | "undead_humanoid";
 
 export type MonsterVisualVariant =
   | "mortal"
@@ -111,6 +112,8 @@ const PRODUCTION_READY_MONSTER_IDS = new Set<string>([
   "m26_c2",
   "m30_c1",
   "m30_c2",
+  "m31_c1",
+  "m31_c2",
 ]);
 
 const includesAny = (name: string, tokens: readonly string[]): boolean =>
@@ -153,6 +156,9 @@ const resolveBodyTypeAndArchetype = (
   }
   if (includesAny(name, ["豬", "虎", "豹", "猿", "獸", "鹿"])) {
     return { visualArchetype: name.includes("豬") ? "boar" : "beast", bodyType: "quadruped" };
+  }
+  if (includesAny(name, ["屍", "骷髏", "骨"])) {
+    return { visualArchetype: "undead_humanoid", bodyType: "humanoid" };
   }
   if (includesAny(name, ["魂", "靈", "幽", "鬼", "劍意", "幻影", "怨"])) {
     return {

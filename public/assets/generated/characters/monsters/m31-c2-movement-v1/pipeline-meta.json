@@ -1,0 +1,332 @@
+{
+  "target": "player",
+  "mode": "humanoid_walk_sheet",
+  "input": "/Users/andyka1714/.codex/generated_images/019de1e6-d9f8-79d2-854e-61c3a482ad93/ig_04aed0c982ded83d0169f683b148e8819a9283e46545a46d45.png",
+  "prompt": "m31_c2 寒冰骷髏 four-direction movement. Slim 1x2 humanoid ice skeleton, common-rank, player/NPC proportions, frames 1/3 neutral and 2/4 alternating legs.",
+  "rows": 4,
+  "cols": 4,
+  "frameCount": 16,
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "profile": "humanoid",
+  "rowOrder": [
+    "down",
+    "left",
+    "right",
+    "up"
+  ],
+  "targetHeight": 80,
+  "heightTolerance": 1,
+  "footlineY": 88,
+  "centerX": 48,
+  "centerTolerance": 1,
+  "qcStatus": "passed",
+  "qc": [
+    {
+      "label": "enemy_movement-1",
+      "bbox": [
+        27,
+        9,
+        68,
+        88
+      ],
+      "width": 42,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1768
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_movement-2",
+      "bbox": [
+        26,
+        9,
+        68,
+        88
+      ],
+      "width": 43,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        1748
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_movement-3",
+      "bbox": [
+        27,
+        9,
+        68,
+        88
+      ],
+      "width": 42,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1779
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_movement-4",
+      "bbox": [
+        26,
+        9,
+        68,
+        88
+      ],
+      "width": 43,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        1747
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_movement-5",
+      "bbox": [
+        32,
+        9,
+        64,
+        88
+      ],
+      "width": 33,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        1447
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_movement-6",
+      "bbox": [
+        26,
+        9,
+        69,
+        88
+      ],
+      "width": 44,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1703
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_movement-7",
+      "bbox": [
+        32,
+        9,
+        64,
+        88
+      ],
+      "width": 33,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        1419
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_movement-8",
+      "bbox": [
+        26,
+        9,
+        69,
+        88
+      ],
+      "width": 44,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1670
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_movement-9",
+      "bbox": [
+        35,
+        9,
+        60,
+        88
+      ],
+      "width": 26,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1332
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_movement-10",
+      "bbox": [
+        28,
+        9,
+        67,
+        88
+      ],
+      "width": 40,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1574
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_movement-11",
+      "bbox": [
+        34,
+        9,
+        60,
+        88
+      ],
+      "width": 27,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        1377
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_movement-12",
+      "bbox": [
+        28,
+        9,
+        68,
+        88
+      ],
+      "width": 41,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        1574
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_movement-13",
+      "bbox": [
+        28,
+        9,
+        67,
+        88
+      ],
+      "width": 40,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1676
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_movement-14",
+      "bbox": [
+        29,
+        9,
+        66,
+        88
+      ],
+      "width": 38,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1667
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_movement-15",
+      "bbox": [
+        28,
+        9,
+        67,
+        88
+      ],
+      "width": 40,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1660
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_movement-16",
+      "bbox": [
+        29,
+        9,
+        66,
+        88
+      ],
+      "width": 38,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1654
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    }
+  ],
+  "movement_gait_qc": "passed",
+  "movement_gait_qc_notes": "Visual review confirmed frames 1 and 3 are neutral/compact while frames 2 and 4 show alternating locomotion phases for each direction."
+}

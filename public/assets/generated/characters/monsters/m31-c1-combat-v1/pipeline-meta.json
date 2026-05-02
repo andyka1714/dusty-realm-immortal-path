@@ -1,0 +1,483 @@
+{
+  "target": "player",
+  "mode": "humanoid_combat_sheet",
+  "input": "/Users/andyka1714/.codex/generated_images/019de1e6-d9f8-79d2-854e-61c3a482ad93/ig_04aed0c982ded83d0169f63dcba2d0819aa774ff9bdccf6402.png",
+  "prompt": "m31_c1 冰封屍傀 four-direction combat. Same slim 1x2 frozen corpse puppet, ice claw attack sequence, same identity/style/scale as movement.",
+  "rows": 4,
+  "cols": 6,
+  "frameCount": 24,
+  "framesPerDirection": 6,
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "profile": "humanoid",
+  "rowOrder": [
+    "down",
+    "left",
+    "right",
+    "up"
+  ],
+  "targetHeight": 80,
+  "maxWidth": 90,
+  "footlineY": 88,
+  "centerX": 48,
+  "centerTolerance": 2,
+  "qcStatus": "passed",
+  "qc": [
+    {
+      "label": "enemy_combat-1",
+      "bbox": [
+        29,
+        9,
+        66,
+        88
+      ],
+      "width": 38,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2025
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-2",
+      "bbox": [
+        26,
+        9,
+        68,
+        88
+      ],
+      "width": 43,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2194
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-3",
+      "bbox": [
+        11,
+        9,
+        84,
+        88
+      ],
+      "width": 74,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2459
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-4",
+      "bbox": [
+        22,
+        9,
+        72,
+        88
+      ],
+      "width": 51,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2220
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-5",
+      "bbox": [
+        21,
+        9,
+        74,
+        88
+      ],
+      "width": 54,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2515
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-6",
+      "bbox": [
+        28,
+        9,
+        66,
+        88
+      ],
+      "width": 39,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2035
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-7",
+      "bbox": [
+        34,
+        9,
+        60,
+        88
+      ],
+      "width": 27,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        1550
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-8",
+      "bbox": [
+        20,
+        9,
+        74,
+        88
+      ],
+      "width": 55,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2479
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-9",
+      "bbox": [
+        8,
+        9,
+        87,
+        88
+      ],
+      "width": 80,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2710
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-10",
+      "bbox": [
+        21,
+        9,
+        74,
+        88
+      ],
+      "width": 54,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2306
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-11",
+      "bbox": [
+        23,
+        9,
+        72,
+        88
+      ],
+      "width": 50,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2544
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-12",
+      "bbox": [
+        34,
+        9,
+        60,
+        88
+      ],
+      "width": 27,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        1564
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-13",
+      "bbox": [
+        34,
+        9,
+        61,
+        88
+      ],
+      "width": 28,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1569
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-14",
+      "bbox": [
+        22,
+        9,
+        72,
+        88
+      ],
+      "width": 51,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2374
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-15",
+      "bbox": [
+        10,
+        9,
+        86,
+        88
+      ],
+      "width": 77,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2581
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-16",
+      "bbox": [
+        22,
+        9,
+        73,
+        88
+      ],
+      "width": 52,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2252
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-17",
+      "bbox": [
+        23,
+        9,
+        72,
+        88
+      ],
+      "width": 50,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2347
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-18",
+      "bbox": [
+        34,
+        9,
+        60,
+        88
+      ],
+      "width": 27,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        1547
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-19",
+      "bbox": [
+        28,
+        9,
+        67,
+        88
+      ],
+      "width": 40,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2145
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-20",
+      "bbox": [
+        22,
+        9,
+        72,
+        88
+      ],
+      "width": 51,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2312
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-21",
+      "bbox": [
+        12,
+        9,
+        82,
+        88
+      ],
+      "width": 71,
+      "height": 80,
+      "centerX": 47.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2164
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-22",
+      "bbox": [
+        25,
+        9,
+        70,
+        88
+      ],
+      "width": 46,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        1862
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-23",
+      "bbox": [
+        24,
+        9,
+        72,
+        88
+      ],
+      "width": 49,
+      "height": 80,
+      "centerX": 48.0,
+      "footlineY": 88,
+      "largeComponents": [
+        2378
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    },
+    {
+      "label": "enemy_combat-24",
+      "bbox": [
+        28,
+        9,
+        67,
+        88
+      ],
+      "width": 40,
+      "height": 80,
+      "centerX": 47.5,
+      "footlineY": 88,
+      "largeComponents": [
+        2140
+      ],
+      "chromaCount": 0,
+      "passed": true,
+      "failures": []
+    }
+  ]
+}
