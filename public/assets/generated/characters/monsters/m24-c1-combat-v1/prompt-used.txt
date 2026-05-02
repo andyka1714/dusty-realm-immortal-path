@@ -1,0 +1,1 @@
+m24_c1 幻影靈貓 combat sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x6 common-rank wood-element phantom spirit cat, same palette/tail/marking language as movement, fixed row facings, contained ghost claw/spirit pulse sequence, no elite or boss effects.

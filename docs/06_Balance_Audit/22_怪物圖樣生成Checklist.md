@@ -18,10 +18,10 @@
 ## 目前摘要
 
 - 怪物總數：265
-- Movement 完成：30 / 265
-- Combat 完成：30 / 265
-- Production-ready：30 / 265
-- 普通：174 隻，movement 完成 30，combat 完成 30，production-ready 30
+- Movement 完成：32 / 265
+- Combat 完成：32 / 265
+- Production-ready：32 / 265
+- 普通：174 隻，movement 完成 32，combat 完成 32，production-ready 32
 - 精英：69 隻，movement 完成 0，combat 完成 0，production-ready 0
 - 首領：22 隻，movement 完成 0，combat 完成 0，production-ready 0
 
@@ -59,8 +59,8 @@
 | m15_c2 | 疾風豹 | 練氣 | 普通 | 木 | beast | quadruped | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m16_c1 | 獅蠍獸 | 練氣 | 普通 | 火 | insect | low_crawler | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m16_c2 | 狂暴棕熊 | 練氣 | 普通 | 土 | bear | quadruped | 2x2 | 完成 | 完成 | 通過 | 是 |
-| m24_c1 | 幻影靈貓 | 練氣 | 普通 | 木 | spirit | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m24_c2 | 符紙人 | 練氣 | 普通 | 火 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m24_c1 | 幻影靈貓 | 練氣 | 普通 | 木 | spirit | spirit | 1x2 | 完成 | 完成 | 通過 | 是 |
+| m24_c2 | 符紙人 | 練氣 | 普通 | 火 | elemental | spirit | 1x2 | 完成 | 完成 | 通過 | 是 |
 | m25_c1 | 食藥鼠 | 練氣 | 普通 | 土 | beast | quadruped | 1x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m25_c2 | 毒荊棘妖 | 練氣 | 普通 | 木 | plant | plant | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m26_c1 | 靈水蟒 | 練氣 | 普通 | 水 | serpent | serpentine | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |

@@ -1,0 +1,1 @@
+m24_c1 幻影靈貓 movement sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x4 common-rank wood-element phantom spirit cat, slender spectral feline identity, neutral frames in columns 1/3 and alternating paw/tail/wisp phases in columns 2/4, no elite or boss effects.

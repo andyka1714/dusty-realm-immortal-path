@@ -1,0 +1,1 @@
+m24_c2 符紙人 combat sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x6 common-rank fire-element animated talisman paper person, same slim paper identity/style/scale as movement, fixed row facings, contained paper sleeve/talisman flare sequence, no elite or boss effects.
