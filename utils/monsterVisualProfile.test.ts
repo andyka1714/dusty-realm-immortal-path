@@ -93,7 +93,16 @@ describe("monsterVisualProfile", () => {
 
     expect(
       profiles.filter((profile) => profile.productionReadySprite).map((profile) => profile.enemyId)
-    ).toEqual(["m1_c1", "m1_c2", "m2_c1", "m2_c2", "m3_c1", "m3_c2"]);
+    ).toEqual([
+      "m1_c1",
+      "m1_c2",
+      "m2_c1",
+      "m2_c2",
+      "m3_c1",
+      "m3_c2",
+      "m10_c1",
+      "m10_c2",
+    ]);
     expect(movementAssetIds.size).toBe(profiles.length);
     expect(combatAssetIds.size).toBe(profiles.length);
     expect(

@@ -79,6 +79,8 @@ const PRODUCTION_READY_MONSTER_IDS = new Set<string>([
   "m2_c2",
   "m3_c1",
   "m3_c2",
+  "m10_c1",
+  "m10_c2",
 ]);
 
 const includesAny = (name: string, tokens: readonly string[]): boolean =>

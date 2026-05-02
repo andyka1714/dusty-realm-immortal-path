@@ -18,10 +18,10 @@
 ## 目前摘要
 
 - 怪物總數：265
-- Movement 完成：6 / 265
-- Combat 完成：6 / 265
-- Production-ready：6 / 265
-- 普通：174 隻，movement 完成 6，combat 完成 6，production-ready 6
+- Movement 完成：8 / 265
+- Combat 完成：8 / 265
+- Production-ready：8 / 265
+- 普通：174 隻，movement 完成 8，combat 完成 8，production-ready 8
 - 精英：69 隻，movement 完成 0，combat 完成 0，production-ready 0
 - 首領：22 隻，movement 完成 0，combat 完成 0，production-ready 0
 
@@ -35,8 +35,8 @@
 | m2_c2 | 石壁壁虎 | 凡人 | 普通 | 土 | beast | quadruped | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m3_c1 | 巡山道童 | 凡人 | 普通 | 木 | humanoid_guard | humanoid | 1x2 | 完成 | 完成 | 通過 | 是 |
 | m3_c2 | 山腳巨熊 | 凡人 | 普通 | 土 | bear | quadruped | 2x2 | 完成 | 完成 | 通過 | 是 |
-| m10_c1 | 密林野豬 | 凡人 | 普通 | 土 | boar | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m10_c2 | 樹梢毒蛇 | 凡人 | 普通 | 木 | serpent | serpentine | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m10_c1 | 密林野豬 | 凡人 | 普通 | 土 | boar | quadruped | 2x1 | 完成 | 完成 | 通過 | 是 |
+| m10_c2 | 樹梢毒蛇 | 凡人 | 普通 | 木 | serpent | serpentine | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m11_c1 | 蠻荒獵手 | 凡人 | 普通 | 無 | humanoid_guard | humanoid | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m11_c2 | 硬皮犀牛 | 凡人 | 普通 | 土 | beast | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m12_c1 | 谷口守衛 | 凡人 | 普通 | 無 | humanoid_guard | humanoid | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
