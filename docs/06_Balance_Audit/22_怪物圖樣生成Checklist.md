@@ -18,10 +18,10 @@
 ## 目前摘要
 
 - 怪物總數：265
-- Movement 完成：10 / 265
-- Combat 完成：10 / 265
-- Production-ready：10 / 265
-- 普通：174 隻，movement 完成 10，combat 完成 10，production-ready 10
+- Movement 完成：12 / 265
+- Combat 完成：12 / 265
+- Production-ready：12 / 265
+- 普通：174 隻，movement 完成 12，combat 完成 12，production-ready 12
 - 精英：69 隻，movement 完成 0，combat 完成 0，production-ready 0
 - 首領：22 隻，movement 完成 0，combat 完成 0，production-ready 0
 
@@ -39,8 +39,8 @@
 | m10_c2 | 樹梢毒蛇 | 凡人 | 普通 | 木 | serpent | serpentine | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m11_c1 | 蠻荒獵手 | 凡人 | 普通 | 無 | humanoid_guard | humanoid | 1x2 | 完成 | 完成 | 通過 | 是 |
 | m11_c2 | 硬皮犀牛 | 凡人 | 普通 | 土 | beast | quadruped | 2x2 | 完成 | 完成 | 通過 | 是 |
-| m12_c1 | 谷口守衛 | 凡人 | 普通 | 無 | humanoid_guard | humanoid | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m12_c2 | 嗜血蝙蝠 | 凡人 | 普通 | 火 | insect | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m12_c1 | 谷口守衛 | 凡人 | 普通 | 無 | humanoid_guard | humanoid | 1x2 | 完成 | 完成 | 通過 | 是 |
+| m12_c2 | 嗜血蝙蝠 | 凡人 | 普通 | 火 | beast | winged | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m20_c1 | 田間稻草人 | 凡人 | 普通 | 木 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m20_c2 | 偷糧碩鼠 | 凡人 | 普通 | 土 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m21_c1 | 迷霧幻影 | 凡人 | 普通 | 水 | spirit | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
@@ -72,7 +72,7 @@
 | m32_c1 | 紫電靈鷲 | 築基 | 普通 | 金 | spirit | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m32_c2 | 引雷石像 | 築基 | 普通 | 土 | construct | construct | 1x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m40_c1 | 腐化鬣狗 | 築基 | 普通 | 土 | dog | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m40_c2 | 嗜血蝠群 | 築基 | 普通 | 火 | insect | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m40_c2 | 嗜血蝠群 | 築基 | 普通 | 火 | beast | winged | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m41_c1 | 鬼面蜘蛛 | 築基 | 普通 | 木 | insect | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m41_c2 | 嗜血妖花 | 築基 | 普通 | 木 | plant | plant | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m42_c1 | 火蜥蜴 | 築基 | 普通 | 火 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |

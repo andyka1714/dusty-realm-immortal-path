@@ -83,6 +83,8 @@ const PRODUCTION_READY_MONSTER_IDS = new Set<string>([
   "m10_c2",
   "m11_c1",
   "m11_c2",
+  "m12_c1",
+  "m12_c2",
 ]);
 
 const includesAny = (name: string, tokens: readonly string[]): boolean =>
@@ -105,7 +107,10 @@ const resolveBodyTypeAndArchetype = (
   if (includesAny(name, ["龜"])) {
     return { visualArchetype: "turtle", bodyType: "low_crawler" };
   }
-  if (includesAny(name, ["蜈蚣", "蜘蛛", "蠍", "蚊", "蟲", "蛭", "蝠"])) {
+  if (includesAny(name, ["蝠"])) {
+    return { visualArchetype: "beast", bodyType: "winged" };
+  }
+  if (includesAny(name, ["蜈蚣", "蜘蛛", "蠍", "蚊", "蟲", "蛭"])) {
     return { visualArchetype: "insect", bodyType: "low_crawler" };
   }
   if (includesAny(name, ["蛟", "龍", "蟒", "蛇"])) {
@@ -222,6 +227,12 @@ const resolveFootprintAndHeight = (
     return {
       footprintTiles: enemy.rank === EnemyRank.Common ? { width: 1, height: 1 } : { width: 2, height: 2 },
       heightTiles: enemy.rank === EnemyRank.Common ? 2 : 3,
+    };
+  }
+  if (bodyType === "winged") {
+    return {
+      footprintTiles: enemy.rank === EnemyRank.Elite ? { width: 2, height: 2 } : { width: 2, height: 1 },
+      heightTiles: enemy.rank === EnemyRank.Elite ? 2 : 1,
     };
   }
   if (bodyType === "humanoid") {

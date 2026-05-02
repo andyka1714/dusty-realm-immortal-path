@@ -35,6 +35,12 @@ describe("monsterVisualProfile", () => {
       heightTiles: 2,
     });
 
+    expect(resolveMonsterVisualProfile(BESTIARY.m12_c2)).toMatchObject({
+      bodyType: "winged",
+      footprintTiles: { width: 2, height: 1 },
+      heightTiles: 1,
+    });
+
     expect(resolveMonsterVisualProfile(BESTIARY.m22_b1)).toMatchObject({
       visualArchetype: "giant_crab",
       bodyType: "low_crawler",
@@ -104,6 +110,8 @@ describe("monsterVisualProfile", () => {
       "m10_c2",
       "m11_c1",
       "m11_c2",
+      "m12_c1",
+      "m12_c2",
     ]);
     expect(movementAssetIds.size).toBe(profiles.length);
     expect(combatAssetIds.size).toBe(profiles.length);
