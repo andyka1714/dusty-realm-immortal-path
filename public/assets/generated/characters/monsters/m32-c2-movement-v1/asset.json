@@ -1,0 +1,47 @@
+{
+  "assetId": "enemy.m32_c2.movement_v1",
+  "kind": "enemy",
+  "name": "引雷石像 四方向移動圖樣",
+  "description": "引雷石像 的獨立 四方向移動 sheet，以玩家 1x2 比例與腳底錨點為基準。",
+  "style": "project_native",
+  "source": "generated",
+  "version": 1,
+  "usage": [
+    "enemy_movement",
+    "map_token"
+  ],
+  "basePath": "/assets/generated/characters/monsters/m32-c2-movement-v1",
+  "files": {
+    "raw": "raw-sheet.png",
+    "sheet": "sheet-transparent.png",
+    "preview": "animation.gif",
+    "framesDir": "frames",
+    "framePrefix": "enemy_movement",
+    "prompt": "prompt-used.txt",
+    "meta": "pipeline-meta.json"
+  },
+  "sprite": {
+    "profile": "enemy",
+    "rows": 4,
+    "cols": 4,
+    "frameCount": 16,
+    "framesPerDirection": 4,
+    "rowOrder": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "anchor": "feet",
+    "view": "topdown",
+    "qcStatus": "passed"
+  },
+  "tags": [
+    "enemy",
+    "m32_c2",
+    "common",
+    "movement",
+    "four-direction",
+    "requires-generate2dsprite"
+  ]
+}

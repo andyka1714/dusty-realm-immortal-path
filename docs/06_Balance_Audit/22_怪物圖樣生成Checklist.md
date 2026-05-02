@@ -18,10 +18,10 @@
 ## 目前摘要
 
 - 怪物總數：265
-- Movement 完成：40 / 265
-- Combat 完成：40 / 265
-- Production-ready：40 / 265
-- 普通：174 隻，movement 完成 40，combat 完成 40，production-ready 40
+- Movement 完成：42 / 265
+- Combat 完成：42 / 265
+- Production-ready：42 / 265
+- 普通：174 隻，movement 完成 42，combat 完成 42，production-ready 42
 - 精英：69 隻，movement 完成 0，combat 完成 0，production-ready 0
 - 首領：22 隻，movement 完成 0，combat 完成 0，production-ready 0
 
@@ -69,8 +69,8 @@
 | m30_c2 | 冰晶蟲 | 築基 | 普通 | 水 | insect | low_crawler | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m31_c1 | 冰封屍傀 | 築基 | 普通 | 水 | undead_humanoid | humanoid | 1x2 | 完成 | 完成 | 通過 | 是 |
 | m31_c2 | 寒冰骷髏 | 築基 | 普通 | 水 | undead_humanoid | humanoid | 1x2 | 完成 | 完成 | 通過 | 是 |
-| m32_c1 | 紫電靈鷲 | 築基 | 普通 | 金 | spirit | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m32_c2 | 引雷石像 | 築基 | 普通 | 土 | construct | construct | 1x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m32_c1 | 紫電靈鷲 | 築基 | 普通 | 金 | beast | winged | 2x1 | 完成 | 完成 | 通過 | 是 |
+| m32_c2 | 引雷石像 | 築基 | 普通 | 土 | construct | construct | 1x3 | 完成 | 完成 | 通過 | 是 |
 | m40_c1 | 腐化鬣狗 | 築基 | 普通 | 土 | dog | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m40_c2 | 嗜血蝠群 | 築基 | 普通 | 火 | beast | winged | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m41_c1 | 鬼面蜘蛛 | 築基 | 普通 | 木 | insect | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
@@ -83,7 +83,7 @@
 | m51_c2 | 毒液飛蛾 | 築基 | 普通 | 木 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m52_c1 | 雷澤水妖 | 築基 | 普通 | 水 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m52_c2 | 紫電銀鰻 | 築基 | 普通 | 金 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m60_c1 | 罡風鷹 | 金丹 | 普通 | 金 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m60_c1 | 罡風鷹 | 金丹 | 普通 | 金 | beast | winged | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m60_c2 | 風元素 | 金丹 | 普通 | 木 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m61_c1 | 羽族斥候 | 金丹 | 普通 | 金 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m61_c2 | 浮島翼人 | 金丹 | 普通 | 金 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
@@ -188,7 +188,7 @@
 | m172_c3 | 玉獄天鎖 | 仙人 | 普通 | 火 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m172_c4 | 仙庭禁將 | 仙人 | 普通 | 金 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m171_c1 | 金甲天衛 | 仙人 | 普通 | 金 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m171_c2 | 天界戰鷹 | 仙人 | 普通 | 金 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m171_c2 | 天界戰鷹 | 仙人 | 普通 | 金 | beast | winged | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m171_c3 | 玉京監察使 | 仙人 | 普通 | 火 | humanoid_guard | humanoid | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m171_c4 | 天庭誅邪令 | 仙人 | 普通 | 金 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m181_c1 | 太初巡環衛 | 仙帝 | 普通 | 金 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
@@ -219,7 +219,7 @@
 | m51_e1 | 沼澤巨鱷 | 築基 | 精英 | 水 | elemental | spirit | 2x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m52_e1 | 雷霆蜥蜴 | 築基 | 精英 | 金 | elemental | spirit | 2x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m61_e1 | 羽族戰士 | 金丹 | 精英 | 金 | humanoid_guard | humanoid | 1x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m62_e1 | 鐵翼鳥王 | 金丹 | 精英 | 金 | elemental | spirit | 2x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m62_e1 | 鐵翼鳥王 | 金丹 | 精英 | 金 | beast | winged | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m71_e1 | 地火龍蜥 | 金丹 | 精英 | 火 | dragon | serpentine | 3x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m72_e1 | 萬毒蛛后 | 金丹 | 精英 | 木 | elemental | spirit | 2x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m81_e1 | 護島神獸 | 金丹 | 精英 | 水 | beast | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |

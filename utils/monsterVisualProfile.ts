@@ -114,6 +114,8 @@ const PRODUCTION_READY_MONSTER_IDS = new Set<string>([
   "m30_c2",
   "m31_c1",
   "m31_c2",
+  "m32_c1",
+  "m32_c2",
 ]);
 
 const includesAny = (name: string, tokens: readonly string[]): boolean =>
@@ -136,7 +138,7 @@ const resolveBodyTypeAndArchetype = (
   if (includesAny(name, ["龜"])) {
     return { visualArchetype: "turtle", bodyType: "low_crawler" };
   }
-  if (includesAny(name, ["蝠"])) {
+  if (includesAny(name, ["蝠", "鷲", "鷹", "鳥"])) {
     return { visualArchetype: "beast", bodyType: "winged" };
   }
   if (includesAny(name, ["蜈蚣", "蜘蛛", "蠍", "蚊", "蟲", "蛭"])) {
