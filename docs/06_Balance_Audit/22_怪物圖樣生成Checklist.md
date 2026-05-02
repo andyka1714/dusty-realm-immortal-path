@@ -18,10 +18,10 @@
 ## 目前摘要
 
 - 怪物總數：265
-- Movement 完成：16 / 265
-- Combat 完成：16 / 265
-- Production-ready：16 / 265
-- 普通：174 隻，movement 完成 16，combat 完成 16，production-ready 16
+- Movement 完成：18 / 265
+- Combat 完成：18 / 265
+- Production-ready：18 / 265
+- 普通：174 隻，movement 完成 18，combat 完成 18，production-ready 18
 - 精英：69 隻，movement 完成 0，combat 完成 0，production-ready 0
 - 首領：22 隻，movement 完成 0，combat 完成 0，production-ready 0
 
@@ -45,8 +45,8 @@
 | m20_c2 | 偷糧碩鼠 | 凡人 | 普通 | 土 | beast | quadruped | 1x1 | 完成 | 完成 | 通過 | 是 |
 | m21_c1 | 迷霧幻影 | 凡人 | 普通 | 水 | spirit | spirit | 1x2 | 完成 | 完成 | 通過 | 是 |
 | m21_c2 | 沼澤水蛭 | 凡人 | 普通 | 水 | insect | low_crawler | 2x1 | 完成 | 完成 | 通過 | 是 |
-| m22_c1 | 湖畔水怪 | 凡人 | 普通 | 水 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m22_c2 | 草甸餓狼 | 凡人 | 普通 | 木 | wolf | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m22_c1 | 湖畔水怪 | 凡人 | 普通 | 水 | elemental | spirit | 1x2 | 完成 | 完成 | 通過 | 是 |
+| m22_c2 | 草甸餓狼 | 凡人 | 普通 | 木 | wolf | quadruped | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m5_c1 | 劍木樁妖 | 練氣 | 普通 | 木 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m5_c2 | 遊蕩劍魂 | 練氣 | 普通 | 金 | sword_spirit | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m6_c1 | 鏽劍甲蟲 | 練氣 | 普通 | 土 | insect | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
