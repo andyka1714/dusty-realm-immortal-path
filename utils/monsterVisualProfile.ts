@@ -72,7 +72,14 @@ export interface MonsterVisualProfile {
 }
 
 const PLAYER_SCALE_REFERENCE = { width: 1, height: 2 } as const;
-const PRODUCTION_READY_MONSTER_IDS = new Set<string>(["m1_c1", "m1_c2", "m2_c1", "m2_c2"]);
+const PRODUCTION_READY_MONSTER_IDS = new Set<string>([
+  "m1_c1",
+  "m1_c2",
+  "m2_c1",
+  "m2_c2",
+  "m3_c1",
+  "m3_c2",
+]);
 
 const includesAny = (name: string, tokens: readonly string[]): boolean =>
   tokens.some((token) => name.includes(token));
@@ -162,9 +169,14 @@ const resolveVisualVariant = (enemy: Enemy): MonsterVisualVariant => {
   }
 };
 
+const isHeavyQuadruped = (enemy: Enemy, archetype: MonsterVisualArchetype): boolean =>
+  archetype === "bear" ||
+  includesAny(enemy.name, ["巨熊", "熊", "巨猿", "猿", "犀", "巨獸", "甲獸"]);
+
 const resolveFootprintAndHeight = (
   enemy: Enemy,
-  bodyType: MonsterSpriteBodyType
+  bodyType: MonsterSpriteBodyType,
+  archetype: MonsterVisualArchetype
 ): Pick<MonsterVisualProfile, "footprintTiles" | "heightTiles"> => {
   if (bodyType === "colossus") {
     return { footprintTiles: { width: 2, height: 2 }, heightTiles: 6 };
@@ -214,6 +226,16 @@ const resolveFootprintAndHeight = (
       heightTiles: enemy.rank === EnemyRank.Elite ? 3 : 2,
     };
   }
+  if (bodyType === "quadruped" && isHeavyQuadruped(enemy, archetype)) {
+    if (enemy.rank === EnemyRank.Boss) {
+      return { footprintTiles: { width: 3, height: 2 }, heightTiles: 3 };
+    }
+
+    return {
+      footprintTiles: enemy.rank === EnemyRank.Elite ? { width: 2, height: 2 } : { width: 2, height: 2 },
+      heightTiles: enemy.rank === EnemyRank.Elite ? 3 : 2,
+    };
+  }
 
   return {
     footprintTiles: enemy.rank === EnemyRank.Elite ? { width: 2, height: 2 } : { width: 2, height: 1 },
@@ -258,7 +280,7 @@ const resolveRankVisualLanguage = (rank: EnemyRank): MonsterRankVisualLanguage =
 
 export const resolveMonsterVisualProfile = (enemy: Enemy): MonsterVisualProfile => {
   const semantic = resolveBodyTypeAndArchetype(enemy);
-  const size = resolveFootprintAndHeight(enemy, semantic.bodyType);
+  const size = resolveFootprintAndHeight(enemy, semantic.bodyType, semantic.visualArchetype);
 
   return {
     enemyId: enemy.id,

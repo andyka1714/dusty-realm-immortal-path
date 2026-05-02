@@ -18,10 +18,10 @@
 ## 目前摘要
 
 - 怪物總數：265
-- Movement 完成：4 / 265
-- Combat 完成：4 / 265
-- Production-ready：4 / 265
-- 普通：174 隻，movement 完成 4，combat 完成 4，production-ready 4
+- Movement 完成：6 / 265
+- Combat 完成：6 / 265
+- Production-ready：6 / 265
+- 普通：174 隻，movement 完成 6，combat 完成 6，production-ready 6
 - 精英：69 隻，movement 完成 0，combat 完成 0，production-ready 0
 - 首領：22 隻，movement 完成 0，combat 完成 0，production-ready 0
 
@@ -33,12 +33,12 @@
 | m1_c2 | 攔路劫匪 | 凡人 | 普通 | 無 | humanoid_bandit | humanoid | 1x2 | 完成 | 完成 | 通過 | 是 |
 | m2_c1 | 古道劍客 | 凡人 | 普通 | 金 | swordsman | humanoid | 1x2 | 完成 | 完成 | 通過 | 是 |
 | m2_c2 | 石壁壁虎 | 凡人 | 普通 | 土 | beast | quadruped | 2x1 | 完成 | 完成 | 通過 | 是 |
-| m3_c1 | 巡山道童 | 凡人 | 普通 | 木 | humanoid_guard | humanoid | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m3_c2 | 山腳巨熊 | 凡人 | 普通 | 土 | bear | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m3_c1 | 巡山道童 | 凡人 | 普通 | 木 | humanoid_guard | humanoid | 1x2 | 完成 | 完成 | 通過 | 是 |
+| m3_c2 | 山腳巨熊 | 凡人 | 普通 | 土 | bear | quadruped | 2x2 | 完成 | 完成 | 通過 | 是 |
 | m10_c1 | 密林野豬 | 凡人 | 普通 | 土 | boar | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m10_c2 | 樹梢毒蛇 | 凡人 | 普通 | 木 | serpent | serpentine | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m11_c1 | 蠻荒獵手 | 凡人 | 普通 | 無 | humanoid_guard | humanoid | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m11_c2 | 硬皮犀牛 | 凡人 | 普通 | 土 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m11_c2 | 硬皮犀牛 | 凡人 | 普通 | 土 | beast | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m12_c1 | 谷口守衛 | 凡人 | 普通 | 無 | humanoid_guard | humanoid | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m12_c2 | 嗜血蝙蝠 | 凡人 | 普通 | 火 | insect | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m20_c1 | 田間稻草人 | 凡人 | 普通 | 木 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
@@ -54,11 +54,11 @@
 | m7_c1 | 劍煞邪靈 | 練氣 | 普通 | 金 | sword_spirit | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m7_c2 | 劍塚守衛 | 練氣 | 普通 | 金 | humanoid_guard | humanoid | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m14_c1 | 赤血水怪 | 練氣 | 普通 | 水 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m14_c2 | 蠻力巨猿 | 練氣 | 普通 | 土 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m14_c2 | 蠻力巨猿 | 練氣 | 普通 | 土 | beast | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m15_c1 | 鐵皮野豬 | 練氣 | 普通 | 土 | boar | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m15_c2 | 疾風豹 | 練氣 | 普通 | 木 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m16_c1 | 獅蠍獸 | 練氣 | 普通 | 火 | insect | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m16_c2 | 狂暴棕熊 | 練氣 | 普通 | 土 | bear | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m16_c2 | 狂暴棕熊 | 練氣 | 普通 | 土 | bear | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m24_c1 | 幻影靈貓 | 練氣 | 普通 | 木 | spirit | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m24_c2 | 符紙人 | 練氣 | 普通 | 火 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m25_c1 | 食藥鼠 | 練氣 | 普通 | 土 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
@@ -90,7 +90,7 @@
 | m62_c1 | 鎖鏈怨靈 | 金丹 | 普通 | 金 | spirit | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m62_c2 | 斷罪獄卒 | 金丹 | 普通 | 金 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m70_c1 | 岩石傀儡 | 金丹 | 普通 | 土 | construct | construct | 1x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m70_c2 | 黑山甲獸 | 金丹 | 普通 | 土 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m70_c2 | 黑山甲獸 | 金丹 | 普通 | 土 | beast | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m71_c1 | 熔岩魔人 | 金丹 | 普通 | 火 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m71_c2 | 炎甲蟲 | 金丹 | 普通 | 火 | insect | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m72_c1 | 五毒獸 | 金丹 | 普通 | 木 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
@@ -204,11 +204,11 @@
 | m180_c3 | 法則殘碑 | 仙帝 | 普通 | 木 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m180_c4 | 混元噬界體 | 仙帝 | 普通 | 火 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m3_e1 | 流浪劍師 | 凡人 | 精英 | 金 | beast | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m12_e1 | 鐵甲犀牛王 | 凡人 | 精英 | 土 | beast | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m12_e1 | 鐵甲犀牛王 | 凡人 | 精英 | 土 | beast | quadruped | 2x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m22_e1 | 迷霧之靈 | 凡人 | 精英 | 水 | spirit | spirit | 2x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m5_e1 | 劍氣魁儡 | 練氣 | 精英 | 金 | beast | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m7_e1 | 嗜血劍魔 | 練氣 | 精英 | 火 | beast | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m15_e1 | 狂暴棕熊 | 練氣 | 精英 | 土 | bear | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m15_e1 | 狂暴棕熊 | 練氣 | 精英 | 土 | bear | quadruped | 2x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m16_e1 | 雙頭狼王 | 練氣 | 精英 | 金 | wolf | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m25_e1 | 丹爐精 | 練氣 | 精英 | 火 | elemental | spirit | 2x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m26_e1 | 寒冰龜 | 練氣 | 精英 | 水 | turtle | low_crawler | 3x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
@@ -273,7 +273,7 @@
 | m180_e1 | 守道者 | 仙帝 | 精英 | 金 | beast | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m180_e2 | 混元監道官 | 仙帝 | 精英 | 火 | elemental | spirit | 2x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m3_b1 | 守山靈虎 | 凡人 | 首領 | 金 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m12_b1 | 赤火猿 | 凡人 | 首領 | 火 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m12_b1 | 赤火猿 | 凡人 | 首領 | 火 | beast | quadruped | 3x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m22_b1 | 靈湖巨蟹 | 凡人 | 首領 | 水 | giant_crab | low_crawler | 4x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m7_b1 | 萬劍劍意 | 練氣 | 首領 | 金 | sword_spirit | spirit | 2x4 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m16_b1 | 萬獸獸王 | 練氣 | 首領 | 土 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |

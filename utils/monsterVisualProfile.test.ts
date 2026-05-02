@@ -28,6 +28,13 @@ describe("monsterVisualProfile", () => {
       heightTiles: 2,
     });
 
+    expect(resolveMonsterVisualProfile(BESTIARY.m3_c2)).toMatchObject({
+      visualArchetype: "bear",
+      bodyType: "quadruped",
+      footprintTiles: { width: 2, height: 2 },
+      heightTiles: 2,
+    });
+
     expect(resolveMonsterVisualProfile(BESTIARY.m22_b1)).toMatchObject({
       visualArchetype: "giant_crab",
       bodyType: "low_crawler",
@@ -86,7 +93,7 @@ describe("monsterVisualProfile", () => {
 
     expect(
       profiles.filter((profile) => profile.productionReadySprite).map((profile) => profile.enemyId)
-    ).toEqual(["m1_c1", "m1_c2", "m2_c1", "m2_c2"]);
+    ).toEqual(["m1_c1", "m1_c2", "m2_c1", "m2_c2", "m3_c1", "m3_c2"]);
     expect(movementAssetIds.size).toBe(profiles.length);
     expect(combatAssetIds.size).toBe(profiles.length);
     expect(
