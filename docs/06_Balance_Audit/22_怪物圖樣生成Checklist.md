@@ -18,10 +18,10 @@
 ## 目前摘要
 
 - 怪物總數：265
-- Movement 完成：22 / 265
-- Combat 完成：22 / 265
-- Production-ready：22 / 265
-- 普通：174 隻，movement 完成 22，combat 完成 22，production-ready 22
+- Movement 完成：24 / 265
+- Combat 完成：24 / 265
+- Production-ready：24 / 265
+- 普通：174 隻，movement 完成 24，combat 完成 24，production-ready 24
 - 精英：69 隻，movement 完成 0，combat 完成 0，production-ready 0
 - 首領：22 隻，movement 完成 0，combat 完成 0，production-ready 0
 
@@ -51,8 +51,8 @@
 | m5_c2 | 遊蕩劍魂 | 練氣 | 普通 | 金 | sword_spirit | spirit | 1x2 | 完成 | 完成 | 通過 | 是 |
 | m6_c1 | 鏽劍甲蟲 | 練氣 | 普通 | 土 | insect | low_crawler | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m6_c2 | 斷刃狼 | 練氣 | 普通 | 金 | wolf | quadruped | 2x1 | 完成 | 完成 | 通過 | 是 |
-| m7_c1 | 劍煞邪靈 | 練氣 | 普通 | 金 | sword_spirit | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m7_c2 | 劍塚守衛 | 練氣 | 普通 | 金 | humanoid_guard | humanoid | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m7_c1 | 劍煞邪靈 | 練氣 | 普通 | 金 | sword_spirit | spirit | 1x2 | 完成 | 完成 | 通過 | 是 |
+| m7_c2 | 劍塚守衛 | 練氣 | 普通 | 金 | humanoid_guard | humanoid | 1x2 | 完成 | 完成 | 通過 | 是 |
 | m14_c1 | 赤血水怪 | 練氣 | 普通 | 水 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m14_c2 | 蠻力巨猿 | 練氣 | 普通 | 土 | beast | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m15_c1 | 鐵皮野豬 | 練氣 | 普通 | 土 | boar | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
