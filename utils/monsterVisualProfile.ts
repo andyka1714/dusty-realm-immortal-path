@@ -85,6 +85,8 @@ const PRODUCTION_READY_MONSTER_IDS = new Set<string>([
   "m11_c2",
   "m12_c1",
   "m12_c2",
+  "m20_c1",
+  "m20_c2",
 ]);
 
 const includesAny = (name: string, tokens: readonly string[]): boolean =>
@@ -134,6 +136,9 @@ const resolveBodyTypeAndArchetype = (
       bodyType: "spirit",
     };
   }
+  if (includesAny(name, ["稻草人"])) {
+    return { visualArchetype: "plant", bodyType: "plant" };
+  }
   if (includesAny(name, ["石像", "傀儡", "石靈", "巨人", "構裝"])) {
     return { visualArchetype: "construct", bodyType: "construct" };
   }
@@ -181,6 +186,9 @@ const resolveVisualVariant = (enemy: Enemy): MonsterVisualVariant => {
 const isHeavyQuadruped = (enemy: Enemy, archetype: MonsterVisualArchetype): boolean =>
   archetype === "bear" ||
   includesAny(enemy.name, ["巨熊", "熊", "巨猿", "猿", "犀", "巨獸", "甲獸"]);
+
+const isSmallQuadruped = (enemy: Enemy): boolean =>
+  includesAny(enemy.name, ["鼠", "靈貓"]);
 
 const resolveFootprintAndHeight = (
   enemy: Enemy,
@@ -249,6 +257,12 @@ const resolveFootprintAndHeight = (
     return {
       footprintTiles: enemy.rank === EnemyRank.Elite ? { width: 2, height: 2 } : { width: 2, height: 2 },
       heightTiles: enemy.rank === EnemyRank.Elite ? 3 : 2,
+    };
+  }
+  if (bodyType === "quadruped" && isSmallQuadruped(enemy)) {
+    return {
+      footprintTiles: enemy.rank === EnemyRank.Elite ? { width: 1, height: 1 } : { width: 1, height: 1 },
+      heightTiles: enemy.rank === EnemyRank.Elite ? 2 : 1,
     };
   }
 

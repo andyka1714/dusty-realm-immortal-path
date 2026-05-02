@@ -18,10 +18,10 @@
 ## 目前摘要
 
 - 怪物總數：265
-- Movement 完成：12 / 265
-- Combat 完成：12 / 265
-- Production-ready：12 / 265
-- 普通：174 隻，movement 完成 12，combat 完成 12，production-ready 12
+- Movement 完成：14 / 265
+- Combat 完成：14 / 265
+- Production-ready：14 / 265
+- 普通：174 隻，movement 完成 14，combat 完成 14，production-ready 14
 - 精英：69 隻，movement 完成 0，combat 完成 0，production-ready 0
 - 首領：22 隻，movement 完成 0，combat 完成 0，production-ready 0
 
@@ -41,8 +41,8 @@
 | m11_c2 | 硬皮犀牛 | 凡人 | 普通 | 土 | beast | quadruped | 2x2 | 完成 | 完成 | 通過 | 是 |
 | m12_c1 | 谷口守衛 | 凡人 | 普通 | 無 | humanoid_guard | humanoid | 1x2 | 完成 | 完成 | 通過 | 是 |
 | m12_c2 | 嗜血蝙蝠 | 凡人 | 普通 | 火 | beast | winged | 2x1 | 完成 | 完成 | 通過 | 是 |
-| m20_c1 | 田間稻草人 | 凡人 | 普通 | 木 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m20_c2 | 偷糧碩鼠 | 凡人 | 普通 | 土 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m20_c1 | 田間稻草人 | 凡人 | 普通 | 木 | plant | plant | 1x2 | 完成 | 完成 | 通過 | 是 |
+| m20_c2 | 偷糧碩鼠 | 凡人 | 普通 | 土 | beast | quadruped | 1x1 | 完成 | 完成 | 通過 | 是 |
 | m21_c1 | 迷霧幻影 | 凡人 | 普通 | 水 | spirit | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m21_c2 | 沼澤水蛭 | 凡人 | 普通 | 水 | insect | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m22_c1 | 湖畔水怪 | 凡人 | 普通 | 水 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
@@ -61,7 +61,7 @@
 | m16_c2 | 狂暴棕熊 | 練氣 | 普通 | 土 | bear | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m24_c1 | 幻影靈貓 | 練氣 | 普通 | 木 | spirit | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m24_c2 | 符紙人 | 練氣 | 普通 | 火 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m25_c1 | 食藥鼠 | 練氣 | 普通 | 土 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m25_c1 | 食藥鼠 | 練氣 | 普通 | 土 | beast | quadruped | 1x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m25_c2 | 毒荊棘妖 | 練氣 | 普通 | 木 | plant | plant | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m26_c1 | 靈水蟒 | 練氣 | 普通 | 水 | serpent | serpentine | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m26_c2 | 水靈龜 | 練氣 | 普通 | 水 | turtle | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
