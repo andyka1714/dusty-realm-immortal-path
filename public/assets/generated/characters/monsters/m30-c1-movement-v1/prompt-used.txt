@@ -1,0 +1,1 @@
+m30_c1 雪原白狼 movement sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x4 common-rank water-element snowfield white wolf, 2x1 lean quadruped, neutral frames in columns 1/3 and alternating wolf gait phases in columns 2/4, no elite or boss effects.

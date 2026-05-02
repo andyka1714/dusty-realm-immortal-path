@@ -1,0 +1,1 @@
+m30_c2 冰晶蟲 movement sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x4 common-rank water-element ice crystal insect, 2x1 low crawler, neutral frames in columns 1/3 and alternating side-leg/segment phases in columns 2/4, no elite or boss effects.
