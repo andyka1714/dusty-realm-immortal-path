@@ -18,10 +18,10 @@
 ## 目前摘要
 
 - 怪物總數：265
-- Movement 完成：34 / 265
-- Combat 完成：34 / 265
-- Production-ready：34 / 265
-- 普通：174 隻，movement 完成 34，combat 完成 34，production-ready 34
+- Movement 完成：36 / 265
+- Combat 完成：36 / 265
+- Production-ready：36 / 265
+- 普通：174 隻，movement 完成 36，combat 完成 36，production-ready 36
 - 精英：69 隻，movement 完成 0，combat 完成 0，production-ready 0
 - 首領：22 隻，movement 完成 0，combat 完成 0，production-ready 0
 
@@ -63,8 +63,8 @@
 | m24_c2 | 符紙人 | 練氣 | 普通 | 火 | elemental | spirit | 1x2 | 完成 | 完成 | 通過 | 是 |
 | m25_c1 | 食藥鼠 | 練氣 | 普通 | 土 | beast | quadruped | 1x1 | 完成 | 完成 | 通過 | 是 |
 | m25_c2 | 毒荊棘妖 | 練氣 | 普通 | 木 | plant | plant | 1x2 | 完成 | 完成 | 通過 | 是 |
-| m26_c1 | 靈水蟒 | 練氣 | 普通 | 水 | serpent | serpentine | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m26_c2 | 水靈龜 | 練氣 | 普通 | 水 | turtle | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m26_c1 | 靈水蟒 | 練氣 | 普通 | 水 | serpent | serpentine | 2x1 | 完成 | 完成 | 通過 | 是 |
+| m26_c2 | 水靈龜 | 練氣 | 普通 | 水 | turtle | low_crawler | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m30_c1 | 雪原白狼 | 築基 | 普通 | 水 | wolf | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m30_c2 | 冰晶蟲 | 築基 | 普通 | 水 | insect | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m31_c1 | 冰封屍傀 | 築基 | 普通 | 水 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |

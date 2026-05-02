@@ -1,0 +1,47 @@
+{
+  "assetId": "enemy.m26_c2.combat_v1",
+  "kind": "enemy",
+  "name": "水靈龜 四方向戰鬥圖樣",
+  "description": "水靈龜 的獨立 四方向戰鬥 sheet，以玩家 1x2 比例與腳底錨點為基準。",
+  "style": "project_native",
+  "source": "generated",
+  "version": 1,
+  "usage": [
+    "enemy_combat",
+    "map_token"
+  ],
+  "basePath": "/assets/generated/characters/monsters/m26-c2-combat-v1",
+  "files": {
+    "raw": "raw-sheet.png",
+    "sheet": "sheet-transparent.png",
+    "preview": "animation.gif",
+    "framesDir": "frames",
+    "framePrefix": "enemy_combat",
+    "prompt": "prompt-used.txt",
+    "meta": "pipeline-meta.json"
+  },
+  "sprite": {
+    "profile": "enemy",
+    "rows": 4,
+    "cols": 6,
+    "frameCount": 24,
+    "framesPerDirection": 6,
+    "rowOrder": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "anchor": "feet",
+    "view": "topdown",
+    "qcStatus": "passed"
+  },
+  "tags": [
+    "enemy",
+    "m26_c2",
+    "common",
+    "combat",
+    "four-direction",
+    "requires-generate2dsprite"
+  ]
+}

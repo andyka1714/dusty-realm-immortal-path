@@ -1,0 +1,1 @@
+m26_c2 水靈龜 combat sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x6 common-rank water-element turtle, same identity/style/scale as movement, fixed row facings, contained shell bash/bite sequence, no elite or boss effects.
