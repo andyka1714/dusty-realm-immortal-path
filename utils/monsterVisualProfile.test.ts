@@ -102,6 +102,8 @@ describe("monsterVisualProfile", () => {
       "m3_c2",
       "m10_c1",
       "m10_c2",
+      "m11_c1",
+      "m11_c2",
     ]);
     expect(movementAssetIds.size).toBe(profiles.length);
     expect(combatAssetIds.size).toBe(profiles.length);

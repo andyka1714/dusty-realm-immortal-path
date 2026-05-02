@@ -18,10 +18,10 @@
 ## 目前摘要
 
 - 怪物總數：265
-- Movement 完成：8 / 265
-- Combat 完成：8 / 265
-- Production-ready：8 / 265
-- 普通：174 隻，movement 完成 8，combat 完成 8，production-ready 8
+- Movement 完成：10 / 265
+- Combat 完成：10 / 265
+- Production-ready：10 / 265
+- 普通：174 隻，movement 完成 10，combat 完成 10，production-ready 10
 - 精英：69 隻，movement 完成 0，combat 完成 0，production-ready 0
 - 首領：22 隻，movement 完成 0，combat 完成 0，production-ready 0
 
@@ -37,8 +37,8 @@
 | m3_c2 | 山腳巨熊 | 凡人 | 普通 | 土 | bear | quadruped | 2x2 | 完成 | 完成 | 通過 | 是 |
 | m10_c1 | 密林野豬 | 凡人 | 普通 | 土 | boar | quadruped | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m10_c2 | 樹梢毒蛇 | 凡人 | 普通 | 木 | serpent | serpentine | 2x1 | 完成 | 完成 | 通過 | 是 |
-| m11_c1 | 蠻荒獵手 | 凡人 | 普通 | 無 | humanoid_guard | humanoid | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m11_c2 | 硬皮犀牛 | 凡人 | 普通 | 土 | beast | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m11_c1 | 蠻荒獵手 | 凡人 | 普通 | 無 | humanoid_guard | humanoid | 1x2 | 完成 | 完成 | 通過 | 是 |
+| m11_c2 | 硬皮犀牛 | 凡人 | 普通 | 土 | beast | quadruped | 2x2 | 完成 | 完成 | 通過 | 是 |
 | m12_c1 | 谷口守衛 | 凡人 | 普通 | 無 | humanoid_guard | humanoid | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m12_c2 | 嗜血蝙蝠 | 凡人 | 普通 | 火 | insect | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m20_c1 | 田間稻草人 | 凡人 | 普通 | 木 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |

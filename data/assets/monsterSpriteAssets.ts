@@ -52,6 +52,10 @@ const GENERATED_MONSTER_SPRITE_ASSETS = new Set<string>([
   "enemy.m10_c1.combat_v1",
   "enemy.m10_c2.movement_v1",
   "enemy.m10_c2.combat_v1",
+  "enemy.m11_c1.movement_v1",
+  "enemy.m11_c1.combat_v1",
+  "enemy.m11_c2.movement_v1",
+  "enemy.m11_c2.combat_v1",
 ]);
 
 export const createMonsterSpriteAssetId = ({
