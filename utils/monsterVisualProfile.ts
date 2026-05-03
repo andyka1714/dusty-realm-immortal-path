@@ -11,6 +11,7 @@ export type MonsterVisualArchetype =
   | "bear"
   | "boar"
   | "beast"
+  | "lizard"
   | "swordsman"
   | "humanoid_bandit"
   | "humanoid_guard"
@@ -120,6 +121,8 @@ const PRODUCTION_READY_MONSTER_IDS = new Set<string>([
   "m40_c2",
   "m41_c1",
   "m41_c2",
+  "m42_c1",
+  "m42_c2",
 ]);
 
 const includesAny = (name: string, tokens: readonly string[]): boolean =>
@@ -144,6 +147,9 @@ const resolveBodyTypeAndArchetype = (
   }
   if (includesAny(name, ["蝠", "鷲", "鷹", "鳥"])) {
     return { visualArchetype: "beast", bodyType: "winged" };
+  }
+  if (includesAny(name, ["蜥", "蟾蜍"])) {
+    return { visualArchetype: "lizard", bodyType: "low_crawler" };
   }
   if (includesAny(name, ["蜈蚣", "蜘蛛", "蠍", "蚊", "蟲", "蛭"])) {
     return { visualArchetype: "insect", bodyType: "low_crawler" };
@@ -175,7 +181,7 @@ const resolveBodyTypeAndArchetype = (
   if (includesAny(name, ["稻草人"])) {
     return { visualArchetype: "plant", bodyType: "plant" };
   }
-  if (includesAny(name, ["石像", "傀儡", "石靈", "巨人", "構裝"])) {
+  if (includesAny(name, ["石像", "傀儡", "石靈", "巨人", "構裝", "石頭人"])) {
     return { visualArchetype: "construct", bodyType: "construct" };
   }
   if (includesAny(name, ["花", "藤", "樹", "樁", "荊棘", "毒草", "靈植"])) {

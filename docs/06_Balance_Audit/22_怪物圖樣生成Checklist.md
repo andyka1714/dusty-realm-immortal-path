@@ -18,10 +18,10 @@
 ## 目前摘要
 
 - 怪物總數：265
-- Movement 完成：46 / 265
-- Combat 完成：46 / 265
-- Production-ready：46 / 265
-- 普通：174 隻，movement 完成 46，combat 完成 46，production-ready 46
+- Movement 完成：48 / 265
+- Combat 完成：48 / 265
+- Production-ready：48 / 265
+- 普通：174 隻，movement 完成 48，combat 完成 48，production-ready 48
 - 精英：69 隻，movement 完成 0，combat 完成 0，production-ready 0
 - 首領：22 隻，movement 完成 0，combat 完成 0，production-ready 0
 
@@ -75,11 +75,11 @@
 | m40_c2 | 嗜血蝠群 | 築基 | 普通 | 火 | beast | winged | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m41_c1 | 鬼面蜘蛛 | 築基 | 普通 | 木 | insect | low_crawler | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m41_c2 | 嗜血妖花 | 築基 | 普通 | 木 | plant | plant | 1x2 | 完成 | 完成 | 通過 | 是 |
-| m42_c1 | 火蜥蜴 | 築基 | 普通 | 火 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m42_c2 | 熔岩石頭人 | 築基 | 普通 | 土 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m42_c1 | 火蜥蜴 | 築基 | 普通 | 火 | lizard | low_crawler | 2x1 | 完成 | 完成 | 通過 | 是 |
+| m42_c2 | 熔岩石頭人 | 築基 | 普通 | 土 | construct | construct | 1x3 | 完成 | 完成 | 通過 | 是 |
 | m50_c1 | 影豹 | 築基 | 普通 | 木 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m50_c2 | 奪靈毒蚊 | 築基 | 普通 | 木 | insect | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m51_c1 | 劇毒蟾蜍 | 築基 | 普通 | 水 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m51_c1 | 劇毒蟾蜍 | 築基 | 普通 | 水 | lizard | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m51_c2 | 毒液飛蛾 | 築基 | 普通 | 木 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m52_c1 | 雷澤水妖 | 築基 | 普通 | 水 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m52_c2 | 紫電銀鰻 | 築基 | 普通 | 金 | beast | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
@@ -217,10 +217,10 @@
 | m41_e1 | 樹妖姥姥 | 築基 | 精英 | 木 | plant | plant | 2x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m42_e1 | 煉獄炎魔 | 築基 | 精英 | 火 | elemental | spirit | 2x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m51_e1 | 沼澤巨鱷 | 築基 | 精英 | 水 | elemental | spirit | 2x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m52_e1 | 雷霆蜥蜴 | 築基 | 精英 | 金 | elemental | spirit | 2x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m52_e1 | 雷霆蜥蜴 | 築基 | 精英 | 金 | lizard | low_crawler | 3x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m61_e1 | 羽族戰士 | 金丹 | 精英 | 金 | humanoid_guard | humanoid | 1x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m62_e1 | 鐵翼鳥王 | 金丹 | 精英 | 金 | beast | winged | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m71_e1 | 地火龍蜥 | 金丹 | 精英 | 火 | dragon | serpentine | 3x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m71_e1 | 地火龍蜥 | 金丹 | 精英 | 火 | lizard | low_crawler | 3x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m72_e1 | 萬毒蛛后 | 金丹 | 精英 | 木 | elemental | spirit | 2x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m81_e1 | 護島神獸 | 金丹 | 精英 | 水 | beast | quadruped | 2x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m82_e1 | 幻海魔鯨 | 金丹 | 精英 | 水 | elemental | spirit | 2x3 | 未生成 | 未生成 | 待兩套完成 | 否 |
