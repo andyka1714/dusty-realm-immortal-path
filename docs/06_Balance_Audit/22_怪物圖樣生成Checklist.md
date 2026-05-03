@@ -18,10 +18,10 @@
 ## 目前摘要
 
 - 怪物總數：265
-- Movement 完成：42 / 265
-- Combat 完成：42 / 265
-- Production-ready：42 / 265
-- 普通：174 隻，movement 完成 42，combat 完成 42，production-ready 42
+- Movement 完成：44 / 265
+- Combat 完成：44 / 265
+- Production-ready：44 / 265
+- 普通：174 隻，movement 完成 44，combat 完成 44，production-ready 44
 - 精英：69 隻，movement 完成 0，combat 完成 0，production-ready 0
 - 首領：22 隻，movement 完成 0，combat 完成 0，production-ready 0
 
@@ -71,8 +71,8 @@
 | m31_c2 | 寒冰骷髏 | 築基 | 普通 | 水 | undead_humanoid | humanoid | 1x2 | 完成 | 完成 | 通過 | 是 |
 | m32_c1 | 紫電靈鷲 | 築基 | 普通 | 金 | beast | winged | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m32_c2 | 引雷石像 | 築基 | 普通 | 土 | construct | construct | 1x3 | 完成 | 完成 | 通過 | 是 |
-| m40_c1 | 腐化鬣狗 | 築基 | 普通 | 土 | dog | quadruped | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
-| m40_c2 | 嗜血蝠群 | 築基 | 普通 | 火 | beast | winged | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
+| m40_c1 | 腐化鬣狗 | 築基 | 普通 | 土 | dog | quadruped | 2x1 | 完成 | 完成 | 通過 | 是 |
+| m40_c2 | 嗜血蝠群 | 築基 | 普通 | 火 | beast | winged | 2x1 | 完成 | 完成 | 通過 | 是 |
 | m41_c1 | 鬼面蜘蛛 | 築基 | 普通 | 木 | insect | low_crawler | 2x1 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m41_c2 | 嗜血妖花 | 築基 | 普通 | 木 | plant | plant | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |
 | m42_c1 | 火蜥蜴 | 築基 | 普通 | 火 | elemental | spirit | 1x2 | 未生成 | 未生成 | 待兩套完成 | 否 |

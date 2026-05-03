@@ -1,0 +1,290 @@
+{
+  "target": "creature",
+  "mode": "movement",
+  "prompt": "m40_c2 嗜血蝠群 four-direction movement. 2x1 compact three-bat swarm; frames 1/3 compact and 2/4 alternating wing flaps.",
+  "role": "",
+  "input": "/Users/andyka1714/.codex/generated_images/019de1e6-d9f8-79d2-854e-61c3a482ad93/ig_04aed0c982ded83d0169f68d57fad0819a8c5e297a179897c6.png",
+  "threshold": 100,
+  "edge_threshold": 150,
+  "duration": 160,
+  "rows": 4,
+  "cols": 4,
+  "cell_size": 128,
+  "fit_scale": 0.62,
+  "trim_border": 4,
+  "edge_clean_depth": 3,
+  "align": "feet",
+  "shared_scale": true,
+  "component_mode": "all",
+  "component_padding": 12,
+  "min_component_area": 40,
+  "edge_touch_margin": 0,
+  "frame_labels": [
+    "enemy_movement-1",
+    "enemy_movement-2",
+    "enemy_movement-3",
+    "enemy_movement-4",
+    "enemy_movement-5",
+    "enemy_movement-6",
+    "enemy_movement-7",
+    "enemy_movement-8",
+    "enemy_movement-9",
+    "enemy_movement-10",
+    "enemy_movement-11",
+    "enemy_movement-12",
+    "enemy_movement-13",
+    "enemy_movement-14",
+    "enemy_movement-15",
+    "enemy_movement-16"
+  ],
+  "frames": [
+    {
+      "grid": [
+        0,
+        0
+      ],
+      "output_size": [
+        76,
+        48
+      ],
+      "paste_position": [
+        26,
+        68
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        0,
+        1
+      ],
+      "output_size": [
+        74,
+        48
+      ],
+      "paste_position": [
+        27,
+        68
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        0,
+        2
+      ],
+      "output_size": [
+        76,
+        48
+      ],
+      "paste_position": [
+        26,
+        68
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        0,
+        3
+      ],
+      "output_size": [
+        62,
+        48
+      ],
+      "paste_position": [
+        33,
+        68
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        1,
+        0
+      ],
+      "output_size": [
+        86,
+        48
+      ],
+      "paste_position": [
+        21,
+        68
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        1,
+        1
+      ],
+      "output_size": [
+        59,
+        48
+      ],
+      "paste_position": [
+        34,
+        68
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        1,
+        2
+      ],
+      "output_size": [
+        86,
+        48
+      ],
+      "paste_position": [
+        21,
+        68
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        1,
+        3
+      ],
+      "output_size": [
+        82,
+        48
+      ],
+      "paste_position": [
+        23,
+        68
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        2,
+        0
+      ],
+      "output_size": [
+        80,
+        48
+      ],
+      "paste_position": [
+        24,
+        68
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        2,
+        1
+      ],
+      "output_size": [
+        59,
+        48
+      ],
+      "paste_position": [
+        34,
+        68
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        2,
+        2
+      ],
+      "output_size": [
+        83,
+        48
+      ],
+      "paste_position": [
+        22,
+        68
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        2,
+        3
+      ],
+      "output_size": [
+        78,
+        48
+      ],
+      "paste_position": [
+        25,
+        68
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        3,
+        0
+      ],
+      "output_size": [
+        80,
+        48
+      ],
+      "paste_position": [
+        24,
+        68
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        3,
+        1
+      ],
+      "output_size": [
+        49,
+        48
+      ],
+      "paste_position": [
+        39,
+        68
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        3,
+        2
+      ],
+      "output_size": [
+        80,
+        48
+      ],
+      "paste_position": [
+        24,
+        68
+      ],
+      "edge_touch": false
+    },
+    {
+      "grid": [
+        3,
+        3
+      ],
+      "output_size": [
+        65,
+        48
+      ],
+      "paste_position": [
+        31,
+        68
+      ],
+      "edge_touch": false
+    }
+  ],
+  "edge_touch_frames": [],
+  "scale_normalization": {
+    "target_output_height": 48,
+    "foot_y": 116,
+    "reason": "player 1x2 sprite baseline normalization"
+  },
+  "movement_gait_qc": "passed",
+  "movement_gait_qc_notes": "Visual review confirmed frames 1 and 3 are neutral/compact while frames 2 and 4 show alternating quadruped/wing locomotion phases for each direction."
+}
