@@ -1,0 +1,1 @@
+Use case: stylized-concept. Production 4x4 top-down xianxia paper-cut terrain atlas with grass, path, stone, water, lava, ice, void and immortal-realm tiles. Fibrous rice paper, layered cut edges, ink contours, restrained cast shadows, no actors, props, text, borders, grid lines, pixel art or photorealism.

@@ -1,0 +1,20 @@
+{
+  "assetId": "map.xianxia_paper_terrain_v1",
+  "kind": "map",
+  "name": "修仙紙雕地形圖集",
+  "source": "image_gen",
+  "style": "paper_cut",
+  "visualModel": "layered_tilemap",
+  "runtimeObjectModel": "y_sorted_props",
+  "collisionModel": "tile_collision_and_trigger_zones",
+  "rows": 4,
+  "cols": 4,
+  "frameSize": [256, 256],
+  "frames": [
+    "grass-1", "grass-2", "grass-3", "grass-4",
+    "path-1", "path-2", "stone-1", "stone-2",
+    "water-1", "water-2", "lava-1", "lava-2",
+    "ice-1", "ice-2", "void-1", "immortal-1"
+  ],
+  "qcStatus": "passed"
+}

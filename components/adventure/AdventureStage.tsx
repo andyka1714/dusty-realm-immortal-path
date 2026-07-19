@@ -16,7 +16,7 @@ import {
   type AdventureTerrainTile,
   resolveAdventureTerrainPalette,
 } from '../../utils/adventureTerrainPixelization';
-import { getAssetDefinition, getAssetFileUrl, getAssetFrameFileUrls } from '../../data/assets';
+import { getAssetFileUrl, getAssetFrameFileUrls } from '../../data/assets';
 import {
   getCharacterSpriteLayout,
   getCharacterTileAnchorPosition,
@@ -89,6 +89,58 @@ const PLAYER_COMBAT_SPRITE_ROWS = 4;
 const PLAYER_COMBAT_SPRITE_COLS = 6;
 const IMMORTAL_FATE_TOWN_BASE = "/assets/generated/maps/immortal-fate-town-v1/frames/base.png";
 const PAPER_WORLD_MATERIAL = "/assets/generated/maps/paper-world-material-v1/frames/rice-paper.png";
+const PAPER_TERRAIN_FRAME_ROOT = "/assets/generated/maps/xianxia-paper-terrain-v1/frames";
+
+const PAPER_TERRAIN_TEXTURES = Object.fromEntries(
+  [
+    'grass-1', 'grass-2', 'grass-3', 'grass-4',
+    'path-1', 'path-2', 'stone-1', 'stone-2',
+    'water-1', 'water-2', 'lava-1', 'lava-2',
+    'ice-1', 'ice-2', 'void-1', 'immortal-1',
+  ].map((name) => [name, PIXI.Texture.from(`${PAPER_TERRAIN_FRAME_ROOT}/${name}.png`)])
+) as Record<string, PIXI.Texture>;
+
+const resolvePaperTerrainTexture = (
+  tile: AdventureTerrainTile,
+  theme: string
+): PIXI.Texture => {
+  const variant = tile.kind === 'path' || tile.kind === 'water' ? 1 : 0;
+  if (tile.kind === 'path') return PAPER_TERRAIN_TEXTURES[`path-${variant + 1}`];
+  if (theme === 'Void') return PAPER_TERRAIN_TEXTURES['void-1'];
+  if (theme === 'Immortal' || theme === 'Ultimate') return PAPER_TERRAIN_TEXTURES['immortal-1'];
+  if (theme === 'North') return PAPER_TERRAIN_TEXTURES[`ice-${variant + 1}`];
+  if (theme === 'West' || theme === 'Thunder') {
+    return tile.kind === 'water' || tile.semanticRole === 'hazard'
+      ? PAPER_TERRAIN_TEXTURES[`lava-${variant + 1}`]
+      : PAPER_TERRAIN_TEXTURES[`path-${variant + 1}`];
+  }
+  if (tile.kind === 'water') return PAPER_TERRAIN_TEXTURES[`water-${variant + 1}`];
+  if (tile.kind === 'accent' && theme === 'Sect') return PAPER_TERRAIN_TEXTURES[`stone-${variant + 1}`];
+  return PAPER_TERRAIN_TEXTURES[`grass-${((tile.x * 5 + tile.y * 7) % 4) + 1}`];
+};
+
+const PAPER_MONSTER_ROOT = "/assets/generated/characters/paper-monster-archetypes-v1";
+const PAPER_MONSTER_ARCHETYPE_ROW: Record<MonsterVisualProfile['bodyType'], {
+  pack: 'core' | 'mystic';
+  row: number;
+}> = {
+  quadruped: { pack: 'core', row: 0 },
+  low_crawler: { pack: 'core', row: 1 },
+  humanoid: { pack: 'core', row: 2 },
+  winged: { pack: 'core', row: 3 },
+  serpentine: { pack: 'mystic', row: 0 },
+  spirit: { pack: 'mystic', row: 1 },
+  construct: { pack: 'mystic', row: 2 },
+  colossus: { pack: 'mystic', row: 2 },
+  plant: { pack: 'mystic', row: 3 },
+};
+
+const getPaperMonsterDirectionUrls = (profile: MonsterVisualProfile): string[] => {
+  const archetype = PAPER_MONSTER_ARCHETYPE_ROW[profile.bodyType];
+  return Array.from({ length: 4 }, (_, directionIndex) =>
+    `${PAPER_MONSTER_ROOT}/${archetype.pack}/frames/paper_monster-${archetype.row * 4 + directionIndex + 1}.png`
+  );
+};
 
 const PAPER_MONSTER_COLORS: Record<MonsterVisualProfile['visualVariant'], number> = {
   mortal: 0xb98b57,
@@ -240,15 +292,26 @@ const drawAdventureTerrainTile = ({
   graphics,
   tile,
   cellSize,
+  theme,
 }: {
   graphics: PIXI.Graphics;
   tile: AdventureTerrainTile;
   cellSize: number;
+  theme: string;
 }) => {
   const px = tile.x * cellSize;
   const py = tile.y * cellSize;
 
-  graphics.beginFill(tile.fillColor, 1);
+  const terrainTexture = resolvePaperTerrainTexture(tile, theme);
+  const textureRegionSize = cellSize * 40;
+  const textureMatrix = new PIXI.Matrix();
+  textureMatrix.scale(textureRegionSize / terrainTexture.width, textureRegionSize / terrainTexture.height);
+  graphics.beginTextureFill({
+      texture: terrainTexture,
+      matrix: textureMatrix,
+      color: 0xffffff,
+      alpha: 1,
+  });
   graphics.drawRect(px, py, cellSize, cellSize);
   graphics.endFill();
 
@@ -1051,6 +1114,7 @@ export default function AdventureStage({
                       graphics: terrainLayer,
                       tile,
                       cellSize,
+                      theme: mapData.theme,
                   })
               );
           }
@@ -1155,35 +1219,22 @@ export default function AdventureStage({
               container.addChild(paperAvatar);
               bg.visible = false;
               text.visible = false;
-          }
 
-          if (template && profile) {
-              const movementAsset = getAssetDefinition(profile.movementAssetId);
-              const combatAsset = getAssetDefinition(profile.combatAssetId);
-              const canUseGeneratedMonsterSprites =
-                  movementAsset.style === 'paper_cut' &&
-                  combatAsset.style === 'paper_cut' &&
-                  movementAsset.source === 'generated' &&
-                  combatAsset.source === 'generated' &&
-                  movementAsset.sprite?.qcStatus === 'passed' &&
-                  combatAsset.sprite?.qcStatus === 'passed';
-              if (!canUseGeneratedMonsterSprites) {
-                  return container;
-              }
-              const movementFrameUrls = getAssetFrameFileUrls(profile.movementAssetId);
-              const combatFrameUrls = getAssetFrameFileUrls(profile.combatAssetId);
-              Promise.all([
-                  Promise.all(movementFrameUrls.map((url) => PIXI.Assets.load(url))),
-                  Promise.all(combatFrameUrls.map((url) => PIXI.Assets.load(url))),
-              ])
-                  .then(([movementTextures, combatTextures]) => {
-                      if (container.destroyed || movementTextures.length === 0) return;
-                      [...movementTextures, ...combatTextures].forEach((texture) => {
-                          texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+              Promise.all(
+                  getPaperMonsterDirectionUrls(profile).map((url) => PIXI.Assets.load(url))
+              )
+                  .then((directionTextures: PIXI.Texture[]) => {
+                      if (container.destroyed || directionTextures.length !== 4) return;
+                      directionTextures.forEach((texture) => {
+                          texture.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR;
                       });
+                      const movementTextures = directionTextures.flatMap((texture) =>
+                          Array.from({ length: 4 }, () => texture)
+                      );
+                      const combatTextures = directionTextures.flatMap((texture) =>
+                          Array.from({ length: 6 }, () => texture)
+                      );
                       const firstTexture = movementTextures[0];
-                      if (!firstTexture?.baseTexture.valid) return;
-
                       const monsterSprite = new PIXI.Sprite(firstTexture);
                       const layout = getMonsterSpriteLayout({
                           cellSize,
@@ -1191,27 +1242,22 @@ export default function AdventureStage({
                           frameHeight: firstTexture.height,
                       });
                       monsterSprite.anchor.set(layout.anchorX, layout.anchorY);
-                      monsterSprite.x = layout.x;
-                      monsterSprite.y = layout.y;
-                      monsterSprite.width = layout.width;
-                      monsterSprite.height = layout.height;
+                      monsterSprite.position.set(layout.x, layout.y);
+                      monsterSprite.width = layout.width * 1.4;
+                      monsterSprite.height = layout.height * 1.4;
                       monsterSprite.roundPixels = true;
+                      monsterSprite.name = 'image_generated_paper_monster';
                       container.movementTextures = movementTextures;
                       container.combatTextures = combatTextures;
                       container.monsterSprite = monsterSprite;
                       container.addChildAt(monsterSprite, 0);
-                      const paperAvatar = container.getChildByName('paper_cut_monster_avatar');
-                      if (paperAvatar) paperAvatar.visible = false;
-                      bg.visible = false;
-                      text.visible = false;
+                      paperAvatar.visible = false;
                   })
                   .catch(() => {
-                      const paperAvatar = container.getChildByName('paper_cut_monster_avatar');
-                      if (paperAvatar) paperAvatar.visible = true;
-                      bg.visible = !paperAvatar;
-                      text.visible = !paperAvatar;
+                      paperAvatar.visible = true;
                   });
           }
+
           return container;
       };
 
@@ -1614,8 +1660,8 @@ export default function AdventureStage({
                   monsterContainer.monsterSprite.anchor.set(layout.anchorX, layout.anchorY);
                   monsterContainer.monsterSprite.x = layout.x;
                   monsterContainer.monsterSprite.y = layout.y;
-                  monsterContainer.monsterSprite.width = layout.width;
-                  monsterContainer.monsterSprite.height = layout.height;
+                  monsterContainer.monsterSprite.width = layout.width * 1.4;
+                  monsterContainer.monsterSprite.height = layout.height * 1.4;
               }
               
               // Random Phase Pulse
