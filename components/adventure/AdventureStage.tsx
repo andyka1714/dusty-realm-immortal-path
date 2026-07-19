@@ -89,35 +89,30 @@ const PLAYER_COMBAT_SPRITE_ROWS = 4;
 const PLAYER_COMBAT_SPRITE_COLS = 6;
 const IMMORTAL_FATE_TOWN_BASE = "/assets/generated/maps/immortal-fate-town-v1/frames/base.png";
 const PAPER_WORLD_MATERIAL = "/assets/generated/maps/paper-world-material-v1/frames/rice-paper.png";
-const PAPER_TERRAIN_FRAME_ROOT = "/assets/generated/maps/xianxia-paper-terrain-v1/frames";
-
-const PAPER_TERRAIN_TEXTURES = Object.fromEntries(
-  [
-    'grass-1', 'grass-2', 'grass-3', 'grass-4',
-    'path-1', 'path-2', 'stone-1', 'stone-2',
-    'water-1', 'water-2', 'lava-1', 'lava-2',
-    'ice-1', 'ice-2', 'void-1', 'immortal-1',
-  ].map((name) => [name, PIXI.Texture.from(`${PAPER_TERRAIN_FRAME_ROOT}/${name}.png`)])
-) as Record<string, PIXI.Texture>;
-
-const resolvePaperTerrainTexture = (
-  tile: AdventureTerrainTile,
-  theme: string
-): PIXI.Texture => {
-  const variant = tile.kind === 'path' || tile.kind === 'water' ? 1 : 0;
-  if (tile.kind === 'path') return PAPER_TERRAIN_TEXTURES[`path-${variant + 1}`];
-  if (theme === 'Void') return PAPER_TERRAIN_TEXTURES['void-1'];
-  if (theme === 'Immortal' || theme === 'Ultimate') return PAPER_TERRAIN_TEXTURES['immortal-1'];
-  if (theme === 'North') return PAPER_TERRAIN_TEXTURES[`ice-${variant + 1}`];
-  if (theme === 'West' || theme === 'Thunder') {
-    return tile.kind === 'water' || tile.semanticRole === 'hazard'
-      ? PAPER_TERRAIN_TEXTURES[`lava-${variant + 1}`]
-      : PAPER_TERRAIN_TEXTURES[`path-${variant + 1}`];
+const PAPER_MAP_BACKGROUND_ROOT = "/assets/generated/maps/xianxia-paper-backgrounds-v2/frames";
+const resolvePaperMapBackground = (mapData: MapData): string => {
+  if (mapData.id === "0") return IMMORTAL_FATE_TOWN_BASE;
+  if (mapData.theme === "Sect") return `${PAPER_MAP_BACKGROUND_ROOT}/sect-courtyard.png`;
+  if (mapData.theme === "North") return `${PAPER_MAP_BACKGROUND_ROOT}/north-snow-pass.png`;
+  if (mapData.theme === "West") {
+    return /烈焰|熔岩|龍血|黑山|火|煉獄/.test(mapData.name)
+      ? `${PAPER_MAP_BACKGROUND_ROOT}/west-volcanic.png`
+      : `${PAPER_MAP_BACKGROUND_ROOT}/west-beast-forest.png`;
   }
-  if (tile.kind === 'water') return PAPER_TERRAIN_TEXTURES[`water-${variant + 1}`];
-  if (tile.kind === 'accent' && theme === 'Sect') return PAPER_TERRAIN_TEXTURES[`stone-${variant + 1}`];
-  return PAPER_TERRAIN_TEXTURES[`grass-${((tile.x * 5 + tile.y * 7) % 4) + 1}`];
+  if (mapData.theme === "East") {
+    return /迷霧|湖|澤|海|島/.test(mapData.name)
+      ? `${PAPER_MAP_BACKGROUND_ROOT}/east-spirit-marsh.png`
+      : `${PAPER_MAP_BACKGROUND_ROOT}/east-spirit-meadow.png`;
+  }
+  return `${PAPER_MAP_BACKGROUND_ROOT}/sect-courtyard.png`;
 };
+
+// Kept as a local rendering primitive for the pixel-stage prototype; official
+// exploration maps now use coherent baked backgrounds instead of tile fills.
+const resolvePaperTerrainTexture = (
+  _tile?: AdventureTerrainTile,
+  _theme?: string
+): PIXI.Texture => PIXI.Texture.WHITE;
 
 const PAPER_MONSTER_ROOT = "/assets/generated/characters/paper-monster-archetypes-v1";
 const PAPER_MONSTER_ARCHETYPE_ROW: Record<MonsterVisualProfile['bodyType'], {
@@ -859,14 +854,11 @@ export default function AdventureStage({
       app.stage.addChild(world);
 
       // Layers
-      const illustratedMapBase = mapData.id === "0"
-        ? PIXI.Sprite.from(IMMORTAL_FATE_TOWN_BASE)
-        : null;
-      if (illustratedMapBase) {
-          illustratedMapBase.width = mapData.width * cellSize;
-          illustratedMapBase.height = mapData.height * cellSize;
-          world.addChild(illustratedMapBase);
-      }
+      const illustratedMapBase = PIXI.Sprite.from(resolvePaperMapBackground(mapData));
+      illustratedMapBase.width = mapData.width * cellSize;
+      illustratedMapBase.height = mapData.height * cellSize;
+      illustratedMapBase.eventMode = 'none';
+      world.addChild(illustratedMapBase);
       const terrainLayer = new PIXI.Graphics();
       world.addChild(terrainLayer);
       displayRefs.current.terrainLayer = terrainLayer;
@@ -879,7 +871,7 @@ export default function AdventureStage({
           mapData.width * cellSize,
           mapData.height * cellSize
       );
-      paperWorldMaterial.alpha = mapData.id === "0" ? 0.08 : 0.24;
+      paperWorldMaterial.alpha = 0.08;
       paperWorldMaterial.blendMode = PIXI.BLEND_MODES.MULTIPLY;
       paperWorldMaterial.eventMode = 'none';
       world.addChild(paperWorldMaterial);
@@ -1105,25 +1097,14 @@ export default function AdventureStage({
           assertAdventureTerrainTilesAreSafeForOfficialStage(terrainTiles);
 
           terrainLayer.clear();
-          if (mapData.id !== "0") {
-              terrainLayer.beginFill(terrainPalette.backgroundColor);
-              terrainLayer.drawRect(0, 0, drawW * cellSize, drawH * cellSize);
-              terrainLayer.endFill();
-              terrainTiles.forEach((tile) =>
-                  drawAdventureTerrainTile({
-                      graphics: terrainLayer,
-                      tile,
-                      cellSize,
-                      theme: mapData.theme,
-                  })
-              );
-          }
+          // Collision and path semantics remain data-driven, but the visible
+          // ground is one coherent baked paper-cut map instead of per-cell art.
 
           gridGraphics.clear();
           gridGraphics.lineStyle(
               1,
               terrainPalette.gridColor || GRID_COLOR,
-              mapData.id === "0" ? 0.07 : 0.18
+              0.045
           );
           for (let x = 0; x <= drawW; x++) {
              gridGraphics.moveTo(x * cellSize, 0);
@@ -1664,11 +1645,7 @@ export default function AdventureStage({
                   monsterContainer.monsterSprite.height = layout.height * 1.4;
               }
               
-              // Random Phase Pulse
-              // Simple hash from instanceId for phase
-              const phase = m.instanceId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 10;
-              const mPulse = 1 + Math.sin(time * 3 + phase) * 0.05;
-              container.scale.set(mPulse);
+              container.scale.set(1);
           });
 
 

@@ -1,0 +1,19 @@
+{
+  "id": "xianxia-paper-backgrounds-v2",
+  "source": "image_gen",
+  "visualModel": "baked_raster",
+  "runtimeObjectModel": "interactive_entities",
+  "collisionModel": "project_native_tile_collision",
+  "engineTarget": "pixi_project_native",
+  "artStyle": "soft_refined_paper_cut",
+  "reference": "immortal-fate-town-v1",
+  "dimensions": [1254, 1254],
+  "frames": [
+    "east-spirit-meadow.png",
+    "east-spirit-marsh.png",
+    "north-snow-pass.png",
+    "west-beast-forest.png",
+    "west-volcanic.png",
+    "sect-courtyard.png"
+  ]
+}
