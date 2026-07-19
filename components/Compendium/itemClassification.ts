@@ -1,5 +1,6 @@
 import {
   ConsumableType,
+  EquipmentItem,
   Item,
   ItemCategory,
   MaterialType,
@@ -207,5 +208,5 @@ export const isCompendiumGeneralItem = (item: Item): boolean => {
   return categoryId !== "manual" && categoryId !== "equipment";
 };
 
-export const isCompendiumEquipmentItem = (item: Item): boolean =>
+export const isCompendiumEquipmentItem = (item: Item): item is EquipmentItem =>
   getCompendiumItemCategory(item).id === "equipment";

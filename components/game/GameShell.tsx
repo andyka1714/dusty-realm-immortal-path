@@ -17,6 +17,7 @@ import {
   resolvePendingEncounterChoice,
 } from "../../store/actions/encounterActions";
 import { Button } from "../ui/button";
+import { SaveRecoveryBanner } from "./SaveRecoveryBanner";
 
 const Adventure = lazy(() =>
   import("../../pages/Adventure").then((module) => ({
@@ -186,6 +187,7 @@ export const GameShell: React.FC = () => {
       <GameHUD />
       <QuestTrackerHUD />
       <FloatingDock activePanel={activePanel} onTogglePanel={handleTogglePanel} />
+      <SaveRecoveryBanner />
 
       <Suspense fallback={null}>
         {activePanelConfig && (

@@ -7,6 +7,7 @@ import { normalizeLearnedSkills } from "../../data/skills";
 import { getRealmLabel } from "../../utils/realm";
 import { Button } from "../ui/button";
 import clsx from "clsx";
+import { GameAssetIcon } from "./GameAssetIcon";
 
 const skillTypeLabel = {
   Active: "主動術式",
@@ -46,7 +47,8 @@ export const SkillPanel: React.FC = () => {
               <Swords size={16} />
               戰鬥功法
             </div>
-            <div className="mt-2 text-lg font-black text-stone-100">
+            <div className="mt-2 flex items-center gap-3 text-lg font-black text-stone-100">
+              {equippedSkill && <GameAssetIcon skill={equippedSkill} className="h-12 w-12" />}
               {equippedSkill ? equippedSkill.name : "尚未裝備"}
             </div>
             <p className="mt-1 text-sm text-stone-400">
@@ -95,6 +97,7 @@ export const SkillPanel: React.FC = () => {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 font-bold text-stone-100">
+                        <GameAssetIcon skill={skill} className="h-10 w-10" />
                         {isEquipped && (
                           <CheckCircle2 size={14} className="text-amber-300" />
                         )}
@@ -138,6 +141,7 @@ export const SkillPanel: React.FC = () => {
                 className="rounded-lg border border-emerald-900/45 bg-emerald-950/10 p-3"
               >
                 <div className="flex items-center gap-2 font-bold text-emerald-200">
+                  <GameAssetIcon skill={skill} className="h-10 w-10" />
                   <Sparkles size={14} />
                   {skill.name}
                 </div>

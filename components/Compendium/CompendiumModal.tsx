@@ -68,6 +68,7 @@ import {
 } from "../../utils/consumableEffects";
 import { getStatusLabel } from "../../utils/battleStatusLabels";
 import { getPassiveSkillBonuses } from "../../utils/battlePassiveSkillBonusRegistry";
+import { GameAssetIcon } from "../game/GameAssetIcon";
 
 interface CompendiumModalProps {
   isOpen: boolean;
@@ -843,8 +844,11 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
         className="bg-stone-800 p-3 rounded border border-stone-700 group hover:border-amber-500/30 transition-colors"
         data-testid={`${testIdPrefix}-card-${item.id}`}
       >
-        <div className="flex justify-between">
-          <span className="font-bold text-stone-200">{item.name}</span>
+        <div className="flex justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <GameAssetIcon item={item} className="h-11 w-11" />
+            <span className="font-bold text-stone-200">{item.name}</span>
+          </div>
           <div className="ml-2">
             {item.category === ItemCategory.Equipment ? (
               <div className="flex gap-1">
@@ -992,8 +996,11 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
         className="bg-stone-800 p-3 rounded border border-stone-700 group hover:border-amber-500/30 transition-colors"
         data-testid={`compendium-skill-card-${skill.id}`}
       >
-        <div className="flex justify-between">
-          <span className="font-bold text-stone-200">{skill.name}</span>
+        <div className="flex justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <GameAssetIcon skill={skill} className="h-11 w-11" />
+            <span className="font-bold text-stone-200">{skill.name}</span>
+          </div>
           <span className="ml-2 h-fit shrink-0 rounded border border-amber-900/40 bg-amber-950/30 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200">
             {getSkillTypeLabel(skill.type)}
           </span>
@@ -1522,7 +1529,9 @@ export const CompendiumModal: React.FC<CompendiumModalProps> = ({
                       <Button
                         key={category.id}
                         data-testid={`compendium-item-category-filter-${category.id}`}
-                        onClick={() => setActiveItemCategory(category.id)}
+                        onClick={() =>
+                          setActiveItemCategory(category.id as GeneralItemCategoryId)
+                        }
                         variant={
                           activeItemCategory === category.id
                             ? "amber"

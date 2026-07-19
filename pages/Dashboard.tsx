@@ -252,7 +252,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ embedded = false }) => {
   if (isReincarnationFlowActive && soul.pendingLifeReview) {
     return (
       <ReincarnationFlow
-        flowStep={soul.flowStep}
+        flowStep={soul.flowStep === "hall" ? "hall" : "life_review"}
         summary={soul.pendingLifeReview}
         totalMerit={soul.totalMerit}
         lifetimeStats={soul.lifetimeStats}

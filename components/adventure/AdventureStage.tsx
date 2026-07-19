@@ -63,6 +63,18 @@ interface AdventureStageProps {
   completedQuests: string[]; // Passed from parent
 }
 
+const resolveCameraOffset = (
+  viewportSize: number,
+  worldSize: number,
+  focusPosition: number
+) => {
+  if (worldSize <= viewportSize) {
+    return (viewportSize - worldSize) / 2;
+  }
+
+  return Math.min(0, Math.max(viewportSize - worldSize, viewportSize / 2 - focusPosition));
+};
+
 // --- Constants ---
 const GRID_COLOR = 0x44403c;
 const GRID_BG = 0x0c0a09; // stone-950
@@ -75,6 +87,7 @@ const THEME_COLORS = {
 const PLAYER_COLOR = 0x4ade80; // Green-400
 const PLAYER_COMBAT_SPRITE_ROWS = 4;
 const PLAYER_COMBAT_SPRITE_COLS = 6;
+const IMMORTAL_FATE_TOWN_BASE = "/assets/generated/maps/immortal-fate-town-v1/frames/base.png";
 
 type MonsterDisplayContainer = PIXI.Container & {
   monsterProfile?: MonsterVisualProfile;
@@ -645,6 +658,14 @@ export default function AdventureStage({
       app.stage.addChild(world);
 
       // Layers
+      const illustratedMapBase = mapData.id === "0"
+        ? PIXI.Sprite.from(IMMORTAL_FATE_TOWN_BASE)
+        : null;
+      if (illustratedMapBase) {
+          illustratedMapBase.width = mapData.width * cellSize;
+          illustratedMapBase.height = mapData.height * cellSize;
+          world.addChild(illustratedMapBase);
+      }
       const terrainLayer = new PIXI.Graphics();
       world.addChild(terrainLayer);
       displayRefs.current.terrainLayer = terrainLayer;
@@ -653,7 +674,7 @@ export default function AdventureStage({
       world.addChild(gridGraphics);
 
       const hitArea = new PIXI.Graphics();
-      hitArea.interactive = true;
+      hitArea.eventMode = 'static';
       hitArea.alpha = 0; 
       world.addChild(hitArea);
 
@@ -870,19 +891,25 @@ export default function AdventureStage({
           assertAdventureTerrainTilesAreSafeForOfficialStage(terrainTiles);
 
           terrainLayer.clear();
-          terrainLayer.beginFill(terrainPalette.backgroundColor);
-          terrainLayer.drawRect(0, 0, drawW * cellSize, drawH * cellSize);
-          terrainLayer.endFill();
-          terrainTiles.forEach((tile) =>
-              drawAdventureTerrainTile({
-                  graphics: terrainLayer,
-                  tile,
-                  cellSize,
-              })
-          );
+          if (mapData.id !== "0") {
+              terrainLayer.beginFill(terrainPalette.backgroundColor);
+              terrainLayer.drawRect(0, 0, drawW * cellSize, drawH * cellSize);
+              terrainLayer.endFill();
+              terrainTiles.forEach((tile) =>
+                  drawAdventureTerrainTile({
+                      graphics: terrainLayer,
+                      tile,
+                      cellSize,
+                  })
+              );
+          }
 
           gridGraphics.clear();
-          gridGraphics.lineStyle(1, terrainPalette.gridColor || GRID_COLOR, 0.18);
+          gridGraphics.lineStyle(
+              1,
+              terrainPalette.gridColor || GRID_COLOR,
+              mapData.id === "0" ? 0.07 : 0.18
+          );
           for (let x = 0; x <= drawW; x++) {
              gridGraphics.moveTo(x * cellSize, 0);
              gridGraphics.lineTo(x * cellSize, drawH * cellSize);
@@ -1042,8 +1069,16 @@ export default function AdventureStage({
                    playerContainer.y = playerAnchor.y;
                }
                // Update Camera
-               world.x = width / 2 - visualRef.current.cam.x;
-               world.y = height / 2 - visualRef.current.cam.y;
+               world.x = resolveCameraOffset(
+                   width,
+                   mapData.width * cellSize,
+                   visualRef.current.cam.x
+               );
+               world.y = resolveCameraOffset(
+                   height,
+                   mapData.height * cellSize,
+                   visualRef.current.cam.y
+               );
                return;
           }
 
@@ -1308,8 +1343,16 @@ export default function AdventureStage({
           visualRef.current.cam.x += (targetCamX - visualRef.current.cam.x) * CAM_LERP;
           visualRef.current.cam.y += (targetCamY - visualRef.current.cam.y) * CAM_LERP;
           
-          world.x = width / 2 - visualRef.current.cam.x;
-          world.y = height / 2 - visualRef.current.cam.y;
+          world.x = resolveCameraOffset(
+              width,
+              mapData.width * cellSize,
+              visualRef.current.cam.x
+          );
+          world.y = resolveCameraOffset(
+              height,
+              mapData.height * cellSize,
+              visualRef.current.cam.y
+          );
 
 
           // --- 3. Monster Management ---
@@ -1597,5 +1640,11 @@ export default function AdventureStage({
       };
   }, [width, height, cellSize, mapData?.id, playerGender]);
 
-  return <div ref={containerRef} data-testid="adventure-stage" />;
+  return (
+    <div
+      ref={containerRef}
+      className="h-full w-full overflow-hidden"
+      data-testid="adventure-stage"
+    />
+  );
 }

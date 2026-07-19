@@ -153,7 +153,7 @@ export const QuestTrackerHUD: React.FC = () => {
         data-layout-anchor="below-character-hud"
         aria-label="任務追蹤"
       >
-        <div className="pointer-events-auto rounded-xl border border-stone-700/80 bg-stone-950/78 p-3 shadow-[0_12px_34px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+        <div className="paper-panel pointer-events-auto rounded-xl p-3 backdrop-blur-xl">
           <div className="mb-2 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-stone-200">
               <ScrollText size={15} className="text-amber-300" />
@@ -173,7 +173,7 @@ export const QuestTrackerHUD: React.FC = () => {
           type="button"
           variant="ghost"
           size="sm"
-          className="pointer-events-auto fixed bottom-28 left-4 z-[3100] inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-stone-950/88 px-3 py-2 text-xs font-bold tracking-widest text-amber-200 shadow-[0_10px_30px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+          className="paper-panel pointer-events-auto fixed bottom-28 left-3 z-[3100] inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-bold tracking-widest text-amber-200 backdrop-blur-xl"
           data-testid="quest-tracker-mobile-toggle"
           aria-controls="quest-tracker-mobile-panel"
           aria-expanded={isMobileOpen}
@@ -193,7 +193,7 @@ export const QuestTrackerHUD: React.FC = () => {
           data-testid="quest-tracker-mobile-panel"
           aria-label="任務追蹤"
           className={clsx(
-            "pointer-events-auto fixed bottom-28 left-4 right-4 z-[3090] max-h-[42dvh] overflow-y-auto rounded-xl border border-stone-700/80 bg-stone-950/92 p-3 shadow-[0_16px_42px_rgba(0,0,0,0.55)] backdrop-blur-xl",
+            "paper-panel pointer-events-auto fixed bottom-28 left-3 right-3 z-[3090] max-h-[42dvh] overflow-y-auto rounded-xl p-3 backdrop-blur-xl",
             isMobileOpen ? "block" : "hidden"
           )}
         >

@@ -536,7 +536,8 @@ describe("ReincarnationFlow", () => {
     );
 
     expect(markup).toContain("min-h-dvh");
-    expect(markup).toContain("max-w-[560px]");
-    expect(markup).toContain("單欄直向閱讀");
+    expect(markup).toContain("max-w-[1180px]");
+    expect(markup).toContain("lg:grid-cols-2");
+    expect(markup).toContain("手機維持單欄直向閱讀");
   });
 });

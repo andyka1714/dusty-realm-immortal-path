@@ -24,7 +24,7 @@ export const GameSection: React.FC<GameSectionProps> = ({
 }) => (
   <section
     className={clsx(
-      "relative overflow-hidden rounded-2xl border border-stone-800/90 bg-[linear-gradient(180deg,rgba(21,21,21,0.92)_0%,rgba(11,11,11,0.96)_100%)] shadow-[0_18px_40px_rgba(0,0,0,0.24)]",
+      "paper-cut-section relative overflow-hidden rounded-2xl",
       className
     )}
   >

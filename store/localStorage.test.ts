@@ -262,4 +262,33 @@ describe("loadState", () => {
       "sword-manual",
     ]);
   });
+
+  it("rejects invalid JSON without crashing the client", () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    storage.set(KEY, "{invalid-json");
+
+    expect(loadState()).toBeUndefined();
+    expect(error).toHaveBeenCalled();
+  });
+
+  it("reports quota failures through the recoverable save-error event", () => {
+    const dispatchEvent = vi.fn();
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubGlobal("window", { dispatchEvent });
+    vi.stubGlobal("CustomEvent", class {
+      constructor(public type: string) {}
+    });
+    vi.stubGlobal("localStorage", {
+      getItem: () => null,
+      setItem: () => {
+        throw new DOMException("quota exceeded", "QuotaExceededError");
+      },
+    });
+
+    expect(saveState({} as never)).toBe(false);
+    expect(error).toHaveBeenCalled();
+    expect(dispatchEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "dusty-realm-save-error" })
+    );
+  });
 });

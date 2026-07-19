@@ -823,32 +823,21 @@ export const Adventure: React.FC<AdventureProps> = ({
             });
 
         } else {
-            // Desktop Strategy: Square Viewport (1:1), Contained
-            const targetSize = TARGET_CELL_SIZE_DESKTOP;
-            let cols = Math.floor(width / targetSize);
-            let rows = Math.floor(height / targetSize);
-            
-            // Enforce Square
-            const minDim = Math.min(cols, rows);
-            cols = minDim;
-            rows = minDim;
-
-            // Ensure odd
-            if (cols % 2 === 0) cols -= 1;
-            if (rows % 2 === 0) rows -= 1;
-            
-            cols = Math.max(7, cols);
-            rows = Math.max(7, rows);
-
-            // Calculate integer cell size to fit
-            const finalCellSize = Math.floor(Math.min(width / cols, height / rows));
+            // Desktop Strategy: use the complete play area. The camera already
+            // follows the player, so forcing a square viewport only creates
+            // unused black gutters on wide screens.
+            const finalCellSize = TARGET_CELL_SIZE_DESKTOP;
+            let cols = Math.ceil(width / finalCellSize);
+            let rows = Math.ceil(height / finalCellSize);
+            if (cols % 2 === 0) cols += 1;
+            if (rows % 2 === 0) rows += 1;
 
             applyGridMetrics({
-                cols, 
-                rows, 
-                cellSize: finalCellSize, 
-                pixelWidth: cols * finalCellSize, 
-                pixelHeight: rows * finalCellSize 
+                cols: Math.max(7, cols),
+                rows: Math.max(7, rows),
+                cellSize: finalCellSize,
+                pixelWidth: width,
+                pixelHeight: height
             });
         }
     });
@@ -1954,9 +1943,20 @@ export const Adventure: React.FC<AdventureProps> = ({
 
   if (showIntro && mapData) {
       return (
-          <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-8 cursor-pointer text-center" onClick={finishIntro}>
-              <h1 className="text-4xl md:text-6xl font-bold text-stone-200 mb-8 tracking-[0.5em] border-y-2 border-stone-800 py-4 animate-fade-in">{mapData.name}</h1>
-              <p className="text-lg md:text-xl text-stone-400 font-serif leading-loose max-w-2xl fade-in-text">{mapData.introText}</p>
+          <div
+            className="fixed inset-0 z-[100] flex cursor-pointer flex-col items-center justify-center bg-cover bg-center p-5 text-center md:p-8"
+            style={{
+              backgroundImage: mapData.id === "0"
+                ? "linear-gradient(rgba(8,7,6,0.68),rgba(8,7,6,0.9)), url('/assets/generated/maps/immortal-fate-town-v1/frames/base.png')"
+                : "radial-gradient(circle at center, #29221b 0%, #090807 70%)",
+            }}
+            onClick={finishIntro}
+          >
+              <div className="paper-panel w-[min(92vw,44rem)] rounded-[28px] px-6 py-10 md:px-12 md:py-14">
+                <h1 className="mb-8 border-y border-amber-700/35 py-4 text-4xl font-bold tracking-[0.36em] text-stone-100 animate-fade-in md:text-6xl md:tracking-[0.5em]">{mapData.name}</h1>
+                <p className="mx-auto max-w-2xl font-serif text-base leading-loose text-stone-300 fade-in-text md:text-xl">{mapData.introText}</p>
+                <p className="mt-8 text-xs tracking-[0.28em] text-amber-300/70">點擊踏入此境</p>
+              </div>
           </div>
       );
   }
@@ -2062,7 +2062,7 @@ export const Adventure: React.FC<AdventureProps> = ({
         {/* Main Grid Render - FILLS AVAILABLE SPACE */}
         <div 
             ref={containerRef}
-            className="flex-1 flex items-center justify-center bg-stone-950/80 relative overflow-hidden"
+            className="relative flex min-h-0 flex-1 items-stretch justify-stretch overflow-hidden bg-stone-950/80"
         >
             {targetedMonster && targetedMonsterTemplate && !isBattling && (
                 <div className="absolute left-1/2 top-4 z-30 w-[min(420px,calc(100%-9rem))] -translate-x-1/2 rounded-xl border border-stone-700/90 bg-black/80 px-4 py-3 shadow-[0_0_30px_rgba(0,0,0,0.55)] backdrop-blur">

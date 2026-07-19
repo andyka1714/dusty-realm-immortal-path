@@ -5,11 +5,140 @@
 @layer base {
   :root {
     color-scheme: dark;
+    --paper-base: #e9e0cf;
+    --paper-ink: #25222a;
+    --paper-jade: #6faf9b;
+    --paper-cinnabar: #c96a4a;
+    --paper-ochre: #b89452;
+    --paper-azure: #6e8fa8;
+    --paper-violet: #806b9b;
   }
 
   body {
     font-family: "Noto Serif TC", serif;
     background-color: #1c1917;
     color: #e7e5e4;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-height: 100%;
+  }
+}
+
+@layer components {
+  .paper-panel {
+    position: relative;
+    border: 1px solid rgb(184 148 82 / 0.34);
+    background:
+      radial-gradient(circle at 18% 8%, rgb(233 224 207 / 0.09), transparent 27%),
+      linear-gradient(145deg, rgb(45 39 35 / 0.96), rgb(21 19 18 / 0.98));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      inset 0 -2px 0 rgb(0 0 0 / 0.24),
+      0 18px 48px rgb(0 0 0 / 0.4);
+  }
+
+  .paper-cut-section {
+    position: relative;
+    border: 1px solid rgb(184 148 82 / 0.3);
+    background:
+      radial-gradient(circle at 8% 0%, rgb(233 224 207 / 0.08), transparent 28%),
+      linear-gradient(160deg, rgb(50 43 37 / 0.92), rgb(24 21 19 / 0.97));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.055),
+      inset 0 -3px 0 rgb(0 0 0 / 0.22),
+      0 10px 0 -6px rgb(112 85 49 / 0.34),
+      0 18px 34px rgb(0 0 0 / 0.28);
+  }
+
+  .paper-cut-section::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 7px;
+    border: 1px solid rgb(233 224 207 / 0.045);
+    border-radius: calc(inherit - 7px);
+  }
+
+  .reincarnation-screen {
+    background:
+      linear-gradient(90deg, rgb(8 7 6 / 0.94), rgb(20 17 14 / 0.82) 50%, rgb(8 7 6 / 0.94)),
+      url('/assets/generated/maps/immortal-fate-town-v1/frames/base.png') center / cover fixed;
+  }
+
+  .reincarnation-panel {
+    min-height: calc(100dvh - 3rem);
+  }
+
+  .reincarnation-flow-grid > :first-child,
+  .reincarnation-flow-grid > :nth-child(2),
+  .reincarnation-flow-grid > :last-child {
+    grid-column: 1 / -1;
+  }
+
+  .reincarnation-panel .paper-cut-section > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 767px) {
+    .reincarnation-panel {
+      min-height: calc(100dvh - 2rem);
+    }
+  }
+
+  .paper-panel::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 6px;
+    border: 1px solid rgb(233 224 207 / 0.05);
+    border-radius: inherit;
+  }
+
+  .paper-asset-icon {
+    position: relative;
+    display: inline-flex;
+    width: 3rem;
+    height: 3rem;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.9rem;
+    border: 1px solid rgb(168 162 158 / 0.36);
+    background: radial-gradient(circle at 50% 35%, rgb(233 224 207 / 0.18), rgb(28 25 23 / 0.72));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 5px 12px rgb(0 0 0 / 0.35);
+    isolation: isolate;
+  }
+
+  .paper-asset-icon img {
+    width: 88%;
+    height: 88%;
+    object-fit: contain;
+    filter: drop-shadow(0 3px 2px rgb(0 0 0 / 0.32));
+  }
+
+  .paper-tier-medium { border-color: rgb(111 175 155 / 0.75); box-shadow: 0 0 14px rgb(111 175 155 / 0.2); }
+  .paper-tier-high { border-color: rgb(110 143 168 / 0.88); box-shadow: 0 0 18px rgb(110 143 168 / 0.3); }
+  .paper-tier-immortal { border-color: rgb(184 148 82 / 0.95); box-shadow: 0 0 22px rgb(184 148 82 / 0.42); }
+  .paper-tier-immortal::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    z-index: -1;
+    border-radius: inherit;
+    background: conic-gradient(from 20deg, transparent, rgb(184 148 82 / 0.35), transparent 30%);
+    animation: paper-tier-orbit 5s linear infinite;
+  }
+
+  @keyframes paper-tier-orbit { to { transform: rotate(360deg); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .paper-tier-immortal::after { animation: none; }
   }
 }

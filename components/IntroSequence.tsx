@@ -8,6 +8,7 @@ import clsx from 'clsx';
 import { Sparkles, ArrowRight, Activity, Sword, Dna } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import { PAPER_CUT_ICON_PATHS } from '../data/assets/paperCutIconRegistry';
 
 const PROLOGUE_TEXT = [
     "大荒曆一〇二六年，春。",
@@ -123,7 +124,7 @@ export const IntroSequence: React.FC = () => {
                  <p className="fade-in-text">{PROLOGUE_TEXT[PROLOGUE_TEXT.length - 1]}</p>
             </div>
 
-            <div className="bg-stone-900/50 p-6 rounded-xl border border-stone-800 space-y-6">
+            <div className="paper-panel space-y-6 rounded-2xl p-6">
                 <Input
                     type="text"
                     placeholder="請道友留下名諱"
@@ -180,7 +181,6 @@ export const IntroSequence: React.FC = () => {
     const renderAwakening = () => {
         // Determine current glow color based on generated stats (if shaking) or default
         let glowStyle = "w-40 h-40 bg-stone-700/10 blur-lg group-hover:bg-amber-500/10";
-        let stoneColor = "bg-gradient-to-br from-stone-600 to-stone-800 border-stone-900";
         let particleColor = "text-amber-200";
 
         if (isShaking && generatedStats) {
@@ -202,12 +202,17 @@ export const IntroSequence: React.FC = () => {
 
                     {/* The Stone */}
                     <div className={clsx(
-                        "w-32 h-32 rounded-full border-4 shadow-2xl relative z-10 flex items-center justify-center transition-transform",
-                        stoneColor,
+                        "relative z-10 flex h-36 w-36 items-center justify-center transition-transform",
                         isShaking && "animate-shake",
                         !isShaking && "animate-stone-pulse group-hover:scale-105"
                     )}>
-                        {isShaking && <Sparkles className={clsx("animate-spin", particleColor)} size={32} />}
+                        <img
+                            src={PAPER_CUT_ICON_PATHS.spiritStone}
+                            alt="感靈石"
+                            className="h-full w-full object-contain drop-shadow-[0_14px_18px_rgba(0,0,0,0.5)]"
+                            draggable={false}
+                        />
+                        {isShaking && <Sparkles className={clsx("absolute animate-spin", particleColor)} size={32} />}
                     </div>
 
                     {/* Particles Instruction */}
@@ -233,7 +238,7 @@ export const IntroSequence: React.FC = () => {
 
         return (
             <div className="animate-fade-in max-w-2xl mx-auto w-full py-6 md:py-10">
-                <div className="bg-stone-900 border border-stone-800 rounded-xl p-5 md:p-8 relative shadow-2xl space-y-6">
+                <div className="paper-panel relative space-y-6 rounded-2xl p-5 shadow-2xl md:p-8">
                     {/* Header with Title and Dialogue */}
                     <div className="text-center space-y-4 border-b border-stone-800 pb-6">
                         <div className="flex items-center justify-center gap-2 text-stone-500 text-xs md:text-sm uppercase tracking-widest">
@@ -353,8 +358,15 @@ export const IntroSequence: React.FC = () => {
     // --- Main Layout ---
     // Changed to min-h-full (or handled by parent) but allowing content to dictate height, parent handles scroll
     return (
-        <div className="flex items-center justify-center w-full p-4 md:p-6 min-h-full">
-            <div className="relative z-10 w-full flex justify-center">
+        <div
+            className="relative flex min-h-full w-full items-center justify-center overflow-hidden bg-cover bg-center p-4 md:p-6"
+            style={{
+                backgroundImage:
+                    "linear-gradient(rgba(8,7,6,0.8),rgba(8,7,6,0.94)), url('/assets/generated/maps/immortal-fate-town-v1/frames/base.png')",
+            }}
+        >
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(184,148,82,0.12),transparent_52%)]" />
+            <div className="relative z-10 flex w-full justify-center">
                 {stage === 0 && renderPrologue()}
                 {stage === 1 && renderIdentity()}
                 {stage === 2 && renderAwakening()}

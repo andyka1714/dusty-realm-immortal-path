@@ -29,7 +29,7 @@ const App: React.FC = () => {
 
   if (!isInitialized || isDead) {
     return (
-      <div className="h-screen w-screen bg-stone-950 text-stone-200 font-serif overflow-y-auto">
+      <div className="h-[100dvh] w-full overflow-y-auto bg-stone-950 font-serif text-stone-200">
         <Suspense fallback={<FullscreenLoading />}>
           <Dashboard />
         </Suspense>

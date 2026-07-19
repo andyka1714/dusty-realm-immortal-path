@@ -10,8 +10,13 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "monster:audit": "npx tsx scripts/monsterSpriteAssetAudit.ts",
     "monster:checklist": "npx tsx scripts/update_monster_sprite_checklist.ts",
-    "monster:qc": "python3 scripts/qc_monster_sprite_assets.py"
+    "monster:qc": "python3 scripts/qc_monster_sprite_assets.py",
+    "artifact:audit": "tsx scripts/audit-production-artifact.ts",
+    "balance:audit": "tsx scripts/system-balance-audit.ts",
+    "typecheck:strict": "node scripts/typecheck-strict-baseline.mjs",
+    "verify": "npm run typecheck && npm run typecheck:strict && npm test -- --run && npm run balance:audit && npm run build && npm run artifact:audit && npm run test:e2e -- --workers=1"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -34,11 +39,14 @@
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "@types/node": "^22.14.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.5.0",
     "postcss": "^8.5.10",
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
+    "tsx": "^4.23.1",
     "typescript": "~5.8.2",
     "vite": "^6.2.0",
     "vitest": "^3.2.4"

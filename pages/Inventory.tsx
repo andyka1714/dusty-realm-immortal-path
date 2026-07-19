@@ -31,6 +31,7 @@ import {
   RECOVERY_CONSUMABLE_COOLDOWN_MS,
   type ConsumableRuntimeResources,
 } from '../utils/consumableEffects';
+import { GameAssetIcon } from '../components/game/GameAssetIcon';
 
 interface InventoryProps {
   embedded?: boolean;
@@ -501,19 +502,11 @@ export const Inventory: React.FC<InventoryProps> = ({
                     {/* Equipped Badge */}
                     {equipped && <span className="absolute top-1 left-1 text-[10px] md:text-xs bg-amber-700 text-stone-100 px-1 rounded z-10 font-bold shadow-sm">裝</span>}
 
-                    {item.category === ItemCategory.Equipment && (
-                        <>
-                          {(item as any).slot === EquipmentSlot.Weapon && <Sword className={`w-5 h-5 md:w-8 md:h-8 ${qualityText}`} />}
-                          {(item as any).slot === EquipmentSlot.Head && <Crown className={`w-5 h-5 md:w-8 md:h-8 ${qualityText}`} />}
-                          {(item as any).slot === EquipmentSlot.Body && <Shirt className={`w-5 h-5 md:w-8 md:h-8 ${qualityText}`} />}
-                          {(item as any).slot === EquipmentSlot.Legs && <Footprints className={`w-5 h-5 md:w-8 md:h-8 ${qualityText}`} />}
-                          {(item as any).slot === EquipmentSlot.Accessory && <Medal className={`w-5 h-5 md:w-8 md:h-8 ${qualityText}`} />}
-                          {(item as any).slot === EquipmentSlot.Offhand && <Shield className={`w-5 h-5 md:w-8 md:h-8 ${qualityText}`} />}
-                        </>
-                    )}
-                    {item.category === ItemCategory.Consumable && <FlaskConical className="w-5 h-5 md:w-8 md:h-8 text-emerald-400" />}
-                    {item.category === ItemCategory.Material && <CircleDashed className="w-5 h-5 md:w-8 md:h-8 text-stone-600" />}
-                    {![ItemCategory.Equipment, ItemCategory.Consumable, ItemCategory.Material].includes(item.category) && <Package className="w-5 h-5 md:w-8 md:h-8 text-stone-600"/>}
+                    <GameAssetIcon
+                      item={item}
+                      quality={quality}
+                      className="h-9 w-9 border-0 bg-transparent shadow-none md:h-12 md:w-12"
+                    />
 
                     <span className={`text-[10px] md:text-sm font-medium mt-1 md:mt-2 text-center line-clamp-1 w-full ${qualityText}`}>{item.name}{slot.instance ? (slot.instance.quality >= 2 ? '+' : '') : ''}</span>
                     {item.category !== ItemCategory.Equipment && (

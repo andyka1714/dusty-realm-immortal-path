@@ -5,9 +5,12 @@ import {
   PersistedState,
 } from "./persistedStateMigration";
 
-const KEY = 'dusty-realm-save-v1';
+export const KEY = 'dusty-realm-save-v1';
 
 export const loadState = (): HydratedPersistedState | undefined => {
+  if (typeof localStorage === "undefined") {
+    return undefined;
+  }
   try {
     const serializedState = localStorage.getItem(KEY);
     if (serializedState === null) {
@@ -20,9 +23,9 @@ export const loadState = (): HydratedPersistedState | undefined => {
   }
 };
 
-export const saveState = (state: HydratedPersistedState): void => {
-  try {
-    const payload: PersistedSaveEnvelope = {
+export const createSaveEnvelope = (
+  state: HydratedPersistedState
+): PersistedSaveEnvelope => ({
       schemaVersion: 2,
       current: {
         character: state.character,
@@ -34,10 +37,24 @@ export const saveState = (state: HydratedPersistedState): void => {
         encounter: state.encounter,
       },
       soul: state.soul,
-    };
-    const serializedState = JSON.stringify(payload);
+    });
+
+export const serializeSaveState = (state: HydratedPersistedState): string =>
+  JSON.stringify(createSaveEnvelope(state));
+
+export const saveState = (state: HydratedPersistedState): boolean => {
+  if (typeof localStorage === "undefined") {
+    return false;
+  }
+  try {
+    const serializedState = serializeSaveState(state);
     localStorage.setItem(KEY, serializedState);
+    return true;
   } catch (err) {
     console.error("Failed to save state", err);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("dusty-realm-save-error"));
+    }
+    return false;
   }
 };

@@ -44,11 +44,11 @@ import {
 import { Button } from "../ui/button";
 
 const SCREEN_SHELL_CLASS =
-  "min-h-dvh w-full overflow-y-auto px-3 py-4 sm:px-4 sm:py-5 md:px-6 md:py-6";
+  "reincarnation-screen min-h-dvh w-full overflow-y-auto px-3 py-4 sm:px-4 sm:py-5 md:px-6 md:py-6";
 const PANEL_SHELL_CLASS =
-  "mx-auto w-full max-w-[560px] rounded-[28px] border border-stone-800 bg-stone-950/95 p-4 shadow-2xl sm:p-5 md:p-6";
+  "paper-panel reincarnation-panel mx-auto w-full max-w-[1180px] rounded-[28px] p-4 sm:p-5 md:p-6";
 const SECTION_SURFACE_CLASS =
-  "rounded-2xl border border-stone-800 bg-stone-900/70 p-4 sm:p-5";
+  "paper-cut-section rounded-2xl p-4 sm:p-5";
 const INHERIT_PREVIOUS_SPIRIT_ROOT_VALUE = "__inherit_previous_spirit_root__";
 
 const getCauseLabel = (cause: LifeReviewSummary["cause"]) => {
@@ -333,7 +333,7 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
   return (
     <div className={SCREEN_SHELL_CLASS}>
       <div className={PANEL_SHELL_CLASS}>
-        <div className="space-y-4 sm:space-y-5">
+        <div className="reincarnation-flow-grid grid gap-4 sm:gap-5 lg:grid-cols-2">
           <section className={SECTION_SURFACE_CLASS}>
             <div className="flex items-center gap-4">
               <div className="rounded-2xl border border-violet-500/30 bg-violet-500/10 p-3 text-violet-300">
@@ -349,7 +349,7 @@ const ReincarnationHallScreen: React.FC<ReincarnationHallScreenProps> = ({
             <p className="mt-4 text-sm leading-7 text-stone-400">
               先定下一世的修途傾向，再配置魂印、加護、遺珍與先天靈根。這裡調整的是開局偏好與可承接資源，
               <span className="font-medium text-stone-200">不會直接把下一世職業鎖死</span>；
-              你重生後仍然會從村莊起步，再依正式流程決定要走哪條路。此頁面會維持單欄直向閱讀，手機與桌面都共用同一組滾動邏輯。
+              你重生後仍然會從村莊起步，再依正式流程決定要走哪條路。手機維持單欄直向閱讀，桌機則展開為雙欄命格卷軸。
             </p>
           </section>
 

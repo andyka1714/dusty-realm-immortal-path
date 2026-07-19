@@ -64,14 +64,14 @@ export const GameHUD: React.FC = () => {
   const displayedMaxMp = worldPlayerResources?.maxMp ?? combatStats.maxMp;
 
   return (
-    <div className="pointer-events-none fixed left-4 top-4 z-[3000] w-[min(370px,calc(100vw-2rem))]">
+    <div className="pointer-events-none fixed left-3 top-3 z-[3000] w-[min(250px,calc(100vw-7.5rem))] sm:left-4 sm:top-4 sm:w-[min(300px,calc(100vw-2rem))] md:w-[min(370px,calc(100vw-2rem))]">
       <div
-        className="pointer-events-auto rounded-2xl border border-stone-700/70 bg-stone-950/88 px-3 py-3 shadow-[0_10px_28px_rgba(0,0,0,0.34)] backdrop-blur-xl"
+        className="paper-panel pointer-events-auto rounded-2xl px-3 py-3 backdrop-blur-xl"
         data-testid="game-hud-character-card"
       >
         <div className="flex items-start gap-3">
           <div
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-amber-500/35 bg-gradient-to-br from-stone-900 to-amber-950/35 text-lg font-black text-amber-300 shadow-[inset_0_0_14px_rgba(245,158,11,0.12)]"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-500/35 bg-gradient-to-br from-stone-900 to-amber-950/35 text-base font-black text-amber-300 shadow-[inset_0_0_14px_rgba(245,158,11,0.12)] sm:h-12 sm:w-12 sm:text-lg"
             data-testid="game-hud-avatar"
           >
             {character.name.slice(0, 1) || "道"}
@@ -137,7 +137,7 @@ export const GameHUD: React.FC = () => {
         </div>
 
         <div
-          className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 border-t border-stone-800/80 pt-2 text-xs text-stone-300"
+          className="mt-2 hidden grid-cols-2 gap-x-3 gap-y-1.5 border-t border-stone-800/80 pt-2 text-xs text-stone-300 sm:grid"
           data-testid="game-hud-compact-stat-grid"
         >
           <div className="flex min-w-0 items-center justify-between gap-2 rounded-md border border-stone-800/70 bg-black/16 px-2 py-1.5">
