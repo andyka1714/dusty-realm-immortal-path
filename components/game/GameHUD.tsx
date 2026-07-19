@@ -71,7 +71,7 @@ export const GameHUD: React.FC = () => {
       >
         <div className="flex items-start gap-3">
           <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-500/35 bg-gradient-to-br from-stone-900 to-amber-950/35 text-base font-black text-amber-300 shadow-[inset_0_0_14px_rgba(245,158,11,0.12)] sm:h-12 sm:w-12 sm:text-lg"
+            className="paper-control flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-500/50 bg-amber-950/70 text-base font-black text-amber-300 sm:h-12 sm:w-12 sm:text-lg"
             data-testid="game-hud-avatar"
           >
             {character.name.slice(0, 1) || "道"}

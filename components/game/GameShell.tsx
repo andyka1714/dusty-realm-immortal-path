@@ -181,7 +181,6 @@ export const GameShell: React.FC = () => {
         />
       </Suspense>
 
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.08),transparent_26%),radial-gradient(circle_at_bottom,rgba(59,130,246,0.08),transparent_24%)]"></div>
       <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_160px_rgba(0,0,0,0.72)]"></div>
 
       <GameHUD />

@@ -3,10 +3,8 @@ import { mkdir } from "node:fs/promises";
 
 const output = "output/playwright/audit-paper-cut-20260718";
 await mkdir(output, { recursive: true });
-const browser = await chromium.connectOverCDP("http://127.0.0.1:9223");
-const context = browser.contexts()[0];
-const sourcePage = context.pages()[0];
-const originalSave = await sourcePage.evaluate(() => localStorage.getItem("dusty-realm-save-v1"));
+const browser = await chromium.launch({ headless: true });
+const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
 const page = await context.newPage();
 await page.addInitScript(() => localStorage.removeItem("dusty-realm-save-v1"));
 await page.setViewportSize({ width: 390, height: 844 });
@@ -32,9 +30,4 @@ const metrics = await page.evaluate(() => ({
   brokenImages: [...document.images].filter((image) => image.complete && image.naturalWidth === 0).length,
 }));
 console.log(JSON.stringify(metrics, null, 2));
-await sourcePage.evaluate((save) => {
-  if (save === null) localStorage.removeItem("dusty-realm-save-v1");
-  else localStorage.setItem("dusty-realm-save-v1", save);
-}, originalSave);
-await page.close();
-process.exit(0);
+await browser.close();

@@ -124,7 +124,7 @@ export const IntroSequence: React.FC = () => {
                  <p className="fade-in-text">{PROLOGUE_TEXT[PROLOGUE_TEXT.length - 1]}</p>
             </div>
 
-            <div className="paper-panel space-y-6 rounded-2xl p-6">
+            <div className="paper-panel intro-paper-panel space-y-6 rounded-2xl p-6">
                 <Input
                     type="text"
                     placeholder="請道友留下名諱"
@@ -180,13 +180,13 @@ export const IntroSequence: React.FC = () => {
 
     const renderAwakening = () => {
         // Determine current glow color based on generated stats (if shaking) or default
-        let glowStyle = "w-40 h-40 bg-stone-700/10 blur-lg group-hover:bg-amber-500/10";
+        let glowStyle = "h-40 w-40 bg-transparent";
         let particleColor = "text-amber-200";
 
         if (isShaking && generatedStats) {
             const rootData = SPIRIT_ROOT_DETAILS[generatedStats.spiritRootId];
             // During shake, use the target color but intense blur
-            glowStyle = `w-64 h-64 blur-xl ${rootData.glowClass.split(' ')[1]}/30`;
+            glowStyle = `h-64 w-64 rounded-full blur-2xl ${rootData.glowClass.split(' ')[1]}/20`;
         }
 
         return (
@@ -202,14 +202,14 @@ export const IntroSequence: React.FC = () => {
 
                     {/* The Stone */}
                     <div className={clsx(
-                        "relative z-10 flex h-36 w-36 items-center justify-center transition-transform",
+                            "relative z-10 flex h-36 w-36 items-center justify-center border-0 bg-transparent shadow-none transition-transform",
                         isShaking && "animate-shake",
                         !isShaking && "animate-stone-pulse group-hover:scale-105"
                     )}>
                         <img
                             src={PAPER_CUT_ICON_PATHS.spiritStone}
                             alt="感靈石"
-                            className="h-full w-full object-contain drop-shadow-[0_14px_18px_rgba(0,0,0,0.5)]"
+                            className="spirit-stone-art h-full w-full object-contain"
                             draggable={false}
                         />
                         {isShaking && <Sparkles className={clsx("absolute animate-spin", particleColor)} size={32} />}
@@ -238,7 +238,7 @@ export const IntroSequence: React.FC = () => {
 
         return (
             <div className="animate-fade-in max-w-2xl mx-auto w-full py-6 md:py-10">
-                <div className="paper-panel relative space-y-6 rounded-2xl p-5 shadow-2xl md:p-8">
+                <div className="paper-panel intro-paper-panel relative space-y-6 rounded-2xl p-5 md:p-8">
                     {/* Header with Title and Dialogue */}
                     <div className="text-center space-y-4 border-b border-stone-800 pb-6">
                         <div className="flex items-center justify-center gap-2 text-stone-500 text-xs md:text-sm uppercase tracking-widest">
@@ -333,9 +333,6 @@ export const IntroSequence: React.FC = () => {
                             )}
                             data-testid="intro-embark"
                         >
-                            {/* Animated Background Gradient */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 opacity-80 animate-bg-slide z-0"></div>
-
                             {/* Hover Glow (Element Color) */}
                             <div className={clsx(
                                 "absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500",
@@ -362,10 +359,10 @@ export const IntroSequence: React.FC = () => {
             className="relative flex min-h-full w-full items-center justify-center overflow-hidden bg-cover bg-center p-4 md:p-6"
             style={{
                 backgroundImage:
-                    "linear-gradient(rgba(8,7,6,0.8),rgba(8,7,6,0.94)), url('/assets/generated/maps/immortal-fate-town-v1/frames/base.png')",
+                    "url('/assets/generated/maps/immortal-fate-town-v1/frames/base.png')",
             }}
         >
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(184,148,82,0.12),transparent_52%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-stone-950/80" />
             <div className="relative z-10 flex w-full justify-center">
                 {stage === 0 && renderPrologue()}
                 {stage === 1 && renderIdentity()}
