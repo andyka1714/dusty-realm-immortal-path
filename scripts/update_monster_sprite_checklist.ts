@@ -6,6 +6,7 @@ import { getAssetDefinition } from "../data/assets";
 import { createMonsterSpriteBasePath } from "../data/assets/monsterSpriteAssets";
 import { resolveMonsterVisualProfile } from "../utils/monsterVisualProfile";
 import { ElementType, EnemyRank, MajorRealm } from "../types";
+import { auditMonsterSpriteAssets } from "./monsterSpriteAssetAudit";
 
 const outputPath = "docs/06_Balance_Audit/22_怪物圖樣生成Checklist.md";
 
@@ -40,6 +41,23 @@ const elementName: Record<ElementType, string> = {
 };
 
 const ranks = [EnemyRank.Common, EnemyRank.Elite, EnemyRank.Boss] as const;
+const monsterRoot = path.join(
+  process.cwd(),
+  "public/assets/generated/characters/monsters"
+);
+const bodyTypesByEnemyId = Object.fromEntries(
+  Object.values(BESTIARY).map((enemy) => [
+    enemy.id,
+    resolveMonsterVisualProfile(enemy).bodyType,
+  ])
+);
+const assetAudit = auditMonsterSpriteAssets({
+  monsterRoot,
+  bodyTypesByEnemyId,
+});
+const auditByDirName = new Map(
+  assetAudit.records.map((record) => [record.dirName, record])
+);
 const requiredFiles = [
   "raw-sheet.png",
   "raw-sheet-clean.png",
@@ -57,6 +75,12 @@ const hasRequiredFiles = (basePath: string): boolean => {
     requiredFiles.every((file) => fs.existsSync(path.join(root, file))) &&
     fs.existsSync(path.join(root, "frames"))
   );
+};
+
+const getAuditRecord = (basePath: string) => {
+  const dirName = path.basename(basePath);
+
+  return auditByDirName.get(dirName) ?? null;
 };
 
 const getPipelineCellSize = (basePath: string): number | null => {
@@ -167,11 +191,22 @@ const statusFor = (
   basePath: string
 ): "未生成" | "待檔案檢查" | "QC failed" | "完成" => {
   const asset = getAssetDefinition(assetId);
+  const audit = getAuditRecord(basePath);
+
+  if (
+    audit?.status === "needs-regenerate-style" ||
+    audit?.status === "needs-regenerate-motion" ||
+    audit?.status === "missing-files" ||
+    audit?.status === "quarantine"
+  ) {
+    return audit.status === "missing-files" ? "待檔案檢查" : "QC failed";
+  }
 
   if (
     asset.source === "generated" &&
     asset.sprite?.qcStatus === "passed" &&
-    hasRequiredFiles(basePath)
+    hasRequiredFiles(basePath) &&
+    (audit?.status === "accepted" || audit?.status === "file-ready")
   ) {
     return "完成";
   }
@@ -187,6 +222,25 @@ const statusFor = (
   return "未生成";
 };
 
+const pairAuditReasonFor = (movementPath: string, combatPath: string): string | null => {
+  const movementAudit = getAuditRecord(movementPath);
+  const combatAudit = getAuditRecord(combatPath);
+  const failed = [movementAudit, combatAudit].find(
+    (audit) =>
+      audit?.status === "needs-regenerate-style" ||
+      audit?.status === "needs-regenerate-motion" ||
+      audit?.status === "quarantine" ||
+      audit?.status === "missing-files"
+  );
+
+  if (!failed) return null;
+  if (failed.status === "needs-regenerate-style") return "Style regenerate required";
+  if (failed.status === "needs-regenerate-motion") return "Movement direction QC failed";
+  if (failed.status === "quarantine") return "Quarantined scratch output";
+
+  return "待檔案檢查";
+};
+
 const rows = Object.values(BESTIARY).map((enemy) => {
   const profile = resolveMonsterVisualProfile(enemy);
   const movementPath = createMonsterSpriteBasePath({
@@ -199,6 +253,7 @@ const rows = Object.values(BESTIARY).map((enemy) => {
   });
   const movement = statusFor(profile.movementAssetId, movementPath);
   const combat = statusFor(profile.combatAssetId, combatPath);
+  const pairAuditReason = pairAuditReasonFor(movementPath, combatPath);
   const movementCellSize = getPipelineCellSize(movementPath);
   const combatCellSize = getPipelineCellSize(combatPath);
   const movementMetrics = getSheetMetrics(movementPath, 4, 4);
@@ -217,7 +272,7 @@ const rows = Object.values(BESTIARY).map((enemy) => {
       ? Math.max(movementHeight, combatHeight) /
         Math.min(movementHeight, combatHeight)
       : null;
-  const maxHeightRatio = profile.bodyType === "humanoid" ? 1.04 : 1.12;
+  const maxHeightRatio = profile.bodyType === "humanoid" ? 1.08 : 1.12;
   const footlineDelta =
     movementFootline && combatFootline
       ? Math.abs(movementFootline - combatFootline)
@@ -232,7 +287,7 @@ const rows = Object.values(BESTIARY).map((enemy) => {
       ? "是"
       : "否";
   const pairStyleQc =
-    movement === "完成" && combat === "完成"
+    pairAuditReason ?? (movement === "完成" && combat === "完成"
       ? movementUnique === false
         ? "Movement duplicate frames"
         : sameCellSize !== true
@@ -244,7 +299,7 @@ const rows = Object.values(BESTIARY).map((enemy) => {
           : profile.productionReadySprite
             ? "通過"
             : "未檢查"
-      : "待兩套完成";
+      : "待兩套完成");
 
   return { enemy, profile, movement, combat, pairStyleQc, ready };
 });

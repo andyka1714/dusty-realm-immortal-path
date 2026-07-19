@@ -11,6 +11,7 @@ export type GeneratedAssetStyle =
   | "pixel_art"
   | "clean_hd"
   | "pixel_inspired"
+  | "paper_cut"
   | "map_style"
   | "project_native";
 

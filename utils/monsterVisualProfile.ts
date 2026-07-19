@@ -4,6 +4,7 @@ import {
   type MonsterSpriteBodyType,
 } from "../data/assets/monsterSpriteAssets";
 import { ElementType, EnemyRank, MajorRealm, type Enemy } from "../types";
+import { PRODUCTION_READY_MONSTER_ID_SET } from "../data/assets/monsterSpriteReadiness";
 
 export type MonsterVisualArchetype =
   | "dog"
@@ -74,56 +75,7 @@ export interface MonsterVisualProfile {
 }
 
 const PLAYER_SCALE_REFERENCE = { width: 1, height: 2 } as const;
-const PRODUCTION_READY_MONSTER_IDS = new Set<string>([
-  "m1_c1",
-  "m1_c2",
-  "m2_c1",
-  "m2_c2",
-  "m3_c1",
-  "m3_c2",
-  "m10_c1",
-  "m10_c2",
-  "m11_c1",
-  "m11_c2",
-  "m12_c1",
-  "m12_c2",
-  "m20_c1",
-  "m20_c2",
-  "m21_c1",
-  "m21_c2",
-  "m22_c1",
-  "m22_c2",
-  "m5_c1",
-  "m5_c2",
-  "m6_c1",
-  "m6_c2",
-  "m7_c1",
-  "m7_c2",
-  "m14_c1",
-  "m14_c2",
-  "m15_c1",
-  "m15_c2",
-  "m16_c1",
-  "m16_c2",
-  "m24_c1",
-  "m24_c2",
-  "m25_c1",
-  "m25_c2",
-  "m26_c1",
-  "m26_c2",
-  "m30_c1",
-  "m30_c2",
-  "m31_c1",
-  "m31_c2",
-  "m32_c1",
-  "m32_c2",
-  "m40_c1",
-  "m40_c2",
-  "m41_c1",
-  "m41_c2",
-  "m42_c1",
-  "m42_c2",
-]);
+const PRODUCTION_READY_MONSTER_IDS = PRODUCTION_READY_MONSTER_ID_SET;
 
 const includesAny = (name: string, tokens: readonly string[]): boolean =>
   tokens.some((token) => name.includes(token));
@@ -145,17 +97,29 @@ const resolveBodyTypeAndArchetype = (
   if (includesAny(name, ["龜"])) {
     return { visualArchetype: "turtle", bodyType: "low_crawler" };
   }
-  if (includesAny(name, ["蝠", "鷲", "鷹", "鳥"])) {
+  if (includesAny(name, ["蚊", "蛾"])) {
+    return { visualArchetype: "insect", bodyType: "winged" };
+  }
+  if (includesAny(name, ["蝠", "鷲", "鷹", "鳥", "羽族", "翼人"])) {
     return { visualArchetype: "beast", bodyType: "winged" };
   }
   if (includesAny(name, ["蜥", "蟾蜍"])) {
     return { visualArchetype: "lizard", bodyType: "low_crawler" };
   }
-  if (includesAny(name, ["蜈蚣", "蜘蛛", "蠍", "蚊", "蟲", "蛭"])) {
+  if (includesAny(name, ["蜈蚣", "蜘蛛", "蠍", "蟲", "蛭"])) {
     return { visualArchetype: "insect", bodyType: "low_crawler" };
   }
   if (includesAny(name, ["蛟", "龍", "蟒", "蛇"])) {
     return { visualArchetype: name.includes("龍") ? "dragon" : "serpent", bodyType: "serpentine" };
+  }
+  if (includesAny(name, ["稻草人"])) {
+    return { visualArchetype: "plant", bodyType: "humanoid" };
+  }
+  if (includesAny(name, ["石像", "傀儡", "石靈", "巨人", "構裝", "石頭人"])) {
+    return { visualArchetype: "construct", bodyType: "construct" };
+  }
+  if (includesAny(name, ["魔人"])) {
+    return { visualArchetype: "humanoid_guard", bodyType: "humanoid" };
   }
   if (includesAny(name, ["熊"])) {
     return { visualArchetype: "bear", bodyType: "quadruped" };
@@ -166,7 +130,7 @@ const resolveBodyTypeAndArchetype = (
   if (includesAny(name, ["狗"])) {
     return { visualArchetype: "dog", bodyType: "quadruped" };
   }
-  if (includesAny(name, ["豬", "虎", "豹", "猿", "獸", "鹿"])) {
+  if (includesAny(name, ["豬", "虎", "豹", "猿", "獸", "鹿", "貓"])) {
     return { visualArchetype: name.includes("豬") ? "boar" : "beast", bodyType: "quadruped" };
   }
   if (includesAny(name, ["屍", "骷髏", "骨"])) {
@@ -178,19 +142,13 @@ const resolveBodyTypeAndArchetype = (
       bodyType: "spirit",
     };
   }
-  if (includesAny(name, ["稻草人"])) {
-    return { visualArchetype: "plant", bodyType: "plant" };
-  }
-  if (includesAny(name, ["石像", "傀儡", "石靈", "巨人", "構裝", "石頭人"])) {
-    return { visualArchetype: "construct", bodyType: "construct" };
-  }
   if (includesAny(name, ["花", "藤", "樹", "樁", "荊棘", "毒草", "靈植"])) {
     return { visualArchetype: "plant", bodyType: "plant" };
   }
   if (includesAny(name, ["劍客", "劍修", "劍士"])) {
     return { visualArchetype: "swordsman", bodyType: "humanoid" };
   }
-  if (includesAny(name, ["匪", "守衛", "獵手", "道童", "戰士", "修士", "使"])) {
+  if (includesAny(name, ["匪", "守衛", "獵手", "道童", "戰士", "修士", "使", "獄卒", "戍卒", "雷卒", "衛"])) {
     return {
       visualArchetype: name.includes("匪") ? "humanoid_bandit" : "humanoid_guard",
       bodyType: "humanoid",

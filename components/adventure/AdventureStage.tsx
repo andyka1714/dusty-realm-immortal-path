@@ -89,6 +89,143 @@ const PLAYER_COMBAT_SPRITE_ROWS = 4;
 const PLAYER_COMBAT_SPRITE_COLS = 6;
 const IMMORTAL_FATE_TOWN_BASE = "/assets/generated/maps/immortal-fate-town-v1/frames/base.png";
 
+const PAPER_MONSTER_COLORS: Record<MonsterVisualProfile['visualVariant'], number> = {
+  mortal: 0xb98b57,
+  sword: 0xb8c8ca,
+  beast: 0x9c7148,
+  mystic: 0x78669d,
+  fire: 0xc75f43,
+  water: 0x4f86a5,
+  wood: 0x66865a,
+  metal: 0x8b9296,
+  earth: 0xa17a50,
+  void: 0x55466f,
+  tribulation: 0x67519a,
+  immortal: 0xc09b50,
+  emperor: 0xb64845,
+};
+
+const createPaperCutMonsterAvatar = ({
+  profile,
+  cellSize,
+  rankColor,
+  symbol,
+}: {
+  profile: MonsterVisualProfile;
+  cellSize: number;
+  rankColor: number;
+  symbol: string;
+}) => {
+  const avatar = new PIXI.Container();
+  const width = Math.max(cellSize * 0.9, profile.footprintTiles.width * cellSize * 0.76);
+  const height = Math.max(cellSize * 0.82, profile.heightTiles * cellSize * 0.58);
+  const bodyColor = PAPER_MONSTER_COLORS[profile.visualVariant];
+  const paper = 0xead9b7;
+  const ink = 0x34271f;
+
+  const groundShadow = new PIXI.Graphics();
+  groundShadow.beginFill(0x211713, 0.34);
+  groundShadow.drawEllipse(cellSize * 0.08, cellSize * 0.05, width * 0.5, cellSize * 0.2);
+  groundShadow.endFill();
+  avatar.addChild(groundShadow);
+
+  const backing = new PIXI.Graphics();
+  backing.lineStyle(Math.max(1.5, cellSize * 0.045), ink, 0.92);
+  backing.beginFill(paper, 1);
+  backing.drawRoundedRect(-width * 0.48, -height, width * 0.96, height * 0.9, cellSize * 0.16);
+  backing.endFill();
+  backing.x = cellSize * 0.045;
+  backing.y = cellSize * 0.045;
+  avatar.addChild(backing);
+
+  const body = new PIXI.Graphics();
+  body.lineStyle(Math.max(1.2, cellSize * 0.035), ink, 0.96);
+  body.beginFill(bodyColor, 1);
+  switch (profile.bodyType) {
+    case 'humanoid':
+      body.drawCircle(0, -height * 0.73, height * 0.15);
+      body.drawPolygon([
+        -width * 0.2, -height * 0.57,
+        width * 0.2, -height * 0.57,
+        width * 0.3, -height * 0.16,
+        0, -height * 0.04,
+        -width * 0.3, -height * 0.16,
+      ]);
+      break;
+    case 'winged':
+      body.drawPolygon([
+        -width * 0.46, -height * 0.46,
+        -width * 0.12, -height * 0.72,
+        0, -height * 0.42,
+        width * 0.12, -height * 0.72,
+        width * 0.46, -height * 0.46,
+        width * 0.12, -height * 0.18,
+        -width * 0.12, -height * 0.18,
+      ]);
+      break;
+    case 'serpentine':
+      body.drawEllipse(-width * 0.12, -height * 0.33, width * 0.35, height * 0.2);
+      body.drawCircle(width * 0.28, -height * 0.47, height * 0.17);
+      break;
+    case 'low_crawler':
+      body.drawEllipse(0, -height * 0.38, width * 0.37, height * 0.24);
+      body.drawCircle(width * 0.34, -height * 0.42, height * 0.14);
+      break;
+    case 'quadruped':
+      body.drawRoundedRect(-width * 0.34, -height * 0.58, width * 0.62, height * 0.35, height * 0.15);
+      body.drawCircle(width * 0.34, -height * 0.58, height * 0.18);
+      body.drawRect(-width * 0.25, -height * 0.3, width * 0.1, height * 0.22);
+      body.drawRect(width * 0.12, -height * 0.3, width * 0.1, height * 0.22);
+      break;
+    case 'plant':
+      body.drawPolygon([
+        0, -height * 0.86,
+        width * 0.28, -height * 0.56,
+        width * 0.13, -height * 0.5,
+        width * 0.3, -height * 0.22,
+        0, -height * 0.08,
+        -width * 0.3, -height * 0.22,
+        -width * 0.13, -height * 0.5,
+        -width * 0.28, -height * 0.56,
+      ]);
+      break;
+    case 'spirit':
+      body.drawCircle(0, -height * 0.58, height * 0.25);
+      body.drawPolygon([
+        -width * 0.26, -height * 0.48,
+        width * 0.26, -height * 0.48,
+        width * 0.16, -height * 0.08,
+        0, -height * 0.22,
+        -width * 0.16, -height * 0.08,
+      ]);
+      break;
+    default:
+      body.drawRoundedRect(-width * 0.28, -height * 0.78, width * 0.56, height * 0.68, height * 0.12);
+  }
+  body.endFill();
+  avatar.addChild(body);
+
+  const seal = new PIXI.Graphics();
+  seal.lineStyle(Math.max(1, cellSize * 0.025), rankColor, 0.92);
+  seal.beginFill(0xf4ead2, 0.94);
+  seal.drawCircle(-width * 0.3, -height * 0.78, Math.max(8, cellSize * 0.18));
+  seal.endFill();
+  avatar.addChild(seal);
+
+  const glyph = new PIXI.Text(symbol, {
+    fontFamily: 'serif',
+    fontSize: Math.max(10, cellSize * 0.23),
+    fontWeight: 'bold',
+    fill: ink,
+    align: 'center',
+  });
+  glyph.anchor.set(0.5);
+  glyph.position.set(-width * 0.3, -height * 0.78);
+  avatar.addChild(glyph);
+
+  return avatar;
+};
+
 type MonsterDisplayContainer = PIXI.Container & {
   monsterProfile?: MonsterVisualProfile;
   monsterSprite?: PIXI.Sprite;
@@ -993,10 +1130,25 @@ export default function AdventureStage({
           container.addChild(bg);
           container.addChild(text);
 
+          if (profile) {
+              const paperAvatar = createPaperCutMonsterAvatar({
+                  profile,
+                  cellSize,
+                  rankColor: color,
+                  symbol,
+              });
+              paperAvatar.name = 'paper_cut_monster_avatar';
+              container.addChild(paperAvatar);
+              bg.visible = false;
+              text.visible = false;
+          }
+
           if (template && profile) {
               const movementAsset = getAssetDefinition(profile.movementAssetId);
               const combatAsset = getAssetDefinition(profile.combatAssetId);
               const canUseGeneratedMonsterSprites =
+                  movementAsset.style === 'paper_cut' &&
+                  combatAsset.style === 'paper_cut' &&
                   movementAsset.source === 'generated' &&
                   combatAsset.source === 'generated' &&
                   movementAsset.sprite?.qcStatus === 'passed' &&
@@ -1034,12 +1186,16 @@ export default function AdventureStage({
                       container.combatTextures = combatTextures;
                       container.monsterSprite = monsterSprite;
                       container.addChildAt(monsterSprite, 0);
+                      const paperAvatar = container.getChildByName('paper_cut_monster_avatar');
+                      if (paperAvatar) paperAvatar.visible = false;
                       bg.visible = false;
                       text.visible = false;
                   })
                   .catch(() => {
-                      bg.visible = true;
-                      text.visible = true;
+                      const paperAvatar = container.getChildByName('paper_cut_monster_avatar');
+                      if (paperAvatar) paperAvatar.visible = true;
+                      bg.visible = !paperAvatar;
+                      text.visible = !paperAvatar;
                   });
           }
           return container;

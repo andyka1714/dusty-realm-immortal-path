@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BESTIARY } from "../data/enemies";
+import { PRODUCTION_READY_MONSTER_IDS } from "../data/assets/monsterSpriteReadiness";
 import { EnemyRank } from "../types";
 import {
   listMissingMonsterVisualProfiles,
@@ -49,7 +50,7 @@ describe("monsterVisualProfile", () => {
 
     expect(resolveMonsterVisualProfile(BESTIARY.m20_c1)).toMatchObject({
       visualArchetype: "plant",
-      bodyType: "plant",
+      bodyType: "humanoid",
       footprintTiles: { width: 1, height: 1 },
       heightTiles: 2,
     });
@@ -100,6 +101,40 @@ describe("monsterVisualProfile", () => {
       bodyType: "construct",
       footprintTiles: { width: 1, height: 1 },
       heightTiles: 3,
+    });
+
+    expect(resolveMonsterVisualProfile(BESTIARY.m50_c2)).toMatchObject({
+      visualArchetype: "insect",
+      bodyType: "winged",
+      footprintTiles: { width: 2, height: 1 },
+      heightTiles: 1,
+    });
+
+    expect(resolveMonsterVisualProfile(BESTIARY.m61_c2)).toMatchObject({
+      visualArchetype: "beast",
+      bodyType: "winged",
+      footprintTiles: { width: 2, height: 1 },
+      heightTiles: 1,
+    });
+
+    expect(resolveMonsterVisualProfile(BESTIARY.m62_c2)).toMatchObject({
+      visualArchetype: "humanoid_guard",
+      bodyType: "humanoid",
+      footprintTiles: { width: 1, height: 1 },
+      heightTiles: 2,
+    });
+
+    expect(resolveMonsterVisualProfile(BESTIARY.m70_c1)).toMatchObject({
+      visualArchetype: "construct",
+      bodyType: "construct",
+      footprintTiles: { width: 1, height: 1 },
+      heightTiles: 3,
+    });
+
+    expect(resolveMonsterVisualProfile(BESTIARY.m70_c2)).toMatchObject({
+      bodyType: "quadruped",
+      footprintTiles: { width: 2, height: 2 },
+      heightTiles: 2,
     });
 
     expect(resolveMonsterVisualProfile(BESTIARY.m92_b1)).toMatchObject({
@@ -153,56 +188,7 @@ describe("monsterVisualProfile", () => {
 
     expect(
       profiles.filter((profile) => profile.productionReadySprite).map((profile) => profile.enemyId)
-    ).toEqual([
-      "m1_c1",
-      "m1_c2",
-      "m2_c1",
-      "m2_c2",
-      "m3_c1",
-      "m3_c2",
-      "m10_c1",
-      "m10_c2",
-      "m11_c1",
-      "m11_c2",
-      "m12_c1",
-      "m12_c2",
-      "m20_c1",
-      "m20_c2",
-      "m21_c1",
-      "m21_c2",
-      "m22_c1",
-      "m22_c2",
-      "m5_c1",
-      "m5_c2",
-      "m6_c1",
-      "m6_c2",
-      "m7_c1",
-      "m7_c2",
-      "m14_c1",
-      "m14_c2",
-      "m15_c1",
-      "m15_c2",
-      "m16_c1",
-      "m16_c2",
-      "m24_c1",
-      "m24_c2",
-      "m25_c1",
-      "m25_c2",
-      "m26_c1",
-      "m26_c2",
-      "m30_c1",
-      "m30_c2",
-      "m31_c1",
-      "m31_c2",
-      "m32_c1",
-      "m32_c2",
-      "m40_c1",
-      "m40_c2",
-      "m41_c1",
-      "m41_c2",
-      "m42_c1",
-      "m42_c2",
-    ]);
+    ).toEqual(PRODUCTION_READY_MONSTER_IDS);
     expect(movementAssetIds.size).toBe(profiles.length);
     expect(combatAssetIds.size).toBe(profiles.length);
     expect(
