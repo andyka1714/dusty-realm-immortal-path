@@ -87,25 +87,10 @@ const THEME_COLORS = {
 const PLAYER_COLOR = 0x4ade80; // Green-400
 const PLAYER_COMBAT_SPRITE_ROWS = 4;
 const PLAYER_COMBAT_SPRITE_COLS = 6;
-const IMMORTAL_FATE_TOWN_BASE = "/assets/generated/maps/immortal-fate-town-v1/frames/base.png";
 const PAPER_WORLD_MATERIAL = "/assets/generated/maps/paper-world-material-v1/frames/rice-paper.png";
-const PAPER_MAP_BACKGROUND_ROOT = "/assets/generated/maps/xianxia-paper-backgrounds-v2/frames";
-const resolvePaperMapBackground = (mapData: MapData): string => {
-  if (mapData.id === "0") return IMMORTAL_FATE_TOWN_BASE;
-  if (mapData.theme === "Sect") return `${PAPER_MAP_BACKGROUND_ROOT}/sect-courtyard.png`;
-  if (mapData.theme === "North") return `${PAPER_MAP_BACKGROUND_ROOT}/north-snow-pass.png`;
-  if (mapData.theme === "West") {
-    return /烈焰|熔岩|龍血|黑山|火|煉獄/.test(mapData.name)
-      ? `${PAPER_MAP_BACKGROUND_ROOT}/west-volcanic.png`
-      : `${PAPER_MAP_BACKGROUND_ROOT}/west-beast-forest.png`;
-  }
-  if (mapData.theme === "East") {
-    return /迷霧|湖|澤|海|島/.test(mapData.name)
-      ? `${PAPER_MAP_BACKGROUND_ROOT}/east-spirit-marsh.png`
-      : `${PAPER_MAP_BACKGROUND_ROOT}/east-spirit-meadow.png`;
-  }
-  return `${PAPER_MAP_BACKGROUND_ROOT}/sect-courtyard.png`;
-};
+const PAPER_MAP_BACKGROUND_ROOT = "/assets/generated/maps/paper-cut-v3";
+const resolvePaperMapBackground = (mapData: MapData): string =>
+  `${PAPER_MAP_BACKGROUND_ROOT}/${mapData.id}.webp`;
 
 // Kept as a local rendering primitive for the pixel-stage prototype; official
 // exploration maps now use coherent baked backgrounds instead of tile fills.

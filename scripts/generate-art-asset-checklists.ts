@@ -8,6 +8,7 @@ import { MATERIAL_ITEMS } from "../data/items/materials";
 import { CONSUMABLE_ITEMS } from "../data/items/consumables";
 import { MANUAL_ITEMS } from "../data/items/manuals";
 import { SKILLS } from "../data/skills";
+import type { EquipmentItem } from "../types";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const checklistDir = join(root, "docs", "assets");
@@ -25,7 +26,7 @@ const relativeAssetPath = (group: string, id: string) =>
 
 const hasAsset = (entry: ChecklistEntry) => existsSync(join(root, entry.path));
 
-const renderChecklist = (title: string, entries: ChecklistEntry[]) => {
+const renderChecklist = (title: string, entries: readonly ChecklistEntry[]) => {
   const completed = entries.filter(hasAsset).length;
   const rows = entries.map((entry) =>
     `- [${hasAsset(entry) ? "x" : " "}] \`${entry.id}\`｜${entry.name}｜${entry.detail}｜\`${entry.path}\``
@@ -58,12 +59,15 @@ const monsterEntries: ChecklistEntry[] = Object.values(BESTIARY).map((enemy) => 
   path: relativeAssetPath("characters/monsters/paper-cut-v3", enemy.id),
 }));
 
-const equipmentEntries: ChecklistEntry[] = Object.values(EQUIPMENT_ITEMS).map((item) => ({
-  id: item.id,
-  name: item.name,
-  detail: `${item.slot}｜${item.subType}｜${item.minRealm ?? item.reqRealm ?? "不限"}`,
-  path: relativeAssetPath("icons/equipment-paper-v3", item.id),
-}));
+const equipmentEntries: ChecklistEntry[] = Object.values(EQUIPMENT_ITEMS).map((rawItem) => {
+  const item = rawItem as EquipmentItem;
+  return {
+    id: item.id,
+    name: item.name,
+    detail: `${item.slot}｜${item.subType}｜${item.minRealm ?? item.reqRealm ?? "不限"}`,
+    path: relativeAssetPath("icons/equipment-paper-v3", item.id),
+  };
+});
 
 const otherItemEntries = [
   ...Object.values(MATERIAL_ITEMS),
