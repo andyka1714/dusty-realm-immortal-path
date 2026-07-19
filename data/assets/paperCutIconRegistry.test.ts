@@ -12,14 +12,16 @@ describe("paper-cut visual asset coverage", () => {
   it("maps every runtime item to a generated paper-cut frame", () => {
     Object.values(ITEMS).forEach((item) => {
       expect(getPaperCutItemIcon(item), item.id).toMatch(
-        /^\/assets\/generated\/ui\/paper-cut-core-v1\/frames\/icon-\d+\.png$/
+        /^\/assets\/generated\/icons\/(?:equipment|items)-paper-v3\/[a-z0-9_-]+\.webp$/
       );
     });
   });
 
   it("maps every formal skill to a generated paper-cut frame", () => {
     FORMAL_CORE_SKILLS_SORTED.forEach((skill) => {
-      expect(getPaperCutSkillIcon(skill), skill.id).toContain("/frames/icon-");
+      expect(getPaperCutSkillIcon(skill), skill.id).toBe(
+        `/assets/generated/icons/skills-paper-v3/${skill.id}.webp`
+      );
     });
   });
 

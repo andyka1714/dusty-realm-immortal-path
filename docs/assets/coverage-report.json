@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-19T15:17:30.439Z",
+  "generatedAt": "2026-07-19T16:14:25.365Z",
   "groups": {
     "maps": {
       "total": 70,
@@ -13,8 +13,8 @@
     },
     "equipment": {
       "total": 204,
-      "completed": 0,
-      "missing": 204
+      "completed": 204,
+      "missing": 0
     },
     "items": {
       "total": 147,
