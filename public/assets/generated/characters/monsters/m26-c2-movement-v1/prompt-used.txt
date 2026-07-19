@@ -1,1 +1,0 @@
-m26_c2 水靈龜 movement sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x4 common-rank water-element turtle, 2x1 low crawling shell body, neutral frames in columns 1/3 and alternating side-leg crawl phases in columns 2/4, no elite or boss effects.

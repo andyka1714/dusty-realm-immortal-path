@@ -310,10 +310,11 @@ const summary = rows.reduce(
     if (row.movement === "完成") acc.movementDone += 1;
     if (row.combat === "完成") acc.combatDone += 1;
     if (row.ready === "是") acc.ready += 1;
+    if (row.profile.paperCutRuntimeReady) acc.paperRuntimeReady += 1;
 
     return acc;
   },
-  { total: 0, movementDone: 0, combatDone: 0, ready: 0 }
+  { total: 0, movementDone: 0, combatDone: 0, ready: 0, paperRuntimeReady: 0 }
 );
 
 const rankSummary = ranks.map((rank) => {
@@ -350,6 +351,7 @@ const lines = [
   `- Movement 完成：${summary.movementDone} / ${summary.total}`,
   `- Combat 完成：${summary.combatDone} / ${summary.total}`,
   `- Production-ready：${summary.ready} / ${summary.total}`,
+  `- 紙雕 runtime avatar：${summary.paperRuntimeReady} / ${summary.total}`,
   ...rankSummary,
   "",
   "## 逐隻清單",

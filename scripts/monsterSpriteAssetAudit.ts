@@ -199,8 +199,9 @@ export const auditMonsterSpriteAssets = ({
   monsterRoot: string;
   bodyTypesByEnemyId: Record<string, MonsterSpriteBodyType>;
 }): MonsterSpriteAuditSummary => {
-  const records = fs
-    .readdirSync(monsterRoot, { withFileTypes: true })
+  const records = (fs.existsSync(monsterRoot)
+    ? fs.readdirSync(monsterRoot, { withFileTypes: true })
+    : [])
     .filter((entry) => entry.isDirectory())
     .map((entry) => {
       const dirName = entry.name;

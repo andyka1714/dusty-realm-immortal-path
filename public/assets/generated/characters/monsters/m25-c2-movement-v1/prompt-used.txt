@@ -1,1 +1,0 @@
-m25_c2 毒荊棘妖 movement sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x4 common-rank wood-element poisonous thorn-vine plant, slim 1x2 rooted plant body, neutral frames in columns 1/3 and alternating vine/leaf/root phases in columns 2/4, no elite or boss effects.

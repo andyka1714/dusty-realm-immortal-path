@@ -1,1 +1,0 @@
-Create a top-down 2D game sprite sheet for one creature: 荒徑野狗 (wild stray dog), common mortal monster. Invisible 4x4 sheet, row order down,left,right,up. Four movement frames per direction. Solid #FF00FF background, no grid lines. Low quadruped dog, 2x1 relative to 1x2 player, common-rank clean silhouette, no aura.

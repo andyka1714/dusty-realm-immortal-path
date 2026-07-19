@@ -1,1 +1,0 @@
-m25_c2 毒荊棘妖 combat sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x6 common-rank wood-element poisonous thorn-vine plant, same identity/style/scale as movement, fixed row facings, contained thorn-vine lash sequence, normalized to avoid edge clipping, no elite or boss effects.

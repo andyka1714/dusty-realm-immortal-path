@@ -189,6 +189,7 @@ describe("monsterVisualProfile", () => {
     expect(
       profiles.filter((profile) => profile.productionReadySprite).map((profile) => profile.enemyId)
     ).toEqual(PRODUCTION_READY_MONSTER_IDS);
+    expect(profiles.every((profile) => profile.paperCutRuntimeReady)).toBe(true);
     expect(movementAssetIds.size).toBe(profiles.length);
     expect(combatAssetIds.size).toBe(profiles.length);
     expect(

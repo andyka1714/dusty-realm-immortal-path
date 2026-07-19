@@ -1,1 +1,0 @@
-m16_c1 獅蠍獸 movement sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x4 common-rank fire-element low lion-scorpion hybrid, 2x1 low crawler, neutral frames in columns 1/3 and alternating claw/leg/tail phases in columns 2/4, no elite or boss effects.

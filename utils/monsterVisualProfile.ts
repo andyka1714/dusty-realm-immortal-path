@@ -68,6 +68,7 @@ export interface MonsterVisualProfile {
   playerScaleReference: { width: 1; height: 2 };
   rankVisual: MonsterRankVisualLanguage;
   productionReadySprite: boolean;
+  paperCutRuntimeReady: true;
   directionalMovement: "four_direction";
   directionalCombat: "four_direction";
   movementAssetId: string;
@@ -321,6 +322,7 @@ export const resolveMonsterVisualProfile = (enemy: Enemy): MonsterVisualProfile 
     playerScaleReference: PLAYER_SCALE_REFERENCE,
     rankVisual: resolveRankVisualLanguage(enemy.rank),
     productionReadySprite: PRODUCTION_READY_MONSTER_IDS.has(enemy.id),
+    paperCutRuntimeReady: true,
     directionalMovement: "four_direction",
     directionalCombat: "four_direction",
     movementAssetId: createMonsterSpriteAssetId({

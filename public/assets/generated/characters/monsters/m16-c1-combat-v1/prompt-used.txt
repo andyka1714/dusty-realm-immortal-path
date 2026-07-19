@@ -1,1 +1,0 @@
-m16_c1 獅蠍獸 combat sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x6 common-rank fire-element low lion-scorpion hybrid, same identity/style/scale as movement, fixed row facings, contained claw and stinger sequence, no elite or boss effects.

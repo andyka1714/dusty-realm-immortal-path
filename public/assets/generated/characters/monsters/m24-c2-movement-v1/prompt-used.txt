@@ -1,1 +1,0 @@
-m24_c2 符紙人 movement sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x4 common-rank fire-element animated talisman paper person, slim 1x2 paper-doll body, neutral frames in columns 1/3 and alternating flutter phases in columns 2/4, no elite or boss effects.

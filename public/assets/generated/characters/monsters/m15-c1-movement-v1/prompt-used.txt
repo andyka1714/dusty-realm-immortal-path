@@ -1,1 +1,0 @@
-m15_c1 鐵皮野豬 movement sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x4 common-rank earth-element low boar, armored hide, 2x1 low quadruped, neutral frames in columns 1/3 and alternating leg phases in columns 2/4, no elite or boss effects.

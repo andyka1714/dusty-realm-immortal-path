@@ -1,1 +1,0 @@
-m15_c1 鐵皮野豬 combat sheet. Generated with $generate2dsprite using built-in image_gen. Four-direction 4x6 common-rank earth-element low boar, same identity/style/scale as movement, fixed row facings, contained tusk charge/headbutt sequence, no elite or boss effects.
