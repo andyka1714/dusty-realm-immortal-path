@@ -1,5 +1,0 @@
-Six production top-down xianxia exploration maps generated with built-in image generation.
-
-Shared art direction: use immortal-fate-town-v1 as the strict visual reference; refined soft layered paper-cut relief, hand-painted rice-paper surfaces, fine ink-like contours, subtle stacked-paper shadows, coherent large terrain forms, low texture noise, no grid, no tiles, no checkerboard, no text, and no characters.
-
-Map variants: eastern spirit-farm meadow, eastern marsh and lakeside, northern snow pass, western beast forest, western volcanic wasteland, and cultivation sect courtyard.

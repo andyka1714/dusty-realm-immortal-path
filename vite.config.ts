@@ -10,6 +10,16 @@ const copyRuntimeAssets = () => ({
     const targetRoot = path.resolve(__dirname, 'dist/assets/generated');
     rmSync(targetRoot, { recursive: true, force: true });
     const sourceRoot = path.resolve(__dirname, 'public/assets/generated');
+    const copyDirectoryFiles = (sourceDirectory: string, relativeDirectory: string, extension: string) => {
+      if (!existsSync(sourceDirectory)) return;
+      const targetDirectory = path.resolve(__dirname, 'dist/assets/generated', relativeDirectory);
+      mkdirSync(targetDirectory, { recursive: true });
+      for (const entry of readdirSync(sourceDirectory)) {
+        const sourcePath = path.join(sourceDirectory, entry);
+        if (!statSync(sourcePath).isFile() || !entry.endsWith(extension)) continue;
+        copyFileSync(sourcePath, path.join(targetDirectory, entry));
+      }
+    };
     const copyFrames = (directory: string, relativeDirectory: string) => {
       if (!existsSync(directory)) return;
       for (const entry of readdirSync(directory)) {
@@ -30,6 +40,31 @@ const copyRuntimeAssets = () => ({
 
     copyFrames(path.join(sourceRoot, 'characters'), 'characters');
     copyFrames(path.join(sourceRoot, 'maps'), 'maps');
+    copyDirectoryFiles(
+      path.join(sourceRoot, 'maps/paper-cut-v3'),
+      'maps/paper-cut-v3',
+      '.webp'
+    );
+    copyDirectoryFiles(
+      path.join(sourceRoot, 'characters/monsters/paper-cut-v3'),
+      'characters/monsters/paper-cut-v3',
+      '.webp'
+    );
+    copyDirectoryFiles(
+      path.join(sourceRoot, 'icons/equipment-paper-v3'),
+      'icons/equipment-paper-v3',
+      '.webp'
+    );
+    copyDirectoryFiles(
+      path.join(sourceRoot, 'icons/items-paper-v3'),
+      'icons/items-paper-v3',
+      '.webp'
+    );
+    copyDirectoryFiles(
+      path.join(sourceRoot, 'icons/skills-paper-v3'),
+      'icons/skills-paper-v3',
+      '.webp'
+    );
 
     const fallback = path.join(sourceRoot, 'ui/fallback/transparent.png');
     if (existsSync(fallback)) {
