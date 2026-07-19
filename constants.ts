@@ -431,16 +431,16 @@ export const REALM_BASE_STATS: Record<MajorRealm, { hp: number; mp: number }> = 
 
 export const REALM_EXP_CONFIG: Record<MajorRealm, { base: number; growth: number; isLinear?: boolean }> = {
     [MajorRealm.Mortal]: { base: 100, growth: 1, isLinear: true },
-    [MajorRealm.QiRefining]: { base: 2500, growth: 1.25 },
-    [MajorRealm.Foundation]: { base: 75000, growth: 1.15 },
-    [MajorRealm.GoldenCore]: { base: 1250000, growth: 1.14 },
-    [MajorRealm.NascentSoul]: { base: 20000000, growth: 1.13 },
-    [MajorRealm.SpiritSevering]: { base: 300000000, growth: 1.12 },
-    [MajorRealm.VoidRefining]: { base: 5000000000, growth: 1.11 },
-    [MajorRealm.Fusion]: { base: 75000000000, growth: 1.10 },
-    [MajorRealm.Mahayana]: { base: 1000000000000, growth: 1.09 },
-    [MajorRealm.Tribulation]: { base: 15000000000000, growth: 1.08 },
-    [MajorRealm.Immortal]: { base: 50000000000000, growth: 1.06 },
+    [MajorRealm.QiRefining]: { base: 3000, growth: 1.18 },
+    [MajorRealm.Foundation]: { base: 70000, growth: 1.14 },
+    [MajorRealm.GoldenCore]: { base: 750000, growth: 1.13 },
+    [MajorRealm.NascentSoul]: { base: 8000000, growth: 1.12 },
+    [MajorRealm.SpiritSevering]: { base: 72000000, growth: 1.11 },
+    [MajorRealm.VoidRefining]: { base: 590000000, growth: 1.10 },
+    [MajorRealm.Fusion]: { base: 4700000000, growth: 1.09 },
+    [MajorRealm.Mahayana]: { base: 36000000000, growth: 1.08 },
+    [MajorRealm.Tribulation]: { base: 295000000000, growth: 1.07 },
+    [MajorRealm.Immortal]: { base: 2800000000000, growth: 1.06 },
     [MajorRealm.ImmortalEmperor]: { base: 0, growth: 0 }, // No Exp
 };
 

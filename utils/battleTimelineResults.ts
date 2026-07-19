@@ -3,6 +3,7 @@ import { getDropRewards } from "../data/drop_tables";
 import { getItem } from "../data/items";
 import { generateDrops } from "./dropSystem";
 import { formatSpiritStones, pushCombatLog } from "./battleLog";
+import { getCombatExperienceReward } from "./progressionBalance";
 
 export interface AutoBattleRewards {
   spiritStones: number;
@@ -70,7 +71,7 @@ export const resolveVictoryRewards = ({
   playerMaxHp: number;
   enemyHp: number;
 }): AutoBattleRewards => {
-  const exp = enemy.exp || 0;
+  const exp = getCombatExperienceReward(enemy);
   pushCombatLog(logs, {
     turn,
     timeMs: currentTimeMs,

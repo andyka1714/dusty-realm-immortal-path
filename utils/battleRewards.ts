@@ -3,6 +3,7 @@ import { getItem } from "../data/items";
 import { getDropRewards } from "../data/drop_tables";
 import { generateDrops } from "./dropSystem";
 import { formatSpiritStone } from "./currency";
+import { getCombatExperienceReward } from "./progressionBalance";
 
 export interface BattleRewardManifest {
   expAmount: number;
@@ -41,7 +42,9 @@ export const createBattleRewardManifest = ({
   enemy: Enemy;
   rewards?: BattleRewardSource;
 }): BattleRewardManifest => {
-  const expAmount = rewards?.exp && rewards.exp > 0 ? rewards.exp : enemy.exp;
+  const expAmount = rewards?.exp && rewards.exp > 0
+    ? rewards.exp
+    : getCombatExperienceReward(enemy);
   const spiritStones = rewards?.spiritStones ?? getDropRewards(enemy).spiritStones;
   const drops = rewards?.drops ?? generateDrops(enemy);
   const spiritStoneAwards: number[] = [];

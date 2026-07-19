@@ -26,6 +26,7 @@ import {
     getSkillManualTierLabel,
 } from '../../data/items/manuals';
 import { MessageCircle, Gift, CheckCircle, Circle, ScrollText } from 'lucide-react';
+import { getScaledQuestExperienceReward } from '../../utils/progressionBalance';
 
 interface QuestModalProps {
     npc: NPC;
@@ -55,7 +56,7 @@ const getQualityTextColor = (quality: ItemQuality) => {
 export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
     const dispatch = useDispatch();
     const { activeQuests, completedQuests, npcAffinity, sectAffinity } = useSelector((state: RootState) => state.quest);
-    const { majorRealm } = useSelector((state: RootState) => state.character);
+    const { majorRealm, maxExp } = useSelector((state: RootState) => state.character);
     const npcRelationship = resolveNpcInteractionAffinity({
         npcId: npc.id,
         sectId: resolveSectIdFromRouteId(npc.id),
@@ -247,9 +248,14 @@ export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
 
                 rewards.forEach(r => {
                     if (r.exp) {
-                        dispatch(gainExperience(r.exp));
-                        rewardLogParts.push(`<exp>修為 ${r.exp}</exp>`);
-                        dispatch(addVisualEffect({ type: 'text', text: `修為 +${r.exp}`, colorInt: 0xa78bfa, color: '#a78bfa' })); // Purple-400
+                        const scaledExperience = getScaledQuestExperienceReward({
+                            baseExperience: r.exp,
+                            currentMaxExperience: maxExp,
+                            questType: currentQuest.type,
+                        });
+                        dispatch(gainExperience(scaledExperience));
+                        rewardLogParts.push(`<exp>修為 ${scaledExperience}</exp>`);
+                        dispatch(addVisualEffect({ type: 'text', text: `修為 +${scaledExperience}`, colorInt: 0xa78bfa, color: '#a78bfa' })); // Purple-400
                     }
                     if (r.spiritStones) {
                         dispatch(addSpiritStones({ amount: r.spiritStones, source: 'quest' }));
@@ -393,7 +399,15 @@ export const QuestModal: React.FC<QuestModalProps> = ({ npc, onClose }) => {
                                 <span>獎勵：</span>
                                 {currentQuest.rewards.map((r, i) => (
                                     <React.Fragment key={i}>
-                                        {r.exp && <span className="text-purple-400">修為 {r.exp}</span>}
+                                        {r.exp && (
+                                            <span className="text-purple-400">
+                                                修為 {getScaledQuestExperienceReward({
+                                                    baseExperience: r.exp,
+                                                    currentMaxExperience: maxExp,
+                                                    questType: currentQuest.type,
+                                                })}
+                                            </span>
+                                        )}
                                         {r.spiritStones && <span className="text-yellow-400">靈石 {r.spiritStones}</span>}
                                         {r.items && r.items.map((rewardItem, idx) => {
                                             const itemDef = ITEMS[rewardItem.itemId];
