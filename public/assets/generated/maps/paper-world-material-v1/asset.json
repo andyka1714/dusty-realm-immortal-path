@@ -1,0 +1,19 @@
+{
+  "assetId": "map.paper_world_material_v1",
+  "kind": "map",
+  "name": "全境紙雕地表材質",
+  "source": "derived_from_generated_map",
+  "visualModel": "layered_tilemap",
+  "runtimeObjectModel": "y_sorted",
+  "collisionModel": "tile_collision_and_trigger_zones",
+  "style": "paper_cut",
+  "files": {
+    "runtimeTexture": "frames/rice-paper.png",
+    "sourceMap": "../immortal-fate-town-v1/frames/base.png"
+  },
+  "usage": [
+    "map_background",
+    "terrain_material"
+  ],
+  "qcStatus": "passed"
+}

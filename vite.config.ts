@@ -29,6 +29,7 @@ const copyRuntimeAssets = () => ({
     };
 
     copyFrames(path.join(sourceRoot, 'characters'), 'characters');
+    copyFrames(path.join(sourceRoot, 'maps'), 'maps');
 
     const fallback = path.join(sourceRoot, 'ui/fallback/transparent.png');
     if (existsSync(fallback)) {

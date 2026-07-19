@@ -88,6 +88,7 @@ const PLAYER_COLOR = 0x4ade80; // Green-400
 const PLAYER_COMBAT_SPRITE_ROWS = 4;
 const PLAYER_COMBAT_SPRITE_COLS = 6;
 const IMMORTAL_FATE_TOWN_BASE = "/assets/generated/maps/immortal-fate-town-v1/frames/base.png";
+const PAPER_WORLD_MATERIAL = "/assets/generated/maps/paper-world-material-v1/frames/rice-paper.png";
 
 const PAPER_MONSTER_COLORS: Record<MonsterVisualProfile['visualVariant'], number> = {
   mortal: 0xb98b57,
@@ -806,6 +807,19 @@ export default function AdventureStage({
       const terrainLayer = new PIXI.Graphics();
       world.addChild(terrainLayer);
       displayRefs.current.terrainLayer = terrainLayer;
+
+      // A shared rice-paper layer keeps every generated terrain theme in the
+      // same physical paper-diorama material system without baking dozens of
+      // full-size map images into the production bundle.
+      const paperWorldMaterial = new PIXI.TilingSprite(
+          PIXI.Texture.from(PAPER_WORLD_MATERIAL),
+          mapData.width * cellSize,
+          mapData.height * cellSize
+      );
+      paperWorldMaterial.alpha = mapData.id === "0" ? 0.08 : 0.24;
+      paperWorldMaterial.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+      paperWorldMaterial.eventMode = 'none';
+      world.addChild(paperWorldMaterial);
 
       const gridGraphics = new PIXI.Graphics();
       world.addChild(gridGraphics);
