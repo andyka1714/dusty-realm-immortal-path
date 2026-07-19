@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-19T12:23:15.527Z",
+  "generatedAt": "2026-07-19T15:17:30.439Z",
   "groups": {
     "maps": {
       "total": 70,
@@ -8,8 +8,8 @@
     },
     "monsters": {
       "total": 265,
-      "completed": 0,
-      "missing": 265
+      "completed": 265,
+      "missing": 0
     },
     "equipment": {
       "total": 204,

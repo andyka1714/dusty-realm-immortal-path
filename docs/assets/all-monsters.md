@@ -1,272 +1,272 @@
 # 所有怪物素材 Checklist
 
 - 資料定義總數：265
-- 已有唯一素材：0
-- 尚缺素材：265
-- 完成率：0.00%
+- 已有唯一素材：265
+- 尚缺素材：0
+- 完成率：100.00%
 
-- [ ] `m1_c1`｜荒徑野狗｜Common｜0｜None｜`public/assets/generated/characters/monsters/paper-cut-v3/m1_c1.webp`
-- [ ] `m1_c2`｜攔路劫匪｜Common｜0｜None｜`public/assets/generated/characters/monsters/paper-cut-v3/m1_c2.webp`
-- [ ] `m2_c1`｜古道劍客｜Common｜0｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m2_c1.webp`
-- [ ] `m2_c2`｜石壁壁虎｜Common｜0｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m2_c2.webp`
-- [ ] `m3_c1`｜巡山道童｜Common｜0｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m3_c1.webp`
-- [ ] `m3_c2`｜山腳巨熊｜Common｜0｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m3_c2.webp`
-- [ ] `m10_c1`｜密林野豬｜Common｜0｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m10_c1.webp`
-- [ ] `m10_c2`｜樹梢毒蛇｜Common｜0｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m10_c2.webp`
-- [ ] `m11_c1`｜蠻荒獵手｜Common｜0｜None｜`public/assets/generated/characters/monsters/paper-cut-v3/m11_c1.webp`
-- [ ] `m11_c2`｜硬皮犀牛｜Common｜0｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m11_c2.webp`
-- [ ] `m12_c1`｜谷口守衛｜Common｜0｜None｜`public/assets/generated/characters/monsters/paper-cut-v3/m12_c1.webp`
-- [ ] `m12_c2`｜嗜血蝙蝠｜Common｜0｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m12_c2.webp`
-- [ ] `m20_c1`｜田間稻草人｜Common｜0｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m20_c1.webp`
-- [ ] `m20_c2`｜偷糧碩鼠｜Common｜0｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m20_c2.webp`
-- [ ] `m21_c1`｜迷霧幻影｜Common｜0｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m21_c1.webp`
-- [ ] `m21_c2`｜沼澤水蛭｜Common｜0｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m21_c2.webp`
-- [ ] `m22_c1`｜湖畔水怪｜Common｜0｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m22_c1.webp`
-- [ ] `m22_c2`｜草甸餓狼｜Common｜0｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m22_c2.webp`
-- [ ] `m5_c1`｜劍木樁妖｜Common｜1｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m5_c1.webp`
-- [ ] `m5_c2`｜遊蕩劍魂｜Common｜1｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m5_c2.webp`
-- [ ] `m6_c1`｜鏽劍甲蟲｜Common｜1｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m6_c1.webp`
-- [ ] `m6_c2`｜斷刃狼｜Common｜1｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m6_c2.webp`
-- [ ] `m7_c1`｜劍煞邪靈｜Common｜1｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m7_c1.webp`
-- [ ] `m7_c2`｜劍塚守衛｜Common｜1｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m7_c2.webp`
-- [ ] `m14_c1`｜赤血水怪｜Common｜1｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m14_c1.webp`
-- [ ] `m14_c2`｜蠻力巨猿｜Common｜1｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m14_c2.webp`
-- [ ] `m15_c1`｜鐵皮野豬｜Common｜1｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m15_c1.webp`
-- [ ] `m15_c2`｜疾風豹｜Common｜1｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m15_c2.webp`
-- [ ] `m16_c1`｜獅蠍獸｜Common｜1｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m16_c1.webp`
-- [ ] `m16_c2`｜狂暴棕熊｜Common｜1｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m16_c2.webp`
-- [ ] `m24_c1`｜幻影靈貓｜Common｜1｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m24_c1.webp`
-- [ ] `m24_c2`｜符紙人｜Common｜1｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m24_c2.webp`
-- [ ] `m25_c1`｜食藥鼠｜Common｜1｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m25_c1.webp`
-- [ ] `m25_c2`｜毒荊棘妖｜Common｜1｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m25_c2.webp`
-- [ ] `m26_c1`｜靈水蟒｜Common｜1｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m26_c1.webp`
-- [ ] `m26_c2`｜水靈龜｜Common｜1｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m26_c2.webp`
-- [ ] `m30_c1`｜雪原白狼｜Common｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m30_c1.webp`
-- [ ] `m30_c2`｜冰晶蟲｜Common｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m30_c2.webp`
-- [ ] `m31_c1`｜冰封屍傀｜Common｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m31_c1.webp`
-- [ ] `m31_c2`｜寒冰骷髏｜Common｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m31_c2.webp`
-- [ ] `m32_c1`｜紫電靈鷲｜Common｜2｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m32_c1.webp`
-- [ ] `m32_c2`｜引雷石像｜Common｜2｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m32_c2.webp`
-- [ ] `m40_c1`｜腐化鬣狗｜Common｜2｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m40_c1.webp`
-- [ ] `m40_c2`｜嗜血蝠群｜Common｜2｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m40_c2.webp`
-- [ ] `m41_c1`｜鬼面蜘蛛｜Common｜2｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m41_c1.webp`
-- [ ] `m41_c2`｜嗜血妖花｜Common｜2｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m41_c2.webp`
-- [ ] `m42_c1`｜火蜥蜴｜Common｜2｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m42_c1.webp`
-- [ ] `m42_c2`｜熔岩石頭人｜Common｜2｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m42_c2.webp`
-- [ ] `m50_c1`｜影豹｜Common｜2｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m50_c1.webp`
-- [ ] `m50_c2`｜奪靈毒蚊｜Common｜2｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m50_c2.webp`
-- [ ] `m51_c1`｜劇毒蟾蜍｜Common｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m51_c1.webp`
-- [ ] `m51_c2`｜毒液飛蛾｜Common｜2｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m51_c2.webp`
-- [ ] `m52_c1`｜雷澤水妖｜Common｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m52_c1.webp`
-- [ ] `m52_c2`｜紫電銀鰻｜Common｜2｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m52_c2.webp`
-- [ ] `m60_c1`｜罡風鷹｜Common｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m60_c1.webp`
-- [ ] `m60_c2`｜風元素｜Common｜3｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m60_c2.webp`
-- [ ] `m61_c1`｜羽族斥候｜Common｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m61_c1.webp`
-- [ ] `m61_c2`｜浮島翼人｜Common｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m61_c2.webp`
-- [ ] `m62_c1`｜鎖鏈怨靈｜Common｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m62_c1.webp`
-- [ ] `m62_c2`｜斷罪獄卒｜Common｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m62_c2.webp`
-- [ ] `m70_c1`｜岩石傀儡｜Common｜3｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m70_c1.webp`
-- [ ] `m70_c2`｜黑山甲獸｜Common｜3｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m70_c2.webp`
-- [ ] `m71_c1`｜熔岩魔人｜Common｜3｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m71_c1.webp`
-- [ ] `m71_c2`｜炎甲蟲｜Common｜3｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m71_c2.webp`
-- [ ] `m72_c1`｜五毒獸｜Common｜3｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m72_c1.webp`
-- [ ] `m72_c2`｜噬毒蜈蚣｜Common｜3｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m72_c2.webp`
-- [ ] `m80_c1`｜巡海夜叉｜Common｜3｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m80_c1.webp`
-- [ ] `m80_c2`｜風暴水母｜Common｜3｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m80_c2.webp`
-- [ ] `m81_c1`｜仙島靈猴｜Common｜3｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m81_c1.webp`
-- [ ] `m81_c2`｜靈島鹿靈｜Common｜3｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m81_c2.webp`
-- [ ] `m82_c1`｜蜃氣妖｜Common｜3｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m82_c1.webp`
-- [ ] `m82_c2`｜迷霧海葵｜Common｜3｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m82_c2.webp`
-- [ ] `m90_c1`｜冰魄幽靈｜Common｜4｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m90_c1.webp`
-- [ ] `m90_c2`｜冰霜女妖｜Common｜4｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m90_c2.webp`
-- [ ] `m91_c1`｜極光飛魚｜Common｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m91_c1.webp`
-- [ ] `m91_c2`｜天光靈｜Common｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m91_c2.webp`
-- [ ] `m92_c1`｜劍意殘魂｜Common｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m92_c1.webp`
-- [ ] `m92_c2`｜鎮劍石靈｜Common｜4｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m92_c2.webp`
-- [ ] `m100_c1`｜荒原巨人｜Common｜4｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m100_c1.webp`
-- [ ] `m100_c2`｜荒地暴龍｜Common｜4｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m100_c2.webp`
-- [ ] `m101_c1`｜血池孽獸｜Common｜4｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m101_c1.webp`
-- [ ] `m101_c2`｜龍血蚊｜Common｜4｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m101_c2.webp`
-- [ ] `m102_c1`｜蠻荒巫衛｜Common｜4｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m102_c1.webp`
-- [ ] `m102_c2`｜荒古咒柱｜Common｜4｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m102_c2.webp`
-- [ ] `m110_c1`｜噬魂怪｜Common｜4｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m110_c1.webp`
-- [ ] `m110_c2`｜精神體｜Common｜4｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m110_c2.webp`
-- [ ] `m111_c1`｜幽冥戰鬼｜Common｜4｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m111_c1.webp`
-- [ ] `m111_c2`｜地煞陰卒｜Common｜4｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m111_c2.webp`
-- [ ] `m112_c1`｜虛空蟲族｜Common｜4｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m112_c1.webp`
-- [ ] `m112_c2`｜虛空掠食者｜Common｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m112_c2.webp`
-- [ ] `m120_c1`｜異界魔兵｜Common｜5｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m120_c1.webp`
-- [ ] `m120_c2`｜天界巡邏者｜Common｜5｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m120_c2.webp`
-- [ ] `m120_c3`｜斷魂焰靈｜Common｜5｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m120_c3.webp`
-- [ ] `m120_c4`｜鎖界妖僧｜Common｜5｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m120_c4.webp`
-- [ ] `m122_c1`｜斷界戍卒｜Common｜5｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m122_c1.webp`
-- [ ] `m122_c2`｜殞橋戰傀｜Common｜5｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m122_c2.webp`
-- [ ] `m122_c3`｜星烽殘將｜Common｜5｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m122_c3.webp`
-- [ ] `m122_c4`｜鎮橋血衛｜Common｜5｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m122_c4.webp`
-- [ ] `m121_c1`｜怨念集合體｜Common｜5｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m121_c1.webp`
-- [ ] `m121_c2`｜殘念魔刃｜Common｜5｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m121_c2.webp`
-- [ ] `m121_c3`｜噬念鬼母｜Common｜5｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m121_c3.webp`
-- [ ] `m121_c4`｜葬界骨龍｜Common｜5｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m121_c4.webp`
-- [ ] `m130_c1`｜光陰蜉蝣｜Common｜6｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m130_c1.webp`
-- [ ] `m130_c2`｜溯時靈魚｜Common｜6｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m130_c2.webp`
-- [ ] `m130_c3`｜鏡界殘像｜Common｜6｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m130_c3.webp`
-- [ ] `m130_c4`｜裂隙追魂獸｜Common｜6｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m130_c4.webp`
-- [ ] `m132_c1`｜虛淵巡衛｜Common｜6｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m132_c1.webp`
-- [ ] `m132_c2`｜界縫殘兵｜Common｜6｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m132_c2.webp`
-- [ ] `m132_c3`｜虛潮法靈｜Common｜6｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m132_c3.webp`
-- [ ] `m132_c4`｜斷界牽魂使｜Common｜6｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m132_c4.webp`
-- [ ] `m131_c1`｜空間吞噬者｜Common｜6｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m131_c1.webp`
-- [ ] `m131_c2`｜裂空魔雲｜Common｜6｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m131_c2.webp`
-- [ ] `m131_c3`｜虛空牧星者｜Common｜6｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m131_c3.webp`
-- [ ] `m131_c4`｜時淵殘骸｜Common｜6｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m131_c4.webp`
-- [ ] `m140_c1`｜聖城執法隊｜Common｜7｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m140_c1.webp`
-- [ ] `m140_c2`｜玄機戰獸｜Common｜7｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m140_c2.webp`
-- [ ] `m140_c3`｜聖城審判官｜Common｜7｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m140_c3.webp`
-- [ ] `m140_c4`｜靈紋鎮獸｜Common｜7｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m140_c4.webp`
-- [ ] `m142_c1`｜壇前鎮衛｜Common｜7｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m142_c1.webp`
-- [ ] `m142_c2`｜萬靈司誥使｜Common｜7｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m142_c2.webp`
-- [ ] `m142_c3`｜法壇靈衛｜Common｜7｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m142_c3.webp`
-- [ ] `m142_c4`｜靈契縛獸｜Common｜7｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m142_c4.webp`
-- [ ] `m141_c1`｜靈元戰體｜Common｜7｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m141_c1.webp`
-- [ ] `m141_c2`｜暴亂靈渦｜Common｜7｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m141_c2.webp`
-- [ ] `m141_c3`｜混元拘魂使｜Common｜7｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m141_c3.webp`
-- [ ] `m141_c4`｜天穹裂殖體｜Common｜7｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m141_c4.webp`
-- [ ] `m150_c1`｜鯤鵬幼體｜Common｜8｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m150_c1.webp`
-- [ ] `m150_c2`｜深海巨魷｜Common｜8｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m150_c2.webp`
-- [ ] `m150_c3`｜吞日海鵬｜Common｜8｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m150_c3.webp`
-- [ ] `m150_c4`｜深淵潮妖｜Common｜8｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m150_c4.webp`
-- [ ] `m152_c1`｜界海烽卒｜Common｜8｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m152_c1.webp`
-- [ ] `m152_c2`｜裂潮戍衛｜Common｜8｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m152_c2.webp`
-- [ ] `m152_c3`｜界烽戰魂｜Common｜8｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m152_c3.webp`
-- [ ] `m152_c4`｜鎮潮古像｜Common｜8｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m152_c4.webp`
-- [ ] `m151_c1`｜天梯守門人｜Common｜8｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m151_c1.webp`
-- [ ] `m151_c2`｜登仙執法者｜Common｜8｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m151_c2.webp`
-- [ ] `m151_c3`｜登天囚徒｜Common｜8｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m151_c3.webp`
-- [ ] `m151_c4`｜天關鎮獸｜Common｜8｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m151_c4.webp`
-- [ ] `m160_c1`｜劫雷獸｜Common｜9｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m160_c1.webp`
-- [ ] `m160_c2`｜劫火鴉｜Common｜9｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m160_c2.webp`
-- [ ] `m160_c3`｜劫雲巡狩者｜Common｜9｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m160_c3.webp`
-- [ ] `m160_c4`｜天罰雷傀｜Common｜9｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m160_c4.webp`
-- [ ] `m162_c1`｜天刑雷卒｜Common｜9｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m162_c1.webp`
-- [ ] `m162_c2`｜罰獄雷鎖｜Common｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m162_c2.webp`
-- [ ] `m162_c3`｜天刑雷將｜Common｜9｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m162_c3.webp`
-- [ ] `m162_c4`｜雷獄誅魂使｜Common｜9｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m162_c4.webp`
-- [ ] `m161_c1`｜雷池金龍｜Common｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m161_c1.webp`
-- [ ] `m161_c2`｜雷光電蛇｜Common｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m161_c2.webp`
-- [ ] `m161_c3`｜天譴雷侍｜Common｜9｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m161_c3.webp`
-- [ ] `m161_c4`｜萬劫殘龍｜Common｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m161_c4.webp`
-- [ ] `m170_c1`｜仙界仙鶴｜Common｜10｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m170_c1.webp`
-- [ ] `m170_c2`｜仙宮力士｜Common｜10｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m170_c2.webp`
-- [ ] `m170_c3`｜巡界仙靈｜Common｜10｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m170_c3.webp`
-- [ ] `m170_c4`｜鎮界金人｜Common｜10｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m170_c4.webp`
-- [ ] `m172_c1`｜玉詔鎮卒｜Common｜10｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m172_c1.webp`
-- [ ] `m172_c2`｜仙獄錄魂使｜Common｜10｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m172_c2.webp`
-- [ ] `m172_c3`｜玉獄天鎖｜Common｜10｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m172_c3.webp`
-- [ ] `m172_c4`｜仙庭禁將｜Common｜10｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m172_c4.webp`
-- [ ] `m171_c1`｜金甲天衛｜Common｜10｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m171_c1.webp`
-- [ ] `m171_c2`｜天界戰鷹｜Common｜10｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m171_c2.webp`
-- [ ] `m171_c3`｜玉京監察使｜Common｜10｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m171_c3.webp`
-- [ ] `m171_c4`｜天庭誅邪令｜Common｜10｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m171_c4.webp`
-- [ ] `m181_c1`｜太初巡環衛｜Common｜11｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m181_c1.webp`
-- [ ] `m181_c2`｜本源蝕獸｜Common｜11｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m181_c2.webp`
-- [ ] `m181_c3`｜太初法相｜Common｜11｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m181_c3.webp`
-- [ ] `m181_c4`｜歸源執印官｜Common｜11｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m181_c4.webp`
-- [ ] `m182_c1`｜歸墟裂界卒｜Common｜11｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m182_c1.webp`
-- [ ] `m182_c2`｜萬象鎖魂使｜Common｜11｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m182_c2.webp`
-- [ ] `m182_c3`｜滅界熔兵｜Common｜11｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m182_c3.webp`
-- [ ] `m182_c4`｜歸墟吞星獸｜Common｜11｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m182_c4.webp`
-- [ ] `m180_c1`｜大道顯化｜Common｜11｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m180_c1.webp`
-- [ ] `m180_c2`｜混沌獸｜Common｜11｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m180_c2.webp`
-- [ ] `m180_c3`｜法則殘碑｜Common｜11｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m180_c3.webp`
-- [ ] `m180_c4`｜混元噬界體｜Common｜11｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m180_c4.webp`
-- [ ] `m3_e1`｜流浪劍師｜Elite｜0｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m3_e1.webp`
-- [ ] `m12_e1`｜鐵甲犀牛王｜Elite｜0｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m12_e1.webp`
-- [ ] `m22_e1`｜迷霧之靈｜Elite｜0｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m22_e1.webp`
-- [ ] `m5_e1`｜劍氣魁儡｜Elite｜1｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m5_e1.webp`
-- [ ] `m7_e1`｜嗜血劍魔｜Elite｜1｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m7_e1.webp`
-- [ ] `m15_e1`｜狂暴棕熊｜Elite｜1｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m15_e1.webp`
-- [ ] `m16_e1`｜雙頭狼王｜Elite｜1｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m16_e1.webp`
-- [ ] `m25_e1`｜丹爐精｜Elite｜1｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m25_e1.webp`
-- [ ] `m26_e1`｜寒冰龜｜Elite｜1｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m26_e1.webp`
-- [ ] `m31_e1`｜寒冰巨人｜Elite｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m31_e1.webp`
-- [ ] `m32_e1`｜奔雷古獸｜Elite｜2｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m32_e1.webp`
-- [ ] `m41_e1`｜樹妖姥姥｜Elite｜2｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m41_e1.webp`
-- [ ] `m42_e1`｜煉獄炎魔｜Elite｜2｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m42_e1.webp`
-- [ ] `m51_e1`｜沼澤巨鱷｜Elite｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m51_e1.webp`
-- [ ] `m52_e1`｜雷霆蜥蜴｜Elite｜2｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m52_e1.webp`
-- [ ] `m61_e1`｜羽族戰士｜Elite｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m61_e1.webp`
-- [ ] `m62_e1`｜鐵翼鳥王｜Elite｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m62_e1.webp`
-- [ ] `m71_e1`｜地火龍蜥｜Elite｜3｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m71_e1.webp`
-- [ ] `m72_e1`｜萬毒蛛后｜Elite｜3｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m72_e1.webp`
-- [ ] `m81_e1`｜護島神獸｜Elite｜3｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m81_e1.webp`
-- [ ] `m82_e1`｜幻海魔鯨｜Elite｜3｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m82_e1.webp`
-- [ ] `m91_e1`｜虛空獵手｜Elite｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m91_e1.webp`
-- [ ] `m92_e1`｜守劍長老魂｜Elite｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m92_e1.webp`
-- [ ] `m101_e1`｜龍血戰士｜Elite｜4｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m101_e1.webp`
-- [ ] `m102_e1`｜祭司亡魂｜Elite｜4｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m102_e1.webp`
-- [ ] `m111_e1`｜幽冥羅剎｜Elite｜4｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m111_e1.webp`
-- [ ] `m112_e1`｜虛空領主｜Elite｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m112_e1.webp`
-- [ ] `m120_e1`｜百戰魔傀｜Elite｜5｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m120_e1.webp`
-- [ ] `m120_e2`｜界墟焚天使｜Elite｜5｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m120_e2.webp`
-- [ ] `m121_e1`｜墮落仙人｜Elite｜5｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m121_e1.webp`
-- [ ] `m121_e2`｜怨天祭司｜Elite｜5｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m121_e2.webp`
-- [ ] `m122_e1`｜界橋督戰官｜Elite｜5｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m122_e1.webp`
-- [ ] `m122_e2`｜墜星焚令使｜Elite｜5｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m122_e2.webp`
-- [ ] `m130_e1`｜歲月守衛｜Elite｜6｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m130_e1.webp`
-- [ ] `m130_e2`｜時獄觀測者｜Elite｜6｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m130_e2.webp`
-- [ ] `m132_e1`｜虛淵裂守｜Elite｜6｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m132_e1.webp`
-- [ ] `m132_e2`｜時迴觀測官｜Elite｜6｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m132_e2.webp`
-- [ ] `m131_e1`｜虛空行者｜Elite｜6｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m131_e1.webp`
-- [ ] `m131_e2`｜界碑吞星魔｜Elite｜6｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m131_e2.webp`
-- [ ] `m140_e1`｜執法統領｜Elite｜7｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m140_e1.webp`
-- [ ] `m140_e2`｜聖壇監軍｜Elite｜7｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m140_e2.webp`
-- [ ] `m142_e1`｜法壇鎮印官｜Elite｜7｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m142_e1.webp`
-- [ ] `m142_e2`｜靈脈誦令使｜Elite｜7｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m142_e2.webp`
-- [ ] `m141_e1`｜樞紐守護獸｜Elite｜7｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m141_e1.webp`
-- [ ] `m141_e2`｜渦心鎮衛｜Elite｜7｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m141_e2.webp`
-- [ ] `m150_e1`｜深海魔龍｜Elite｜8｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m150_e1.webp`
-- [ ] `m150_e2`｜潮汐司命｜Elite｜8｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m150_e2.webp`
-- [ ] `m152_e1`｜界海鎮烽將｜Elite｜8｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m152_e1.webp`
-- [ ] `m152_e2`｜孤烽斷航使｜Elite｜8｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m152_e2.webp`
-- [ ] `m151_e1`｜天將虛影｜Elite｜8｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m151_e1.webp`
-- [ ] `m151_e2`｜升仙鎮碑將｜Elite｜8｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m151_e2.webp`
-- [ ] `m160_e1`｜滅世魔雷｜Elite｜9｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m160_e1.webp`
-- [ ] `m160_e2`｜劫域司雷官｜Elite｜9｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m160_e2.webp`
-- [ ] `m162_e1`｜天刑鎮獄官｜Elite｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m162_e1.webp`
-- [ ] `m162_e2`｜誅命司劫使｜Elite｜9｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m162_e2.webp`
-- [ ] `m161_e1`｜雷道天尊｜Elite｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m161_e1.webp`
-- [ ] `m161_e2`｜天劫巡界尊｜Elite｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m161_e2.webp`
-- [ ] `m170_e1`｜巡天仙吏｜Elite｜10｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m170_e1.webp`
-- [ ] `m170_e2`｜巡天錄事｜Elite｜10｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m170_e2.webp`
-- [ ] `m172_e1`｜仙獄鎮刑將｜Elite｜10｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m172_e1.webp`
-- [ ] `m172_e2`｜玉京禁靈使｜Elite｜10｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m172_e2.webp`
-- [ ] `m171_e1`｜鎮天神將｜Elite｜10｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m171_e1.webp`
-- [ ] `m171_e2`｜玉京誅邪使｜Elite｜10｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m171_e2.webp`
-- [ ] `m181_e1`｜太初巡道使｜Elite｜11｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m181_e1.webp`
-- [ ] `m181_e2`｜歸源監印官｜Elite｜11｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m181_e2.webp`
-- [ ] `m182_e1`｜歸墟碎界將｜Elite｜11｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m182_e1.webp`
-- [ ] `m182_e2`｜萬象熔界司｜Elite｜11｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m182_e2.webp`
-- [ ] `m180_e1`｜守道者｜Elite｜11｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m180_e1.webp`
-- [ ] `m180_e2`｜混元監道官｜Elite｜11｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m180_e2.webp`
-- [ ] `m3_b1`｜守山靈虎｜Boss｜0｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m3_b1.webp`
-- [ ] `m12_b1`｜赤火猿｜Boss｜0｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m12_b1.webp`
-- [ ] `m22_b1`｜靈湖巨蟹｜Boss｜0｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m22_b1.webp`
-- [ ] `m7_b1`｜萬劍劍意｜Boss｜1｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m7_b1.webp`
-- [ ] `m16_b1`｜萬獸獸王｜Boss｜1｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m16_b1.webp`
-- [ ] `m26_b1`｜靈湖水蛟｜Boss｜1｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m26_b1.webp`
-- [ ] `m32_b1`｜極地劍靈｜Boss｜2｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m32_b1.webp`
-- [ ] `m42_b1`｜烈焰妖王｜Boss｜2｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m42_b1.webp`
-- [ ] `m52_b1`｜雷澤領主｜Boss｜2｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m52_b1.webp`
-- [ ] `m62_b1`｜金翅大鵬｜Boss｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m62_b1.webp`
-- [ ] `m72_b1`｜厄難毒體｜Boss｜3｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m72_b1.webp`
-- [ ] `m82_b1`｜覆海蛟龍｜Boss｜3｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m82_b1.webp`
-- [ ] `m92_b1`｜北寒劍尊｜Boss｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m92_b1.webp`
-- [ ] `m102_b1`｜刑天殘軀｜Boss｜4｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m102_b1.webp`
-- [ ] `m112_b1`｜九幽鬼帝｜Boss｜4｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m112_b1.webp`
-- [ ] `m121_b1`｜修羅魔尊｜Boss｜5｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m121_b1.webp`
-- [ ] `m131_b1`｜時空之主｜Boss｜6｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m131_b1.webp`
-- [ ] `m141_b1`｜靈皇｜Boss｜7｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m141_b1.webp`
-- [ ] `m151_b1`｜守界者｜Boss｜8｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m151_b1.webp`
-- [ ] `m161_b1`｜天道化身｜Boss｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m161_b1.webp`
-- [ ] `m171_b1`｜九天仙尊｜Boss｜10｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m171_b1.webp`
-- [ ] `m180_b1`｜鴻蒙道祖｜Boss｜11｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m180_b1.webp`
+- [x] `m1_c1`｜荒徑野狗｜Common｜0｜None｜`public/assets/generated/characters/monsters/paper-cut-v3/m1_c1.webp`
+- [x] `m1_c2`｜攔路劫匪｜Common｜0｜None｜`public/assets/generated/characters/monsters/paper-cut-v3/m1_c2.webp`
+- [x] `m2_c1`｜古道劍客｜Common｜0｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m2_c1.webp`
+- [x] `m2_c2`｜石壁壁虎｜Common｜0｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m2_c2.webp`
+- [x] `m3_c1`｜巡山道童｜Common｜0｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m3_c1.webp`
+- [x] `m3_c2`｜山腳巨熊｜Common｜0｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m3_c2.webp`
+- [x] `m10_c1`｜密林野豬｜Common｜0｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m10_c1.webp`
+- [x] `m10_c2`｜樹梢毒蛇｜Common｜0｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m10_c2.webp`
+- [x] `m11_c1`｜蠻荒獵手｜Common｜0｜None｜`public/assets/generated/characters/monsters/paper-cut-v3/m11_c1.webp`
+- [x] `m11_c2`｜硬皮犀牛｜Common｜0｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m11_c2.webp`
+- [x] `m12_c1`｜谷口守衛｜Common｜0｜None｜`public/assets/generated/characters/monsters/paper-cut-v3/m12_c1.webp`
+- [x] `m12_c2`｜嗜血蝙蝠｜Common｜0｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m12_c2.webp`
+- [x] `m20_c1`｜田間稻草人｜Common｜0｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m20_c1.webp`
+- [x] `m20_c2`｜偷糧碩鼠｜Common｜0｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m20_c2.webp`
+- [x] `m21_c1`｜迷霧幻影｜Common｜0｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m21_c1.webp`
+- [x] `m21_c2`｜沼澤水蛭｜Common｜0｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m21_c2.webp`
+- [x] `m22_c1`｜湖畔水怪｜Common｜0｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m22_c1.webp`
+- [x] `m22_c2`｜草甸餓狼｜Common｜0｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m22_c2.webp`
+- [x] `m5_c1`｜劍木樁妖｜Common｜1｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m5_c1.webp`
+- [x] `m5_c2`｜遊蕩劍魂｜Common｜1｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m5_c2.webp`
+- [x] `m6_c1`｜鏽劍甲蟲｜Common｜1｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m6_c1.webp`
+- [x] `m6_c2`｜斷刃狼｜Common｜1｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m6_c2.webp`
+- [x] `m7_c1`｜劍煞邪靈｜Common｜1｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m7_c1.webp`
+- [x] `m7_c2`｜劍塚守衛｜Common｜1｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m7_c2.webp`
+- [x] `m14_c1`｜赤血水怪｜Common｜1｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m14_c1.webp`
+- [x] `m14_c2`｜蠻力巨猿｜Common｜1｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m14_c2.webp`
+- [x] `m15_c1`｜鐵皮野豬｜Common｜1｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m15_c1.webp`
+- [x] `m15_c2`｜疾風豹｜Common｜1｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m15_c2.webp`
+- [x] `m16_c1`｜獅蠍獸｜Common｜1｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m16_c1.webp`
+- [x] `m16_c2`｜狂暴棕熊｜Common｜1｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m16_c2.webp`
+- [x] `m24_c1`｜幻影靈貓｜Common｜1｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m24_c1.webp`
+- [x] `m24_c2`｜符紙人｜Common｜1｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m24_c2.webp`
+- [x] `m25_c1`｜食藥鼠｜Common｜1｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m25_c1.webp`
+- [x] `m25_c2`｜毒荊棘妖｜Common｜1｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m25_c2.webp`
+- [x] `m26_c1`｜靈水蟒｜Common｜1｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m26_c1.webp`
+- [x] `m26_c2`｜水靈龜｜Common｜1｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m26_c2.webp`
+- [x] `m30_c1`｜雪原白狼｜Common｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m30_c1.webp`
+- [x] `m30_c2`｜冰晶蟲｜Common｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m30_c2.webp`
+- [x] `m31_c1`｜冰封屍傀｜Common｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m31_c1.webp`
+- [x] `m31_c2`｜寒冰骷髏｜Common｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m31_c2.webp`
+- [x] `m32_c1`｜紫電靈鷲｜Common｜2｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m32_c1.webp`
+- [x] `m32_c2`｜引雷石像｜Common｜2｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m32_c2.webp`
+- [x] `m40_c1`｜腐化鬣狗｜Common｜2｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m40_c1.webp`
+- [x] `m40_c2`｜嗜血蝠群｜Common｜2｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m40_c2.webp`
+- [x] `m41_c1`｜鬼面蜘蛛｜Common｜2｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m41_c1.webp`
+- [x] `m41_c2`｜嗜血妖花｜Common｜2｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m41_c2.webp`
+- [x] `m42_c1`｜火蜥蜴｜Common｜2｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m42_c1.webp`
+- [x] `m42_c2`｜熔岩石頭人｜Common｜2｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m42_c2.webp`
+- [x] `m50_c1`｜影豹｜Common｜2｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m50_c1.webp`
+- [x] `m50_c2`｜奪靈毒蚊｜Common｜2｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m50_c2.webp`
+- [x] `m51_c1`｜劇毒蟾蜍｜Common｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m51_c1.webp`
+- [x] `m51_c2`｜毒液飛蛾｜Common｜2｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m51_c2.webp`
+- [x] `m52_c1`｜雷澤水妖｜Common｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m52_c1.webp`
+- [x] `m52_c2`｜紫電銀鰻｜Common｜2｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m52_c2.webp`
+- [x] `m60_c1`｜罡風鷹｜Common｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m60_c1.webp`
+- [x] `m60_c2`｜風元素｜Common｜3｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m60_c2.webp`
+- [x] `m61_c1`｜羽族斥候｜Common｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m61_c1.webp`
+- [x] `m61_c2`｜浮島翼人｜Common｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m61_c2.webp`
+- [x] `m62_c1`｜鎖鏈怨靈｜Common｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m62_c1.webp`
+- [x] `m62_c2`｜斷罪獄卒｜Common｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m62_c2.webp`
+- [x] `m70_c1`｜岩石傀儡｜Common｜3｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m70_c1.webp`
+- [x] `m70_c2`｜黑山甲獸｜Common｜3｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m70_c2.webp`
+- [x] `m71_c1`｜熔岩魔人｜Common｜3｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m71_c1.webp`
+- [x] `m71_c2`｜炎甲蟲｜Common｜3｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m71_c2.webp`
+- [x] `m72_c1`｜五毒獸｜Common｜3｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m72_c1.webp`
+- [x] `m72_c2`｜噬毒蜈蚣｜Common｜3｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m72_c2.webp`
+- [x] `m80_c1`｜巡海夜叉｜Common｜3｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m80_c1.webp`
+- [x] `m80_c2`｜風暴水母｜Common｜3｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m80_c2.webp`
+- [x] `m81_c1`｜仙島靈猴｜Common｜3｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m81_c1.webp`
+- [x] `m81_c2`｜靈島鹿靈｜Common｜3｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m81_c2.webp`
+- [x] `m82_c1`｜蜃氣妖｜Common｜3｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m82_c1.webp`
+- [x] `m82_c2`｜迷霧海葵｜Common｜3｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m82_c2.webp`
+- [x] `m90_c1`｜冰魄幽靈｜Common｜4｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m90_c1.webp`
+- [x] `m90_c2`｜冰霜女妖｜Common｜4｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m90_c2.webp`
+- [x] `m91_c1`｜極光飛魚｜Common｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m91_c1.webp`
+- [x] `m91_c2`｜天光靈｜Common｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m91_c2.webp`
+- [x] `m92_c1`｜劍意殘魂｜Common｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m92_c1.webp`
+- [x] `m92_c2`｜鎮劍石靈｜Common｜4｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m92_c2.webp`
+- [x] `m100_c1`｜荒原巨人｜Common｜4｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m100_c1.webp`
+- [x] `m100_c2`｜荒地暴龍｜Common｜4｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m100_c2.webp`
+- [x] `m101_c1`｜血池孽獸｜Common｜4｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m101_c1.webp`
+- [x] `m101_c2`｜龍血蚊｜Common｜4｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m101_c2.webp`
+- [x] `m102_c1`｜蠻荒巫衛｜Common｜4｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m102_c1.webp`
+- [x] `m102_c2`｜荒古咒柱｜Common｜4｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m102_c2.webp`
+- [x] `m110_c1`｜噬魂怪｜Common｜4｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m110_c1.webp`
+- [x] `m110_c2`｜精神體｜Common｜4｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m110_c2.webp`
+- [x] `m111_c1`｜幽冥戰鬼｜Common｜4｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m111_c1.webp`
+- [x] `m111_c2`｜地煞陰卒｜Common｜4｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m111_c2.webp`
+- [x] `m112_c1`｜虛空蟲族｜Common｜4｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m112_c1.webp`
+- [x] `m112_c2`｜虛空掠食者｜Common｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m112_c2.webp`
+- [x] `m120_c1`｜異界魔兵｜Common｜5｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m120_c1.webp`
+- [x] `m120_c2`｜天界巡邏者｜Common｜5｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m120_c2.webp`
+- [x] `m120_c3`｜斷魂焰靈｜Common｜5｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m120_c3.webp`
+- [x] `m120_c4`｜鎖界妖僧｜Common｜5｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m120_c4.webp`
+- [x] `m122_c1`｜斷界戍卒｜Common｜5｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m122_c1.webp`
+- [x] `m122_c2`｜殞橋戰傀｜Common｜5｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m122_c2.webp`
+- [x] `m122_c3`｜星烽殘將｜Common｜5｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m122_c3.webp`
+- [x] `m122_c4`｜鎮橋血衛｜Common｜5｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m122_c4.webp`
+- [x] `m121_c1`｜怨念集合體｜Common｜5｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m121_c1.webp`
+- [x] `m121_c2`｜殘念魔刃｜Common｜5｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m121_c2.webp`
+- [x] `m121_c3`｜噬念鬼母｜Common｜5｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m121_c3.webp`
+- [x] `m121_c4`｜葬界骨龍｜Common｜5｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m121_c4.webp`
+- [x] `m130_c1`｜光陰蜉蝣｜Common｜6｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m130_c1.webp`
+- [x] `m130_c2`｜溯時靈魚｜Common｜6｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m130_c2.webp`
+- [x] `m130_c3`｜鏡界殘像｜Common｜6｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m130_c3.webp`
+- [x] `m130_c4`｜裂隙追魂獸｜Common｜6｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m130_c4.webp`
+- [x] `m132_c1`｜虛淵巡衛｜Common｜6｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m132_c1.webp`
+- [x] `m132_c2`｜界縫殘兵｜Common｜6｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m132_c2.webp`
+- [x] `m132_c3`｜虛潮法靈｜Common｜6｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m132_c3.webp`
+- [x] `m132_c4`｜斷界牽魂使｜Common｜6｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m132_c4.webp`
+- [x] `m131_c1`｜空間吞噬者｜Common｜6｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m131_c1.webp`
+- [x] `m131_c2`｜裂空魔雲｜Common｜6｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m131_c2.webp`
+- [x] `m131_c3`｜虛空牧星者｜Common｜6｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m131_c3.webp`
+- [x] `m131_c4`｜時淵殘骸｜Common｜6｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m131_c4.webp`
+- [x] `m140_c1`｜聖城執法隊｜Common｜7｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m140_c1.webp`
+- [x] `m140_c2`｜玄機戰獸｜Common｜7｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m140_c2.webp`
+- [x] `m140_c3`｜聖城審判官｜Common｜7｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m140_c3.webp`
+- [x] `m140_c4`｜靈紋鎮獸｜Common｜7｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m140_c4.webp`
+- [x] `m142_c1`｜壇前鎮衛｜Common｜7｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m142_c1.webp`
+- [x] `m142_c2`｜萬靈司誥使｜Common｜7｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m142_c2.webp`
+- [x] `m142_c3`｜法壇靈衛｜Common｜7｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m142_c3.webp`
+- [x] `m142_c4`｜靈契縛獸｜Common｜7｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m142_c4.webp`
+- [x] `m141_c1`｜靈元戰體｜Common｜7｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m141_c1.webp`
+- [x] `m141_c2`｜暴亂靈渦｜Common｜7｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m141_c2.webp`
+- [x] `m141_c3`｜混元拘魂使｜Common｜7｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m141_c3.webp`
+- [x] `m141_c4`｜天穹裂殖體｜Common｜7｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m141_c4.webp`
+- [x] `m150_c1`｜鯤鵬幼體｜Common｜8｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m150_c1.webp`
+- [x] `m150_c2`｜深海巨魷｜Common｜8｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m150_c2.webp`
+- [x] `m150_c3`｜吞日海鵬｜Common｜8｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m150_c3.webp`
+- [x] `m150_c4`｜深淵潮妖｜Common｜8｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m150_c4.webp`
+- [x] `m152_c1`｜界海烽卒｜Common｜8｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m152_c1.webp`
+- [x] `m152_c2`｜裂潮戍衛｜Common｜8｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m152_c2.webp`
+- [x] `m152_c3`｜界烽戰魂｜Common｜8｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m152_c3.webp`
+- [x] `m152_c4`｜鎮潮古像｜Common｜8｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m152_c4.webp`
+- [x] `m151_c1`｜天梯守門人｜Common｜8｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m151_c1.webp`
+- [x] `m151_c2`｜登仙執法者｜Common｜8｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m151_c2.webp`
+- [x] `m151_c3`｜登天囚徒｜Common｜8｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m151_c3.webp`
+- [x] `m151_c4`｜天關鎮獸｜Common｜8｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m151_c4.webp`
+- [x] `m160_c1`｜劫雷獸｜Common｜9｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m160_c1.webp`
+- [x] `m160_c2`｜劫火鴉｜Common｜9｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m160_c2.webp`
+- [x] `m160_c3`｜劫雲巡狩者｜Common｜9｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m160_c3.webp`
+- [x] `m160_c4`｜天罰雷傀｜Common｜9｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m160_c4.webp`
+- [x] `m162_c1`｜天刑雷卒｜Common｜9｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m162_c1.webp`
+- [x] `m162_c2`｜罰獄雷鎖｜Common｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m162_c2.webp`
+- [x] `m162_c3`｜天刑雷將｜Common｜9｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m162_c3.webp`
+- [x] `m162_c4`｜雷獄誅魂使｜Common｜9｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m162_c4.webp`
+- [x] `m161_c1`｜雷池金龍｜Common｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m161_c1.webp`
+- [x] `m161_c2`｜雷光電蛇｜Common｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m161_c2.webp`
+- [x] `m161_c3`｜天譴雷侍｜Common｜9｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m161_c3.webp`
+- [x] `m161_c4`｜萬劫殘龍｜Common｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m161_c4.webp`
+- [x] `m170_c1`｜仙界仙鶴｜Common｜10｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m170_c1.webp`
+- [x] `m170_c2`｜仙宮力士｜Common｜10｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m170_c2.webp`
+- [x] `m170_c3`｜巡界仙靈｜Common｜10｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m170_c3.webp`
+- [x] `m170_c4`｜鎮界金人｜Common｜10｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m170_c4.webp`
+- [x] `m172_c1`｜玉詔鎮卒｜Common｜10｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m172_c1.webp`
+- [x] `m172_c2`｜仙獄錄魂使｜Common｜10｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m172_c2.webp`
+- [x] `m172_c3`｜玉獄天鎖｜Common｜10｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m172_c3.webp`
+- [x] `m172_c4`｜仙庭禁將｜Common｜10｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m172_c4.webp`
+- [x] `m171_c1`｜金甲天衛｜Common｜10｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m171_c1.webp`
+- [x] `m171_c2`｜天界戰鷹｜Common｜10｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m171_c2.webp`
+- [x] `m171_c3`｜玉京監察使｜Common｜10｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m171_c3.webp`
+- [x] `m171_c4`｜天庭誅邪令｜Common｜10｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m171_c4.webp`
+- [x] `m181_c1`｜太初巡環衛｜Common｜11｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m181_c1.webp`
+- [x] `m181_c2`｜本源蝕獸｜Common｜11｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m181_c2.webp`
+- [x] `m181_c3`｜太初法相｜Common｜11｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m181_c3.webp`
+- [x] `m181_c4`｜歸源執印官｜Common｜11｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m181_c4.webp`
+- [x] `m182_c1`｜歸墟裂界卒｜Common｜11｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m182_c1.webp`
+- [x] `m182_c2`｜萬象鎖魂使｜Common｜11｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m182_c2.webp`
+- [x] `m182_c3`｜滅界熔兵｜Common｜11｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m182_c3.webp`
+- [x] `m182_c4`｜歸墟吞星獸｜Common｜11｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m182_c4.webp`
+- [x] `m180_c1`｜大道顯化｜Common｜11｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m180_c1.webp`
+- [x] `m180_c2`｜混沌獸｜Common｜11｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m180_c2.webp`
+- [x] `m180_c3`｜法則殘碑｜Common｜11｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m180_c3.webp`
+- [x] `m180_c4`｜混元噬界體｜Common｜11｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m180_c4.webp`
+- [x] `m3_e1`｜流浪劍師｜Elite｜0｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m3_e1.webp`
+- [x] `m12_e1`｜鐵甲犀牛王｜Elite｜0｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m12_e1.webp`
+- [x] `m22_e1`｜迷霧之靈｜Elite｜0｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m22_e1.webp`
+- [x] `m5_e1`｜劍氣魁儡｜Elite｜1｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m5_e1.webp`
+- [x] `m7_e1`｜嗜血劍魔｜Elite｜1｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m7_e1.webp`
+- [x] `m15_e1`｜狂暴棕熊｜Elite｜1｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m15_e1.webp`
+- [x] `m16_e1`｜雙頭狼王｜Elite｜1｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m16_e1.webp`
+- [x] `m25_e1`｜丹爐精｜Elite｜1｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m25_e1.webp`
+- [x] `m26_e1`｜寒冰龜｜Elite｜1｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m26_e1.webp`
+- [x] `m31_e1`｜寒冰巨人｜Elite｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m31_e1.webp`
+- [x] `m32_e1`｜奔雷古獸｜Elite｜2｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m32_e1.webp`
+- [x] `m41_e1`｜樹妖姥姥｜Elite｜2｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m41_e1.webp`
+- [x] `m42_e1`｜煉獄炎魔｜Elite｜2｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m42_e1.webp`
+- [x] `m51_e1`｜沼澤巨鱷｜Elite｜2｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m51_e1.webp`
+- [x] `m52_e1`｜雷霆蜥蜴｜Elite｜2｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m52_e1.webp`
+- [x] `m61_e1`｜羽族戰士｜Elite｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m61_e1.webp`
+- [x] `m62_e1`｜鐵翼鳥王｜Elite｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m62_e1.webp`
+- [x] `m71_e1`｜地火龍蜥｜Elite｜3｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m71_e1.webp`
+- [x] `m72_e1`｜萬毒蛛后｜Elite｜3｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m72_e1.webp`
+- [x] `m81_e1`｜護島神獸｜Elite｜3｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m81_e1.webp`
+- [x] `m82_e1`｜幻海魔鯨｜Elite｜3｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m82_e1.webp`
+- [x] `m91_e1`｜虛空獵手｜Elite｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m91_e1.webp`
+- [x] `m92_e1`｜守劍長老魂｜Elite｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m92_e1.webp`
+- [x] `m101_e1`｜龍血戰士｜Elite｜4｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m101_e1.webp`
+- [x] `m102_e1`｜祭司亡魂｜Elite｜4｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m102_e1.webp`
+- [x] `m111_e1`｜幽冥羅剎｜Elite｜4｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m111_e1.webp`
+- [x] `m112_e1`｜虛空領主｜Elite｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m112_e1.webp`
+- [x] `m120_e1`｜百戰魔傀｜Elite｜5｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m120_e1.webp`
+- [x] `m120_e2`｜界墟焚天使｜Elite｜5｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m120_e2.webp`
+- [x] `m121_e1`｜墮落仙人｜Elite｜5｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m121_e1.webp`
+- [x] `m121_e2`｜怨天祭司｜Elite｜5｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m121_e2.webp`
+- [x] `m122_e1`｜界橋督戰官｜Elite｜5｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m122_e1.webp`
+- [x] `m122_e2`｜墜星焚令使｜Elite｜5｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m122_e2.webp`
+- [x] `m130_e1`｜歲月守衛｜Elite｜6｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m130_e1.webp`
+- [x] `m130_e2`｜時獄觀測者｜Elite｜6｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m130_e2.webp`
+- [x] `m132_e1`｜虛淵裂守｜Elite｜6｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m132_e1.webp`
+- [x] `m132_e2`｜時迴觀測官｜Elite｜6｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m132_e2.webp`
+- [x] `m131_e1`｜虛空行者｜Elite｜6｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m131_e1.webp`
+- [x] `m131_e2`｜界碑吞星魔｜Elite｜6｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m131_e2.webp`
+- [x] `m140_e1`｜執法統領｜Elite｜7｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m140_e1.webp`
+- [x] `m140_e2`｜聖壇監軍｜Elite｜7｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m140_e2.webp`
+- [x] `m142_e1`｜法壇鎮印官｜Elite｜7｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m142_e1.webp`
+- [x] `m142_e2`｜靈脈誦令使｜Elite｜7｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m142_e2.webp`
+- [x] `m141_e1`｜樞紐守護獸｜Elite｜7｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m141_e1.webp`
+- [x] `m141_e2`｜渦心鎮衛｜Elite｜7｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m141_e2.webp`
+- [x] `m150_e1`｜深海魔龍｜Elite｜8｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m150_e1.webp`
+- [x] `m150_e2`｜潮汐司命｜Elite｜8｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m150_e2.webp`
+- [x] `m152_e1`｜界海鎮烽將｜Elite｜8｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m152_e1.webp`
+- [x] `m152_e2`｜孤烽斷航使｜Elite｜8｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m152_e2.webp`
+- [x] `m151_e1`｜天將虛影｜Elite｜8｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m151_e1.webp`
+- [x] `m151_e2`｜升仙鎮碑將｜Elite｜8｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m151_e2.webp`
+- [x] `m160_e1`｜滅世魔雷｜Elite｜9｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m160_e1.webp`
+- [x] `m160_e2`｜劫域司雷官｜Elite｜9｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m160_e2.webp`
+- [x] `m162_e1`｜天刑鎮獄官｜Elite｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m162_e1.webp`
+- [x] `m162_e2`｜誅命司劫使｜Elite｜9｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m162_e2.webp`
+- [x] `m161_e1`｜雷道天尊｜Elite｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m161_e1.webp`
+- [x] `m161_e2`｜天劫巡界尊｜Elite｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m161_e2.webp`
+- [x] `m170_e1`｜巡天仙吏｜Elite｜10｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m170_e1.webp`
+- [x] `m170_e2`｜巡天錄事｜Elite｜10｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m170_e2.webp`
+- [x] `m172_e1`｜仙獄鎮刑將｜Elite｜10｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m172_e1.webp`
+- [x] `m172_e2`｜玉京禁靈使｜Elite｜10｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m172_e2.webp`
+- [x] `m171_e1`｜鎮天神將｜Elite｜10｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m171_e1.webp`
+- [x] `m171_e2`｜玉京誅邪使｜Elite｜10｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m171_e2.webp`
+- [x] `m181_e1`｜太初巡道使｜Elite｜11｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m181_e1.webp`
+- [x] `m181_e2`｜歸源監印官｜Elite｜11｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m181_e2.webp`
+- [x] `m182_e1`｜歸墟碎界將｜Elite｜11｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m182_e1.webp`
+- [x] `m182_e2`｜萬象熔界司｜Elite｜11｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m182_e2.webp`
+- [x] `m180_e1`｜守道者｜Elite｜11｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m180_e1.webp`
+- [x] `m180_e2`｜混元監道官｜Elite｜11｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m180_e2.webp`
+- [x] `m3_b1`｜守山靈虎｜Boss｜0｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m3_b1.webp`
+- [x] `m12_b1`｜赤火猿｜Boss｜0｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m12_b1.webp`
+- [x] `m22_b1`｜靈湖巨蟹｜Boss｜0｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m22_b1.webp`
+- [x] `m7_b1`｜萬劍劍意｜Boss｜1｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m7_b1.webp`
+- [x] `m16_b1`｜萬獸獸王｜Boss｜1｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m16_b1.webp`
+- [x] `m26_b1`｜靈湖水蛟｜Boss｜1｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m26_b1.webp`
+- [x] `m32_b1`｜極地劍靈｜Boss｜2｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m32_b1.webp`
+- [x] `m42_b1`｜烈焰妖王｜Boss｜2｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m42_b1.webp`
+- [x] `m52_b1`｜雷澤領主｜Boss｜2｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m52_b1.webp`
+- [x] `m62_b1`｜金翅大鵬｜Boss｜3｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m62_b1.webp`
+- [x] `m72_b1`｜厄難毒體｜Boss｜3｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m72_b1.webp`
+- [x] `m82_b1`｜覆海蛟龍｜Boss｜3｜Water｜`public/assets/generated/characters/monsters/paper-cut-v3/m82_b1.webp`
+- [x] `m92_b1`｜北寒劍尊｜Boss｜4｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m92_b1.webp`
+- [x] `m102_b1`｜刑天殘軀｜Boss｜4｜Earth｜`public/assets/generated/characters/monsters/paper-cut-v3/m102_b1.webp`
+- [x] `m112_b1`｜九幽鬼帝｜Boss｜4｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m112_b1.webp`
+- [x] `m121_b1`｜修羅魔尊｜Boss｜5｜Fire｜`public/assets/generated/characters/monsters/paper-cut-v3/m121_b1.webp`
+- [x] `m131_b1`｜時空之主｜Boss｜6｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m131_b1.webp`
+- [x] `m141_b1`｜靈皇｜Boss｜7｜Wood｜`public/assets/generated/characters/monsters/paper-cut-v3/m141_b1.webp`
+- [x] `m151_b1`｜守界者｜Boss｜8｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m151_b1.webp`
+- [x] `m161_b1`｜天道化身｜Boss｜9｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m161_b1.webp`
+- [x] `m171_b1`｜九天仙尊｜Boss｜10｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m171_b1.webp`
+- [x] `m180_b1`｜鴻蒙道祖｜Boss｜11｜Metal｜`public/assets/generated/characters/monsters/paper-cut-v3/m180_b1.webp`
