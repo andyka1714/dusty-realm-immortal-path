@@ -95,7 +95,7 @@ const save = {
 
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true });
-const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+const context = await browser.newContext({ viewport: { width: 1656, height: 1081 } });
 const page = await context.newPage();
 await page.addInitScript(({ key, value }) => localStorage.setItem(key, value), {
   key: saveKey,
