@@ -97,6 +97,10 @@ import {
   formatCombatPower,
 } from '../utils/combatPower';
 import type { QuestNavigationTarget } from '../utils/questTracker';
+import {
+  findAdventurePath,
+  isAdventureTerrainBlocked,
+} from '../utils/adventureTerrainNavigation';
 
 const AdventurePixelStagePrototype = lazy(() =>
   import('../components/adventure/AdventurePixelStagePrototype').then((module) => ({
@@ -282,44 +286,6 @@ const renderStatusBadges = (
     compact: true,
     maxVisible: 5,
   });
-
-// Simple BFS for Pathfinding
-const findPath = (start: Coordinate, end: Coordinate, width: number, height: number): Coordinate[] => {
-    const queue: { pos: Coordinate; path: Coordinate[] }[] = [{ pos: start, path: [] }];
-    const visited = new Set<string>();
-    visited.add(`${start.x},${start.y}`);
-
-    let iterations = 0;
-    while (queue.length > 0 && iterations < 2000) {
-        iterations++;
-        const { pos, path } = queue.shift()!;
-        if (pos.x === end.x && pos.y === end.y) return path;
-
-        const dirs = [
-            { x: 0, y: -1 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 1, y: 0 },
-            { x: -1, y: -1 }, { x: 1, y: -1 }, { x: -1, y: 1 }, { x: 1, y: 1 }
-        ];
-        // Heuristic sort to prioritize direction towards target
-        dirs.sort((a, b) => {
-             const distA = Math.abs((pos.x + a.x) - end.x) + Math.abs((pos.y + a.y) - end.y);
-             const distB = Math.abs((pos.x + b.x) - end.x) + Math.abs((pos.y + b.y) - end.y);
-             return distA - distB;
-        });
-
-        for (const dir of dirs) {
-            const nextX = pos.x + dir.x;
-            const nextY = pos.y + dir.y;
-            if (nextX >= 0 && nextX < width && nextY >= 0 && nextY < height) {
-                const key = `${nextX},${nextY}`;
-                if (!visited.has(key)) {
-                    visited.add(key);
-                    queue.push({ pos: { x: nextX, y: nextY }, path: [...path, { x: nextX, y: nextY }] });
-                }
-            }
-        }
-    }
-    return [];
-};
 
 // --- Extracted WorldMap Component ---
 const WorldMap: React.FC<{ onClose: () => void }> = ({ onClose }) => {
@@ -890,12 +856,11 @@ export const Adventure: React.FC<AdventureProps> = ({
         return;
       }
 
-      const path = findPath(
-        playerPosition,
-        targetPoint,
-        mapData.width,
-        mapData.height
-      );
+      const path = findAdventurePath({
+        start: playerPosition,
+        end: targetPoint,
+        mapData,
+      });
 
       if (path.length > 0) {
         setAutoMovePath(path);
@@ -1597,6 +1562,7 @@ export const Adventure: React.FC<AdventureProps> = ({
               engagementRange: playerEngagementRange,
               width: mapData.width,
               height: mapData.height,
+              isBlocked: (x, y) => isAdventureTerrainBlocked(mapData, x, y),
           });
           const desiredDest = newPath.length > 0 ? newPath[newPath.length - 1] : null;
           const currentDest = autoMovePath.length > 0 ? autoMovePath[autoMovePath.length - 1] : null;
@@ -1889,6 +1855,11 @@ export const Adventure: React.FC<AdventureProps> = ({
           }
       }
 
+      if (!targetMonster && !targetNPC && isAdventureTerrainBlocked(mapData, targetX, targetY)) {
+          setWorldLastCombatMessage('此處受地形阻隔，請沿道路或可通行區域前進。');
+          return;
+      }
+
       // Pathfinding
       const path = targetMonster
           ? resolveEngagementPath({
@@ -1897,8 +1868,13 @@ export const Adventure: React.FC<AdventureProps> = ({
               engagementRange: playerEngagementRange,
               width: mapData.width,
               height: mapData.height,
+              isBlocked: (x, y) => isAdventureTerrainBlocked(mapData, x, y),
           })
-          : findPath(playerPosition, { x: targetX, y: targetY }, mapData.width, mapData.height);
+          : findAdventurePath({
+              start: playerPosition,
+              end: { x: targetX, y: targetY },
+              mapData,
+            });
       if (path.length > 0) {
           const immediateStep = resolveImmediatePathStep({
               playerPosition,

@@ -11,6 +11,8 @@ import reducer, {
 } from "./adventureSlice";
 import { ElementType, EnemyRank, MajorRealm } from "../../types";
 import { getGridDistance } from "../../utils/worldCombat";
+import { MAPS } from "../../data/maps";
+import { isAdventureTerrainBlocked } from "../../utils/adventureTerrainNavigation";
 
 const fixedRandom = vi.spyOn(Math, "random");
 
@@ -254,7 +256,22 @@ describe("adventure engagement flow", () => {
   it("lets ranged and caster enemies backstep when the player gets too close", () => {
     fixedRandom.mockReturnValue(0);
 
-    let state = reducer(undefined, enterMap({ mapId: "26", startX: 20, startY: 20 }));
+    const map = MAPS.find((entry) => entry.id === "26")!;
+    let lane = { x: 20, y: 20 };
+    outer: for (let y = 1; y < map.height - 1; y += 1) {
+      for (let x = 1; x < map.width - 2; x += 1) {
+        if (
+          !isAdventureTerrainBlocked(map, x, y) &&
+          !isAdventureTerrainBlocked(map, x + 1, y) &&
+          !isAdventureTerrainBlocked(map, x + 2, y)
+        ) {
+          lane = { x, y };
+          break outer;
+        }
+      }
+    }
+
+    let state = reducer(undefined, enterMap({ mapId: "26", startX: lane.x, startY: lane.y }));
     state = {
       ...state,
       activeMonsters: [
@@ -263,10 +280,10 @@ describe("adventure engagement flow", () => {
           templateId: "m26_b1",
           name: "靈湖水蛟",
           symbol: "蛟",
-          x: 21,
-          y: 20,
-          spawnX: 21,
-          spawnY: 20,
+          x: lane.x + 1,
+          y: lane.y,
+          spawnX: lane.x + 1,
+          spawnY: lane.y,
           currentHp: 4650,
           rank: EnemyRank.Boss,
           nextMoveTime: 0,

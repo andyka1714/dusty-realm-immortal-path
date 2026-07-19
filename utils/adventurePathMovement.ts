@@ -9,12 +9,14 @@ const getPathToNearestReachableEngagementCell = ({
   engagementRange,
   width,
   height,
+  isBlocked = () => false,
 }: {
   playerPosition: Coordinate;
   targetPosition: Coordinate;
   engagementRange: number;
   width: number;
   height: number;
+  isBlocked?: (x: number, y: number) => boolean;
 }): Coordinate[] => {
   const queue: { pos: Coordinate; path: Coordinate[] }[] = [
     { pos: playerPosition, path: [] },
@@ -32,7 +34,7 @@ const getPathToNearestReachableEngagementCell = ({
   ];
 
   let iterations = 0;
-  while (queue.length > 0 && iterations < 2000) {
+  while (queue.length > 0 && iterations < width * height) {
     iterations++;
     const { pos, path } = queue.shift()!;
     if (
@@ -64,6 +66,12 @@ const getPathToNearestReachableEngagementCell = ({
       if (nextX === targetPosition.x && nextY === targetPosition.y) {
         continue;
       }
+      if (isBlocked(nextX, nextY)) continue;
+      if (
+        dir.x !== 0 &&
+        dir.y !== 0 &&
+        (isBlocked(pos.x + dir.x, pos.y) || isBlocked(pos.x, pos.y + dir.y))
+      ) continue;
 
       const key = `${nextX},${nextY}`;
       if (visited.has(key)) {
@@ -87,12 +95,14 @@ export const resolveEngagementPath = ({
   engagementRange,
   width,
   height,
+  isBlocked,
 }: {
   playerPosition: Coordinate;
   targetPosition: Coordinate;
   engagementRange: number;
   width: number;
   height: number;
+  isBlocked?: (x: number, y: number) => boolean;
 }): Coordinate[] => {
   if (getGridDistance(playerPosition, targetPosition) <= engagementRange) {
     return [];
@@ -104,6 +114,7 @@ export const resolveEngagementPath = ({
     engagementRange,
     width,
     height,
+    isBlocked,
   });
 };
 

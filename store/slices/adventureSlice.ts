@@ -7,6 +7,7 @@ import {
   Coordinate,
   Enemy,
   EnemyRank,
+  MapData,
   NPC,
   VisualEffect,
 } from '../../types';
@@ -30,6 +31,7 @@ import {
   DEFAULT_AUTO_CONSUMABLE_SETTINGS,
   sanitizeAutoConsumableSettings,
 } from '../../utils/autoConsumableSettings';
+import { isAdventureTerrainBlocked } from '../../utils/adventureTerrainNavigation';
 
 interface AdventureState {
   currentMapId: string | null;
@@ -114,16 +116,17 @@ const isNpcCell = (npcs: NPC[] = [], x: number, y: number) =>
   npcs.some((npc) => npc.x === x && npc.y === y);
 
 const isBlockedForPlayer = (
-  mapData: { npcs?: NPC[] },
+  mapData: MapData,
   monsters: ActiveMonster[],
   x: number,
   y: number
-) => isNpcCell(mapData.npcs, x, y) || isOccupiedCell(monsters, x, y);
+) =>
+  isAdventureTerrainBlocked(mapData, x, y) ||
+  isNpcCell(mapData.npcs, x, y) ||
+  isOccupiedCell(monsters, x, y);
 
 const resolvePlayerStartPosition = (
-  width: number,
-  height: number,
-  npcs: NPC[] = [],
+  mapData: MapData,
   preferred: Coordinate
 ) => {
   const candidates: Coordinate[] = [
@@ -138,17 +141,17 @@ const resolvePlayerStartPosition = (
     candidates.find(
       (candidate) =>
         candidate.x >= 0 &&
-        candidate.x < width &&
+        candidate.x < mapData.width &&
         candidate.y >= 0 &&
-        candidate.y < height &&
-        !isNpcCell(npcs, candidate.x, candidate.y)
+        candidate.y < mapData.height &&
+        !isAdventureTerrainBlocked(mapData, candidate.x, candidate.y) &&
+        !isNpcCell(mapData.npcs, candidate.x, candidate.y)
     ) ?? preferred
   );
 };
 
 const findOpenCoordinate = (
-  width: number,
-  height: number,
+  mapData: MapData,
   monsters: ActiveMonster[],
   playerPosition: Coordinate,
   preferred?: Coordinate
@@ -157,22 +160,25 @@ const findOpenCoordinate = (
 
   for (let attempt = 0; attempt < 24; attempt += 1) {
     tryPositions.push({
-      x: Math.floor(Math.random() * width),
-      y: Math.floor(Math.random() * height),
+      x: Math.floor(Math.random() * mapData.width),
+      y: Math.floor(Math.random() * mapData.height),
     });
   }
 
   for (const position of tryPositions) {
     if (
       position.x < 0 ||
-      position.x >= width ||
+      position.x >= mapData.width ||
       position.y < 0 ||
-      position.y >= height
+      position.y >= mapData.height
     ) {
       continue;
     }
 
-    if (!isOccupiedCell(monsters, position.x, position.y, playerPosition)) {
+    if (
+      !isAdventureTerrainBlocked(mapData, position.x, position.y) &&
+      !isOccupiedCell(monsters, position.x, position.y, playerPosition)
+    ) {
       return position;
     }
   }
@@ -215,12 +221,10 @@ const adventureSlice = createSlice({
       if (!mapData) return;
 
       state.currentMapId = mapId;
-      state.playerPosition = resolvePlayerStartPosition(
-        mapData.width,
-        mapData.height,
-        mapData.npcs,
-        { x: startX ?? 0, y: startY ?? 0 }
-      );
+      state.playerPosition = resolvePlayerStartPosition(mapData, {
+        x: startX ?? 0,
+        y: startY ?? 0,
+      });
       state.visitedCells = { [`${state.playerPosition.x},${state.playerPosition.y}`]: true };
       
       // Spawn Monsters Logic
@@ -236,8 +240,7 @@ const adventureSlice = createSlice({
           for(let i=0; i<commonCap; i++) {
               const template = commonPool[Math.floor(Math.random() * commonPool.length)];
               const openPosition = findOpenCoordinate(
-                mapData.width,
-                mapData.height,
+                mapData,
                 state.activeMonsters,
                 state.playerPosition
               );
@@ -260,8 +263,7 @@ const adventureSlice = createSlice({
           for(let i=0; i<eliteCap; i++) {
               const template = elitePool[Math.floor(Math.random() * elitePool.length)];
               const openPosition = findOpenCoordinate(
-                mapData.width,
-                mapData.height,
+                mapData,
                 state.activeMonsters,
                 state.playerPosition
               );
@@ -284,8 +286,7 @@ const adventureSlice = createSlice({
           const bossTemplate = mapData.enemies.find(e => e.rank === EnemyRank.Boss);
           if (bossTemplate) {
              const bossPosition = findOpenCoordinate(
-               mapData.width,
-               mapData.height,
+               mapData,
                state.activeMonsters,
                state.playerPosition,
                { x: mapData.bossSpawn.x, y: mapData.bossSpawn.y }
@@ -373,8 +374,7 @@ const adventureSlice = createSlice({
                ? { x: mapData.bossSpawn.x, y: mapData.bossSpawn.y }
                : undefined;
            const openPosition = findOpenCoordinate(
-             mapData.width,
-             mapData.height,
+             mapData,
              state.activeMonsters,
              state.playerPosition,
              preferredPosition
@@ -527,6 +527,7 @@ const adventureSlice = createSlice({
                  nx < mapData.width &&
                  ny >= 0 &&
                  ny < mapData.height &&
+                 !isAdventureTerrainBlocked(mapData, nx, ny) &&
                  !isOccupiedCell(
                    state.activeMonsters,
                    nx,
