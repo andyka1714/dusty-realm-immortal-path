@@ -1,0 +1,22 @@
+{
+  "id": "paper-monster-motion-v2",
+  "source": "image_gen",
+  "processor": "generate2dsprite",
+  "artStyle": "refined_soft_paper_cut_clean_hd",
+  "view": "topdown_three_quarter",
+  "directions": ["down", "left", "right", "up"],
+  "movementFramesPerDirection": 4,
+  "combatFramesPerDirection": 6,
+  "globalScaleAnimation": false,
+  "archetypes": [
+    "quadruped",
+    "low_crawler",
+    "humanoid",
+    "winged",
+    "serpentine",
+    "spirit",
+    "construct",
+    "plant"
+  ],
+  "qcStatus": "passed"
+}

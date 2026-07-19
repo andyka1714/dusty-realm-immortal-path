@@ -114,27 +114,58 @@ const resolvePaperTerrainTexture = (
   _theme?: string
 ): PIXI.Texture => PIXI.Texture.WHITE;
 
-const PAPER_MONSTER_ROOT = "/assets/generated/characters/paper-monster-archetypes-v1";
-const PAPER_MONSTER_ARCHETYPE_ROW: Record<MonsterVisualProfile['bodyType'], {
-  pack: 'core' | 'mystic';
-  row: number;
-}> = {
-  quadruped: { pack: 'core', row: 0 },
-  low_crawler: { pack: 'core', row: 1 },
-  humanoid: { pack: 'core', row: 2 },
-  winged: { pack: 'core', row: 3 },
-  serpentine: { pack: 'mystic', row: 0 },
-  spirit: { pack: 'mystic', row: 1 },
-  construct: { pack: 'mystic', row: 2 },
-  colossus: { pack: 'mystic', row: 2 },
-  plant: { pack: 'mystic', row: 3 },
-};
+const PAPER_MONSTER_MOTION_ROOT = "/assets/generated/characters/paper-monster-motion-v2";
 
-const getPaperMonsterDirectionUrls = (profile: MonsterVisualProfile): string[] => {
-  const archetype = PAPER_MONSTER_ARCHETYPE_ROW[profile.bodyType];
-  return Array.from({ length: 4 }, (_, directionIndex) =>
-    `${PAPER_MONSTER_ROOT}/${archetype.pack}/frames/paper_monster-${archetype.row * 4 + directionIndex + 1}.png`
-  );
+const resolveMotionArchetype = (
+  bodyType: MonsterVisualProfile['bodyType']
+): Exclude<MonsterVisualProfile['bodyType'], 'colossus'> =>
+  bodyType === 'colossus' ? 'construct' : bodyType;
+
+const buildDirectionalFrameUrls = ({
+  directory,
+  prefix,
+  columns,
+}: {
+  directory: string;
+  prefix: string;
+  columns: number[];
+}): string[] => Array.from({ length: 4 }, (_, row) =>
+  columns.map((column) => `${directory}/${prefix}-${row * 4 + column + 1}.png`)
+).flat();
+
+const getPaperMonsterMotionUrls = (profile: MonsterVisualProfile): {
+  movement: string[];
+  combat: string[];
+} => {
+  const archetype = resolveMotionArchetype(profile.bodyType);
+  if (archetype === 'quadruped') {
+    return {
+      movement: buildDirectionalFrameUrls({
+        directory: `${PAPER_MONSTER_MOTION_ROOT}/quadruped/walk/frames`,
+        prefix: 'quadruped-walk',
+        columns: [0, 1, 2, 3],
+      }),
+      combat: buildDirectionalFrameUrls({
+        directory: `${PAPER_MONSTER_MOTION_ROOT}/quadruped/attack/frames`,
+        prefix: 'quadruped-attack',
+        columns: [0, 1, 2, 3, 2, 3],
+      }),
+    };
+  }
+
+  const directory = `${PAPER_MONSTER_MOTION_ROOT}/${archetype}/combined/frames`;
+  return {
+    movement: buildDirectionalFrameUrls({
+      directory,
+      prefix: archetype,
+      columns: [0, 1, 0, 1],
+    }),
+    combat: buildDirectionalFrameUrls({
+      directory,
+      prefix: archetype,
+      columns: [2, 3, 3, 2, 3, 2],
+    }),
+  };
 };
 
 const PAPER_MONSTER_COLORS: Record<MonsterVisualProfile['visualVariant'], number> = {
@@ -1201,20 +1232,16 @@ export default function AdventureStage({
               bg.visible = false;
               text.visible = false;
 
-              Promise.all(
-                  getPaperMonsterDirectionUrls(profile).map((url) => PIXI.Assets.load(url))
-              )
-                  .then((directionTextures: PIXI.Texture[]) => {
-                      if (container.destroyed || directionTextures.length !== 4) return;
-                      directionTextures.forEach((texture) => {
+              const motionUrls = getPaperMonsterMotionUrls(profile);
+              Promise.all([
+                  Promise.all(motionUrls.movement.map((url) => PIXI.Assets.load(url))),
+                  Promise.all(motionUrls.combat.map((url) => PIXI.Assets.load(url))),
+              ])
+                  .then(([movementTextures, combatTextures]: [PIXI.Texture[], PIXI.Texture[]]) => {
+                      if (container.destroyed || movementTextures.length !== 16 || combatTextures.length !== 24) return;
+                      [...movementTextures, ...combatTextures].forEach((texture) => {
                           texture.baseTexture.scaleMode = PIXI.SCALE_MODES.LINEAR;
                       });
-                      const movementTextures = directionTextures.flatMap((texture) =>
-                          Array.from({ length: 4 }, () => texture)
-                      );
-                      const combatTextures = directionTextures.flatMap((texture) =>
-                          Array.from({ length: 6 }, () => texture)
-                      );
                       const firstTexture = movementTextures[0];
                       const monsterSprite = new PIXI.Sprite(firstTexture);
                       const layout = getMonsterSpriteLayout({

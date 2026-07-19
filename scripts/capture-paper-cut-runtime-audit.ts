@@ -10,7 +10,7 @@ import logReducer from "../store/slices/logSlice";
 import questReducer from "../store/slices/questSlice";
 import soulReducer from "../store/slices/soulSlice";
 import workshopReducer from "../store/slices/workshopSlice";
-import { BESTIARY } from "../data/enemies";
+import { MAPS } from "../data/maps";
 import { Gender, MajorRealm, SpiritRootId } from "../types";
 
 const output = "output/playwright/audit-paper-cut-runtime-20260719";
@@ -46,7 +46,8 @@ store.dispatch(addItem({ itemId: "novice_robe", count: 1 }));
 store.dispatch(addItem({ itemId: "qi_pill", count: 3 }));
 
 const state = store.getState();
-const enemy = BESTIARY.m1_c1;
+const enemy = MAPS.find((map) => map.id === "20")?.enemies[0];
+if (!enemy) throw new Error("Map 20 has no enemy fixture");
 const now = Date.now();
 const save = {
   schemaVersion: 2,
@@ -72,9 +73,9 @@ const save = {
         templateId: enemy.id,
         name: enemy.name,
         symbol: enemy.symbol,
-        x: 39,
+        x: 38,
         y: 40,
-        spawnX: 39,
+        spawnX: 38,
         spawnY: 40,
         currentHp: enemy.maxHp,
         rank: enemy.rank,
@@ -105,6 +106,15 @@ await page.goto("http://127.0.0.1:3003", { waitUntil: "networkidle" });
 await page.getByTestId("adventure-stage").waitFor({ state: "visible" });
 await page.waitForTimeout(2500);
 await page.screenshot({ path: `${output}/01-desktop-wild-map.png` });
+const canvas = page.getByTestId("adventure-stage").locator("canvas");
+const canvasBox = await canvas.boundingBox();
+if (canvasBox) {
+  await canvas.click({
+    position: { x: canvasBox.width / 2 - 80, y: canvasBox.height / 2 },
+  });
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: `${output}/01b-desktop-monster-attack.png` });
+}
 await page.getByTestId("dock-character").click();
 await page.getByTestId("game-shell-panel").waitFor({ state: "visible" });
 await page.waitForTimeout(400);
