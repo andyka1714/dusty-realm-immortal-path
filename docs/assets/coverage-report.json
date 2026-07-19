@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-07-19T11:42:23.706Z",
+  "groups": {
+    "maps": {
+      "total": 70,
+      "completed": 0,
+      "missing": 70
+    },
+    "monsters": {
+      "total": 265,
+      "completed": 0,
+      "missing": 265
+    },
+    "equipment": {
+      "total": 204,
+      "completed": 0,
+      "missing": 204
+    },
+    "items": {
+      "total": 147,
+      "completed": 0,
+      "missing": 147
+    },
+    "skills": {
+      "total": 74,
+      "completed": 0,
+      "missing": 74
+    }
+  }
+}

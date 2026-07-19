@@ -14,6 +14,7 @@
     "monster:checklist": "npx tsx scripts/update_monster_sprite_checklist.ts",
     "monster:qc": "python3 scripts/qc_monster_sprite_assets.py",
     "artifact:audit": "tsx scripts/audit-production-artifact.ts",
+    "assets:checklists": "tsx scripts/generate-art-asset-checklists.ts",
     "balance:audit": "tsx scripts/system-balance-audit.ts",
     "typecheck:strict": "node scripts/typecheck-strict-baseline.mjs",
     "verify": "npm run typecheck && npm run typecheck:strict && npm test -- --run && npm run balance:audit && npm run build && npm run artifact:audit && npm run test:e2e -- --workers=1"

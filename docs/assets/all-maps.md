@@ -1,0 +1,77 @@
+# 所有地圖素材 Checklist
+
+- 資料定義總數：70
+- 已有唯一素材：0
+- 尚缺素材：70
+- 完成率：0.00%
+
+- [ ] `0`｜仙緣鎮｜Center｜40×40｜0｜`public/assets/generated/maps/paper-cut-v3/0.webp`
+- [ ] `1`｜北郊荒徑｜North｜80×80｜0｜`public/assets/generated/maps/paper-cut-v3/1.webp`
+- [ ] `2`｜劍門古道｜North｜80×80｜0｜`public/assets/generated/maps/paper-cut-v3/2.webp`
+- [ ] `3`｜凌霄山腳｜North｜80×80｜0｜`public/assets/generated/maps/paper-cut-v3/3.webp`
+- [ ] `4`｜凌霄劍宗｜Sect｜40×40｜1｜`public/assets/generated/maps/paper-cut-v3/4.webp`
+- [ ] `5`｜試劍台｜North｜100×100｜1｜`public/assets/generated/maps/paper-cut-v3/5.webp`
+- [ ] `6`｜藏劍谷｜North｜100×100｜1｜`public/assets/generated/maps/paper-cut-v3/6.webp`
+- [ ] `7`｜萬劍塚｜North｜100×100｜1｜`public/assets/generated/maps/paper-cut-v3/7.webp`
+- [ ] `10`｜西郊密林｜West｜80×80｜0｜`public/assets/generated/maps/paper-cut-v3/10.webp`
+- [ ] `11`｜蠻荒徑｜West｜80×80｜0｜`public/assets/generated/maps/paper-cut-v3/11.webp`
+- [ ] `12`｜獸王谷口｜West｜80×80｜0｜`public/assets/generated/maps/paper-cut-v3/12.webp`
+- [ ] `13`｜萬獸山莊｜Sect｜40×40｜1｜`public/assets/generated/maps/paper-cut-v3/13.webp`
+- [ ] `14`｜淬體潭｜West｜100×100｜1｜`public/assets/generated/maps/paper-cut-v3/14.webp`
+- [ ] `15`｜百獸林｜West｜100×100｜1｜`public/assets/generated/maps/paper-cut-v3/15.webp`
+- [ ] `16`｜獸王谷｜West｜100×100｜1｜`public/assets/generated/maps/paper-cut-v3/16.webp`
+- [ ] `20`｜東郊靈田｜East｜80×80｜0｜`public/assets/generated/maps/paper-cut-v3/20.webp`
+- [ ] `21`｜迷霧澤｜East｜80×80｜0｜`public/assets/generated/maps/paper-cut-v3/21.webp`
+- [ ] `22`｜靈湖草甸｜East｜80×80｜0｜`public/assets/generated/maps/paper-cut-v3/22.webp`
+- [ ] `23`｜縹緲仙宮｜Sect｜40×40｜1｜`public/assets/generated/maps/paper-cut-v3/23.webp`
+- [ ] `24`｜試煉迷宮｜East｜100×100｜1｜`public/assets/generated/maps/paper-cut-v3/24.webp`
+- [ ] `25`｜藥王谷｜East｜100×100｜1｜`public/assets/generated/maps/paper-cut-v3/25.webp`
+- [ ] `26`｜靈源仙湖｜East｜100×100｜1｜`public/assets/generated/maps/paper-cut-v3/26.webp`
+- [ ] `30`｜雪線古道｜North｜120×120｜2｜`public/assets/generated/maps/paper-cut-v3/30.webp`
+- [ ] `31`｜冰封峽谷｜North｜120×120｜2｜`public/assets/generated/maps/paper-cut-v3/31.webp`
+- [ ] `32`｜落雷懸崖｜North｜120×120｜2｜`public/assets/generated/maps/paper-cut-v3/32.webp`
+- [ ] `40`｜狂獸巢穴｜West｜120×120｜2｜`public/assets/generated/maps/paper-cut-v3/40.webp`
+- [ ] `41`｜食人叢林｜West｜120×120｜2｜`public/assets/generated/maps/paper-cut-v3/41.webp`
+- [ ] `42`｜烈焰荒原｜West｜120×120｜2｜`public/assets/generated/maps/paper-cut-v3/42.webp`
+- [ ] `50`｜幽暗密林｜East｜120×120｜2｜`public/assets/generated/maps/paper-cut-v3/50.webp`
+- [ ] `51`｜瘴氣沼澤｜East｜120×120｜2｜`public/assets/generated/maps/paper-cut-v3/51.webp`
+- [ ] `52`｜寂滅雷澤｜East｜120×120｜2｜`public/assets/generated/maps/paper-cut-v3/52.webp`
+- [ ] `60`｜罡風層｜North｜130×130｜3｜`public/assets/generated/maps/paper-cut-v3/60.webp`
+- [ ] `61`｜懸空浮島｜North｜130×130｜3｜`public/assets/generated/maps/paper-cut-v3/61.webp`
+- [ ] `62`｜通天鎖鏈｜North｜130×130｜3｜`public/assets/generated/maps/paper-cut-v3/62.webp`
+- [ ] `70`｜重力黑山｜West｜130×130｜3｜`public/assets/generated/maps/paper-cut-v3/70.webp`
+- [ ] `71`｜熔岩煉獄｜West｜130×130｜3｜`public/assets/generated/maps/paper-cut-v3/71.webp`
+- [ ] `72`｜萬毒坑｜West｜130×130｜3｜`public/assets/generated/maps/paper-cut-v3/72.webp`
+- [ ] `80`｜風暴洋｜East｜130×130｜3｜`public/assets/generated/maps/paper-cut-v3/80.webp`
+- [ ] `81`｜蓬萊仙島｜East｜130×130｜3｜`public/assets/generated/maps/paper-cut-v3/81.webp`
+- [ ] `82`｜幻海古境｜East｜130×130｜3｜`public/assets/generated/maps/paper-cut-v3/82.webp`
+- [ ] `90`｜萬載玄冰窟｜North｜140×140｜4｜`public/assets/generated/maps/paper-cut-v3/90.webp`
+- [ ] `91`｜極光天境｜North｜140×140｜4｜`public/assets/generated/maps/paper-cut-v3/91.webp`
+- [ ] `92`｜碎星劍垣｜North｜140×140｜4｜`public/assets/generated/maps/paper-cut-v3/92.webp`
+- [ ] `100`｜盤古脊｜West｜140×140｜4｜`public/assets/generated/maps/paper-cut-v3/100.webp`
+- [ ] `101`｜龍血池｜West｜140×140｜4｜`public/assets/generated/maps/paper-cut-v3/101.webp`
+- [ ] `102`｜蠻荒祖廟｜West｜140×140｜4｜`public/assets/generated/maps/paper-cut-v3/102.webp`
+- [ ] `110`｜靈魂之海｜East｜140×140｜4｜`public/assets/generated/maps/paper-cut-v3/110.webp`
+- [ ] `111`｜幽冥鬼域｜East｜140×140｜4｜`public/assets/generated/maps/paper-cut-v3/111.webp`
+- [ ] `112`｜虛空裂隙｜East｜140×140｜4｜`public/assets/generated/maps/paper-cut-v3/112.webp`
+- [ ] `120`｜三界戰場｜Center｜150×150｜5｜`public/assets/generated/maps/paper-cut-v3/120.webp`
+- [ ] `122`｜殞星界橋｜Center｜150×150｜5｜`public/assets/generated/maps/paper-cut-v3/122.webp`
+- [ ] `121`｜隕仙深淵｜Center｜150×150｜5｜`public/assets/generated/maps/paper-cut-v3/121.webp`
+- [ ] `130`｜時光長河｜Void｜160×160｜6｜`public/assets/generated/maps/paper-cut-v3/130.webp`
+- [ ] `132`｜虛淵迴廊｜Void｜160×160｜6｜`public/assets/generated/maps/paper-cut-v3/132.webp`
+- [ ] `131`｜破碎虛空｜Void｜160×160｜6｜`public/assets/generated/maps/paper-cut-v3/131.webp`
+- [ ] `140`｜萬法聖城｜Spirit｜160×160｜7｜`public/assets/generated/maps/paper-cut-v3/140.webp`
+- [ ] `142`｜萬靈法壇｜Spirit｜160×160｜7｜`public/assets/generated/maps/paper-cut-v3/142.webp`
+- [ ] `141`｜靈界中樞｜Spirit｜160×160｜7｜`public/assets/generated/maps/paper-cut-v3/141.webp`
+- [ ] `150`｜無盡海｜Sea｜180×180｜8｜`public/assets/generated/maps/paper-cut-v3/150.webp`
+- [ ] `152`｜界海孤烽｜Sea｜180×180｜8｜`public/assets/generated/maps/paper-cut-v3/152.webp`
+- [ ] `151`｜登仙天梯｜Sky｜180×180｜8｜`public/assets/generated/maps/paper-cut-v3/151.webp`
+- [ ] `160`｜劫雲荒原｜Dark｜200×200｜9｜`public/assets/generated/maps/paper-cut-v3/160.webp`
+- [ ] `162`｜天刑迴廊｜Thunder｜200×200｜9｜`public/assets/generated/maps/paper-cut-v3/162.webp`
+- [ ] `161`｜九天雷池｜Thunder｜200×200｜9｜`public/assets/generated/maps/paper-cut-v3/161.webp`
+- [ ] `170`｜接引仙殿｜Immortal｜200×200｜10｜`public/assets/generated/maps/paper-cut-v3/170.webp`
+- [ ] `172`｜玉詔仙獄｜Immortal｜200×200｜10｜`public/assets/generated/maps/paper-cut-v3/172.webp`
+- [ ] `171`｜九重天闕｜Immortal｜200×200｜10｜`public/assets/generated/maps/paper-cut-v3/171.webp`
+- [ ] `181`｜太初外環｜Ultimate｜200×200｜11｜`public/assets/generated/maps/paper-cut-v3/181.webp`
+- [ ] `182`｜歸墟裂界｜Ultimate｜200×200｜11｜`public/assets/generated/maps/paper-cut-v3/182.webp`
+- [ ] `180`｜鴻蒙道宮｜Ultimate｜200×200｜11｜`public/assets/generated/maps/paper-cut-v3/180.webp`
